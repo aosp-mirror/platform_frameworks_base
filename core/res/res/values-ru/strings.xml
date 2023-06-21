@@ -2159,7 +2159,7 @@
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Заблокировано вашим администратором"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Этот контент нельзя открывать через рабочие приложения."</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Этот контент нельзя открыть в рабочем приложении."</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Этот контент нельзя открывать через личные приложения."</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Этим контентом нельзя делиться с личными приложениями."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Этот контент нельзя открыть в личном приложении."</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Рабочие приложения приостановлены."</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Включить"</string>

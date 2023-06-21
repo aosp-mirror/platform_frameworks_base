@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bublina"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogové"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Pokud chcete pokračovat, odemkněte zařízení"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Pokud aktualizaci chcete nainstalovat později, zadejte PIN"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Pokud aktualizaci chcete nainstalovat později, zadejte heslo"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Pokud aktualizaci chcete nainstalovat později, zadejte gesto"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Zařízení bylo aktualizováno. Pokud chcete pokračovat, zadejte PIN."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Zařízení bylo aktualizováno. Pokud chcete pokračovat, zadejte heslo."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Zařízení bylo aktualizováno. Pokud chcete pokračovat, zadejte gesto."</string>
 </resources>

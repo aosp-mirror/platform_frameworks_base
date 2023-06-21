@@ -179,7 +179,7 @@ public final class TotalCaptureResult extends CaptureResult {
      * @return unmodifiable map between physical camera ids and their capture result metadata
      *
      * @deprecated
-     * <p>Please use {@link #getPhysicalCameraTotalResults() instead to get the
+     * <p>Please use {@link #getPhysicalCameraTotalResults()} instead to get the
      * physical cameras' {@code TotalCaptureResult}.</p>
      */
     public Map<String, CaptureResult> getPhysicalCameraResults() {

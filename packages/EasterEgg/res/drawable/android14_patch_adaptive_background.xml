@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2023 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:pathData="M0,0 L108,0 L108,108 L0,108 z"
+      android:fillColor="#FF073042"/>
+  <path
+      android:pathData="M44.51,43.32L44.86,42.27C47.04,54.48 52.81,86.71 52.81,50.14C52.81,49.99 52.92,49.86 53.06,49.86H55.04C55.18,49.86 55.3,49.98 55.3,50.14C55.27,114.18 44.51,43.32 44.51,43.32Z"
+      android:fillColor="#3DDC84"/>
+  <path
+      android:name="planetary head"
+      android:pathData="M38.81,42.23L33.63,51.21C33.33,51.72 33.51,52.38 34.02,52.68C34.54,52.98 35.2,52.8 35.49,52.28L40.74,43.2C49.22,47 58.92,47 67.4,43.2L72.65,52.28C72.96,52.79 73.62,52.96 74.13,52.65C74.62,52.35 74.79,51.71 74.51,51.21L69.33,42.23C78.23,37.39 84.32,28.38 85.21,17.74H22.93C23.82,28.38 29.91,37.39 38.81,42.23Z"
+      android:fillColor="#ffffff"/>
+  <!-- yes it's an easter egg in a vector drawable -->
+  <path
+      android:name="planetary body"
+      android:pathData="M22.9,0 L85.1,0 L85.1,15.5 L22.9,15.5 z"
+      android:fillColor="#ffffff" />
+  <path
+      android:pathData="M54.96,43.32H53.1C52.92,43.32 52.77,43.47 52.77,43.65V48.04C52.77,48.22 52.92,48.37 53.1,48.37H54.96C55.15,48.37 55.3,48.22 55.3,48.04V43.65C55.3,43.47 55.15,43.32 54.96,43.32Z"
+      android:fillColor="#3DDC84"/>
+  <path
+      android:pathData="M54.99,40.61H53.08C52.91,40.61 52.77,40.75 52.77,40.92V41.56C52.77,41.73 52.91,41.87 53.08,41.87H54.99C55.16,41.87 55.3,41.73 55.3,41.56V40.92C55.3,40.75 55.16,40.61 54.99,40.61Z"
+      android:fillColor="#3DDC84"/>
+  <path
+      android:pathData="M41.49,47.88H40.86V48.51H41.49V47.88Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M44.13,57.08H43.5V57.71H44.13V57.08Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M72.29,66.76H71.66V67.39H72.29V66.76Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M59.31,53.41H58.68V54.04H59.31V53.41Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M64.47,48.19H63.84V48.83H64.47V48.19Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M60.58,59.09H59.95V59.72H60.58V59.09Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M66.95,56.7H65.69V57.97H66.95V56.7Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M44.13,60.71H43.5V61.34H44.13V60.71Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M49.66,51.33H48.4V52.6H49.66V51.33Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M57.78,63.83H56.52V65.09H57.78V63.83Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M61.1,68.57H59.83V69.83H61.1V68.57Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M40.43,53.73H39.16V54.99H40.43V53.73Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M74.47,44H73.21V45.26H74.47V44Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M36.8,64.58H35.54V65.84H36.8V64.58Z"
+      android:fillColor="#ffffff"/>
+</vector>

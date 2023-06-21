@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"无法创建您的脸部模型，请重试。"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"检测到墨镜，您的脸部必须完全可见。"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到脸部存在遮挡，请露出整张脸。"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到面部被遮挡，请露出整个面部。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"无法验证人脸。硬件无法使用。"</string>
@@ -1363,7 +1363,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已开启 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已开启 USB 网络共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已开启 USB MIDI 模式"</string>
-    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接为摄像头"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接并作为摄像头使用"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 配件已连接"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"点按即可查看更多选项。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在为连接的设备充电。点按即可查看更多选项。"</string>
