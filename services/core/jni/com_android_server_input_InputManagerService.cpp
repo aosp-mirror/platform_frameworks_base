@@ -353,7 +353,7 @@ public:
     void setPointerCapture(const PointerCaptureRequest& request) override;
     void notifyDropWindow(const sp<IBinder>& token, float x, float y) override;
     void notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
-                                 const std::set<int32_t>& uids) override;
+                                 const std::set<gui::Uid>& uids) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -966,7 +966,7 @@ void NativeInputManager::notifyDropWindow(const sp<IBinder>& token, float x, flo
 }
 
 void NativeInputManager::notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
-                                                 const std::set<int32_t>& uids) {
+                                                 const std::set<gui::Uid>& uids) {
     static const bool ENABLE_INPUT_DEVICE_USAGE_METRICS =
             sysprop::InputProperties::enable_input_device_usage_metrics().value_or(true);
     if (!ENABLE_INPUT_DEVICE_USAGE_METRICS) return;
@@ -1849,7 +1849,8 @@ static jboolean nativeSetInTouchMode(JNIEnv* env, jobject nativeImplObj, jboolea
                                      jint pid, jint uid, jboolean hasPermission, jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid, uid,
+    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid,
+                                                                 gui::Uid{static_cast<uid_t>(uid)},
                                                                  hasPermission, displayId);
 }
 
@@ -1865,7 +1866,7 @@ static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject i
                                    jint timeoutMillis, jint policyFlags) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    const std::optional<int32_t> targetUid = injectIntoUid ? std::make_optional(uid) : std::nullopt;
+    const auto targetUid = injectIntoUid ? std::make_optional<gui::Uid>(uid) : std::nullopt;
     // static_cast is safe because the value was already checked at the Java layer
     InputEventInjectionSync mode = static_cast<InputEventInjectionSync>(syncMode);
 
