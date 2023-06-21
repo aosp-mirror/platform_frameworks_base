@@ -26,7 +26,10 @@ package {
 android_app {
     // the build system in pi-dev can't quite handle R.java in kt
     // so we will have a mix of java and kotlin files
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     resource_dirs: ["res"],
 
@@ -36,17 +39,34 @@ android_app {
     certificate: "platform",
 
     optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
+        proguard_compatibility: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
-	static_libs: [
-		"androidx.core_core",
-		"androidx.recyclerview_recyclerview",
+    static_libs: [
+        "androidx.core_core",
         "androidx.annotation_annotation",
-		"kotlinx-coroutines-android",
-		"kotlinx-coroutines-core",
-		//"kotlinx-coroutines-reactive",
-	],
+        "androidx.recyclerview_recyclerview",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
+
+        "androidx.core_core-ktx",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.activity_activity-compose",
+        "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-util",
+        "androidx.compose.ui_ui-tooling-preview",
+        "androidx.compose.material_material",
+        "androidx.window_window",
+
+        "androidx.compose.runtime_runtime",
+        "androidx.activity_activity-compose",
+        "androidx.compose.ui_ui",
+    ],
 
     manifest: "AndroidManifest.xml",
 
