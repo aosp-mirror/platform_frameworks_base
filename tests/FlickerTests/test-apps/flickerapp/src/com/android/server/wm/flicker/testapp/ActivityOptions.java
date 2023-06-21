@@ -186,6 +186,8 @@ public class ActivityOptions {
             public static final String LABEL = "SplitScreenPrimaryActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".SplitScreenActivity");
+
+            public static final String EXTRA_LAUNCH_ADJACENT = "launch_adjacent";
         }
 
         public static class Secondary {

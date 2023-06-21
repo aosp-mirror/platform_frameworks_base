@@ -52,7 +52,6 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            defaultSetup(this)
             defaultTeardown(this)
             thisTransition(this)
         }
