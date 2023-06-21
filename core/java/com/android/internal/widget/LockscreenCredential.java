@@ -64,6 +64,20 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     // is represented as a byte array of length 0.
     private byte[] mCredential;
 
+    // This indicates that the credential is a password that used characters outside ASCII 32–127.
+    //
+    // Such passwords were never intended to be allowed.  However, Android 10–14 had a bug where
+    // conversion from the chars the user entered to the credential bytes used a simple truncation.
+    // Thus, any 'char' whose remainder mod 256 was in the range 32–127 was accepted and was
+    // equivalent to some ASCII character.  For example, ™, which is U+2122, was truncated to ASCII
+    // 0x22 which is the double-quote character ".
+    //
+    // We have to continue to allow a LockscreenCredential to be constructed with this bug, so that
+    // existing devices can be unlocked if their password used this bug.  However, we prevent new
+    // passwords that use this bug from being set.  The boolean below keeps track of the information
+    // needed to do that check, since the conversion to mCredential may have been lossy.
+    private final boolean mHasInvalidChars;
+
     /**
      * Private constructor, use static builder methods instead.
      *
@@ -71,7 +85,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      * LockscreenCredential will only store the reference internally without copying. This is to
      * minimize the number of extra copies introduced.
      */
-    private LockscreenCredential(int type, byte[] credential) {
+    private LockscreenCredential(int type, byte[] credential, boolean hasInvalidChars) {
         Objects.requireNonNull(credential);
         if (type == CREDENTIAL_TYPE_NONE) {
             Preconditions.checkArgument(credential.length == 0);
@@ -88,15 +102,21 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             // LockscreenCredential object to be constructed so that the validation logic can run,
             // even though the validation logic will ultimately reject the credential as too short.
         }
+        Preconditions.checkArgument(!hasInvalidChars || type == CREDENTIAL_TYPE_PASSWORD);
         mType = type;
         mCredential = credential;
+        mHasInvalidChars = hasInvalidChars;
+    }
+
+    private LockscreenCredential(int type, CharSequence credential) {
+        this(type, charsToBytesTruncating(credential), hasInvalidChars(credential));
     }
 
     /**
      * Creates a LockscreenCredential object representing a none credential.
      */
     public static LockscreenCredential createNone() {
-        return new LockscreenCredential(CREDENTIAL_TYPE_NONE, new byte[0]);
+        return new LockscreenCredential(CREDENTIAL_TYPE_NONE, new byte[0], false);
     }
 
     /**
@@ -104,15 +124,14 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      */
     public static LockscreenCredential createPattern(@NonNull List<LockPatternView.Cell> pattern) {
         return new LockscreenCredential(CREDENTIAL_TYPE_PATTERN,
-                LockPatternUtils.patternToByteArray(pattern));
+                LockPatternUtils.patternToByteArray(pattern), /* hasInvalidChars= */ false);
     }
 
     /**
      * Creates a LockscreenCredential object representing the given alphabetic password.
      */
     public static LockscreenCredential createPassword(@NonNull CharSequence password) {
-        return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
-                charSequenceToByteArray(password));
+        return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD, password);
     }
 
     /**
@@ -123,15 +142,14 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      */
     public static LockscreenCredential createManagedPassword(@NonNull byte[] password) {
         return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
-                Arrays.copyOf(password, password.length));
+                Arrays.copyOf(password, password.length), /* hasInvalidChars= */ false);
     }
 
     /**
      * Creates a LockscreenCredential object representing the given numeric PIN.
      */
     public static LockscreenCredential createPin(@NonNull CharSequence pin) {
-        return new LockscreenCredential(CREDENTIAL_TYPE_PIN,
-                charSequenceToByteArray(pin));
+        return new LockscreenCredential(CREDENTIAL_TYPE_PIN, pin);
     }
 
     /**
@@ -211,10 +229,17 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         return mCredential.length;
     }
 
+    /** Returns true if this credential was constructed with any chars outside the allowed range */
+    public boolean hasInvalidChars() {
+        ensureNotZeroized();
+        return mHasInvalidChars;
+    }
+
     /** Create a copy of the credential */
     public LockscreenCredential duplicate() {
         return new LockscreenCredential(mType,
-                mCredential != null ? Arrays.copyOf(mCredential, mCredential.length) : null);
+                mCredential != null ? Arrays.copyOf(mCredential, mCredential.length) : null,
+                mHasInvalidChars);
     }
 
     /**
@@ -323,6 +348,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
         dest.writeByteArray(mCredential);
+        dest.writeBoolean(mHasInvalidChars);
     }
 
     public static final Parcelable.Creator<LockscreenCredential> CREATOR =
@@ -330,7 +356,8 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
 
         @Override
         public LockscreenCredential createFromParcel(Parcel source) {
-            return new LockscreenCredential(source.readInt(), source.createByteArray());
+            return new LockscreenCredential(source.readInt(), source.createByteArray(),
+                    source.readBoolean());
         }
 
         @Override
@@ -352,7 +379,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     @Override
     public int hashCode() {
         // Effective Java — Always override hashCode when you override equals
-        return Objects.hash(mType, Arrays.hashCode(mCredential));
+        return Objects.hash(mType, Arrays.hashCode(mCredential), mHasInvalidChars);
     }
 
     @Override
@@ -360,20 +387,45 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         if (o == this) return true;
         if (!(o instanceof LockscreenCredential)) return false;
         final LockscreenCredential other = (LockscreenCredential) o;
-        return mType == other.mType && Arrays.equals(mCredential, other.mCredential);
+        return mType == other.mType && Arrays.equals(mCredential, other.mCredential)
+            && mHasInvalidChars == other.mHasInvalidChars;
+    }
+
+    private static boolean hasInvalidChars(CharSequence chars) {
+        //
+        // Consider the password to have invalid characters if it contains any non-ASCII characters
+        // or control characters.  There are multiple reasons for this restriction:
+        //
+        // - Non-ASCII characters might only be possible to enter on a third-party keyboard app
+        //   (IME) that is available when setting the password but not when verifying it after a
+        //   reboot.  This can happen if the keyboard is not direct boot aware or gets uninstalled.
+        //
+        // - Unicode strings that look identical to the user can map to different byte[].  Yet, only
+        //   one byte[] can be accepted.  Unicode normalization can solve this problem to some
+        //   extent, but still many Unicode characters look similar and could cause confusion.
+        //
+        // - For backwards compatibility reasons, the upper 8 bits of the 16-bit 'chars' are
+        //   discarded by charsToBytesTruncating().  Thus, as-is passwords with characters above
+        //   U+00FF (255) are not as secure as they should be.  IMPORTANT: Do not change the below
+        //   code to allow characters above U+00FF (255) without fixing this issue!
+        //
+        for (int i = 0; i < chars.length(); i++) {
+            char c = chars.charAt(i);
+            if (c < 32 || c > 127) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Converts a CharSequence to a byte array without requiring a toString(), which creates an
-     * additional copy.
+     * Converts a CharSequence to a byte array, intentionally truncating chars greater than 255 for
+     * backwards compatibility reasons.  See {@link #mHasInvalidChars}.
      *
      * @param chars The CharSequence to convert
      * @return A byte array representing the input
      */
-    private static byte[] charSequenceToByteArray(CharSequence chars) {
-        if (chars == null) {
-            return new byte[0];
-        }
+    private static byte[] charsToBytesTruncating(CharSequence chars) {
         byte[] bytes = new byte[chars.length()];
         for (int i = 0; i < chars.length(); i++) {
             bytes[i] = (byte) chars.charAt(i);
