@@ -468,9 +468,10 @@ public class LightsService extends SystemService {
         }
 
         for (int i = mLightsById.size() - 1; i >= 0; i--) {
-            final int type = mLightsById.keyAt(i);
+            LightImpl light = mLightsById.valueAt(i);
+            final int type = light.mHwLight.type;
             if (0 <= type && type < mLightsByType.length) {
-                mLightsByType[type] = mLightsById.valueAt(i);
+                mLightsByType[type] = light;
             }
         }
     }
