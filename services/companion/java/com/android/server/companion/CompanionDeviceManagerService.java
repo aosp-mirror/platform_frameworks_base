@@ -64,6 +64,7 @@ import android.companion.IOnAssociationsChangedListener;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
+import android.companion.utils.FeatureUtils;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -746,6 +747,11 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
                 int userId, int associationId) {
+            if (!FeatureUtils.isPermSyncEnabled()) {
+                throw new UnsupportedOperationException("Calling"
+                        + " buildPermissionTransferUserConsentIntent, but this API is disabled by"
+                        + " the system.");
+            }
             return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
                     packageName, userId, associationId);
         }
@@ -753,6 +759,10 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void startSystemDataTransfer(String packageName, int userId, int associationId,
                 ISystemDataTransferCallback callback) {
+            if (!FeatureUtils.isPermSyncEnabled()) {
+                throw new UnsupportedOperationException("Calling startSystemDataTransfer, but this"
+                        + " API is disabled by the system.");
+            }
             mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,
                     associationId, callback);
         }
