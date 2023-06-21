@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.os.UserHandle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -43,7 +42,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
@@ -195,14 +193,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @NonNull
     @Override
     Lifecycle getLifecycle();
-
-    /**
-     * Wakes up the device if the device was dozing.
-     *
-     * @deprecated Use {@link PowerInteractor#wakeUpIfDozing(String, int)} instead.
-     */
-    @Deprecated
-    void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
 
     /** */
     ShadeViewController getShadeViewController();
