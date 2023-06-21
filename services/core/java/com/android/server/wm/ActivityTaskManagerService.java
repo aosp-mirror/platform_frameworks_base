@@ -6068,6 +6068,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void showSystemReadyErrorDialogsIfNeeded() {
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "showSystemReadyErrorDialogs");
+            }
+            // Pull the check for build consistency outside the lock, to avoid holding the lock for
+            // too long, given that `Build.isBuildConsistent()` takes relatively long.
+            boolean isBuildConsistent = Build.isBuildConsistent();
             synchronized (mGlobalLock) {
                 try {
                     if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
@@ -6090,7 +6096,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 } catch (RemoteException e) {
                 }
 
-                if (!Build.isBuildConsistent()) {
+                if (!isBuildConsistent) {
                     Slog.e(TAG, "Build fingerprint is not consistent, warning user");
                     mUiHandler.post(() -> {
                         if (mShowDialogs) {
@@ -6107,6 +6113,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     });
                 }
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         @Override
