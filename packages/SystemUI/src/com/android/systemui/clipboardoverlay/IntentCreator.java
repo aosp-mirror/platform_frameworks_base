@@ -17,6 +17,7 @@
 package com.android.systemui.clipboardoverlay;
 
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,10 +42,16 @@ class IntentCreator {
         // From the ACTION_SEND docs:
         //   "If using EXTRA_TEXT, the MIME type should be "text/plain"; otherwise it should be the
         //    MIME type of the data in EXTRA_STREAM"
-        if (clipData.getItemAt(0).getUri() != null) {
+        Uri uri = clipData.getItemAt(0).getUri();
+        if (uri != null) {
             // We don't use setData here because some apps interpret this as "to:".
             shareIntent.setType(clipData.getDescription().getMimeType(0));
-            shareIntent.putExtra(Intent.EXTRA_STREAM, clipData.getItemAt(0).getUri());
+            // Include URI in ClipData also, so that grantPermission picks it up.
+            shareIntent.setClipData(new ClipData(
+                    new ClipDescription(
+                            "content", new String[]{clipData.getDescription().getMimeType(0)}),
+                    new ClipData.Item(uri)));
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } else {
             shareIntent.putExtra(
