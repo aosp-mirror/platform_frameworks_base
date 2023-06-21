@@ -202,6 +202,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
     private volatile boolean mHasImeService;
 
+    /**
+     * Whether this process can use realtime prioirity (SCHED_FIFO) for its UI and render threads
+     * when this process is SCHED_GROUP_TOP_APP.
+     */
+    private final boolean mUseFifoUiScheduling;
+
     /** Whether {@link #mActivities} is not empty. */
     private volatile boolean mHasActivities;
     /** All activities running in the process (exclude destroying). */
@@ -340,6 +346,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
             mIsActivityConfigOverrideAllowed = false;
         }
+        mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
+                && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
         mCanUseSystemGrammaticalGender = mAtm.mGrammaticalManagerInternal != null
                 && mAtm.mGrammaticalManagerInternal.canGetSystemGrammaticalGender(mUid,
@@ -1901,6 +1909,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    /** Returns {@code true} if the process prefers to use fifo scheduling. */
+    public boolean useFifoUiScheduling() {
+        return mUseFifoUiScheduling;
+    }
+
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void onTopProcChanged() {
         if (mAtm.mVrController.isInterestingToSchedGroup()) {
@@ -2077,6 +2090,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 pw.print("legacy-recents");
             }
             pw.println();
+        }
+        if (mUseFifoUiScheduling) {
+            pw.println(prefix + " mUseFifoUiScheduling=true");
         }
 
         final int stateFlags = mActivityStateFlags;

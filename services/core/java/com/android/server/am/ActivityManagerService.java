@@ -731,6 +731,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     final boolean mUseFifoUiScheduling;
 
+    /** Whether some specified important processes are allowed to use FIFO priority. */
+    boolean mAllowSpecifiedFifoScheduling = true;
+
     @GuardedBy("this")
     private final SparseArray<IUnsafeIntentStrictModeCallback>
             mStrictModeCallbacks = new SparseArray<>();
@@ -1051,6 +1054,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
     @GuardedBy("this")
     final SparseArray<ImportanceToken> mImportantProcesses = new SparseArray<ImportanceToken>();
+
+    /** The processes that are allowed to use SCHED_FIFO prorioty. */
+    @GuardedBy("mProcLock")
+    final ArrayList<ProcessRecord> mSpecifiedFifoProcesses = new ArrayList<>();
 
     /**
      * List of records for processes that someone had tried to start before the
@@ -8189,6 +8196,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
+    /**
+     * Switches the priority between SCHED_FIFO and SCHED_OTHER for the main thread and render
+     * thread of the given process.
+     */
+    @GuardedBy("mProcLock")
+    static void setFifoPriority(@NonNull ProcessRecord app, boolean enable) {
+        final int pid = app.getPid();
+        final int renderThreadTid = app.getRenderThreadTid();
+        if (enable) {
+            scheduleAsFifoPriority(pid, true /* suppressLogs */);
+            if (renderThreadTid != 0) {
+                scheduleAsFifoPriority(renderThreadTid, true /* suppressLogs */);
+            }
+        } else {
+            scheduleAsRegularPriority(pid, true /* suppressLogs */);
+            if (renderThreadTid != 0) {
+                scheduleAsRegularPriority(renderThreadTid, true /* suppressLogs */);
+            }
+        }
+    }
+
     @Override
     public void setRenderThread(int tid) {
         synchronized (mProcLock) {
@@ -8214,7 +8242,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // promote to FIFO now
                 if (proc.mState.getCurrentSchedulingGroup() == ProcessList.SCHED_GROUP_TOP_APP) {
                     if (DEBUG_OOM_ADJ) Slog.d("UI_FIFO", "Promoting " + tid + "out of band");
-                    if (mUseFifoUiScheduling) {
+                    if (proc.useFifoUiScheduling()) {
                         setThreadScheduler(proc.getRenderThreadTid(),
                                 SCHED_FIFO | SCHED_RESET_ON_FORK, 1);
                     } else {
@@ -11250,6 +11278,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dumpPackage == null) {
             if (mAlwaysFinishActivities) {
                 pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities);
+            }
+            if (mAllowSpecifiedFifoScheduling) {
+                pw.println("  mAllowSpecifiedFifoScheduling=true");
             }
             if (dumpAll) {
                 pw.println("  Total persistent processes: " + numPers);
@@ -17314,11 +17345,45 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+
+        if (com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()) {
+            synchronized (mProcLock) {
+                adjustFifoProcessesIfNeeded(uid, !active /* allowFifo */);
+            }
+        }
     }
 
     final boolean isCameraActiveForUid(@UserIdInt int uid) {
         synchronized (mActiveCameraUids) {
             return mActiveCameraUids.indexOf(uid) >= 0;
+        }
+    }
+
+    /**
+     * This is called when the given uid is using camera. If the uid has top process state, then
+     * cancel the FIFO priority of the high priority processes.
+     */
+    @VisibleForTesting
+    @GuardedBy("mProcLock")
+    void adjustFifoProcessesIfNeeded(int preemptiveUid, boolean allowSpecifiedFifo) {
+        if (allowSpecifiedFifo == mAllowSpecifiedFifoScheduling) {
+            return;
+        }
+        if (!allowSpecifiedFifo) {
+            final UidRecord uidRec = mProcessList.mActiveUids.get(preemptiveUid);
+            if (uidRec == null || uidRec.getCurProcState() > PROCESS_STATE_TOP) {
+                // To avoid frequent switching by background camera usages, e.g. face unlock,
+                // face detection (auto rotation), screen attention (keep screen on).
+                return;
+            }
+        }
+        mAllowSpecifiedFifoScheduling = allowSpecifiedFifo;
+        for (int i = mSpecifiedFifoProcesses.size() - 1; i >= 0; i--) {
+            final ProcessRecord proc = mSpecifiedFifoProcesses.get(i);
+            if (proc.mState.getSetSchedGroup() != ProcessList.SCHED_GROUP_TOP_APP) {
+                continue;
+            }
+            setFifoPriority(proc, allowSpecifiedFifo /* enable */);
         }
     }
 
