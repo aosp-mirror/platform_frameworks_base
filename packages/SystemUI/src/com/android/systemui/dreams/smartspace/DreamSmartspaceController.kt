@@ -50,7 +50,7 @@ import javax.inject.Named
 @SysUISingleton
 class DreamSmartspaceController @Inject constructor(
     private val context: Context,
-    private val smartspaceManager: SmartspaceManager,
+    private val smartspaceManager: SmartspaceManager?,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
     private val smartspaceViewComponentFactory: SmartspaceViewComponent.Factory,
@@ -184,6 +184,9 @@ class DreamSmartspaceController @Inject constructor(
     }
 
     private fun connectSession() {
+        if (smartspaceManager == null) {
+            return
+        }
         if (plugin == null && weatherPlugin == null) {
             return
         }

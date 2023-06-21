@@ -184,7 +184,7 @@ class MediaDataManager(
     private val tunerService: TunerService,
     private val mediaFlags: MediaFlags,
     private val logger: MediaUiEventLogger,
-    private val smartspaceManager: SmartspaceManager,
+    private val smartspaceManager: SmartspaceManager?,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
@@ -260,7 +260,7 @@ class MediaDataManager(
         tunerService: TunerService,
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
-        smartspaceManager: SmartspaceManager,
+        smartspaceManager: SmartspaceManager?,
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
@@ -347,7 +347,7 @@ class MediaDataManager(
         // Register for Smartspace data updates.
         smartspaceMediaDataProvider.registerListener(this)
         smartspaceSession =
-            smartspaceManager.createSmartspaceSession(
+            smartspaceManager?.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build()
             )
         smartspaceSession?.let {
