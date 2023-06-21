@@ -20,7 +20,7 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test
 
 /** Base class for app launch tests */
-abstract class OpenAppTransition(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class OpenAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
     /** {@inheritDoc} */

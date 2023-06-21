@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.launch
 
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -27,19 +27,17 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppFromIntentColdAfterCameraTestCfArm(flicker: FlickerTest) :
+class OpenAppFromIntentColdAfterCameraTestCfArm(flicker: LegacyFlickerTest) :
     OpenAppFromIntentColdAfterCameraTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
     }
 }

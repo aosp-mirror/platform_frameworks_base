@@ -19,21 +19,21 @@
 package com.android.server.wm.flicker.ime
 
 import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 
-fun FlickerTest.imeLayerBecomesVisible() {
+fun LegacyFlickerTest.imeLayerBecomesVisible() {
     assertLayers {
         this.isInvisible(ComponentNameMatcher.IME).then().isVisible(ComponentNameMatcher.IME)
     }
 }
 
-fun FlickerTest.imeLayerBecomesInvisible() {
+fun LegacyFlickerTest.imeLayerBecomesInvisible() {
     assertLayers {
         this.isVisible(ComponentNameMatcher.IME).then().isInvisible(ComponentNameMatcher.IME)
     }
 }
 
-fun FlickerTest.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
+fun LegacyFlickerTest.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertWm {
             this.isNonAppWindowVisible(ComponentNameMatcher.IME)
@@ -47,7 +47,7 @@ fun FlickerTest.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
     }
 }
 
-fun FlickerTest.imeWindowBecomesVisible() {
+fun LegacyFlickerTest.imeWindowBecomesVisible() {
     assertWm {
         this.isNonAppWindowInvisible(ComponentNameMatcher.IME)
             .then()
@@ -55,7 +55,7 @@ fun FlickerTest.imeWindowBecomesVisible() {
     }
 }
 
-fun FlickerTest.imeWindowBecomesInvisible() {
+fun LegacyFlickerTest.imeWindowBecomesInvisible() {
     assertWm {
         this.isNonAppWindowVisible(ComponentNameMatcher.IME)
             .then()

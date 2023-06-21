@@ -24,8 +24,8 @@ import android.tools.common.Rotation
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
@@ -69,17 +69,17 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: FlickerTest) :
-        AutoEnterPipOnGoToHomeTest(flicker) {
+class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
+    AutoEnterPipOnGoToHomeTest(flicker) {
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     /** Second app used to enter split screen mode */
     protected val secondAppForSplitScreen = getSplitScreenApp(instrumentation)
     fun getSplitScreenApp(instrumentation: Instrumentation): StandardAppHelper =
-            SimpleAppHelper(
-                    instrumentation,
-                    ActivityOptions.SplitScreen.Primary.LABEL,
-                    ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent()
-            )
+        SimpleAppHelper(
+            instrumentation,
+            ActivityOptions.SplitScreen.Primary.LABEL,
+            ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent()
+        )
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
@@ -91,11 +91,11 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: FlickerTest) :
                 enterSplitScreen()
                 // wait until split screen is established
                 wmHelper
-                        .StateSyncBuilder()
-                        .withWindowSurfaceAppeared(pipApp)
-                        .withWindowSurfaceAppeared(secondAppForSplitScreen)
-                        .withSplitDividerVisible()
-                        .waitForAndVerify()
+                    .StateSyncBuilder()
+                    .withWindowSurfaceAppeared(pipApp)
+                    .withWindowSurfaceAppeared(secondAppForSplitScreen)
+                    .withSplitDividerVisible()
+                    .waitForAndVerify()
                 pipApp.enableAutoEnterForPipActivity()
             }
             teardown {
@@ -120,8 +120,8 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: FlickerTest) :
             // contains more than 3 task views. We need to use uiautomator directly to find the
             // second task to split.
             tapl.workspace.switchToOverview().overviewActions.clickSplit()
-            val snapshots = tapl.device.wait(Until.findObjects(overviewSnapshotSelector),
-                    TIMEOUT_MS)
+            val snapshots =
+                tapl.device.wait(Until.findObjects(overviewSnapshotSelector), TIMEOUT_MS)
             if (snapshots == null || snapshots.size < 1) {
                 error("Fail to find a overview snapshot to split.")
             }
@@ -137,12 +137,12 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: FlickerTest) :
             snapshots[0].click()
         } else {
             tapl.workspace
-                    .switchToOverview()
-                    .currentTask
-                    .tapMenu()
-                    .tapSplitMenuItem()
-                    .currentTask
-                    .open()
+                .switchToOverview()
+                .currentTask
+                .tapMenu()
+                .tapSplitMenuItem()
+                .currentTask
+                .open()
         }
         SystemClock.sleep(TIMEOUT_MS)
     }
@@ -190,11 +190,10 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: FlickerTest) :
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                    // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                    supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
+                // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
-        }
     }
 }

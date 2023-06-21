@@ -20,20 +20,20 @@ import android.content.Context
 import android.system.helpers.CommandsHelper
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import com.android.server.wm.flicker.helpers.setRotation
+import android.tools.device.flicker.legacy.FlickerTestData
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.helpers.LetterboxAppHelper
-import android.tools.device.flicker.legacy.IFlickerTestData
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseTest
-import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.layerKeepVisible
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
 
-abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val letterboxApp = LetterboxAppHelper(instrumentation)
     lateinit var cmdHelper: CommandsHelper
@@ -47,9 +47,7 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
                 letterboxApp.launchViaIntent(wmHelper)
                 setEndRotation()
             }
-            teardown {
-                letterboxApp.exit(wmHelper)
-            }
+            teardown { letterboxApp.exit(wmHelper) }
         }
 
     @Before
@@ -100,9 +98,9 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
         return res != null && res.contains("true")
     }
 
-    fun IFlickerTestData.setStartRotation() = setRotation(flicker.scenario.startRotation)
+    fun FlickerTestData.setStartRotation() = setRotation(flicker.scenario.startRotation)
 
-    fun IFlickerTestData.setEndRotation() = setRotation(flicker.scenario.endRotation)
+    fun FlickerTestData.setEndRotation() = setRotation(flicker.scenario.endRotation)
 
     /** Checks that app entering letterboxed state have rounded corners */
     fun assertLetterboxAppAtStartHasRoundedCorners() {
@@ -131,13 +129,13 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
     }
 
     fun assertAppLetterboxedAtEnd() =
-            flicker.assertLayersEnd { isVisible(ComponentNameMatcher.LETTERBOX) }
+        flicker.assertLayersEnd { isVisible(ComponentNameMatcher.LETTERBOX) }
 
     fun assertAppLetterboxedAtStart() =
-            flicker.assertLayersStart { isVisible(ComponentNameMatcher.LETTERBOX) }
+        flicker.assertLayersStart { isVisible(ComponentNameMatcher.LETTERBOX) }
 
     fun assertAppStaysLetterboxed() =
-            flicker.assertLayers { isVisible(ComponentNameMatcher.LETTERBOX) }
+        flicker.assertLayers { isVisible(ComponentNameMatcher.LETTERBOX) }
 
     fun assertLetterboxAppLayerKeepVisible() = flicker.layerKeepVisible(letterboxApp)
 

@@ -20,7 +20,7 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.navBarLayerPositionAtEnd
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.Assume
@@ -28,7 +28,8 @@ import org.junit.Ignore
 import org.junit.Test
 
 /** Base class for app launch tests from lock screen */
-abstract class OpenAppFromLockscreenTransition(flicker: FlickerTest) : OpenAppTransition(flicker) {
+abstract class OpenAppFromLockscreenTransition(flicker: LegacyFlickerTest) :
+    OpenAppTransition(flicker) {
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit = {

@@ -21,8 +21,8 @@ import android.platform.test.annotations.Postsubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker) {
+class PipDragThenSnapTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     // represents the direction in which the pip window should be snapping
     private var willSnapRight: Boolean = true
 
@@ -99,15 +99,14 @@ class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker) {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
-        }
     }
 }

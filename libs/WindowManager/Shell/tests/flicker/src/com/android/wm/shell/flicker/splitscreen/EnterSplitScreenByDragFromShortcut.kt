@@ -21,8 +21,8 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenByDragFromShortcut(override val flicker: FlickerTest) :
+class EnterSplitScreenByDragFromShortcut(override val flicker: LegacyFlickerTest) :
     EnterSplitScreenByDragFromShortcutBenchmark(flicker), ICommonAssertions {
 
     override val transition: FlickerBuilder.() -> Unit
@@ -105,11 +105,10 @@ class EnterSplitScreenByDragFromShortcut(override val flicker: FlickerTest) :
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
-        }
     }
 }

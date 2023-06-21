@@ -20,7 +20,7 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.replacesLayer
 import org.junit.Test
 
 /** Base test class for transitions that close an app back to the launcher screen */
-abstract class CloseAppTransition(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class CloseAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
     /** {@inheritDoc} */
