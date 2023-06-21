@@ -40,10 +40,7 @@ import java.io.File;
  */
 class WallpaperData {
 
-    int userId;
-
-    final File wallpaperFile;   // source image
-    final File cropFile;        // eventual destination
+    final int userId;
 
     /**
      * True while the client is writing a new wallpaper
@@ -133,14 +130,13 @@ class WallpaperData {
      */
     final Rect cropHint = new Rect(0, 0, 0, 0);
 
+    // map of which -> File
+    private final SparseArray<File> mWallpaperFiles = new SparseArray<>();
+    private final SparseArray<File> mCropFiles = new SparseArray<>();
+
     WallpaperData(int userId, @SetWallpaperFlags int wallpaperType) {
         this.userId = userId;
         this.mWhich = wallpaperType;
-        File wallpaperDir = getWallpaperDir(userId);
-        String wallpaperFileName = (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_ORIG : WALLPAPER;
-        String cropFileName = (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP;
-        this.wallpaperFile = new File(wallpaperDir, wallpaperFileName);
-        this.cropFile = new File(wallpaperDir, cropFileName);
     }
 
     /**
@@ -154,8 +150,6 @@ class WallpaperData {
      */
     WallpaperData(WallpaperData source) {
         this.userId = source.userId;
-        this.wallpaperFile = source.wallpaperFile;
-        this.cropFile = source.cropFile;
         this.wallpaperComponent = source.wallpaperComponent;
         this.mWhich = source.mWhich;
         this.wallpaperId = source.wallpaperId;
@@ -169,6 +163,25 @@ class WallpaperData {
         }
     }
 
+    File getWallpaperFile() {
+        String fileName = mWhich == FLAG_LOCK ? WALLPAPER_LOCK_ORIG : WALLPAPER;
+        return getFile(mWallpaperFiles, fileName);
+    }
+
+    File getCropFile() {
+        String fileName = mWhich == FLAG_LOCK ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP;
+        return getFile(mCropFiles, fileName);
+    }
+
+    private File getFile(SparseArray<File> map, String fileName) {
+        File result = map.get(mWhich);
+        if (result == null) {
+            result = new File(getWallpaperDir(userId), fileName);
+            map.put(userId, result);
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         StringBuilder out = new StringBuilder(defaultString(this));
@@ -177,7 +190,7 @@ class WallpaperData {
         out.append(", which: ");
         out.append(mWhich);
         out.append(", file mod: ");
-        out.append(wallpaperFile != null ? wallpaperFile.lastModified() : "null");
+        out.append(getWallpaperFile() != null ? getWallpaperFile().lastModified() : "null");
         if (connection == null) {
             out.append(", no connection");
         } else {
@@ -202,10 +215,10 @@ class WallpaperData {
 
     // Called during initialization of a given user's wallpaper bookkeeping
     boolean cropExists() {
-        return cropFile.exists();
+        return getCropFile().exists();
     }
 
     boolean sourceExists() {
-        return wallpaperFile.exists();
+        return getWallpaperFile().exists();
     }
 }
