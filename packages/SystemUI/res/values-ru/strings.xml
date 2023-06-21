@@ -814,6 +814,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Открыть приложение \"<xliff:g id="APP_LABEL">%1$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Воспроизвести медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (исполнитель: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) из приложения \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Воспроизвести медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" из приложения \"<xliff:g id="APP_LABEL">%2$s</xliff:g>\""</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запущено"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Управление недоступно"</string>
