@@ -1335,7 +1335,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * the key, it is also irreversibly invalidated once a new biometric is enrolled or once\
          * no more biometrics are enrolled, unless {@link
          * #setInvalidatedByBiometricEnrollment(boolean)} is used to allow validity after
-         * enrollment. Attempts to initialize cryptographic operations using such keys will throw
+         * enrollment, or {@code KeyProperties.AUTH_DEVICE_CREDENTIAL} is specified as part of
+         * the parameters to {@link #setUserAuthenticationParameters}.
+         * Attempts to initialize cryptographic operations using such keys will throw
          * {@link KeyPermanentlyInvalidatedException}.</li>
          * </ul>
          *
