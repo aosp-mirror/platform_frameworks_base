@@ -69,6 +69,8 @@ public abstract class Transport {
      */
     private final Map<Integer, IOnMessageReceivedListener> mListeners;
 
+    private OnTransportClosedListener mOnTransportClosed;
+
     private static boolean isRequest(int message) {
         return (message & 0xFF000000) == 0x63000000;
     }
@@ -119,19 +121,17 @@ public abstract class Transport {
     abstract void stop();
 
     /**
-     * Stop listening to the incoming data and close the streams.
+     * Stop listening to the incoming data and close the streams. If a listener for closed event
+     * is set, then trigger it to assist with its clean-up.
      */
-    abstract void close();
+    void close() {
+        if (mOnTransportClosed != null) {
+            mOnTransportClosed.onClosed(this);
+        }
+    }
 
     protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException;
-
-    /**
-     * Send a message.
-     */
-    public void sendMessage(int message, @NonNull byte[] data) throws IOException {
-        sendMessage(message, mNextSequence.incrementAndGet(), data);
-    }
 
     public Future<byte[]> requestForResponse(int message, byte[] data) {
         if (DEBUG) Slog.d(TAG, "Requesting for response");
@@ -239,5 +239,15 @@ public abstract class Transport {
                 Slog.w(TAG, "Ignoring unknown response 0x" + Integer.toHexString(message));
             }
         }
+    }
+
+    void setOnTransportClosedListener(OnTransportClosedListener callback) {
+        this.mOnTransportClosed = callback;
+    }
+
+    // Interface to pass transport to the transport manager to assist with detachment.
+    @FunctionalInterface
+    interface OnTransportClosedListener {
+        void onClosed(Transport transport);
     }
 }
