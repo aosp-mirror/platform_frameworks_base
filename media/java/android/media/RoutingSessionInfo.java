@@ -100,8 +100,12 @@ public final class RoutingSessionInfo implements Parcelable {
 
         boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
-        mVolumeHandling = defineVolumeHandling(builder.mVolumeHandling, mSelectedRoutes,
-                volumeAdjustmentForRemoteGroupSessions);
+        mVolumeHandling =
+                defineVolumeHandling(
+                        mIsSystemSession,
+                        builder.mVolumeHandling,
+                        mSelectedRoutes,
+                        volumeAdjustmentForRemoteGroupSessions);
 
         mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
     }
@@ -150,9 +154,14 @@ public final class RoutingSessionInfo implements Parcelable {
         return controlHints;
     }
 
-    private static int defineVolumeHandling(int volumeHandling, List<String> selectedRoutes,
+    private static int defineVolumeHandling(
+            boolean isSystemSession,
+            int volumeHandling,
+            List<String> selectedRoutes,
             boolean volumeAdjustmentForRemoteGroupSessions) {
-        if (!volumeAdjustmentForRemoteGroupSessions && selectedRoutes.size() > 1) {
+        if (!isSystemSession
+                && !volumeAdjustmentForRemoteGroupSessions
+                && selectedRoutes.size() > 1) {
             return MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
         }
         return volumeHandling;
