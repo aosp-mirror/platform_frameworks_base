@@ -780,7 +780,7 @@ public class BubbleController implements ConfigurationChangeListener,
         try {
             mAddedToWindowManager = true;
             registerBroadcastReceiver();
-            mBubbleData.getOverflow().initialize(this);
+            mBubbleData.getOverflow().initialize(this, isShowingAsBubbleBar());
             // (TODO: b/273314541) some duplication in the inset listener
             if (isShowingAsBubbleBar()) {
                 mWindowManager.addView(mLayerView, mWmLayoutParams);
@@ -1077,6 +1077,13 @@ public class BubbleController implements ConfigurationChangeListener,
     @VisibleForTesting
     public void expandStackAndSelectBubbleFromLauncher(String key, boolean onLauncherHome) {
         mBubblePositioner.setShowingInBubbleBar(onLauncherHome);
+
+        if (BubbleOverflow.KEY.equals(key)) {
+            mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
+            mLayerView.showExpandedView(mBubbleData.getOverflow());
+            return;
+        }
+
         Bubble b = mBubbleData.getAnyBubbleWithkey(key);
         if (b == null) {
             return;

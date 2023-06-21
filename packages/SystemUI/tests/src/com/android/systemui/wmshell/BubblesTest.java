@@ -133,8 +133,10 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
+import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.bubbles.StackEducationViewKt;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
@@ -1936,6 +1938,7 @@ public class BubblesTest extends SysuiTestCase {
 
         assertThat(mBubbleData.getBubbles()).hasSize(1);
         assertBubbleIsInflatedForStack(mBubbleData.getBubbles().get(0));
+        assertBubbleIsInflatedForStack(mBubbleData.getOverflow());
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
@@ -1944,6 +1947,7 @@ public class BubblesTest extends SysuiTestCase {
 
         assertThat(mBubbleData.getBubbles()).hasSize(1);
         assertBubbleIsInflatedForBar(mBubbleData.getBubbles().get(0));
+        assertBubbleIsInflatedForBar(mBubbleData.getOverflow());
 
         mBubbleController.unregisterBubbleStateListener();
 
@@ -1951,6 +1955,7 @@ public class BubblesTest extends SysuiTestCase {
 
         assertThat(mBubbleData.getBubbles()).hasSize(1);
         assertBubbleIsInflatedForStack(mBubbleData.getBubbles().get(0));
+        assertBubbleIsInflatedForStack(mBubbleData.getOverflow());
     }
 
     @Test
@@ -2118,7 +2123,7 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     /** Asserts that the given bubble has the stack expanded view inflated. */
-    private void assertBubbleIsInflatedForStack(Bubble b) {
+    private void assertBubbleIsInflatedForStack(BubbleViewProvider b) {
         assertThat(b.getIconView()).isNotNull();
         assertThat(b.getExpandedView()).isNotNull();
         assertThat(b.getBubbleBarExpandedView()).isNull();
@@ -2131,8 +2136,14 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     /** Asserts that the given bubble has the bar expanded view inflated. */
-    private void assertBubbleIsInflatedForBar(Bubble b) {
-        assertThat(b.getIconView()).isNull();
+    private void assertBubbleIsInflatedForBar(BubbleViewProvider b) {
+        // the icon view should be inflated for the overflow but not for other bubbles when showing
+        // in the bar
+        if (b instanceof Bubble) {
+            assertThat(b.getIconView()).isNull();
+        } else if (b instanceof BubbleOverflow) {
+            assertThat(b.getIconView()).isNotNull();
+        }
         assertThat(b.getExpandedView()).isNull();
         assertThat(b.getBubbleBarExpandedView()).isNotNull();
     }
