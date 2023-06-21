@@ -22,12 +22,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -37,11 +35,14 @@ import kotlinx.coroutines.launch
 class FromGoneTransitionInteractor
 @Inject
 constructor(
+    override val transitionRepository: KeyguardTransitionRepository,
+    override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(FromGoneTransitionInteractor::class.simpleName!!) {
+) :
+    TransitionInteractor(
+        fromState = KeyguardState.GONE,
+    ) {
 
     override fun start() {
         listenForGoneToAodOrDozing()
@@ -53,17 +54,10 @@ constructor(
     private fun listenForGoneToLockscreen() {
         scope.launch {
             keyguardInteractor.isKeyguardShowing
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (isKeyguardShowing, lastStartedStep) ->
                     if (isKeyguardShowing && lastStartedStep.to == KeyguardState.GONE) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.GONE,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
                     }
                 }
         }
@@ -72,17 +66,10 @@ constructor(
     private fun listenForGoneToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (isAbleToDream, lastStartedStep) ->
                     if (isAbleToDream && lastStartedStep.to == KeyguardState.GONE) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.GONE,
-                                KeyguardState.DREAMING,
-                                getAnimator(TO_DREAMING_DURATION),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.DREAMING)
                     }
                 }
         }
@@ -93,7 +80,7 @@ constructor(
             keyguardInteractor.wakefulnessModel
                 .sample(
                     combine(
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        transitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Pair
                     ),
@@ -104,30 +91,24 @@ constructor(
                         lastStartedStep.to == KeyguardState.GONE &&
                             wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.GONE,
-                                if (isAodAvailable) {
-                                    KeyguardState.AOD
-                                } else {
-                                    KeyguardState.DOZING
-                                },
-                                getAnimator(),
-                            )
+                        startTransitionTo(
+                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
                         )
                     }
                 }
         }
     }
 
-    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
+    override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
-            setInterpolator(Interpolators.LINEAR)
-            setDuration(duration.inWholeMilliseconds)
+            interpolator = Interpolators.LINEAR
+            duration =
+                when (toState) {
+                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
-
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds

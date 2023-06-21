@@ -47,6 +47,8 @@ constructor(
     private val repository: KeyguardTransitionRepository,
     @Application val scope: CoroutineScope,
 ) {
+    private val TAG = this::class.simpleName
+
     /** (any)->GONE transition information */
     val anyStateToGoneTransition: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.to == KeyguardState.GONE }
