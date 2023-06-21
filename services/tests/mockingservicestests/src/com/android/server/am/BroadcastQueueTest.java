@@ -421,6 +421,12 @@ public class BroadcastQueueTest {
                 UserHandle.USER_SYSTEM);
     }
 
+    private ProcessRecord makeActiveProcessRecord(String packageName, String processName)
+            throws Exception {
+        return makeActiveProcessRecord(packageName, processName, ProcessBehavior.NORMAL,
+                UserHandle.USER_SYSTEM);
+    }
+
     private ProcessRecord makeActiveProcessRecord(String packageName,
             ProcessBehavior behavior) throws Exception {
         return makeActiveProcessRecord(packageName, packageName, behavior, UserHandle.USER_SYSTEM);
@@ -621,6 +627,11 @@ public class BroadcastQueueTest {
                 AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
                 Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId,
                 BackgroundStartPrivileges.NONE, false, null, PROCESS_STATE_UNKNOWN);
+    }
+
+    private void setProcessFreezable(ProcessRecord app, boolean pendingFreeze, boolean frozen) {
+        app.mOptRecord.setPendingFreeze(pendingFreeze);
+        app.mOptRecord.setFrozen(frozen);
     }
 
     private void assertHealth() {
@@ -1769,12 +1780,10 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
         final ProcessRecord receiverOrangeApp = makeActiveProcessRecord(PACKAGE_ORANGE);
 
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
-                ActivityManager.PROCESS_STATE_CACHED_ACTIVITY, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_BLUE),
-                ActivityManager.PROCESS_STATE_CACHED_EMPTY, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
+        setProcessFreezable(receiverGreenApp, true, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        setProcessFreezable(receiverBlueApp, false, true);
+        mQueue.onProcessFreezableChangedLocked(receiverBlueApp);
 
         final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
         final BroadcastOptions opts = BroadcastOptions.makeBasic()
@@ -1818,16 +1827,14 @@ public class BroadcastQueueTest {
                 eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
 
         // Shift blue to be active and confirm that deferred broadcast is delivered
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_BLUE),
-                ActivityManager.PROCESS_STATE_TOP, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
+        setProcessFreezable(receiverBlueApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverBlueApp);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, timeTick);
 
         // Shift green to be active and confirm that deferred broadcast is delivered
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
-                ActivityManager.PROCESS_STATE_SERVICE, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
+        setProcessFreezable(receiverGreenApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
     }
@@ -2252,15 +2259,12 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
 
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
-                ActivityManager.PROCESS_STATE_CACHED_ACTIVITY, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_BLUE),
-                ActivityManager.PROCESS_STATE_CACHED_EMPTY, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_YELLOW),
-                ActivityManager.PROCESS_STATE_SERVICE, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
+        setProcessFreezable(receiverGreenApp, true, true);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        setProcessFreezable(receiverBlueApp, true, false);
+        mQueue.onProcessFreezableChangedLocked(receiverBlueApp);
+        setProcessFreezable(receiverYellowApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverYellowApp);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastOptions opts = BroadcastOptions.makeBasic()
@@ -2283,11 +2287,48 @@ public class BroadcastQueueTest {
         verifyScheduleRegisteredReceiver(times(1), receiverYellowApp, airplane);
 
         // Shift green to be active and confirm that deferred broadcast is delivered
-        mUidCachedStateObserver.onUidStateChanged(getUidForPackage(PACKAGE_GREEN),
-                ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
+        setProcessFreezable(receiverGreenApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+    }
+
+    /**
+     * Verify broadcasts to a runtime receiver in cached process is deferred even when a different
+     * process in the same package is not cached.
+     */
+    @Test
+    public void testDeferralPolicy_UntilActive_WithMultiProcessUid() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp1 = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverGreenApp2 = makeActiveProcessRecord(PACKAGE_GREEN,
+                PACKAGE_GREEN + "_proc2");
+
+        setProcessFreezable(receiverGreenApp1, true, true);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp1);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, opts,
+                List.of(makeRegisteredReceiver(receiverGreenApp1),
+                        makeRegisteredReceiver(receiverGreenApp2))));
+        waitForIdle();
+
+        // 1st process in Green package is ignored since it is in a cached state
+        // but the 2nd process should still receive the broadcast.
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp1, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp2, airplane);
+
+        // Shift the 1st process in Green package to be active and confirm that deferred broadcast
+        // is delivered
+        setProcessFreezable(receiverGreenApp1, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp1);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp1, airplane);
     }
 
     @Test
