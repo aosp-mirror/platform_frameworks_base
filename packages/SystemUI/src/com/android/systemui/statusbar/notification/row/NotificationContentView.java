@@ -1394,8 +1394,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (shouldShowBubbleButton(entry)) {
             // explicitly resolve drawable resource using SystemUI's theme
             Drawable d = mContext.getDrawable(entry.isBubble()
-                    ? R.drawable.bubble_ic_stop_bubble
-                    : R.drawable.bubble_ic_create_bubble);
+                    ? com.android.wm.shell.R.drawable.bubble_ic_stop_bubble
+                    : com.android.wm.shell.R.drawable.bubble_ic_create_bubble);
 
             String contentDescription = mContext.getResources().getString(entry.isBubble()
                     ? R.string.notification_conversation_unbubble
