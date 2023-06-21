@@ -5718,6 +5718,9 @@
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
 
+    <!-- Whether per-app user aspect ratio override settings is enabled -->
+    <bool name="config_appCompatUserAppAspectRatioSettingsIsEnabled">false</bool>
+
     <!-- Whether sending compat fake focus for split screen resumed activities is enabled.
          Needed because some game engines wait to get focus before drawing the content of
          the app which isn't guaranteed by default in multi-window modes. -->
