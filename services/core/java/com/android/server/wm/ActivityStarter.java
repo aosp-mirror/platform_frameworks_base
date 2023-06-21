@@ -1587,21 +1587,14 @@ class ActivityStarter {
                 newTransition = null;
             }
         }
-        if (isTransientLaunch) {
-            if (forceTransientTransition) {
-                transitionController.collect(mLastStartActivityRecord);
-                transitionController.collect(mPriorAboveTask);
-            }
-            // `started` isn't guaranteed to be the actual relevant activity, so we must wait
-            // until after we launched to identify the relevant activity.
-            transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
-            if (forceTransientTransition) {
-                final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
-                // update wallpaper target to TransientHide
-                dc.mWallpaperController.adjustWallpaperWindows();
-                // execute transition because there is no change
-                transitionController.setReady(dc, true /* ready */);
-            }
+        if (forceTransientTransition) {
+            transitionController.collect(mLastStartActivityRecord);
+            transitionController.collect(mPriorAboveTask);
+            final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
+            // update wallpaper target to TransientHide
+            dc.mWallpaperController.adjustWallpaperWindows();
+            // execute transition because there is no change
+            transitionController.setReady(dc, true /* ready */);
         }
         if (!userLeaving) {
             // no-user-leaving implies not entering PiP.
@@ -1711,6 +1704,7 @@ class ActivityStarter {
                     activity.destroyIfPossible("Removes redundant singleInstance");
                 }
             }
+            recordTransientLaunchIfNeeded(targetTaskTop);
             // Recycle the target task for this launch.
             startResult = recycleTask(targetTask, targetTaskTop, reusedTask, intentGrants);
             if (startResult != START_SUCCESS) {
@@ -1741,6 +1735,9 @@ class ActivityStarter {
         } else if (mAddingToTask) {
             addOrReparentStartingActivity(targetTask, "adding to task");
         }
+
+        // After activity is attached to task, but before actual start
+        recordTransientLaunchIfNeeded(mLastStartActivityRecord);
 
         if (!mAvoidMoveToFront && mDoResume) {
             mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
@@ -1836,6 +1833,14 @@ class ActivityStarter {
         }
 
         return START_SUCCESS;
+    }
+
+    private void recordTransientLaunchIfNeeded(ActivityRecord r) {
+        if (r == null || !mTransientLaunch) return;
+        final TransitionController controller = r.mTransitionController;
+        if (controller.isCollecting() && !controller.isTransientCollect(r)) {
+            controller.setTransientLaunch(r, mPriorAboveTask);
+        }
     }
 
     /** Returns the leaf task where the target activity may be placed. */
