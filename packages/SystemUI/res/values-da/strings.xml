@@ -870,6 +870,7 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Caster medie"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Caster <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Tjek appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ikke fundet"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Styringselement ikke tilgængeligt"</string>
