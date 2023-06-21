@@ -737,6 +737,16 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testResetBouncerAnimatingAway() {
+        reset(mPrimaryBouncerInteractor);
+        when(mPrimaryBouncerInteractor.isAnimatingAway()).thenReturn(true);
+
+        mStatusBarKeyguardViewManager.reset(true);
+
+        verify(mPrimaryBouncerInteractor, never()).hide();
+    }
+
+    @Test
     public void handleDispatchTouchEvent_alternateBouncerNotVisible() {
         mStatusBarKeyguardViewManager.addCallback(mCallback);
 
