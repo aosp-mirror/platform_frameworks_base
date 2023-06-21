@@ -16,6 +16,8 @@
 
 package com.android.server.companion;
 
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
+
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
 import android.companion.Telecom;
@@ -30,7 +32,6 @@ import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.transport.CompanionTransportManager;
-import com.android.server.companion.transport.Transport;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -135,7 +136,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 case "send-context-sync-empty-message": {
                     associationId = getNextIntArgRequired();
                     mTransportManager.createEmulatedTransport(associationId)
-                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                            .processMessage(MESSAGE_REQUEST_CONTEXT_SYNC,
                                     /* sequence= */ 0,
                                     CrossDeviceSyncController.createEmptyMessage());
                     break;
@@ -147,7 +148,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String address = getNextArgRequired();
                     String facilitator = getNextArgRequired();
                     mTransportManager.createEmulatedTransport(associationId)
-                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                            .processMessage(MESSAGE_REQUEST_CONTEXT_SYNC,
                                     /* sequence= */ 0,
                                     CrossDeviceSyncController.createCallCreateMessage(callId,
                                             address, facilitator));
@@ -159,7 +160,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String callId = getNextArgRequired();
                     int control = getNextIntArgRequired();
                     mTransportManager.createEmulatedTransport(associationId)
-                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                            .processMessage(MESSAGE_REQUEST_CONTEXT_SYNC,
                                     /* sequence= */ 0,
                                     CrossDeviceSyncController.createCallControlMessage(callId,
                                             control));
@@ -184,7 +185,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     }
                     pos.end(telecomToken);
                     mTransportManager.createEmulatedTransport(associationId)
-                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                            .processMessage(MESSAGE_REQUEST_CONTEXT_SYNC,
                                     /* sequence= */ 0, pos.getBytes());
                     break;
                 }
@@ -246,7 +247,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     pos.end(callsToken);
                     pos.end(telecomToken);
                     mTransportManager.createEmulatedTransport(associationId)
-                            .processMessage(Transport.MESSAGE_REQUEST_CONTEXT_SYNC,
+                            .processMessage(MESSAGE_REQUEST_CONTEXT_SYNC,
                                     /* sequence= */ 0, pos.getBytes());
                     break;
                 }
