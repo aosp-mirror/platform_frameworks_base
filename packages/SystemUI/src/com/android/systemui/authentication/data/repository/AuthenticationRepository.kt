@@ -77,7 +77,9 @@ class AuthenticationRepositoryImpl @Inject constructor() : AuthenticationReposit
     override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
     private val _authenticationMethod =
-        MutableStateFlow<AuthenticationMethodModel>(AuthenticationMethodModel.Pin(1234))
+        MutableStateFlow<AuthenticationMethodModel>(
+            AuthenticationMethodModel.Pin(listOf(1, 2, 3, 4), autoConfirm = false)
+        )
     override val authenticationMethod: StateFlow<AuthenticationMethodModel> =
         _authenticationMethod.asStateFlow()
 
