@@ -1079,6 +1079,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Παράβλεψη"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Συνέχιση"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ρυθμίσεις"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εκτελείται"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ανενεργό, έλεγχος εφαρμογής"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Προέκυψε σφάλμα. Επανάληψη…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Δεν βρέθηκε."</string>

@@ -1079,6 +1079,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"닫기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"설정"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> 실행 중"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"비활성. 앱을 확인하세요."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"오류 발생, 다시 시도 중…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"찾을 수 없음"</string>

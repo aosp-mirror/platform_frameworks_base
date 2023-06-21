@@ -1079,6 +1079,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ปิด"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"เล่นต่อ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"การตั้งค่า"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงาน"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ไม่มีการใช้งาน โปรดตรวจสอบแอป"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"มีข้อผิดพลาด กำลังลองอีกครั้ง…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ไม่พบ"</string>
