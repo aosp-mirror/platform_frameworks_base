@@ -44,7 +44,6 @@
 
         <item>android:drawable/ic_audio_alarm</item>
         <item>android:drawable/ic_audio_alarm_mute</item>
-        <item>android:drawable/ic_bluetooth_share_icon</item>
         <item>android:drawable/ic_bt_headphones_a2dp</item>
         <item>android:drawable/ic_bt_headset_hfp</item>
         <item>android:drawable/ic_bt_hearing_aid</item>
