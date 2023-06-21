@@ -96,7 +96,9 @@ import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -115,6 +117,8 @@ public class ContentProviderHelper {
     private final ArrayList<ContentProviderRecord> mLaunchingProviders = new ArrayList<>();
     private final ProviderMap mProviderMap;
     private boolean mSystemProvidersInstalled;
+
+    private final Map<String, Boolean> mCloneProfileAuthorityRedirectionCache = new HashMap<>();
 
     ContentProviderHelper(ActivityManagerService service, boolean createProviderMap) {
         mService = service;
@@ -201,9 +205,24 @@ public class ContentProviderHelper {
             final UserProperties userProps = umInternal.getUserProperties(userId);
             final boolean isMediaSharedWithParent =
                     userProps != null && userProps.isMediaSharedWithParent();
-            if (!isAuthorityRedirectedForCloneProfile(name) || !isMediaSharedWithParent) {
+            if (!isAuthorityRedirectedForCloneProfileCached(name) || !isMediaSharedWithParent) {
                 // First check if this content provider has been published...
                 cpr = mProviderMap.getProviderByName(name, userId);
+                // In case we are on media authority and callingUid is cloned app asking to access
+                // the contentProvider of user 0 by specifying content as
+                // content://<parent-id>@media/external/file, we skip checkUser.
+                if (isAuthorityRedirectedForCloneProfileCached(name)) {
+                    final int callingUserId = UserHandle.getUserId(callingUid);
+                    final UserProperties userPropsCallingUser =
+                            umInternal.getUserProperties(callingUserId);
+                    final boolean isMediaSharedWithParentForCallingUser =
+                            userPropsCallingUser != null
+                                    && userPropsCallingUser.isMediaSharedWithParent();
+                    if (isMediaSharedWithParentForCallingUser
+                            && umInternal.getProfileParentId(callingUserId) == userId) {
+                        checkCrossUser = false;
+                    }
+                }
             }
             // If that didn't work, check if it exists for user 0 and then
             // verify that it's a singleton provider before using it.
@@ -218,7 +237,7 @@ public class ContentProviderHelper {
                                         r == null ? callingUid : r.uid, cpi.applicationInfo.uid)) {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
-                    } else if (isAuthorityRedirectedForCloneProfile(name)) {
+                    } else if (isAuthorityRedirectedForCloneProfileCached(name)) {
                         if (isMediaSharedWithParent) {
                             userId = umInternal.getProfileParentId(userId);
                             checkCrossUser = false;
@@ -1073,7 +1092,7 @@ public class ContentProviderHelper {
             return false;
         }
 
-        if (isAuthorityRedirectedForCloneProfile(holder.info.authority)
+        if (isAuthorityRedirectedForCloneProfileCached(holder.info.authority)
                 && resolveParentUserIdForCloneProfile(userId) != userId) {
             // Since clone profile shares certain providers with its parent and the access is
             // re-directed as well, the holder may not actually be installed on the clone profile.
@@ -1108,7 +1127,7 @@ public class ContentProviderHelper {
             userId = UserHandle.getCallingUserId();
         }
 
-        if (isAuthorityRedirectedForCloneProfile(authority)) {
+        if (isAuthorityRedirectedForCloneProfileCached(authority)) {
             UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
             UserInfo userInfo = umInternal.getUserInfo(userId);
 
@@ -1953,5 +1972,15 @@ public class ContentProviderHelper {
     protected boolean dumpProviderProto(FileDescriptor fd, PrintWriter pw, String name,
             String[] args) {
         return mProviderMap.dumpProviderProto(fd, pw, name, args);
+    }
+
+    private Boolean isAuthorityRedirectedForCloneProfileCached(String auth) {
+        if (mCloneProfileAuthorityRedirectionCache.containsKey(auth)) {
+            return mCloneProfileAuthorityRedirectionCache.get(auth);
+        } else {
+            boolean isAuthRedirected = isAuthorityRedirectedForCloneProfile(auth);
+            mCloneProfileAuthorityRedirectionCache.put(auth, isAuthRedirected);
+            return isAuthRedirected;
+        }
     }
 }
