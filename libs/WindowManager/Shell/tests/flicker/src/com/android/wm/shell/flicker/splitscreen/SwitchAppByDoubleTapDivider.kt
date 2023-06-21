@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -45,7 +44,7 @@ import org.junit.runners.Parameterized
 /**
  * Test double tap the divider bar to switch the two apps.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchAppByDoubleTapDivider`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:SwitchAppByDoubleTapDivider`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -61,7 +60,6 @@ class SwitchAppByDoubleTapDivider(override val flicker: FlickerTest) :
         }
 
     @PlatinumTest(focusArea = "sysui")
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     override fun cujCompleted() {

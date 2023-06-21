@@ -198,6 +198,11 @@ public class ShadeCarrierGroupController {
         return mSlotIndexResolver.getSlotIndex(subscriptionId);
     }
 
+    @VisibleForTesting
+    protected int getShadeCarrierVisibility(int index) {
+        return mCarrierGroups[index].getVisibility();
+    }
+
     /**
      * Sets a {@link OnSingleCarrierChangedListener}.
      *
@@ -307,11 +312,13 @@ public class ShadeCarrierGroupController {
                                         + info.subscriptionIds[i]);
                         continue;
                     }
-                    mInfos[slot] = mInfos[slot].changeVisibility(true);
-                    slotSeen[slot] = true;
-                    mCarrierGroups[slot].setCarrierText(
-                            info.listOfCarriers[i].toString().trim());
-                    mCarrierGroups[slot].setVisibility(View.VISIBLE);
+                    String carrierText = info.listOfCarriers[i].toString().trim();
+                    if (!TextUtils.isEmpty(carrierText)) {
+                        mInfos[slot] = mInfos[slot].changeVisibility(true);
+                        slotSeen[slot] = true;
+                        mCarrierGroups[slot].setCarrierText(carrierText);
+                        mCarrierGroups[slot].setVisibility(View.VISIBLE);
+                    }
                 }
                 for (int i = 0; i < SIM_SLOTS; i++) {
                     if (!slotSeen[i]) {

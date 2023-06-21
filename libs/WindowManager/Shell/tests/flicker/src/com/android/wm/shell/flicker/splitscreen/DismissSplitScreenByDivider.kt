@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 /**
  * Test dismiss split screen by dragging the divider bar.
  *
- * To run this test: `atest WMShellFlickerTests:DismissSplitScreenByDivider`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:DismissSplitScreenByDivider`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

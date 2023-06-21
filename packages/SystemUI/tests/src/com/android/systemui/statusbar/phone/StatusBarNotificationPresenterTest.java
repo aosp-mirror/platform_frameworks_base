@@ -55,6 +55,7 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -80,6 +81,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private FakeMetricsLogger mMetricsLogger;
     private final ShadeController mShadeController = mock(ShadeController.class);
     private final CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
+    private final NotificationsInteractor mNotificationsInteractor =
+            mock(NotificationsInteractor.class);
     private final KeyguardStateController mKeyguardStateController =
             mock(KeyguardStateController.class);
     private final NotifPipelineFlags mNotifPipelineFlags = mock(NotifPipelineFlags.class);
@@ -122,6 +125,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(DynamicPrivacyController.class),
                 mKeyguardStateController,
                 mCentralSurfaces,
+                mNotificationsInteractor,
                 mock(LockscreenShadeTransitionController.class),
                 mCommandQueue,
                 mock(NotificationLockscreenUserManager.class),
@@ -233,9 +237,9 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 .setTag("a")
                 .setNotification(n)
                 .build();
-        when(mCentralSurfaces.areNotificationAlertsDisabled()).thenReturn(true);
+        when(mNotificationsInteractor.areNotificationAlertsEnabled()).thenReturn(false);
 
-        assertTrue("CentralSurfaces alerts disabled shouldn't allow interruptions",
+        assertTrue("When alerts aren't enabled, interruptions are suppressed",
                 mInterruptSuppressor.suppressInterruptions(entry));
     }
 }

@@ -474,7 +474,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     return false;
                 }
                 // Avoid dragging the pattern view
-                if (mSecurityViewFlipper.getSecurityView().disallowInterceptTouch(event)) {
+                if (mSecurityViewFlipper.getSecurityView() != null
+                        && mSecurityViewFlipper.getSecurityView().disallowInterceptTouch(event)) {
                     return false;
                 }
                 int index = event.findPointerIndex(mActivePointerId);
