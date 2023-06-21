@@ -91,6 +91,15 @@ object Flags {
     val NOTIFICATION_SHELF_REFACTOR =
         unreleasedFlag(271161129, "notification_shelf_refactor")
 
+    // TODO(b/288326013): Tracking Bug
+    @JvmField
+    val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =
+            unreleasedFlag(
+                    288326013,
+                    "notification_async_hybrid_view_inflation",
+                    teamfood = false
+            )
+
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
         releasedFlag(270682168, "animated_notification_shade_insets")
