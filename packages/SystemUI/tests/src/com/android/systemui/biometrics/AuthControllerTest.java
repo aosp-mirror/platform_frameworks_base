@@ -488,7 +488,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         assertEquals(modalityCaptor.getValue().intValue(), modality);
         assertEquals(messageCaptor.getValue(),
-                mContext.getString(R.string.fingerprint_error_not_match));
+                mContext.getString(R.string.biometric_not_recognized));
     }
 
     @Test
