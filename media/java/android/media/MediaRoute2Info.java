@@ -156,6 +156,7 @@ public final class MediaRoute2Info implements Parcelable {
                 TYPE_REMOTE_GAME_CONSOLE,
                 TYPE_REMOTE_CAR,
                 TYPE_REMOTE_SMARTWATCH,
+                TYPE_REMOTE_SMARTPHONE,
                 TYPE_GROUP
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -341,6 +342,17 @@ public final class MediaRoute2Info implements Parcelable {
      * @hide
      */
     public static final int TYPE_REMOTE_SMARTWATCH = 1009;
+
+    /**
+     * Indicates the route is a remote smartphone.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_SMARTPHONE = 1010;
 
     /**
      * Indicates the route is a group of devices.
@@ -546,32 +558,8 @@ public final class MediaRoute2Info implements Parcelable {
         return mFeatures;
     }
 
-    // TODO (b/278728942): Add the following once the symbols are published in the SDK. Until then,
-    //     adding them would cause the generated link to be broken.
-    //     @see #TYPE_REMOTE_TABLET
-    //     @see #TYPE_REMOTE_TABLET_DOCKED
-    //     @see #TYPE_REMOTE_COMPUTER
-    //     @see #TYPE_REMOTE_GAME_CONSOLE
-    //     @see #TYPE_REMOTE_CAR
-    //     @see #TYPE_REMOTE_SMARTWATCH
     /**
      * Returns the type of this route.
-     *
-     * @see #TYPE_UNKNOWN
-     * @see #TYPE_BUILTIN_SPEAKER
-     * @see #TYPE_WIRED_HEADSET
-     * @see #TYPE_WIRED_HEADPHONES
-     * @see #TYPE_BLUETOOTH_A2DP
-     * @see #TYPE_HDMI
-     * @see #TYPE_DOCK
-     * @see #TYPE_USB_DEVICE
-     * @see #TYPE_USB_ACCESSORY
-     * @see #TYPE_USB_HEADSET
-     * @see #TYPE_HEARING_AID
-     * @see #TYPE_REMOTE_TV
-     * @see #TYPE_REMOTE_SPEAKER
-     * @see #TYPE_REMOTE_AUDIO_VIDEO_RECEIVER
-     * @see #TYPE_GROUP
      */
     @Type
     public int getType() {
@@ -954,6 +942,8 @@ public final class MediaRoute2Info implements Parcelable {
                 return "REMOTE_CAR";
             case TYPE_REMOTE_SMARTWATCH:
                 return "REMOTE_SMARTWATCH";
+            case TYPE_REMOTE_SMARTPHONE:
+                return "REMOTE_SMARTPHONE";
             case TYPE_GROUP:
                 return "GROUP";
             case TYPE_UNKNOWN:
