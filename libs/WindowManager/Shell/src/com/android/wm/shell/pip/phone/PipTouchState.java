@@ -410,6 +410,7 @@ public class PipTouchState {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mAllowTouches=" + mAllowTouches);
+        pw.println(innerPrefix + "mAllowInputEvents=" + mAllowInputEvents);
         pw.println(innerPrefix + "mActivePointerId=" + mActivePointerId);
         pw.println(innerPrefix + "mLastTouchDisplayId=" + mLastTouchDisplayId);
         pw.println(innerPrefix + "mDownTouch=" + mDownTouch);

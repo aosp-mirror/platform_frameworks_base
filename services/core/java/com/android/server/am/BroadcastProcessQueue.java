@@ -208,7 +208,7 @@ class BroadcastProcessQueue {
     private boolean mLastDeferredStates;
 
     private boolean mUidForeground;
-    private boolean mUidCached;
+    private boolean mProcessFreezable;
     private boolean mProcessInstrumented;
     private boolean mProcessPersistent;
 
@@ -440,7 +440,7 @@ class BroadcastProcessQueue {
      */
     @CheckResult
     public boolean setProcessAndUidState(@Nullable ProcessRecord app, boolean uidForeground,
-            boolean uidCached) {
+            boolean processFreezable) {
         this.app = app;
 
         // Since we may have just changed our PID, invalidate cached strings
@@ -449,13 +449,13 @@ class BroadcastProcessQueue {
 
         boolean didSomething = false;
         if (app != null) {
-            didSomething |= setUidCached(uidCached);
             didSomething |= setUidForeground(uidForeground);
+            didSomething |= setProcessFreezable(processFreezable);
             didSomething |= setProcessInstrumented(app.getActiveInstrumentation() != null);
             didSomething |= setProcessPersistent(app.isPersistent());
         } else {
-            didSomething |= setUidCached(uidCached);
             didSomething |= setUidForeground(false);
+            didSomething |= setProcessFreezable(false);
             didSomething |= setProcessInstrumented(false);
             didSomething |= setProcessPersistent(false);
         }
@@ -479,13 +479,13 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Update if this process is in the "cached" state, typically signaling that
+     * Update if this process is in the "freezable" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
     @CheckResult
-    private boolean setUidCached(boolean uidCached) {
-        if (mUidCached != uidCached) {
-            mUidCached = uidCached;
+    private boolean setProcessFreezable(boolean freezable) {
+        if (mProcessFreezable != freezable) {
+            mProcessFreezable = freezable;
             invalidateRunnableAt();
             return true;
         } else {
@@ -1150,7 +1150,7 @@ class BroadcastProcessQueue {
             } else if (mCountManifest > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_MANIFEST;
-            } else if (mUidCached) {
+            } else if (mProcessFreezable) {
                 if (r.deferUntilActive) {
                     // All enqueued broadcasts are deferrable, defer
                     if (mCountDeferred == mCountEnqueued) {
@@ -1220,7 +1220,7 @@ class BroadcastProcessQueue {
         // When all we have pending is deferred broadcasts, and we're cached,
         // then we want everything to be marked deferred
         final boolean wantDeferredStates = (mCountDeferred > 0)
-                && (mCountDeferred == mCountEnqueued) && mUidCached;
+                && (mCountDeferred == mCountEnqueued) && mProcessFreezable;
 
         if (mLastDeferredStates != wantDeferredStates) {
             mLastDeferredStates = wantDeferredStates;
@@ -1407,9 +1407,9 @@ class BroadcastProcessQueue {
         if (mUidForeground) {
             sb.append("FG");
         }
-        if (mUidCached) {
+        if (mProcessFreezable) {
             if (sb.length() > 0) sb.append("|");
-            sb.append("CACHED");
+            sb.append("FRZ");
         }
         if (mProcessInstrumented) {
             if (sb.length() > 0) sb.append("|");
