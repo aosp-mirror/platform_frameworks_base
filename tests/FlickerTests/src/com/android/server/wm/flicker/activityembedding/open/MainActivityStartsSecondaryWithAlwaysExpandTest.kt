@@ -17,10 +17,11 @@
 package com.android.server.wm.flicker.activityembedding
 
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.Rect
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
@@ -28,14 +29,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
-import android.tools.common.datatypes.Rect
 
 /**
  * Test launching an activity with AlwaysExpand rule.
  *
- * Setup: Launch A|B in split with B being the secondary activity.
- * Transitions:
- * A start C with alwaysExpand=true, expect C to launch in fullscreen and cover split A|B.
+ * Setup: Launch A|B in split with B being the secondary activity. Transitions: A start C with
+ * alwaysExpand=true, expect C to launch in fullscreen and cover split A|B.
  *
  * To run this test: `atest FlickerTests:MainActivityStartsSecondaryWithAlwaysExpandTest`
  */
@@ -43,98 +42,93 @@ import android.tools.common.datatypes.Rect
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: FlickerTest) :
-  ActivityEmbeddingTestBase(flicker) {
+class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest) :
+    ActivityEmbeddingTestBase(flicker) {
 
-  /** {@inheritDoc} */
-  override val transition: FlickerBuilder.() -> Unit = {
-    setup {
-      tapl.setExpectedRotationCheckEnabled(false)
-      // Launch a split
-      testApp.launchViaIntent(wmHelper)
-      testApp.launchSecondaryActivity(wmHelper)
-      startDisplayBounds =
-        wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
-    }
-    transitions {
-      // Launch C with alwaysExpand
-      testApp.launchAlwaysExpandActivity(wmHelper)
-    }
-    teardown {
-      tapl.goHome()
-      testApp.exit(wmHelper)
-    }
-  }
-
-  /** Transition begins with a split. */
-  @Presubmit
-  @Test
-  fun startsWithSplit() {
-    flicker.assertWmStart {
-      this.isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-    }
-    flicker.assertWmStart {
-      this.isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-    }
-  }
-
-
-  /** Main activity should become invisible after being covered by always expand activity. */
-  @Presubmit
-  @Test
-  fun mainActivityLayerBecomesInvisible() {
-    flicker.assertLayers {
-      isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        .then()
-        .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-    }
-  }
-
-  /** Secondary activity should become invisible after being covered by always expand activity. */
-  @Presubmit
-  @Test
-  fun secondaryActivityLayerBecomesInvisible() {
-    flicker.assertLayers {
-      isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-        .then()
-        .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-    }
-  }
-
-  /** At the end of transition always expand activity is in fullscreen. */
-  @Presubmit
-  @Test
-  fun endsWithAlwaysExpandActivityCoveringFullScreen() {
-    flicker.assertWmEnd {
-      this.visibleRegion(ActivityEmbeddingAppHelper.ALWAYS_EXPAND_ACTIVITY_COMPONENT)
-        .coversExactly(startDisplayBounds)
-    }
-  }
-
-  /** Always expand activity is on top of the split. */
-  @Presubmit
-  @Test
-  fun endsWithAlwaysExpandActivityOnTop() {
-    flicker.assertWmEnd {
-      this.isAppWindowOnTop(
-        ActivityEmbeddingAppHelper.ALWAYS_EXPAND_ACTIVITY_COMPONENT)
-    }
-  }
-
-  companion object {
     /** {@inheritDoc} */
-    private var startDisplayBounds = Rect.EMPTY
-    /**
-     * Creates the test configurations.
-     *
-     * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
-     * navigation modes.
-     */
-    @Parameterized.Parameters(name = "{0}")
-    @JvmStatic
-    fun getParams(): Collection<FlickerTest> {
-      return FlickerTestFactory.nonRotationTests()
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            tapl.setExpectedRotationCheckEnabled(false)
+            // Launch a split
+            testApp.launchViaIntent(wmHelper)
+            testApp.launchSecondaryActivity(wmHelper)
+            startDisplayBounds =
+                wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
+        }
+        transitions {
+            // Launch C with alwaysExpand
+            testApp.launchAlwaysExpandActivity(wmHelper)
+        }
+        teardown {
+            tapl.goHome()
+            testApp.exit(wmHelper)
+        }
     }
-  }
-}
 
+    /** Transition begins with a split. */
+    @Presubmit
+    @Test
+    fun startsWithSplit() {
+        flicker.assertWmStart {
+            this.isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+        }
+        flicker.assertWmStart {
+            this.isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+        }
+    }
+
+    /** Main activity should become invisible after being covered by always expand activity. */
+    @Presubmit
+    @Test
+    fun mainActivityLayerBecomesInvisible() {
+        flicker.assertLayers {
+            isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .then()
+                .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+        }
+    }
+
+    /** Secondary activity should become invisible after being covered by always expand activity. */
+    @Presubmit
+    @Test
+    fun secondaryActivityLayerBecomesInvisible() {
+        flicker.assertLayers {
+            isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+        }
+    }
+
+    /** At the end of transition always expand activity is in fullscreen. */
+    @Presubmit
+    @Test
+    fun endsWithAlwaysExpandActivityCoveringFullScreen() {
+        flicker.assertWmEnd {
+            this.visibleRegion(ActivityEmbeddingAppHelper.ALWAYS_EXPAND_ACTIVITY_COMPONENT)
+                .coversExactly(startDisplayBounds)
+        }
+    }
+
+    /** Always expand activity is on top of the split. */
+    @Presubmit
+    @Test
+    fun endsWithAlwaysExpandActivityOnTop() {
+        flicker.assertWmEnd {
+            this.isAppWindowOnTop(ActivityEmbeddingAppHelper.ALWAYS_EXPAND_ACTIVITY_COMPONENT)
+        }
+    }
+
+    companion object {
+        /** {@inheritDoc} */
+        private var startDisplayBounds = Rect.EMPTY
+        /**
+         * Creates the test configurations.
+         *
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
+    }
+}
