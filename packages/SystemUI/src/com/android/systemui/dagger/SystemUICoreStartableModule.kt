@@ -42,6 +42,7 @@ import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
+import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherCoreStartable
 import com.android.systemui.power.PowerUI
 import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
@@ -110,6 +111,14 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyboardUI::class)
     abstract fun bindKeyboardUI(sysui: KeyboardUI): CoreStartable
+
+    /** Inject into MediaProjectionTaskSwitcherCoreStartable. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaProjectionTaskSwitcherCoreStartable::class)
+    abstract fun bindProjectedTaskListener(
+            sysui: MediaProjectionTaskSwitcherCoreStartable
+    ): CoreStartable
 
     /** Inject into KeyguardBiometricLockoutLogger */
     @Binds

@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.mediaprojection.taskswitcher.data.repository
+package com.android.systemui.mediaprojection.taskswitcher
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.mediaprojection.taskswitcher.ui.TaskSwitcherNotificationCoordinator
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
-/**
- * No-op implementation of [MediaProjectionRepository] that does nothing. Currently used as a
- * placeholder, while the real implementation is not completed.
- */
 @SysUISingleton
-class NoOpMediaProjectionRepository @Inject constructor() : MediaProjectionRepository {
+class MediaProjectionTaskSwitcherCoreStartable
+@Inject
+constructor(
+    private val notificationCoordinator: TaskSwitcherNotificationCoordinator,
+    private val featureFlags: FeatureFlags,
+) : CoreStartable {
 
-    override val mediaProjectionState: Flow<MediaProjectionState> = emptyFlow()
+    override fun start() {
+        if (featureFlags.isEnabled(Flags.PARTIAL_SCREEN_SHARING_TASK_SWITCHER)) {
+            notificationCoordinator.start()
+        }
+    }
 }
