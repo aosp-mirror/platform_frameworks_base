@@ -128,6 +128,16 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setDozeAmount(float amount);
 
         /**
+         * Set if dozing is true or false
+         */
+        default void setDozing(boolean dozing) {}
+
+        /**
+         * Set if split shade enabled
+         */
+        default void setSplitShadeEnabled(boolean enabled) {}
+
+        /**
          * Set the current keyguard bypass enabled status.
          */
         default void setKeyguardBypassEnabled(boolean enabled) {}
