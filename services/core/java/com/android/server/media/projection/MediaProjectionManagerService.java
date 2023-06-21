@@ -1048,7 +1048,7 @@ public final class MediaProjectionManagerService extends SystemService
                     // Tear down projection here; necessary to ensure (among other reasons) that
                     // stop is dispatched to client and cast icon disappears from status bar.
                     mProjectionGrant.stop();
-                    throw new IllegalStateException("Don't re-use the resultData to retrieve "
+                    throw new SecurityException("Don't re-use the resultData to retrieve "
                             + "the same projection instance, and don't use a token that has "
                             + "timed out. Don't take multiple captures by invoking "
                             + "MediaProjection#createVirtualDisplay multiple times on the "
