@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switch between two split pairs.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchBetweenSplitPairs`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:SwitchBetweenSplitPairs`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

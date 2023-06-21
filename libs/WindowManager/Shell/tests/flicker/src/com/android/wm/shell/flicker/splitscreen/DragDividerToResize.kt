@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized
 /**
  * Test resize split by dragging the divider bar.
  *
- * To run this test: `atest WMShellFlickerTests:DragDividerToResize`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:DragDividerToResize`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

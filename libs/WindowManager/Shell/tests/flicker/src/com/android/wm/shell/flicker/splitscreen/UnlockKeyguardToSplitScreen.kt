@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
 /**
  * Test unlocking insecure keyguard to back to split screen tasks and verify the transition behavior.
  *
- * To run this test: `atest WMShellFlickerTests:UnlockKeyguardToSplitScreen`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:UnlockKeyguardToSplitScreen`
  */
 @RequiresDevice
 @Postsubmit

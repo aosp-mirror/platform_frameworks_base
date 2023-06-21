@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switch to split pair from home.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchBackToSplitFromHome`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:SwitchBackToSplitFromHome`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

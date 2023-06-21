@@ -45,7 +45,7 @@ import org.junit.runners.Parameterized
  * Test enter split screen by dragging app icon from taskbar. This test is only for large screen
  * devices.
  *
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromTaskbar`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:EnterSplitScreenByDragFromTaskbar`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
