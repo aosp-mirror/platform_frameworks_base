@@ -2860,7 +2860,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
                     final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                    if (taskInfo != null && getStageOfTask(taskInfo) != null) {
+                    if (taskInfo != null && (getStageOfTask(taskInfo) != null
+                            || getSplitItemPosition(change.getLastParent())
+                            != SPLIT_POSITION_UNDEFINED)) {
                         recentTasks.removeSplitPair(taskInfo.taskId);
                     }
                 }
