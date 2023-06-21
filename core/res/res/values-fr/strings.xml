@@ -686,16 +686,16 @@
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Déplacez le téléphone vers le bas"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
-    <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Veuillez regarder plus directement l\'appareil."</string>
+    <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mettez-vous bien de face et regardez l\'appareil."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Ne bougez pas le téléphone."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez enregistrer à nouveau votre visage."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Déplacez légèrement votre tête."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Centrez bien votre visage devant votre téléphone"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui cache votre visage."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mettez-vous bien de face et regardez le téléphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mettez-vous bien de face et regardez le téléphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mettez-vous bien de face et regardez le téléphone"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui cache votre visage"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez la partie supérieure de l\'écran, y compris la barre noire"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -703,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossible de créer votre empreinte faciale. Réessayez."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Lunettes sombres détectées. Votre visage doit être entièrement visible."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Masque détecté. Votre visage doit être entièrement visible."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Visage partiellement couvert. Votre visage doit être entièrement visible."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. valider visage. Matériel non disponible."</string>

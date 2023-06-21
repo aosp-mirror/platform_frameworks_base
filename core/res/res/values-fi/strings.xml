@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Käynnistetään sovelluksia."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Viimeistellään päivitystä."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nKosketa painiketta kevyesti tallentaessasi sormenjälkeä."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Lopeta käyttöönotto sammuttamalla näyttö"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Lopeta sammuttamalla näyttö"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Laita pois päältä"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Jatketaanko sormenjäljen vahvistamista?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nVahvista sormenjälki koskettamalla painiketta kevyesti."</string>
