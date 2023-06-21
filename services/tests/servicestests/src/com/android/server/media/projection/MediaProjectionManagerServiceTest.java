@@ -344,7 +344,7 @@ public class MediaProjectionManagerServiceTest {
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
 
-        assertThrows(IllegalStateException.class, projection::isValid);
+        assertThrows(SecurityException.class, projection::isValid);
     }
 
     // TODO(269273190): Test flag using compat annotations instead.
