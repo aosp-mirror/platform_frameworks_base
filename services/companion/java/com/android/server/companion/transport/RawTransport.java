@@ -70,6 +70,8 @@ class RawTransport extends Transport {
         }
         IoUtils.closeQuietly(mRemoteIn);
         IoUtils.closeQuietly(mRemoteOut);
+
+        super.close();
     }
 
     @Override
