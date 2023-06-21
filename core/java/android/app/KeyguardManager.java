@@ -883,17 +883,18 @@ public class KeyguardManager {
         if (!checkInitialLockMethodUsage()) {
             return false;
         }
+        Objects.requireNonNull(password, "Password cannot be null.");
         complexity = PasswordMetrics.sanitizeComplexityLevel(complexity);
         // TODO: b/131755827 add devicePolicyManager support for Auto
         DevicePolicyManager devicePolicyManager =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         PasswordMetrics adminMetrics =
                 devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
-        // Check if the password fits the mold of a pin or pattern.
-        boolean isPinOrPattern = lockType != PASSWORD;
 
-        return PasswordMetrics.validatePassword(
-                adminMetrics, complexity, isPinOrPattern, password).size() == 0;
+        try (LockscreenCredential credential = createLockscreenCredential(lockType, password)) {
+            return PasswordMetrics.validateCredential(adminMetrics, complexity,
+                    credential).size() == 0;
+        }
     }
 
     /**

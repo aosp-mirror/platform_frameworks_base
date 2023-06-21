@@ -25,6 +25,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.PasswordMetrics.complexityLevelToMinQuality;
 import static android.app.admin.PasswordMetrics.sanitizeComplexityLevel;
+import static android.app.admin.PasswordMetrics.validateCredential;
 import static android.app.admin.PasswordMetrics.validatePasswordMetrics;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -41,6 +42,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 
 import org.junit.Test;
@@ -374,8 +376,51 @@ public class PasswordMetricsTest {
                 PasswordValidationError.NOT_ENOUGH_NON_DIGITS, 1);
     }
 
+    @Test
+    public void testValidateCredential_none() {
+        PasswordMetrics adminMetrics;
+        LockscreenCredential none = LockscreenCredential.createNone();
+
+        adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_NONE, none));
+
+        adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PIN);
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_NONE, none),
+                PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
+    }
+
+    @Test
+    public void testValidateCredential_password() {
+        PasswordMetrics adminMetrics;
+        LockscreenCredential password;
+
+        adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        password = LockscreenCredential.createPassword("password");
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_LOW, password));
+
+        // Test that validateCredential() checks LockscreenCredential#hasInvalidChars().
+        adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        password = LockscreenCredential.createPassword("™™™™");
+        assertTrue(password.hasInvalidChars());
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_LOW, password),
+                PasswordValidationError.CONTAINS_INVALID_CHARACTERS, 0);
+
+        // Test one more case where validateCredential() should reject the password.  Beyond this,
+        // the unit tests for the lower-level method validatePasswordMetrics() should be sufficient.
+        adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        adminMetrics.length = 6;
+        password = LockscreenCredential.createPassword("pass");
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_LOW, password),
+                PasswordValidationError.TOO_SHORT, 6);
+    }
+
     /**
-     * @param expected sequense of validation error codes followed by requirement values, must have
+     * @param expected sequence of validation error codes followed by requirement values, must have
      *                 even number of elements. Empty means no errors.
      */
     private void assertValidationErrors(

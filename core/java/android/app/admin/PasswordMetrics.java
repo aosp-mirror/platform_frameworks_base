@@ -513,15 +513,44 @@ public final class PasswordMetrics implements Parcelable {
     }
 
     /**
-     * Validates password against minimum metrics and complexity.
+     * Validates a proposed lockscreen credential against minimum metrics and complexity.
      *
-     * @param adminMetrics - minimum metrics to satisfy admin requirements.
-     * @param minComplexity - minimum complexity imposed by the requester.
-     * @param isPin - whether it is PIN that should be only digits
-     * @param password - password to validate.
-     * @return a list of password validation errors. An empty list means the password is OK.
+     * @param adminMetrics minimum metrics to satisfy admin requirements
+     * @param minComplexity minimum complexity imposed by the requester
+     * @param credential the proposed lockscreen credential
+     *
+     * @return a list of validation errors. An empty list means the credential is OK.
      *
      * TODO: move to PasswordPolicy
+     */
+    public static List<PasswordValidationError> validateCredential(
+            PasswordMetrics adminMetrics, int minComplexity, LockscreenCredential credential) {
+        if (credential.hasInvalidChars()) {
+            return Collections.singletonList(
+                    new PasswordValidationError(CONTAINS_INVALID_CHARACTERS, 0));
+        }
+        if (credential.isPassword() || credential.isPin()) {
+            return validatePassword(adminMetrics, minComplexity, credential.isPin(),
+                    credential.getCredential());
+        } else {
+            return validatePasswordMetrics(adminMetrics, minComplexity,
+                    new PasswordMetrics(credential.getType()));
+        }
+    }
+
+    /**
+     * Validates a proposed lockscreen credential against minimum metrics and complexity.
+     *
+     * @param adminMetrics minimum metrics to satisfy admin requirements
+     * @param minComplexity minimum complexity imposed by the requester
+     * @param isPin whether to validate as a PIN (true) or password (false)
+     * @param password the proposed lockscreen credential as a byte[].  Must be the value from
+     *                 {@link LockscreenCredential#getCredential()}.
+     *
+     * @return a list of validation errors. An empty list means the credential is OK.
+     *
+     * TODO: merge this into validateCredential() and remove the redundant hasInvalidCharacters(),
+     *       once all external callers are removed
      */
     public static List<PasswordValidationError> validatePassword(
             PasswordMetrics adminMetrics, int minComplexity, boolean isPin, byte[] password) {
