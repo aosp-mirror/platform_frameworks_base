@@ -59,6 +59,7 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -118,7 +119,6 @@ import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -141,7 +141,7 @@ import javax.inject.Named;
 /**
  * Controller for {@link NotificationStackScrollLayout}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
@@ -1462,7 +1462,7 @@ public class NotificationStackScrollLayoutController {
         return mNotificationRoundnessManager;
     }
 
-    NotificationListContainer getNotificationListContainer() {
+    public NotificationListContainer getNotificationListContainer() {
         return mNotificationListContainer;
     }
 

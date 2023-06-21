@@ -312,7 +312,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final DeviceStateManager mDeviceStateManager;
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
-    private NotificationListContainer mNotifListContainer;
+    private final NotificationListContainer mNotifListContainer;
     private boolean mIsShortcutListSearchEnabled;
 
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
@@ -660,8 +660,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ActivityIntentHelper mActivityIntentHelper;
 
-    @VisibleForTesting
-    protected NotificationStackScrollLayoutController mStackScrollerController;
+    private final NotificationStackScrollLayoutController mStackScrollerController;
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
@@ -749,6 +748,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationShelfController notificationShelfController,
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -849,6 +849,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mConfigurationController = configurationController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationShelfController = notificationShelfController;
+        mStackScrollerController = notificationStackScrollLayoutController;
+        mStackScroller = mStackScrollerController.getView();
+        mNotifListContainer = mStackScrollerController.getNotificationListContainer();
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -1639,12 +1642,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeController.setNotificationPanelViewController(npvc);
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
-        mStackScrollerController =
-                mCentralSurfacesComponent.getNotificationStackScrollLayoutController();
         mQsController = mCentralSurfacesComponent.getQuickSettingsController();
         mBackActionInteractor.setup(mQsController, mShadeSurface);
-        mStackScroller = mStackScrollerController.getView();
-        mNotifListContainer = mCentralSurfacesComponent.getNotificationListContainer();
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
 
@@ -3344,7 +3343,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected IStatusBarService mBarService;
 
     // all notifications
-    protected NotificationStackScrollLayout mStackScroller;
+    private final NotificationStackScrollLayout mStackScroller;
 
     protected AccessibilityManager mAccessibilityManager;
 
