@@ -2055,14 +2055,17 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("StartPacProxyService");
-            try {
-                pacProxyService = new PacProxyService(context);
-                ServiceManager.addService(Context.PAC_PROXY_SERVICE, pacProxyService);
-            } catch (Throwable e) {
-                reportWtf("starting PacProxyService", e);
+            // Devices without WebView/JavaScript cannot support PAC proxies.
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
+                t.traceBegin("StartPacProxyService");
+                try {
+                    pacProxyService = new PacProxyService(context);
+                    ServiceManager.addService(Context.PAC_PROXY_SERVICE, pacProxyService);
+                } catch (Throwable e) {
+                    reportWtf("starting PacProxyService", e);
+                }
+                t.traceEnd();
             }
-            t.traceEnd();
 
             t.traceBegin("StartConnectivityService");
             // This has to be called after NetworkManagementService, NetworkStatsService
