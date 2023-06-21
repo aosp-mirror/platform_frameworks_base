@@ -16,6 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.android.server.wm.flicker">
 
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29"/>
@@ -47,5 +48,11 @@
     <application android:requestLegacyExternalStorage="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner"/>
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
+
+        <!-- (b/197936012) Remove startup provider due to test timeout issue -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
     </application>
 </manifest>
