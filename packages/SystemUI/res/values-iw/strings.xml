@@ -412,7 +412,7 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏בזמן שיתוף, הקלטה או העברה (cast) תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏בזמן שיתוף, הקלטה או העברה (cast) של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"התחלה"</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"‏נחסם על ידי מנהל ה-IT"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"‏האפשרות נחסמה על ידי אדמין ב-IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"צילום המסך מושבת בגלל מדיניות המכשיר"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ניקוי הכול"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ניהול"</string>
