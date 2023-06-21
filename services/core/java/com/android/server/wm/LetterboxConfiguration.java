@@ -78,6 +78,13 @@ final class LetterboxConfiguration {
 
     private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
 
+    // Whether per-app user aspect ratio override settings is enabled
+    private static final String KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS =
+            "enable_app_compat_user_aspect_ratio_settings";
+
+    // TODO(b/288142656): Enable user aspect ratio settings by default.
+    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS = false;
+
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
      * set-fixed-orientation-letterbox-aspect-ratio or via {@link
@@ -345,6 +352,10 @@ final class LetterboxConfiguration {
                         DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
                         mContext.getResources().getBoolean(
                                 R.bool.config_letterboxIsEnabledForTranslucentActivities))
+                .addDeviceConfigEntry(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                        DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_appCompatUserAppAspectRatioSettingsIsEnabled))
                 .build();
     }
 
@@ -1206,5 +1217,12 @@ final class LetterboxConfiguration {
      */
     boolean isDisplayRotationImmersiveAppCompatPolicyEnabled() {
         return mDeviceConfig.getFlagValue(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+    }
+
+    /**
+     * Whether per-app user aspect ratio override settings is enabled
+     */
+    boolean isUserAppAspectRatioSettingsEnabled() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS);
     }
 }
