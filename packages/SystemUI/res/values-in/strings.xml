@@ -802,6 +802,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buka <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Putar <xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> dari <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Putar <xliff:g id="SONG_NAME">%1$s</xliff:g> dari <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nonaktif, periksa aplikasi"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tidak ditemukan"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol tidak tersedia"</string>
