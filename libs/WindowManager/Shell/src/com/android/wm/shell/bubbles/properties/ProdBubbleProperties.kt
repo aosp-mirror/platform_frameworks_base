@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.bubbles;
+package com.android.wm.shell.bubbles.properties
 
-import android.content.Intent;
-import com.android.wm.shell.bubbles.IBubblesListener;
+import android.os.SystemProperties
 
-/**
- * Interface that is exposed to remote callers (launcher) to manipulate the bubbles feature when
- * showing in the bubble bar.
- */
-interface IBubbles {
+/** Provides bubble properties in production. */
+object ProdBubbleProperties : BubbleProperties {
 
-    oneway void registerBubbleListener(in IBubblesListener listener) = 1;
-
-    oneway void unregisterBubbleListener(in IBubblesListener listener) = 2;
-
-    oneway void showBubble(in String key, in boolean onLauncherHome) = 3;
-
-    oneway void removeBubble(in String key, in int reason) = 4;
-
-    oneway void collapseBubbles() = 5;
-
+    // TODO(b/256873975) Should use proper flag when available to shell/launcher
+    override val isBubbleBarEnabled =
+        SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false)
 }
