@@ -130,6 +130,7 @@ public class SecureChannel {
         if (DEBUG) {
             Slog.d(TAG, "Starting secure channel.");
         }
+        mStopped = false;
         new Thread(() -> {
             try {
                 // 1. Wait for the next handshake message and process it.
@@ -182,6 +183,17 @@ public class SecureChannel {
         IoUtils.closeQuietly(mInput);
         IoUtils.closeQuietly(mOutput);
         KeyStoreUtils.cleanUp(mAlias);
+    }
+
+    /**
+     * Return true if the channel is currently inactive.
+     * The channel could have been stopped by either {@link SecureChannel#stop()} or by
+     * encountering a fatal error.
+     *
+     * @return true if the channel is currently inactive.
+     */
+    public boolean isStopped() {
+        return mStopped;
     }
 
     /**
@@ -290,6 +302,7 @@ public class SecureChannel {
             try {
                 data = new byte[length];
             } catch (OutOfMemoryError error) {
+                Streams.skipByReading(mInput, Long.MAX_VALUE);
                 throw new SecureChannelException("Payload is too large.", error);
             }
 
