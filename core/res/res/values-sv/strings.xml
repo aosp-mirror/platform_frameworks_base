@@ -645,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingeravtryckskonfigurering nådde tidsgränsen. Försök igen."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiden för fingeravtrycksinställning gick ut. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"För många försök. Använd låsskärmen i stället."</string>

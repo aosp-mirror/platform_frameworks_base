@@ -645,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ, ದೃಢೀಕರಣವನ್ನು ಒತ್ತಿ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಸೆಟಪ್ ಮಾಡುವ ಅವಧಿ ಮುಗಿದಿದೆ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆಟಪ್ ಮಾಡುವ ಅವಧಿ ಮುಗಿದಿದೆ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ಬಳಕೆದಾರರು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಪಡಿಸಿದ್ದಾರೆ."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಬದಲಾಗಿ ಸ್ಕ್ರೀನ್‌ಲಾಕ್ ಬಳಸಿ."</string>
