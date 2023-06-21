@@ -1770,10 +1770,19 @@ public class UserManager {
     /**
      * Specifies if a user is not allowed to use 2g networks.
      *
+     * <p> This is a security feature. 2g has no mutual authentication between a device and
+     * cellular base station and downgrading a device's connection to 2g is a common tactic for
+     * several types of privacy and security compromising attacks that could allow an adversary
+     * to intercept, inject, or modify cellular communications.
+     *
      * <p>This restriction can only be set by a device owner or a profile owner of an
      * organization-owned managed profile on the parent profile.
-     * In all cases, the setting applies globally on the device and will prevent the device from
-     * scanning for or connecting to 2g networks, except in the case of an emergency.
+     * In all cases, the setting applies globally on the device.
+     *
+     * <p> Cellular connectivity loss (where a device would have otherwise successfully
+     * connected to a 2g network) occurs if the device is in an area where only 2g networks are
+     * available. Emergency calls are an exception and are never impacted. The device will still
+     * scan for and connect to a 2g network for emergency calls.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
