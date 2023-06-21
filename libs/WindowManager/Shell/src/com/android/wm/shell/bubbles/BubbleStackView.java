@@ -1500,9 +1500,6 @@ public class BubbleStackView extends FrameLayout
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
-        if (mBubbleOverflow != null) {
-            mBubbleOverflow.cleanUpExpandedState();
-        }
     }
 
     @Override

@@ -64,18 +64,27 @@ public class BubbleOverflowTest extends ShellTestCase {
     }
 
     @Test
-    public void test_initialize() {
+    public void test_initialize_forStack() {
         assertThat(mOverflow.getExpandedView()).isNull();
 
-        mOverflow.initialize(mBubbleController);
+        mOverflow.initialize(mBubbleController, /* forBubbleBar= */ false);
 
         assertThat(mOverflow.getExpandedView()).isNotNull();
         assertThat(mOverflow.getExpandedView().getBubbleKey()).isEqualTo(BubbleOverflow.KEY);
+        assertThat(mOverflow.getBubbleBarExpandedView()).isNull();
+    }
+
+    @Test
+    public void test_initialize_forBubbleBar() {
+        mOverflow.initialize(mBubbleController, /* forBubbleBar= */ true);
+
+        assertThat(mOverflow.getBubbleBarExpandedView()).isNotNull();
+        assertThat(mOverflow.getExpandedView()).isNull();
     }
 
     @Test
     public void test_cleanUpExpandedState() {
-        mOverflow.createExpandedView();
+        mOverflow.initialize(mBubbleController, /* forBubbleBar= */ false);
         assertThat(mOverflow.getExpandedView()).isNotNull();
 
         mOverflow.cleanUpExpandedState();

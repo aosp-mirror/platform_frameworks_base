@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 
@@ -146,8 +147,9 @@ public class BubbleBarLayerView extends FrameLayout
         if (mExpandedView == null) {
             mExpandedBubble = b;
             mExpandedView = expandedView;
-            final int width = mPositioner.getExpandedViewWidthForBubbleBar();
-            final int height = mPositioner.getExpandedViewHeightForBubbleBar();
+            boolean isOverflowExpanded = b.getKey().equals(BubbleOverflow.KEY);
+            final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+            final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
             mExpandedView.setVisibility(GONE);
             mExpandedView.setUnBubbleConversationCallback(mUnBubbleConversationCallback);
             mExpandedView.setLayerBoundsSupplier(() -> new Rect(0, 0, getWidth(), getHeight()));
@@ -156,6 +158,7 @@ public class BubbleBarLayerView extends FrameLayout
                     mUnBubbleConversationCallback.accept(bubbleKey);
                 }
             });
+            mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
             addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
         }
 
@@ -184,9 +187,10 @@ public class BubbleBarLayerView extends FrameLayout
     /** Updates the expanded view size and position. */
     private void updateExpandedView() {
         if (mExpandedView == null) return;
+        boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         final int padding = mPositioner.getBubbleBarExpandedViewPadding();
-        final int width = mPositioner.getExpandedViewWidthForBubbleBar();
-        final int height = mPositioner.getExpandedViewHeightForBubbleBar();
+        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
         FrameLayout.LayoutParams lp = (LayoutParams) mExpandedView.getLayoutParams();
         lp.width = width;
         lp.height = height;
@@ -196,7 +200,7 @@ public class BubbleBarLayerView extends FrameLayout
         } else {
             mExpandedView.setX(mPositioner.getAvailableRect().width() - width - padding);
         }
-        mExpandedView.setY(mPositioner.getInsets().top + padding);
+        mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
         mExpandedView.updateLocation();
     }
 
