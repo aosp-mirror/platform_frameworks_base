@@ -23,6 +23,7 @@ import com.android.systemui.log.dagger.DisableFlagsRepositoryLog
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -33,17 +34,23 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Repository for the disable flags received from external systems. See [IStatusBar.disable]. */
+interface DisableFlagsRepository {
+    /** A model of the disable flags last received from [IStatusBar]. */
+    val disableFlags: StateFlow<DisableFlagsModel>
+}
+
 @SysUISingleton
-class DisableFlagsRepository
+class DisableFlagsRepositoryImpl
 @Inject
 constructor(
     commandQueue: CommandQueue,
-    @DisplayId private val displayId: Int,
+    @DisplayId private val thisDisplayId: Int,
     @Application scope: CoroutineScope,
+    remoteInputQuickSettingsDisabler: RemoteInputQuickSettingsDisabler,
     @DisableFlagsRepositoryLog private val logBuffer: LogBuffer,
     private val disableFlagsLogger: DisableFlagsLogger,
-) {
-    val disableFlags: StateFlow<DisableFlagsModel> =
+) : DisableFlagsRepository {
+    override val disableFlags: StateFlow<DisableFlagsModel> =
         conflatedCallbackFlow {
                 val callback =
                     object : CommandQueue.Callbacks {
@@ -53,10 +60,20 @@ constructor(
                             state2: Int,
                             animate: Boolean,
                         ) {
-                            if (displayId != this@DisableFlagsRepository.displayId) {
+                            if (displayId != thisDisplayId) {
                                 return
                             }
-                            trySend(DisableFlagsModel(state1, state2))
+                            trySend(
+                                DisableFlagsModel(
+                                    state1,
+                                    // Ideally, [RemoteInputQuickSettingsDisabler] should instead
+                                    // expose a flow that gets `combine`d with this [disableFlags]
+                                    // flow in a [DisableFlagsInteractor] or
+                                    // [QuickSettingsInteractor]-type class. However, that's out of
+                                    // scope for the CentralSurfaces removal project.
+                                    remoteInputQuickSettingsDisabler.adjustDisableFlags(state2),
+                                )
+                            )
                         }
                     }
                 commandQueue.addCallback(callback)

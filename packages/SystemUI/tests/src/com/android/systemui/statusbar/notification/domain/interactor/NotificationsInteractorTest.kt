@@ -22,6 +22,7 @@ import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepositoryImpl
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -47,10 +48,11 @@ class NotificationsInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         disableFlagsRepository =
-            DisableFlagsRepository(
+            DisableFlagsRepositoryImpl(
                 commandQueue,
                 DISPLAY_ID,
                 testScope.backgroundScope,
+                mock(),
                 logBuffer,
                 disableFlagsLogger,
             )

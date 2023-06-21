@@ -202,8 +202,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     int getStatusBarHeight();
 
-    void updateQsExpansionEnabled();
-
     boolean isShadeDisabled();
 
     boolean isLaunchingActivityOverLockscreen();
