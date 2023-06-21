@@ -1634,6 +1634,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                                 + PERMISSION);
             }
         }
+        credential.validateBasicRequirements();
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -3069,6 +3070,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
             byte[] token, int userId) {
         boolean result;
+        credential.validateBasicRequirements();
         synchronized (mSpManager) {
             if (!mSpManager.hasEscrowData(userId)) {
                 throw new SecurityException("Escrow token is disabled on the current user");

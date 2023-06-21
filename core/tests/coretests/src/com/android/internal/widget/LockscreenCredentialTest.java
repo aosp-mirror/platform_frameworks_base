@@ -47,6 +47,7 @@ public class LockscreenCredentialTest {
         assertFalse(none.isPassword());
         assertFalse(none.isPattern());
         assertFalse(none.hasInvalidChars());
+        none.validateBasicRequirements();
     }
 
     @Test
@@ -61,6 +62,7 @@ public class LockscreenCredentialTest {
         assertFalse(pin.isPassword());
         assertFalse(pin.isPattern());
         assertFalse(pin.hasInvalidChars());
+        pin.validateBasicRequirements();
     }
 
     @Test
@@ -75,6 +77,7 @@ public class LockscreenCredentialTest {
         assertFalse(password.isPin());
         assertFalse(password.isPattern());
         assertFalse(password.hasInvalidChars());
+        password.validateBasicRequirements();
     }
 
     @Test
@@ -95,6 +98,7 @@ public class LockscreenCredentialTest {
         assertFalse(pattern.isPin());
         assertFalse(pattern.isPassword());
         assertFalse(pattern.hasInvalidChars());
+        pattern.validateBasicRequirements();
     }
 
     // Constructing a LockscreenCredential with a too-short length, even 0, should not throw an
@@ -136,7 +140,7 @@ public class LockscreenCredentialTest {
     }
 
     // Test that passwords containing invalid characters that were incorrectly allowed in
-    // Android 10–14 are still interpreted in the same way.
+    // Android 10–14 are still interpreted in the same way, but are not allowed for new passwords.
     @Test
     public void testPasswordWithInvalidChars() {
         // ™ is U+2122, which was truncated to ASCII 0x22 which is double quote.
@@ -146,6 +150,10 @@ public class LockscreenCredentialTest {
             LockscreenCredential credential = LockscreenCredential.createPassword(passwords[i]);
             assertTrue(credential.hasInvalidChars());
             assertArrayEquals(equivalentAsciiPasswords[i].getBytes(), credential.getCredential());
+            try {
+                credential.validateBasicRequirements();
+                fail("should not be able to set password with invalid chars");
+            } catch (IllegalArgumentException expected) { }
         }
     }
 
