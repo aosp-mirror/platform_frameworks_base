@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"തുടരാൻ നിങ്ങളുടെ ഉപകരണം അൺലോക്ക് ചെയ്യുക"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"അപ്ഡേറ്റ് പിന്നീട് ഇൻസ്റ്റാൾ ചെയ്യാൻ പിൻ നൽകുക"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"അപ്ഡേറ്റ് പിന്നീട് ഇൻസ്റ്റാൾ ചെയ്യാൻ പാസ്‍വേഡ് നൽകുക"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"അപ്ഡേറ്റ് പിന്നീട് ഇൻസ്റ്റാൾ ചെയ്യാൻ പാറ്റേൺ വരയ്ക്കുക"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ഉപകരണം അപ്ഡേറ്റ് ചെയ്തു. തുടരുന്നതിന് പിൻ നൽകുക."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ഉപകരണം അപ്ഡേറ്റ് ചെയ്തു. തുടരുന്നതിന് പാസ്‍വേഡ് നൽകുക."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ഉപകരണം അപ്ഡേറ്റ് ചെയ്തു. തുടരുന്നതിന് പാറ്റേൺ വരയ്ക്കുക."</string>
 </resources>

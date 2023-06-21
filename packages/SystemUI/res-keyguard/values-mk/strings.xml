@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Балонче"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоген"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отклучете го уредот за да продолжите"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Внесете PIN за да го инсталирате ажурирањето подоцна"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Внесете ја лозинката за да го инсталирате ажурирањето подоцна"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Нацртајте ја шемата за да го инсталирате ажурирањето подоцна"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Уредот е ажуриран. Внесете PIN за да продолжите."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Уредот е ажуриран. Внесете лозинка за да продолжите."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Уредот е ажуриран. Нацртајте ја шемата за да продолжите."</string>
 </resources>
