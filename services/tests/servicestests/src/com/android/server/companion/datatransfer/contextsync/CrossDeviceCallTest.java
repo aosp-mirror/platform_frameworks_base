@@ -308,6 +308,18 @@ public class CrossDeviceCallTest {
                 .isEqualTo(CONTACT_DISPLAY_NAME);
     }
 
+    @Test
+    public void getSerializedPhoneAccountHandle_serializesCorrectly() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext(),
+                mUninitializedCallDetails, /* callAudioState= */ null);
+
+        final String result = crossDeviceCall.getSerializedPhoneAccountHandle();
+
+        assertWithMessage("Wrong phone account handle serialization").that(result)
+                .isEqualTo("label::com.google.test/com.google.test.Activity");
+    }
+
     private Call.Details createCallDetails(int state, int capabilities) {
         return createCallDetails(state, capabilities, /* hasContactName= */ true);
     }
