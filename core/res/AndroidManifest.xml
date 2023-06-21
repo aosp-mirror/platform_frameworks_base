@@ -5633,6 +5633,12 @@
                 android:description="@string/permdesc_deliverCompanionMessages"
                 android:protectionLevel="normal" />
 
+    <!-- @hide @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES)
+         Allows an application to send and receive messages via CDM transports.
+    -->
+    <permission android:name="android.permission.USE_COMPANION_TRANSPORTS"
+        android:protectionLevel="signature|module" />
+
     <!-- Allows an application to create new companion device associations.
          @SystemApi
          @hide -->
