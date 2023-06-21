@@ -150,7 +150,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
 
-        verify(mCentralSurfaces).updateQsExpansionEnabled();
         verify(mShadeController).animateCollapseShade();
     }
 
@@ -162,7 +161,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
-        verify(mCentralSurfaces).updateQsExpansionEnabled();
         verify(mShadeController, never()).animateCollapseShade();
     }
 
