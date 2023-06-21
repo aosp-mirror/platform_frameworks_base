@@ -19,7 +19,6 @@ package com.android.server.companion.transport;
 import android.annotation.NonNull;
 import android.companion.IOnMessageReceivedListener;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -188,12 +187,6 @@ public abstract class Transport {
                 break;
             }
             case MESSAGE_REQUEST_PERMISSION_RESTORE: {
-                if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
-                        && !Build.isDebuggable()) {
-                    Slog.w(TAG, "Restoring permissions only supported on watches");
-                    sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
-                    break;
-                }
                 try {
                     callback(message, data);
                     sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
