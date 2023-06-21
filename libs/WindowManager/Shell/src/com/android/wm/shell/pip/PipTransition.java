@@ -953,7 +953,8 @@ public class PipTransition extends PipTransitionController {
         if (swipePipToHomeOverlay != null) {
             // Launcher fade in the overlay on top of the fullscreen Task. It is possible we
             // reparent the PIP activity to a new PIP task (in case there are other activities
-            // in the original Task), so we should also reparent the overlay to the PIP task.
+            // in the original Task, in other words multi-activity apps), so we should also reparent
+            // the overlay to the final PIP task.
             startTransaction.reparent(swipePipToHomeOverlay, leash)
                     .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE);
             mPipOrganizer.mSwipePipToHomeOverlay = null;
