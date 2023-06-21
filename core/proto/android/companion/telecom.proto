@@ -88,6 +88,8 @@ message Telecom {
     string name = 1;
     // Unique identifier for this facilitator, such as a package name.
     string identifier = 2;
+    // Extended identifier for this facilitator.
+    string extended_identifier = 3;
   }
 
   enum Control {
