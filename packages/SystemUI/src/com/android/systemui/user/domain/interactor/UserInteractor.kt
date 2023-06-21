@@ -768,21 +768,22 @@ constructor(
         userId: Int,
     ): Drawable {
         if (isGuest) {
-            return checkNotNull(applicationContext.getDrawable(R.drawable.ic_account_circle))
+            return checkNotNull(
+                applicationContext.getDrawable(com.android.settingslib.R.drawable.ic_account_circle)
+            )
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        val userIcon = withContext(backgroundDispatcher) {
-            manager.getUserIcon(userId)
-                ?.let { bitmap ->
+        val userIcon =
+            withContext(backgroundDispatcher) {
+                manager.getUserIcon(userId)?.let { bitmap ->
                     val iconSize =
-                        applicationContext
-                            .resources
-                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                        applicationContext.resources.getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_icon_size
+                        )
                     Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
                 }
-        }
-
+            }
 
         if (userIcon != null) {
             return BitmapDrawable(userIcon)
