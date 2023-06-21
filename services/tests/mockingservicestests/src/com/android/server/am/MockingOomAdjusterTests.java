@@ -1971,6 +1971,36 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoOne_PendingFinishAttach() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        app.setPendingFinishAttach(true);
+        app.mState.setHasForegroundActivities(false);
+
+        sService.mOomAdjuster.setAttachingProcessStatesLSP(app);
+        updateOomAdj(app);
+
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, FOREGROUND_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_TopApp_PendingFinishAttach() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        app.setPendingFinishAttach(true);
+        app.mState.setHasForegroundActivities(true);
+
+        sService.mOomAdjuster.setAttachingProcessStatesLSP(app);
+        updateOomAdj(app);
+
+        assertProcStates(app, PROCESS_STATE_TOP, FOREGROUND_APP_ADJ,
+                SCHED_GROUP_TOP_APP);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_UidIdle_StopService() {
         final ProcessRecord app1 = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
