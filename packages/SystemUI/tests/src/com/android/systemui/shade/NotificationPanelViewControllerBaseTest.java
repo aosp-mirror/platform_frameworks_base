@@ -117,6 +117,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -168,6 +169,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
@@ -311,6 +313,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ActivityStarter mActivityStarter;
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     @Mock protected ShadeRepository mShadeRepository;
+    @Mock private ShadeInteractor mShadeInteractor;
+    @Mock private JavaAdapter mJavaAdapter;
     @Mock private CastController mCastController;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
@@ -688,6 +692,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mDumpManager,
                 mKeyguardFaceAuthInteractor,
                 mShadeRepository,
+                mShadeInteractor,
+                mJavaAdapter,
                 mCastController
         );
     }

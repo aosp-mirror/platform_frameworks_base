@@ -15,6 +15,8 @@
 package com.android.systemui.statusbar.disableflags.data.model
 
 import android.app.StatusBarManager.DISABLE2_NONE
+import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
+import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
 import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS
 import com.android.systemui.log.LogBuffer
@@ -35,6 +37,16 @@ data class DisableFlagsModel(
     /** Returns true if notification alerts are allowed based on the flags. */
     fun areNotificationAlertsEnabled(): Boolean {
         return (disable1 and DISABLE_NOTIFICATION_ALERTS) == 0
+    }
+
+    /** Returns true if the shade is allowed based on the flags. */
+    fun isShadeEnabled(): Boolean {
+        return (disable2 and DISABLE2_NOTIFICATION_SHADE) == 0
+    }
+
+    /** Returns true if full quick settings are allowed based on the flags. */
+    fun isQuickSettingsEnabled(): Boolean {
+        return (disable2 and DISABLE2_QUICK_SETTINGS) == 0
     }
 
     /** Logs the change to the provided buffer. */
