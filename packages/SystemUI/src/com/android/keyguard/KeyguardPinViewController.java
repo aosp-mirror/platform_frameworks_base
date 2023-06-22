@@ -43,6 +43,15 @@ public class KeyguardPinViewController
     private long mPinLength;
 
     private boolean mDisabledAutoConfirmation;
+    /**
+     * Responsible for identifying if PIN hinting is to be enabled or not
+     */
+    private boolean mIsPinHinting;
+
+    /**
+     * Responsible for identifying if auto confirm is enabled or not in Settings
+     */
+    private boolean mIsAutoPinConfirmEnabledInSettings;
 
     protected KeyguardPinViewController(KeyguardPINView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -63,6 +72,9 @@ public class KeyguardPinViewController
         mFeatureFlags = featureFlags;
         mBackspaceKey = view.findViewById(R.id.delete_button);
         mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
+        mIsPinHinting = mPinLength == DEFAULT_PIN_LENGTH;
+        mIsAutoPinConfirmEnabledInSettings = mLockPatternUtils.isAutoPinConfirmEnabled(
+                KeyguardUpdateMonitor.getCurrentUser());
     }
 
     @Override
@@ -82,7 +94,7 @@ public class KeyguardPinViewController
 
     protected void onUserInput() {
         super.onUserInput();
-        if (isAutoPinConfirmEnabledInSettings()) {
+        if (mIsAutoPinConfirmEnabledInSettings) {
             updateAutoConfirmationState();
             if (mPasswordEntry.getText().length() == mPinLength
                     && mOkButton.getVisibility() == View.INVISIBLE) {
@@ -130,7 +142,7 @@ public class KeyguardPinViewController
      * Updates the visibility of the OK button for auto confirm feature
      */
     private void updateOKButtonVisibility() {
-        if (isAutoPinConfirmEnabledInSettings() && !mDisabledAutoConfirmation) {
+        if (mIsPinHinting && !mDisabledAutoConfirmation) {
             mOkButton.setVisibility(View.INVISIBLE);
         } else {
             mOkButton.setVisibility(View.VISIBLE);
@@ -142,10 +154,9 @@ public class KeyguardPinViewController
      * Visibility changes are only for auto confirmation configuration.
      */
     private void updateBackSpaceVisibility() {
-        boolean isAutoConfirmation = isAutoPinConfirmEnabledInSettings();
         mBackspaceKey.setTransparentMode(/* isTransparentMode= */
-                isAutoConfirmation && !mDisabledAutoConfirmation);
-        if (isAutoConfirmation) {
+                mIsAutoPinConfirmEnabledInSettings && !mDisabledAutoConfirmation);
+        if (mIsAutoPinConfirmEnabledInSettings) {
             if (mPasswordEntry.getText().length() > 0
                     || mDisabledAutoConfirmation) {
                 mBackspaceKey.setVisibility(View.VISIBLE);
@@ -155,24 +166,8 @@ public class KeyguardPinViewController
         }
     }
     /** Updates whether to use pin hinting or not. */
-    void updatePinHinting() {
-        mPasswordEntry.setIsPinHinting(isAutoPinConfirmEnabledInSettings() && isPinHinting()
+    private void updatePinHinting() {
+        mPasswordEntry.setIsPinHinting(mIsAutoPinConfirmEnabledInSettings && mIsPinHinting
                 && !mDisabledAutoConfirmation);
-    }
-
-    /**
-     * Responsible for identifying if PIN hinting is to be enabled or not
-     */
-    private boolean isPinHinting() {
-        return mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser())
-                == DEFAULT_PIN_LENGTH;
-    }
-
-    /**
-     * Responsible for identifying if auto confirm is enabled or not in Settings
-     */
-    private boolean isAutoPinConfirmEnabledInSettings() {
-        //Checks if user has enabled the auto confirm in Settings
-        return mLockPatternUtils.isAutoPinConfirmEnabled(KeyguardUpdateMonitor.getCurrentUser());
     }
 }
