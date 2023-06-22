@@ -28,6 +28,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.service.media.MediaBrowserService
 import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.tuner.TunerService
@@ -47,7 +48,8 @@ class MediaResumeListener @Inject constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
     @Background private val backgroundExecutor: Executor,
-    private val tunerService: TunerService
+    private val tunerService: TunerService,
+    private val mediaBrowserFactory: ResumeMediaBrowserFactory
 ) : MediaDataManager.Listener {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
@@ -58,7 +60,8 @@ class MediaResumeListener @Inject constructor(
     private var mediaBrowser: ResumeMediaBrowser? = null
     private var currentUserId: Int = context.userId
 
-    private val userChangeReceiver = object : BroadcastReceiver() {
+    @VisibleForTesting
+    val userChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Intent.ACTION_USER_UNLOCKED == intent.action) {
                 loadMediaResumptionControls()
@@ -87,9 +90,16 @@ class MediaResumeListener @Inject constructor(
                 Log.e(TAG, "Error getting package information", e)
             }
 
-            Log.d(TAG, "Adding resume controls $desc")
-            mediaDataManager.addResumptionControls(currentUserId, desc, resumeAction, token,
-                appName.toString(), appIntent, component.packageName)
+            Log.d(TAG, "Adding resume controls for ${browser.userId}: $desc")
+            mediaDataManager.addResumptionControls(
+                browser.userId,
+                desc,
+                resumeAction,
+                token,
+                appName.toString(),
+                appIntent,
+                component.packageName
+            )
         }
     }
 
@@ -132,7 +142,11 @@ class MediaResumeListener @Inject constructor(
             val component = ComponentName(packageName, className)
             resumeComponents.add(component)
         }
-        Log.d(TAG, "loaded resume components ${resumeComponents.toArray().contentToString()}")
+        Log.d(
+            TAG,
+            "loaded resume components for $currentUserId: " +
+                "${resumeComponents.toArray().contentToString()}"
+        )
     }
 
     /**
@@ -143,9 +157,19 @@ class MediaResumeListener @Inject constructor(
             return
         }
 
+        val pm = context.packageManager
         resumeComponents.forEach {
-            val browser = ResumeMediaBrowser(context, mediaBrowserCallback, it)
-            browser.findRecentMedia()
+            // Verify that the service exists for this user
+            val intent = Intent(MediaBrowserService.SERVICE_INTERFACE)
+            intent.component = it
+            val inf = pm.resolveServiceAsUser(intent, 0, currentUserId)
+            if (inf != null) {
+                val browser =
+                        mediaBrowserFactory.create(mediaBrowserCallback, it, currentUserId)
+                browser.findRecentMedia()
+            } else {
+                Log.d(TAG, "User $currentUserId does not have component $it")
+            }
         }
     }
 
@@ -159,7 +183,7 @@ class MediaResumeListener @Inject constructor(
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
                 val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
-                val resumeInfo = pm.queryIntentServices(serviceIntent, 0)
+                val resumeInfo = pm.queryIntentServicesAsUser(serviceIntent, 0, currentUserId)
 
                 val inf = resumeInfo?.filter {
                     it.serviceInfo.packageName == data.packageName
@@ -183,7 +207,7 @@ class MediaResumeListener @Inject constructor(
     private fun tryUpdateResumptionList(key: String, componentName: ComponentName) {
         Log.d(TAG, "Testing if we can connect to $componentName")
         mediaBrowser?.disconnect()
-        mediaBrowser = ResumeMediaBrowser(context,
+        mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
                         Log.d(TAG, "yes we can resume with $componentName")
@@ -200,7 +224,9 @@ class MediaResumeListener @Inject constructor(
                         mediaBrowser = null
                     }
                 },
-                componentName)
+                componentName,
+                currentUserId
+            )
         mediaBrowser?.testConnection()
     }
 
@@ -235,7 +261,7 @@ class MediaResumeListener @Inject constructor(
     private fun getResumeAction(componentName: ComponentName): Runnable {
         return Runnable {
             mediaBrowser?.disconnect()
-            mediaBrowser = ResumeMediaBrowser(context,
+            mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
                         if (mediaBrowser?.token == null) {
@@ -257,7 +283,8 @@ class MediaResumeListener @Inject constructor(
                         mediaBrowser = null
                     }
                 },
-                componentName)
+                componentName,
+                currentUserId)
             mediaBrowser?.restart()
         }
     }
