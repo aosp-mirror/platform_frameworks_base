@@ -1349,7 +1349,7 @@ final class ActivityManagerConstants extends ContentObserver {
         mService.initDropboxRateLimiter();
     }
 
-    private void loadDeviceConfigConstants() {
+    void loadDeviceConfigConstants() {
         mOnDeviceConfigChangedListener.onPropertiesChanged(
                 DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
         mOnDeviceConfigChangedForComponentAliasListener.onPropertiesChanged(

@@ -4580,14 +4580,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            app.mState.setCurAdj(ProcessList.INVALID_ADJ);
-            app.mState.setSetAdj(ProcessList.INVALID_ADJ);
-            app.mState.setVerifiedAdj(ProcessList.INVALID_ADJ);
-            mOomAdjuster.setAttachingSchedGroupLSP(app);
-            app.mState.setForcingToImportant(null);
+            mOomAdjuster.setAttachingProcessStatesLSP(app);
             clearProcessForegroundLocked(app);
-            app.mState.setHasShownUi(false);
-            app.mState.setCached(false);
             app.setDebugging(false);
             app.setKilledByAm(false);
             app.setKilled(false);
@@ -4756,8 +4750,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(thread, mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
+            app.setPendingFinishAttach(true);
+
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
+
+            updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
+            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
+
             final long now = SystemClock.uptimeMillis();
             synchronized (mAppProfiler.mProfilerLock) {
                 app.mProfile.setLastRequestedGc(now);
@@ -4773,8 +4773,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
-            } else {
-                app.setPendingFinishAttach(true);
             }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)

@@ -131,6 +131,7 @@ public class AsyncProcessStartTest {
 
         mRealAms = new ActivityManagerService(
                 new TestInjector(mContext), mServiceThreadRule.getThread());
+        mRealAms.mConstants.loadDeviceConfigConstants();
         mRealAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mRealAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         mRealAms.mAtmInternal = mActivityTaskManagerInt;
@@ -195,7 +196,9 @@ public class AsyncProcessStartTest {
             Log.v(TAG, "Intercepting bindApplication() for "
                     + Arrays.toString(invocation.getArguments()));
             if (!wedge) {
-                mRealAms.finishAttachApplication(0);
+                if (mRealAms.mConstants.mEnableWaitForFinishAttachApplication) {
+                    mRealAms.finishAttachApplication(0);
+                }
             }
             return null;
         }).when(thread).bindApplication(
@@ -237,9 +240,10 @@ public class AsyncProcessStartTest {
      */
     @Test
     public void testNormal() throws Exception {
-        ProcessRecord app = startProcessAndWait(false);
-
-        verify(app, never()).killLocked(any(), anyInt(), anyBoolean());
+        if (mRealAms.mConstants.mEnableWaitForFinishAttachApplication) {
+            ProcessRecord app = startProcessAndWait(false);
+            verify(app, never()).killLocked(any(), anyInt(), anyBoolean());
+        }
     }
 
     /**
