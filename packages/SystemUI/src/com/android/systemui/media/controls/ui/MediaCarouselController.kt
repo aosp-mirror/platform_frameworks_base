@@ -21,6 +21,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.database.ContentObserver
+import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
 import android.util.MathUtils
@@ -64,6 +66,7 @@ import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
@@ -105,6 +108,7 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val globalSettings: GlobalSettings,
 ) : Dumpable {
     /** The current width of the carousel */
     var currentCarouselWidth: Int = 0
@@ -168,6 +172,13 @@ constructor(
         }
 
     private var carouselLocale: Locale? = null
+
+    private val animationScaleObserver: ContentObserver =
+        object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
+            }
+        }
 
     /** Whether the media card currently has the "expanded" layout */
     @VisibleForTesting
@@ -529,6 +540,12 @@ constructor(
                 listenForAnyStateToGoneKeyguardTransition(this)
             }
         }
+
+        // Notifies all active players about animation scale changes.
+        globalSettings.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            animationScaleObserver
+        )
     }
 
     private fun inflateSettingsButton() {
