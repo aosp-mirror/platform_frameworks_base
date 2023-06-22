@@ -31,7 +31,6 @@ android_test {
         "SpaLib",
         "SpaLibTestUtils",
         "androidx.compose.runtime_runtime",
-        "androidx.lifecycle_lifecycle-runtime-testing",
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "mockito-target-minus-junit4",

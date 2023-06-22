@@ -26,7 +26,7 @@ android {
 
     sourceSets {
         sourceSets.getByName("main") {
-            java.setSrcDirs(listOf("src"))
+            kotlin.setSrcDirs(listOf("src"))
             manifest.srcFile("AndroidManifest.xml")
         }
     }
@@ -40,6 +40,7 @@ dependencies {
 
     api("androidx.arch.core:core-testing:2.2.0-alpha01")
     api("androidx.compose.ui:ui-test-junit4:$jetpackComposeVersion")
+    api("androidx.lifecycle:lifecycle-runtime-testing")
     api(libs.truth)
     api("org.mockito:mockito-core:2.21.0")
     debugApi("androidx.compose.ui:ui-test-manifest:$jetpackComposeVersion")
