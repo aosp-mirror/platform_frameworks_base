@@ -1511,7 +1511,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         private void performScale(float scale) {
             scale = A11Y_ACTION_SCALE_RANGE.clamp(scale);
-            mWindowMagnifierCallback.onPerformScaleAction(mDisplayId, scale);
+            mWindowMagnifierCallback.onPerformScaleAction(
+                    mDisplayId, scale, /* updatePersistence= */ true);
         }
     }
 }

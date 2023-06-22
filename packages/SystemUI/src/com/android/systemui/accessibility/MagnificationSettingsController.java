@@ -164,8 +164,9 @@ public class MagnificationSettingsController implements ComponentCallbacks {
          *
          * @param displayId The logical display id.
          * @param scale Magnification scale value.
+         * @param updatePersistence whether the new scale should be persisted.
          */
-        void onMagnifierScale(int displayId, float scale);
+        void onMagnifierScale(int displayId, float scale, boolean updatePersistence);
 
         /**
          * Called when magnification mode changed.
@@ -215,9 +216,9 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         }
 
         @Override
-        public void onMagnifierScale(float scale) {
+        public void onMagnifierScale(float scale, boolean updatePersistence) {
             mSettingsControllerCallback.onMagnifierScale(mDisplayId,
-                    A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                    A11Y_ACTION_SCALE_RANGE.clamp(scale), updatePersistence);
         }
     };
 }

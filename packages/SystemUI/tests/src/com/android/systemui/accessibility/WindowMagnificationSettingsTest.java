@@ -27,6 +27,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -438,7 +439,7 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
                 mZoomSeekbar.getSeekbar(), /* progress= */ 30, /* fromUser= */ false);
 
         verify(mWindowMagnificationSettingsCallback, never())
-                .onMagnifierScale(/* scale= */ anyFloat());
+                .onMagnifierScale(/* scale= */ anyFloat(), /* updatePersistence= */ eq(false));
     }
 
     @Test
@@ -472,6 +473,21 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     }
 
     @Test
+    public void onSeekbarUserInteractionFinalized_persistedScaleUpdated() {
+        OnSeekBarWithIconButtonsChangeListener onChangeListener =
+                mZoomSeekbar.getOnSeekBarWithIconButtonsChangeListener();
+
+        mZoomSeekbar.setProgress(30);
+        onChangeListener.onUserInteractionFinalized(
+                mZoomSeekbar.getSeekbar(),
+                OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER);
+
+        // should trigger callback to update magnifier scale and persist the scale
+        verify(mWindowMagnificationSettingsCallback)
+                .onMagnifierScale(/* scale= */ eq(4f), /* updatePersistence= */ eq(true));
+    }
+
+    @Test
     public void seekbarProgress_scaleUpdatedAfterSettingPanelOpened_progressAlsoUpdated() {
         setupMagnificationCapabilityAndMode(
                 /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
@@ -486,7 +502,7 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     private void verifyCallbackOnMagnifierScale(float scale) {
         verify(mWindowMagnificationSettingsCallback)
-                .onMagnifierScale(mCallbackMagnifierScaleCaptor.capture());
+                .onMagnifierScale(mCallbackMagnifierScaleCaptor.capture(), anyBoolean());
         assertThat(mCallbackMagnifierScaleCaptor.getValue()).isWithin(0.01f).of(scale);
     }
 
