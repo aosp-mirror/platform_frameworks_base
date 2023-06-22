@@ -15,8 +15,6 @@
  */
 package android.content.res;
 
-import static android.content.res.Resources.ID_NULL;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -388,7 +386,7 @@ public final class ApkAssets {
         synchronized (this) {
             long nativeXmlPtr = nativeOpenXml(mNativePtr, fileName);
             try (XmlBlock block = new XmlBlock(null, nativeXmlPtr)) {
-                XmlResourceParser parser = block.newParser(ID_NULL, new Validator());
+                XmlResourceParser parser = block.newParser();
                 // If nativeOpenXml doesn't throw, it will always return a valid native pointer,
                 // which makes newParser always return non-null. But let's be careful.
                 if (parser == null) {
