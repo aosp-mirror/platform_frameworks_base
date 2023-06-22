@@ -37,6 +37,7 @@
 #include "NinePatchUtils.h"
 #include "RenderNode.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#include "pipeline/skia/BackdropFilterDrawable.h"
 #ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
 #include "pipeline/skia/GLFunctorDrawable.h"
 #include "pipeline/skia/VkFunctorDrawable.h"
@@ -168,6 +169,14 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
         // Put Vulkan WebViews with non-rectangular clips in a HW layer
         renderNode->mutateStagingProperties().setClipMayBeComplex(mRecorder.isClipMayBeComplex());
     }
+
+    // draw backdrop filter drawable if needed.
+    if (renderNode->stagingProperties().layerProperties().getBackdropImageFilter()) {
+        auto* backdropFilterDrawable =
+                mDisplayList->allocateDrawable<BackdropFilterDrawable>(renderNode, asSkCanvas());
+        drawDrawable(backdropFilterDrawable);
+    }
+
     drawDrawable(&renderNodeDrawable);
 
     // use staging property, since recording on UI thread

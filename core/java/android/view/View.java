@@ -22467,6 +22467,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Configure the {@link android.graphics.RenderEffect} to apply to the backdrop contents of this
+     * View. This will apply a visual effect to the result of the backdrop contents of this View
+     * before it is drawn. For example if
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, Shader.TileMode)}
+     * is provided, the previous content behind this View will be blurred before this View is drawn.
+     * @param renderEffect to be applied to the View. Passing null clears the previously configured
+     *                     {@link RenderEffect}
+     * @hide
+     */
+    public void setBackdropRenderEffect(@Nullable RenderEffect renderEffect) {
+        if (mRenderNode.setBackdropRenderEffect(renderEffect)) {
+            invalidateViewProperty(true, true);
+        }
+    }
+
+    /**
      * Updates the {@link Paint} object used with the current layer (used only if the current
      * layer type is not set to {@link #LAYER_TYPE_NONE}). Changed properties of the Paint
      * provided to {@link #setLayerType(int, android.graphics.Paint)} will be used the next time
