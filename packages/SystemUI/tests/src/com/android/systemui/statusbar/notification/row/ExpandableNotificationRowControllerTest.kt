@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
+import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -107,6 +108,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 rivSubComponentFactory,
                 metricsLogger,
                 logBufferLogger,
+                mock<NotificationChildrenContainerLogger>(),
                 listContainer,
                 smartReplyConstants,
                 smartReplyController,
