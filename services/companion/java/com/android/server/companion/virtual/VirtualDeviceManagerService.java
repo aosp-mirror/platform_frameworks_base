@@ -687,6 +687,17 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
+        public int getAssociationIdForDevice(int deviceId) {
+            VirtualDeviceImpl virtualDevice;
+            synchronized (mVirtualDeviceManagerLock) {
+                virtualDevice = mVirtualDevices.get(deviceId);
+            }
+            return virtualDevice == null
+                    ? VirtualDeviceManager.ASSOCIATION_ID_INVALID
+                    : virtualDevice.getAssociationId();
+        }
+
+        @Override
         public void registerVirtualDisplayListener(
                 @NonNull VirtualDisplayListener listener) {
             synchronized (mVirtualDeviceManagerLock) {
