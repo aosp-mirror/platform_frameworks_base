@@ -18,29 +18,29 @@ package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.Rotation
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
-
 import androidx.test.filters.RequiresDevice
 import org.junit.Test
-
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
  * Test launching a fixed portrait letterboxed app in landscape and repositioning to the right.
  *
- * To run this test: `atest WMShellFlickerTests:RepositionFixedPortraitAppTest`
- *  Actions:
+ * To run this test: `atest WMShellFlickerTests:RepositionFixedPortraitAppTest` Actions:
+ *
  *  ```
  *      Launch a fixed portrait app in landscape to letterbox app
  *      Double tap to the right to reposition app and wait for app to move
  *  ```
  *
- *  Notes:
+ * Notes:
+ *
  *  ```
  *      Some default assertions (e.g., nav bar, status bar and screen covered)
  *      are inherited [BaseTest]
@@ -49,7 +49,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class RepositionFixedPortraitAppTest(flicker: FlickerTest) : BaseAppCompat(flicker) {
+class RepositionFixedPortraitAppTest(flicker: LegacyFlickerTest) : BaseAppCompat(flicker) {
 
     val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation).bounds
     /** {@inheritDoc} */
@@ -73,29 +73,23 @@ class RepositionFixedPortraitAppTest(flicker: FlickerTest) : BaseAppCompat(flick
     @Test
     fun letterboxedAppHasRoundedCorners() = assertLetterboxAppAtEndHasRoundedCorners()
 
-    @Postsubmit
-    @Test
-    fun letterboxAppLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
+    @Postsubmit @Test fun letterboxAppLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
 
-    @Postsubmit
-    @Test
-    fun appStaysLetterboxed() = assertAppStaysLetterboxed()
+    @Postsubmit @Test fun appStaysLetterboxed() = assertAppStaysLetterboxed()
 
-    @Postsubmit
-    @Test
-    fun appKeepVisible() = assertLetterboxAppKeepVisible()
+    @Postsubmit @Test fun appKeepVisible() = assertLetterboxAppKeepVisible()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+            return LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_90)
             )
         }

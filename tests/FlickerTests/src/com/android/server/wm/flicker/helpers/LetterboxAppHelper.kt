@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.datatypes.Region
 import android.tools.common.datatypes.Rect
+import android.tools.common.datatypes.Region
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.helpers.FIND_TIMEOUT
@@ -81,15 +81,20 @@ constructor(
         displayBounds: Rect,
         right: Boolean
     ) {
-        wmHelper.StateSyncBuilder().add("letterboxAppRepositioned") {
-            val letterboxAppWindow = getWindowRegion(wmHelper)
-            val appRegionBounds = letterboxAppWindow.bounds
-            val appWidth = appRegionBounds.width
-            return@add if (right) appRegionBounds.left == displayBounds.right - appWidth &&
-                    appRegionBounds.right == displayBounds.right
-                else appRegionBounds.left == displayBounds.left &&
-                    appRegionBounds.right == displayBounds.left + appWidth
-        }.waitForAndVerify()
+        wmHelper
+            .StateSyncBuilder()
+            .add("letterboxAppRepositioned") {
+                val letterboxAppWindow = getWindowRegion(wmHelper)
+                val appRegionBounds = letterboxAppWindow.bounds
+                val appWidth = appRegionBounds.width
+                return@add if (right)
+                    appRegionBounds.left == displayBounds.right - appWidth &&
+                        appRegionBounds.right == displayBounds.right
+                else
+                    appRegionBounds.left == displayBounds.left &&
+                        appRegionBounds.right == displayBounds.left + appWidth
+            }
+            .waitForAndVerify()
     }
 
     fun waitForAppToMoveVerticallyTo(
@@ -98,15 +103,20 @@ constructor(
         navBarHeight: Int,
         bottom: Boolean
     ) {
-        wmHelper.StateSyncBuilder().add("letterboxAppRepositioned") {
-            val letterboxAppWindow = getWindowRegion(wmHelper)
-            val appRegionBounds = letterboxAppWindow.bounds
-            val appHeight = appRegionBounds.height
-            return@add if (bottom) appRegionBounds.bottom == displayBounds.bottom &&
-                    appRegionBounds.top == (displayBounds.bottom - appHeight + navBarHeight)
-                else appRegionBounds.top == displayBounds.top &&
-                    appRegionBounds.bottom == displayBounds.top + appHeight
-        }.waitForAndVerify()
+        wmHelper
+            .StateSyncBuilder()
+            .add("letterboxAppRepositioned") {
+                val letterboxAppWindow = getWindowRegion(wmHelper)
+                val appRegionBounds = letterboxAppWindow.bounds
+                val appHeight = appRegionBounds.height
+                return@add if (bottom)
+                    appRegionBounds.bottom == displayBounds.bottom &&
+                        appRegionBounds.top == (displayBounds.bottom - appHeight + navBarHeight)
+                else
+                    appRegionBounds.top == displayBounds.top &&
+                        appRegionBounds.bottom == displayBounds.top + appHeight
+            }
+            .waitForAndVerify()
     }
 
     private fun getWindowRegion(wmHelper: WindowManagerStateHelper): Region {

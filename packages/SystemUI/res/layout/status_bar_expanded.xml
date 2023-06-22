@@ -132,21 +132,6 @@
         android:id="@+id/lock_icon_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-        <!-- Background protection -->
-        <ImageView
-            android:id="@+id/lock_icon_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/fingerprint_bg"
-            android:visibility="invisible"/>
-
-        <ImageView
-            android:id="@+id/lock_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"/>
-
     </com.android.keyguard.LockIconView>
 
     <include

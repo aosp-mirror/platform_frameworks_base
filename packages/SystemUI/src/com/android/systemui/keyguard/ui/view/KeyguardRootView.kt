@@ -23,6 +23,7 @@ import android.view.Gravity
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
+import com.android.keyguard.LockIconView
 import com.android.systemui.R
 
 /** Provides a container for all keyguard ui content. */
@@ -37,6 +38,7 @@ class KeyguardRootView(
 
     init {
         addIndicationTextArea()
+        addLockIconView()
     }
 
     private fun addIndicationTextArea() {
@@ -51,6 +53,17 @@ class KeyguardRootView(
                     gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                     bottomMargin = R.dimen.keyguard_indication_margin_bottom.dp()
                 }
+        )
+    }
+
+    private fun addLockIconView() {
+        val view = LockIconView(context, attrs).apply { id = R.id.lock_icon_view }
+        addView(
+            view,
+            LayoutParams(
+                WRAP_CONTENT,
+                WRAP_CONTENT,
+            )
         )
     }
 

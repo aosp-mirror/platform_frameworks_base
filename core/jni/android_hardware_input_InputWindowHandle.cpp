@@ -163,10 +163,9 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
-    mInfo.ownerPid = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.ownerPid);
-    mInfo.ownerUid = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.ownerUid);
+    mInfo.ownerPid = env->GetIntField(obj, gInputWindowHandleClassInfo.ownerPid);
+    mInfo.ownerUid = gui::Uid{
+            static_cast<uid_t>(env->GetIntField(obj, gInputWindowHandleClassInfo.ownerUid))};
     mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
@@ -309,7 +308,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.touchOcclusionMode,
                      static_cast<int32_t>(windowInfo.touchOcclusionMode));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerPid, windowInfo.ownerPid);
-    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerUid, windowInfo.ownerUid);
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerUid,
+                     windowInfo.ownerUid.val());
     ScopedLocalRef<jstring> packageName(env, env->NewStringUTF(windowInfo.packageName.data()));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.packageName,
                         packageName.get());

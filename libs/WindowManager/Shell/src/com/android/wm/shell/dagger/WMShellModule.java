@@ -36,6 +36,7 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.bubbles.properties.ProdBubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -187,7 +188,7 @@ public abstract class WMShellModule {
                 statusBarService, windowManager, windowManagerShellWrapper, userManager,
                 launcherApps, logger, taskStackListener, organizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
-                taskViewTransitions, syncQueue, wmService);
+                taskViewTransitions, syncQueue, wmService, ProdBubbleProperties.INSTANCE);
     }
 
     //
@@ -219,12 +220,12 @@ public abstract class WMShellModule {
                     desktopTasksController);
         }
         return new CaptionWindowDecorViewModel(
-                    context,
-                    mainHandler,
-                    mainChoreographer,
-                    taskOrganizer,
-                    displayController,
-                    syncQueue);
+                context,
+                mainHandler,
+                mainChoreographer,
+                taskOrganizer,
+                displayController,
+                syncQueue);
     }
 
     //
@@ -584,13 +585,13 @@ public abstract class WMShellModule {
         animators.add(fullscreenAnimator);
 
         return new UnfoldAnimationController(
-                        shellInit,
-                        transactionPool,
-                        progressProvider.get(),
-                        animators,
-                        unfoldTransitionHandler,
-                        mainExecutor
-                );
+                shellInit,
+                transactionPool,
+                progressProvider.get(),
+                animators,
+                unfoldTransitionHandler,
+                mainExecutor
+        );
     }
 
     @Provides

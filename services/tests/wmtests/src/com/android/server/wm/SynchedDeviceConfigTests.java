@@ -16,9 +16,13 @@
 
 package com.android.server.wm;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 import android.app.ActivityThread;
 import android.platform.test.annotations.Presubmit;
@@ -68,8 +72,6 @@ public class SynchedDeviceConfigTests {
                 .addDeviceConfigEntry(/* key */ "key2", /* default */ false, /* enabled */ true)
                 .addDeviceConfigEntry(/* key */ "key3",  /* default */ true, /* enabled */ false)
                 .addDeviceConfigEntry(/* key */ "key4",  /* default */ false, /* enabled */ false)
-                .addDeviceConfigEntry(/* key */ "key5",  /* default */ true, /* enabled */ false)
-                .addDeviceConfigEntry(/* key */ "key6",  /* default */ false, /* enabled */ false)
                 .build();
     }
 
@@ -84,8 +86,6 @@ public class SynchedDeviceConfigTests {
         assertFlagValue(/* key */ "key2", /* expected */ false); // enabled
         assertFlagValue(/* key */ "key3", /* expected */ false); // disabled
         assertFlagValue(/* key */ "key4", /* expected */ false); // disabled
-        assertFlagValue(/* key */ "key5", /* expected */ false); // disabled
-        assertFlagValue(/* key */ "key6", /* expected */ false); // disabled
     }
 
     @Test
@@ -94,18 +94,17 @@ public class SynchedDeviceConfigTests {
         assertFlagEnabled(/* key */ "key2", /* expected */ true);
         assertFlagEnabled(/* key */ "key3", /* expected */ false);
         assertFlagEnabled(/* key */ "key4", /* expected */ false);
-        assertFlagEnabled(/* key */ "key5", /* expected */ false);
-        assertFlagEnabled(/* key */ "key6", /* expected */ false);
     }
 
     @Test
     public void testWhenUpdated_onlyEnabledChanges() {
         final CountDownLatch countDownLatch = new CountDownLatch(4);
-        final DeviceConfig.OnPropertiesChangedListener countDownLatchListener =
-                properties -> countDownLatch.countDown();
-        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_FOR_TEST, mExecutor,
-                countDownLatchListener);
-
+        spyOn(mDeviceConfig);
+        doAnswer(invocation -> {
+            invocation.callRealMethod();
+            countDownLatch.countDown();
+            return null;
+        }).when(mDeviceConfig).onPropertiesChanged(any());
         try {
             // We update all the keys
             updateProperty(/* key */ "key1", /* value */ false);
@@ -123,57 +122,8 @@ public class SynchedDeviceConfigTests {
             assertFlagValue(/* key */ "key4", /* expected */ false); // disabled
         } catch (InterruptedException e) {
             Assert.fail(e.getMessage());
-        } finally {
-            DeviceConfig.removeOnPropertiesChangedListener(countDownLatchListener);
         }
     }
-
-    @Test
-    public void testWhenEnabled_updatesAreUsed() {
-        final CountDownLatch countDownLatchBefore = new CountDownLatch(2);
-        final CountDownLatch countDownLatchAfter = new CountDownLatch(2);
-        final DeviceConfig.OnPropertiesChangedListener countDownLatchBeforeListener =
-                properties -> countDownLatchBefore.countDown();
-        final DeviceConfig.OnPropertiesChangedListener countDownLatchAfterListener =
-                properties -> countDownLatchAfter.countDown();
-        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_FOR_TEST, mExecutor,
-                countDownLatchBeforeListener);
-
-        try {
-            // We update disabled values
-            updateProperty(/* key */ "key3", /* value */ false);
-            updateProperty(/* key */ "key4", /* value */ true);
-
-            assertThat(countDownLatchBefore.await(
-                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-
-            // We check they haven't been updated
-            assertFlagValue(/* key */ "key3", /* expected */ false);
-            assertFlagValue(/* key */ "key4", /* expected */ false);
-
-
-            DeviceConfig.removeOnPropertiesChangedListener(countDownLatchBeforeListener);
-            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_FOR_TEST, mExecutor,
-                    countDownLatchAfterListener);
-
-            // We update enabled flags
-            updateProperty(/* key */ "key1", /* value */ false);
-            updateProperty(/* key */ "key2", /* value */ true);
-
-            assertThat(countDownLatchAfter.await(
-                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-
-            // Value have been updated
-            assertFlagValue(/* key */ "key1", /* expected */ false);
-            assertFlagValue(/* key */ "key2", /* expected */ true);
-
-        } catch (InterruptedException e) {
-            Assert.fail(e.getMessage());
-        } finally {
-            DeviceConfig.removeOnPropertiesChangedListener(countDownLatchAfterListener);
-        }
-    }
-
 
     private void assertFlagValue(String key, boolean expectedValue) {
         assertEquals(/* message */"Flag " + key + " value is not " + expectedValue, /* expected */

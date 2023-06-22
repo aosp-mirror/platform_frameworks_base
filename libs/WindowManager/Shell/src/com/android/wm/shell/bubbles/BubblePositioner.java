@@ -732,17 +732,25 @@ public class BubblePositioner {
     /**
      * How wide the expanded view should be when showing from the bubble bar.
      */
-    public int getExpandedViewWidthForBubbleBar() {
-        return mExpandedViewLargeScreenWidth;
+    public int getExpandedViewWidthForBubbleBar(boolean isOverflow) {
+        return isOverflow ? mOverflowWidth : mExpandedViewLargeScreenWidth;
     }
 
     /**
      * How tall the expanded view should be when showing from the bubble bar.
      */
-    public int getExpandedViewHeightForBubbleBar() {
+    public int getExpandedViewHeightForBubbleBar(boolean isOverflow) {
+        return isOverflow
+                ? mOverflowHeight
+                : getExpandedViewBottomForBubbleBar() - mInsets.top - mExpandedViewPadding;
+    }
+
+    /** The bottom position of the expanded view when showing above the bubble bar. */
+    public int getExpandedViewBottomForBubbleBar() {
         return getAvailableRect().height()
+                + mInsets.top
                 - mBubbleBarSize
-                - mExpandedViewPadding * 2
+                - mExpandedViewPadding
                 - getBubbleBarHomeAdjustment();
     }
 

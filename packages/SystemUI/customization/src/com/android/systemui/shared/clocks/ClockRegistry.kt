@@ -113,6 +113,7 @@ open class ClockRegistry(
     val logBuffer: LogBuffer? = null,
     val keepAllLoaded: Boolean,
     subTag: String,
+    var isTransitClockEnabled: Boolean = false,
 ) {
     private val TAG = "${ClockRegistry::class.simpleName} ($subTag)"
     interface ClockChangeListener {
@@ -204,6 +205,10 @@ open class ClockRegistry(
                 var isClockListChanged = false
                 for (clock in plugin.getClocks()) {
                     val id = clock.clockId
+                    if (!isTransitClockEnabled && id == "DIGITAL_CLOCK_METRO") {
+                        continue
+                    }
+
                     val info =
                         availableClocks.concurrentGetOrPut(id, ClockInfo(clock, plugin, manager)) {
                             isClockListChanged = true

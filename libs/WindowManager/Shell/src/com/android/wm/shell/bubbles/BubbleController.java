@@ -64,7 +64,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
@@ -92,6 +91,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
+import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -143,16 +143,6 @@ public class BubbleController implements ConfigurationChangeListener,
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private static final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
 
-    // TODO(b/256873975) Should use proper flag when available to shell/launcher
-    /**
-     * Whether bubbles are showing in the bubble bar from launcher. This is only available
-     * on large screens and {@link BubbleController#isShowingAsBubbleBar()} should be used
-     * to check all conditions that indicate if the bubble bar is in use.
-     */
-    private static final boolean BUBBLE_BAR_ENABLED =
-            SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false);
-
-
     /**
      * Common interface to send updates to bubble views.
      */
@@ -195,6 +185,7 @@ public class BubbleController implements ConfigurationChangeListener,
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
     private final IWindowManager mWmService;
+    private final BubbleProperties mBubbleProperties;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -291,7 +282,8 @@ public class BubbleController implements ConfigurationChangeListener,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue,
-            IWindowManager wmService) {
+            IWindowManager wmService,
+            BubbleProperties bubbleProperties) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -328,6 +320,7 @@ public class BubbleController implements ConfigurationChangeListener,
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
         mWmService = wmService;
+        mBubbleProperties = bubbleProperties;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -518,11 +511,14 @@ public class BubbleController implements ConfigurationChangeListener,
     /**
      * Sets a listener to be notified of bubble updates. This is used by launcher so that
      * it may render bubbles in itself. Only one listener is supported.
+     *
+     * <p>If bubble bar is supported, bubble views will be updated to switch to bar mode.
      */
     public void registerBubbleStateListener(Bubbles.BubbleStateListener listener) {
-        if (isShowingAsBubbleBar()) {
-            // Only set the listener if bubble bar is showing.
+        if (canShowAsBubbleBar() && listener != null) {
+            // Only set the listener if we can show the bubble bar.
             mBubbleStateListener = listener;
+            setUpBubbleViewsForMode();
             sendInitialListenerUpdate();
         } else {
             mBubbleStateListener = null;
@@ -531,9 +527,15 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /**
      * Unregisters the {@link Bubbles.BubbleStateListener}.
+     *
+     * <p>If there's an existing listener, then we're switching back to stack mode and bubble views
+     * will be updated accordingly.
      */
     public void unregisterBubbleStateListener() {
-        mBubbleStateListener = null;
+        if (mBubbleStateListener != null) {
+            mBubbleStateListener = null;
+            setUpBubbleViewsForMode();
+        }
     }
 
     /**
@@ -645,8 +647,12 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Whether bubbles are showing in the bubble bar. */
     public boolean isShowingAsBubbleBar() {
-        // TODO(b/269670598): should also check that we're in gesture nav
-        return BUBBLE_BAR_ENABLED && mBubblePositioner.isLargeScreen();
+        return canShowAsBubbleBar() && mBubbleStateListener != null;
+    }
+
+    /** Whether the current configuration supports showing as bubble bar. */
+    private boolean canShowAsBubbleBar() {
+        return mBubbleProperties.isBubbleBarEnabled() && mBubblePositioner.isLargeScreen();
     }
 
     /** Whether this userId belongs to the current user. */
@@ -774,12 +780,12 @@ public class BubbleController implements ConfigurationChangeListener,
         try {
             mAddedToWindowManager = true;
             registerBroadcastReceiver();
-            mBubbleData.getOverflow().initialize(this);
+            mBubbleData.getOverflow().initialize(this, isShowingAsBubbleBar());
             // (TODO: b/273314541) some duplication in the inset listener
             if (isShowingAsBubbleBar()) {
                 mWindowManager.addView(mLayerView, mWmLayoutParams);
                 mLayerView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-                    if (!windowInsets.equals(mWindowInsets)) {
+                    if (!windowInsets.equals(mWindowInsets) && mLayerView != null) {
                         mWindowInsets = windowInsets;
                         mBubblePositioner.update();
                         mLayerView.onDisplaySizeChanged();
@@ -789,7 +795,7 @@ public class BubbleController implements ConfigurationChangeListener,
             } else {
                 mWindowManager.addView(mStackView, mWmLayoutParams);
                 mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-                    if (!windowInsets.equals(mWindowInsets)) {
+                    if (!windowInsets.equals(mWindowInsets) && mStackView != null) {
                         mWindowInsets = windowInsets;
                         mBubblePositioner.update();
                         mStackView.onDisplaySizeChanged();
@@ -1066,9 +1072,18 @@ public class BubbleController implements ConfigurationChangeListener,
      * Expands and selects the provided bubble as long as it already exists in the stack or the
      * overflow.
      *
-     * This is used by external callers (launcher).
+     * <p>This is used by external callers (launcher).
      */
-    public void expandStackAndSelectBubbleFromLauncher(String key) {
+    @VisibleForTesting
+    public void expandStackAndSelectBubbleFromLauncher(String key, boolean onLauncherHome) {
+        mBubblePositioner.setShowingInBubbleBar(onLauncherHome);
+
+        if (BubbleOverflow.KEY.equals(key)) {
+            mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
+            mLayerView.showExpandedView(mBubbleData.getOverflow());
+            return;
+        }
+
         Bubble b = mBubbleData.getAnyBubbleWithkey(key);
         if (b == null) {
             return;
@@ -1284,6 +1299,50 @@ public class BubbleController implements ConfigurationChangeListener,
             });
             return null;
         });
+    }
+
+    void setUpBubbleViewsForMode() {
+        mBubbleViewCallback = isShowingAsBubbleBar()
+                ? mBubbleBarViewCallback
+                : mBubbleStackViewCallback;
+
+        // reset the overflow so that it can be re-added later if needed.
+        if (mStackView != null) {
+            mStackView.resetOverflowView();
+            mStackView.removeAllViews();
+        }
+        // cleanup existing bubble views so they can be recreated later if needed.
+        mBubbleData.getBubbles().forEach(Bubble::cleanupViews);
+
+        // remove the current bubble container from window manager, null it out, and create a new
+        // container based on the current mode.
+        removeFromWindowManagerMaybe();
+        mLayerView = null;
+        mStackView = null;
+        ensureBubbleViewsAndWindowCreated();
+
+        // inflate bubble views
+        BubbleViewInfoTask.Callback callback = null;
+        if (!isShowingAsBubbleBar()) {
+            callback = b -> {
+                if (mStackView != null) {
+                    mStackView.addBubble(b);
+                    mStackView.setSelectedBubble(b);
+                } else {
+                    Log.w(TAG, "Tried to add a bubble to the stack but the stack is null");
+                }
+            };
+        }
+        for (int i = mBubbleData.getBubbles().size() - 1; i >= 0; i--) {
+            Bubble bubble = mBubbleData.getBubbles().get(i);
+            bubble.inflate(callback,
+                    mContext,
+                    this,
+                    mStackView,
+                    mLayerView,
+                    mBubbleIconFactory,
+                    false /* skipInflation */);
+        }
     }
 
     /**
@@ -1746,7 +1805,7 @@ public class BubbleController implements ConfigurationChangeListener,
             // Update the cached state for queries from SysUI
             mImpl.mCachedState.update(update);
 
-            if (isShowingAsBubbleBar() && mBubbleStateListener != null) {
+            if (isShowingAsBubbleBar()) {
                 BubbleBarUpdate bubbleBarUpdate = update.toBubbleBarUpdate();
                 // Some updates aren't relevant to the bubble bar so check first.
                 if (bubbleBarUpdate.anythingChanged()) {
@@ -1868,8 +1927,15 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     @VisibleForTesting
+    @Nullable
     public BubbleStackView getStackView() {
         return mStackView;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    public BubbleBarLayerView getLayerView() {
+        return mLayerView;
     }
 
     /**
@@ -2010,22 +2076,18 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void registerBubbleListener(IBubblesListener listener) {
-            mMainExecutor.execute(() -> {
-                mListener.register(listener);
-            });
+            mMainExecutor.execute(() -> mListener.register(listener));
         }
 
         @Override
         public void unregisterBubbleListener(IBubblesListener listener) {
-            mMainExecutor.execute(() -> mListener.unregister());
+            mMainExecutor.execute(mListener::unregister);
         }
 
         @Override
         public void showBubble(String key, boolean onLauncherHome) {
-            mMainExecutor.execute(() -> {
-                mBubblePositioner.setShowingInBubbleBar(onLauncherHome);
-                mController.expandStackAndSelectBubbleFromLauncher(key);
-            });
+            mMainExecutor.execute(
+                    () -> mController.expandStackAndSelectBubbleFromLauncher(key, onLauncherHome));
         }
 
         @Override
@@ -2036,11 +2098,6 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void collapseBubbles() {
             mMainExecutor.execute(() -> mController.collapseStack());
-        }
-
-        @Override
-        public void onTaskbarStateChanged(int newState) {
-            // TODO (b/269670598)
         }
     }
 

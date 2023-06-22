@@ -309,6 +309,7 @@ public class BubbleStackView extends FrameLayout
 
         String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
                 getBubblesOnScreen(), getExpandedBubble());
+        pw.print("  stack visibility :       "); pw.println(getVisibility());
         pw.print("  bubbles on screen:       "); pw.println(bubblesOnScreen);
         pw.print("  gestureInProgress:       "); pw.println(mIsGestureInProgress);
         pw.print("  showingDismiss:          "); pw.println(mDismissView.isShowing());
@@ -970,6 +971,8 @@ public class BubbleStackView extends FrameLayout
         mBubbleContainer.bringToFront();
 
         mBubbleOverflow = mBubbleData.getOverflow();
+
+        resetOverflowView();
         mBubbleContainer.addView(mBubbleOverflow.getIconView(),
                 mBubbleContainer.getChildCount() /* index */,
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
@@ -1497,9 +1500,6 @@ public class BubbleStackView extends FrameLayout
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
-        if (mBubbleOverflow != null) {
-            mBubbleOverflow.cleanUpExpandedState();
-        }
     }
 
     @Override
@@ -3411,6 +3411,19 @@ public class BubbleStackView extends FrameLayout
     void onVerticalOffsetChanged(int offset) {
         // adjust dismiss view vertical position, so that it is still visible to the user
         mDismissView.setPadding(/* left = */ 0, /* top = */ 0, /* right = */ 0, offset);
+    }
+
+    /**
+     * Removes the overflow view from the stack. This allows for re-adding it later to a new stack.
+     */
+    void resetOverflowView() {
+        BadgedImageView overflowIcon = mBubbleOverflow.getIconView();
+        if (overflowIcon != null) {
+            PhysicsAnimationLayout parent = (PhysicsAnimationLayout) overflowIcon.getParent();
+            if (parent != null) {
+                parent.removeViewNoAnimation(overflowIcon);
+            }
+        }
     }
 
     /**

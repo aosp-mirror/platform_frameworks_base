@@ -19,8 +19,8 @@ package com.android.wm.shell.flicker.splitscreen.benchmark
 import android.tools.common.NavBar
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import com.android.wm.shell.flicker.splitscreen.SplitScreenUtils
@@ -33,11 +33,11 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class UnlockKeyguardToSplitScreenBenchmark(override val flicker: FlickerTest) :
-        SplitScreenBase(flicker) {
+open class UnlockKeyguardToSplitScreenBenchmark(override val flicker: LegacyFlickerTest) :
+    SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp) }
+            setup { SplitScreenUtils.enterSplitViaIntent(wmHelper, primaryApp, secondaryApp) }
             transitions {
                 device.sleep()
                 wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
@@ -58,10 +58,9 @@ open class UnlockKeyguardToSplitScreenBenchmark(override val flicker: FlickerTes
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                    supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
-        }
     }
 }

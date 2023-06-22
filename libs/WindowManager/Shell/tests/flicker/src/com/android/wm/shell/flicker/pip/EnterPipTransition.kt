@@ -20,16 +20,14 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import org.junit.Test
 import org.junit.runners.Parameterized
 
-abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker) {
+abstract class EnterPipTransition(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
-        setup {
-            pipApp.launchViaIntent(wmHelper)
-        }
+        setup { pipApp.launchViaIntent(wmHelper) }
     }
 
     /** Checks [pipApp] window remains visible throughout the animation */
@@ -126,15 +124,14 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
-         * and navigation modes.
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring repetitions, screen
+         * orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
-        }
     }
 }

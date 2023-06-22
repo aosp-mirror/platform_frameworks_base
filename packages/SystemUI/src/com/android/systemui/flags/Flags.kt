@@ -249,10 +249,18 @@ object Flags {
     @JvmField
     val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer", teamfood = true)
 
+
+    /** Keyguard Migration */
+
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
     @JvmField
     val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
+
+    /** Migrate the lock icon view to the new keyguard root view. */
+    // TODO(b/286552209): Tracking bug.
+    @JvmField
+    val MIGRATE_LOCK_ICON = unreleasedFlag(238, "migrate_lock_icon")
 
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
@@ -263,6 +271,10 @@ object Flags {
     // TODO(b/286563884): Tracking bug
     @JvmField
     val KEYGUARD_TALKBACK_FIX = releasedFlag(238, "keyguard_talkback_fix")
+
+    // TODO(b/287268101): Tracking bug.
+    @JvmField
+    val TRANSIT_CLOCK = unreleasedFlag(239, "lockscreen_custom_transit_clock")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug

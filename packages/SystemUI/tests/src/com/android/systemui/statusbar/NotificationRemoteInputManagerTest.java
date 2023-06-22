@@ -33,24 +33,20 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
-
-import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -69,6 +65,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private RemoteInputUriController mRemoteInputUriController;
     @Mock private NotificationClickNotifier mClickNotifier;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private PowerInteractor mPowerInteractor;
 
     private TestableNotificationRemoteInputManager mRemoteInputManager;
     private NotificationEntry mEntry;
@@ -82,7 +79,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mSmartReplyController,
                 mVisibilityProvider,
-                () -> Optional.of(mock(CentralSurfaces.class)),
+                mPowerInteractor,
                 mStateController,
                 mRemoteInputUriController,
                 mock(RemoteInputControllerLogger.class),
@@ -140,7 +137,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationVisibilityProvider visibilityProvider,
-                Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+                PowerInteractor powerInteractor,
                 StatusBarStateController statusBarStateController,
                 RemoteInputUriController remoteInputUriController,
                 RemoteInputControllerLogger remoteInputControllerLogger,
@@ -153,7 +150,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     lockscreenUserManager,
                     smartReplyController,
                     visibilityProvider,
-                    centralSurfacesOptionalLazy,
+                    powerInteractor,
                     statusBarStateController,
                     remoteInputUriController,
                     remoteInputControllerLogger,

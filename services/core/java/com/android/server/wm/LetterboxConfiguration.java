@@ -78,6 +78,13 @@ final class LetterboxConfiguration {
 
     private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
 
+    // Whether per-app user aspect ratio override settings is enabled
+    private static final String KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS =
+            "enable_app_compat_user_aspect_ratio_settings";
+
+    // TODO(b/288142656): Enable user aspect ratio settings by default.
+    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS = false;
+
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
      * set-fixed-orientation-letterbox-aspect-ratio or via {@link
@@ -242,6 +249,9 @@ final class LetterboxConfiguration {
     // Allows to enable letterboxing strategy for translucent activities ignoring flags.
     private boolean mTranslucentLetterboxingOverrideEnabled;
 
+    // Allows to enable user aspect ratio settings ignoring flags.
+    private boolean mUserAppAspectRatioSettingsOverrideEnabled;
+
     // Whether we should use split screen aspect ratio for the activity when camera compat treatment
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
@@ -345,6 +355,10 @@ final class LetterboxConfiguration {
                         DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
                         mContext.getResources().getBoolean(
                                 R.bool.config_letterboxIsEnabledForTranslucentActivities))
+                .addDeviceConfigEntry(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                        DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_appCompatUserAppAspectRatioSettingsIsEnabled))
                 .build();
     }
 
@@ -1206,5 +1220,25 @@ final class LetterboxConfiguration {
      */
     boolean isDisplayRotationImmersiveAppCompatPolicyEnabled() {
         return mDeviceConfig.getFlagValue(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+    }
+
+    /**
+     * Whether per-app user aspect ratio override settings is enabled
+     */
+    boolean isUserAppAspectRatioSettingsEnabled() {
+        return mUserAppAspectRatioSettingsOverrideEnabled
+                || mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS);
+    }
+
+    void setUserAppAspectRatioSettingsOverrideEnabled(boolean enabled) {
+        mUserAppAspectRatioSettingsOverrideEnabled = enabled;
+    }
+
+    /**
+     * Resets whether per-app user aspect ratio override settings is enabled
+     * {@code mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS)}.
+     */
+    void resetUserAppAspectRatioSettingsEnabled() {
+        setUserAppAspectRatioSettingsOverrideEnabled(false);
     }
 }

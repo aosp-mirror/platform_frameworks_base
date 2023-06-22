@@ -17,11 +17,11 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-open class SendBubbleNotificationTestCfArm(flicker: FlickerTest) :
+open class SendBubbleNotificationTestCfArm(flicker: LegacyFlickerTest) :
     SendBubbleNotificationTest(flicker)

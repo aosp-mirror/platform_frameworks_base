@@ -21,7 +21,7 @@ import android.graphics.Point
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
@@ -44,7 +44,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-open class DragToDismissBubbleScreenTest(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
+open class DragToDismissBubbleScreenTest(flicker: LegacyFlickerTest) : BaseBubbleScreen(flicker) {
 
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val displaySize = DisplayMetrics()

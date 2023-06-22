@@ -195,7 +195,8 @@ public class CrossDeviceSyncControllerTest {
                 new CrossDeviceSyncController.PhoneAccountManager(mMockContext);
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         verify(mMockTelecomManager, times(1)).registerPhoneAccount(any());
@@ -208,10 +209,12 @@ public class CrossDeviceSyncControllerTest {
                 new CrossDeviceSyncController.PhoneAccountManager(mMockContext);
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test2"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test2",
+                        "com.google.test2/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         verify(mMockTelecomManager, times(2)).registerPhoneAccount(any());
         verify(mMockTelecomManager, times(0)).unregisterPhoneAccount(any());
@@ -223,7 +226,8 @@ public class CrossDeviceSyncControllerTest {
                 new CrossDeviceSyncController.PhoneAccountManager(mMockContext);
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         final CallMetadataSyncData callMetadataSyncData2 = new CallMetadataSyncData();
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData2);
@@ -236,7 +240,9 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc");
         call.setDirection(android.companion.Telecom.Call.INCOMING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
         final CrossDeviceSyncController.CallManager callManager =
@@ -252,7 +258,9 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc");
         call.setDirection(android.companion.Telecom.Call.OUTGOING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         call.setCallerId("555-555-5555");
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
@@ -269,7 +277,9 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc");
         call.setDirection(android.companion.Telecom.Call.OUTGOING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
         final CrossDeviceSyncController.CallManager callManager =
@@ -316,7 +326,8 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc::originalId");
         call.setDirection(android.companion.Telecom.Call.INCOMING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
         final CrossDeviceSyncController.CallManager callManager =
@@ -334,7 +345,8 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc::originalId");
         call.setDirection(android.companion.Telecom.Call.OUTGOING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                "com.google.test/.InCallService"));
         call.setCallerId("555-555-5555");
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
@@ -352,7 +364,8 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc");
         call.setDirection(android.companion.Telecom.Call.INCOMING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                "com.google.test/.InCallService"));
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
         final CrossDeviceSyncController.CallManager callManager =
@@ -369,7 +382,8 @@ public class CrossDeviceSyncControllerTest {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
         call.setId("123abc");
         call.setDirection(android.companion.Telecom.Call.OUTGOING);
-        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                "com.google.test/.InCallService"));
         call.setCallerId("555-555-5555");
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addCall(call);
