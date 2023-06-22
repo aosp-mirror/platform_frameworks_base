@@ -445,7 +445,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
     @VisibleForTesting
     public static class Builder extends GenericDocument.Builder<Builder> {
 
-        private List<String> mFlags = new ArrayList<>(1);
+        private final List<String> mFlags = new ArrayList<>(1);
 
         public Builder(String packageName, String id) {
             super(/*namespace=*/ packageName, id, SCHEMA_TYPE);
