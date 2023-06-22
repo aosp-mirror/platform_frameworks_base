@@ -606,9 +606,10 @@ public class MagnificationControllerTest {
     public void onPerformScaleAction_fullScreenMagnifierEnabled_handleScaleChange()
             throws RemoteException {
         final float newScale = 4.0f;
+        final boolean updatePersistence = true;
         setMagnificationEnabled(MODE_FULLSCREEN);
 
-        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
         verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), eq(newScale),
                 anyFloat(), anyFloat(), anyBoolean(), anyInt());
@@ -619,12 +620,13 @@ public class MagnificationControllerTest {
     public void onPerformScaleAction_windowMagnifierEnabled_handleScaleChange()
             throws RemoteException {
         final float newScale = 4.0f;
+        final boolean updatePersistence = false;
         setMagnificationEnabled(MODE_WINDOW);
 
-        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
         verify(mWindowMagnificationManager).setScale(eq(TEST_DISPLAY), eq(newScale));
-        verify(mWindowMagnificationManager).persistScale(eq(TEST_DISPLAY));
+        verify(mWindowMagnificationManager, never()).persistScale(eq(TEST_DISPLAY));
     }
 
     @Test
@@ -1310,9 +1312,9 @@ public class MagnificationControllerTest {
         }
 
         @Override
-        public void onPerformScaleAction(int displayId, float scale) {
+        public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mCallback != null) {
-                mCallback.onPerformScaleAction(displayId, scale);
+                mCallback.onPerformScaleAction(displayId, scale, updatePersistence);
             }
         }
 
