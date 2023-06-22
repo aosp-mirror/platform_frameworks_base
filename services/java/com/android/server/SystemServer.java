@@ -338,6 +338,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.time.WearTimeService";
     private static final String WEAR_SETTINGS_SERVICE_CLASS =
             "com.android.clockwork.settings.WearSettingsService";
+    private static final String WRIST_ORIENTATION_SERVICE_CLASS =
+            "com.android.clockwork.wristorientation.WristOrientationService";
     private static final String ACCOUNT_SERVICE_CLASS =
             "com.android.server.accounts.AccountManagerService$Lifecycle";
     private static final String CONTENT_SERVICE_CLASS =
@@ -2584,7 +2586,7 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(MediaProjectionManagerService.class);
         t.traceEnd();
 
-       if (isWatch) {
+        if (isWatch) {
             // Must be started before services that depend it, e.g. WearConnectivityService
             t.traceBegin("StartWearPowerService");
             mSystemServiceManager.startService(WEAR_POWER_SERVICE_CLASS);
@@ -2617,6 +2619,14 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartWearModeService");
             mSystemServiceManager.startService(WEAR_MODE_SERVICE_CLASS);
             t.traceEnd();
+
+            boolean enableWristOrientationService = SystemProperties.getBoolean(
+                    "config.enable_wristorientation", false);
+            if (enableWristOrientationService) {
+                t.traceBegin("StartWristOrientationService");
+                mSystemServiceManager.startService(WRIST_ORIENTATION_SERVICE_CLASS);
+                t.traceEnd();
+            }
         }
 
         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
