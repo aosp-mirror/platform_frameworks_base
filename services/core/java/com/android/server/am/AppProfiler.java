@@ -633,16 +633,20 @@ public class AppProfiler {
                     return st.vsize > 0 && st.uid < FIRST_APPLICATION_UID;
                 });
             }
-            final int numOfStats = stats.size();
-            for (int j = 0; j < numOfStats; j++) {
-                synchronized (mService.mPidsSelfLocked) {
-                    if (mService.mPidsSelfLocked.indexOfKey(stats.get(j).pid) >= 0) {
-                        // This is one of our own processes; skip it.
-                        continue;
+
+            if (!mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED) {
+                final int numOfStats = stats.size();
+                for (int j = 0; j < numOfStats; j++) {
+                    synchronized (mService.mPidsSelfLocked) {
+                        if (mService.mPidsSelfLocked.indexOfKey(stats.get(j).pid) >= 0) {
+                            // This is one of our own processes; skip it.
+                            continue;
+                        }
                     }
+                    nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
                 }
-                nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
             }
+
             memInfo.readMemInfo();
             synchronized (mService.mProcessStats.mLock) {
                 if (DEBUG_PSS) {
@@ -706,7 +710,8 @@ public class AppProfiler {
                 final boolean skipPSSCollection =
                         (profile.mApp.mOptRecord != null
                          && profile.mApp.mOptRecord.skipPSSCollectionBecauseFrozen())
-                        || mService.isCameraActiveForUid(profile.mApp.uid);
+                        || mService.isCameraActiveForUid(profile.mApp.uid)
+                        || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
                 long pss = skipPSSCollection ? 0 : Debug.getPss(pid, tmp, null);
                 long endTime = SystemClock.currentThreadTimeMillis();
                 synchronized (mProfilerLock) {
