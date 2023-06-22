@@ -1258,7 +1258,7 @@
     <string name="android_upgrading_complete" msgid="409800058018374746">"תהליך האתחול בשלבי סיום."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות במהלך ההגדרה של טביעת האצבע שלך."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"לסיום ההגדרה, יש לכבות את המסך"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"השבתה"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"כיבוי"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"להמשיך לאמת את טביעת האצבע שלך?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות כדי לאמת את טביעת האצבע שלך."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"כיבוי המסך"</string>
