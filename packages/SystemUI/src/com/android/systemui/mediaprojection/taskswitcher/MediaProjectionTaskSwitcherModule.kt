@@ -17,8 +17,8 @@
 package com.android.systemui.mediaprojection.taskswitcher
 
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionRepository
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.NoOpMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.TasksRepository
 import dagger.Binds
 import dagger.Module
@@ -26,7 +26,7 @@ import dagger.Module
 @Module
 interface MediaProjectionTaskSwitcherModule {
 
-    @Binds fun mediaRepository(impl: NoOpMediaProjectionRepository): MediaProjectionRepository
+    @Binds fun mediaRepository(impl: MediaProjectionManagerRepository): MediaProjectionRepository
 
     @Binds fun tasksRepository(impl: ActivityTaskManagerTasksRepository): TasksRepository
 }
