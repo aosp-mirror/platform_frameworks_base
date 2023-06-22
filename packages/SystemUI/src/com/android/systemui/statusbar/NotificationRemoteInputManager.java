@@ -27,7 +27,6 @@ import android.content.pm.UserInfo;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
@@ -52,6 +51,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
@@ -60,19 +60,15 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry.
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.ListenerSet;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -95,10 +91,8 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SmartReplyController mSmartReplyController;
     private final NotificationVisibilityProvider mVisibilityProvider;
+    private final PowerInteractor mPowerInteractor;
     private final ActionClickLogger mLogger;
-
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-
     protected final Context mContext;
     protected final NotifPipelineFlags mNotifPipelineFlags;
     private final UserManager mUserManager;
@@ -122,10 +116,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         @Override
         public boolean onInteraction(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
-            mCentralSurfacesOptionalLazy.get().ifPresent(
-                    centralSurfaces -> centralSurfaces.wakeUpIfDozing(
-                            SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
-                            PowerManager.WAKE_REASON_GESTURE));
+            mPowerInteractor.wakeUpIfDozing(
+                    "NOTIFICATION_CLICK", PowerManager.WAKE_REASON_GESTURE);
 
             final NotificationEntry entry = getNotificationForParent(view.getParent());
             mLogger.logInitialClick(entry, pendingIntent);
@@ -259,7 +251,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            PowerInteractor powerInteractor,
             StatusBarStateController statusBarStateController,
             RemoteInputUriController remoteInputUriController,
             RemoteInputControllerLogger remoteInputControllerLogger,
@@ -271,7 +263,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
         mVisibilityProvider = visibilityProvider;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mPowerInteractor = powerInteractor;
         mLogger = logger;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));

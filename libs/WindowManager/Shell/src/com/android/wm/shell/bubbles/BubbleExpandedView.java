@@ -948,9 +948,9 @@ public class BubbleExpandedView extends LinearLayout {
             mTaskView.onLocationChanged();
         }
         if (mIsOverflow) {
-            post(() -> {
-                mOverflowView.show();
-            });
+            // post this to the looper so that the view has a chance to be laid out before it can
+            // calculate row and column sizes correctly.
+            post(() -> mOverflowView.show());
         }
     }
 

@@ -19,7 +19,7 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.Direction
 import org.junit.FixMethodOrder
@@ -55,7 +55,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class MovePipDownOnShelfHeightChange(flicker: FlickerTest) : MovePipShelfHeightTransition(flicker) {
+class MovePipDownOnShelfHeightChange(flicker: LegacyFlickerTest) :
+    MovePipShelfHeightTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         teardown { testApp.exit(wmHelper) }
         transitions { testApp.launchViaIntent(wmHelper) }

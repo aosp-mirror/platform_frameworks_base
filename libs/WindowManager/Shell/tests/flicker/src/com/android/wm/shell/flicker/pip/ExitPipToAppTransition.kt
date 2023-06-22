@@ -19,14 +19,14 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.Test
 import org.junit.runners.Parameterized
 
 /** Base class for pip expand tests */
-abstract class ExitPipToAppTransition(flicker: FlickerTest) : PipTransition(flicker) {
+abstract class ExitPipToAppTransition(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     protected val testApp = SimpleAppHelper(instrumentation)
 
     /**
@@ -130,15 +130,14 @@ abstract class ExitPipToAppTransition(flicker: FlickerTest) : PipTransition(flic
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
-        }
     }
 }

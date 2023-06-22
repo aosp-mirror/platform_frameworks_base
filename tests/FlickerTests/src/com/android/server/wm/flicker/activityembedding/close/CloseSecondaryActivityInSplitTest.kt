@@ -21,8 +21,8 @@ import android.tools.common.datatypes.Rect
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
@@ -34,8 +34,8 @@ import org.junit.runners.Parameterized
 /**
  * Test closing a secondary activity in a split.
  *
- * Setup: Launch A|B in split with B being the secondary activity.
- * Transitions: Finish B and expect A to become fullscreen.
+ * Setup: Launch A|B in split with B being the secondary activity. Transitions: Finish B and expect
+ * A to become fullscreen.
  *
  * To run this test: `atest FlickerTests:CloseSecondaryActivityInSplitTest`
  */
@@ -43,95 +43,93 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseSecondaryActivityInSplitTest(flicker: FlickerTest) :
-  ActivityEmbeddingTestBase(flicker) {
+class CloseSecondaryActivityInSplitTest(flicker: LegacyFlickerTest) :
+    ActivityEmbeddingTestBase(flicker) {
 
-  override val transition: FlickerBuilder.() -> Unit = {
-    setup {
-      tapl.setExpectedRotationCheckEnabled(false)
-      // Launches fullscreen A.
-      testApp.launchViaIntent(wmHelper)
-      // Launches a split A|B and waits for both activities to show.
-      testApp.launchSecondaryActivity(wmHelper)
-      // Get fullscreen bounds
-      startDisplayBounds =
-        wmHelper.currentState.layerState.physicalDisplayBounds ?:
-          error("Can't get display bounds")
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            tapl.setExpectedRotationCheckEnabled(false)
+            // Launches fullscreen A.
+            testApp.launchViaIntent(wmHelper)
+            // Launches a split A|B and waits for both activities to show.
+            testApp.launchSecondaryActivity(wmHelper)
+            // Get fullscreen bounds
+            startDisplayBounds =
+                wmHelper.currentState.layerState.physicalDisplayBounds
+                    ?: error("Can't get display bounds")
+        }
+        transitions {
+            // Finish secondary activity B.
+            testApp.finishSecondaryActivity(wmHelper)
+            // Expect the main activity A to expand into fullscreen.
+            wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
+        }
+        teardown {
+            tapl.goHome()
+            testApp.exit(wmHelper)
+        }
     }
-    transitions {
-      // Finish secondary activity B.
-      testApp.finishSecondaryActivity(wmHelper)
-      // Expect the main activity A to expand into fullscreen.
-      wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
-    }
-    teardown {
-      tapl.goHome()
-      testApp.exit(wmHelper)
-    }
-  }
 
-  /** Main activity is always visible and becomes fullscreen in the end. */
-  @Presubmit
-  @Test
-  fun mainActivityWindowBecomesFullScreen() {
-    flicker.assertWm { isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
-    flicker.assertWmEnd {
-      this.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        .coversExactly(startDisplayBounds)
+    /** Main activity is always visible and becomes fullscreen in the end. */
+    @Presubmit
+    @Test
+    fun mainActivityWindowBecomesFullScreen() {
+        flicker.assertWm { isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
+        flicker.assertWmEnd {
+            this.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .coversExactly(startDisplayBounds)
+        }
     }
-  }
 
-  /** Main activity surface is animated from split to fullscreen. */
-  @Presubmit
-  @Test
-  fun mainActivityLayerIsAlwaysVisible() {
-    flicker.assertLayers {
-      isVisible(
-        ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT.or(
-          ComponentNameMatcher.TRANSITION_SNAPSHOT
-        )
-      )
+    /** Main activity surface is animated from split to fullscreen. */
+    @Presubmit
+    @Test
+    fun mainActivityLayerIsAlwaysVisible() {
+        flicker.assertLayers {
+            isVisible(
+                ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT.or(
+                    ComponentNameMatcher.TRANSITION_SNAPSHOT
+                )
+            )
+        }
+        flicker.assertLayersEnd {
+            isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .isInvisible(ComponentNameMatcher.TRANSITION_SNAPSHOT)
+        }
     }
-    flicker.assertLayersEnd {
-      isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        .isInvisible(ComponentNameMatcher.TRANSITION_SNAPSHOT)
-    }
-  }
 
-  /** Secondary activity should destroy and become invisible. */
-  @Presubmit
-  @Test
-  fun secondaryActivityWindowFinishes() {
-    flicker.assertWm {
-      contains(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-        .then()
-        .notContains(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+    /** Secondary activity should destroy and become invisible. */
+    @Presubmit
+    @Test
+    fun secondaryActivityWindowFinishes() {
+        flicker.assertWm {
+            contains(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .notContains(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+        }
     }
-  }
 
-  @Presubmit
-  @Test
-  fun secondaryActivityLayerFinishes() {
-    flicker.assertLayers {
-      isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-        .then()
-        .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+    @Presubmit
+    @Test
+    fun secondaryActivityLayerFinishes() {
+        flicker.assertLayers {
+            isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+        }
     }
-  }
 
-  companion object {
-    /** {@inheritDoc} */
-    private var startDisplayBounds = Rect.EMPTY
-    /**
-     * Creates the test configurations.
-     *
-     * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
-     * navigation modes.
-     */
-    @Parameterized.Parameters(name = "{0}")
-    @JvmStatic
-    fun getParams(): Collection<FlickerTest> {
-      return FlickerTestFactory.nonRotationTests()
+    companion object {
+        /** {@inheritDoc} */
+        private var startDisplayBounds = Rect.EMPTY
+        /**
+         * Creates the test configurations.
+         *
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
     }
-  }
-  }
+}

@@ -23,18 +23,18 @@ import android.tools.common.datatypes.Region
 import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.IComponentMatcher
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.helpers.WindowUtils
 
-fun FlickerTest.appPairsDividerIsVisibleAtEnd() {
+fun LegacyFlickerTest.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.appPairsDividerIsInvisibleAtEnd() {
+fun LegacyFlickerTest.appPairsDividerIsInvisibleAtEnd() {
     assertLayersEnd { this.notContains(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.appPairsDividerBecomesVisible() {
+fun LegacyFlickerTest.appPairsDividerBecomesVisible() {
     assertLayers {
         this.isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
             .then()
@@ -42,7 +42,7 @@ fun FlickerTest.appPairsDividerBecomesVisible() {
     }
 }
 
-fun FlickerTest.splitScreenEntered(
+fun LegacyFlickerTest.splitScreenEntered(
     component1: IComponentMatcher,
     component2: IComponentMatcher,
     fromOtherApp: Boolean,
@@ -69,7 +69,7 @@ fun FlickerTest.splitScreenEntered(
     splitScreenDividerIsVisibleAtEnd()
 }
 
-fun FlickerTest.splitScreenDismissed(
+fun LegacyFlickerTest.splitScreenDismissed(
     component1: IComponentMatcher,
     component2: IComponentMatcher,
     toHome: Boolean
@@ -87,27 +87,27 @@ fun FlickerTest.splitScreenDismissed(
     splitScreenDividerIsInvisibleAtEnd()
 }
 
-fun FlickerTest.splitScreenDividerIsVisibleAtStart() {
+fun LegacyFlickerTest.splitScreenDividerIsVisibleAtStart() {
     assertLayersStart { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.splitScreenDividerIsVisibleAtEnd() {
+fun LegacyFlickerTest.splitScreenDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.splitScreenDividerIsInvisibleAtStart() {
+fun LegacyFlickerTest.splitScreenDividerIsInvisibleAtStart() {
     assertLayersStart { this.isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.splitScreenDividerIsInvisibleAtEnd() {
+fun LegacyFlickerTest.splitScreenDividerIsInvisibleAtEnd() {
     assertLayersEnd { this.isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.splitScreenDividerBecomesVisible() {
+fun LegacyFlickerTest.splitScreenDividerBecomesVisible() {
     layerBecomesVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 }
 
-fun FlickerTest.splitScreenDividerBecomesInvisible() {
+fun LegacyFlickerTest.splitScreenDividerBecomesInvisible() {
     assertLayers {
         this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
             .then()
@@ -115,23 +115,23 @@ fun FlickerTest.splitScreenDividerBecomesInvisible() {
     }
 }
 
-fun FlickerTest.layerBecomesVisible(component: IComponentMatcher) {
+fun LegacyFlickerTest.layerBecomesVisible(component: IComponentMatcher) {
     assertLayers { this.isInvisible(component).then().isVisible(component) }
 }
 
-fun FlickerTest.layerBecomesInvisible(component: IComponentMatcher) {
+fun LegacyFlickerTest.layerBecomesInvisible(component: IComponentMatcher) {
     assertLayers { this.isVisible(component).then().isInvisible(component) }
 }
 
-fun FlickerTest.layerIsVisibleAtEnd(component: IComponentMatcher) {
+fun LegacyFlickerTest.layerIsVisibleAtEnd(component: IComponentMatcher) {
     assertLayersEnd { this.isVisible(component) }
 }
 
-fun FlickerTest.layerKeepVisible(component: IComponentMatcher) {
+fun LegacyFlickerTest.layerKeepVisible(component: IComponentMatcher) {
     assertLayers { this.isVisible(component) }
 }
 
-fun FlickerTest.splitAppLayerBoundsBecomesVisible(
+fun LegacyFlickerTest.splitAppLayerBoundsBecomesVisible(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean
@@ -150,7 +150,7 @@ fun FlickerTest.splitAppLayerBoundsBecomesVisible(
     }
 }
 
-fun FlickerTest.splitAppLayerBoundsBecomesVisibleByDrag(component: IComponentMatcher) {
+fun LegacyFlickerTest.splitAppLayerBoundsBecomesVisibleByDrag(component: IComponentMatcher) {
     assertLayers {
         this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
             .then()
@@ -161,7 +161,7 @@ fun FlickerTest.splitAppLayerBoundsBecomesVisibleByDrag(component: IComponentMat
     }
 }
 
-fun FlickerTest.splitAppLayerBoundsBecomesInvisible(
+fun LegacyFlickerTest.splitAppLayerBoundsBecomesInvisible(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean
@@ -180,7 +180,7 @@ fun FlickerTest.splitAppLayerBoundsBecomesInvisible(
     }
 }
 
-fun FlickerTest.splitAppLayerBoundsIsVisibleAtEnd(
+fun LegacyFlickerTest.splitAppLayerBoundsIsVisibleAtEnd(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean
@@ -195,7 +195,7 @@ fun FlickerTest.splitAppLayerBoundsIsVisibleAtEnd(
     }
 }
 
-fun FlickerTest.splitAppLayerBoundsKeepVisible(
+fun LegacyFlickerTest.splitAppLayerBoundsKeepVisible(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean
@@ -210,7 +210,7 @@ fun FlickerTest.splitAppLayerBoundsKeepVisible(
     }
 }
 
-fun FlickerTest.splitAppLayerBoundsChanges(
+fun LegacyFlickerTest.splitAppLayerBoundsChanges(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean
@@ -304,7 +304,7 @@ fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
     }
 }
 
-fun FlickerTest.appWindowBecomesVisible(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowBecomesVisible(component: IComponentMatcher) {
     assertWm {
         this.isAppWindowInvisible(component)
             .then()
@@ -316,39 +316,39 @@ fun FlickerTest.appWindowBecomesVisible(component: IComponentMatcher) {
     }
 }
 
-fun FlickerTest.appWindowBecomesInvisible(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowBecomesInvisible(component: IComponentMatcher) {
     assertWm { this.isAppWindowVisible(component).then().isAppWindowInvisible(component) }
 }
 
-fun FlickerTest.appWindowIsVisibleAtStart(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowIsVisibleAtStart(component: IComponentMatcher) {
     assertWmStart { this.isAppWindowVisible(component) }
 }
 
-fun FlickerTest.appWindowIsVisibleAtEnd(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowIsVisibleAtEnd(component: IComponentMatcher) {
     assertWmEnd { this.isAppWindowVisible(component) }
 }
 
-fun FlickerTest.appWindowIsInvisibleAtStart(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowIsInvisibleAtStart(component: IComponentMatcher) {
     assertWmStart { this.isAppWindowInvisible(component) }
 }
 
-fun FlickerTest.appWindowIsInvisibleAtEnd(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowIsInvisibleAtEnd(component: IComponentMatcher) {
     assertWmEnd { this.isAppWindowInvisible(component) }
 }
 
-fun FlickerTest.appWindowIsNotContainAtStart(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowIsNotContainAtStart(component: IComponentMatcher) {
     assertWmStart { this.notContains(component) }
 }
 
-fun FlickerTest.appWindowKeepVisible(component: IComponentMatcher) {
+fun LegacyFlickerTest.appWindowKeepVisible(component: IComponentMatcher) {
     assertWm { this.isAppWindowVisible(component) }
 }
 
-fun FlickerTest.dockedStackDividerIsVisibleAtEnd() {
+fun LegacyFlickerTest.dockedStackDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.dockedStackDividerBecomesVisible() {
+fun LegacyFlickerTest.dockedStackDividerBecomesVisible() {
     assertLayers {
         this.isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
             .then()
@@ -356,7 +356,7 @@ fun FlickerTest.dockedStackDividerBecomesVisible() {
     }
 }
 
-fun FlickerTest.dockedStackDividerBecomesInvisible() {
+fun LegacyFlickerTest.dockedStackDividerBecomesInvisible() {
     assertLayers {
         this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
             .then()
@@ -364,11 +364,11 @@ fun FlickerTest.dockedStackDividerBecomesInvisible() {
     }
 }
 
-fun FlickerTest.dockedStackDividerNotExistsAtEnd() {
+fun LegacyFlickerTest.dockedStackDividerNotExistsAtEnd() {
     assertLayersEnd { this.notContains(DOCKED_STACK_DIVIDER_COMPONENT) }
 }
 
-fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
+fun LegacyFlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
     rotation: Rotation,
     primaryComponent: IComponentMatcher
 ) {
@@ -380,7 +380,7 @@ fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
     }
 }
 
-fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
+fun LegacyFlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
     rotation: Rotation,
     primaryComponent: IComponentMatcher
 ) {
@@ -392,7 +392,7 @@ fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
     }
 }
 
-fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
+fun LegacyFlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
     rotation: Rotation,
     secondaryComponent: IComponentMatcher
 ) {
@@ -404,7 +404,7 @@ fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
     }
 }
 
-fun FlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
+fun LegacyFlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
     rotation: Rotation,
     secondaryComponent: IComponentMatcher
 ) {

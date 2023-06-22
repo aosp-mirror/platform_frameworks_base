@@ -29,7 +29,6 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -510,6 +509,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 configurationController,
                 mNotificationShadeWindowController,
                 mNotificationShelfController,
+                mStackScrollerController,
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
@@ -593,8 +593,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;
         mCentralSurfaces.mBarService = mBarService;
-        mCentralSurfaces.mStackScrollerController = mStackScrollerController;
-        mCentralSurfaces.mStackScroller = mStackScroller;
         mCentralSurfaces.mGestureWakeLock = mPowerManager.newWakeLock(
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "sysui:GestureWakeLock");
         mCentralSurfaces.startKeyguard();
@@ -1250,34 +1248,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(false);
         setKeyguardShowingAndOccluded(false /* showing */, true /* occluded */);
         verify(mStatusBarStateController).setState(SHADE);
-    }
-
-    @Test
-    public void dozing_wakeUp() throws RemoteException {
-        // GIVEN can wakeup when dozing & is dozing
-        when(mScreenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true);
-        setDozing(true);
-
-        // WHEN wakeup is requested
-        final int wakeReason = PowerManager.WAKE_REASON_TAP;
-        mCentralSurfaces.wakeUpIfDozing(0, "", wakeReason);
-
-        // THEN power manager receives wakeup
-        verify(mPowerManagerService).wakeUp(eq(0L), eq(wakeReason), anyString(), anyString());
-    }
-
-    @Test
-    public void notDozing_noWakeUp() throws RemoteException {
-        // GIVEN can wakeup when dozing and NOT dozing
-        when(mScreenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true);
-        setDozing(false);
-
-        // WHEN wakeup is requested
-        final int wakeReason = PowerManager.WAKE_REASON_TAP;
-        mCentralSurfaces.wakeUpIfDozing(0, "", wakeReason);
-
-        // THEN power manager receives wakeup
-        verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());
     }
 
     @Test

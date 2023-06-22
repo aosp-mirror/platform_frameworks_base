@@ -49,6 +49,7 @@ import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
@@ -558,7 +559,8 @@ final class InputMonitor {
         private boolean mAddWallpaperInputConsumerHandle;
         private boolean mAddRecentsAnimationInputConsumerHandle;
 
-        boolean mInDrag;
+        private boolean mInDrag;
+        private final Rect mTmpRect = new Rect();
 
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
@@ -582,8 +584,11 @@ final class InputMonitor {
                 layer = layer != null ? layer : activeRecents;
                 // Handle edge-case for SUW where windows don't exist yet
                 if (layer.getSurfaceControl() != null) {
-                    mRecentsAnimationInputConsumer.mWindowHandle
-                            .replaceTouchableRegionWithCrop(layer.getSurfaceControl());
+                    final WindowState targetAppMainWindow = activeRecents.findMainWindow();
+                    if (targetAppMainWindow != null) {
+                        targetAppMainWindow.getBounds(mTmpRect);
+                        mRecentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
+                    }
                     mRecentsAnimationInputConsumer.show(mInputTransaction, layer);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }

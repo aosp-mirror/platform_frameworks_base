@@ -22,7 +22,6 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -36,6 +35,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeViewController;
@@ -86,6 +86,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final CentralSurfaces mCentralSurfaces;
     private final NotificationsInteractor mNotificationsInteractor;
     private final LockscreenShadeTransitionController mShadeTransitionController;
+    private final PowerInteractor mPowerInteractor;
     private final CommandQueue mCommandQueue;
 
     private final AccessibilityManager mAccessibilityManager;
@@ -115,6 +116,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             CentralSurfaces centralSurfaces,
             NotificationsInteractor notificationsInteractor,
             LockscreenShadeTransitionController shadeTransitionController,
+            PowerInteractor powerInteractor,
             CommandQueue commandQueue,
             NotificationLockscreenUserManager lockscreenUserManager,
             SysuiStatusBarStateController sysuiStatusBarStateController,
@@ -138,6 +140,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mCentralSurfaces = centralSurfaces;
         mNotificationsInteractor = notificationsInteractor;
         mShadeTransitionController = shadeTransitionController;
+        mPowerInteractor = powerInteractor;
         mCommandQueue = commandQueue;
         mLockscreenUserManager = lockscreenUserManager;
         mStatusBarStateController = sysuiStatusBarStateController;
@@ -238,9 +241,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     public void onExpandClicked(NotificationEntry clickedEntry, View clickedView,
             boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
-        mCentralSurfaces.wakeUpIfDozing(
-                SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
-                PowerManager.WAKE_REASON_GESTURE);
+        mPowerInteractor.wakeUpIfDozing("NOTIFICATION_CLICK", PowerManager.WAKE_REASON_GESTURE);
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());

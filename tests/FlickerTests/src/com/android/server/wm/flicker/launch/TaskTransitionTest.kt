@@ -28,8 +28,8 @@ import android.tools.common.traces.component.ComponentSplashScreenMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
@@ -58,7 +58,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
+class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val launchNewTaskApp = NewTasksAppHelper(instrumentation)
     private val simpleApp = SimpleAppHelper(instrumentation)
     private val wallpaper by lazy { getWallpaperPackage(instrumentation) }
@@ -214,8 +214,6 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
     }
 }

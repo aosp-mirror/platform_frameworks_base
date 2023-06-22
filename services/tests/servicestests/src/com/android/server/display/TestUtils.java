@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.input.InputSensorInfo;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.view.DisplayAddress;
@@ -73,6 +74,12 @@ public final class TestUtils {
         setSensorType(sensor, type, strType);
         setMaximumRange(sensor, maximumRange);
         return sensor;
+    }
+
+    public static Sensor createSensor(String type, String name) {
+        return new Sensor(new InputSensorInfo(
+                name, "vendor", 0, 0, 0, 1f, 1f, 1, 1, 1, 1,
+                type, "", 0, 0, 0));
     }
 
     /**

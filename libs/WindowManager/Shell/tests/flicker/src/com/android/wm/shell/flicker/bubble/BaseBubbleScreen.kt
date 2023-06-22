@@ -23,9 +23,9 @@ import android.content.pm.PackageManager
 import android.os.ServiceManager
 import android.tools.common.Rotation
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
-import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.flicker.legacy.FlickerTestData
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.SYSTEMUI_PACKAGE
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
@@ -35,7 +35,7 @@ import com.android.wm.shell.flicker.BaseTest
 import org.junit.runners.Parameterized
 
 /** Base configurations for Bubble flicker tests */
-abstract class BaseBubbleScreen(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) {
 
     protected val context: Context = instrumentation.context
     protected val testApp = LaunchBubbleHelper(instrumentation)
@@ -79,19 +79,18 @@ abstract class BaseBubbleScreen(flicker: FlickerTest) : BaseTest(flicker) {
         }
     }
 
-    protected fun IFlickerTestData.waitAndGetAddBubbleBtn(): UiObject2? =
+    protected fun FlickerTestData.waitAndGetAddBubbleBtn(): UiObject2? =
         device.wait(Until.findObject(By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
-    protected fun IFlickerTestData.waitAndGetCancelAllBtn(): UiObject2? =
+    protected fun FlickerTestData.waitAndGetCancelAllBtn(): UiObject2? =
         device.wait(Until.findObject(By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
-        }
 
         const val FIND_OBJECT_TIMEOUT = 2000L
         const val SYSTEM_UI_PACKAGE = SYSTEMUI_PACKAGE
