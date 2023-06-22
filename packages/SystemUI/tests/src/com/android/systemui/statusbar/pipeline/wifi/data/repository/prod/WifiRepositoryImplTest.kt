@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -33,7 +34,6 @@ import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -46,13 +46,10 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -60,7 +57,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -73,7 +69,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiRepositoryImpl
 
-    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var logger: WifiInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
     @Mock private lateinit var connectivityManager: ConnectivityManager
@@ -86,15 +81,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(
-                broadcastDispatcher.broadcastFlow(
-                    any(),
-                    nullable(),
-                    anyInt(),
-                    nullable(),
-                )
-            )
-            .thenReturn(flowOf(Unit))
         executor = FakeExecutor(FakeSystemClock())
 
         connectivityRepository =
@@ -168,27 +154,23 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isWifiEnabled_intentsReceived_valueUpdated() =
         testScope.runTest {
-            val intentFlow = MutableSharedFlow<Unit>()
-            whenever(
-                    broadcastDispatcher.broadcastFlow(
-                        any(),
-                        nullable(),
-                        anyInt(),
-                        nullable(),
-                    )
-                )
-                .thenReturn(intentFlow)
             underTest = createRepo()
 
             val job = underTest.isWifiEnabled.launchIn(this)
 
             whenever(wifiManager.isWifiEnabled).thenReturn(true)
-            intentFlow.emit(Unit)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(WifiManager.WIFI_STATE_CHANGED_ACTION),
+            )
 
             assertThat(underTest.isWifiEnabled.value).isTrue()
 
             whenever(wifiManager.isWifiEnabled).thenReturn(false)
-            intentFlow.emit(Unit)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(WifiManager.WIFI_STATE_CHANGED_ACTION),
+            )
 
             assertThat(underTest.isWifiEnabled.value).isFalse()
 
@@ -198,23 +180,16 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isWifiEnabled_bothIntentAndNetworkUpdates_valueAlwaysUpdated() =
         testScope.runTest {
-            val intentFlow = MutableSharedFlow<Unit>()
-            whenever(
-                    broadcastDispatcher.broadcastFlow(
-                        any(),
-                        nullable(),
-                        anyInt(),
-                        nullable(),
-                    )
-                )
-                .thenReturn(intentFlow)
             underTest = createRepo()
 
             val networkJob = underTest.wifiNetwork.launchIn(this)
             val enabledJob = underTest.isWifiEnabled.launchIn(this)
 
             whenever(wifiManager.isWifiEnabled).thenReturn(false)
-            intentFlow.emit(Unit)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(WifiManager.WIFI_STATE_CHANGED_ACTION),
+            )
             assertThat(underTest.isWifiEnabled.value).isFalse()
 
             whenever(wifiManager.isWifiEnabled).thenReturn(true)
@@ -227,7 +202,10 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             assertThat(underTest.isWifiEnabled.value).isFalse()
 
             whenever(wifiManager.isWifiEnabled).thenReturn(true)
-            intentFlow.emit(Unit)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(WifiManager.WIFI_STATE_CHANGED_ACTION),
+            )
             assertThat(underTest.isWifiEnabled.value).isTrue()
 
             networkJob.cancel()
@@ -1317,7 +1295,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     private fun createRepo(): WifiRepositoryImpl {
         return WifiRepositoryImpl(
-            broadcastDispatcher,
+            fakeBroadcastDispatcher,
             connectivityManager,
             connectivityRepository,
             logger,
