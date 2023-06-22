@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 
 import android.Manifest.permission;
@@ -24,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.IUriGrantsManager;
@@ -4407,8 +4409,11 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
         try {
+            ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentBackgroundActivityStartMode(
+                            MODE_BACKGROUND_ACTIVITY_START_DENIED);
             intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null);
+                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }
