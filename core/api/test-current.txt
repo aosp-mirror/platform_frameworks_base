@@ -1303,7 +1303,6 @@ package android.database.sqlite {
 
   public final class SQLiteDirectCursorDriver implements android.database.sqlite.SQLiteCursorDriver {
     ctor public SQLiteDirectCursorDriver(android.database.sqlite.SQLiteDatabase, String, String, android.os.CancellationSignal);
-    ctor public SQLiteDirectCursorDriver(@NonNull android.database.sqlite.SQLiteDatabase, @Nullable android.database.sqlite.SQLiteAuthorizer, @NonNull String, @Nullable String, @Nullable android.os.CancellationSignal);
     method public void cursorClosed();
     method public void cursorDeactivated();
     method public void cursorRequeried(android.database.Cursor);

@@ -16,8 +16,6 @@
 
 package android.database.sqlite;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.database.DatabaseUtils;
 import android.os.Build;
@@ -35,7 +33,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private final SQLiteDatabase mDatabase;
-    private final SQLiteAuthorizer mAuthorizer;
     @UnsupportedAppUsage
     private final String mSql;
     private final boolean mReadOnly;
@@ -44,11 +41,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final Object[] mBindArgs;
 
-    SQLiteProgram(@NonNull SQLiteDatabase db, @Nullable SQLiteAuthorizer authorizer,
-            @NonNull String sql, @Nullable Object[] bindArgs,
-            @Nullable CancellationSignal cancellationSignalForPrepare) {
+    SQLiteProgram(SQLiteDatabase db, String sql, Object[] bindArgs,
+            CancellationSignal cancellationSignalForPrepare) {
         mDatabase = db;
-        mAuthorizer = authorizer;
         mSql = sql.trim();
 
         int n = DatabaseUtils.getSqlStatementType(mSql);
@@ -64,7 +59,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             default:
                 boolean assumeReadOnly = (n == DatabaseUtils.STATEMENT_SELECT);
                 SQLiteStatementInfo info = new SQLiteStatementInfo();
-                db.getThreadSession().prepare(mAuthorizer, mSql,
+                db.getThreadSession().prepare(mSql,
                         db.getThreadDefaultConnectionFlags(assumeReadOnly),
                         cancellationSignalForPrepare, info);
                 mReadOnly = info.readOnly;
@@ -91,10 +86,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     final SQLiteDatabase getDatabase() {
         return mDatabase;
-    }
-
-    final SQLiteAuthorizer getAuthorizer() {
-        return mAuthorizer;
     }
 
     final String getSql() {
