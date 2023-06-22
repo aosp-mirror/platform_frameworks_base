@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.TouchDelegate;
@@ -47,10 +48,11 @@ public class A11yMenuAdapter extends BaseAdapter {
     private final ShortcutDrawableUtils mShortcutDrawableUtils;
 
     public A11yMenuAdapter(
-            AccessibilityMenuService service, List<A11yMenuShortcut> shortcutDataList) {
+            AccessibilityMenuService service,
+            Context displayContext, List<A11yMenuShortcut> shortcutDataList) {
         this.mService = service;
         this.mShortcutDataList = shortcutDataList;
-        mInflater = LayoutInflater.from(service);
+        mInflater = LayoutInflater.from(displayContext);
 
         mShortcutDrawableUtils = new ShortcutDrawableUtils(service);
 
@@ -75,7 +77,9 @@ public class A11yMenuAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView = mInflater.inflate(R.layout.grid_item, null);
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.grid_item, parent, false);
+        }
 
         A11yMenuShortcut shortcutItem = (A11yMenuShortcut) getItem(position);
         // Sets shortcut icon and label resource.
