@@ -33,6 +33,7 @@ import com.android.wm.shell.common.ShellExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
@@ -45,7 +46,7 @@ internal class BubbleDataRepository(
     private val volatileRepository = BubbleVolatileRepository(launcherApps)
     private val persistentRepository = BubblePersistentRepository(context)
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var job: Job? = null
 
     // For use in Bubble construction.
@@ -131,7 +132,7 @@ internal class BubbleDataRepository(
      */
     private fun persistToDisk() {
         val prev = job
-        job = ioScope.launch {
+        job = coroutineScope.launch {
             // if there was an ongoing disk I/O operation, they can be cancelled
             prev?.cancelAndJoin()
             // check for cancellation before disk I/O
@@ -148,7 +149,7 @@ internal class BubbleDataRepository(
      *           bubbles.
      */
     @SuppressLint("WrongConstant")
-    fun loadBubbles(userId: Int, cb: (List<Bubble>) -> Unit) = ioScope.launch {
+    fun loadBubbles(userId: Int, cb: (List<Bubble>) -> Unit) = coroutineScope.launch {
         /**
          * Load BubbleEntity from disk.
          * e.g.
