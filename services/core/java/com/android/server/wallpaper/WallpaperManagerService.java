@@ -955,7 +955,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             try {
                 connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,
                         wpdData.mWidth, wpdData.mHeight,
-                        wpdData.mPadding, mDisplayId, wallpaper.mWhich);
+                        wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed attaching wallpaper on display", e);
                 if (wallpaper != null && !wallpaper.wallpaperUpdating
@@ -3588,7 +3588,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 final int hasPrivilege = mIPackageManager.checkPermission(
                         android.Manifest.permission.AMBIENT_WALLPAPER, wi.getPackageName(),
                         serviceUserId);
-                if (hasPrivilege != PERMISSION_GRANTED) {
+                // All watch wallpapers support ambient mode by default.
+                if (hasPrivilege != PERMISSION_GRANTED
+                        && !mIPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
                     String msg = "Selected service does not have "
                             + android.Manifest.permission.AMBIENT_WALLPAPER
                             + ": " + componentName;

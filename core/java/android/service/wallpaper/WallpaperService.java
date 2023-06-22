@@ -1606,8 +1606,13 @@ public abstract class WallpaperService extends Service {
             if (!mDestroyed) {
                 mDisplayState =
                         mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getCommittedState();
-                boolean displayVisible = Display.isOnState(mDisplayState) && !mIsScreenTurningOn;
-                boolean visible = mVisible && displayVisible;
+                boolean displayFullyOn = Display.isOnState(mDisplayState) && !mIsScreenTurningOn;
+                boolean supportsAmbientMode =
+                        mIWallpaperEngine.mInfo == null
+                                ? false
+                                : mIWallpaperEngine.mInfo.supportsAmbientMode();
+                // Report visibility only if display is fully on or wallpaper supports ambient mode.
+                boolean visible = mVisible && (displayFullyOn || supportsAmbientMode);
                 if (DEBUG) {
                     Log.v(
                             TAG,
@@ -2060,7 +2065,7 @@ public abstract class WallpaperService extends Service {
         }
 
         private void updateFrozenState(boolean frozenRequested) {
-            if (mIWallpaperEngine.mWallpaperManager.getWallpaperInfo() == null
+            if (mIWallpaperEngine.mInfo == null
                     // Procees the unfreeze command in case the wallaper became static while
                     // being paused.
                     && frozenRequested) {
@@ -2355,6 +2360,7 @@ public abstract class WallpaperService extends Service {
         final DisplayManager mDisplayManager;
         final Display mDisplay;
         final WallpaperManager mWallpaperManager;
+        @Nullable final WallpaperInfo mInfo;
 
         Engine mEngine;
         @SetWallpaperFlags int mWhich;
@@ -2362,7 +2368,7 @@ public abstract class WallpaperService extends Service {
         IWallpaperEngineWrapper(WallpaperService service,
                 IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
-                int displayId, @SetWallpaperFlags int which) {
+                int displayId, @SetWallpaperFlags int which, @Nullable WallpaperInfo info) {
             mWallpaperManager = getSystemService(WallpaperManager.class);
             mCaller = new HandlerCaller(service, service.onProvideEngineLooper(), this, true);
             mConnection = conn;
@@ -2374,6 +2380,7 @@ public abstract class WallpaperService extends Service {
             mDisplayPadding.set(padding);
             mDisplayId = displayId;
             mWhich = which;
+            mInfo = info;
 
             // Create a display context before onCreateEngine.
             mDisplayManager = getSystemService(DisplayManager.class);
@@ -2447,8 +2454,7 @@ public abstract class WallpaperService extends Service {
                 Trace.beginSection("WPMS.mConnection.engineShown");
                 try {
                     mConnection.engineShown(this);
-                    Log.d(TAG, "Wallpaper has updated the surface:"
-                            + mWallpaperManager.getWallpaperInfo());
+                    Log.d(TAG, "Wallpaper has updated the surface:" + mInfo);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Wallpaper host disappeared", e);
                 }
@@ -2702,11 +2708,11 @@ public abstract class WallpaperService extends Service {
         @Override
         public void attach(IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
-                int displayId, @SetWallpaperFlags int which) {
+                int displayId, @SetWallpaperFlags int which, @Nullable WallpaperInfo info) {
             Trace.beginSection("WPMS.ServiceWrapper.attach");
             IWallpaperEngineWrapper engineWrapper =
                     new IWallpaperEngineWrapper(mTarget, conn, windowToken, windowType,
-                            isPreview, reqWidth, reqHeight, padding, displayId, which);
+                            isPreview, reqWidth, reqHeight, padding, displayId, which, info);
             synchronized (mActiveEngines) {
                 mActiveEngines.put(windowToken, engineWrapper);
             }

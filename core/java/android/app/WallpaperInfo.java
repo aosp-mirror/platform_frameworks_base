@@ -142,9 +142,13 @@ public final class WallpaperInfo implements Parcelable {
             mShowMetadataInPreview = sa.getBoolean(
                     com.android.internal.R.styleable.Wallpaper_showMetadataInPreview,
                     false);
+
+            // Watch wallpapers support ambient mode by default.
+            final boolean defSupportsAmbientMode =
+                    pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
             mSupportsAmbientMode = sa.getBoolean(
                     com.android.internal.R.styleable.Wallpaper_supportsAmbientMode,
-                    false);
+                    defSupportsAmbientMode);
             mShouldUseDefaultUnfoldTransition = sa.getBoolean(
                     com.android.internal.R.styleable
                             .Wallpaper_shouldUseDefaultUnfoldTransition, true);
