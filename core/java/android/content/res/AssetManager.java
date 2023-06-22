@@ -16,8 +16,6 @@
 
 package android.content.res;
 
-import static android.content.res.Resources.ID_NULL;
-
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
 import android.annotation.AttrRes;
@@ -1091,7 +1089,7 @@ public final class AssetManager implements AutoCloseable {
     public @NonNull XmlResourceParser openXmlResourceParser(int cookie, @NonNull String fileName)
             throws IOException {
         try (XmlBlock block = openXmlBlockAsset(cookie, fileName)) {
-            XmlResourceParser parser = block.newParser(ID_NULL, new Validator());
+            XmlResourceParser parser = block.newParser();
             // If openXmlBlockAsset doesn't throw, it will always return an XmlBlock object with
             // a valid native pointer, which makes newParser always return non-null. But let's
             // be careful.
