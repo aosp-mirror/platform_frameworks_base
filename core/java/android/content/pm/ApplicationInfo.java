@@ -67,7 +67,7 @@ import java.util.UUID;
  * &lt;application&gt; tag.
  */
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
-    private static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
+    private static final ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
             Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
 
@@ -1892,7 +1892,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Collator   sCollator = Collator.getInstance();
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-        private PackageManager   mPM;
+        private final PackageManager mPM;
     }
 
     public ApplicationInfo() {

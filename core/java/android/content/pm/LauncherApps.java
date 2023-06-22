@@ -1737,7 +1737,8 @@ public class LauncherApps {
         mCallbacks.add(toAdd);
     }
 
-    private IOnAppsChangedListener.Stub mAppsChangedListener = new IOnAppsChangedListener.Stub() {
+    private final IOnAppsChangedListener.Stub mAppsChangedListener =
+            new IOnAppsChangedListener.Stub() {
 
         @Override
         public void onPackageRemoved(UserHandle user, String packageName)
@@ -1872,7 +1873,7 @@ public class LauncherApps {
         private static final int MSG_SHORTCUT_CHANGED = 8;
         private static final int MSG_LOADING_PROGRESS_CHANGED = 9;
 
-        private LauncherApps.Callback mCallback;
+        private final LauncherApps.Callback mCallback;
 
         private static class CallbackInfo {
             String[] packageNames;
