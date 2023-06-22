@@ -222,9 +222,8 @@ private:
  */
 class RecyclingClippingPixelAllocator : public android::skia::BRDAllocator {
 public:
-
     RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
-            size_t recycledBytes);
+                                    bool mustMatchColorType = true);
 
     ~RecyclingClippingPixelAllocator();
 
@@ -252,6 +251,7 @@ private:
     const size_t     mRecycledBytes;
     SkBitmap*        mSkiaBitmap;
     bool             mNeedsCopy;
+    const bool mMustMatchColorType;
 };
 
 class AshmemPixelAllocator : public SkBitmap::Allocator {
