@@ -987,7 +987,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         if (ar.pictureInPictureArgs != null && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
-            if (didCommitTransientLaunch()) {
+            if (!ar.getTask().isVisibleRequested() || didCommitTransientLaunch()) {
                 // force enable pip-on-task-switch now that we've committed to actually launching
                 // to the transient activity.
                 ar.supportsEnterPipOnTaskSwitch = true;
@@ -1016,7 +1016,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         // Legacy pip-entry (not via isAutoEnterEnabled).
-        if (didCommitTransientLaunch() && ar.supportsPictureInPicture()) {
+        if ((!ar.getTask().isVisibleRequested() || didCommitTransientLaunch())
+                && ar.supportsPictureInPicture()) {
             // force enable pip-on-task-switch now that we've committed to actually launching to the
             // transient activity, and then recalculate whether we can attempt pip.
             ar.supportsEnterPipOnTaskSwitch = true;
