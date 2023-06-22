@@ -507,6 +507,18 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun authenticateDoesNotRunIfKeyguardIsNotShowing() =
+        testScope.runTest {
+            testGatingCheckForFaceAuth { keyguardRepository.setKeyguardShowing(false) }
+        }
+
+    @Test
+    fun detectDoesNotRunIfKeyguardIsNotShowing() =
+        testScope.runTest {
+            testGatingCheckForDetect { keyguardRepository.setKeyguardShowing(false) }
+        }
+
+    @Test
     fun authenticateDoesNotRunWhenFpIsLockedOut() =
         testScope.runTest {
             testGatingCheckForFaceAuth { deviceEntryFingerprintAuthRepository.setLockedOut(true) }
@@ -565,6 +577,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             testGatingCheckForFaceAuth {
                 bouncerRepository.setAlternateVisible(false)
+                // Keyguard is occluded when secure camera is active.
+                keyguardRepository.setKeyguardOccluded(true)
                 fakeCommandQueue.doForEachCallback {
                     it.onCameraLaunchGestureDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
                 }
@@ -774,6 +788,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             testGatingCheckForDetect {
                 bouncerRepository.setAlternateVisible(false)
+                // Keyguard is occluded when secure camera is active.
+                keyguardRepository.setKeyguardOccluded(true)
                 fakeCommandQueue.doForEachCallback {
                     it.onCameraLaunchGestureDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
                 }
@@ -1011,6 +1027,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         fakeUserRepository.setSelectedUserInfo(primaryUser)
         biometricSettingsRepository.setIsFaceAuthSupportedInCurrentPosture(true)
         bouncerRepository.setAlternateVisible(true)
+        keyguardRepository.setKeyguardShowing(true)
         runCurrent()
     }
 

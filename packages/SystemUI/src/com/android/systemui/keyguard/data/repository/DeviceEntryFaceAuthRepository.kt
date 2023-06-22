@@ -335,6 +335,11 @@ constructor(
                     biometricSettingsRepository.isCurrentUserInLockdown.isFalse(),
                     "userHasNotLockedDownDevice",
                     tableLogBuffer
+                ),
+                logAndObserve(
+                    keyguardRepository.isKeyguardShowing,
+                    "isKeyguardShowing",
+                    tableLogBuffer
                 )
             )
             .reduce(::and)
@@ -598,7 +603,7 @@ constructor(
         const val DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000L
 
         /** Number of allowed retries whenever there is a face hardware error */
-        const val HAL_ERROR_RETRY_MAX = 20
+        const val HAL_ERROR_RETRY_MAX = 5
 
         /** Timeout before retries whenever there is a HAL error. */
         const val HAL_ERROR_RETRY_TIMEOUT = 500L // ms
