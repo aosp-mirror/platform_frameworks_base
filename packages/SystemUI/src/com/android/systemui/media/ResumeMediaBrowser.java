@@ -16,6 +16,7 @@
 
 package com.android.systemui.media;
 
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,6 +50,8 @@ public class ResumeMediaBrowser {
     private final Context mContext;
     private final Callback mCallback;
     private MediaBrowserFactory mBrowserFactory;
+    @UserIdInt private final int mUserId;
+
     private MediaBrowser mMediaBrowser;
     private ComponentName mComponentName;
 
@@ -57,13 +60,15 @@ public class ResumeMediaBrowser {
      * @param context the context
      * @param callback used to report media items found
      * @param componentName Component name of the MediaBrowserService this browser will connect to
+     * @param userId ID of the current user
      */
     public ResumeMediaBrowser(Context context, Callback callback, ComponentName componentName,
-            MediaBrowserFactory browserFactory) {
+            MediaBrowserFactory browserFactory, @UserIdInt int userId) {
         mContext = context;
         mCallback = callback;
         mComponentName = componentName;
         mBrowserFactory = browserFactory;
+        mUserId = userId;
     }
 
     /**
@@ -222,6 +227,14 @@ public class ResumeMediaBrowser {
     @VisibleForTesting
     protected MediaController createMediaController(MediaSession.Token token) {
         return new MediaController(mContext, token);
+    }
+
+    /**
+     * Get the ID of the user associated with this broswer
+     * @return the user ID
+     */
+    public @UserIdInt int getUserId() {
+        return mUserId;
     }
 
     /**
