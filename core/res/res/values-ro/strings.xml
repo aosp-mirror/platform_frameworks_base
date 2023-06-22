@@ -1257,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Se pornesc aplicațiile."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Se finalizează pornirea."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Ai apăsat butonul de pornire. De obicei, astfel se dezactivează ecranul.\n\nAtinge ușor când îți configurezi amprenta."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Ca să termini configurarea, dezactivează ecranul"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Termină configurarea dezactivând ecranul"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Dezactivează"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continui cu verificarea amprentei?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Ai apăsat butonul de pornire. De obicei, astfel se dezactivează ecranul.\n\nAtinge ușor pentru verificarea amprentei."</string>
