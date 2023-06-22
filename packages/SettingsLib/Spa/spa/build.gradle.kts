@@ -69,7 +69,6 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:5.2.0")
 
     androidTestImplementation(project(":testutils"))
-    androidTestImplementation("androidx.lifecycle:lifecycle-runtime-testing")
     androidTestImplementation(libs.dexmaker.mockito)
 }
 
