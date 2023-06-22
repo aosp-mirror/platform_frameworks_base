@@ -963,14 +963,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             mOccludeByDreamAnimator.cancel();
                         }
                     });
-                    // The value of isKeyguardOccluded here may come from mergeAnimation, which
-                    // isn't reliable. In all cases, after running or cancelling this animation,
-                    // keyguard should be occluded.
-                    setOccluded(true /* isOccluded */, false /* animate */);
-                    if (DEBUG) {
-                        Log.d(TAG, "Occlude by Dream animation cancelled. Occluded state is now: "
-                                + mOccluded);
-                    }
+                    Log.d(TAG, "Occlude by Dream animation cancelled.");
                 }
 
                 @Override
@@ -1076,10 +1069,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         }
                     });
 
-                    setOccluded(isKeyguardOccluded /* isOccluded */, false /* animate */);
-                    Log.d(TAG, "Unocclude animation cancelled. Occluded state is now: "
-                            + mOccluded);
-
+                    Log.d(TAG, "Unocclude animation cancelled.");
                     mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
                 }
 
@@ -3446,10 +3436,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         public void onAnimationCancelled(boolean isKeyguardOccluded) throws RemoteException {
             super.onAnimationCancelled(isKeyguardOccluded);
 
-            Log.d(TAG, "Occlude animation cancelled by WM. "
-                    + "Setting occluded state to: " + isKeyguardOccluded);
-            setOccluded(isKeyguardOccluded /* occluded */, false /* animate */);
-
+            Log.d(TAG, "Occlude animation cancelled by WM.");
             mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
         }
     }
