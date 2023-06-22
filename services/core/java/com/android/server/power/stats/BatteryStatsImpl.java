@@ -281,6 +281,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
     private int[] mCpuPowerBracketMap;
     private final CpuUsageDetails mCpuUsageDetails = new CpuUsageDetails();
+    private final CpuPowerStatsCollector mCpuPowerStatsCollector;
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
         return mKernelMemoryStats;
@@ -439,6 +440,7 @@ public class BatteryStatsImpl extends BatteryStats {
         static final int RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG = 1 << 1;
 
         private final int mFlags;
+        private final long mPowerStatsThrottlePeriodCpu;
 
         private BatteryStatsConfig(Builder builder) {
             int flags = 0;
@@ -449,6 +451,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 flags |= RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG;
             }
             mFlags = flags;
+            mPowerStatsThrottlePeriodCpu = builder.mPowerStatsThrottlePeriodCpu;
         }
 
         /**
@@ -469,15 +472,22 @@ public class BatteryStatsImpl extends BatteryStats {
                     == RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG;
         }
 
+        long getPowerStatsThrottlePeriodCpu() {
+            return mPowerStatsThrottlePeriodCpu;
+        }
+
         /**
          * Builder for BatteryStatsConfig
          */
         public static class Builder {
             private boolean mResetOnUnplugHighBatteryLevel;
             private boolean mResetOnUnplugAfterSignificantCharge;
+            private long mPowerStatsThrottlePeriodCpu;
+
             public Builder() {
                 mResetOnUnplugHighBatteryLevel = true;
                 mResetOnUnplugAfterSignificantCharge = true;
+                mPowerStatsThrottlePeriodCpu = 60000;
             }
 
             /**
@@ -504,8 +514,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 mResetOnUnplugAfterSignificantCharge = reset;
                 return this;
             }
-        }
 
+            /**
+             * Sets the minimum amount of time (in millis) to wait between passes
+             * of CPU power stats collection.
+             */
+            public Builder setPowerStatsThrottlePeriodCpu(long periodMs) {
+                mPowerStatsThrottlePeriodCpu = periodMs;
+                return this;
+            }
+        }
     }
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
@@ -1556,7 +1574,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @VisibleForTesting
     @GuardedBy("this")
-    protected BatteryStatsConfig mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
+    protected BatteryStatsConfig mBatteryStatsConfig;
 
     @GuardedBy("this")
     private AlarmManager mAlarmManager = null;
@@ -1733,6 +1751,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(Clock clock, File historyDirectory) {
         init(clock);
+        mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
         mHandler = null;
         mConstants = new Constants(mHandler);
         mStartClockTimeMs = clock.currentTimeMillis();
@@ -1751,6 +1770,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mPlatformIdleStateCallback = null;
         mEnergyConsumerRetriever = null;
         mUserInfoProvider = null;
+        mCpuPowerStatsCollector = null;
     }
 
     private void init(Clock clock) {
@@ -10911,21 +10931,23 @@ public class BatteryStatsImpl extends BatteryStats {
         return mTmpCpuTimeInFreq;
     }
 
-    public BatteryStatsImpl(@Nullable File systemDir, @NonNull Handler handler,
-            @Nullable PlatformIdleStateCallback cb, @Nullable EnergyStatsRetriever energyStatsCb,
-            @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
-            @NonNull CpuScalingPolicies cpuScalingPolicies) {
-        this(Clock.SYSTEM_CLOCK, systemDir, handler, cb, energyStatsCb, userInfoProvider,
-                powerProfile, cpuScalingPolicies);
-    }
-
-    private BatteryStatsImpl(@NonNull Clock clock, @Nullable File systemDir,
+    public BatteryStatsImpl(@NonNull BatteryStatsConfig config, @Nullable File systemDir,
             @NonNull Handler handler, @Nullable PlatformIdleStateCallback cb,
             @Nullable EnergyStatsRetriever energyStatsCb,
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
             @NonNull CpuScalingPolicies cpuScalingPolicies) {
+        this(config, Clock.SYSTEM_CLOCK, systemDir, handler, cb, energyStatsCb, userInfoProvider,
+                powerProfile, cpuScalingPolicies);
+    }
+
+    private BatteryStatsImpl(@NonNull BatteryStatsConfig config, @NonNull Clock clock,
+            @Nullable File systemDir, @NonNull Handler handler,
+            @Nullable PlatformIdleStateCallback cb, @Nullable EnergyStatsRetriever energyStatsCb,
+            @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
+            @NonNull CpuScalingPolicies cpuScalingPolicies) {
         init(clock);
 
+        mBatteryStatsConfig = config;
         mHandler = new MyHandler(handler.getLooper());
         mConstants = new Constants(mHandler);
 
@@ -10947,6 +10969,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistory = new BatteryStatsHistory(systemDir, mConstants.MAX_HISTORY_FILES,
                     mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         }
+
+        mCpuPowerStatsCollector = new CpuPowerStatsCollector(mCpuScalingPolicies, mPowerProfile,
+                mHandler, mBatteryStatsConfig.getPowerStatsThrottlePeriodCpu());
+
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
@@ -11092,15 +11118,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     PowerProfile getPowerProfile() {
         return mPowerProfile;
-    }
-
-    /**
-     * Injects BatteryStatsConfig
-     */
-    public void setBatteryStatsConfig(BatteryStatsConfig config) {
-        synchronized (this) {
-            mBatteryStatsConfig = config;
-        }
     }
 
     /**
@@ -14197,6 +14214,9 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mCpuUidFreqTimeReader != null) {
             mCpuUidFreqTimeReader.onSystemReady();
         }
+        if (mCpuPowerStatsCollector != null) {
+            mCpuPowerStatsCollector.onSystemReady();
+        }
         mSystemReady = true;
     }
 
@@ -15703,6 +15723,13 @@ public class BatteryStatsImpl extends BatteryStats {
         iPw.increaseIndent();
         mPowerProfile.dump(iPw);
         iPw.decreaseIndent();
+    }
+
+    /**
+     * Grabs one sample of PowerStats and prints it.
+     */
+    public void dumpStatsSample(PrintWriter pw) {
+        mCpuPowerStatsCollector.collectAndDump(pw);
     }
 
     private final Runnable mWriteAsyncRunnable = () -> {

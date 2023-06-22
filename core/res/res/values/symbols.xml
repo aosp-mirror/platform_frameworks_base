@@ -5074,6 +5074,7 @@
 
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
+  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodCpu" />
 
   <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
