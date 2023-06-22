@@ -152,6 +152,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mUserTracker = userTracker;
+        mCurrentUser = userTracker.getUserId();
         mSecureSettings = secureSettings;
         mCustomTileStatePersister = customTileStatePersister;
 
@@ -272,6 +273,13 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         if (!TILES_SETTING.equals(key)) {
             return;
         }
+        int currentUser = mUserTracker.getUserId();
+        if (currentUser != mCurrentUser) {
+            mUserContext = mUserTracker.getUserContext();
+            if (mAutoTiles != null) {
+                mAutoTiles.changeUser(UserHandle.of(currentUser));
+            }
+        }
         // Do not process tiles if the flag is enabled.
         if (mFeatureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
             return;
@@ -280,13 +288,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
-        int currentUser = mUserTracker.getUserId();
-        if (currentUser != mCurrentUser) {
-            mUserContext = mUserTracker.getUserContext();
-            if (mAutoTiles != null) {
-                mAutoTiles.changeUser(UserHandle.of(currentUser));
-            }
-        }
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
         Log.d(TAG, "Recreating tiles: " + tileSpecs);
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
