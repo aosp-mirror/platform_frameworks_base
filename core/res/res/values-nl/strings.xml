@@ -701,7 +701,7 @@
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet helemaal zichtbaar zijn."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je hele gezicht moet zichtbaar zijn."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Opstarten afronden."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan terwijl je je vingerafdruk instelt."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zet het scherm uit om het instellen te beëindigen"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zet scherm uit om instellen te beëindigen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Uitzetten"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Doorgaan met verificatie van je vingerafdruk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan om je vingerafdruk te verifiëren."</string>
