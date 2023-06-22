@@ -96,17 +96,33 @@ public:
         sk_sp<SkColorSpace> decodeColorSpace =
                 mGainmapBRD->computeOutputColorSpace(decodeColorType, nullptr);
         SkBitmap bm;
-        HeapAllocator heapAlloc;
-        if (!mGainmapBRD->decodeRegion(&bm, &heapAlloc, desiredSubset, sampleSize, decodeColorType,
-                                       requireUnpremul, decodeColorSpace)) {
-            ALOGE("Error decoding Gainmap region");
-            return false;
-        }
-        sk_sp<Bitmap> nativeBitmap(heapAlloc.getStorageObjAndReset());
+        // Because we must match the dimensions of the base bitmap, we always use a
+        // recycling allocator even though we are allocating a new bitmap. This is to ensure
+        // that if a recycled bitmap was used for the base image that we match the relative
+        // dimensions of that base image. The behavior of BRD here is:
+        // if inBitmap is specified -> output dimensions are always equal to the inBitmap's
+        // if no bitmap is reused   -> output dimensions are the intersect of the desiredSubset &
+        //                           the image bounds
+        // The handling of the above conditionals are baked into the desiredSubset, so we
+        // simply need to ensure that the resulting bitmap is the exact same width/height as
+        // the specified desiredSubset regardless of the intersection to the image bounds.
+        // kPremul_SkAlphaType is used just as a placeholder as it doesn't change the underlying
+        // allocation type. RecyclingClippingPixelAllocator will populate this with the
+        // actual alpha type in either allocPixelRef() or copyIfNecessary()
+        sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(
+                SkImageInfo::Make(desiredSubset.width(), desiredSubset.height(), decodeColorType,
+                                  kPremul_SkAlphaType, decodeColorSpace));
         if (!nativeBitmap) {
             ALOGE("OOM allocating Bitmap for Gainmap");
             return false;
         }
+        RecyclingClippingPixelAllocator allocator(nativeBitmap.get(), false);
+        if (!mGainmapBRD->decodeRegion(&bm, &allocator, desiredSubset, sampleSize, decodeColorType,
+                                       requireUnpremul, decodeColorSpace)) {
+            ALOGE("Error decoding Gainmap region");
+            return false;
+        }
+        allocator.copyIfNecessary();
         auto gainmap = sp<uirenderer::Gainmap>::make();
         if (!gainmap) {
             ALOGE("OOM allocating Gainmap");
@@ -238,13 +254,11 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 
     // Recycle a bitmap if possible.
     android::Bitmap* recycledBitmap = nullptr;
-    size_t recycledBytes = 0;
     if (javaBitmap) {
         recycledBitmap = &bitmap::toBitmap(inBitmapHandle);
         if (recycledBitmap->isImmutable()) {
             ALOGW("Warning: Reusing an immutable bitmap as an image decoder target.");
         }
-        recycledBytes = recycledBitmap->getAllocationByteCount();
     }
 
     auto* brd = reinterpret_cast<BitmapRegionDecoderWrapper*>(brdHandle);
@@ -263,7 +277,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 
     // Set up the pixel allocator
     skia::BRDAllocator* allocator = nullptr;
-    RecyclingClippingPixelAllocator recycleAlloc(recycledBitmap, recycledBytes);
+    RecyclingClippingPixelAllocator recycleAlloc(recycledBitmap);
     HeapAllocator heapAlloc;
     if (javaBitmap) {
         allocator = &recycleAlloc;
@@ -277,7 +291,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
             decodeColorType, colorSpace);
 
     // Decode the region.
-    SkIRect subset = SkIRect::MakeXYWH(inputX, inputY, inputWidth, inputHeight);
+    const SkIRect subset = SkIRect::MakeXYWH(inputX, inputY, inputWidth, inputHeight);
     SkBitmap bitmap;
     if (!brd->decodeRegion(&bitmap, allocator, subset, sampleSize,
             decodeColorType, requireUnpremul, decodeColorSpace)) {
@@ -307,10 +321,27 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
                 GraphicsJNI::getColorSpace(env, decodeColorSpace.get(), decodeColorType));
     }
 
+    if (javaBitmap) {
+        recycleAlloc.copyIfNecessary();
+    }
+
     sp<uirenderer::Gainmap> gainmap;
     bool hasGainmap = brd->hasGainmap();
     if (hasGainmap) {
-        SkIRect gainmapSubset = brd->calculateGainmapRegion(subset);
+        SkIRect adjustedSubset{};
+        if (javaBitmap) {
+            // Clamp to the width/height of the recycled bitmap in case the reused bitmap
+            // was too small for the specified rectangle, in which case we need to clip
+            adjustedSubset = SkIRect::MakeXYWH(inputX, inputY,
+                                               std::min(subset.width(), recycledBitmap->width()),
+                                               std::min(subset.height(), recycledBitmap->height()));
+        } else {
+            // We are not recycling, so use the decoded width/height for calculating the gainmap
+            // subset instead to ensure the gainmap region proportionally matches
+            adjustedSubset = SkIRect::MakeXYWH(std::max(0, inputX), std::max(0, inputY),
+                                               bitmap.width(), bitmap.height());
+        }
+        SkIRect gainmapSubset = brd->calculateGainmapRegion(adjustedSubset);
         if (!brd->decodeGainmapRegion(&gainmap, gainmapSubset, sampleSize, requireUnpremul)) {
             // If there is an error decoding Gainmap - we don't fail. We just don't provide Gainmap
             hasGainmap = false;
@@ -319,7 +350,6 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
 
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.
     if (javaBitmap) {
-        recycleAlloc.copyIfNecessary();
         if (hasGainmap) {
             recycledBitmap->setGainmap(std::move(gainmap));
         }
@@ -331,6 +361,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     if (!requireUnpremul) {
         bitmapCreateFlags |= android::bitmap::kBitmapCreateFlag_Premultiplied;
     }
+
     if (isHardware) {
         sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(bitmap);
         if (hasGainmap) {
