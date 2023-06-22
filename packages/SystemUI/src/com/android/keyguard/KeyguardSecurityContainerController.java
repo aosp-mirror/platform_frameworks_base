@@ -70,11 +70,11 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -318,6 +318,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                         "swipeUpOnBouncer");
             }
+        }
+
+        @Override
+        public void onSwipeDown() {
+            mViewMediatorCallback.onBouncerSwipeDown();
         }
     };
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
