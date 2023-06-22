@@ -25,7 +25,9 @@ import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Build;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
 
@@ -38,6 +40,10 @@ import java.util.List;
  * Ledger to track the last recorded balance and recent activities of an app.
  */
 class Ledger {
+    private static final String TAG = "TARE-" + Ledger.class.getSimpleName();
+    private static final boolean DEBUG = InternalResourceService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
+
     /** The window size within which rewards will be counted and used towards reward limiting. */
     private static final long TOTAL_REWARD_WINDOW_MS = 24 * HOUR_IN_MILLIS;
     /** The number of buckets to split {@link #TOTAL_REWARD_WINDOW_MS} into. */
@@ -51,7 +57,7 @@ class Ledger {
             TOTAL_REWARD_WINDOW_MS / NUM_REWARD_BUCKET_WINDOWS;
     /** The maximum number of transactions to retain in memory at any one time. */
     @VisibleForTesting
-    static final int MAX_TRANSACTION_COUNT = 50;
+    static final int MAX_TRANSACTION_COUNT = Build.IS_ENG || Build.IS_USERDEBUG || DEBUG ? 32 : 4;
 
     static class Transaction {
         public final long startTimeMs;
@@ -67,7 +73,7 @@ class Ledger {
             this.startTimeMs = startTimeMs;
             this.endTimeMs = endTimeMs;
             this.eventId = eventId;
-            this.tag = tag;
+            this.tag = tag == null ? null : tag.intern();
             this.delta = delta;
             this.ctp = ctp;
         }
