@@ -34,6 +34,7 @@
         android:background="@drawable/expand_button_pill_bg"
         android:gravity="center_vertical"
         android:layout_gravity="center_vertical"
+        android:duplicateParentState="true"
         >
 
         <TextView
