@@ -22,6 +22,7 @@ import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
@@ -47,7 +48,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
@@ -102,7 +102,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
     private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
-    private lateinit var registry: FakeKeyguardQuickAffordanceRegistry
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScannerAffordanceConfig: FakeKeyguardQuickAffordanceConfig
@@ -112,6 +111,18 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf(
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START + ":" +
+                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END + ":" +
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
+        )
+
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), any()))
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
@@ -125,23 +136,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
-        registry =
-            FakeKeyguardQuickAffordanceRegistry(
-                mapOf(
-                    KeyguardQuickAffordancePosition.BOTTOM_START to
-                        listOf(
-                            homeControlsQuickAffordanceConfig,
-                        ),
-                    KeyguardQuickAffordancePosition.BOTTOM_END to
-                        listOf(
-                            quickAccessWalletAffordanceConfig,
-                            qrCodeScannerAffordanceConfig,
-                        ),
-                ),
-            )
         val featureFlags =
             FakeFeatureFlags().apply {
-                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
@@ -152,7 +148,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         repository = withDeps.repository
 
         whenever(userTracker.userHandle).thenReturn(mock())
-        whenever(userTracker.userId).thenReturn(10)
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
         val testDispatcher = StandardTestDispatcher()
@@ -225,7 +220,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
-                        registry = registry,
                         lockPatternUtils = lockPatternUtils,
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
@@ -700,7 +694,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 KeyguardQuickAffordanceConfig.LockScreenState.Hidden
             }
         config.setState(lockScreenState)
-        return config.key
+
+        return "${position.toSlotId()}::${config.key}"
     }
 
     private fun assertQuickAffordanceViewModel(

@@ -50,7 +50,6 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffor
 import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
@@ -91,7 +90,6 @@ import kotlinx.coroutines.CoroutineDispatcher;
         includes = {
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
-            KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
             KeyguardFaceAuthModule.class,
             StartKeyguardTransitionModule.class,

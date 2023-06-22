@@ -44,7 +44,6 @@ import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsReposi
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
@@ -102,6 +101,15 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf(
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START + ":" +
+                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END + ":" +
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
+        )
 
         repository = FakeKeyguardRepository()
         repository.setKeyguardShowing(true)
@@ -164,7 +172,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             )
         featureFlags =
             FakeFeatureFlags().apply {
-                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
 
@@ -176,20 +183,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor = withDeps.keyguardInteractor,
-                registry =
-                    FakeKeyguardQuickAffordanceRegistry(
-                        mapOf(
-                            KeyguardQuickAffordancePosition.BOTTOM_START to
-                                listOf(
-                                    homeControls,
-                                ),
-                            KeyguardQuickAffordancePosition.BOTTOM_END to
-                                listOf(
-                                    quickAccessWallet,
-                                    qrCodeScanner,
-                                ),
-                        ),
-                    ),
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
@@ -225,7 +218,9 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(collectedValue())
                 .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
             val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
-            assertThat(visibleModel.configKey).isEqualTo(configKey)
+            assertThat(visibleModel.configKey).isEqualTo(
+                "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::${configKey}"
+            )
             assertThat(visibleModel.icon).isEqualTo(ICON)
             assertThat(visibleModel.icon.contentDescription)
                 .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
@@ -250,7 +245,9 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(collectedValue())
                 .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
             val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
-            assertThat(visibleModel.configKey).isEqualTo(configKey)
+            assertThat(visibleModel.configKey).isEqualTo(
+                "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END}::${configKey}"
+            )
             assertThat(visibleModel.icon).isEqualTo(ICON)
             assertThat(visibleModel.icon.contentDescription)
                 .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
@@ -387,7 +384,9 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(collectedValue())
                 .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
             val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
-            assertThat(visibleModel.configKey).isEqualTo(configKey)
+            assertThat(visibleModel.configKey).isEqualTo(
+                "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::${configKey}"
+            )
             assertThat(visibleModel.icon).isEqualTo(ICON)
             assertThat(visibleModel.icon.contentDescription)
                 .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
@@ -401,8 +400,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 R.array.config_keyguardQuickAffordanceDefaults,
                 arrayOf<String>(),
             )
-
-            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(icon = ICON)
             )
@@ -543,7 +540,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun unselect_one() =
         testScope.runTest {
-            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(icon = ICON)
             )
@@ -620,7 +616,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun useLongPress_whenDocked_isFalse() =
         testScope.runTest {
-            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             dockManager.setIsDocked(true)
 
             val useLongPress by collectLastValue(underTest.useLongPress())
@@ -631,7 +626,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun useLongPress_whenNotDocked_isTrue() =
         testScope.runTest {
-            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             dockManager.setIsDocked(false)
 
             val useLongPress by collectLastValue(underTest.useLongPress())
@@ -642,7 +636,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun useLongPress_whenNotDocked_isTrue_changedTo_whenDocked_isFalse() =
         testScope.runTest {
-            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             dockManager.setIsDocked(false)
             val firstUseLongPress by collectLastValue(underTest.useLongPress())
             runCurrent()
@@ -660,7 +653,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun unselect_all() =
         testScope.runTest {
-            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(icon = ICON)
             )
