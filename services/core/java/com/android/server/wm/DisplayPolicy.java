@@ -2588,7 +2588,8 @@ public class DisplayPolicy {
         if (win == null) {
             return false;
         }
-        if (win == getNotificationShade() || win.isActivityTypeDream()) {
+        if (win.mPolicy.getWindowLayerLw(win) > win.mPolicy.getWindowLayerFromTypeLw(
+                WindowManager.LayoutParams.TYPE_STATUS_BAR) || win.isActivityTypeDream()) {
             return false;
         }
         return getInsetsPolicy().hasHiddenSources(Type.navigationBars());
