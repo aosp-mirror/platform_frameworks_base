@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -48,7 +49,7 @@ import java.io.IOException;
  * used in the package installer application.
  */
 public class PackageUtil {
-    private static final String LOG_TAG = PackageUtil.class.getSimpleName();
+    private static final String LOG_TAG = "PackageInstaller";
 
     public static final String PREFIX="com.android.packageinstaller.";
     public static final String INTENT_ATTR_INSTALL_STATUS = PREFIX+"installStatus";
@@ -56,6 +57,7 @@ public class PackageUtil {
     public static final String INTENT_ATTR_PERMISSIONS_LIST=PREFIX+"PermissionsList";
     //intent attribute strings related to uninstall
     public static final String INTENT_ATTR_PACKAGE_NAME=PREFIX+"PackageName";
+    private static final String DOWNLOADS_AUTHORITY = "downloads";
 
     /**
      * Utility method to get package information for a given {@link File}
@@ -244,5 +246,27 @@ public class PackageUtil {
             getActivity().setResult(Activity.RESULT_CANCELED);
             getActivity().finish();
         }
+    }
+
+    /**
+     * Determines if the UID belongs to the system downloads provider and returns the
+     * {@link ApplicationInfo} of the provider
+     *
+     * @param uid UID of the caller
+     * @return {@link ApplicationInfo} of the provider if a downloads provider exists,
+     *          it is a system app, and its UID matches with the passed UID, null otherwise.
+     */
+    public static ApplicationInfo getSystemDownloadsProviderInfo(PackageManager pm, int uid) {
+        final ProviderInfo providerInfo = pm.resolveContentProvider(
+                DOWNLOADS_AUTHORITY, 0);
+        if (providerInfo == null) {
+            // There seems to be no currently enabled downloads provider on the system.
+            return null;
+        }
+        ApplicationInfo appInfo = providerInfo.applicationInfo;
+        if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 && uid == appInfo.uid) {
+            return appInfo;
+        }
+        return null;
     }
 }

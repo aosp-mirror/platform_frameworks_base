@@ -51,7 +51,6 @@ import java.util.Arrays;
 public class InstallStart extends Activity {
     private static final String TAG = InstallStart.class.getSimpleName();
 
-    private static final String DOWNLOADS_AUTHORITY = "downloads";
 
     private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = 1;
     private static final int DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER = 2;
@@ -103,6 +102,8 @@ public class InstallStart extends Activity {
 
         boolean isDocumentsManager = checkPermission(Manifest.permission.MANAGE_DOCUMENTS,
                 -1, callingUid) == PackageManager.PERMISSION_GRANTED;
+        boolean isSystemDownloadsProvider = PackageUtil.getSystemDownloadsProviderInfo(
+                                                mPackageManager, callingUid) != null;
         boolean isTrustedSource = false;
         if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
             isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
@@ -111,7 +112,7 @@ public class InstallStart extends Activity {
                             == PackageManager.PERMISSION_GRANTED);
         }
 
-        if (!isTrustedSource && !isSystemDownloadsProvider(callingUid) && !isDocumentsManager
+        if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager
                 && originatingUid != Process.INVALID_UID) {
             final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
             if (targetSdkVersion < 0) {
@@ -241,17 +242,6 @@ public class InstallStart extends Activity {
         return null;
     }
 
-    private boolean isSystemDownloadsProvider(int uid) {
-        final ProviderInfo downloadProviderPackage = getPackageManager().resolveContentProvider(
-                DOWNLOADS_AUTHORITY, 0);
-        if (downloadProviderPackage == null) {
-            // There seems to be no currently enabled downloads provider on the system.
-            return false;
-        }
-        final ApplicationInfo appInfo = downloadProviderPackage.applicationInfo;
-        return ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                && uid == appInfo.uid);
-    }
 
     @NonNull
     private boolean canPackageQuery(int callingUid, Uri packageUri) {
@@ -266,7 +256,7 @@ public class InstallStart extends Activity {
         if (callingPackages == null) {
             return false;
         }
-        for (String callingPackage: callingPackages) {
+        for (String callingPackage : callingPackages) {
             try {
                 if (mPackageManager.canPackageQuery(callingPackage, targetPackage)) {
                     return true;
@@ -346,7 +336,6 @@ public class InstallStart extends Activity {
      * Create a new dialog.
      *
      * @param id The id of the dialog (determines dialog type)
-     *
      * @return The dialog
      */
     private DialogFragment createDialog(int id) {
