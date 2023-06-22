@@ -2114,16 +2114,19 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
+    @Deprecated
     public float getDisplayDensity() {
         return mDisplayMetrics.density;
     }
 
     @Override
+    @Deprecated
     public float getDisplayWidth() {
         return mDisplayMetrics.widthPixels;
     }
 
     @Override
+    @Deprecated
     public float getDisplayHeight() {
         return mDisplayMetrics.heightPixels;
     }
