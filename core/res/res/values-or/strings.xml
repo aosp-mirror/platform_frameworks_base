@@ -1365,7 +1365,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ମାଧ୍ୟମରେ MIDIକୁ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ୱେବକେମ ଭାବେ ଡିଭାଇସ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ଆକ୍ସେସୋରୀ ଯୋଡ଼ାଗଲା"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି। ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ଆନାଲଗ୍‍ ଅଡିଓ ଆକ୍ସେସରୀ ଚିହ୍ନଟ ହେଲା"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ଏହି ଫୋନ୍‌ରେ କନେକ୍ଟ ଥିବା ଡିଭାଇସ୍‍ କମ୍ପାଟିବଲ୍‍ ନୁହେଁ। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ।"</string>

@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"মুখাৱয়বৰ মডেল সৃষ্টি কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ডাঠ ৰঙৰ চশমা চিনাক্ত কৰা হৈছে। আপোনাৰ মুখাৱয়ব সম্পূৰ্ণৰূপে দেখা পোৱা হৈ থাকিবই লাগিব।"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"মুখাৱয়বত আৱৰণ চিনাক্ত কৰা হৈছে। আপোনাৰ মুখাৱয়ব সম্পূৰ্ণৰূপে দেখা পোৱা হৈ থাকিবই লাগিব।"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"মুখাৱয়ব ঢাক খাই আছে। সম্পূৰ্ণ মুখাৱয়ব দেখা পাব লাগিব।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। হাৰ্ডৱেৰ নাই।"</string>

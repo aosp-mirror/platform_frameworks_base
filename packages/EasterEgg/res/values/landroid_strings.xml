@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Copyright (C) 2023 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<resources>
+    <string name="u_egg_name" translatable="false">Android 14 Easter Egg</string>
+
+    <string-array name="planet_descriptors" translatable="false">
+        <item>earthy</item>
+        <item>swamp</item>
+        <item>frozen</item>
+        <item>grassy</item>
+        <item>arid</item>
+        <item>crowded</item>
+        <item>ancient</item>
+        <item>lively</item>
+        <item>homey</item>
+        <item>modern</item>
+        <item>boring</item>
+        <item>compact</item>
+        <item>expensive</item>
+        <item>polluted</item>
+        <item>rusty</item>
+        <item>sandy</item>
+        <item>undulating</item>
+        <item>verdant</item>
+        <item>tessellated</item>
+        <item>hollow</item>
+        <item>scalding</item>
+        <item>hemispherical</item>
+        <item>oblong</item>
+        <item>oblate</item>
+        <item>vacuum</item>
+        <item>high-pressure</item>
+        <item>low-pressure</item>
+        <item>plastic</item>
+        <item>metallic</item>
+        <item>burned-out</item>
+        <item>bucolic</item>
+    </string-array>
+
+    <string-array name="life_descriptors" translatable="false">
+        <item>aggressive</item>
+        <item>passive-aggressive</item>
+        <item>shy</item>
+        <item>timid</item>
+        <item>nasty</item>
+        <item>brutish</item>
+        <item>short</item>
+        <item>absent</item>
+        <item>teen-aged</item>
+        <item>confused</item>
+        <item>transparent</item>
+        <item>cubic</item>
+        <item>quadratic</item>
+        <item>higher-order</item>
+        <item>huge</item>
+        <item>tall</item>
+        <item>wary</item>
+        <item>loud</item>
+        <item>yodeling</item>
+        <item>purring</item>
+        <item>slender</item>
+        <item>cats</item>
+        <item>adorable</item>
+        <item>eclectic</item>
+        <item>electric</item>
+        <item>microscopic</item>
+        <item>trunkless</item>
+        <item>myriad</item>
+        <item>cantankerous</item>
+        <item>gargantuan</item>
+        <item>contagious</item>
+        <item>fungal</item>
+        <item>cattywampus</item>
+        <item>spatchcocked</item>
+        <item>rotisserie</item>
+        <item>farm-to-table</item>
+        <item>organic</item>
+        <item>synthetic</item>
+        <item>unfocused</item>
+        <item>focused</item>
+        <item>capitalist</item>
+        <item>communal</item>
+        <item>bossy</item>
+        <item>malicious</item>
+        <item>compliant</item>
+        <item>psychic</item>
+        <item>oblivious</item>
+        <item>passive</item>
+        <item>bonsai</item>
+    </string-array>
+
+    <string-array name="any_descriptors" translatable="false">
+        <item>silly</item>
+        <item>dangerous</item>
+        <item>vast</item>
+        <item>invisible</item>
+        <item>superfluous</item>
+        <item>superconducting</item>
+        <item>superior</item>
+        <item>alien</item>
+        <item>phantom</item>
+        <item>friendly</item>
+        <item>peaceful</item>
+        <item>lonely</item>
+        <item>uncomfortable</item>
+        <item>charming</item>
+        <item>fractal</item>
+        <item>imaginary</item>
+        <item>forgotten</item>
+        <item>tardy</item>
+        <item>gassy</item>
+        <item>fungible</item>
+        <item>bespoke</item>
+        <item>artisanal</item>
+        <item>exceptional</item>
+        <item>puffy</item>
+        <item>rusty</item>
+        <item>fresh</item>
+        <item>crusty</item>
+        <item>glossy</item>
+        <item>lovely</item>
+        <item>processed</item>
+        <item>macabre</item>
+        <item>reticulated</item>
+        <item>shocking</item>
+        <item>void</item>
+        <item>undefined</item>
+        <item>gothic</item>
+        <item>beige</item>
+        <item>mid</item>
+        <item>milquetoast</item>
+        <item>melancholy</item>
+        <item>unnerving</item>
+        <item>cheery</item>
+        <item>vibrant</item>
+        <item>heliotrope</item>
+        <item>psychedelic</item>
+        <item>nondescript</item>
+        <item>indescribable</item>
+        <item>tubular</item>
+        <item>toroidal</item>
+        <item>voxellated</item>
+        <item>low-poly</item>
+        <item>low-carb</item>
+        <item>100% cotton</item>
+        <item>synthetic</item>
+        <item>boot-cut</item>
+        <item>bell-bottom</item>
+        <item>bumpy</item>
+        <item>fluffy</item>
+        <item>sous-vide</item>
+        <item>tepid</item>
+        <item>upcycled</item>
+        <item>sous-vide</item>
+        <item>bedazzled</item>
+        <item>ancient</item>
+        <item>inexplicable</item>
+        <item>sparkling</item>
+        <item>still</item>
+        <item>lemon-scented</item>
+        <item>eccentric</item>
+        <item>tilted</item>
+        <item>pungent</item>
+        <item>pine-scented</item>
+        <item>corduroy</item>
+        <item>overengineered</item>
+        <item>bioengineered</item>
+        <item>impossible</item>
+    </string-array>
+
+    <string-array name="constellations" translatable="false">
+        <item>Aries</item>
+        <item>Taurus</item>
+        <item>Gemini</item>
+        <item>Cancer</item>
+        <item>Leo</item>
+        <item>Virgo</item>
+        <item>Libra</item>
+        <item>Scorpio</item>
+        <item>Sagittarius</item>
+        <item>Capricorn</item>
+        <item>Aquarius</item>
+        <item>Pisces</item>
+        <item>Andromeda</item>
+        <item>Cygnus</item>
+        <item>Draco</item>
+        <item>Alcor</item>
+        <item>Calamari</item>
+        <item>Cuckoo</item>
+        <item>Neko</item>
+        <item>Monoceros</item>
+        <item>Norma</item>
+        <item>Abnorma</item>
+        <item>Morel</item>
+        <item>Redlands</item>
+        <item>Cupcake</item>
+        <item>Donut</item>
+        <item>Eclair</item>
+        <item>Froyo</item>
+        <item>Gingerbread</item>
+        <item>Honeycomb</item>
+        <item>Icecreamsandwich</item>
+        <item>Jellybean</item>
+        <item>Kitkat</item>
+        <item>Lollipop</item>
+        <item>Marshmallow</item>
+        <item>Nougat</item>
+        <item>Oreo</item>
+        <item>Pie</item>
+        <item>Quincetart</item>
+        <item>Redvelvetcake</item>
+        <item>Snowcone</item>
+        <item>Tiramisu</item>
+        <item>Upsidedowncake</item>
+        <item>Vanillaicecream</item>
+        <item>Android</item>
+        <item>Binder</item>
+        <item>Campanile</item>
+        <item>Dread</item>
+    </string-array>
+
+    <!-- prob: 5% -->
+    <string-array name="constellations_rare" translatable="false">
+        <item>Jandycane</item>
+        <item>Zombiegingerbread</item>
+        <item>Astro</item>
+        <item>Bender</item>
+        <item>Flan</item>
+        <item>Untitled-1</item>
+        <item>Expedit</item>
+        <item>Petit Four</item>
+        <item>Worcester</item>
+        <item>Xylophone</item>
+        <item>Yellowpeep</item>
+        <item>Zebraball</item>
+        <item>Hutton</item>
+        <item>Klang</item>
+        <item>Frogblast</item>
+        <item>Exo</item>
+        <item>Keylimepie</item>
+        <item>Nat</item>
+        <item>Nrp</item>
+    </string-array>
+
+    <!-- prob: 75% -->
+    <string-array name="star_suffixes" translatable="false">
+        <item>Alpha</item>
+        <item>Beta</item>
+        <item>Gamma</item>
+        <item>Delta</item>
+        <item>Epsilon</item>
+        <item>Zeta</item>
+        <item>Eta</item>
+        <item>Theta</item>
+        <item>Iota</item>
+        <item>Kappa</item>
+        <item>Lambda</item>
+        <item>Mu</item>
+        <item>Nu</item>
+        <item>Xi</item>
+        <item>Omicron</item>
+        <item>Pi</item>
+        <item>Rho</item>
+        <item>Sigma</item>
+        <item>Tau</item>
+        <item>Upsilon</item>
+        <item>Phi</item>
+        <item>Chi</item>
+        <item>Psi</item>
+        <item>Omega</item>
+
+        <item>Prime</item>
+        <item>Secundo</item>
+        <item>Major</item>
+        <item>Minor</item>
+        <item>Diminished</item>
+        <item>Augmented</item>
+        <item>Ultima</item>
+        <item>Penultima</item>
+        <item>Mid</item>
+
+        <item>Proxima</item>
+        <item>Novis</item>
+
+        <item>Plus</item>
+    </string-array>
+
+    <!-- prob: 5% -->
+    <!-- more than one can be appended, with very low prob -->
+    <string-array name="star_suffixes_rare" translatable="false">
+        <item>Serif</item>
+        <item>Sans</item>
+        <item>Oblique</item>
+        <item>Grotesque</item>
+        <item>Handtooled</item>
+        <item>III “Trey”</item>
+        <item>Alfredo</item>
+        <item>2.0</item>
+        <item>(Final)</item>
+        <item>(Final (Final))</item>
+        <item>(Draft)</item>
+        <item>Con Carne</item>
+    </string-array>
+
+    <string-array name="planet_types" translatable="false">
+        <item>planet</item>
+        <item>planetoid</item>
+        <item>moon</item>
+        <item>moonlet</item>
+        <item>centaur</item>
+        <item>asteroid</item>
+        <item>space garbage</item>
+        <item>detritus</item>
+        <item>satellite</item>
+        <item>core</item>
+        <item>giant</item>
+        <item>body</item>
+        <item>slab</item>
+        <item>rock</item>
+        <item>husk</item>
+        <item>planemo</item>
+        <item>object</item>
+        <item>planetesimal</item>
+        <item>exoplanet</item>
+        <item>ploonet</item>
+    </string-array>
+
+    <string-array name="atmo_descriptors" translatable="false">
+        <item>toxic</item>
+        <item>breathable</item>
+        <item>radioactive</item>
+        <item>clear</item>
+        <item>calm</item>
+        <item>peaceful</item>
+        <item>vacuum</item>
+        <item>stormy</item>
+        <item>freezing</item>
+        <item>burning</item>
+        <item>humid</item>
+        <item>tropical</item>
+        <item>cloudy</item>
+        <item>obscured</item>
+        <item>damp</item>
+        <item>dank</item>
+        <item>clammy</item>
+        <item>frozen</item>
+        <item>contaminated</item>
+        <item>temperate</item>
+        <item>moist</item>
+        <item>minty</item>
+        <item>relaxed</item>
+        <item>skunky</item>
+        <item>breezy</item>
+        <item>soup </item>
+    </string-array>
+
+</resources>

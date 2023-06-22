@@ -171,25 +171,30 @@ public final class MediaProjection {
      * @param handler  The {@link android.os.Handler} on which the callback should be invoked, or
      *                 null if the callback should be invoked on the calling thread's main
      *                 {@link android.os.Looper}.
-     * @throws IllegalStateException In the following scenarios, if the target SDK is {@link
-     *                               android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up:
+     * @throws IllegalStateException If the target SDK is {@link
+     *                               android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up, and
+     *                               if no {@link Callback} is registered.
+     * @throws SecurityException In any of the following scenarios:
      *                               <ol>
-     *                                 <li>If no {@link Callback} is registered.</li>
-     *                                 <li>If {@link MediaProjectionManager#getMediaProjection}
+     *                                 <li>If attempting to create a new virtual display
+     *                                 associated with this MediaProjection instance after it has
+     *                                 been stopped by invoking {@link #stop()}.
+     *                                 <li>If the target SDK is {@link
+     *                                 android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up,
+     *                                 and if this instance has already taken a recording through
+     *                                 {@code #createVirtualDisplay}, but {@link #stop()} wasn't
+     *                                 invoked to end the recording.
+     *                                 <li>If the target SDK is {@link
+     *                                 android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up,
+     *                                 and if {@link MediaProjectionManager#getMediaProjection}
      *                                 was invoked more than once to get this
      *                                 {@code MediaProjection} instance.
-     *                                 <li>If this instance has already taken a recording through
-     *                                 {@code #createVirtualDisplay}.
      *                               </ol>
-     *                               However, if the target SDK is less than
-     *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}, no
-     *                               exception is thrown. In case 1, recording begins even without
-     *                               the callback. In case 2 & 3, recording doesn't begin
-     *                               until the user re-grants consent in the dialog.
-     * @throws SecurityException If attempting to create a new virtual display associated with this
-     *                           MediaProjection instance after it has been stopped by invoking
-     *                           {@link #stop()}.
-     *
+     *                               In cases 2 & 3, no exception is thrown if the target SDK is
+     *                               less than
+     *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}.
+     *                               Instead, recording doesn't begin until the user re-grants
+     *                               consent in the dialog.
      * @see VirtualDisplay
      * @see VirtualDisplay.Callback
      */

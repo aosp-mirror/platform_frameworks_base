@@ -59,7 +59,7 @@
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"خروج از «حالت یک‌دستی»"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"تنظیمات برای حبابک‌های <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"سرریز"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"افزودن برگشت به پشته"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"افزودن برگشتن به پشته"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> از <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> از <xliff:g id="APP_NAME">%2$s</xliff:g> و <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> مورد بیشتر"</string>
     <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"انتقال به بالا سمت راست"</string>

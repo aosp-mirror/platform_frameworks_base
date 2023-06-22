@@ -683,11 +683,11 @@
     <string name="face_acquired_too_close" msgid="4453646176196302462">"צריך להרחיק את הטלפון"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"צריך לקרב את הטלפון"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"צריך להגביה את הטלפון"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להוריד את הטלפון"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להנמיך את הטלפון."</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"צריך להזיז את הטלפון שמאלה"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"צריך להזיז את הטלפון ימינה"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"כדי לראות את הפנים שלך יש להחזיק את הטלפון בגובה העיניים."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"לא רואים את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
@@ -703,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"לא ניתן ליצור את התבנית לזיהוי הפנים. יש לנסות שוב."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"זוהו משקפיים כהים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה כיסוי על הפנים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה שהפנים מכוסות. הפנים שלך חייבות להיות גלויות לגמרי."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
@@ -1366,7 +1366,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏MIDI באמצעות USB מופעל"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"המכשיר מחובר כמצלמת אינטרנט"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏אביזר USB מחובר"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"יש להקיש להצגת אפשרויות נוספות."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"לאפשרויות נוספות, יש להקיש כאן."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"המכשיר המחובר בטעינה. יש להקיש לאפשרויות נוספות."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"המכשיר זיהה התקן אודיו אנלוגי"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ההתקן שחיברת לא תואם לטלפון הזה. יש להקיש לקבלת מידע נוסף."</string>

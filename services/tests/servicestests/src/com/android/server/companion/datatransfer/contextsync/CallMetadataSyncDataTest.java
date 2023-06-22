@@ -35,6 +35,7 @@ public class CallMetadataSyncDataTest {
         final byte[] appIcon = "appIcon".getBytes();
         final String appName = "appName";
         final String appIdentifier = "com.google.test";
+        final String extendedId = "com.google.test/.InCallService";
         final int status = 1;
         final int direction = android.companion.Telecom.Call.OUTGOING;
         final int control1 = 2;
@@ -43,7 +44,7 @@ public class CallMetadataSyncDataTest {
         call.setCallerId(callerId);
         call.setAppIcon(appIcon);
         final CallMetadataSyncData.CallFacilitator callFacilitator =
-                new CallMetadataSyncData.CallFacilitator(appName, appIdentifier);
+                new CallMetadataSyncData.CallFacilitator(appName, appIdentifier, extendedId);
         call.setFacilitator(callFacilitator);
         call.setStatus(status);
         call.setDirection(direction);
@@ -59,6 +60,8 @@ public class CallMetadataSyncDataTest {
         assertThat(reconstructedCall.getAppIcon()).isEqualTo(appIcon);
         assertThat(reconstructedCall.getFacilitator().getName()).isEqualTo(appName);
         assertThat(reconstructedCall.getFacilitator().getIdentifier()).isEqualTo(appIdentifier);
+        assertThat(reconstructedCall.getFacilitator().getExtendedIdentifier())
+                .isEqualTo(extendedId);
         assertThat(reconstructedCall.getStatus()).isEqualTo(status);
         assertThat(reconstructedCall.getDirection()).isEqualTo(direction);
         assertThat(reconstructedCall.getControls()).containsExactly(control1, control2);
