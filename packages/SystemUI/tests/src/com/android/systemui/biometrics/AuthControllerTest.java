@@ -492,6 +492,50 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnAuthenticationFailedInvoked_whenFaceAuthRejected() throws RemoteException {
+        final int modality = BiometricAuthenticator.TYPE_FACE;
+        final int userId = 0;
+
+        enrollFingerprintAndFace(userId);
+
+        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+
+        mAuthController.onBiometricError(modality,
+                BiometricConstants.BIOMETRIC_PAUSED_REJECTED,
+                0 /* vendorCode */);
+
+        ArgumentCaptor<Integer> modalityCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mDialog1).onAuthenticationFailed(modalityCaptor.capture(), messageCaptor.capture());
+
+        assertEquals(modalityCaptor.getValue().intValue(), modality);
+        assertEquals(messageCaptor.getValue(),
+                mContext.getString(R.string.biometric_face_not_recognized));
+    }
+
+    @Test
+    public void testOnAuthenticationFailedInvoked_whenFingerprintAuthRejected() {
+        final int modality = BiometricAuthenticator.TYPE_FINGERPRINT;
+        final int userId = 0;
+
+        enrollFingerprintAndFace(userId);
+
+        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+
+        mAuthController.onBiometricError(modality,
+                BiometricConstants.BIOMETRIC_PAUSED_REJECTED,
+                0 /* vendorCode */);
+
+        ArgumentCaptor<Integer> modalityCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mDialog1).onAuthenticationFailed(modalityCaptor.capture(), messageCaptor.capture());
+
+        assertEquals(modalityCaptor.getValue().intValue(), modality);
+        assertEquals(messageCaptor.getValue(),
+                mContext.getString(R.string.fingerprint_error_not_match));
+    }
+
+    @Test
     public void testOnAuthenticationFailedInvoked_whenBiometricTimedOut() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
         final int modality = BiometricAuthenticator.TYPE_FACE;
@@ -1015,6 +1059,31 @@ public class AuthControllerTest extends SysuiTestCase {
         Random random = new Random();
         random.nextBytes(HAT);
         return HAT;
+    }
+
+    private void enrollFingerprintAndFace(final int userId) {
+
+        // Enroll fingerprint
+        verify(mFingerprintManager).registerBiometricStateListener(
+                mBiometricStateCaptor.capture());
+        assertFalse(mAuthController.isFingerprintEnrolled(userId));
+
+        mBiometricStateCaptor.getValue().onEnrollmentsChanged(userId,
+                1 /* sensorId */, true /* hasEnrollments */);
+        waitForIdleSync();
+
+        assertTrue(mAuthController.isFingerprintEnrolled(userId));
+
+        // Enroll face
+        verify(mFaceManager).registerBiometricStateListener(
+                mBiometricStateCaptor.capture());
+        assertFalse(mAuthController.isFaceAuthEnrolled(userId));
+
+        mBiometricStateCaptor.getValue().onEnrollmentsChanged(userId,
+                2 /* sensorId */, true /* hasEnrollments */);
+        waitForIdleSync();
+
+        assertTrue(mAuthController.isFaceAuthEnrolled(userId));
     }
 
     private final class TestableAuthController extends AuthController {
