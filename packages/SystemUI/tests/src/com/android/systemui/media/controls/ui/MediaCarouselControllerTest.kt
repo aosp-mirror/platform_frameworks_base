@@ -19,7 +19,9 @@ package com.android.systemui.media.controls.ui
 import android.app.PendingIntent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.database.ContentObserver
 import android.os.LocaleList
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
@@ -56,6 +58,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.Locale
 import javax.inject.Provider
@@ -113,6 +116,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaFlags: MediaFlags
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    @Mock lateinit var globalSettings: GlobalSettings
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
@@ -120,6 +124,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
     @Captor lateinit var keyguardCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
     @Captor lateinit var hostStateCallback: ArgumentCaptor<MediaHostStatesManager.Callback>
+    @Captor lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -148,6 +153,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 mediaFlags,
                 keyguardUpdateMonitor,
                 KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
+                globalSettings
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
@@ -160,6 +166,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
+        verify(globalSettings)
+            .registerContentObserver(
+                eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
+                settingsObserverCaptor.capture()
+            )
     }
 
     @Test
@@ -871,6 +882,15 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         // Then the carousel visibility is updated
         assertTrue(stateUpdated)
+    }
+
+    @Test
+    fun testAnimationScaleChanged_mediaControlPanelsNotified() {
+        MediaPlayerData.addMediaPlayer("key", DATA, panel, clock, isSsReactivated = false)
+
+        globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
+        settingsObserverCaptor.value!!.onChange(false)
+        verify(panel).updateAnimatorDurationScale()
     }
 
     /**
