@@ -558,6 +558,6 @@ public class ResolveInfo implements Parcelable {
         }
 
         private final Collator   mCollator = Collator.getInstance();
-        private PackageManager   mPM;
+        private final PackageManager mPM;
     }
 }
