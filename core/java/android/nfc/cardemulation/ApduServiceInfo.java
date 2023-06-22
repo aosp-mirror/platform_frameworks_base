@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+/**********************************************************************
+ * This file is not a part of the NFC mainline module                 *
+ * *******************************************************************/
+
 package android.nfc.cardemulation;
 
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -28,7 +34,9 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.nfc.Flags;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -38,7 +46,6 @@ import android.util.proto.ProtoOutputStream;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -47,82 +54,82 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Class holding APDU service info.
+ *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
 public final class ApduServiceInfo implements Parcelable {
-    static final String TAG = "ApduServiceInfo";
+    private static final String TAG = "ApduServiceInfo";
 
     /**
      * The service that implements this
      */
-    @UnsupportedAppUsage
-    final ResolveInfo mService;
+    private final ResolveInfo mService;
 
     /**
      * Description of the service
      */
-    final String mDescription;
+    private final String mDescription;
 
     /**
      * Whether this service represents AIDs running on the host CPU
      */
-    final boolean mOnHost;
+    private final boolean mOnHost;
 
     /**
      * Offhost reader name.
      * eg: SIM, eSE etc
      */
-    String mOffHostName;
+    private String mOffHostName;
 
     /**
      * Offhost reader name from manifest file.
-     * Used for unsetOffHostSecureElement()
+     * Used for resetOffHostSecureElement()
      */
-    final String mStaticOffHostName;
+    private final String mStaticOffHostName;
 
     /**
      * Mapping from category to static AID group
      */
-    @UnsupportedAppUsage
-    final HashMap<String, AidGroup> mStaticAidGroups;
+    private final HashMap<String, AidGroup> mStaticAidGroups;
 
     /**
      * Mapping from category to dynamic AID group
      */
-    @UnsupportedAppUsage
-    final HashMap<String, AidGroup> mDynamicAidGroups;
+    private final HashMap<String, AidGroup> mDynamicAidGroups;
 
     /**
      * Whether this service should only be started when the device is unlocked.
      */
-    final boolean mRequiresDeviceUnlock;
+    private final boolean mRequiresDeviceUnlock;
 
     /**
      * Whether this service should only be started when the device is screen on.
      */
-    final boolean mRequiresDeviceScreenOn;
+    private final boolean mRequiresDeviceScreenOn;
 
     /**
      * The id of the service banner specified in XML.
      */
-    final int mBannerResourceId;
+    private final int mBannerResourceId;
 
     /**
      * The uid of the package the service belongs to
      */
-    final int mUid;
+    private final int mUid;
 
     /**
      * Settings Activity for this service
      */
-    final String mSettingsActivityName;
+    private final String mSettingsActivityName;
 
     /**
      * @hide
      */
-    @UnsupportedAppUsage
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
+            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost) {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
@@ -134,7 +141,7 @@ public final class ApduServiceInfo implements Parcelable {
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
+            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost) {
         this.mService = info;
@@ -147,19 +154,28 @@ public final class ApduServiceInfo implements Parcelable {
         this.mRequiresDeviceUnlock = requiresUnlock;
         this.mRequiresDeviceScreenOn = requiresScreenOn;
         for (AidGroup aidGroup : staticAidGroups) {
-            this.mStaticAidGroups.put(aidGroup.category, aidGroup);
+            this.mStaticAidGroups.put(aidGroup.getCategory(), aidGroup);
         }
         for (AidGroup aidGroup : dynamicAidGroups) {
-            this.mDynamicAidGroups.put(aidGroup.category, aidGroup);
+            this.mDynamicAidGroups.put(aidGroup.getCategory(), aidGroup);
         }
         this.mBannerResourceId = bannerResource;
         this.mUid = uid;
         this.mSettingsActivityName = settingsActivityName;
     }
 
-    @UnsupportedAppUsage
-    public ApduServiceInfo(PackageManager pm, ResolveInfo info, boolean onHost) throws
-            XmlPullParserException, IOException {
+    /**
+     * Creates a new ApduServiceInfo object.
+     *
+     * @param pm packageManager instance
+     * @param info app component info
+     * @param onHost whether service is on host or not (secure element)
+     * @throws XmlPullParserException If an error occurs parsing the element.
+     * @throws IOException If an error occurs reading the element.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public ApduServiceInfo(@NonNull PackageManager pm, @NonNull ResolveInfo info, boolean onHost)
+            throws XmlPullParserException, IOException {
         ServiceInfo si = info.serviceInfo;
         XmlResourceParser parser = null;
         try {
@@ -277,9 +293,9 @@ public final class ApduServiceInfo implements Parcelable {
                     groupAttrs.recycle();
                 } else if (eventType == XmlPullParser.END_TAG && "aid-group".equals(tagName) &&
                         currentGroup != null) {
-                    if (currentGroup.aids.size() > 0) {
-                        if (!mStaticAidGroups.containsKey(currentGroup.category)) {
-                            mStaticAidGroups.put(currentGroup.category, currentGroup);
+                    if (currentGroup.getAids().size() > 0) {
+                        if (!mStaticAidGroups.containsKey(currentGroup.getCategory())) {
+                            mStaticAidGroups.put(currentGroup.getCategory(), currentGroup);
                         }
                     } else {
                         Log.e(TAG, "Not adding <aid-group> with empty or invalid AIDs");
@@ -291,8 +307,8 @@ public final class ApduServiceInfo implements Parcelable {
                             com.android.internal.R.styleable.AidFilter);
                     String aid = a.getString(com.android.internal.R.styleable.AidFilter_name).
                             toUpperCase();
-                    if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
-                        currentGroup.aids.add(aid);
+                    if (CardEmulation.isValidAid(aid) && !currentGroup.getAids().contains(aid)) {
+                        currentGroup.getAids().add(aid);
                     } else {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
@@ -305,8 +321,8 @@ public final class ApduServiceInfo implements Parcelable {
                             toUpperCase();
                     // Add wildcard char to indicate prefix
                     aid = aid.concat("*");
-                    if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
-                        currentGroup.aids.add(aid);
+                    if (CardEmulation.isValidAid(aid) && !currentGroup.getAids().contains(aid)) {
+                        currentGroup.getAids().add(aid);
                     } else {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
@@ -319,8 +335,8 @@ public final class ApduServiceInfo implements Parcelable {
                             toUpperCase();
                     // Add wildcard char to indicate suffix
                     aid = aid.concat("#");
-                    if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
-                        currentGroup.aids.add(aid);
+                    if (CardEmulation.isValidAid(aid) && !currentGroup.getAids().contains(aid)) {
+                        currentGroup.getAids().add(aid);
                     } else {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
@@ -336,11 +352,25 @@ public final class ApduServiceInfo implements Parcelable {
         mUid = si.applicationInfo.uid;
     }
 
+    /**
+     * Returns the app component corresponding to this APDU service.
+     *
+     * @return app component for this service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public ComponentName getComponent() {
         return new ComponentName(mService.serviceInfo.packageName,
                 mService.serviceInfo.name);
     }
 
+    /**
+     * Returns the offhost secure element name (if the service is offhost).
+     *
+     * @return offhost secure element name for offhost services
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @Nullable
     public String getOffHostSecureElement() {
         return mOffHostName;
     }
@@ -353,18 +383,30 @@ public final class ApduServiceInfo implements Parcelable {
      * for that category.
      * @return List of AIDs registered by the service
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public List<String> getAids() {
         final ArrayList<String> aids = new ArrayList<String>();
         for (AidGroup group : getAidGroups()) {
-            aids.addAll(group.aids);
+            aids.addAll(group.getAids());
         }
         return aids;
     }
 
+    /**
+     * Returns a consolidated list of AIDs with prefixes from the AID groups
+     * registered by this service. Note that if a service has both
+     * a static (manifest-based) AID group for a category and a dynamic
+     * AID group, only the dynamically registered AIDs will be returned
+     * for that category.
+     * @return List of prefix AIDs registered by the service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public List<String> getPrefixAids() {
         final ArrayList<String> prefixAids = new ArrayList<String>();
         for (AidGroup group : getAidGroups()) {
-            for (String aid : group.aids) {
+            for (String aid : group.getAids()) {
                 if (aid.endsWith("*")) {
                     prefixAids.add(aid);
                 }
@@ -373,10 +415,20 @@ public final class ApduServiceInfo implements Parcelable {
         return prefixAids;
     }
 
+    /**
+     * Returns a consolidated list of AIDs with subsets from the AID groups
+     * registered by this service. Note that if a service has both
+     * a static (manifest-based) AID group for a category and a dynamic
+     * AID group, only the dynamically registered AIDs will be returned
+     * for that category.
+     * @return List of prefix AIDs registered by the service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public List<String> getSubsetAids() {
         final ArrayList<String> subsetAids = new ArrayList<String>();
         for (AidGroup group : getAidGroups()) {
-            for (String aid : group.aids) {
+            for (String aid : group.getAids()) {
                 if (aid.endsWith("#")) {
                     subsetAids.add(aid);
                 }
@@ -384,14 +436,28 @@ public final class ApduServiceInfo implements Parcelable {
         }
         return subsetAids;
     }
+
     /**
      * Returns the registered AID group for this category.
+     *
+     * @param category category name
+     * @return {@link AidGroup} instance for the provided category
      */
-    public AidGroup getDynamicAidGroupForCategory(String category) {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public AidGroup getDynamicAidGroupForCategory(@NonNull String category) {
         return mDynamicAidGroups.get(category);
     }
 
-    public boolean removeDynamicAidGroupForCategory(String category) {
+    /**
+     * Removes the registered AID group for this category.
+     *
+     * @param category category name
+     * @return {@code true} if an AID group existed
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public boolean removeDynamicAidGroupForCategory(@NonNull String category) {
         return (mDynamicAidGroups.remove(category) != null);
     }
 
@@ -403,7 +469,9 @@ public final class ApduServiceInfo implements Parcelable {
      * for that category.
      * @return List of AIDs registered by the service
      */
-    public ArrayList<AidGroup> getAidGroups() {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public List<AidGroup> getAidGroups() {
         final ArrayList<AidGroup> groups = new ArrayList<AidGroup>();
         for (Map.Entry<String, AidGroup> entry : mDynamicAidGroups.entrySet()) {
             groups.add(entry.getValue());
@@ -421,49 +489,83 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * Returns the category to which this service has attributed the AID that is passed in,
      * or null if we don't know this AID.
+     * @param aid AID to lookup for
+     * @return category name corresponding to this AID
      */
-    public String getCategoryForAid(String aid) {
-        ArrayList<AidGroup> groups = getAidGroups();
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public String getCategoryForAid(@NonNull String aid) {
+        List<AidGroup> groups = getAidGroups();
         for (AidGroup group : groups) {
-            if (group.aids.contains(aid.toUpperCase())) {
-                return group.category;
+            if (group.getAids().contains(aid.toUpperCase())) {
+                return group.getCategory();
             }
         }
         return null;
     }
 
-    public boolean hasCategory(String category) {
+    /**
+     * Returns whether there is any AID group for this category.
+     * @param category category name
+     * @return {@code true} if an AID group exists
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public boolean hasCategory(@NonNull String category) {
         return (mStaticAidGroups.containsKey(category) || mDynamicAidGroups.containsKey(category));
     }
 
-    @UnsupportedAppUsage
+    /**
+     * Returns whether the service is on host or not.
+     * @return true if the service is on host (not secure element)
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public boolean isOnHost() {
         return mOnHost;
     }
 
-    @UnsupportedAppUsage
+    /**
+     * Returns whether the service requires device unlock.
+     * @return whether the service requires device unlock
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public boolean requiresUnlock() {
         return mRequiresDeviceUnlock;
     }
 
     /**
      * Returns whether this service should only be started when the device is screen on.
+     * @return whether the service requires screen on
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public boolean requiresScreenOn() {
         return mRequiresDeviceScreenOn;
     }
 
-    @UnsupportedAppUsage
+    /**
+     * Returns description of service.
+     * @return user readable description of service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getDescription() {
         return mDescription;
     }
 
-    @UnsupportedAppUsage
+    /**
+     * Returns uid of service.
+     * @return uid of the service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public int getUid() {
         return mUid;
     }
 
-    public void setOrReplaceDynamicAidGroup(AidGroup aidGroup) {
+    /**
+     * Add or replace an AID group to this service.
+     * @param aidGroup instance of aid group to set or replace
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void setDynamicAidGroup(@NonNull AidGroup aidGroup) {
         mDynamicAidGroups.put(aidGroup.getCategory(), aidGroup);
     }
 
@@ -476,7 +578,8 @@ public final class ApduServiceInfo implements Parcelable {
      *                  TS26_NFC_REQ_070: For embedded SE, Secure Element Name SHALL be eSE[number]
      *                                    (e.g. eSE/eSE1, eSE2, etc.).
      */
-    public void setOffHostSecureElement(String offHost) {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void setOffHostSecureElement(@NonNull String offHost) {
         mOffHostName = offHost;
     }
 
@@ -484,15 +587,30 @@ public final class ApduServiceInfo implements Parcelable {
      * Resets the off host Secure Element to statically defined
      * by the service in the manifest file.
      */
-    public void unsetOffHostSecureElement() {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void resetOffHostSecureElement() {
         mOffHostName = mStaticOffHostName;
     }
 
-    public CharSequence loadLabel(PackageManager pm) {
+    /**
+     * Load label for this service.
+     * @param pm packagemanager instance
+     * @return label name corresponding to service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public CharSequence loadLabel(@NonNull PackageManager pm) {
         return mService.loadLabel(pm);
     }
 
-    public CharSequence loadAppLabel(PackageManager pm) {
+    /**
+     * Load application label for this service.
+     * @param pm packagemanager instance
+     * @return app label name corresponding to service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public CharSequence loadAppLabel(@NonNull PackageManager pm) {
         try {
             return pm.getApplicationLabel(pm.getApplicationInfo(
                     mService.resolvePackageName, PackageManager.GET_META_DATA));
@@ -501,12 +619,25 @@ public final class ApduServiceInfo implements Parcelable {
         }
     }
 
-    public Drawable loadIcon(PackageManager pm) {
+    /**
+     * Load application icon for this service.
+     * @param pm packagemanager instance
+     * @return app icon corresponding to service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public Drawable loadIcon(@NonNull PackageManager pm) {
         return mService.loadIcon(pm);
     }
 
-    @UnsupportedAppUsage
-    public Drawable loadBanner(PackageManager pm) {
+    /**
+     * Load application banner for this service.
+     * @param pm packagemanager instance
+     * @return app banner corresponding to service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
+    public Drawable loadBanner(@NonNull PackageManager pm) {
         Resources res;
         try {
             res = pm.getResourcesForApplication(mService.serviceInfo.packageName);
@@ -521,7 +652,12 @@ public final class ApduServiceInfo implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    /**
+     * Load activity name for this service.
+     * @return activity name for this service
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @NonNull
     public String getSettingsActivityName() { return mSettingsActivityName; }
 
     @Override
@@ -556,14 +692,15 @@ public final class ApduServiceInfo implements Parcelable {
         return getComponent().hashCode();
     }
 
-
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @Override
     public int describeContents() {
         return 0;
     }
 
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         mService.writeToParcel(dest, flags);
         dest.writeString(mDescription);
         dest.writeInt(mOnHost ? 1 : 0);
@@ -584,8 +721,8 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeString(mSettingsActivityName);
     };
 
-    @UnsupportedAppUsage
-    public static final @android.annotation.NonNull Parcelable.Creator<ApduServiceInfo> CREATOR =
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public static final @NonNull Parcelable.Creator<ApduServiceInfo> CREATOR =
             new Parcelable.Creator<ApduServiceInfo>() {
         @Override
         public ApduServiceInfo createFromParcel(Parcel source) {
@@ -620,7 +757,15 @@ public final class ApduServiceInfo implements Parcelable {
         }
     };
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    /**
+     * Dump contents for debugging.
+     * @param fd parcelfiledescriptor instance
+     * @param pw printwriter instance
+     * @param args args for dumping
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void dump(@NonNull ParcelFileDescriptor fd, @NonNull PrintWriter pw,
+                     @NonNull String[] args) {
         pw.println("    " + getComponent()
                 + " (Description: " + getDescription() + ")"
                 + " (UID: " + getUid() + ")");
@@ -633,15 +778,15 @@ public final class ApduServiceInfo implements Parcelable {
         }
         pw.println("    Static AID groups:");
         for (AidGroup group : mStaticAidGroups.values()) {
-            pw.println("        Category: " + group.category);
-            for (String aid : group.aids) {
+            pw.println("        Category: " + group.getCategory());
+            for (String aid : group.getAids()) {
                 pw.println("            AID: " + aid);
             }
         }
         pw.println("    Dynamic AID groups:");
         for (AidGroup group : mDynamicAidGroups.values()) {
-            pw.println("        Category: " + group.category);
-            for (String aid : group.aids) {
+            pw.println("        Category: " + group.getCategory());
+            for (String aid : group.getAids()) {
                 pw.println("            AID: " + aid);
             }
         }
@@ -651,7 +796,7 @@ public final class ApduServiceInfo implements Parcelable {
     }
 
     /**
-     * Dump debugging info as ApduServiceInfoProto
+     * Dump debugging info as ApduServiceInfoProto.
      *
      * If the output belongs to a sub message, the caller is responsible for wrapping this function
      * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
@@ -659,7 +804,8 @@ public final class ApduServiceInfo implements Parcelable {
      *
      * @param proto the ProtoOutputStream to write to
      */
-    public void dumpDebug(ProtoOutputStream proto) {
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void dumpDebug(@NonNull ProtoOutputStream proto) {
         Utils.dumpDebugComponentName(getComponent(), proto, ApduServiceInfoProto.COMPONENT_NAME);
         proto.write(ApduServiceInfoProto.DESCRIPTION, getDescription());
         proto.write(ApduServiceInfoProto.ON_HOST, mOnHost);

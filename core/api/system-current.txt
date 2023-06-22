@@ -9140,6 +9140,73 @@ package android.nfc {
 
 }
 
+package android.nfc.cardemulation {
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public final class AidGroup implements android.os.Parcelable {
+    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public AidGroup(@NonNull java.util.List<java.lang.String>, @Nullable String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public static android.nfc.cardemulation.AidGroup createFromXml(@NonNull org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int describeContents();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dump(@NonNull android.util.proto.ProtoOutputStream);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getAids();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getCategory();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeAsXml(@NonNull org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.AidGroup> CREATOR;
+  }
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public final class ApduServiceInfo implements android.os.Parcelable {
+    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public ApduServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo, boolean) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int describeContents();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<android.nfc.cardemulation.AidGroup> getAidGroups();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getAids();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getCategoryForAid(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.content.ComponentName getComponent();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getDescription();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.nfc.cardemulation.AidGroup getDynamicAidGroupForCategory(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @Nullable public String getOffHostSecureElement();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getPrefixAids();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getSettingsActivityName();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public java.util.List<java.lang.String> getSubsetAids();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int getUid();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean hasCategory(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean isOnHost();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public CharSequence loadAppLabel(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.graphics.drawable.Drawable loadBanner(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public boolean removeDynamicAidGroupForCategory(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean requiresScreenOn();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public boolean requiresUnlock();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void resetOffHostSecureElement();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setOffHostSecureElement(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
+  }
+
+  @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public final class NfcFServiceInfo implements android.os.Parcelable {
+    ctor @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public NfcFServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int describeContents();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.content.ComponentName getComponent();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getDescription();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getNfcid2();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getSystemCode();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public String getT3tPmm();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public int getUid();
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setDynamicNfcid2(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void setDynamicSystemCode(@NonNull String);
+    method @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE) @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.NfcFServiceInfo> CREATOR;
+  }
+
+}
+
 package android.os {
 
   public class BatteryManager {

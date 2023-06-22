@@ -225,3 +225,16 @@ SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplora
     SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
     SAM-compatible parameters (such as parameter 2, "filePathCallback", in android.webkit.WebChromeClient.onShowFileChooser) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
+UnflaggedApi: android.nfc.cardemulation.AidGroup#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.AidGroup.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.nfc.cardemulation.AidGroup#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.AidGroup.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.nfc.cardemulation.ApduServiceInfo#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.ApduServiceInfo.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.nfc.cardemulation.ApduServiceInfo#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.ApduServiceInfo.PARCELABLE_WRITE_RETURN_VALUE
+UnflaggedApi: android.nfc.cardemulation.NfcFServiceInfo#CONTENTS_FILE_DESCRIPTOR:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.NfcFServiceInfo.CONTENTS_FILE_DESCRIPTOR
+UnflaggedApi: android.nfc.cardemulation.NfcFServiceInfo#PARCELABLE_WRITE_RETURN_VALUE:
+    New API must be flagged with @FlaggedApi: field android.nfc.cardemulation.NfcFServiceInfo.PARCELABLE_WRITE_RETURN_VALUE
