@@ -34,7 +34,6 @@ import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
 import com.android.internal.jank.InteractionJankMonitor
-import java.lang.IllegalArgumentException
 import java.util.LinkedList
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -240,7 +239,7 @@ constructor(
         val ghostView = this.ghostView ?: return
         val backgroundView = this.backgroundView!!
 
-        if (!state.visible) {
+        if (!state.visible || !ghostedView.isAttachedToWindow) {
             if (ghostView.visibility == View.VISIBLE) {
                 // Making the ghost view invisible will make the ghosted view visible, so order is
                 // important here.
