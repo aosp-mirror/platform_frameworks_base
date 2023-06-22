@@ -1822,6 +1822,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
             // Set after notifyExpandingStarted, as notifyExpandingStarted resets the closing state.
             setClosing(true);
+            mUpdateFlingOnLayout = false;
             if (delayed) {
                 mNextCollapseSpeedUpFactor = speedUpFactor;
                 this.mView.postDelayed(mFlingCollapseRunnable, 120);
