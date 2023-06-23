@@ -1123,18 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Իմանալ ավելին"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Իմացեք ավելին <xliff:g id="URL">%s</xliff:g> էջում"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Բացել <xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet հավելվածի դյուրանցումն ավելացնելու համար համոզվեք, որ հավելվածը տեղադրված է"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet հավելվածի դյուրանցումն ավելացնելու համար համոզվեք, որ առնվազն մեկ քարտ ավելացված է"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR կոդերի սկաների դյուրանցումն ավելացնելու համար համոզվեք, որ տեսախցիկի հավելվածը տեղադրված է"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home հավելվածի դյուրանցումն ավելացնելու համար համոզվեք, որ հավելվածը տեղադրված է"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Հասանելի է առնվազն մեկ սարք"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Ընտրեք նշումների կանխադրված հավելված՝ նշումների ստեղծման դյուրանցումն օգտագործելու համար"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ընտրել հավելված"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Հպեք դյուրանցմանը և պահեք"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Չեղարկել"</string>
