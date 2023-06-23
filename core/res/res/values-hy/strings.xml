@@ -1257,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը ավելացնելու համար թեթևակի հպեք կոճակին։"</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Ավարտեք կարգավորումը՝ անջատելով էկրանը"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Անջատեք էկրանը և ավարտեք"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Անջատել"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Շարունակե՞լ մատնահետքի սկանավորումը"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը սկանավորելու համար թեթևակի հպեք կոճակին։"</string>
