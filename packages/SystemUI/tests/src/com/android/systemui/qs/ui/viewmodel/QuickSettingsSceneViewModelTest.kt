@@ -72,7 +72,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
@@ -87,7 +87,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()

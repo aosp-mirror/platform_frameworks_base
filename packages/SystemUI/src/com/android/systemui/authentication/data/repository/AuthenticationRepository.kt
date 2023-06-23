@@ -19,17 +19,22 @@ package com.android.systemui.authentication.data.repository
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.user.data.repository.UserRepository
 import dagger.Binds
 import dagger.Module
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
 import java.util.function.Function
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** Defines interface for classes that can access authentication-related application state. */
 interface AuthenticationRepository {
@@ -64,9 +69,6 @@ interface AuthenticationRepository {
      */
     suspend fun getAuthenticationMethod(): AuthenticationMethodModel
 
-    /** See [isUnlocked]. */
-    fun setUnlocked(isUnlocked: Boolean)
-
     /** See [isBypassEnabled]. */
     fun setBypassEnabled(isBypassEnabled: Boolean)
 
@@ -77,14 +79,20 @@ interface AuthenticationRepository {
 class AuthenticationRepositoryImpl
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val lockPatternUtils: LockPatternUtils,
+    keyguardRepository: KeyguardRepository,
 ) : AuthenticationRepository {
 
-    private val _isUnlocked = MutableStateFlow(false)
-    override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
+    override val isUnlocked: StateFlow<Boolean> =
+        keyguardRepository.isKeyguardUnlocked.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false,
+        )
 
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled.asStateFlow()
@@ -126,10 +134,6 @@ constructor(
                 null -> error("Invalid security is null!")
             }
         }
-    }
-
-    override fun setUnlocked(isUnlocked: Boolean) {
-        _isUnlocked.value = isUnlocked
     }
 
     override fun setBypassEnabled(isBypassEnabled: Boolean) {
