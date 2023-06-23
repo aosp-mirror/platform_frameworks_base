@@ -875,6 +875,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                 && !hasFlag(entry, Notification.FLAG_ONGOING_EVENT)
                 && !hasFlag(entry, Notification.FLAG_BUBBLE)
                 && !hasFlag(entry, Notification.FLAG_NO_CLEAR)
+                && (entry.getChannel() == null || !entry.getChannel().isImportantConversation())
                 && entry.getDismissState() != DISMISSED;
     }
 
