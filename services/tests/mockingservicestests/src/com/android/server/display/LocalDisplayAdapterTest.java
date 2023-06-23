@@ -1257,6 +1257,17 @@ public class LocalDisplayAdapterTest {
         public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
             return mSurfaceControlProxy;
         }
+
+        // Instead of using DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay)
+        // we should use DisplayDeviceConfig.create(context, isFirstDisplay) for the test to ensure
+        // that real device DisplayDeviceConfig is not loaded for FakeDisplay and we are getting
+        // consistent behaviour. Please also note that context passed to this method, is
+        // mMockContext and values will be loaded from mMockResources.
+        @Override
+        public DisplayDeviceConfig createDisplayDeviceConfig(Context context,
+                long physicalDisplayId, boolean isFirstDisplay) {
+            return DisplayDeviceConfig.create(context, isFirstDisplay);
+        }
     }
 
     private class TestListener implements DisplayAdapter.Listener {
