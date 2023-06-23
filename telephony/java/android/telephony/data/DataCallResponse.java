@@ -36,8 +36,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Description of the response of a setup data call connection request.
@@ -172,63 +174,48 @@ public final class DataCallResponse implements Parcelable {
                             @Nullable List<InetAddress> dnsAddresses,
                             @Nullable List<InetAddress> gatewayAddresses,
                             @Nullable List<InetAddress> pcscfAddresses, int mtu) {
-        mCause = cause;
-        mSuggestedRetryTime = suggestedRetryTime;
-        mId = id;
-        mLinkStatus = linkStatus;
-        mProtocolType = protocolType;
-        mInterfaceName = (interfaceName == null) ? "" : interfaceName;
-        mAddresses = (addresses == null)
-                ? new ArrayList<>() : new ArrayList<>(addresses);
-        mDnsAddresses = (dnsAddresses == null)
-                ? new ArrayList<>() : new ArrayList<>(dnsAddresses);
-        mGatewayAddresses = (gatewayAddresses == null)
-                ? new ArrayList<>() : new ArrayList<>(gatewayAddresses);
-        mPcscfAddresses = (pcscfAddresses == null)
-                ? new ArrayList<>() : new ArrayList<>(pcscfAddresses);
-        mMtu = mMtuV4 = mMtuV6 = mtu;
-        mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
-        mPduSessionId = PDU_SESSION_ID_NOT_SET;
-        mDefaultQos = null;
-        mQosBearerSessions = new ArrayList<>();
-        mSliceInfo = null;
-        mTrafficDescriptors = new ArrayList<>();
+        this(cause, suggestedRetryTime, id,
+                linkStatus, protocolType,
+                interfaceName == null ? "" : interfaceName,
+                addresses == null ? Collections.emptyList() : addresses,
+                dnsAddresses == null ? Collections.emptyList() : dnsAddresses,
+                gatewayAddresses == null ? Collections.emptyList() : gatewayAddresses,
+                pcscfAddresses == null ? Collections.emptyList() : pcscfAddresses,
+                mtu, mtu /* mtuV4 */, mtu /* mtuV6 */,
+                HANDOVER_FAILURE_MODE_LEGACY, PDU_SESSION_ID_NOT_SET,
+                null /* defaultQos */, Collections.emptyList() /* qosBearerSessions */,
+                null /* sliceInfo */,
+                Collections.emptyList() /* trafficDescriptors */);
     }
 
     private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
             @LinkStatus int linkStatus, @ProtocolType int protocolType,
-            @Nullable String interfaceName, @Nullable List<LinkAddress> addresses,
-            @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
-            @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
+            @NonNull String interfaceName, @NonNull List<LinkAddress> addresses,
+            @NonNull List<InetAddress> dnsAddresses, @NonNull List<InetAddress> gatewayAddresses,
+            @NonNull List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
-            @Nullable Qos defaultQos, @Nullable List<QosBearerSession> qosBearerSessions,
+            @Nullable Qos defaultQos, @NonNull List<QosBearerSession> qosBearerSessions,
             @Nullable NetworkSliceInfo sliceInfo,
-            @Nullable List<TrafficDescriptor> trafficDescriptors) {
+            @NonNull List<TrafficDescriptor> trafficDescriptors) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
         mLinkStatus = linkStatus;
         mProtocolType = protocolType;
-        mInterfaceName = (interfaceName == null) ? "" : interfaceName;
-        mAddresses = (addresses == null)
-                ? new ArrayList<>() : new ArrayList<>(addresses);
-        mDnsAddresses = (dnsAddresses == null)
-                ? new ArrayList<>() : new ArrayList<>(dnsAddresses);
-        mGatewayAddresses = (gatewayAddresses == null)
-                ? new ArrayList<>() : new ArrayList<>(gatewayAddresses);
-        mPcscfAddresses = (pcscfAddresses == null)
-                ? new ArrayList<>() : new ArrayList<>(pcscfAddresses);
+        mInterfaceName = interfaceName;
+        mAddresses = new ArrayList<>(addresses);
+        mDnsAddresses = new ArrayList<>(dnsAddresses);
+        mGatewayAddresses = new ArrayList<>(gatewayAddresses);
+        mPcscfAddresses = new ArrayList<>(pcscfAddresses);
         mMtu = mtu;
         mMtuV4 = mtuV4;
         mMtuV6 = mtuV6;
         mHandoverFailureMode = handoverFailureMode;
         mPduSessionId = pduSessionId;
         mDefaultQos = defaultQos;
-        mQosBearerSessions = (qosBearerSessions == null)
-                ? new ArrayList<>() : new ArrayList<>(qosBearerSessions);
+        mQosBearerSessions = new ArrayList<>(qosBearerSessions);
         mSliceInfo = sliceInfo;
-        mTrafficDescriptors = (trafficDescriptors == null)
-                ? new ArrayList<>() : new ArrayList<>(trafficDescriptors);
+        mTrafficDescriptors = new ArrayList<>(trafficDescriptors);
     }
 
     /** @hide */
@@ -241,24 +228,39 @@ public final class DataCallResponse implements Parcelable {
         mProtocolType = source.readInt();
         mInterfaceName = source.readString();
         mAddresses = new ArrayList<>();
-        source.readList(mAddresses, LinkAddress.class.getClassLoader(), android.net.LinkAddress.class);
+        source.readList(mAddresses,
+                LinkAddress.class.getClassLoader(),
+                android.net.LinkAddress.class);
         mDnsAddresses = new ArrayList<>();
-        source.readList(mDnsAddresses, InetAddress.class.getClassLoader(), java.net.InetAddress.class);
+        source.readList(mDnsAddresses,
+                InetAddress.class.getClassLoader(),
+                java.net.InetAddress.class);
         mGatewayAddresses = new ArrayList<>();
-        source.readList(mGatewayAddresses, InetAddress.class.getClassLoader(), java.net.InetAddress.class);
+        source.readList(mGatewayAddresses,
+                InetAddress.class.getClassLoader(),
+                java.net.InetAddress.class);
         mPcscfAddresses = new ArrayList<>();
-        source.readList(mPcscfAddresses, InetAddress.class.getClassLoader(), java.net.InetAddress.class);
+        source.readList(mPcscfAddresses,
+                InetAddress.class.getClassLoader(),
+                java.net.InetAddress.class);
         mMtu = source.readInt();
         mMtuV4 = source.readInt();
         mMtuV6 = source.readInt();
         mHandoverFailureMode = source.readInt();
         mPduSessionId = source.readInt();
-        mDefaultQos = source.readParcelable(Qos.class.getClassLoader(), android.telephony.data.Qos.class);
+        mDefaultQos = source.readParcelable(Qos.class.getClassLoader(),
+                android.telephony.data.Qos.class);
         mQosBearerSessions = new ArrayList<>();
-        source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader(), android.telephony.data.QosBearerSession.class);
-        mSliceInfo = source.readParcelable(NetworkSliceInfo.class.getClassLoader(), android.telephony.data.NetworkSliceInfo.class);
+        source.readList(mQosBearerSessions,
+                QosBearerSession.class.getClassLoader(),
+                android.telephony.data.QosBearerSession.class);
+        mSliceInfo = source.readParcelable(
+                NetworkSliceInfo.class.getClassLoader(),
+                android.telephony.data.NetworkSliceInfo.class);
         mTrafficDescriptors = new ArrayList<>();
-        source.readList(mTrafficDescriptors, TrafficDescriptor.class.getClassLoader(), android.telephony.data.TrafficDescriptor.class);
+        source.readList(mTrafficDescriptors,
+                TrafficDescriptor.class.getClassLoader(),
+                android.telephony.data.TrafficDescriptor.class);
     }
 
     /**
@@ -322,28 +324,36 @@ public final class DataCallResponse implements Parcelable {
      * @return A list of addresses of this data connection.
      */
     @NonNull
-    public List<LinkAddress> getAddresses() { return mAddresses; }
+    public List<LinkAddress> getAddresses() {
+        return Collections.unmodifiableList(mAddresses);
+    }
 
     /**
      * @return A list of DNS server addresses, e.g., "192.0.1.3" or
      * "192.0.1.11 2001:db8::1". Empty list if no dns server addresses returned.
      */
     @NonNull
-    public List<InetAddress> getDnsAddresses() { return mDnsAddresses; }
+    public List<InetAddress> getDnsAddresses() {
+        return Collections.unmodifiableList(mDnsAddresses);
+    }
 
     /**
      * @return A list of default gateway addresses, e.g., "192.0.1.3" or
      * "192.0.1.11 2001:db8::1". Empty list if the addresses represent point to point connections.
      */
     @NonNull
-    public List<InetAddress> getGatewayAddresses() { return mGatewayAddresses; }
+    public List<InetAddress> getGatewayAddresses() {
+        return Collections.unmodifiableList(mGatewayAddresses);
+    }
 
     /**
      * @return A list of Proxy Call State Control Function address via PCO (Protocol Configuration
      * Option) for IMS client.
      */
     @NonNull
-    public List<InetAddress> getPcscfAddresses() { return mPcscfAddresses; }
+    public List<InetAddress> getPcscfAddresses() {
+        return Collections.unmodifiableList(mPcscfAddresses);
+    }
 
     /**
      * @return MTU (maximum transmission unit) in bytes received from network. Zero or negative
@@ -404,7 +414,7 @@ public final class DataCallResponse implements Parcelable {
      */
     @NonNull
     public List<QosBearerSession> getQosBearerSessions() {
-        return mQosBearerSessions;
+        return Collections.unmodifiableList(mQosBearerSessions);
     }
 
     /**
@@ -420,7 +430,7 @@ public final class DataCallResponse implements Parcelable {
      */
     @NonNull
     public List<TrafficDescriptor> getTrafficDescriptors() {
-        return mTrafficDescriptors;
+        return Collections.unmodifiableList(mTrafficDescriptors);
     }
 
     @NonNull
@@ -461,18 +471,6 @@ public final class DataCallResponse implements Parcelable {
 
         DataCallResponse other = (DataCallResponse) o;
 
-        final boolean isQosBearerSessionsSame =
-                (mQosBearerSessions == null || other.mQosBearerSessions == null)
-                ? mQosBearerSessions == other.mQosBearerSessions
-                : (mQosBearerSessions.size() == other.mQosBearerSessions.size()
-                        && mQosBearerSessions.containsAll(other.mQosBearerSessions));
-
-        final boolean isTrafficDescriptorsSame =
-                (mTrafficDescriptors == null || other.mTrafficDescriptors == null)
-                ? mTrafficDescriptors == other.mTrafficDescriptors
-                : (mTrafficDescriptors.size() == other.mTrafficDescriptors.size()
-                        && mTrafficDescriptors.containsAll(other.mTrafficDescriptors));
-
         return mCause == other.mCause
                 && mSuggestedRetryTime == other.mSuggestedRetryTime
                 && mId == other.mId
@@ -493,42 +491,20 @@ public final class DataCallResponse implements Parcelable {
                 && mHandoverFailureMode == other.mHandoverFailureMode
                 && mPduSessionId == other.mPduSessionId
                 && Objects.equals(mDefaultQos, other.mDefaultQos)
-                && isQosBearerSessionsSame
+                && mQosBearerSessions.size() == other.mQosBearerSessions.size() // non-null
+                && mQosBearerSessions.containsAll(other.mQosBearerSessions) // non-null
                 && Objects.equals(mSliceInfo, other.mSliceInfo)
-                && isTrafficDescriptorsSame;
+                && mTrafficDescriptors.size() == other.mTrafficDescriptors.size() // non-null
+                && mTrafficDescriptors.containsAll(other.mTrafficDescriptors); // non-null
     }
 
     @Override
     public int hashCode() {
-        // Generate order-independent hashes for lists
-        int addressesHash = mAddresses.stream()
-                .map(LinkAddress::hashCode)
-                .mapToInt(Integer::intValue)
-                .sum();
-        int dnsAddressesHash = mDnsAddresses.stream()
-                .map(InetAddress::hashCode)
-                .mapToInt(Integer::intValue)
-                .sum();
-        int gatewayAddressesHash = mGatewayAddresses.stream()
-                .map(InetAddress::hashCode)
-                .mapToInt(Integer::intValue)
-                .sum();
-        int pcscfAddressesHash = mPcscfAddresses.stream()
-                .map(InetAddress::hashCode)
-                .mapToInt(Integer::intValue)
-                .sum();
-        int qosBearerSessionsHash = mQosBearerSessions.stream()
-                .map(QosBearerSession::hashCode)
-                .mapToInt(Integer::intValue)
-                .sum();
-        int trafficDescriptorsHash = mTrafficDescriptors.stream()
-                .map(TrafficDescriptor::hashCode)
-                .mapToInt(Integer::intValue)
-                .sum();
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
-                mInterfaceName, addressesHash, dnsAddressesHash, gatewayAddressesHash,
-                pcscfAddressesHash, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
-                mDefaultQos, qosBearerSessionsHash, mSliceInfo, trafficDescriptorsHash);
+                mInterfaceName, Set.copyOf(mAddresses), Set.copyOf(mDnsAddresses),
+                Set.copyOf(mGatewayAddresses), Set.copyOf(mPcscfAddresses), mMtu, mMtuV4, mMtuV6,
+                mHandoverFailureMode, mPduSessionId, mDefaultQos, Set.copyOf(mQosBearerSessions),
+                mSliceInfo, Set.copyOf(mTrafficDescriptors));
     }
 
     @Override
@@ -616,15 +592,15 @@ public final class DataCallResponse implements Parcelable {
 
         private @ProtocolType int mProtocolType;
 
-        private String mInterfaceName;
+        private String mInterfaceName = "";
 
-        private List<LinkAddress> mAddresses;
+        private List<LinkAddress> mAddresses = Collections.emptyList();
 
-        private List<InetAddress> mDnsAddresses;
+        private List<InetAddress> mDnsAddresses = Collections.emptyList();
 
-        private List<InetAddress> mGatewayAddresses;
+        private List<InetAddress> mGatewayAddresses = Collections.emptyList();
 
-        private List<InetAddress> mPcscfAddresses;
+        private List<InetAddress> mPcscfAddresses = Collections.emptyList();
 
         private int mMtu;
 
@@ -636,11 +612,11 @@ public final class DataCallResponse implements Parcelable {
 
         private int mPduSessionId = PDU_SESSION_ID_NOT_SET;
 
-        private Qos mDefaultQos;
+        private @Nullable Qos mDefaultQos;
 
         private List<QosBearerSession> mQosBearerSessions = new ArrayList<>();
 
-        private NetworkSliceInfo mSliceInfo;
+        private @Nullable NetworkSliceInfo mSliceInfo;
 
         private List<TrafficDescriptor> mTrafficDescriptors = new ArrayList<>();
 
@@ -726,6 +702,7 @@ public final class DataCallResponse implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setInterfaceName(@NonNull String interfaceName) {
+            Objects.requireNonNull(interfaceName);
             mInterfaceName = interfaceName;
             return this;
         }
@@ -737,6 +714,7 @@ public final class DataCallResponse implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setAddresses(@NonNull List<LinkAddress> addresses) {
+            Objects.requireNonNull(addresses);
             mAddresses = addresses;
             return this;
         }
@@ -748,6 +726,7 @@ public final class DataCallResponse implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setDnsAddresses(@NonNull List<InetAddress> dnsAddresses) {
+            Objects.requireNonNull(dnsAddresses);
             mDnsAddresses = dnsAddresses;
             return this;
         }
@@ -759,6 +738,7 @@ public final class DataCallResponse implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setGatewayAddresses(@NonNull List<InetAddress> gatewayAddresses) {
+            Objects.requireNonNull(gatewayAddresses);
             mGatewayAddresses = gatewayAddresses;
             return this;
         }
@@ -771,6 +751,7 @@ public final class DataCallResponse implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setPcscfAddresses(@NonNull List<InetAddress> pcscfAddresses) {
+            Objects.requireNonNull(pcscfAddresses);
             mPcscfAddresses = pcscfAddresses;
             return this;
         }
