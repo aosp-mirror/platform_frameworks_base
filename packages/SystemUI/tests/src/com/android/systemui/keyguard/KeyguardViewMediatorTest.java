@@ -36,6 +36,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -316,6 +317,27 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // Once we're 100% dozed, the screen off animation should be completed.
         mViewMediator.onDozeAmountChanged(1f, 1f);
         assertFalse(mViewMediator.isAnimatingScreenOff());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void wakeupFromDreamingWhenKeyguardHides() {
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        // Given device is dreaming
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // When keyguard is going away
+        mKeyguardStateController.notifyKeyguardGoingAway(true);
+
+        // And keyguard is disabled which will call #handleHide
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+
+        // Then dream should wake up
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(),
+                eq("com.android.systemui:UNLOCK_DREAMING"));
     }
 
     @Test
