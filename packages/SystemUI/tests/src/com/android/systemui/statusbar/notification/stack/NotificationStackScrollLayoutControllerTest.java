@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -32,10 +33,14 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
@@ -49,8 +54,12 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -105,6 +114,7 @@ import java.util.Optional;
  * Tests for {@link NotificationStackScrollLayoutController}.
  */
 @SmallTest
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner.class)
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
@@ -151,6 +161,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private SecureSettings mSecureSettings;
     @Mock private NotificationIconAreaController mIconAreaController;
     @Mock private ActivityStarter mActivityStarter;
+    @Mock private KeyguardTransitionRepository mKeyguardTransitionRepo;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -162,11 +173,13 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
 
         mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
+        when(mKeyguardTransitionRepo.getTransitions()).thenReturn(emptyFlow());
     }
 
     @Test
@@ -572,17 +585,33 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
+    @Test
+    public void updateEmptyShadeView_onKeyguardTransitionToAod_hidesView() {
+        initController(/* viewIsAttached= */ true);
+        mController.onKeyguardTransitionChanged(
+                new TransitionStep(
+                        /* from= */ KeyguardState.GONE,
+                        /* to= */ KeyguardState.AOD));
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
+    }
+
     private LogMaker logMatcher(int category, int type) {
         return argThat(new LogMatcher(category, type));
     }
 
     private void setupShowEmptyShadeViewState(boolean toShow) {
         if (toShow) {
-            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(SHADE);
+            mController.onKeyguardTransitionChanged(
+                    new TransitionStep(
+                            /* from= */ KeyguardState.LOCKSCREEN,
+                            /* to= */ KeyguardState.GONE));
             mController.setQsFullScreen(false);
             mController.getView().removeAllViews();
         } else {
-            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+            mController.onKeyguardTransitionChanged(
+                    new TransitionStep(
+                            /* from= */ KeyguardState.GONE,
+                            /* to= */ KeyguardState.AOD));
             mController.setQsFullScreen(true);
             mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
         }
@@ -590,7 +619,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     private void initController(boolean viewIsAttached) {
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(viewIsAttached);
-
+        ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
+        when(mNotificationStackScrollLayout.getViewTreeObserver())
+                .thenReturn(viewTreeObserver);
         mController = new NotificationStackScrollLayoutController(
                 mNotificationStackScrollLayout,
                 true,
@@ -608,6 +639,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mKeyguardBypassController,
                 mKeyguardInteractor,
                 mPrimaryBouncerInteractor,
+                mKeyguardTransitionRepo,
                 mZenModeController,
                 mNotificationLockscreenUserManager,
                 Optional.<NotificationListViewModel>empty(),
