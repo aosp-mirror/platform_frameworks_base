@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Tətbiq quraşdırılıb."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bu tətbiqi quraşdırmaq istəyirsiniz?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bu tətbiqi güncəlləmək istəyirsiniz?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Bu tətbiq &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənsin?&lt;/p&gt;&lt;p&gt;Bu tətbiq adətən &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənir. Fərqli mənbədən güncəllədikdə gələcəkdə planşetdə istənilən mənbədən güncəlləyə bilərsiniz. Tətbiq funksionallığı dəyişə bilər.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Bu tətbiq &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənsin?&lt;/p&gt;&lt;p&gt;Bu tətbiq adətən &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənir. Fərqli mənbədən güncəllədikdə gələcəkdə TV-də istənilən mənbədən güncəlləyə bilərsiniz. Tətbiq funksionallığı dəyişə bilər.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Bu tətbiq &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənsin?&lt;/p&gt;&lt;p&gt;Bu tətbiq adətən &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənir. Fərqli mənbədən güncəllədikdə gələcəkdə telefonda istənilən mənbədən güncəlləyə bilərsiniz. Tətbiq funksionallığı dəyişə bilər.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Tətbiq quraşdırılmayıb."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin quraşdırılması blok edildi."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Bu paketin mövcud paket ilə ziddiyətinə görə tətbiq quraşdırılmadı."</string>

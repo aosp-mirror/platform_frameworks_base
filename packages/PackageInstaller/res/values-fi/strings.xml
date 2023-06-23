@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Sovellus on asennettu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Haluatko asentaa tämän sovelluksen?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Haluatko päivittää tämän sovelluksen?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Päivitä sovellus täältä: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Sovellus saa päivitykset yleensä täältä: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa tabletilla olevasta lähteestä. Sovelluksen toiminnot voivat muuttua.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Päivitä sovellus täältä: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Sovellus saa päivitykset yleensä täältä: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa televisiolla olevasta lähteestä. Sovelluksen toiminnot voivat muuttua.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Päivitä sovellus täältä: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Sovellus saa päivitykset yleensä täältä: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa puhelimella olevasta lähteestä. Sovelluksen toiminnot voivat muuttua.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Sovellusta ei asennettu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin asennus estettiin."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Sovellusta ei asennettu, koska paketti on ristiriidassa nykyisen paketin kanssa."</string>

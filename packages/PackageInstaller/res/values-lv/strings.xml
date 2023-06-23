@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Lietotne ir instalēta."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vai vēlaties instalēt šo lietotni?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vai vēlaties atjaunināt šo lietotni?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vai atjaunināt šo lietotni, izmantojot &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Šī lietotne parasti saņem atjauninājumus no &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Veicot atjaunināšanu no cita avota, iespējams, turpmāk planšetdatorā saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vai atjaunināt šo lietotni, izmantojot &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Šī lietotne parasti saņem atjauninājumus no &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Veicot atjaunināšanu no cita avota, iespējams, turpmāk televizorā saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vai atjaunināt šo lietotni, izmantojot &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Šī lietotne parasti saņem atjauninājumus no &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Veicot atjaunināšanu no cita avota, iespējams, turpmāk tālrunī saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Lietotne nav instalēta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakotnes instalēšana tika bloķēta."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Lietotne netika instalēta, jo pastāv pakotnes konflikts ar esošu pakotni."</string>

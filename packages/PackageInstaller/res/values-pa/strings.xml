@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ਐਪ ਸਥਾਪਤ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;ਕੀ ਇਸ ਐਪ ਨੂੰ &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ਤੋਂ ਅੱਪਡੇਟ ਕਰਨਾ ਹੈ?&lt;/p&gt;&lt;p&gt;ਇਹ ਐਪ ਆਮ ਤੌਰ \'ਤੇ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ਤੋਂ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰਦੀ ਹੈ। ਕਿਸੇ ਵੱਖਰੇ ਸਰੋਤ ਤੋਂ ਅੱਪਡੇਟ ਕਰ ਕੇ, ਤੁਸੀਂ ਆਪਣੇ ਟੈਬਲੈੱਟ \'ਤੇ ਕਿਸੇ ਵੀ ਸਰੋਤ ਤੋਂ ਭਵਿੱਖੀ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ। ਐਪ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਬਦਲ ਸਕਦੀ ਹੈ।&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;ਕੀ ਇਸ ਐਪ ਨੂੰ &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ਤੋਂ ਅੱਪਡੇਟ ਕਰਨਾ ਹੈ?&lt;/p&gt;&lt;p&gt;ਇਹ ਐਪ ਆਮ ਤੌਰ \'ਤੇ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ਤੋਂ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰਦੀ ਹੈ। ਕਿਸੇ ਵੱਖਰੇ ਸਰੋਤ ਤੋਂ ਅੱਪਡੇਟ ਕਰ ਕੇ, ਤੁਸੀਂ ਆਪਣੇ ਟੀਵੀ \'ਤੇ ਕਿਸੇ ਵੀ ਸਰੋਤ ਤੋਂ ਭਵਿੱਖੀ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ। ਐਪ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਬਦਲ ਸਕਦੀ ਹੈ।&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;ਕੀ ਇਸ ਐਪ ਨੂੰ &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ਤੋਂ ਅੱਪਡੇਟ ਕਰਨਾ ਹੈ?&lt;/p&gt;&lt;p&gt;ਇਹ ਐਪ ਆਮ ਤੌਰ \'ਤੇ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ਤੋਂ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰਦੀ ਹੈ। ਕਿਸੇ ਵੱਖਰੇ ਸਰੋਤ ਤੋਂ ਅੱਪਡੇਟ ਕਰ ਕੇ, ਤੁਸੀਂ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਕਿਸੇ ਵੀ ਸਰੋਤ ਤੋਂ ਭਵਿੱਖੀ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ। ਐਪ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਬਦਲ ਸਕਦੀ ਹੈ।&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ਪੈਕੇਜ ਨੂੰ ਸਥਾਪਤ ਹੋਣ ਤੋਂ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ਪੈਕੇਜ ਦੇ ਇੱਕ ਮੌਜੂਦਾ ਪੈਕੇਜ ਨਾਲ ਵਿਵਾਦ ਹੋਣ ਕਰਕੇ ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>

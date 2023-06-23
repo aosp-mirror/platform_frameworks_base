@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ஆப்ஸ் நிறுவப்பட்டது."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"இந்த ஆப்ஸை நிறுவ வேண்டுமா?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; இல் இருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?&lt;/p&gt;&lt;p&gt;பொதுவாக இந்த ஆப்ஸ் &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; இல் இருந்து புதுப்பிப்புகளைப் பெறும். வேறு உரிமையாளர் மூலம் புதுப்பித்தால் எதிர்காலத்தில் டேப்லெட்டில் இடம்பெற்றுள்ள எந்த உரிமையாளரிடம் இருந்தும் புதுப்பிப்புகளைப் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; இல் இருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?&lt;/p&gt;&lt;p&gt;பொதுவாக இந்த ஆப்ஸ் &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; இல் இருந்து புதுப்பிப்புகளைப் பெறும். வேறு உரிமையாளர் மூலம் புதுப்பித்தால் எதிர்காலத்தில் டிவியில் இடம்பெற்றுள்ள எந்த உரிமையாளரிடம் இருந்தும் புதுப்பிப்புகளைப் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; இல் இருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?&lt;/p&gt;&lt;p&gt;பொதுவாக இந்த ஆப்ஸ் &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; இல் இருந்து புதுப்பிப்புகளைப் பெறும். வேறு உரிமையாளர் மூலம் புதுப்பித்தால் எதிர்காலத்தில் மொபைலில் இடம்பெற்றுள்ள எந்த உரிமையாளரிடம் இருந்தும் புதுப்பிப்புகளைப் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ஆப்ஸ் நிறுவப்படவில்லை."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"இந்தத் தொகுப்பு நிறுவப்படுவதிலிருந்து தடுக்கப்பட்டது."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"இந்தத் தொகுப்பு ஏற்கனவே உள்ள தொகுப்புடன் முரண்படுவதால் ஆப்ஸ் நிறுவப்படவில்லை."</string>

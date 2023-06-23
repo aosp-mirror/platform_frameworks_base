@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Se instaló la app."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"¿Deseas instalar esta app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"¿Deseas actualizar esta app?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Actualiza esta app desde &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Esta app normalmente recibe actualizaciones desde &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si actualizas a través de otra fuente, es posible que recibas las próximas actualizaciones de cualquier fuente en la tablet. Las funciones de la app puede cambiar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Actualiza esta app desde &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Esta app normalmente recibe actualizaciones desde &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si actualizas a través de otra fuente, es posible que recibas las próximas actualizaciones de cualquier fuente en la TV. Las funciones de la app puede cambiar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Actualiza esta app desde &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Esta app normalmente recibe actualizaciones desde &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si actualizas a través de otra fuente, es posible que recibas las próximas actualizaciones de cualquier fuente en el teléfono. Las funciones de la app puede cambiar.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"No se instaló la app."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Se bloqueó el paquete para impedir la instalación."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"No se instaló la app debido a un conflicto con un paquete."</string>

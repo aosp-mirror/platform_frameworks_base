@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Alkalmazás telepítve."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Telepíti ezt az alkalmazást?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Frissíti ezt az alkalmazást?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Frissítse ezt az alkalmazást innen: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ez az alkalmazás általában a következő forrásból kap frissítéseket: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a táblagépén. Emiatt megváltozhat az alkalmazás működése.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Frissítse ezt az alkalmazást innen: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ez az alkalmazás általában a következő forrásból kap frissítéseket: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a tévéjén. Emiatt megváltozhat az alkalmazás működése.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Frissítse ezt az alkalmazást innen: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ez az alkalmazás általában a következő forrásból kap frissítéseket: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a telefonján. Emiatt megváltozhat az alkalmazás működése.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Az alkalmazás nincs telepítve."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"A csomag telepítését letiltotta a rendszer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A nem csomagként telepített alkalmazás ütközik egy már létező csomaggal."</string>

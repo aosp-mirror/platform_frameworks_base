@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;ಈ ಆ್ಯಪ್ ಅನ್ನು &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೇ?&lt;/p&gt;&lt;p&gt;ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ನೀವು ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;ಈ ಆ್ಯಪ್ ಅನ್ನು &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೇ?&lt;/p&gt;&lt;p&gt;ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ TV ಯಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ನೀವು ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;ಈ ಆ್ಯಪ್ ಅನ್ನು &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೇ?&lt;/p&gt;&lt;p&gt;ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ನೀವು ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿಲ್ಲ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಪ್ಯಾಕೇಜ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿರುವ ಆ್ಯಪ್‌ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಯಾಕೇಜ್ ಜೊತೆಗೆ ಸಂಘರ್ಷವಾಗುತ್ತದೆ."</string>
