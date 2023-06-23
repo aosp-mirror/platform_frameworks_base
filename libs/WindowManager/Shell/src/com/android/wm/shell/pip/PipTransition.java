@@ -856,6 +856,9 @@ public class PipTransition extends PipTransitionController {
         final int enterAnimationType = mEnterAnimationType;
         if (enterAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
+        } else {
+            // set alpha to 1, because for multi-activity PiP it will create a new task with alpha 0
+            startTransaction.setAlpha(leash, 1f);
         }
         startTransaction.apply();
 
