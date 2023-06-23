@@ -1373,7 +1373,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB გამართვა შეერთებულია"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB შეცდ. გამართვა"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB გამართვა"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"შეცდომების უსადენო გამართვა დაკავშირებულია"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"შეეხეთ შეცდომების უსადენო გამართვის გამოსართავად"</string>
@@ -1959,7 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> მიუწვდომელია"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"საჭიროა ნებართვა"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"ნებართვის მოთხოვნა შეჩერებულია"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"კამერა მიუწვდომელია"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ტელეფონზე გაგრძელება"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"მიკროფონი მიუწვდომელია"</string>
@@ -1970,6 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ Android TV მოწყობილობიდან."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ ტაბლეტიდან."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ ტელეფონიდან."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"ეს აპი დამატებით ნებართვებს მოითხოვს, მაგრამ ნებართვების მიცემა შეუძლებელია სტრიმინგის სესიაში თავდაპირველად მიანიჭეთ ნებართვა Android TV მოწყობილობაზე."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"ეს აპი დამატებით ნებართვებს მოითხოვს, მაგრამ ნებართვების მიცემა შეუძლებელია სტრიმინგის სესიაში თავდაპირველად მიანიჭეთ ნებართვა ტაბლეტზე."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"ეს აპი დამატებით ნებართვებს მოითხოვს, მაგრამ ნებართვების მიცემა შეუძლებელია სტრიმინგის სესიაში თავდაპირველად მიანიჭეთ ნებართვა ტელეფონზე."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ეს აპი დამატებით უსაფრთხოებას ითხოვს. ცადეთ Android TV მოწყობილობიდან."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ეს აპი დამატებით უსაფრთხოებას ითხოვს. ცადეთ ტაბლეტიდან."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ეს აპი დამატებით უსაფრთხოებას ითხოვს. ცადეთ ტელეფონიდან."</string>

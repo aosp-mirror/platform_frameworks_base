@@ -689,16 +689,16 @@
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Déplacez le téléphone vers le bas"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
-    <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Veuillez regarder plus directement l\'appareil."</string>
+    <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mettez-vous bien de face et regardez l\'appareil."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Ne bougez pas le téléphone."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez enregistrer à nouveau votre visage."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Déplacez légèrement votre tête."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Centrez bien votre visage devant votre téléphone"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui cache votre visage."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mettez-vous bien de face et regardez le téléphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mettez-vous bien de face et regardez le téléphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mettez-vous bien de face et regardez le téléphone"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui cache votre visage"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez la partie supérieure de l\'écran, y compris la barre noire"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -706,7 +706,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossible de créer votre empreinte faciale. Réessayez."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Lunettes sombres détectées. Votre visage doit être entièrement visible."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Masque détecté. Votre visage doit être entièrement visible."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Visage partiellement couvert. Votre visage doit être entièrement visible."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. valider visage. Matériel non disponible."</string>
@@ -1260,7 +1260,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Lancement des applications…"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalisation de la mise à jour."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Vous avez appuyé sur le bouton Marche/Arrêt, ce qui éteint généralement l\'écran.\n\nEssayez d\'appuyer doucement pendant la configuration de votre empreinte digitale."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Éteignez l\'écran pour achever la configuration."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Éteignez l\'écran pour finir la config."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Éteindre"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuer de valider votre empreinte ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Vous avez appuyé sur le bouton Marche/Arrêt, ce qui éteint généralement l\'écran.\n\nPour valider votre empreinte digitale, appuyez plus doucement."</string>
@@ -1960,7 +1960,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorisation nécessaire"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Caméra indisponible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuez sur le téléphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Micro indisponible"</string>
@@ -1971,6 +1972,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre appareil Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre tablette."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Actuellement, vous ne pouvez pas accéder à cette application sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez plutôt d\'y accéder sur votre téléphone."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Cette appli demande une sécurité supplémentaire. Essayez plutôt d\'y accéder sur votre appareil Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Cette appli demande une sécurité supplémentaire. Essayez plutôt d\'y accéder sur votre tablette."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Cette appli demande une sécurité supplémentaire. Essayez plutôt d\'y accéder sur votre téléphone."</string>

@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Tətbiq əlçatan deyil"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> hazırda əlçatan deyil."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> əlçatan deyil"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"İcazə tələb olunur"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera əlçatan deyil"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Telefonda davam edin"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon əlçatan deyil"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Hazırda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızda buna giriş mümkün deyil. Android TV cihazınızda sınayın."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Hazırda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızda buna giriş mümkün deyil. Planşetinizdə sınayın."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Hazırda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızda buna giriş mümkün deyil. Telefonunuzda sınayın."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Bu tətbiq əlavə təhlükəsizlik tələb edir. Android TV cihazınızda sınayın."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Bu tətbiq əlavə təhlükəsizlik tələb edir. Planşetinizdə sınayın."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Bu tətbiq əlavə təhlükəsizlik tələb edir. Telefonunuzda sınayın."</string>

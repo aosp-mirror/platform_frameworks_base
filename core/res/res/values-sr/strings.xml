@@ -1367,7 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режим PTP преко USB-а је укључен"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB привезивање је укључено"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режим MIDI преко USB-а је укључен"</string>
-    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Уређај повезан са веб-камером"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Уређај повезан као веб-камера"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB додатак је повезан"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Додирните за још опција."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Повезани уређај се пуни. Додирните за још опција."</string>
@@ -1960,7 +1960,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликација није доступна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> тренутно није доступна."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – није доступно"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Потребна је дозвола"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камера није доступна"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Наставите на телефону"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофон је недоступан"</string>
@@ -1971,6 +1972,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Овој апликацији тренутно не може да се приступи са уређаја <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на Android TV уређају."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Овој апликацији тренутно не може да се приступи са уређаја <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на таблету."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Овој апликацији тренутно не може да се приступи са уређаја <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на телефону."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ова апликација захтева додатну безбедност. Пробајте на Android TV уређају."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ова апликација захтева додатну безбедност. Пробајте на таблету."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ова апликација захтева додатну безбедност. Пробајте на телефону."</string>

@@ -1266,7 +1266,7 @@
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
-    <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشت به بازی، ضربه بزنید"</string>
+    <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشتن به بازی، ضربه بزنید"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"انتخاب بازی"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"برای عملکرد بهتر، هربار فقط یکی از این بازی‌ها را می‌توان باز کرد."</string>
     <string name="old_app_action" msgid="725331621042848590">"به <xliff:g id="OLD_APP">%1$s</xliff:g> برگردید"</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> دردسترس نیست"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"اجازه لازم است"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"دوربین دردسترس نیست"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ادامه دادن در تلفن"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"میکروفون دردسترس نیست"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"‏درحال‌حاضر نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> شما به این برنامه دسترسی داشت. دسترسی به آن را در دستگاه Android TV امتحان کنید."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"درحال‌حاضر نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> شما به این برنامه دسترسی داشت. دسترسی به آن را در رایانه لوحی‌تان امتحان کنید."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"درحال‌حاضر نمی‌توان در <xliff:g id="DEVICE">%1$s</xliff:g> شما به این برنامه دسترسی داشت. دسترسی به آن را در تلفنتان امتحان کنید."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏این برنامه درخواست امنیت اضافی دارد. دسترسی به آن را در دستگاه Android TV امتحان کنید."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"این برنامه درخواست امنیت اضافی دارد. دسترسی به آن را در رایانه لوحی‌تان امتحان کنید."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"این برنامه درخواست امنیت اضافی دارد. دسترسی به آن را در تلفنتان امتحان کنید."</string>

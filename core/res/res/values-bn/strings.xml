@@ -628,11 +628,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"যাচাইকরণে সমস্যা হয়েছে"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"চালিয়ে যেতে আপনার স্ক্রিন লক ব্যবহার করুন"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"সেন্সর জোরে প্রেস করুন"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"সেন্সরে জোরে প্রেস করুন"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"আঙ্গুলের ছাপের সেন্সর পরিষ্কার করে আবার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"সেন্সর পরিষ্কার করে আবার চেষ্টা করুন"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"সেন্সর জোরে প্রেস করুন"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"সেন্সরে জোরে প্রেস করুন"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য আঙ্গুলের ছাপ দিয়ে চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
@@ -641,7 +641,7 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আপনার আঙুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"আঙ্গুলের ছাপ শনাক্ত করা যায়নি"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"আঙ্গুলের ছাপ যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ফেস যাচাই করা হয়েছে"</string>
@@ -1368,7 +1368,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB এর মাধ্যমে MIDI চালু করা হয়েছে"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ওয়েবক্যাম হিসেবে কানেক্ট করা আছে"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"ইউএসবি অ্যাক্সেসরি কানেক্ট করা হয়েছে"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"আরও বিকল্পের জন্য আলতো চাপুন৷"</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"আরও বিকল্পের জন্য ট্যাপ করুন।"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"সংযুক্ত ডিভাইস চার্জ করা হচ্ছে। আরও বিকল্প দেখতে ট্যাপ করুন।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"অ্যানালগ অডিও অ্যাক্সেসরি শনাক্ত করা হয়েছে"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"সংযুক্ত ডিভাইসটি এই ফোনের সাথে ব্যবহার করা যাবে না। আরও জানতে ট্যাপ করুন।"</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"অ্যাপ পাওয়া যাচ্ছে না"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূর্তে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ পাওয়া যাচ্ছে না।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলভ্য নেই"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"অনুমতি প্রয়োজন"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ক্যামেরা উপলভ্য নেই"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ফোনে চালিয়ে যান"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"মাইক্রোফোন উপলভ্য নেই"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"এই সময়ে আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার Android TV ডিভাইস ব্যবহার করে দেখুন।"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"এই সময়ে আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ট্যাবলেটে ব্যবহার করে দেখুন।"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"এই সময়ে আপনার <xliff:g id="DEVICE">%1$s</xliff:g>-এ এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"এই অ্যাপ অতিরিক্ত নিরাপত্তার জন্য অনুরোধ করছে। পরিবর্তে আপনার Android TV ডিভাইস ব্যবহার করে দেখুন।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"এই অ্যাপ অতিরিক্ত নিরাপত্তার জন্য অনুরোধ করছে। পরিবর্তে আপনার ট্যাবলেটে ব্যবহার করে দেখুন।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"এই অ্যাপ অতিরিক্ত নিরাপত্তার জন্য অনুরোধ করছে। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>

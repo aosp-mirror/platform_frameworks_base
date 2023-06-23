@@ -649,7 +649,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado, pressione \"Confirmar\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware de impressão digital não disponível."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Não foi possível configurar a impressão digital"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"A configuração da impressão digital expirou. Tente de novo."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tempo de configuração esgotado. Tente de novo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operação de impressão digital cancelada."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operação de impressão digital cancelada pelo usuário."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Excesso de tentativas. Use o bloqueio de tela."</string>
@@ -1369,7 +1369,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB ativado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo conectado como Webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para ver mais opções."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para conferir mais opções."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Carregando dispositivo conectado. Toque para ver mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
@@ -1960,7 +1960,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Permissão necessária"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Solicitação de permissão suprimida"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Câmera indisponível"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuar no smartphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfone indisponível"</string>
@@ -1971,6 +1971,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"No momento, não é possível acessar esse app pelo <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"No momento, não é possível acessar esse app pelo <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo seu tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"No momento, não é possível acessar esse app pelo <xliff:g id="DEVICE">%1$s</xliff:g>. Tente pelo seu smartphone."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Esse app está solicitando permissões extras, mas elas não podem ser concedidas em uma sessão de streaming. Dê permissão pelo dispositivo Android TV primeiro."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Esse app está solicitando permissões extras, mas elas não podem ser concedidas em uma sessão de streaming. Dê permissão pelo tablet primeiro."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Esse app está solicitando permissões extras, mas elas não podem ser concedidas em uma sessão de streaming. Dê permissão pelo smartphone primeiro."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Esse app está solicitando segurança extra. Tente pelo dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Esse app está solicitando segurança extra. Tente pelo tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Esse app está solicitando segurança extra. Tente pelo smartphone."</string>
