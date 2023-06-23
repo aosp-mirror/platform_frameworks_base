@@ -72,6 +72,10 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
                     uid,
                     NotificationManager.BUBBLE_PREFERENCE_NONE
                 )
+                device.wait(
+                    Until.gone(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
+                    FIND_OBJECT_TIMEOUT
+                )
                 testApp.exit(wmHelper)
             }
 
@@ -92,7 +96,7 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
 
-        const val FIND_OBJECT_TIMEOUT = 2000L
+        const val FIND_OBJECT_TIMEOUT = 4000L
         const val SYSTEM_UI_PACKAGE = SYSTEMUI_PACKAGE
         const val BUBBLE_RES_NAME = "bubble_view"
     }
