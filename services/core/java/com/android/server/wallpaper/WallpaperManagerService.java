@@ -675,8 +675,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             // Not having a wallpaperComponent means it's a lock screen wallpaper.
             final boolean imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
                     || wallpaper.wallpaperComponent == null;
-            if (imageWallpaper && wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
-                cropFile = wallpaper.cropFile.getAbsolutePath();
+            if (imageWallpaper && wallpaper.getCropFile().exists()) {
+                cropFile = wallpaper.getCropFile().getAbsolutePath();
             } else if (imageWallpaper && !wallpaper.cropExists() && !wallpaper.sourceExists()) {
                 defaultImageWallpaper = true;
             }
@@ -1839,8 +1839,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private boolean clearWallpaperBitmaps(WallpaperData wallpaper) {
         boolean sourceExists = wallpaper.sourceExists();
         boolean cropExists = wallpaper.cropExists();
-        if (sourceExists) wallpaper.wallpaperFile.delete();
-        if (cropExists) wallpaper.cropFile.delete();
+        if (sourceExists) wallpaper.getWallpaperFile().delete();
+        if (cropExists) wallpaper.getCropFile().delete();
         return sourceExists || cropExists;
     }
 
@@ -2439,13 +2439,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.callbacks.register(cb);
                 }
 
-                File fileToReturn = getCropped ? wallpaper.cropFile : wallpaper.wallpaperFile;
+                File result = getCropped ? wallpaper.getCropFile() : wallpaper.getWallpaperFile();
 
-                if (!fileToReturn.exists()) {
+                if (!result.exists()) {
                     return null;
                 }
 
-                return ParcelFileDescriptor.open(fileToReturn, MODE_READ_ONLY);
+                return ParcelFileDescriptor.open(result, MODE_READ_ONLY);
             } catch (FileNotFoundException e) {
                 /* Shouldn't happen as we check to see if the file exists */
                 Slog.w(TAG, "Error getting wallpaper", e);
@@ -3206,16 +3206,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         // Migrate the bitmap files outright; no need to copy
         try {
-            if (!mIsLockscreenLiveWallpaperEnabled || sysWP.wallpaperFile.exists()) {
-                Os.rename(sysWP.wallpaperFile.getAbsolutePath(),
-                        lockWP.wallpaperFile.getAbsolutePath());
+            if (!mIsLockscreenLiveWallpaperEnabled || sysWP.getWallpaperFile().exists()) {
+                Os.rename(sysWP.getWallpaperFile().getAbsolutePath(),
+                        lockWP.getWallpaperFile().getAbsolutePath());
             }
-            if (!mIsLockscreenLiveWallpaperEnabled || sysWP.cropFile.exists()) {
-                Os.rename(sysWP.cropFile.getAbsolutePath(), lockWP.cropFile.getAbsolutePath());
+            if (!mIsLockscreenLiveWallpaperEnabled || sysWP.getCropFile().exists()) {
+                Os.rename(sysWP.getCropFile().getAbsolutePath(),
+                        lockWP.getCropFile().getAbsolutePath());
             }
             mLockWallpaperMap.put(userId, lockWP);
             if (mIsLockscreenLiveWallpaperEnabled) {
-                SELinux.restorecon(lockWP.wallpaperFile);
+                SELinux.restorecon(lockWP.getWallpaperFile());
                 mLastLockWallpaper = lockWP;
             }
         } catch (ErrnoException e) {
@@ -3236,11 +3237,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
                         -1, -1);
             }
-            ParcelFileDescriptor fd = ParcelFileDescriptor.open(wallpaper.wallpaperFile,
+            ParcelFileDescriptor fd = ParcelFileDescriptor.open(wallpaper.getWallpaperFile(),
                     MODE_CREATE|MODE_READ_WRITE|MODE_TRUNCATE);
-            if (!SELinux.restorecon(wallpaper.wallpaperFile)) {
+            if (!SELinux.restorecon(wallpaper.getWallpaperFile())) {
                 Slog.w(TAG, "restorecon failed for wallpaper file: " +
-                        wallpaper.wallpaperFile.getPath());
+                        wallpaper.getWallpaperFile().getPath());
                 return null;
             }
             wallpaper.name = name;
@@ -3251,7 +3252,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             // Nullify field to require new computation
             wallpaper.primaryColors = null;
             Slog.v(TAG, "updateWallpaperBitmapLocked() : id=" + wallpaper.wallpaperId
-                    + " name=" + name + " file=" + wallpaper.wallpaperFile.getName());
+                    + " name=" + name + " file=" + wallpaper.getWallpaperFile().getName());
             return fd;
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "Error setting wallpaper", e);
