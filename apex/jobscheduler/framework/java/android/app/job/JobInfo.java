@@ -1817,6 +1817,8 @@ public class JobInfo implements Parcelable {
         /**
          * Specify that this job should recur with the provided interval and flex. The job can
          * execute at any time in a window of flex length at the end of the period.
+         * If the constraints are not satisfied within the window,
+         * the job will wait until the constraints are satisfied.
          * @param intervalMillis Millisecond interval for which this job will repeat. A minimum
          *                       value of {@link #getMinPeriodMillis()} is enforced.
          * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
