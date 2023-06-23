@@ -105,6 +105,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private WallpaperColors mWallpaperColors;
     private boolean mShouldLaunchLeBroadcastDialog;
     private boolean mIsLeBroadcastCallbackRegistered;
+    private boolean mDismissing;
 
     MediaOutputBaseAdapter mAdapter;
 
@@ -265,13 +266,22 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDevicesRecyclerView.setHasFixedSize(false);
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
-        mStopButton.setOnClickListener(v -> {
-            mMediaOutputController.releaseSession();
-            dismiss();
-        });
+        mStopButton.setOnClickListener(v -> onStopButtonClick());
         mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
         mMediaMetadataSectionLayout.setOnClickListener(
                 mMediaOutputController::tryToLaunchMediaApplication);
+
+        mDismissing = false;
+    }
+
+    @Override
+    public void dismiss() {
+        // TODO(287191450): remove this once expensive binder calls are removed from refresh().
+        // Due to these binder calls on the UI thread, calling refresh() during dismissal causes
+        // significant frame drops for the dismissal animation. Since the dialog is going away
+        // anyway, we use this state to turn refresh() into a no-op.
+        mDismissing = true;
+        super.dismiss();
     }
 
     @Override
@@ -299,7 +309,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     void refresh(boolean deviceSetChanged) {
-        if (mMediaOutputController.isRefreshing()) {
+        // TODO(287191450): remove binder calls in this method from the UI thread.
+        // If the dialog is going away or is already refreshing, do nothing.
+        if (mDismissing || mMediaOutputController.isRefreshing()) {
             return;
         }
         mMediaOutputController.setRefreshing(true);

@@ -132,6 +132,8 @@ public class NotificationChildrenContainer extends ViewGroup
     private boolean mContainingNotificationIsFaded = false;
     private RoundableState mRoundableState;
 
+    private NotificationChildrenContainerLogger mLogger;
+
     public NotificationChildrenContainer(Context context) {
         this(context, null);
     }
@@ -1505,6 +1507,33 @@ public class NotificationChildrenContainer extends ViewGroup
 
     public NotificationHeaderViewWrapper getNotificationHeaderWrapper() {
         return mNotificationHeaderWrapper;
+    }
+
+    public void setLogger(NotificationChildrenContainerLogger logger) {
+        mLogger = logger;
+    }
+
+    @Override
+    public void addTransientView(View view, int index) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.addTransientRow(
+                    ((ExpandableNotificationRow) view).getEntry(),
+                    getContainingNotification().getEntry(),
+                    index
+            );
+        }
+        super.addTransientView(view, index);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.removeTransientRow(
+                    ((ExpandableNotificationRow) view).getEntry(),
+                    getContainingNotification().getEntry()
+            );
+        }
+        super.removeTransientView(view);
     }
 
     public String debugString() {

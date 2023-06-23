@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
+import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -88,6 +89,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
     private final StatusBarStateController mStatusBarStateController;
     private final MetricsLogger mMetricsLogger;
+    private final NotificationChildrenContainerLogger mChildrenContainerLogger;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
@@ -125,6 +127,46 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 ) {
                     mLogBufferLogger.logSkipAttachingKeepInParentChild(child, newParent);
                 }
+
+                @Override
+                public void logRemoveTransientFromContainer(
+                        NotificationEntry childEntry,
+                        NotificationEntry containerEntry
+                ) {
+                    mLogBufferLogger.logRemoveTransientFromContainer(childEntry, containerEntry);
+                }
+
+                @Override
+                public void logRemoveTransientFromNssl(
+                        NotificationEntry childEntry
+                ) {
+                    mLogBufferLogger.logRemoveTransientFromNssl(childEntry);
+                }
+
+                @Override
+                public void logRemoveTransientFromViewGroup(
+                        NotificationEntry childEntry,
+                        ViewGroup containerView
+                ) {
+                    mLogBufferLogger.logRemoveTransientFromViewGroup(childEntry, containerView);
+                }
+
+                @Override
+                public void logAddTransientRow(
+                        NotificationEntry childEntry,
+                        NotificationEntry containerEntry,
+                        int index
+                ) {
+                    mLogBufferLogger.logAddTransientRow(childEntry, containerEntry, index);
+                }
+
+                @Override
+                public void logRemoveTransientRow(
+                        NotificationEntry childEntry,
+                        NotificationEntry containerEntry
+                ) {
+                    mLogBufferLogger.logRemoveTransientRow(childEntry, containerEntry);
+                }
             };
 
 
@@ -135,6 +177,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             MetricsLogger metricsLogger,
             NotificationRowLogger logBufferLogger,
+            NotificationChildrenContainerLogger childrenContainerLogger,
             NotificationListContainer listContainer,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
@@ -188,6 +231,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mBubblesManagerOptional = bubblesManagerOptional;
         mDragController = dragController;
         mMetricsLogger = metricsLogger;
+        mChildrenContainerLogger = childrenContainerLogger;
         mLogBufferLogger = logBufferLogger;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
@@ -222,6 +266,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mNotificationGutsManager,
                 mDismissibilityProvider,
                 mMetricsLogger,
+                mChildrenContainerLogger,
                 mSmartReplyConstants,
                 mSmartReplyController,
                 mFeatureFlags,
