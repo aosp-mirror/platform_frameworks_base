@@ -36,5 +36,6 @@ android_test {
         "mockito-target-minus-junit4",
     ],
     kotlincflags: ["-Xjvm-default=all"],
+    sdk_version: "current",
     min_sdk_version: "31",
 }
