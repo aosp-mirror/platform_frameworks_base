@@ -72,6 +72,7 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
@@ -99,14 +100,15 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.keyguard.util.IndicationHelper;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
@@ -214,6 +216,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private ScreenLifecycle.Observer mScreenObserver;
     private BroadcastReceiver mBroadcastReceiver;
+    private IndicationHelper mIndicationHelper;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private TestableLooper mTestableLooper;
     private final int mCurrentUserId = 1;
@@ -263,12 +266,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
 
-
         when(mDevicePolicyResourcesManager.getString(anyString(), any()))
                 .thenReturn(mDisclosureGeneric);
         when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
                 .thenReturn(mDisclosureWithOrganization);
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
+
+        mIndicationHelper = new IndicationHelper(mKeyguardUpdateMonitor);
 
         mWakeLock = new WakeLockFake();
         mWakeLockBuilder = new WakeLockFake.Builder(mContext);
@@ -305,7 +309,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mAlarmManager,
                 mUserTracker,
                 mock(BouncerMessageInteractor.class),
-                flags
+                flags,
+                mIndicationHelper
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
@@ -807,33 +812,19 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transientIndication_visibleWhenDozing_ignoresFingerprintCancellation() {
+    public void transientIndication_visibleWhenDozing_ignoresFingerprintErrorMsg() {
         createController();
-
         mController.setVisible(true);
         reset(mRotateTextViewController);
+
+        // WHEN a fingerprint error user cancelled message is received
         mController.getKeyguardCallback().onBiometricError(
-                FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED, "foo",
-                BiometricSourceType.FINGERPRINT);
-        mController.getKeyguardCallback().onBiometricError(
-                FingerprintManager.FINGERPRINT_ERROR_CANCELED, "bar",
+                BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED, "foo",
                 BiometricSourceType.FINGERPRINT);
 
+        // THEN no message is shown
         verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
         verifyNoMessage(INDICATION_TYPE_TRANSIENT);
-    }
-
-    @Test
-    public void transientIndication_visibleWhenDozing_ignoresPowerPressed() {
-        createController();
-
-        mController.setVisible(true);
-        reset(mRotateTextViewController);
-        mController.getKeyguardCallback().onBiometricError(
-                FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "foo",
-                BiometricSourceType.FINGERPRINT);
-
-        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
     }
 
     @Test
