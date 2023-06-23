@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"មានបញ្ហាក្នុង​ការអាន​ឧបករណ៍រង្វាស់កម្រិតថ្មរបស់អ្នក"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ចុចដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"មិនបាន​កំណត់​ម៉ោងរោទ៍​ទេ"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"បញ្ចូលព័ត៌មានផ្ទៀងផ្ទាត់សម្រាប់ការចាក់សោអេក្រង់"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ផ្ទៀងផ្ទាត់"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"បញ្ចូល​ឧបករណ៍"</string>

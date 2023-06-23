@@ -176,7 +176,7 @@
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Barmoq izi bilan ochish sozlanmadi. Sozlamalarni ochib, qaytadan urining."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Yuz bilan ochishni qayta sozlash"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Yuz bilan ochish"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Yuz bilan ochish funksiyasini sozlash"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Yuz bilan ochishni sozlash"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Yuz bilan ochish funksiyasini qayta sozlash uchun joriy yuz modelingiz oʻchirib tashlanadi.\n\nTelefonni qulfdan chiqarish maqsadida yuzingizdan foydalanish uchun bu funksiyani qayta sozlashingiz kerak."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Yuz bilan ochish sozlanmadimi. Sozlamalarni ochib, qaytadan urining."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Barmoq izi skaneriga tegining"</string>
@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batareya quvvati aniqlanmadi"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Batafsil axborot olish uchun bosing"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Signal sozlanmagan"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"ekran qulfini kiriting"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Barmoq izi skaneri"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentifikatsiya"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"qurilmani ochish"</string>

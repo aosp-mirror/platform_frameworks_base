@@ -770,8 +770,8 @@
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"拔除裝置"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"裝置的充電埠附近越來越熱。如果裝置已連接充電器或 USB 配件，請立即拔除。此外，電線也可能會變熱，請特別留意。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"查看處理步驟"</string>
-    <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"向左快速鍵"</string>
-    <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"向右快速鍵"</string>
+    <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"左側捷徑"</string>
+    <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"右側捷徑"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"向左快速鍵可一併解鎖裝置"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"向右快速鍵可一併解鎖裝置"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"無"</string>
@@ -1126,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"如要瞭解詳情，請前往 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"如要將錢包應用程式新增為捷徑，請確認已安裝該應用程式"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"如要將錢包應用程式新增為捷徑，請確認已新增至少一張卡片"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"如要將 QR code 掃描器新增為捷徑，請確認已安裝相機應用程式"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"如要將 Google Home 應用程式新增為捷徑，請確認已安裝該應用程式"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• 至少要有一部可用裝置"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"選取預設的記事應用程式，即可使用筆記捷徑"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"選取應用程式"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"按住快速鍵"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>

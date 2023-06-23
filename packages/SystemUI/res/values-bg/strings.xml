@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Възникна проблем при четенето на данните за нивото на батерията"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Докоснете за още информация"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Няма зададен будилник"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"въведете опция за заключване на екрана"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сензор за отпечатъци"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"удостоверяване"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"вход в устройството"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Научете повече"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Научете повече на адрес <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отваряне на <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"За да добавите пряк път към приложението Wallet, уверете се, че то е инсталирано"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"За да добавите пряк път към приложението Wallet, уверете се, че е добавена поне една карта"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"За да добавите пряк път към скенера за QR кодове, уверете се, че е инсталирано приложение за камера"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"За да добавите пряк път към приложението Home, уверете се, че то е инсталирано"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Налице е поне едно устройство."</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Изберете стандартно приложение за бележки, за да използвате прекия път за водене на бележки"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Избиране на приложение"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Докоснете и задръжте прекия път"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отказ"</string>

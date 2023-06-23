@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Došlo je do problema prilikom očitavanja mjerača stanja baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nema nijednog alarma"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"unos zaključavanja ekrana"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor za otisak prsta"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentificiranje"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"pristup uređaju"</string>
@@ -1127,12 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Saznajte više"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Saznajte više na <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otvori aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Za dodavanje aplikacije Wallet kao prečaca provjerite je li instalirana"</string>
-    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Provjerite je li dodana barem jedna kartica kako biste dodali aplikaciju Wallet kao prečac"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Provjerite je li instalirana aplikacija kamere kako biste dodali čitač QR koda kao prečac"</string>
-    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Provjerite je li aplikacija Home instalirana kako biste je dodali kao prečac"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Da dodate aplikaciju Novčanik kao prečicu, instalirajte aplikaciju"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Da dodate aplikaciju Novčanik kao prečicu, dodajte barem jednu karticu"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Da dodate skener QR koda kao prečicu, instalirajte aplikaciju kamere"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Da dodate aplikaciju Home kao prečicu, instalirajte aplikaciju"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Dostupan je najmanje jedan uređaj"</string>
-    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Odaberite zadanu aplikaciju za bilješke da biste koristili prečac za pisanje bilježaka"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Odaberite zadanu aplikaciju za bilješke da koristite prečicu za zapisivanje bilješki"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Odaberi aplikaciju"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Dodirnite i zadržite prečicu"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Otkaži"</string>

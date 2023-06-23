@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Մարտկոցի ցուցիչի ցուցմունքը կարդալու հետ կապված խնդիր կա"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Հպեք՝ ավելին իմանալու համար"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Զարթուցիչ դրված չէ"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"ապակողպել էկրանը"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Մատնահետքի սկաներ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"նույնականացնել"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"նշել սարքը"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Իմանալ ավելին"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Իմացեք ավելին <xliff:g id="URL">%s</xliff:g> էջում"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Բացել <xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet հավելվածի դյուրանցումն ավելացնելու համար համոզվեք, որ հավելվածը տեղադրված է"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet հավելվածի դյուրանցումն ավելացնելու համար համոզվեք, որ առնվազն մեկ քարտ ավելացված է"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR կոդերի սկաների դյուրանցումն ավելացնելու համար համոզվեք, որ տեսախցիկի հավելվածը տեղադրված է"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home հավելվածի դյուրանցումն ավելացնելու համար համոզվեք, որ հավելվածը տեղադրված է"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Հասանելի է առնվազն մեկ սարք"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Ընտրեք նշումների կանխադրված հավելված՝ նշումների ստեղծման դյուրանցումն օգտագործելու համար"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ընտրել հավելված"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Հպեք դյուրանցմանը և պահեք"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Չեղարկել"</string>

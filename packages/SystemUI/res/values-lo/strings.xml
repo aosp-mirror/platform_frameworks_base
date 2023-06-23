@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ເກີດບັນຫາໃນການອ່ານຕົວວັດແທກແບັດເຕີຣີຂອງທ່ານ"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ແຕະເພື່ອເບິ່ງຂໍ້ມູນເພີ່ມເຕີມ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ບໍ່ໄດ້ຕັ້ງໂມງປຸກ"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"ໃສ່ຂໍ້ມູນການລັອກໜ້າຈໍ"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ເຊັນ​ເຊີລາຍນິ້ວ​ມື"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ພິສູດຢືນຢັນ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ເຂົ້າອຸປະກອນ"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ສຶກສາເພີ່ມເຕີມຢູ່ <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"ເປີດ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ເພື່ອເພີ່ມແອັບ Wallet ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ຕິດຕັ້ງແອັບແລ້ວ"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ເພື່ອເພີ່ມແອັ Wallet ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ເພີ່ມຢ່າງໜ້ອຍ 1 ບັດແລ້ວ"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"ເພື່ອເພີ່ມຕົວສະແກນລະຫັດ QR ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບແລ້ວ"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"ເພື່ອເພີ່ມແອັບ Home ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ຕິດຕັ້ງແອັບແລ້ວ"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ເລືອກແອັບບັນທຶກເລີ່ມຕົ້ນເພື່ອໃຊ້ທາງລັດການຈົດບັນທຶກ"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ເລືອກແອັບ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ແຕະທາງລັດຄ້າງໄວ້"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>

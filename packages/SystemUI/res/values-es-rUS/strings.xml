@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema al leer el medidor de batería"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Presiona para obtener más información"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"No establecida"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"ingresa el bloqueo pantalla"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de huellas dactilares"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ingresar al dispositivo"</string>

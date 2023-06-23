@@ -399,7 +399,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Podczas nagrywania i przesyłania usługa udostępniająca tę funkcję będzie miała dostęp do wszystkich informacji widocznych na ekranie lub odtwarzanych na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Cały ekran"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Pojedyncza aplikacja"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Udostępnianie i nagrywanie za pomocą aplikacji"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Udostępnianie i nagrywanie aplikacji"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Rozpocząć nagrywanie lub przesyłanie za pomocą aplikacji <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem z odczytaniem pomiaru wykorzystania baterii"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nie ustawiono alarmu"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"Wprowadź blokadę ekranu"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Czytnik linii papilarnych"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"uwierzytelnij"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"otwórz urządzenie"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Więcej informacji"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Więcej informacji: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otwórz: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Aby dodać aplikację Portfel jako skrót, upewnij się, że jest zainstalowana"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Aby dodać aplikację Portfel jako skrót, upewnij się, że została dodana co najmniej 1 karta"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Aby dodać Skaner kodów QR jako skrót, upewnij się, że jest zainstalowana aplikacja aparatu"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Aby dodać aplikację Home jako skrót, upewnij się, że jest zainstalowana"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Dostępne jest co najmniej 1 urządzenie."</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Wybierz domyślną aplikację do obsługi notatek, której skrótu będziesz używać do funkcji notowania"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Wybierz aplikację"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Skrót – naciśnij i przytrzymaj"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anuluj"</string>

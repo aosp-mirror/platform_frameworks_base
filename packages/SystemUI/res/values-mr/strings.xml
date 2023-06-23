@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"तुमचे बॅटरी मीटर वाचताना समस्या आली"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"अधिक माहितीसाठी टॅप करा"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"अलार्म सेट केला नाही"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"स्क्रीन लॉक एंटर करा"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"फिंगरप्रिंट सेन्सर"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ऑथेंटिकेट करा"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिव्हाइस एंटर करा"</string>

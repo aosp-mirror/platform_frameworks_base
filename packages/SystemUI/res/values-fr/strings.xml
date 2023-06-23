@@ -412,7 +412,7 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Lorsque vous partagez, enregistrez ou castez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Lorsque vous partagez, enregistrez ou castez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Commencer"</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquée par votre administrateur informatique"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqué par votre administrateur informatique"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"La capture d\'écran est désactivée conformément aux règles relatives à l\'appareil"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tout effacer"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Un problème est survenu au niveau de la lecture de votre outil de mesure de batterie"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Appuyer pour en savoir plus"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Pas d\'alarme définie"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"accéder au verrouillage de l\'écran"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Lecteur d\'empreinte digitale"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"s\'authentifier"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accéder à l\'appareil"</string>
