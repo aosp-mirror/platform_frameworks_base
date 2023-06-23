@@ -224,7 +224,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotation automatique"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotation automatique de l\'écran"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à l\'appareil photo"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à la caméra"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accès au micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Accessible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqué"</string>
@@ -826,6 +826,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Ouvrez <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Lecture de <xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> à partir de <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Lecture de <xliff:g id="SONG_NAME">%1$s</xliff:g> à partir de <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Annuler"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Rapprochez-vous pour faire jouer le contenu sur <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Rapprochez-vous de <xliff:g id="DEVICENAME">%1$s</xliff:g> pour lire le contenu"</string>

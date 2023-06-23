@@ -674,8 +674,8 @@
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"拔除充電器"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"為這個裝置充電時發生問題。這可能是因為傳輸線過熱所致，請拔除電源變壓器並採取處理措施。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"查看處理步驟"</string>
-    <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"向左快速鍵"</string>
-    <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"向右快速鍵"</string>
+    <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"左側捷徑"</string>
+    <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"右側捷徑"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"向左快速鍵可一併解鎖裝置"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"向右快速鍵可一併解鎖裝置"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"無"</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"開啟「<xliff:g id="APP_LABEL">%1$s</xliff:g>」"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"透過「<xliff:g id="APP_LABEL">%3$s</xliff:g>」播放<xliff:g id="ARTIST_NAME">%2$s</xliff:g>的〈<xliff:g id="SONG_NAME">%1$s</xliff:g>〉"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"透過「<xliff:g id="APP_LABEL">%2$s</xliff:g>」播放〈<xliff:g id="SONG_NAME">%1$s</xliff:g>〉"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」執行中"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"復原"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"如要在「<xliff:g id="DEVICENAME">%1$s</xliff:g>」上播放，請靠近一點"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"如要在這部裝置上播放，請移到更靠近「<xliff:g id="DEVICENAME">%1$s</xliff:g>」的位置"</string>
