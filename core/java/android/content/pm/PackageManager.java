@@ -4612,6 +4612,19 @@ public abstract class PackageManager {
             "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
 
     /**
+     * The deviceId for which the permissions are requested, {@link Context#DEVICE_ID_DEFAULT}
+     * is the default device ID.
+     * <p>
+     * <strong>Type:</strong> int
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID =
+            "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
+
+    /**
      * The results from the permissions request.
      * <p>
      * <strong>Type:</strong> int[] of #PermissionResult
@@ -6592,7 +6605,7 @@ public abstract class PackageManager {
     @UnsupportedAppUsage
     public Intent buildRequestPermissionsIntent(@NonNull String[] permissions) {
         if (ArrayUtils.isEmpty(permissions)) {
-           throw new IllegalArgumentException("permission cannot be null or empty");
+            throw new IllegalArgumentException("permission cannot be null or empty");
         }
         Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
         intent.putExtra(EXTRA_REQUEST_PERMISSIONS_NAMES, permissions);
