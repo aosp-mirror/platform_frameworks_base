@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Моделът на лицето ви не бе създаден. Опитайте отново."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Изглежда, че носите тъмни очила. То трябва да е напълно видимо."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Изглежда, че лицето ви е покрито. То трябва да е напълно видимо."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лицето ви е покрито. То трябва да е напълно видимо."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Лицето не може да се потвърди. Хардуерът не е налице."</string>
@@ -1253,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Зареждането завършва."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Натиснахте бутона за включване/изключване – това обикновено изключва екрана.\n\nОпитайте да докоснете леко, докато настройвате отпечатъка си."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Изключете екрана за изход от настройката"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За изход изключете екрана"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Изключване"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Напред с потвърждаването на отпечатъка?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Натиснахте бутона за включване/изключване – това обикновено изключва екрана.\n\nОпитайте да докоснете леко, за да потвърдите отпечатъка си."</string>
