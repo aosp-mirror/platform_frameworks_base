@@ -176,7 +176,16 @@ constructor(
                     now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
         }
         if (weatherTarget != null) {
-            val weatherData = WeatherData.fromBundle(weatherTarget.baseAction.extras)
+            val clickIntent = weatherTarget.headerAction?.intent
+            val weatherData = WeatherData.fromBundle(weatherTarget.baseAction.extras, { v ->
+                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    activityStarter.startActivity(
+                        clickIntent,
+                        true, /* dismissShade */
+                        null,
+                        false)
+                }
+            })
             if (weatherData != null) {
                 keyguardUpdateMonitor.sendWeatherData(weatherData)
             }

@@ -1293,10 +1293,17 @@ public class OomAdjuster {
         for (int i = numLru - 1; i >= 0; i--) {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
-            if (!app.isKilledByAm() && app.getThread() != null && !app.isPendingFinishAttach()) {
+            if (!app.isKilledByAm() && app.getThread() != null) {
                 // We don't need to apply the update for the process which didn't get computed
                 if (state.getCompletedAdjSeq() == mAdjSeq) {
                     applyOomAdjLSP(app, true, now, nowElapsed, oomAdjReason);
+                }
+
+                if (app.isPendingFinishAttach()) {
+                    // Avoid trimming processes that are still initializing. If they aren't
+                    // hosting any components yet because they may be unfairly killed.
+                    // We however apply the oom scores set at #setAttachingProcessStatesLSP.
+                    continue;
                 }
 
                 final ProcessServiceRecord psr = app.mServices;
@@ -2806,6 +2813,18 @@ public class OomAdjuster {
             capability &= ~PROCESS_CAPABILITY_BFSL;
         }
 
+
+        if (app.isPendingFinishAttach()) {
+            // If the app is still starting up. We reset the computations to the
+            // hardcoded values in setAttachingProcessStatesLSP. This ensures that the app keeps
+            // hard-coded default 'startup' oom scores while starting up. When it finishes startup,
+            // we'll recompute oom scores based on it's actual hosted compoenents.
+            setAttachingProcessStatesLSP(app);
+            state.setAdjSeq(mAdjSeq);
+            state.setCompletedAdjSeq(state.getAdjSeq());
+            return false;
+        }
+
         // Do final modification to adj.  Everything we do between here and applying
         // the final setAdj must be done in this function, because we will also use
         // it when computing the final cached adj later.  Note that we don't need to
@@ -3243,8 +3262,11 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    void setAttachingSchedGroupLSP(ProcessRecord app) {
+    void setAttachingProcessStatesLSP(ProcessRecord app) {
         int initialSchedGroup = SCHED_GROUP_DEFAULT;
+        int initialProcState = PROCESS_STATE_CACHED_EMPTY;
+        int initialCapability =  PROCESS_CAPABILITY_NONE;
+        boolean initialCached = true;
         final ProcessStateRecord state = app.mState;
         // If the process has been marked as foreground, it is starting as the top app (with
         // Zygote#START_AS_TOP_APP_ARG), so boost the thread priority of its default UI thread.
@@ -3260,13 +3282,24 @@ public class OomAdjuster {
                     setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
                 }
                 initialSchedGroup = SCHED_GROUP_TOP_APP;
+                initialProcState = PROCESS_STATE_TOP;
+                initialCapability = PROCESS_CAPABILITY_ALL;
+                initialCached = false;
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to pre-set top priority to " + app + " " + e);
             }
         }
 
-        state.setSetSchedGroup(initialSchedGroup);
         state.setCurrentSchedulingGroup(initialSchedGroup);
+        state.setCurProcState(initialProcState);
+        state.setCurRawProcState(initialProcState);
+        state.setCurCapability(initialCapability);
+        state.setCached(initialCached);
+
+        state.setCurAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setCurRawAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setForcingToImportant(null);
+        state.setHasShownUi(false);
     }
 
     // ONLY used for unit testing in OomAdjusterTests.java

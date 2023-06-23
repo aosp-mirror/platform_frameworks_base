@@ -2759,6 +2759,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean animationGenerated = container != null && generateRemoveAnimation(child);
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
+                logAddTransientChild(child, container);
                 container.addTransientView(child, 0);
                 child.setTransientContainer(container);
             }
@@ -2772,6 +2773,46 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateAnimationState(false, child);
 
         focusNextViewIfFocused(child);
+    }
+
+    private void logAddTransientChild(ExpandableView child, ViewGroup container) {
+        if (mLogger == null) {
+            return;
+        }
+        if (child instanceof ExpandableNotificationRow) {
+            if (container instanceof NotificationChildrenContainer) {
+                mLogger.addTransientChildNotificationToChildContainer(
+                        ((ExpandableNotificationRow) child).getEntry(),
+                        ((NotificationChildrenContainer) container)
+                                .getContainingNotification().getEntry()
+                );
+            } else if (container instanceof NotificationStackScrollLayout) {
+                mLogger.addTransientChildNotificationToNssl(
+                        ((ExpandableNotificationRow) child).getEntry()
+                );
+            } else {
+                mLogger.addTransientChildNotificationToViewGroup(
+                        ((ExpandableNotificationRow) child).getEntry(),
+                        container
+                );
+            }
+        }
+    }
+
+    @Override
+    public void addTransientView(View view, int index) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.addTransientRow(((ExpandableNotificationRow) view).getEntry(), index);
+        }
+        super.addTransientView(view, index);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.removeTransientRow(((ExpandableNotificationRow) view).getEntry());
+        }
+        super.removeTransientView(view);
     }
 
     /**
@@ -3033,7 +3074,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!animationsEnabled) {
             mSwipedOutViews.clear();
             mChildrenToRemoveAnimated.clear();
-            clearTemporaryViewsInGroup(this);
+            clearTemporaryViewsInGroup(
+                    /* viewGroup = */ this,
+                    /* reason = */ "setAnimationsEnabled");
         }
     }
 
@@ -4008,24 +4051,46 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     private void clearTemporaryViews() {
         // lets make sure nothing is transient anymore
-        clearTemporaryViewsInGroup(this);
+        clearTemporaryViewsInGroup(
+                /* viewGroup = */ this,
+                /* reason = */ "clearTemporaryViews"
+        );
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView child = getChildAtIndex(i);
             if (child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                clearTemporaryViewsInGroup(row.getChildrenContainer());
+                clearTemporaryViewsInGroup(
+                        /* viewGroup = */ row.getChildrenContainer(),
+                        /* reason = */ "clearTemporaryViewsInGroup(row.getChildrenContainer())"
+                );
             }
         }
     }
 
-    private void clearTemporaryViewsInGroup(ViewGroup viewGroup) {
+    private void clearTemporaryViewsInGroup(ViewGroup viewGroup, String reason) {
         while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
             final View transientView = viewGroup.getTransientView(0);
             viewGroup.removeTransientView(transientView);
             if (transientView instanceof ExpandableView) {
                 ((ExpandableView) transientView).setTransientContainer(null);
+                if (transientView instanceof ExpandableNotificationRow) {
+                    logTransientNotificationRowTraversalCleaned(
+                            (ExpandableNotificationRow) transientView,
+                            reason
+                    );
+                }
             }
         }
+    }
+
+    private void logTransientNotificationRowTraversalCleaned(
+            ExpandableNotificationRow transientView,
+            String reason
+    ) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.transientNotificationRowTraversalCleaned(transientView.getEntry(), reason);
     }
 
     void onPanelTrackingStarted() {

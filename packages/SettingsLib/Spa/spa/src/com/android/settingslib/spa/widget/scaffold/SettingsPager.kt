@@ -20,20 +20,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
@@ -49,7 +41,7 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
 
     Column {
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPageStateFixed()
+        val pagerState = rememberPagerState { titles.size }
 
         TabRow(
             selectedTabIndex = pagerState.currentPage,
@@ -72,46 +64,8 @@ fun SettingsPager(titles: List<String>, content: @Composable (page: Int) -> Unit
             }
         }
 
-        HorizontalPager(pageCount = titles.size, state = pagerState) { page ->
+        HorizontalPager(state = pagerState) { page ->
             content(page)
         }
     }
-}
-
-/**
- * Gets the state of [PagerState].
- *
- * This is a work around.
- *
- * TODO: Remove this and replace with rememberPageState() after the Compose Foundation 1.5.0-alpha04
- *       updated in the platform.
- */
-@Composable
-@OptIn(ExperimentalFoundationApi::class)
-private fun rememberPageStateFixed(): PagerState {
-    var currentPage by rememberSaveable { mutableStateOf(0) }
-    var targetPage by rememberSaveable { mutableStateOf(-1) }
-    val pagerState = rememberPagerState()
-    val configuration = LocalConfiguration.current
-    var lastScreenWidthDp by rememberSaveable { mutableStateOf(-1) }
-    val screenWidthDp = configuration.screenWidthDp
-    LaunchedEffect(screenWidthDp) {
-        // Reset pager state to fix an issue after configuration change.
-        // When we declare android:configChanges in the manifest, the pager state is in a weird
-        // state after configuration change.
-        targetPage = currentPage
-        lastScreenWidthDp = screenWidthDp
-    }
-    LaunchedEffect(targetPage) {
-        if (targetPage != -1) {
-            pagerState.scrollToPage(targetPage)
-            targetPage = -1
-        }
-    }
-    SideEffect {
-        if (lastScreenWidthDp == screenWidthDp) {
-            currentPage = pagerState.currentPage
-        }
-    }
-    return pagerState
 }

@@ -347,10 +347,12 @@ public class StackStateAnimator {
             final ExpandableView changingView = (ExpandableView) event.mChangingView;
             boolean loggable = false;
             boolean isHeadsUp = false;
+            boolean isGroupChild = false;
             String key = null;
             if (changingView instanceof ExpandableNotificationRow && mLogger != null) {
                 loggable = true;
                 isHeadsUp = ((ExpandableNotificationRow) changingView).isHeadsUp();
+                isGroupChild = changingView.isChildInGroup();
                 key = ((ExpandableNotificationRow) changingView).getEntry().getKey();
             }
             if (event.animationType ==
@@ -407,13 +409,21 @@ public class StackStateAnimator {
 
                 }
                 Runnable postAnimation = changingView::removeFromTransientContainer;
-                if (loggable && isHeadsUp) {
-                    mLogger.logHUNViewDisappearingWithRemoveEvent(key);
+                if (loggable) {
                     String finalKey = key;
-                    postAnimation = () -> {
-                        mLogger.disappearAnimationEnded(finalKey);
-                        changingView.removeFromTransientContainer();
-                    };
+                    if (isHeadsUp) {
+                        mLogger.logHUNViewDisappearingWithRemoveEvent(key);
+                        postAnimation = () -> {
+                            mLogger.disappearAnimationEnded(finalKey);
+                            changingView.removeFromTransientContainer();
+                        };
+                    } else if (isGroupChild) {
+                        mLogger.groupChildRemovalEventProcessed(key);
+                        postAnimation = () -> {
+                            mLogger.groupChildRemovalAnimationEnded(finalKey);
+                            changingView.removeFromTransientContainer();
+                        };
+                    }
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,

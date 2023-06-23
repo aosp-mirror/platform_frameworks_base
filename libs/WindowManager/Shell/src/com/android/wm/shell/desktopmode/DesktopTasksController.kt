@@ -33,6 +33,7 @@ import android.os.IBinder
 import android.os.SystemProperties
 import android.util.DisplayMetrics.DENSITY_DEFAULT
 import android.view.SurfaceControl
+import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
@@ -267,16 +268,24 @@ class DesktopTasksController(
      */
     fun cancelMoveToFreeform(task: RunningTaskInfo, position: Point) {
         KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: cancelMoveToFreeform taskId=%d",
-                task.taskId
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTasksController: cancelMoveToFreeform taskId=%d",
+            task.taskId
         )
         val wct = WindowContainerTransaction()
-        addMoveToFullscreenChanges(wct, task)
+        wct.setBounds(task.token, null)
+
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct, position,
-                    mOnAnimationFinishedCallback)
+            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(
+                wct, position) { t ->
+                val callbackWCT = WindowContainerTransaction()
+                visualIndicator?.releaseVisualIndicator(t)
+                visualIndicator = null
+                addMoveToFullscreenChanges(callbackWCT, task)
+                shellTaskOrganizer.applyTransaction(callbackWCT)
+            }
         } else {
+            addMoveToFullscreenChanges(wct, task)
             shellTaskOrganizer.applyTransaction(wct)
             releaseVisualIndicator()
         }

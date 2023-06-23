@@ -1347,7 +1347,7 @@ final class ActivityManagerConstants extends ContentObserver {
         updateForegroundServiceStartsLoggingEnabled();
     }
 
-    private void loadDeviceConfigConstants() {
+    void loadDeviceConfigConstants() {
         mOnDeviceConfigChangedListener.onPropertiesChanged(
                 DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
         mOnDeviceConfigChangedForComponentAliasListener.onPropertiesChanged(
