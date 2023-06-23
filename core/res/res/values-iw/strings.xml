@@ -641,7 +641,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"יש להרחיק את הטלפון."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"צריך לקרב את הטלפון."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"צריך להרים את הטלפון גבוה יותר."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"צריך להוריד את הטלפון."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"צריך להנמיך את הטלפון."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"צריך להזיז את הטלפון שמאלה."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"צריך להזיז את הטלפון ימינה."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
@@ -1354,7 +1354,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"‏שיתוף אינטרנט בין מכשירים באמצעות USB מופעל"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏MIDI באמצעות USB מופעל"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏אביזר USB מחובר"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"יש להקיש להצגת אפשרויות נוספות."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"לאפשרויות נוספות, יש להקיש כאן."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"המכשיר המחובר בטעינה. יש להקיש לאפשרויות נוספות."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"המכשיר זיהה התקן אודיו אנלוגי"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ההתקן שחיברת לא תואם לטלפון הזה. יש להקיש לקבלת מידע נוסף."</string>
