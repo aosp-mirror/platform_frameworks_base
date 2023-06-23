@@ -24,6 +24,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.ACTION_USER_STOPPED;
 import static android.content.Intent.ACTION_USER_UNLOCKED;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_TIMED;
@@ -251,6 +253,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_REQUIRE_NFC_UNLOCK = 345;
     private static final int MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED = 346;
     private static final int MSG_SERVICE_PROVIDERS_UPDATED = 347;
+    private static final int MSG_BIOMETRIC_ENROLLMENT_STATE_CHANGED = 348;
 
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
@@ -2484,6 +2487,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED:
                         handleKeyguardDismissAnimationFinished();
                         break;
+                    case MSG_BIOMETRIC_ENROLLMENT_STATE_CHANGED:
+                        notifyAboutEnrollmentChange(msg.arg1);
+                        break;
                     default:
                         super.handleMessage(msg);
                         break;
@@ -2584,6 +2590,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
             @Override
             public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
+                mHandler.obtainMessage(MSG_BIOMETRIC_ENROLLMENT_STATE_CHANGED, modality, 0)
+                        .sendToTarget();
                 mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                         FACE_AUTH_TRIGGERED_ENROLLMENTS_CHANGED));
             }
@@ -3431,6 +3439,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
         updateFaceEnrolled(userId);
         return mIsFaceEnrolled;
+    }
+
+    private void notifyAboutEnrollmentChange(@BiometricAuthenticator.Modality int modality) {
+        BiometricSourceType biometricSourceType;
+        if (modality == TYPE_FINGERPRINT) {
+            biometricSourceType = FINGERPRINT;
+        } else if (modality == TYPE_FACE) {
+            biometricSourceType = FACE;
+        } else {
+            return;
+        }
+        mLogger.notifyAboutEnrollmentsChanged(biometricSourceType);
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onBiometricEnrollmentStateChanged(biometricSourceType);
+            }
+        }
     }
 
     private void stopListeningForFingerprint() {

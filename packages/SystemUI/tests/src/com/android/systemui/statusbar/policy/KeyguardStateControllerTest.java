@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -43,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -66,6 +68,9 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitorLogger mLogger;
 
+    @Captor
+    private ArgumentCaptor<KeyguardUpdateMonitorCallback> mUpdateCallbackCaptor;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -81,6 +86,23 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Test
     public void testAddCallback_registersListener() {
         verify(mKeyguardUpdateMonitor).registerCallback(any());
+    }
+
+    @Test
+    public void testFaceAuthEnabledChanged_calledWhenFaceEnrollmentStateChanges() {
+        KeyguardStateController.Callback callback = mock(KeyguardStateController.Callback.class);
+
+        when(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(anyInt())).thenReturn(false);
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+        mKeyguardStateController.addCallback(callback);
+        assertThat(mKeyguardStateController.isFaceAuthEnabled()).isFalse();
+
+        when(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onBiometricEnrollmentStateChanged(
+                BiometricSourceType.FACE);
+
+        assertThat(mKeyguardStateController.isFaceAuthEnabled()).isTrue();
+        verify(callback).onFaceAuthEnabledChanged();
     }
 
     @Test
@@ -177,16 +199,14 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Test
     public void testOnEnabledTrustAgentsChangedCallback() {
         final Random random = new Random();
-        final ArgumentCaptor<KeyguardUpdateMonitorCallback> updateCallbackCaptor =
-                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
 
-        verify(mKeyguardUpdateMonitor).registerCallback(updateCallbackCaptor.capture());
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
         final KeyguardStateController.Callback stateCallback =
                 mock(KeyguardStateController.Callback.class);
         mKeyguardStateController.addCallback(stateCallback);
 
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        updateCallbackCaptor.getValue().onEnabledTrustAgentsChanged(random.nextInt());
+        mUpdateCallbackCaptor.getValue().onEnabledTrustAgentsChanged(random.nextInt());
         verify(stateCallback).onUnlockedChanged();
     }
 }
