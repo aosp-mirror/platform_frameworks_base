@@ -603,7 +603,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
                 mShadeTransitionController,
-                mInteractionJankMonitor,
                 systemClock,
                 mKeyguardBottomAreaViewModel,
                 mKeyguardBottomAreaInteractor,
