@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"در حال قطع اتصال..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"در حال اتصال…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"متصل<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"در حال مرتبط‌سازی..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"درحال جفت کردن..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"متصل (بدون تلفن)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"متصل (بدون رسانه)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"متصل (بدون تلفن یا رسانه)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -247,7 +247,7 @@
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"مرتبط‌سازی ناموفق"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"مطمئن شوید که دستگاه به همان شبکه متصل باشد."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن رمزینه پاسخ‌سریع مرتبط کنید"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"مرتبط‌سازی دستگاه…"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"جفت کردن دستگاه…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"جفت کردن دستگاه انجام نشد. یا رمزینه پاسخ‌سریع اشتباه بوده است، یا دستگاه به همان شبکه متصل نیست."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏نشانی IP و درگاه"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"اسکن رمزینه پاسخ‌سریع"</string>
