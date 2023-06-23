@@ -22,7 +22,9 @@ import android.annotation.IntDef;
  * Callback called when receiving drag-resize or drag-move related input events.
  */
 public interface DragPositioningCallback {
-    @IntDef({CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM})
+    @IntDef(flag = true, value = {
+            CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM
+    })
     @interface CtrlType {}
 
     int CTRL_TYPE_UNDEFINED = 0;

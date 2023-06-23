@@ -18,8 +18,11 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
@@ -48,6 +51,8 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.view.BaseIWindow;
 
+import java.util.function.Supplier;
+
 /**
  * An input event listener registered to InputDispatcher to receive input events on task edges and
  * and corners. Converts them to drag resize requests.
@@ -60,6 +65,7 @@ class DragResizeInputListener implements AutoCloseable {
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final InputManager mInputManager;
+    private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
 
     private final int mDisplayId;
     private final BaseIWindow mFakeWindow;
@@ -68,6 +74,10 @@ class DragResizeInputListener implements AutoCloseable {
     private final InputChannel mInputChannel;
     private final TaskResizeInputEventReceiver mInputEventReceiver;
     private final DragPositioningCallback mCallback;
+
+    private final SurfaceControl mInputSinkSurface;
+    private final BaseIWindow mFakeSinkWindow;
+    private final InputChannel mSinkInputChannel;
 
     private int mTaskWidth;
     private int mTaskHeight;
@@ -90,15 +100,18 @@ class DragResizeInputListener implements AutoCloseable {
             int displayId,
             int taskCornerRadius,
             SurfaceControl decorationSurface,
-            DragPositioningCallback callback) {
+            DragPositioningCallback callback,
+            Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier) {
         mInputManager = context.getSystemService(InputManager.class);
         mHandler = handler;
         mChoreographer = choreographer;
+        mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mDisplayId = displayId;
         mTaskCornerRadius = taskCornerRadius;
         mDecorationSurface = decorationSurface;
-        // Use a fake window as the backing surface is a container layer and we don't want to create
-        // a buffer layer for it so we can't use ViewRootImpl.
+        // Use a fake window as the backing surface is a container layer, and we don't want to
+        // create a buffer layer for it, so we can't use ViewRootImpl.
         mFakeWindow = new BaseIWindow();
         mFakeWindow.setSession(mWindowSession);
         mFocusGrantToken = new Binder();
@@ -111,7 +124,7 @@ class DragResizeInputListener implements AutoCloseable {
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
-                    0 /* inputFeatures */,
+                    INPUT_FEATURE_SPY,
                     TYPE_APPLICATION,
                     null /* windowToken */,
                     mFocusGrantToken,
@@ -126,6 +139,35 @@ class DragResizeInputListener implements AutoCloseable {
         mCallback = callback;
         mDragDetector = new DragDetector(mInputEventReceiver);
         mDragDetector.setTouchSlop(ViewConfiguration.get(context).getScaledTouchSlop());
+
+        mInputSinkSurface = surfaceControlBuilderSupplier.get()
+                .setName("TaskInputSink of " + decorationSurface)
+                .setContainerLayer()
+                .setParent(mDecorationSurface)
+                .build();
+        mSurfaceControlTransactionSupplier.get()
+                .setLayer(mInputSinkSurface, WindowDecoration.INPUT_SINK_Z_ORDER)
+                .show(mInputSinkSurface)
+                .apply();
+        mFakeSinkWindow = new BaseIWindow();
+        mSinkInputChannel = new InputChannel();
+        try {
+            mWindowSession.grantInputChannel(
+                    mDisplayId,
+                    mInputSinkSurface,
+                    mFakeSinkWindow,
+                    null /* hostInputToken */,
+                    FLAG_NOT_FOCUSABLE,
+                    0 /* privateFlags */,
+                    INPUT_FEATURE_NO_INPUT_CHANNEL,
+                    TYPE_INPUT_CONSUMER,
+                    null /* windowToken */,
+                    mFocusGrantToken,
+                    "TaskInputSink of " + decorationSurface,
+                    mSinkInputChannel);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -219,7 +261,35 @@ class DragResizeInputListener implements AutoCloseable {
                     mDecorationSurface,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
-                    0 /* inputFeatures */,
+                    INPUT_FEATURE_SPY,
+                    touchRegion);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        mSurfaceControlTransactionSupplier.get()
+                .setWindowCrop(mInputSinkSurface, mTaskWidth, mTaskHeight)
+                .apply();
+        // The touch region of the TaskInputSink should be the touch region of this
+        // DragResizeInputHandler minus the task bounds. Pilfering events isn't enough to prevent
+        // input windows from handling down events, which will bring tasks in the back to front.
+        //
+        // Note not the entire touch region responds to both mouse and touchscreen events.
+        // Therefore, in the region that only responds to one of them, it would be a no-op to
+        // perform a gesture in the other type of events. We currently only have a mouse-only region
+        // out of the task bounds, and due to the roughness of touchscreen events, it's not a severe
+        // issue. However, were there touchscreen-only a region out of the task bounds, mouse
+        // gestures will become no-op in that region, even though the mouse gestures may appear to
+        // be performed on the input window behind the resize handle.
+        touchRegion.op(0, 0, mTaskWidth, mTaskHeight, Region.Op.DIFFERENCE);
+        try {
+            mWindowSession.updateInputChannel(
+                    mSinkInputChannel.getToken(),
+                    mDisplayId,
+                    mInputSinkSurface,
+                    FLAG_NOT_FOCUSABLE,
+                    0 /* privateFlags */,
+                    INPUT_FEATURE_NO_INPUT_CHANNEL,
                     touchRegion);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -248,6 +318,16 @@ class DragResizeInputListener implements AutoCloseable {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+
+        mSinkInputChannel.dispose();
+        try {
+            mWindowSession.remove(mFakeSinkWindow);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        mSurfaceControlTransactionSupplier.get()
+                .remove(mInputSinkSurface)
+                .apply();
     }
 
     private class TaskResizeInputEventReceiver extends InputEventReceiver
@@ -316,6 +396,8 @@ class DragResizeInputListener implements AutoCloseable {
                         mShouldHandleEvents = isInResizeHandleBounds(x, y);
                     }
                     if (mShouldHandleEvents) {
+                        mInputManager.pilferPointers(mInputChannel.getToken());
+
                         mDragPointerId = e.getPointerId(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
