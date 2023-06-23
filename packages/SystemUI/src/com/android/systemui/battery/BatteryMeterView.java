@@ -350,7 +350,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 updatePercentText();
                 addView(mBatteryPercentView, new LayoutParams(
                         LayoutParams.WRAP_CONTENT,
-                        LayoutParams.MATCH_PARENT));
+                        LayoutParams.WRAP_CONTENT));
             }
         } else {
             if (showing) {
