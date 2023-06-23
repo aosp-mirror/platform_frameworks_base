@@ -573,6 +573,29 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun authenticateRunsWhenSecureCameraIsActiveIfBouncerIsShowing() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+            bouncerRepository.setAlternateVisible(false)
+            bouncerRepository.setPrimaryShow(false)
+
+            assertThat(canFaceAuthRun()).isTrue()
+
+            // launch secure camera
+            fakeCommandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+            }
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+            assertThat(canFaceAuthRun()).isFalse()
+
+            // but bouncer is shown after that.
+            bouncerRepository.setPrimaryShow(true)
+            assertThat(canFaceAuthRun()).isTrue()
+        }
+
+    @Test
     fun authenticateDoesNotRunOnUnsupportedPosture() =
         testScope.runTest {
             testGatingCheckForFaceAuth {
