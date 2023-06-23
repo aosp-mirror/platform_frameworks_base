@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -1131,7 +1132,7 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2User11.getKey())).isNotNull();
 
         // Would have loaded bubbles twice because of user switch
-        verify(mDataRepository, times(2)).loadBubbles(anyInt(), any());
+        verify(mDataRepository, times(2)).loadBubbles(anyInt(), anyList(), any());
     }
 
     @Test
@@ -1187,7 +1188,7 @@ public class BubblesTest extends SysuiTestCase {
         mEntryListener.onEntryRemoved(mRow2, REASON_APP_CANCEL);
         assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
 
-        verify(mDataRepository, times(1)).loadBubbles(anyInt(), any());
+        verify(mDataRepository, times(1)).loadBubbles(anyInt(), anyList(), any());
     }
 
     /**
