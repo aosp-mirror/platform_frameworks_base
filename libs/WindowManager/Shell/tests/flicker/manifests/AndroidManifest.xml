@@ -15,6 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.android.wm.shell.flicker">
 
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29"/>
@@ -57,10 +58,11 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-    </application>
 
-    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="com.android.wm.shell.flicker"
-                     android:label="WindowManager Shell Flicker Tests">
-    </instrumentation>
+        <!-- (b/197936012) Remove startup provider due to test timeout issue -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
+    </application>
 </manifest>
