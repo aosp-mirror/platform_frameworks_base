@@ -659,7 +659,6 @@ void VulkanManager::destroySurface(VulkanSurface* surface) {
     if (VK_NULL_HANDLE != mGraphicsQueue) {
         mQueueWaitIdle(mGraphicsQueue);
     }
-    mDeviceWaitIdle(mDevice);
 
     delete surface;
 }
