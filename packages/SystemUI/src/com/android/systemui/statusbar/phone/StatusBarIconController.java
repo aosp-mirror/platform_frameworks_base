@@ -173,7 +173,7 @@ public interface StatusBarIconController {
      */
     class DarkIconManager extends IconManager {
         private final DarkIconDispatcher mDarkIconDispatcher;
-        private int mIconHPadding;
+        private final int mIconHorizontalMargin;
 
         public DarkIconManager(
                 LinearLayout linearLayout,
@@ -189,8 +189,8 @@ public interface StatusBarIconController {
                     wifiUiAdapter,
                     mobileUiAdapter,
                     mobileContextProvider);
-            mIconHPadding = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.status_bar_icon_padding);
+            mIconHorizontalMargin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_icon_horizontal_margin);
             mDarkIconDispatcher = darkIconDispatcher;
         }
 
@@ -205,7 +205,7 @@ public interface StatusBarIconController {
         protected LayoutParams onCreateLayoutParams() {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
-            lp.setMargins(mIconHPadding, 0, mIconHPadding, 0);
+            lp.setMargins(mIconHorizontalMargin, 0, mIconHorizontalMargin, 0);
             return lp;
         }
 
