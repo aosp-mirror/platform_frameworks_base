@@ -355,10 +355,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"मौजूदा टच डेटा दिखाने वाला स्‍क्रीन ओवरले"</string>
     <string name="show_touches" msgid="8437666942161289025">"टैप दिखाएं"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"टैप के लिए विज़ुअल फ़ीडबैक दिखाएं"</string>
-    <!-- no translation found for show_key_presses (6360141722735900214) -->
-    <skip />
-    <!-- no translation found for show_key_presses_summary (725387457373015024) -->
-    <skip />
+    <string name="show_key_presses" msgid="6360141722735900214">"दबाए गए बटन दिखाएं"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"दबाए गए बटन के लिए विज़ुअल फ़ीडबैक दिखाएं"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"सर्फ़ेस अपडेट दिखाएं"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"अपडेट होने पर पूरे विंडो सर्फ़ेस फ़्लैश करें"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"जीपीयू व्यू के अपडेट दिखाएं"</string>
