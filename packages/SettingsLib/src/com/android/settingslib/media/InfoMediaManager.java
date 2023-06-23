@@ -26,6 +26,7 @@ import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTPHONE;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
@@ -566,8 +567,8 @@ public abstract class InfoMediaManager extends MediaManager {
             case TYPE_REMOTE_GAME_CONSOLE:
             case TYPE_REMOTE_CAR:
             case TYPE_REMOTE_SMARTWATCH:
-                mediaDevice =
-                        createInfoMediaDevice(route, mPreferenceItemMap.get(route.getId()));
+            case TYPE_REMOTE_SMARTPHONE:
+                mediaDevice = createInfoMediaDevice(route, mPreferenceItemMap.get(route.getId()));
                 break;
             case TYPE_BUILTIN_SPEAKER:
             case TYPE_USB_DEVICE:
