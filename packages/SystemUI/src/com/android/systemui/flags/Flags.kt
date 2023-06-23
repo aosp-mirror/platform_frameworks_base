@@ -624,7 +624,8 @@ object Flags {
             unreleasedFlag(1702, "clipboard_image_timeout", teamfood = true)
     // TODO(b/279405451): Tracking Bug
     @JvmField
-    val CLIPBOARD_SHARED_TRANSITIONS = unreleasedFlag(1703, "clipboard_shared_transitions")
+    val CLIPBOARD_SHARED_TRANSITIONS =
+            unreleasedFlag(1703, "clipboard_shared_transitions", teamfood = true)
 
     // 1800 - shade container
     // TODO(b/265944639): Tracking Bug
