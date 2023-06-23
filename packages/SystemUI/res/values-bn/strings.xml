@@ -399,7 +399,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"যে পরিষেবা এই ফাংশন প্রদান করছে, সেটি রেকর্ড বা কাস্ট করার সময় আপনার স্ক্রিনে দৃশ্যমান বা ডিভাইসে চালানো হয়েছে এমন সব তথ্য অ্যাক্সেস করতে পারবে। এর মধ্যে আপনার পাসওয়ার্ড, পেমেন্টের বিবরণ, ফটো, মেসেজ এবং আপনার চালানো অডিও সম্পর্কিত তথ্য রয়েছে।"</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"পুরো স্ক্রিন"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"একটি অ্যাপ"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"অ্যাপ শেয়ার বা এর মাধ্যমে রেকর্ড করুন"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"অ্যাপ শেয়ার বা রেকর্ড করুন"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ব্যবহার করে রেকর্ডিং বা কাস্টিং শুরু করবেন?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"আপনি শেয়ার, রেকর্ড বা কাস্ট করার সময়, স্ক্রিনে দৃশ্যমান বা ডিভাইসে চালানো সব কিছুই <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> অ্যাক্সেস করতে পারবে। তাই পাসওয়ার্ড, পেমেন্টের বিবরণ, মেসেজ, ফটো এবং অডিও ও ভিডিওর মতো বিষয়ে সতর্ক থাকুন।"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"আপনি কোনও অ্যাপ শেয়ার, রেকর্ড বা কাস্ট করার সময়, সেই অ্যাপে দেখা যায় বা চালানো হয় এমন সব কিছু <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> অ্যাক্সেস করতে পারবে। তাই পাসওয়ার্ড, পেমেন্টের বিবরণ, মেসেজ, ফটো এবং অডিও ও ভিডিওর মতো বিষয়ে সতর্ক থাকুন।"</string>
@@ -415,7 +415,7 @@
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"আপনার আইটি অ্যাডমিন ব্লক করেছেন"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ডিভাইস নীতির কারণে স্ক্রিন ক্যাপচার করার প্রসেস বন্ধ করা আছে"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"সব মুছে দিন"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"পরিচালনা করুন"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"ম্যানেজ করুন"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ইতিহাস"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"নতুন"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"আওয়াজ করবে না"</string>
@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ব্যাটারির মিটারের রিডিং নেওয়ার সময় সমস্যা হয়েছে"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"আরও তথ্যের জন্য ট্যাপ করুন"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"কোনও অ্যালার্ম সেট করা নেই"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"স্ক্রিন লক খুলুন"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ফিঙ্গারপ্রিন্ট সেন্সর"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"যাচাই করিয়ে নিন"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ডিভাইস আনলক করুন"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"আরও জানুন"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"আরও জানতে <xliff:g id="URL">%s</xliff:g>-এ যান"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> খুলুন"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet অ্যাপ, শর্টকাট হিসেবে যোগ করতে, অ্যাপ ইনস্টল করা আছে কিনা তা ভালভাবে দেখে নিন"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet অ্যাপ, শর্টকাট হিসেবে যোগ করতে, অন্তত একটি কার্ড যোগ করা হয়েছে কিনা তা ভালভাবে দেখে নিন"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR কোড স্ক্যানার, শর্টকাট হিসেবে যোগ করতে, ক্যামেরা অ্যাপ ইনস্টল করা আছে কিনা তা ভালভাবে দেখে নিন"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home অ্যাপ, শর্টকাট হিসেবে যোগ করতে, অ্যাপ ইনস্টল করা আছে কিনা তা ভালভাবে দেখে নিন"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• অন্তত একটি ডিভাইস উপলভ্য আছে"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"নোট নেওয়ার শর্টকাট ব্যবহার করতে, ডিফল্ট কোনও নোট অ্যাপ বেছে নিন"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"অ্যাপ বেছে নিন"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শর্টকাট টাচ করে ধরে রাখুন"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
