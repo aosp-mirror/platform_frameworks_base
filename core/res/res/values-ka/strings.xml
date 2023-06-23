@@ -1370,7 +1370,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB გამართვა შეერთებულია"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB შეცდ. გამართვა"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB გამართვა"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"შეცდომების უსადენო გამართვა დაკავშირებულია"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"შეეხეთ შეცდომების უსადენო გამართვის გამოსართავად"</string>
