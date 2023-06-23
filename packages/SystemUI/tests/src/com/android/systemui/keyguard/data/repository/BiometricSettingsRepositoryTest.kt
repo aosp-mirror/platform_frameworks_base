@@ -461,12 +461,10 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     }
 
     private fun broadcastDPMStateChange() {
-        fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-            receiver.onReceive(
-                context,
-                Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED)
-            )
-        }
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+        )
     }
 
     companion object {

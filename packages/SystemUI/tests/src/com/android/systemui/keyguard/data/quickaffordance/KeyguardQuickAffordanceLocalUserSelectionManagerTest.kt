@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.backup.BackupHelper
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.util.FakeSharedPreferences
@@ -360,7 +361,10 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
             }
         clearInvocations(userFileManager)
 
-        fakeBroadcastDispatcher.registeredReceivers.firstOrNull()?.onReceive(context, Intent())
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(BackupHelper.ACTION_RESTORE_FINISHED),
+        )
 
         verify(userFileManager, atLeastOnce()).getSharedPreferences(anyString(), anyInt(), anyInt())
         job.cancel()
@@ -374,12 +378,13 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
             arrayOf("leftTest:testShortcut1", "rightTest:testShortcut2")
         )
 
-        assertThat(underTest.getSelections()).isEqualTo(
-            mapOf(
-                "leftTest" to listOf("testShortcut1"),
-                "rightTest" to listOf("testShortcut2"),
+        assertThat(underTest.getSelections())
+            .isEqualTo(
+                mapOf(
+                    "leftTest" to listOf("testShortcut1"),
+                    "rightTest" to listOf("testShortcut2"),
+                )
             )
-        )
     }
 
     private fun assertSelections(
