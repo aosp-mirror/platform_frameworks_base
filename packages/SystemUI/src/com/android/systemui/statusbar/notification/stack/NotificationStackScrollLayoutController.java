@@ -29,6 +29,7 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -64,7 +65,10 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -189,6 +193,7 @@ public class NotificationStackScrollLayoutController {
     private final GroupExpansionManager mGroupExpansionManager;
     private final NotifPipelineFlags mNotifPipelineFlags;
     private final SeenNotificationsProvider mSeenNotificationsProvider;
+    private final KeyguardTransitionRepository mKeyguardTransitionRepo;
 
     private NotificationStackScrollLayout mView;
     private NotificationSwipeHelper mSwipeHelper;
@@ -197,6 +202,8 @@ public class NotificationStackScrollLayoutController {
     private int mBarState;
     private boolean mIsBouncerShowingFromCentralSurfaces;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
+    private boolean mIsInTransitionToAod = false;
+
     private final FeatureFlags mFeatureFlags;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
@@ -633,6 +640,7 @@ public class NotificationStackScrollLayoutController {
             KeyguardBypassController keyguardBypassController,
             KeyguardInteractor keyguardInteractor,
             PrimaryBouncerInteractor primaryBouncerInteractor,
+            KeyguardTransitionRepository keyguardTransitionRepo,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
             Optional<NotificationListViewModel> nsslViewModel,
@@ -665,6 +673,7 @@ public class NotificationStackScrollLayoutController {
             NotificationDismissibilityProvider dismissibilityProvider,
             ActivityStarter activityStarter) {
         mView = view;
+        mKeyguardTransitionRepo = keyguardTransitionRepo;
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -819,6 +828,9 @@ public class NotificationStackScrollLayoutController {
         mViewModel.ifPresent(
                 vm -> NotificationListViewBinder
                         .bind(mView, vm, mFalsingManager, mFeatureFlags, mNotifIconAreaController));
+
+        collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
+                this::onKeyguardTransitionChanged);
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
@@ -1241,10 +1253,10 @@ public class NotificationStackScrollLayoutController {
 
         final boolean shouldShow = getVisibleNotificationCount() == 0
                 && !mView.isQsFullScreen()
-                // Hide empty shade view when in transition to Keyguard.
+                // Hide empty shade view when in transition to AOD.
                 // That avoids "No Notifications" to blink when transitioning to AOD.
                 // For more details, see: b/228790482
-                && !isInTransitionToKeyguard()
+                && !mIsInTransitionToAod
                 // Don't show any notification content if the bouncer is showing. See b/267060171.
                 && !isBouncerShowing();
 
@@ -1641,6 +1653,16 @@ public class NotificationStackScrollLayoutController {
         }
         ExpandableView shelf = mView.getShelf();
         return shelf == null ? 0 : shelf.getIntrinsicHeight();
+    }
+
+    @VisibleForTesting
+    void onKeyguardTransitionChanged(TransitionStep transitionStep) {
+        boolean isTransitionToAod = transitionStep.getFrom().equals(KeyguardState.GONE)
+                && transitionStep.getTo().equals(KeyguardState.AOD);
+        if (mIsInTransitionToAod != isTransitionToAod) {
+            mIsInTransitionToAod = isTransitionToAod;
+            updateShowEmptyShadeView();
+        }
     }
 
     /**
