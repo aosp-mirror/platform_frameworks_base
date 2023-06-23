@@ -365,6 +365,7 @@ constructor(
                     "nonStrongBiometricIsAllowed",
                     faceAuthLog
                 ),
+                logAndObserve(isAuthenticated.isFalse(), "faceNotAuthenticated", faceAuthLog),
             )
             .reduce(::and)
             .distinctUntilChanged()

@@ -260,6 +260,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             assertThat(authStatus()).isEqualTo(SuccessAuthenticationStatus(successResult))
             assertThat(authenticated()).isTrue()
             assertThat(authRunning()).isFalse()
+            assertThat(canFaceAuthRun()).isFalse()
         }
 
     private fun uiEventIsLogged(faceAuthUiEvent: FaceAuthUiEvent) {
