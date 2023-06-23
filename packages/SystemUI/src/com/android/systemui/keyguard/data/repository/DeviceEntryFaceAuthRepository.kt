@@ -312,8 +312,8 @@ constructor(
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() }.isFalse(),
-                    "deviceNotSleepingOrNotStartingToSleep",
+                    keyguardRepository.wakefulness.map { it.isStartingToSleep() }.isFalse(),
+                    "deviceNotStartingToSleep",
                     tableLogBuffer
                 ),
                 logAndObserve(

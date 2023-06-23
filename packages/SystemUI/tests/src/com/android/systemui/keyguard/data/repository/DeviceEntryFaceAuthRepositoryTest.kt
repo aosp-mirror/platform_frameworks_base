@@ -551,20 +551,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticateDoesNotRunWhenDeviceIsSleeping() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth {
-                keyguardRepository.setWakefulnessModel(
-                    WakefulnessModel(
-                        state = WakefulnessState.ASLEEP,
-                        lastWakeReason = WakeSleepReason.OTHER,
-                        lastSleepReason = WakeSleepReason.OTHER,
-                    )
-                )
-            }
-        }
-
-    @Test
     fun authenticateDoesNotRunWhenNonStrongBiometricIsNotAllowed() =
         testScope.runTest {
             testGatingCheckForFaceAuth {
