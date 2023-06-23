@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bong bóng"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Đồng hồ kim"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Mở khoá thiết bị của bạn để tiếp tục"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Hãy nhập mã PIN để cài đặt bản cập nhật vào lúc khác"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Hãy nhập mật khẩu để cài đặt bản cập nhật vào lúc khác"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Hãy vẽ hình mở khoá để cài đặt bản cập nhật vào lúc khác"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Đã cập nhật thiết bị. Hãy nhập mã PIN để tiếp tục."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Đã cập nhật thiết bị. Hãy nhập mật khẩu để tiếp tục."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Đã cập nhật thiết bị. Hãy vẽ hình mở khoá để tiếp tục."</string>
 </resources>

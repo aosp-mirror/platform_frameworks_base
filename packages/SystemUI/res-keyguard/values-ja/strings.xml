@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"バブル"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"アナログ"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"続行するにはデバイスのロックを解除します"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"アップデートを後でインストールするには、PIN を入力してください"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"アップデートを後でインストールするには、パスワードを入力してください"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"アップデートを後でインストールするには、パターンを入力してください"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"デバイスの更新が完了しました。PIN を入力して続行してください。"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"デバイスの更新が完了しました。パスワードを入力して続行してください。"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"デバイスの更新が完了しました。パターンを入力して続行してください。"</string>
 </resources>
