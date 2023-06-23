@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> ilovasida ijro etish: <xliff:g id="SONG_NAME">%1$s</xliff:g> – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> ilovasida ijro etilmoqda: <xliff:g id="SONG_NAME">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Siz uchun"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ishlamoqda"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Qaytarish"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> qurilmasida ijro qilish uchun unga yaqinlashing"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Shu yerda ijro qilish uchun <xliff:g id="DEVICENAME">%1$s</xliff:g>ga yaqinroq suring"</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"planshet"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Mediani translatsiya qilish"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Translatsiya qilinmoqda: <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ishlamoqda"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nofaol. Ilovani tekshiring"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Topilmadi"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Boshqarish imkonsiz"</string>

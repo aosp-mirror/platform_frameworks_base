@@ -386,7 +386,7 @@
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Autoriser cette appli à partager ou enregistrer ?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Lorsque vous partagez, enregistrez ou castez, cette appli a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention à vos mots de passe, détails de mode de paiement, messages ou autres informations sensibles."</string>
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Lorsque vous partagez, enregistrez ou castez une appli, cette appli a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention à vos mots de passe, détails de mode de paiement, messages ou autres informations sensibles."</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquée par votre administrateur informatique"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqué par votre administrateur informatique"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"La capture d\'écran est désactivée conformément aux règles relatives à l\'appareil"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tout effacer"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Mets <xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> depuis <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Mets <xliff:g id="SONG_NAME">%1$s</xliff:g> depuis <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Pour vous"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> est en cours d\'exécution"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Annuler"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Rapprochez-vous de votre <xliff:g id="DEVICENAME">%1$s</xliff:g> pour y lire le contenu"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Pour lancer la lecture ici, rapprochez-vous de <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablette"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Casting de vos contenus multimédias"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Casting de <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> est en cours d\'exécution"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifier l\'appli"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Commande indisponible"</string>

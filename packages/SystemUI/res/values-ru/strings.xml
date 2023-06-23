@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Воспроизвести медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (исполнитель: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) из приложения \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Воспроизвести медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" из приложения \"<xliff:g id="APP_LABEL">%2$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Для вас"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запущено"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Отменить"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Чтобы начать трансляцию на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", подойдите к нему ближе."</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Чтобы начать воспроизведение здесь, подойдите ближе к устройству (<xliff:g id="DEVICENAME">%1$s</xliff:g>)."</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"планшет"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Трансляция медиаконтента"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Трансляция: <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запущено"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Управление недоступно"</string>
@@ -888,7 +888,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Выбрано устройств: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(нет подключения)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не удается переключиться. Нажмите, чтобы повторить попытку."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Подключите устройство"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Подключить устройство"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>

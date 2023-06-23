@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"通过<xliff:g id="APP_LABEL">%3$s</xliff:g>播放<xliff:g id="ARTIST_NAME">%2$s</xliff:g>的《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"通过<xliff:g id="APP_LABEL">%2$s</xliff:g>播放《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"为您推荐"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正在运行"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"撤消"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"若要在“<xliff:g id="DEVICENAME">%1$s</xliff:g>”上播放，请靠近这台设备"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"若要在此设备上播放，请再靠近<xliff:g id="DEVICENAME">%1$s</xliff:g>一点"</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板电脑"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"投放您的媒体"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"投放 <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正在运行"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"无效，请检查应用"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"未找到"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"控件不可用"</string>

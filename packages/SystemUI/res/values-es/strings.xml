@@ -386,7 +386,7 @@
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"¿Permitir que esta aplicación que comparta o grabe contenido?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Cuando compartas, grabes o envíes contenido, esta aplicación podrá acceder a todo lo que se vea en tu pantalla o reproduzcas en tu dispositivo. Debes tener cuidado con contraseñas, detalles de pagos, mensajes o cualquier otra información sensible."</string>
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Cuando compartas, grabes o envíes una aplicación, esta aplicación podrá acceder a todo lo que se muestre o reproduzca en ella. Debes tener cuidado con contraseñas, detalles de pagos, mensajes o cualquier otra información sensible."</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueadas por tu administrador de TI"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueado por tu administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Las capturas de pantalla están inhabilitadas debido a la política de dispositivos"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> en <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Para ti"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Deshacer"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido ahí"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Para reproducirlo aquí, acércate al dispositivo (<xliff:g id="DEVICENAME">%1$s</xliff:g>)"</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Enviando tu contenido multimedia"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Enviando <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"No se ha encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Control no disponible"</string>
