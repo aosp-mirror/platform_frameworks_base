@@ -72,7 +72,7 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
                     uid,
                     NotificationManager.BUBBLE_PREFERENCE_NONE
                 )
-                testApp.exit()
+                testApp.exit(wmHelper)
             }
 
             extraSpec(this)
