@@ -169,6 +169,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         mShadeInteractor =
                 new ShadeInteractor(
+                        mTestScope.getBackgroundScope(),
                         mDisableFlagsRepository,
                         mKeyguardRepository,
                         new FakeUserSetupRepository(),
