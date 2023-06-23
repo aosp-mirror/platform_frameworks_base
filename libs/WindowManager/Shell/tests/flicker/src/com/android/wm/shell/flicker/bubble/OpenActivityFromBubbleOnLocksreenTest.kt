@@ -81,7 +81,7 @@ class OpenActivityFromBubbleOnLocksreenTest(flicker: LegacyFlickerTest) :
                 instrumentation.uiAutomation.syncInputTransactions()
                 val showBubble =
                     device.wait(
-                        Until.findObject(By.res("com.android.systemui", "bubble_view")),
+                        Until.findObject(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
                         FIND_OBJECT_TIMEOUT
                     )
                 showBubble?.click() ?: error("Bubble notify not found")
