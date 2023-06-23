@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bombolla"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analògica"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Desbloqueja el dispositiu per continuar"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Introdueix el PIN per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Introdueix la contrasenya per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Dibuixa el patró per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Dispositiu actualitzat. Introdueix el PIN per continuar."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Dispositiu actualitzat. Introdueix la contrasenya per continuar."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Dispositiu actualitzat. Dibuixa el patró per continuar."</string>
 </resources>
