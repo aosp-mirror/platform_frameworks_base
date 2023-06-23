@@ -601,6 +601,15 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
+    fun allowFingerprintOnCurrentOccludingActivityChanged(allow: Boolean) {
+        logBuffer.log(
+                TAG,
+                VERBOSE,
+                { bool1 = allow },
+                { "allowFingerprintOnCurrentOccludingActivityChanged: $bool1" }
+        )
+    }
+
     fun logAssistantVisible(assistantVisible: Boolean) {
         logBuffer.log(
             TAG,
