@@ -16,8 +16,6 @@
 
 package android.database.sqlite;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -31,7 +29,6 @@ import android.os.CancellationSignal;
 @TestApi
 public final class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
     private final SQLiteDatabase mDatabase;
-    private final SQLiteAuthorizer mAuthorizer;
     private final String mEditTable; 
     private final String mSql;
     private final CancellationSignal mCancellationSignal;
@@ -39,22 +36,14 @@ public final class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
 
     public SQLiteDirectCursorDriver(SQLiteDatabase db, String sql, String editTable,
             CancellationSignal cancellationSignal) {
-        this(db, null, sql, editTable, cancellationSignal);
-    }
-
-    public SQLiteDirectCursorDriver(@NonNull SQLiteDatabase db,
-            @Nullable SQLiteAuthorizer authorizer, @NonNull String sql,
-            @Nullable String editTable, @Nullable CancellationSignal cancellationSignal) {
         mDatabase = db;
-        mAuthorizer = authorizer;
         mEditTable = editTable;
         mSql = sql;
         mCancellationSignal = cancellationSignal;
     }
 
     public Cursor query(CursorFactory factory, String[] selectionArgs) {
-        final SQLiteQuery query = new SQLiteQuery(mDatabase,
-                mAuthorizer, mSql, mCancellationSignal);
+        final SQLiteQuery query = new SQLiteQuery(mDatabase, mSql, mCancellationSignal);
         final Cursor cursor;
         try {
             query.bindAllArgsAsStrings(selectionArgs);

@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import dalvik.annotation.optimization.FastNative;
 
 import java.io.Closeable;
@@ -136,15 +138,14 @@ public final class SQLiteRawStatement implements Closeable {
      * {@link IllegalStateException} if a transaction is not in progress. Clients should call
      * {@link SQLiteDatabase.createRawStatement} to create a new instance.
      */
-    SQLiteRawStatement(@NonNull SQLiteDatabase db, @NonNull String sql,
-            @Nullable SQLiteAuthorizer authorizer) throws SQLiteException {
+    SQLiteRawStatement(@NonNull SQLiteDatabase db, @NonNull String sql) throws SQLiteException {
         mThread = Thread.currentThread();
         mDatabase = db;
         mSession = mDatabase.getThreadSession();
         mSession.throwIfNoTransaction();
         mSql = sql;
         // Acquire a connection and prepare the statement.
-        mPreparedStatement = mSession.acquirePersistentStatement(authorizer, mSql, this);
+        mPreparedStatement = mSession.acquirePersistentStatement(mSql, this);
         mStatement = mPreparedStatement.mStatementPtr;
     }
 
