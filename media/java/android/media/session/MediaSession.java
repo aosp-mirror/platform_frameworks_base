@@ -315,7 +315,7 @@ public final class MediaSession {
             }
             mBinder.setMediaButtonBroadcastReceiver(broadcastReceiver);
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Failure in setMediaButtonBroadcastReceiver.", e);
+            e.rethrowFromSystemServer();
         }
     }
 
