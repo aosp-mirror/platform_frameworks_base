@@ -519,9 +519,15 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 val isPermissionChanged = oldPermission == null ||
                     newPackageName != oldPermission.packageName ||
                     newPermission.protectionLevel != oldPermission.protectionLevel || (
-                        oldPermission.isReconciled && newPermission.isRuntime &&
-                            newPermission.groupName != null &&
-                            newPermission.groupName != oldPermission.groupName
+                        oldPermission.isReconciled && (
+                            (
+                                newPermission.isKnownSigner &&
+                                    newPermission.knownCerts != oldPermission.knownCerts
+                            ) || (
+                                newPermission.isRuntime && newPermission.groupName != null &&
+                                    newPermission.groupName != oldPermission.groupName
+                            )
+                        )
                     )
                 if (isPermissionChanged) {
                     changedPermissionNames += permissionName
