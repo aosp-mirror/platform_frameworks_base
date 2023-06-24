@@ -170,7 +170,7 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Ова е потребно за да се подобрат сигурноста и изведбата"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Поставете „Отклучување со отпечаток“ повторно"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Отклучување со отпечаток"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Поставување „Отклучување со отпечаток“"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Поставете „Отклучување со отпечаток“"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашни слики и модели на отпечаток ќе се избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за отклучување на телефонот или потврда дека сте вие."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашните слики и модели на отпечаток ќе бидат избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за да го отклучите телефонот или да потврдите дека сте вие."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Не можеше да се постави „Отклучување со отпечаток“. Отворете „Поставки“ за да се обидете повторно."</string>
@@ -399,7 +399,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Цел екран"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Една апликација"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Споделете или снимете апликација"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Споделување или снимање апликација"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Кога споделувате, снимате или емитувате, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има пристап до сѐ што е видливо на вашиот екран или пуштено на вашиот уред. Затоа, бидете внимателни со работи како лозинки, детали за плаќање, пораки, фотографии и аудио и видео."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Кога споделувате, снимате или емитувате апликација, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има пристап до сѐ што се прикажува или пушта на таа апликација. Затоа, бидете внимателни со работи како лозинки, детали за плаќање, пораки, фотографии и аудио и видео."</string>
@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем при читањето на мерачот на батеријата"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Допрете за повеќе информации"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Не е поставен аларм"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"внесете PIN/шема/лозинка"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сензор за отпечатоци"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"автентицирате"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"внесете уред"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Дознајте повеќе"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Дознајте повеќе на <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворете ја <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"За да ја додадете апликацијата Wallet како кратенка, апликацијата мора да е инсталирана"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"За да ја додадете апликацијата Wallet како кратенка, мора да имате додадено најмалку една картичка"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"За да го додадете скенерот на QR-кодови како кратенка, погрижете се дека имате инсталирано апликација за камера"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"За да ја додадете апликацијата Home како кратенка, апликацијата мора да е инсталирана"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• достапен е најмалку еден уред"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Изберете стандардна апликација за белешки за да ја користите кратенката за фаќање белешки"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Изберете апликација"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Допрете и задржете ја кратенката"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>

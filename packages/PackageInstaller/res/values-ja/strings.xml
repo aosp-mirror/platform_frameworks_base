@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"アプリをインストールしました。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"このアプリをインストールしますか？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"このアプリを更新しますか？"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"このアプリを <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> から更新しますか？\n\nこのアプリは通常、<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> からアップデートを受信しています。別の提供元から更新することにより、お使いのスマートフォンで今後のアップデートを任意の提供元から受け取ることになります。アプリの機能は変更される場合があります。"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="738046584021528374">"このアプリを <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> から更新しますか？\n\nこのアプリは通常、<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> からアップデートを受信しています。別の提供元から更新することにより、お使いのタブレットで今後のアップデートを任意の提供元から受け取ることになります。アプリの機能は変更される場合があります。"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="3056133099508550163">"このアプリを <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> から更新しますか？\n\nこのアプリは通常、<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> からアップデートを受信しています。別の提供元から更新することにより、お使いのテレビで今後のアップデートを任意の提供元から受け取ることになります。アプリの機能は変更される場合があります。"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="3750986542284587290">"このアプリを <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> から更新しますか？\n\nこのアプリは通常、<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> からアップデートを受信しています。別の提供元から更新することにより、お使いのスマートフォンで今後のアップデートを任意の提供元から受け取ることになります。アプリの機能は変更される場合があります。"</string>
     <string name="install_failed" msgid="5777824004474125469">"アプリはインストールされていません。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"パッケージのインストールはブロックされています。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"パッケージが既存のパッケージと競合するため、アプリをインストールできませんでした。"</string>

@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Tatizo la kusoma mita ya betri yako"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Gusa ili upate maelezo zaidi"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Hujaweka kengele"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"weka kifunga skrini"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Kitambua alama ya kidole"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"thibitisha"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"weka kifaa"</string>
