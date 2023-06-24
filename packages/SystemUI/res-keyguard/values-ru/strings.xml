@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Пузырь"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Стрелки"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Чтобы продолжить, разблокируйте устройство"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Введите PIN-код, чтобы установить обновление позже."</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Введите пароль, чтобы установить обновление позже."</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Введите графический ключ, чтобы установить обновление позже."</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Устройство обновлено. Введите PIN-код."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Устройство обновлено. Введите пароль."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Устройство обновлено. Введите графический ключ."</string>
 </resources>

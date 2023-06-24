@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"एनालॉग"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"जारी रखने के लिए डिवाइस अनलॉक करें"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"अपडेट को बाद में इंस्टॉल करने के लिए पिन डालें"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"अपडेट को बाद में इंस्टॉल करने के लिए पासवर्ड डालें"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"अपडेट को बाद में इंस्टॉल करने के लिए पैटर्न ड्रॉ करें"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"डिवाइस अपडेट किया गया. जारी रखने के लिए पिन डालें."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"डिवाइस अपडेट किया गया. जारी रखने के लिए पासवर्ड डालें."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिवाइस अपडेट किया गया. जारी रखने के लिए पैटर्न ड्रॉ करें."</string>
 </resources>
