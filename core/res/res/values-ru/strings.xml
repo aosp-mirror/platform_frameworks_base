@@ -1373,7 +1373,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Обнаружено аналоговое аудиоустройство"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Подсоединенное устройство несовместимо с этим телефоном. Нажмите, чтобы узнать подробности."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Отладка по USB активна"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Нажмите, чтобы отключить"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Нажмите, чтобы отключить."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Нажмите, чтобы запретить"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Отладка по Wi-Fi включена"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Нажмите, чтобы отключить отладку по Wi-Fi."</string>
@@ -2160,7 +2160,7 @@
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Заблокировано вашим администратором"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Этот контент нельзя открывать через рабочие приложения."</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Этот контент нельзя открыть в рабочем приложении."</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Этот контент нельзя открывать через личные приложения."</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Этим контентом нельзя делиться с личными приложениями."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Этот контент нельзя открыть в личном приложении."</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Рабочие приложения приостановлены."</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Включить"</string>
