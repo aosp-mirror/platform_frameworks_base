@@ -16,9 +16,12 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.Context
+import android.hardware.biometrics.BiometricFaceConstants
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
+import com.android.systemui.R
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -27,6 +30,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.shared.model.AuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.util.kotlin.pairwise
@@ -34,7 +39,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -50,6 +57,7 @@ import kotlinx.coroutines.launch
 class SystemUIKeyguardFaceAuthInteractor
 @Inject
 constructor(
+    private val context: Context,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val repository: DeviceEntryFaceAuthRepository,
@@ -157,17 +165,28 @@ constructor(
         repository.cancel()
     }
 
+    private val _authenticationStatusOverride = MutableStateFlow<AuthenticationStatus?>(null)
     /** Provide the status of face authentication */
-    override val authenticationStatus = repository.authenticationStatus
+    override val authenticationStatus =
+        merge(_authenticationStatusOverride.filterNotNull(), repository.authenticationStatus)
 
     /** Provide the status of face detection */
     override val detectionStatus = repository.detectionStatus
 
     private fun runFaceAuth(uiEvent: FaceAuthUiEvent, fallbackToDetect: Boolean) {
         if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
-            applicationScope.launch {
-                faceAuthenticationLogger.authRequested(uiEvent)
-                repository.authenticate(uiEvent, fallbackToDetection = fallbackToDetect)
+            if (repository.isLockedOut.value) {
+                _authenticationStatusOverride.value =
+                    ErrorAuthenticationStatus(
+                        BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT,
+                        context.resources.getString(R.string.keyguard_face_unlock_unavailable)
+                    )
+            } else {
+                _authenticationStatusOverride.value = null
+                applicationScope.launch {
+                    faceAuthenticationLogger.authRequested(uiEvent)
+                    repository.authenticate(uiEvent, fallbackToDetection = fallbackToDetect)
+                }
             }
         } else {
             faceAuthenticationLogger.ignoredFaceAuthTrigger(

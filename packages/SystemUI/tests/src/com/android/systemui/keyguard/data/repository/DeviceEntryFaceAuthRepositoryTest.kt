@@ -418,13 +418,9 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 FACE_ERROR_CANCELED,
                 "First auth attempt cancellation completed"
             )
-            assertThat(authStatus())
-                .isEqualTo(
-                    ErrorAuthenticationStatus(
-                        FACE_ERROR_CANCELED,
-                        "First auth attempt cancellation completed"
-                    )
-                )
+            val value = authStatus() as ErrorAuthenticationStatus
+            assertThat(value.msgId).isEqualTo(FACE_ERROR_CANCELED)
+            assertThat(value.msg).isEqualTo("First auth attempt cancellation completed")
 
             faceAuthenticateIsCalled()
             uiEventIsLogged(FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN)
