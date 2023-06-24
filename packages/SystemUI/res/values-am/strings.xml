@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> በ<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ከ<xliff:g id="APP_LABEL">%3$s</xliff:g> ያጫውቱ"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ከ<xliff:g id="APP_LABEL">%2$s</xliff:g> ያጫውቱ"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"ለእርስዎ"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> እያሄደ ነው"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ቀልብስ"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"በ<xliff:g id="DEVICENAME">%1$s</xliff:g> ላይ ለማጫወት ጠጋ ያድርጉ"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"እዚህ ለማጫወት ወደ <xliff:g id="DEVICENAME">%1$s</xliff:g> ጠጋ ይበሉ"</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ጡባዊ"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"የእርስዎን ሚዲያ cast በማድረግ ላይ"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g>ን Cast በማድረግ ላይ"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> እያሄደ ነው"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"አልተገኘም"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"መቆጣጠሪያ አይገኝም"</string>

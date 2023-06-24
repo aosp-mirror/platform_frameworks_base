@@ -237,7 +237,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotation automatique de l\'écran"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Écran de veille"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à l\'appareil photo"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à la caméra"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accès au micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Accessible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqué"</string>
@@ -861,6 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Lecture de <xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> à partir de <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Lecture de <xliff:g id="SONG_NAME">%1$s</xliff:g> à partir de <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Pour vous"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Annuler"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Rapprochez-vous pour faire jouer le contenu sur <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Pour faire jouer le contenu ici, rapprochez-vous de <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -870,7 +871,6 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablette"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Diffusion de votre contenu multimédia en cours…"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Diffusion de <xliff:g id="APP_LABEL">%1$s</xliff:g> en cours…"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifiez l\'appli"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"La commande n\'est pas accessible"</string>
