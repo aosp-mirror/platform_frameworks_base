@@ -17,6 +17,7 @@
 package android.os.health;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -57,7 +58,9 @@ import java.util.concurrent.ExecutionException;
  */
 @SystemService(Context.SYSTEM_HEALTH_SERVICE)
 public class SystemHealthManager {
+    @NonNull
     private final IBatteryStats mBatteryStats;
+    @Nullable
     private final IPowerStatsService mPowerStats;
     private PowerMonitor[] mPowerMonitorsInfo;
 
@@ -74,7 +77,8 @@ public class SystemHealthManager {
     }
 
     /** {@hide} */
-    public SystemHealthManager(IBatteryStats batteryStats, IPowerStatsService powerStats) {
+    public SystemHealthManager(@NonNull IBatteryStats batteryStats,
+            @Nullable IPowerStatsService powerStats) {
         mBatteryStats = batteryStats;
         mPowerStats = powerStats;
     }
@@ -185,6 +189,12 @@ public class SystemHealthManager {
                 return;
             }
             try {
+                if (mPowerStats == null) {
+                    mPowerMonitorsInfo = new PowerMonitor[0];
+                    future.complete(mPowerMonitorsInfo);
+                    return;
+                }
+
                 mPowerStats.getSupportedPowerMonitors(new ResultReceiver(null) {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -227,6 +237,12 @@ public class SystemHealthManager {
      */
     public void getPowerMonitorReadings(@NonNull PowerMonitor[] powerMonitors,
             @NonNull CompletableFuture<PowerMonitorReadings> future) {
+        if (mPowerStats == null) {
+            future.completeExceptionally(
+                    new IllegalArgumentException("Unsupported power monitor"));
+            return;
+        }
+
         Arrays.sort(powerMonitors, POWER_MONITOR_COMPARATOR);
         int[] indices = new int[powerMonitors.length];
         for (int i = 0; i < powerMonitors.length; i++) {

@@ -1119,7 +1119,7 @@ public final class SystemServiceRegistry {
             @Override
             public SystemHealthManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder batteryStats = ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME);
-                IBinder powerStats = ServiceManager.getServiceOrThrow(Context.POWER_STATS_SERVICE);
+                IBinder powerStats = ServiceManager.getService(Context.POWER_STATS_SERVICE);
                 return new SystemHealthManager(IBatteryStats.Stub.asInterface(batteryStats),
                         IPowerStatsService.Stub.asInterface(powerStats));
             }});
