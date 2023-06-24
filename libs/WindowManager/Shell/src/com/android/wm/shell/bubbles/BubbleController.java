@@ -1282,7 +1282,9 @@ public class BubbleController implements ConfigurationChangeListener,
             return;
         }
         mOverflowDataLoadNeeded = false;
-        mDataRepository.loadBubbles(mCurrentUserId, (bubbles) -> {
+        List<UserInfo> users = mUserManager.getAliveUsers();
+        List<Integer> userIds = users.stream().map(userInfo -> userInfo.id).toList();
+        mDataRepository.loadBubbles(mCurrentUserId, userIds, (bubbles) -> {
             bubbles.forEach(bubble -> {
                 if (mBubbleData.hasAnyBubbleWithKey(bubble.getKey())) {
                     // if the bubble is already active, there's no need to push it to overflow
