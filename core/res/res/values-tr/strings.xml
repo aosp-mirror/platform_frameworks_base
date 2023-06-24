@@ -1950,7 +1950,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> uygulaması şu anda kullanılamıyor. Uygulamanın kullanım durumu <xliff:g id="APP_NAME_1">%2$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Daha fazla bilgi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Uygulamanın duraklatmasını kaldır"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları devam ettirilsin mi?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları açılsın mı?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Devam ettir"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Acil durum"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>

@@ -646,7 +646,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado, pressione \"Confirmar\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware de impressão digital não disponível."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Não foi possível configurar a impressão digital"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"A configuração da impressão digital expirou. Tente de novo."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tempo de configuração esgotado. Tente de novo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operação de impressão digital cancelada."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operação de impressão digital cancelada pelo usuário."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Excesso de tentativas. Use o bloqueio de tela."</string>
@@ -1366,7 +1366,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB ativado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo conectado como Webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para ver mais opções."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para conferir mais opções."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Carregando dispositivo conectado. Toque para ver mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
