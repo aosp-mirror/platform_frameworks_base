@@ -1793,7 +1793,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // THEN it sends the PendingIntent without dismissing keyguard first,
         // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(pendingIntent).send()
+        verify(pendingIntent).send(any(Bundle::class.java))
         verify(pendingIntent, never()).getIntent()
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }
