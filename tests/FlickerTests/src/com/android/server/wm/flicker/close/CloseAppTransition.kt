@@ -16,7 +16,10 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -70,5 +73,22 @@ abstract class CloseAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker
             LAUNCHER,
             ignoreEntriesWithRotationLayer = flicker.scenario.isLandscapeOrSeascapeAtStart
         )
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        flicker.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS + listOf(ComponentNameMatcher.NAV_BAR)
+            )
+        }
+    }
+
+    @FlakyTest(bugId = 288369951)
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntryWithNavBar() {
+        flicker.assertLayers { this.visibleLayersShownMoreThanOneConsecutiveEntry() }
     }
 }

@@ -240,7 +240,7 @@ public class NotificationIconAreaController implements
     private void reloadDimens(Context context) {
         Resources res = context.getResources();
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
-        mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
+        mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_horizontal_margin);
         mAodIconAppearTranslation = res.getDimensionPixelSize(
                 R.dimen.shelf_appear_translation);
     }

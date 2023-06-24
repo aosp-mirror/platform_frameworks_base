@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.launch
+package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.Postsubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
@@ -28,9 +27,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Postsubmit
-class OpenAppFromNotificationColdTestCfArm(flicker: LegacyFlickerTest) :
-    OpenAppFromNotificationColdTest(flicker) {
+class OpenAppFromNotificationWarmTestCfArm(flicker: LegacyFlickerTest) :
+    OpenAppFromNotificationWarmTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.

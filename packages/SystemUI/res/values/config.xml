@@ -698,6 +698,10 @@
     -->
     <integer name="config_face_auth_supported_posture">0</integer>
 
+    <!-- Components to allow running fingerprint listening if their activity is occluding the lock screen. -->
+    <string-array name="config_fingerprint_listen_on_occluding_activity_packages" translatable="false">
+    </string-array>
+
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 

@@ -55,6 +55,7 @@ open class SendBubbleNotificationTest(flicker: LegacyFlickerTest) : BaseBubbleSc
                     FIND_OBJECT_TIMEOUT
                 )
                     ?: error("No bubbles found")
+                device.waitForIdle()
             }
         }
 

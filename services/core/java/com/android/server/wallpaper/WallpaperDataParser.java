@@ -542,12 +542,12 @@ class WallpaperDataParser {
                     }
 
                     res = r.openRawResource(resId);
-                    if (wallpaper.wallpaperFile.exists()) {
-                        wallpaper.wallpaperFile.delete();
-                        wallpaper.cropFile.delete();
+                    if (wallpaper.getWallpaperFile().exists()) {
+                        wallpaper.getWallpaperFile().delete();
+                        wallpaper.getCropFile().delete();
                     }
-                    fos = new FileOutputStream(wallpaper.wallpaperFile);
-                    cos = new FileOutputStream(wallpaper.cropFile);
+                    fos = new FileOutputStream(wallpaper.getWallpaperFile());
+                    cos = new FileOutputStream(wallpaper.getCropFile());
 
                     byte[] buffer = new byte[32768];
                     int amt;

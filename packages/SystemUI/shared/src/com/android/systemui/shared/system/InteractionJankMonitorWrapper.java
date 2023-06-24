@@ -61,6 +61,8 @@ public final class InteractionJankMonitorWrapper {
             InteractionJankMonitor.CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS;
     public static final int CUJ_OPEN_SEARCH_RESULT =
             InteractionJankMonitor.CUJ_LAUNCHER_OPEN_SEARCH_RESULT;
+    public static final int CUJ_SHADE_EXPAND_FROM_STATUS_BAR =
+            InteractionJankMonitor.CUJ_SHADE_EXPAND_FROM_STATUS_BAR;
 
     @IntDef({
             CUJ_APP_LAUNCH_FROM_RECENTS,
@@ -76,6 +78,7 @@ public final class InteractionJankMonitorWrapper {
             CUJ_CLOSE_ALL_APPS_SWIPE,
             CUJ_CLOSE_ALL_APPS_TO_HOME,
             CUJ_OPEN_SEARCH_RESULT,
+            CUJ_SHADE_EXPAND_FROM_STATUS_BAR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {

@@ -69,6 +69,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_FROM_STATUS_BAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD;
@@ -267,8 +268,9 @@ public class InteractionJankMonitor {
      * eg: Exit the app using back gesture.
      */
     public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK = 78;
+    public static final int CUJ_SHADE_EXPAND_FROM_STATUS_BAR = 79;
 
-    private static final int LAST_CUJ = CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
+    private static final int LAST_CUJ = CUJ_SHADE_EXPAND_FROM_STATUS_BAR;
     private static final int NO_STATSD_LOGGING = -1;
 
     // Used to convert CujType to InteractionType enum value for statsd logging.
@@ -357,6 +359,7 @@ public class InteractionJankMonitor {
         CUJ_TO_STATSD_INTERACTION_TYPE[76] = NO_STATSD_LOGGING;
         CUJ_TO_STATSD_INTERACTION_TYPE[77] = NO_STATSD_LOGGING;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_SHADE_EXPAND_FROM_STATUS_BAR] = UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_FROM_STATUS_BAR;
     }
 
     private static class InstanceHolder {
@@ -457,6 +460,7 @@ public class InteractionJankMonitor {
             CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION,
             CUJ_LAUNCHER_OPEN_SEARCH_RESULT,
             CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK,
+            CUJ_SHADE_EXPAND_FROM_STATUS_BAR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -1070,6 +1074,8 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_OPEN_SEARCH_RESULT";
             case CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK:
                 return "LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK";
+            case CUJ_SHADE_EXPAND_FROM_STATUS_BAR:
+                return "SHADE_EXPAND_FROM_STATUS_BAR";
         }
         return "UNKNOWN";
     }

@@ -18,6 +18,7 @@ package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
@@ -31,6 +32,14 @@ import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
+/**
+ * A fake instance of [BroadcastDispatcher] for tests.
+ *
+ * Important: The *real* broadcast dispatcher will only send intents to receivers if the intent
+ * matches the [IntentFilter] that the [BroadcastReceiver] was registered with. This fake class
+ * exposes [sendIntentToMatchingReceiversOnly] to get the same matching behavior as the real
+ * broadcast dispatcher.
+ */
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
     mainExecutor: Executor,
@@ -52,7 +61,7 @@ class FakeBroadcastDispatcher(
         PendingRemovalStore(logger)
     ) {
 
-    val registeredReceivers: MutableSet<BroadcastReceiver> = ConcurrentHashMap.newKeySet()
+    private val receivers: MutableSet<InternalReceiver> = ConcurrentHashMap.newKeySet()
 
     override fun registerReceiverWithHandler(
         receiver: BroadcastReceiver,
@@ -62,7 +71,7 @@ class FakeBroadcastDispatcher(
         @Context.RegisterReceiverFlags flags: Int,
         permission: String?
     ) {
-        registeredReceivers.add(receiver)
+        receivers.add(InternalReceiver(receiver, filter))
     }
 
     override fun registerReceiver(
@@ -73,24 +82,52 @@ class FakeBroadcastDispatcher(
         @Context.RegisterReceiverFlags flags: Int,
         permission: String?
     ) {
-        registeredReceivers.add(receiver)
+        receivers.add(InternalReceiver(receiver, filter))
     }
 
     override fun unregisterReceiver(receiver: BroadcastReceiver) {
-        registeredReceivers.remove(receiver)
+        receivers.removeIf { it.receiver == receiver }
     }
 
     override fun unregisterReceiverForUser(receiver: BroadcastReceiver, user: UserHandle) {
-        registeredReceivers.remove(receiver)
+        receivers.removeIf { it.receiver == receiver }
     }
 
-    fun cleanUpReceivers(testName: String) {
-        registeredReceivers.forEach {
-            Log.i(testName, "Receiver not unregistered from dispatcher: $it")
-            if (shouldFailOnLeakedReceiver) {
-                throw IllegalStateException("Receiver not unregistered from dispatcher: $it")
+    /**
+     * Sends the given [intent] to *only* the receivers that were registered with an [IntentFilter]
+     * that matches the intent.
+     */
+    fun sendIntentToMatchingReceiversOnly(context: Context, intent: Intent) {
+        receivers.forEach {
+            if (
+                it.filter.match(
+                    context.contentResolver,
+                    intent,
+                    /* resolve= */ false,
+                    /* logTag= */ "FakeBroadcastDispatcher",
+                ) > 0
+            ) {
+                it.receiver.onReceive(context, intent)
             }
         }
-        registeredReceivers.clear()
     }
+
+    val numReceiversRegistered: Int
+        get() = receivers.size
+
+    fun cleanUpReceivers(testName: String) {
+        receivers.forEach {
+            val receiver = it.receiver
+            Log.i(testName, "Receiver not unregistered from dispatcher: $receiver")
+            if (shouldFailOnLeakedReceiver) {
+                throw IllegalStateException("Receiver not unregistered from dispatcher: $receiver")
+            }
+        }
+        receivers.clear()
+    }
+
+    private data class InternalReceiver(
+        val receiver: BroadcastReceiver,
+        val filter: IntentFilter,
+    )
 }

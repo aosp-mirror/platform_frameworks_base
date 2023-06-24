@@ -231,6 +231,9 @@ interface ShadeViewController {
     /** Sends an external (e.g. Status Bar) touch event to the Shade touch handler. */
     fun handleExternalTouch(event: MotionEvent): Boolean
 
+    /** Starts tracking a shade expansion gesture that originated from the status bar. */
+    fun startTrackingExpansionFromStatusBar()
+
     // ******* End Keyguard Section *********
 
     /** Returns the ShadeHeadsUpTracker. */

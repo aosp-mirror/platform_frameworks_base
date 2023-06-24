@@ -145,8 +145,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mMeasureViews.clear();
-        int mode = MeasureSpec.getMode(widthMeasureSpec);
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int specWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int count = getChildCount();
         // Collect all of the views which want to be laid out
         for (int i = 0; i < count; i++) {
@@ -163,7 +163,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         boolean trackWidth = true;
 
         // Measure all children so that they report the correct width
-        int childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
+        int childWidthSpec = MeasureSpec.makeMeasureSpec(specWidth, MeasureSpec.UNSPECIFIED);
         mNeedsUnderflow = mShouldRestrictIcons && visibleCount > MAX_ICONS;
         for (int i = 0; i < visibleCount; i++) {
             // Walking backwards
@@ -182,18 +182,35 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                 totalWidth += getViewTotalMeasuredWidth(child) + spacing;
             }
         }
+        setMeasuredDimension(
+                getMeasuredWidth(widthMode, specWidth, totalWidth),
+                getMeasuredHeight(heightMeasureSpec, mMeasureViews));
+    }
 
-        if (mode == MeasureSpec.EXACTLY) {
-            if (!mNeedsUnderflow && totalWidth > width) {
-                mNeedsUnderflow = true;
-            }
-            setMeasuredDimension(width, MeasureSpec.getSize(heightMeasureSpec));
+    private int getMeasuredHeight(int heightMeasureSpec, List<View> measuredChildren) {
+        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY) {
+            return MeasureSpec.getSize(heightMeasureSpec);
         } else {
-            if (mode == MeasureSpec.AT_MOST && totalWidth > width) {
-                mNeedsUnderflow = true;
-                totalWidth = width;
+            int highest = 0;
+            for (View child : measuredChildren) {
+                highest = Math.max(child.getMeasuredHeight(), highest);
             }
-            setMeasuredDimension(totalWidth, MeasureSpec.getSize(heightMeasureSpec));
+            return highest + getPaddingTop() + getPaddingBottom();
+        }
+    }
+
+    private int getMeasuredWidth(int widthMode, int specWidth, int totalWidth) {
+        if (widthMode == MeasureSpec.EXACTLY) {
+            if (!mNeedsUnderflow && totalWidth > specWidth) {
+                mNeedsUnderflow = true;
+            }
+            return specWidth;
+        } else {
+            if (widthMode == MeasureSpec.AT_MOST && totalWidth > specWidth) {
+                mNeedsUnderflow = true;
+                totalWidth = specWidth;
+            }
+            return totalWidth;
         }
     }
 
@@ -277,34 +294,6 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         if (removedAny) {
             requestLayout();
         }
-    }
-
-    /**
-     * Sets the list of ignored icon slots clearing the current list.
-     * @param slots names of the icons to ignore
-     */
-    public void setIgnoredSlots(List<String> slots) {
-        mIgnoredSlots.clear();
-        addIgnoredSlots(slots);
-    }
-
-    /**
-     * Returns the view corresponding to a particular slot.
-     *
-     * Use it solely to manipulate how it is presented.
-     * @param slot name of the slot to find. Names are defined in
-     *            {@link com.android.internal.R.config_statusBarIcons}
-     * @return a view for the slot if this container has it, else {@code null}
-     */
-    public View getViewForSlot(String slot) {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child instanceof StatusIconDisplayable
-                    && ((StatusIconDisplayable) child).getSlot().equals(slot)) {
-                return child;
-            }
-        }
-        return null;
     }
 
     /**
