@@ -981,7 +981,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Выбрано устройств: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(нет подключения)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не удается переключиться. Нажмите, чтобы повторить попытку."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Подключите устройство"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Подключить устройство"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>
@@ -1046,8 +1046,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не удалось узнать уровень заряда батареи"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нажмите, чтобы узнать больше."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Нет будильников"</string>
-    <!-- no translation found for accessibility_bouncer (5896923685673320070) -->
-    <skip />
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"разблокировать экран"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сканер отпечатков пальцев"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"выполнить аутентификацию"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"указать устройство"</string>
@@ -1127,18 +1126,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Подробнее"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Подробнее: <xliff:g id="URL">%s</xliff:g>."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Открыть \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
-    <!-- no translation found for wallet_quick_affordance_unavailable_install_the_app (7298552910007208368) -->
-    <skip />
-    <!-- no translation found for wallet_quick_affordance_unavailable_configure_the_app (4387433357429873258) -->
-    <skip />
-    <!-- no translation found for qr_scanner_quick_affordance_unavailable_explanation (3049582306241150946) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_install_the_app (6187820778998446168) -->
-    <skip />
-    <!-- no translation found for home_quick_affordance_unavailable_configure_the_app (7953595390775156839) -->
-    <skip />
-    <!-- no translation found for notes_app_quick_affordance_unavailable_explanation (4796955161600178530) -->
-    <skip />
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Вы можете добавить ярлык приложения \"Кошелек\", только если оно установлено."</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Вы можете добавить ярлык приложения \"Кошелек\", только если добавлена хотя бы одна карта."</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Вы можете добавить ярлык сканера QR-кодов, только если установлено приложение камеры."</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Вы можете добавить ярлык приложения Home, только если оно установлено."</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Доступно хотя бы одно устройство."</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Выберите стандартное приложение для заметок, которое будет открываться при нажатии на ярлык."</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Выбрать приложение"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Нажмите и удерживайте ярлык"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отмена"</string>
