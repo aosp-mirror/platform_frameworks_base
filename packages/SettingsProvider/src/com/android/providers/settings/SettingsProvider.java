@@ -3558,11 +3558,11 @@ public class SettingsProvider extends ContentProvider {
                 if (isSecureSettingsKey(key)) {
                     maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                             sSecureCloneToManagedSettings);
-                    maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
-                            sSystemCloneFromParentOnDependency.values());
                 } else if (isSystemSettingsKey(key)) {
                     maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                             sSystemCloneToManagedSettings);
+                    maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
+                            sSystemCloneFromParentOnDependency.keySet());
                 }
             }
 
