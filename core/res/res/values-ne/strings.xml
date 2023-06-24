@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध छैन"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"अनुमति चाहिन्छ"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"क्यामेरा उपलब्ध छैन"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"फोनमा जारी राख्नुहोस्"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"माइक्रोफोन उपलब्ध छैन"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"यो एपले सुरक्षासम्बन्धी अतिरिक्त सुविधा अन गर्न अनुरोध गरिरहेको छ। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"यो एपले सुरक्षासम्बन्धी अतिरिक्त सुविधा अन गर्न अनुरोध गरिरहेको छ। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"यो एपले सुरक्षासम्बन्धी अतिरिक्त सुविधा अन गर्न अनुरोध गरिरहेको छ। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
@@ -2128,7 +2135,7 @@
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"कुनै पनि व्यक्तिसँग सेयर गर्ने सिफारिस गरिएको छैन"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"अनुप्रयोगहरूको सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"यो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले यो USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
-    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"गृहपृष्ठ"</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"होम"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"पछाडि फर्कनुहोस्"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"हालसालैका एपहरू"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"सूचनाहरू"</string>

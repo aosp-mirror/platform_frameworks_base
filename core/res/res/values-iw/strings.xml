@@ -686,11 +686,11 @@
     <string name="face_acquired_too_close" msgid="4453646176196302462">"צריך להרחיק את הטלפון"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"צריך לקרב את הטלפון"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"צריך להגביה את הטלפון"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להוריד את הטלפון"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להנמיך את הטלפון."</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"צריך להזיז את הטלפון שמאלה"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"צריך להזיז את הטלפון ימינה"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"כדי לראות את הפנים שלך יש להחזיק את הטלפון בגובה העיניים."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"לא רואים את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
@@ -706,7 +706,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"לא ניתן ליצור את התבנית לזיהוי הפנים. יש לנסות שוב."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"זוהו משקפיים כהים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה כיסוי על הפנים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה שהפנים מכוסות. הפנים שלך חייבות להיות גלויות לגמרי."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
@@ -1261,7 +1261,7 @@
     <string name="android_upgrading_complete" msgid="409800058018374746">"תהליך האתחול בשלבי סיום."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות במהלך ההגדרה של טביעת האצבע שלך."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"לסיום ההגדרה, יש לכבות את המסך"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"השבתה"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"כיבוי"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"להמשיך לאמת את טביעת האצבע שלך?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות כדי לאמת את טביעת האצבע שלך."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"כיבוי המסך"</string>
@@ -1369,7 +1369,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏MIDI באמצעות USB מופעל"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"המכשיר מחובר כמצלמת אינטרנט"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏אביזר USB מחובר"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"יש להקיש להצגת אפשרויות נוספות."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"לאפשרויות נוספות, יש להקיש כאן."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"המכשיר המחובר בטעינה. יש להקיש לאפשרויות נוספות."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"המכשיר זיהה התקן אודיו אנלוגי"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ההתקן שחיברת לא תואם לטלפון הזה. יש להקיש לקבלת מידע נוסף."</string>
@@ -1960,7 +1960,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> לא זמינה"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"דרושה הרשאה"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"המצלמה לא זמינה"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"יש להמשיך בטלפון"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"המיקרופון לא זמין"</string>
@@ -1971,6 +1972,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"‏אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, יש לנסות במכשיר Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, יש לנסות בטאבלט."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"אי אפשר לגשת לאפליקציה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g> כרגע. במקום זאת, אפשר לנסות בטלפון."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏האפליקציה הזו מבקשת אמצעי אבטחה נוסף. במקום זאת, יש לנסות במכשיר Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"האפליקציה הזו מבקשת אמצעי אבטחה נוסף. במקום זאת, יש לנסות בטאבלט."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"האפליקציה הזו מבקשת אמצעי אבטחה נוסף. במקום זאת, יש לנסות בטלפון."</string>

@@ -634,7 +634,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Otisk prstu se nepodařilo rozpoznat. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně přitiskněte na snímač"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně přitiskněte prst na snímač"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zkuste jiný otisk prstu"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Je příliš světlo"</string>
@@ -1961,7 +1961,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> není k dispozici"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Je vyžadováno oprávnění"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Žádost o oprávnění byla potlačena"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera není k dispozici"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Pokračujte na telefonu"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon není k dispozici"</string>
@@ -1972,6 +1972,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> v tuto chvíli není k dispozici. Zkuste to na zařízení Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> v tuto chvíli není k dispozici. Zkuste to na tabletu."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> v tuto chvíli není k dispozici. Zkuste to na telefonu."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Tato aplikace požaduje další oprávnění, která ale nelze udělit během relace streamování. Oprávnění udělte nejprve na zařízení Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Tato aplikace požaduje další oprávnění, která ale nelze udělit během relace streamování. Oprávnění udělte nejprve na tabletu."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Tato aplikace požaduje další oprávnění, která ale nelze udělit během relace streamování. Oprávnění udělte nejprve na telefonu."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Tato aplikace požaduje další zabezpečení. Zkuste to na zařízení Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Tato aplikace požaduje další zabezpečení. Zkuste to na tabletu."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Tato aplikace požaduje další zabezpečení. Zkuste to na telefonu."</string>

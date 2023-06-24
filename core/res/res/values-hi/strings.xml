@@ -1259,7 +1259,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट खत्म हो रहा है."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपना फ़िंगरप्रिंट सेट अप करते समय, बटन को हल्के से टैप करके देखें."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेटअप पूरा होने पर, स्क्रीन बंद करें"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेटअप रोकने के लिए, स्क्रीन बंद करें"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"बंद करें"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फ़िंगरप्रिंट की पुष्टि करना जारी रखना है?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपने फ़िंगरप्रिंट की पुष्टि करने के लिए, बटन पर हल्के से टैप करके देखें."</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"अनुमति ज़रूरी है"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"कैमरा उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"फ़ोन पर जारी रखें"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"माइक्रोफ़ोन उपलब्ध नहीं है"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर कोशिश करें."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर कोशिश करें."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर कोशिश करें."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
@@ -2160,7 +2167,7 @@
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"आपके आईटी एडमिन ने इस कॉन्टेंट को शेयर करने की सुविधा ब्लॉक कर रखी है"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"इस कॉन्टेंट को ऑफ़िस के काम से जुड़े ऐप्लिकेशन का इस्तेमाल करके, शेयर नहीं किया जा सकता"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"इस कॉन्टेंट को ऑफ़िस के काम से जुड़े ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"इस कॉन्टेंट को निजी ऐप्लिकेशन का इस्तेमाल करके, शेयर नहीं किया जा सकता"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"इस कॉन्टेंट को निजी ऐप्लिकेशन के ज़रिए शेयर नहीं किया जा सकता"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"इस कॉन्टेंट को निजी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"वर्क ऐप्लिकेशन बंद किए गए हैं"</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"चालू करें"</string>

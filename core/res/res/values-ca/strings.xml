@@ -706,7 +706,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No es pot crear el model facial. Torna-ho a provar."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"S\'han detectat ulleres fosques. La cara ha de veure\'s sencera."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"S\'ha detectat una mascareta. La cara ha de veure\'s sencera."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tens la cara tapada. La cara ha de veure\'s sencera."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No es pot verificar la cara. Maquinari no disponible."</string>
@@ -1960,7 +1960,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'aplicació no està disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Ara mateix, <xliff:g id="APP_NAME">%1$s</xliff:g> no està disponible."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no està disponible"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Permís necessari"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"La càmera no està disponible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua al telèfon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"El micròfon no està disponible"</string>
@@ -1971,6 +1972,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En aquests moments, No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En aquests moments, No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al telèfon."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al telèfon."</string>

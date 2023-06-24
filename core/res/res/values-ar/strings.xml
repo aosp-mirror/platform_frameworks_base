@@ -1223,7 +1223,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"يستمر التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"تستمر عملية <xliff:g id="PROCESS">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_restart" msgid="2789618625210505419">"فتح التطبيق مرة أخرى"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"إرسال تعليقات"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"إرسال ملاحظات"</string>
     <string name="aerr_close" msgid="3398336821267021852">"إغلاق"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"كتم الصوت حتى إعادة تشغيل الجهاز"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"انتظار"</string>
@@ -1963,7 +1963,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"مطلوب منح الإذن"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"الكاميرا غير متاحة"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"الاستمرار على الهاتف"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"الميكروفون غير متاح"</string>
@@ -1974,6 +1975,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"‏لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. حاوِل الوصول إليه على جهاز Android TV بدلاً من ذلك."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. حاوِل الوصول إليه على جهازك اللوحي بدلاً من ذلك."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. حاوِل الوصول إليه على هاتفك بدلاً من ذلك."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>

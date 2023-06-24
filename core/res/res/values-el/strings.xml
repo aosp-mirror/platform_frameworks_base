@@ -705,7 +705,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Αδύνατη η δημιουργία του μοντέλου προσώπου. Δοκιμάστε ξανά."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Ανιχνεύτηκαν σκούρα γυαλιά. Το πρόσωπό σας πρέπει να φαίνεται πλήρως."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ανιχνεύτηκε κάλυμμα προσώπου. Το πρόσωπό σας πρέπει να φαίνεται πλήρως."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ανιχνεύτηκε κάλυμμα προσώπου. Δεν φαίνεται όλο το πρόσωπο."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Αδύν. επαλήθ. προσώπου. Μη διαθέσιμος εξοπλισμός."</string>
@@ -1372,8 +1372,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Φόρτιση συνδεδεμένης συσκευής. Πατήστε για περισσότερες επιλογές."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Πατήστε για απενεργοποίηση εντοπισμού/διόρθ. σφαλμάτων USB"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Συνδέθηκε ο εντοπ. σφαλμ. USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Πατήστε για απενεργ. εντοπ./διόρθ. σφαλμ. USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Συνδέθηκε ο ασύρματος εντοπισμός σφαλμάτων"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Πατήστε, για να απενεργοποιήσετε τον ασύρματο εντοπισμό σφαλμάτων"</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Απαιτείται άδεια"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Η κάμερα δεν είναι διαθέσιμη"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Συνέχεια στο τηλέφωνο"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Το μικρόφωνο δεν είναι διαθέσιμο"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στο τηλέφωνό σας."</string>

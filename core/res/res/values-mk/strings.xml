@@ -697,7 +697,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледајте подиректно во телефонот"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1259,7 +1259,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Се стартуваат апликациите."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Подигањето завршува."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно додека го поставувате отпечатокот."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За да завршите со поставувањето, исклучете го екранот."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За да завршите со поставувањето, исклучете го екранот"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Исклучи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Да продолжи потврдувањето на отпечаток?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно за да го потврдите отпечатокот."</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> е недостапна"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Потребна е дозвола"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камерата е недостапна"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Продолжете на телефонот"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофонот не е достапен"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот Android TV како алтернатива."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот таблет како алтернатива."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот телефон како алтернатива."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Апликацијава бара дополнителна безбедност. Пробајте на вашиот Android TV како алтернатива."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Апликацијава бара дополнителна безбедност. Пробајте на вашиот таблет како алтернатива."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Апликацијава бара дополнителна безбедност. Пробајте на вашиот телефон како алтернатива."</string>

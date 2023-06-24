@@ -1373,7 +1373,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"បាន​រកឃើញ​គ្រឿង​បរិក្ខារ​សំឡេង​អាណាឡូក"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ឧបករណ៍​ដែលភ្ជាប់​មក​ជាមួយ​មិនត្រូវគ្នា​ជាមួយ​ទូរសព្ទ​នេះទេ។ ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម។"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"បាន​ភ្ជាប់​ការ​ជួសជុលតាម​ USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"ចុច​ដើម្បី​បិទ​ការជួសជុលតាម ​USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"ប៉ះ​ដើម្បី​បិទ​ការជួសជុលតាម ​USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"ជ្រើស​រើស ដើម្បី​បិទ​ការ​កែ​កំហុសតាម USB ។"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"បានភ្ជាប់​ការជួសជុល​ដោយឥតខ្សែ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ចុច ដើម្បី​បិទ​ការជួសជុល​ដោយឥតខ្សែ"</string>
@@ -1959,7 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"មិនអាច​ប្រើ​កម្មវិធី​នេះបានទេ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"តម្រូវឱ្យមាន​ការអនុញ្ញាត"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"បានទប់ស្កាត់សំណើសុំការអនុញ្ញាត"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"មិនអាចប្រើ​កាមេរ៉ា​បានទេ"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"បន្ត​នៅលើ​ទូរសព្ទ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"មិនអាចប្រើ​មីក្រូហ្វូនបានទេ"</string>
@@ -1970,6 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"មិនអាចប្រើ​កម្មវិធីនេះ​នៅលើ <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​នៅពេលនេះ​បានទេ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"កម្មវិធីនេះកំពុងស្នើសុំការអនុញ្ញាតបន្ថែម ប៉ុន្តែមិនអាចផ្តល់ការអនុញ្ញាតក្នុងវគ្គផ្សាយបានទេ។ ផ្តល់ការអនុញ្ញាតនៅលើឧបករណ៍ Android TV របស់អ្នកជាមុនសិន។"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"កម្មវិធីនេះកំពុងស្នើសុំការអនុញ្ញាតបន្ថែម ប៉ុន្តែមិនអាចផ្តល់ការអនុញ្ញាតក្នុងវគ្គផ្សាយបានទេ។ ផ្តល់ការអនុញ្ញាតនៅលើថេប្លេតរបស់អ្នកជាមុនសិន។"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"កម្មវិធីនេះកំពុងស្នើសុំការអនុញ្ញាតបន្ថែម ប៉ុន្តែមិនអាចផ្តល់ការអនុញ្ញាតក្នុងវគ្គផ្សាយបានទេ។ ផ្តល់ការអនុញ្ញាតនៅលើទូរសព្ទរបស់អ្នកជាមុនសិន។"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"កម្មវិធីនេះ​កំពុងស្នើសុំ​សុវត្ថិភាពបន្ថែម។ សូមសាកល្បងប្រើ​នៅលើ​ឧបករណ៍ Android TV របស់អ្នក​ជំនួសវិញ។"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"កម្មវិធីនេះ​កំពុងស្នើសុំ​សុវត្ថិភាពបន្ថែម។ សូមសាកល្បងប្រើ​នៅលើ​ថេប្លេត​របស់អ្នក​ជំនួសវិញ។"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"កម្មវិធីនេះ​កំពុងស្នើសុំ​សុវត្ថិភាពបន្ថែម។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
@@ -2160,7 +2163,7 @@
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"បានទប់ស្កាត់ដោយ​អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"ខ្លឹមសារនេះ​មិនអាចចែករំលែក​តាមរយៈ​កម្មវិធី​ការងារ​បានទេ"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ខ្លឹមសារនេះ​មិនអាចបើក​តាមរយៈ​កម្មវិធី​ការងារ​បានទេ"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ខ្លឹមសារនេះ​មិនអាចចែករំលែក​តាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"មិនអាចចែករំលែកខ្លឹមសារនេះ​ជាមួយ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ខ្លឹមសារនេះ​មិនអាចបើក​តាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"កម្មវិធី​ការងារ​ត្រូវបានផ្អាក"</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ឈប់ផ្អាក"</string>

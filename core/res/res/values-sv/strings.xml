@@ -628,7 +628,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ett fel uppstod vid autentiseringen"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Använd skärmlåset"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fortsätt med hjälp av ditt skärmlås"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck på sensorn med ett stadigt tryck"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck hårt på sensorn"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeravtrycket kändes inte igen. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengör fingeravtryckssensorn och försök igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengör sensorn och försök igen"</string>
@@ -648,7 +648,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingeravtryckskonfigurering nådde tidsgränsen. Försök igen."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiden för fingeravtrycksinställning gick ut. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"För många försök. Använd låsskärmen i stället."</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> är inte tillgänglig"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Behörighet krävs"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kameran är inte tillgänglig"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Fortsätt på telefonen"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofonen är inte tillgänglig"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g> för närvarande. Testa med Android TV-enheten i stället."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g> för närvarande. Testa med surfplattan i stället."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g> för närvarande. Testa med telefonen i stället."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Appen begär ytterligare säkerhet. Testa med Android TV-enheten i stället."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Appen begär ytterligare säkerhet. Testa med surfplattan i stället."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Appen begär ytterligare säkerhet. Testa med telefonen i stället."</string>

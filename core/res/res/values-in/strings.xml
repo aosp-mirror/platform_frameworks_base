@@ -223,7 +223,7 @@
     <string name="silent_mode_silent" msgid="5079789070221150912">"Pendering mati"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Pendering bergetar"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Pendering nyala"</string>
-    <string name="reboot_to_update_title" msgid="2125818841916373708">"Pemutakhiran sistem Android"</string>
+    <string name="reboot_to_update_title" msgid="2125818841916373708">"Update sistem Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Bersiap untuk memperbarui..."</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Memproses pembaruan paket…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Memulai ulang…"</string>
@@ -705,7 +705,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah Anda. Coba lagi."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kacamata hitam terdeteksi. Wajah harus terlihat sepenuhnya."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah harus terlihat sepenuhnya."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah harus terlihat jelas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
@@ -1373,7 +1373,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Aksesori audio analog terdeteksi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Perangkat yang terpasang tidak kompatibel dengan ponsel ini. Ketuk untuk mempelajari lebih lanjut."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Proses debug USB terhubung"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Ketuk untuk menonaktifkan proses debug USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Ketuk untuk nonaktifkan proses debug USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Pilih untuk menonaktifkan debugging USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Proses debug nirkabel terhubung"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Ketuk untuk menonaktifkan proses debug nirkabel."</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikasi tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia saat ini."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Perlu izin"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Lanjutkan di ponsel"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon tidak tersedia"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Aplikasi ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g> untuk saat ini. Coba di perangkat Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Aplikasi ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g> untuk saat ini. Coba di tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Aplikasi ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g> untuk saat ini. Coba di ponsel."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aplikasi ini meminta keamanan tambahan. Coba di perangkat Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aplikasi ini meminta keamanan tambahan. Coba di tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aplikasi ini meminta keamanan tambahan. Coba di ponsel."</string>
@@ -2160,7 +2167,7 @@
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Diblokir oleh admin IT Anda"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Konten ini tidak dapat dibagikan dengan aplikasi kerja"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Konten ini tidak dapat dibuka dengan aplikasi kerja"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Konten ini tidak dapat dibagikan dengan aplikasi pribadi"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Konten ini tidak dapat dibagikan ke aplikasi pribadi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Konten ini tidak dapat dibuka dengan aplikasi pribadi"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Aplikasi kerja dijeda"</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Batalkan jeda"</string>

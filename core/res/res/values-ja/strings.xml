@@ -1959,7 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"権限が必要"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"権限のリクエストが抑制されています"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"カメラ: 使用不可"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"スマートフォンで続行"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"マイク: 使用不可"</string>
@@ -1970,6 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。タブレットでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"このアプリは追加の権限を求めていますが、ストリーミング セッションでは権限を付与できません。Android TV デバイスで先に権限を付与してください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"このアプリは追加の権限を求めていますが、ストリーミング セッションでは権限を付与できません。タブレットで先に権限を付与してください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"このアプリは追加の権限を求めていますが、ストリーミング セッションでは権限を付与できません。スマートフォンで先に権限を付与してください。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"このアプリはセキュリティの強化を求めています。Android TV デバイスでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"このアプリはセキュリティの強化を求めています。タブレットでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"このアプリはセキュリティの強化を求めています。スマートフォンでのアクセスをお試しください。"</string>

@@ -689,7 +689,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"請將手機向左移"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"請將手機向右移"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"請儘可能直視裝置正面。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"未偵測到你的臉，請將手機舉到與視線同高。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"未偵測到你的臉，請將手機舉到與眼睛同高的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"鏡頭過度晃動，請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊你的臉孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識這張臉，請再試一次。"</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前無法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法存取「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要相關權限"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"無法使用相機"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"請繼續在手機上操作"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"無法使用麥克風"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個項目，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用手機。"</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"這個應用程式要求進行額外的安全性驗證，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"這個應用程式要求進行額外的安全性驗證，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"這個應用程式要求進行額外的安全性驗證，請改用手機。"</string>

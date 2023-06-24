@@ -1012,7 +1012,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"പാറ്റേൺ മറന്നോ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"അക്കൗണ്ട് അൺലോക്ക്"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google Account ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"ഉപയോക്താവിന്റെ പേര് (ഇമെയിൽ)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"പാസ്‌വേഡ്"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"സൈൻ ഇൻ ചെയ്യുക"</string>
@@ -1663,7 +1663,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ സിം ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"പിൻ കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google Account ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"ഉപയോക്താവിന്റെ പേര് (ഇമെയിൽ)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"പാസ്‌വേഡ്"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"സൈൻ ഇൻ ചെയ്യുക"</string>
@@ -1959,7 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ലഭ്യമല്ല"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"അനുമതി ആവശ്യമാണ്"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"അനുമതി അഭ്യർത്ഥന നിയന്ത്രിച്ചു"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ക്യാമറ ലഭ്യമല്ല"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ഫോണിൽ തുടരുക"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"മൈക്രോഫോൺ ലഭ്യമല്ല"</string>
@@ -1970,6 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം Android TV ഉപകരണത്തിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"ഈ ആപ്പ് അധിക അനുമതികൾ അഭ്യർത്ഥിക്കുന്നു, എന്നാൽ സ്‌ട്രീമിംഗ് സെഷനിടയിൽ അനുമതികൾ നൽകാനാകില്ല. ആദ്യം നിങ്ങളുടെ Android TV ഉപകരണത്തിൽ അനുമതി നൽകുക."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"ഈ ആപ്പ് അധിക അനുമതികൾ അഭ്യർത്ഥിക്കുന്നു, എന്നാൽ സ്‌ട്രീമിംഗ് സെഷനിടയിൽ അനുമതികൾ നൽകാനാകില്ല. ആദ്യം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ അനുമതി നൽകുക."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"ഈ ആപ്പ് അധിക അനുമതികൾ അഭ്യർത്ഥിക്കുന്നു, എന്നാൽ സ്‌ട്രീമിംഗ് സെഷനിടയിൽ അനുമതികൾ നൽകാനാകില്ല. ആദ്യം നിങ്ങളുടെ ഫോണിൽ അനുമതി നൽകുക."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ഈ ആപ്പ് അധിക സുരക്ഷ അഭ്യർത്ഥിക്കുന്നു. പകരം നിങ്ങളുടെ Android TV ഉപകരണത്തിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ഈ ആപ്പ് അധിക സുരക്ഷ അഭ്യർത്ഥിക്കുന്നു. പകരം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ഈ ആപ്പ് അധിക സുരക്ഷ അഭ്യർത്ഥിക്കുന്നു. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>

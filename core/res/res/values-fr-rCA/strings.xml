@@ -695,9 +695,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez inscrire votre visage à nouveau."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Modifiez légèrement la position de votre tête"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez plus directement votre téléphone"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez droit dans le téléphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez droit dans le téléphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez droit dans le téléphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui pourrait couvrir votre visage."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez le haut de l\'écran, y compris la barre noire"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -1960,7 +1960,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'application n\'est pas accessible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas accessible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non accessible"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorisation nécessaire"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Appareil photo non accessible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuer sur le téléphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microphone non accessible"</string>
@@ -1971,6 +1972,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre appareil Android TV à la place."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre tablette à la place."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g> pour le moment. Essayez sur votre téléphone à la place."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Cette application demande une sécurité supplémentaire. Essayez sur votre appareil Android TV à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Cette application demande une sécurité supplémentaire. Essayez sur votre tablette à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Cette application demande une sécurité supplémentaire. Essayez sur votre téléphone à la place."</string>

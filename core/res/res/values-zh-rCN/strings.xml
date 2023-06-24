@@ -705,7 +705,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"无法创建您的脸部模型，请重试。"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"检测到墨镜，您的脸部必须完全可见。"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到脸部存在遮挡，请露出整张脸。"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到面部被遮挡，请露出整个面部。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"无法验证人脸。硬件无法使用。"</string>
@@ -1366,7 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已开启 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已开启 USB 网络共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已开启 USB MIDI 模式"</string>
-    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接为摄像头"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接并作为摄像头使用"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 配件已连接"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"点按即可查看更多选项。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在为连接的设备充电。点按即可查看更多选项。"</string>
@@ -1959,7 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"应用无法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要权限"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"权限请求被阻止"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"无法使用摄像头"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"继续在手机上操作"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"无法使用麦克风"</string>
@@ -1970,6 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在 Android TV 设备上访问。"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在平板电脑上访问。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在手机上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"此应用请求获得额外的权限，但在流式传输会话期间无法授予权限。请先在 Android TV 设备上授予相应权限。"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"此应用请求获得额外的权限，但在流式传输会话期间无法授予权限。请先在平板电脑上授予相应权限。"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"此应用请求获得额外的权限，但在流式传输会话期间无法授予权限。请先在手机上授予相应权限。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"此应用要求进行额外的安全性验证，您可以尝试在 Android TV 设备上访问。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"此应用要求进行额外的安全性验证，您可以尝试在平板电脑上访问。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"此应用要求进行额外的安全性验证，您可以尝试在手机上访问。"</string>

@@ -648,7 +648,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Phần cứng vân tay không khả dụng."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Không thể thiết lập vân tay"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hết thời gian thiết lập vân tay. Hãy thử lại."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hết thời gian chờ thiết lập vân tay. Hãy thử lại."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Thao tác dùng dấu vân tay bị hủy."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Người dùng đã hủy thao tác dùng dấu vân tay."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Bạn đã thử quá nhiều lần. Hãy dùng phương thức khoá màn hình."</string>
@@ -689,7 +689,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Đưa điện thoại sang bên trái"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Đưa điện thoại sang bên phải"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Vui lòng nhìn thẳng vào thiết bị."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không thấy khuôn mặt. Hãy cầm điện thoại ngang tầm mắt"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không thấy khuôn mặt. Hãy cầm điện thoại ngang tầm mắt."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Không thể nhận dạng khuôn mặt. Hãy thử lại."</string>
@@ -704,7 +704,7 @@
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện thấy kính râm. Toàn bộ khuôn mặt của bạn phải được trông thấy rõ ràng."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện thấy kính râm. Bạn phải cho thấy toàn bộ khuôn mặt."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Khuôn mặt bị che. Bạn phải cho thấy toàn bộ khuôn mặt."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Ứng dụng này không dùng được"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> hiện không dùng được."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Không hỗ trợ <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Cần có quyền"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Không dùng được máy ảnh"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Tiếp tục trên điện thoại"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Không dùng được micrô"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Hiện tại, bạn không thể truy cập vào ứng dụng này trên <xliff:g id="DEVICE">%1$s</xliff:g>. Hãy thử trên thiết bị Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Hiện tại, bạn không thể truy cập vào ứng dụng này trên <xliff:g id="DEVICE">%1$s</xliff:g>. Hãy thử trên máy tính bảng."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Hiện tại, bạn không thể truy cập vào ứng dụng này trên <xliff:g id="DEVICE">%1$s</xliff:g>. Hãy thử trên điện thoại."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ứng dụng này đang yêu cầu tính năng bảo mật bổ sung. Hãy thử trên thiết bị Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ứng dụng này đang yêu cầu tính năng bảo mật bổ sung. Hãy thử trên máy tính bảng."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ứng dụng này đang yêu cầu tính năng bảo mật bổ sung. Hãy thử trên điện thoại."</string>
@@ -2128,7 +2135,7 @@
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Không có gợi ý nào về người mà bạn có thể chia sẻ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Danh sách ứng dụng"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
-    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Màn hình chính"</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Nhà"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Quay lại"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Ứng dụng gần đây"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Thông báo"</string>

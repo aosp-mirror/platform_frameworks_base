@@ -697,15 +697,15 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kijk goed recht naar je telefoon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat er niets voor je gezicht zit"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat niets je gezicht bedekt"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinig de bovenkant van je scherm, inclusief de zwarte balk"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet helemaal zichtbaar zijn."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je hele gezicht moet zichtbaar zijn."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan gezicht niet verifiëren. Hardware niet beschikbaar."</string>
@@ -1259,7 +1259,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Opstarten afronden."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan terwijl je je vingerafdruk instelt."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zet het scherm uit om het instellen te beëindigen"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zet scherm uit om instellen te beëindigen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Uitzetten"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Doorgaan met verificatie van je vingerafdruk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan om je vingerafdruk te verifiëren."</string>
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Rechten vereist"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Camera niet beschikbaar"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Doorgaan op telefoon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfoon niet beschikbaar"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Je hebt hier nu geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je Android TV-apparaat."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Je hebt hier nu geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Je hebt hier nu geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je telefoon."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je Android TV-apparaat."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je telefoon."</string>

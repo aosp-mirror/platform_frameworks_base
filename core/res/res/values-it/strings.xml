@@ -695,8 +695,8 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia leggermente la posizione della testa"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nel telefono"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nel telefono"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nello smartphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nello smartphone"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda dritto nel telefono"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pulisci la parte superiore dello schermo, inclusa la barra nera"</string>
@@ -1960,7 +1960,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorizzazione necessaria"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Richiesta di autorizzazione rifiutata"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Fotocamera non disponibile"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sul telefono"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfono non disponibile"</string>
@@ -1971,6 +1971,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Al momento non è possibile accedere a questa app su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Al momento non è possibile accedere a questa app su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Al momento non è possibile accedere a questa app su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Questa app richiede autorizzazioni aggiuntive, ma non è possibile concedere autorizzazioni in una sessione di streaming. Devi prima concedere l\'autorizzazione sul tuo dispositivo Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Questa app richiede autorizzazioni aggiuntive, ma non è possibile concedere autorizzazioni in una sessione di streaming. Devi prima concedere l\'autorizzazione sul tuo tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Questa app richiede autorizzazioni aggiuntive, ma non è possibile concedere autorizzazioni in una sessione di streaming. Devi prima concedere l\'autorizzazione sul tuo smartphone."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Questa app richiede maggiore sicurezza. Prova a usare il dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Questa app richiede maggiore sicurezza. Prova a usare il tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Questa app richiede maggiore sicurezza. Prova a usare il telefono."</string>

@@ -628,11 +628,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서를 세게 누르세요"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서를 세게 누르세요"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
@@ -689,14 +689,14 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 움직이세요"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 움직이세요"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"기기에서 더 똑바로 바라보세요."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"얼굴이 보이지 않습니다. 눈높이에 맞춰 휴대전화를 들어 주세요."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"얼굴이 보이지 않습니다. 눈높이에 맞춰 휴대전화를 들어 주세요"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"너무 많이 움직였습니다. 휴대전화를 흔들리지 않게 잡으세요."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"얼굴을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"얼굴의 위치를 조금 변경해 주세요."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더 정면으로 바라보세요"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더 정면으로 바라보세요"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더 정면으로 바라보세요"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더 정면에서 바라보세요."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더 정면에서 바라보세요."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더 정면에서 바라보세요."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -1959,7 +1959,8 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"권한이 필요함"</string>
+    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
+    <skip />
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"카메라를 사용할 수 없음"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"휴대전화에서 진행하기"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"마이크를 사용할 수 없음"</string>
@@ -1970,6 +1971,12 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 스마트폰에서 시도해 보세요."</string>
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
+    <skip />
+    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
+    <skip />
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"앱에서 추가 보안을 요청합니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"앱에서 추가 보안을 요청합니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"앱에서 추가 보안을 요청합니다. 대신 휴대전화에서 시도해 보세요."</string>
