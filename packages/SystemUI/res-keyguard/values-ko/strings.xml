@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"잘못된 PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"잘못된 PIN입니다. 다시 시도해 주세요."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"또는 지문으로 잠금 해제하세요."</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"지문이 인식되지 않았습니다."</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"지문이 인식되지 않았습니다"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"얼굴을 인식할 수 없습니다."</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"다시 시도하거나 PIN을 입력하세요."</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"다시 시도하거나 비밀번호를 입력하세요."</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"버블"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"아날로그"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"계속하려면 기기 잠금 해제"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"나중에 업데이트를 설치하려면 PIN을 입력하세요."</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"나중에 업데이트를 설치하려면 비밀번호를 입력하세요."</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"나중에 업데이트를 설치하려면 패턴을 그리세요."</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"기기가 업데이트되었습니다. 계속하려면 PIN을 입력하세요."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"기기가 업데이트되었습니다. 계속 진행하려면 비밀번호를 입력하세요."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"기기가 업데이트되었습니다. 계속하려면 패턴을 그리세요."</string>
 </resources>
