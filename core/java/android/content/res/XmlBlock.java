@@ -97,6 +97,18 @@ public final class XmlBlock implements AutoCloseable {
     }
 
     /**
+     * Returns a XmlResourceParser that validates the xml using the given validator.
+     */
+    public XmlResourceParser newParser(@AnyRes int resId, Validator validator) {
+        synchronized (this) {
+            if (mNative != 0) {
+                return new Parser(nativeCreateParseState(mNative, resId), this, validator);
+            }
+            return null;
+        }
+    }
+
+    /**
      * Reference Error.h UNEXPECTED_NULL
      */
     private static final int ERROR_NULL_DOCUMENT = Integer.MIN_VALUE + 8;
@@ -108,10 +120,17 @@ public final class XmlBlock implements AutoCloseable {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public final class Parser implements XmlResourceParser {
+        Validator mValidator;
+
         Parser(long parseState, XmlBlock block) {
             mParseState = parseState;
             mBlock = block;
             block.mOpenCount++;
+        }
+
+        Parser(long parseState, XmlBlock block, Validator validator) {
+            this(parseState, block);
+            mValidator = validator;
         }
 
         @AnyRes
@@ -329,6 +348,9 @@ public final class XmlBlock implements AutoCloseable {
                 break;
             }
             mEventType = ev;
+            if (mValidator != null) {
+                mValidator.validate(this);
+            }
             if (ev == END_DOCUMENT) {
                 // Automatically close the parse when we reach the end of
                 // a document, since the standard XmlPullParser interface
