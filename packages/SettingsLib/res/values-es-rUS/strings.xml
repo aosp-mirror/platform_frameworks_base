@@ -682,7 +682,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si transmites <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambias la salida, tu transmisión actual se detendrá"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Cambia la salida"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animaciones de retroceso predictivas"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animaciones de gesto predictivo"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Habilita animaciones del sistema para gestos de retroceso predictivos."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta configuración habilita las animaciones del sistema para la animación de gestos predictiva. Se requiere la configuración por app de enableOnBackInvokedCallback en verdadero en el archivo de manifiesto."</string>
   <string-array name="udfps_accessibility_touch_hints">
