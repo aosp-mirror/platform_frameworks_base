@@ -92,6 +92,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             "DEFAULT", 0 /* flags */);
 
     private static final String VENDOR_CONFIG_FILE_PATH = "etc/devicestate/";
+    private static final String ODM_CONFIG_FILE_PATH = "etc/devicestate/";
     private static final String DATA_CONFIG_FILE_PATH = "system/devicestate/";
     private static final String CONFIG_FILE_NAME = "device_state_configuration.xml";
     private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
@@ -586,6 +587,12 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 DATA_CONFIG_FILE_PATH, CONFIG_FILE_NAME);
         if (configFileFromDataDir.exists()) {
             return configFileFromDataDir;
+        }
+
+        final File configFileFromOdmDir = Environment.buildPath(Environment.getOdmDirectory(),
+                ODM_CONFIG_FILE_PATH, CONFIG_FILE_NAME);
+        if (configFileFromOdmDir.exists()) {
+            return configFileFromOdmDir;
         }
 
         final File configFileFromVendorDir = Environment.buildPath(Environment.getVendorDirectory(),
