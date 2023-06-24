@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Appen er installeret."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vil du installere denne app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vil du opdatere denne app?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateriner fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din tablet fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateriner fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på dit fjernsyn fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateriner fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din telefon fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen blev ikke installeret."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken blev forhindret i at blive installeret."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen blev ikke installeret, da pakken er i strid med en eksisterende pakke."</string>

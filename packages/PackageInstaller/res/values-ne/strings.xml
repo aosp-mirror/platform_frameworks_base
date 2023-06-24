@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"एप इन्स्टल गरियो।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"तपाईं यो एप इन्स्टल गर्न चाहनुहुन्छ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"तपाईं यो एप अपडेट गर्न चाहनुहुन्छ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> &lt;b&gt;बाट यो एप अपडेट गर्ने हो&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;यो एपले सामान्यतया &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> बाट अपडेटहरू प्राप्त गर्छ&lt;/b&gt;। तपाईंले कुनै फरक स्रोतबाट अपडेट गर्नुभयो भने तपाईं भविष्यमा आफ्नो ट्याब्लेटमा भएको जुनसुकै स्रोतबाट अपडेटहरू प्राप्त गर्न सक्नुहुन्छ। एपका मुख्य सुविधाहरू परिवर्तन हुन सक्छन्।&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> &lt;b&gt;बाट यो एप अपडेट गर्ने हो&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;यो एपले सामान्यतया &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> बाट अपडेटहरू प्राप्त गर्छ&lt;/b&gt;। तपाईंले कुनै फरक स्रोतबाट अपडेट गर्नुभयो भने तपाईं भविष्यमा आफ्नो टिभीमा भएको जुनसुकै स्रोतबाट अपडेटहरू प्राप्त गर्न सक्नुहुन्छ। एपका मुख्य सुविधाहरू परिवर्तन हुन सक्छन्।&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> &lt;b&gt;बाट यो एप अपडेट गर्ने हो&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;यो एपले सामान्यतया &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> बाट अपडेटहरू प्राप्त गर्छ&lt;/b&gt;। तपाईंले कुनै फरक स्रोतबाट अपडेट गर्नुभयो भने तपाईं भविष्यमा आफ्नो फोनमा भएको जुनसुकै स्रोतबाट अपडेटहरू प्राप्त गर्न सक्नुहुन्छ। एपका मुख्य सुविधाहरू परिवर्तन हुन सक्छन्।&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"एप स्थापना गरिएन।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"यो प्याकेज स्थापना गर्ने क्रममा अवरोध गरियो।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"प्याकेजका रूपमा स्थापना नगरिएको एप विद्यमान प्याकेजसँग मेल खाँदैन।"</string>

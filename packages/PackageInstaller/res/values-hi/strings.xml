@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ऐप्लिकेशन इंस्‍टॉल हो गया."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"क्या आपको यह ऐप्लिकेशन इंस्टॉल करना है?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"क्या आप इस ऐप्लिकेशन को अपडेट करना चाहते हैं?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;क्या इस ऐप्लिकेशन को &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; से अपडेट करना है?&lt;/p&gt;&lt;p&gt;आम तौर पर, इस ऐप्लिकेशन को &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; से अपडेट मिलते हैं. किसी दूसरे सोर्स से अपडेट करने पर, आपको आगे से अपने टैबलेट पर किसी भी सोर्स से अपडेट मिल सकते हैं. ऐप्लिकेशन की मुख्य सुविधाएं और उनके काम करने का तरीका बदल सकता है.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;क्या इस ऐप्लिकेशन को &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; से अपडेट करना है?&lt;/p&gt;&lt;p&gt;आम तौर पर, इस ऐप्लिकेशन को &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; से अपडेट मिलते हैं. किसी दूसरे सोर्स से अपडेट करने पर, आपको आगे से अपने टीवी पर किसी भी सोर्स से अपडेट मिल सकते हैं. ऐप्लिकेशन की मुख्य सुविधाएं और उनके काम करने का तरीका बदल सकता है.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;क्या इस ऐप्लिकेशन को &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; से अपडेट करना है?&lt;/p&gt;&lt;p&gt;आम तौर पर, इस ऐप्लिकेशन को &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; से अपडेट मिलते हैं. किसी दूसरे सोर्स से अपडेट करने पर, आपको आगे से अपने फ़ोन पर किसी भी सोर्स से अपडेट मिल सकते हैं. ऐप्लिकेशन की मुख्य सुविधाएं और उनके काम करने का तरीका बदल सकता है.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ऐप्लिकेशन इंस्‍टॉल नहीं हुआ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पैकेज को इंस्टॉल होने से ब्लॉक किया हुआ है."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ऐप्लिकेशन इंस्टॉल नहीं हुआ क्योंकि पैकेज का किसी मौजूदा पैकेज से विरोध है."</string>

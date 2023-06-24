@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ଆପ ଇନଷ୍ଟଲ ହୋଇଗଲା।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ଆପଣ ଏହି ଆପକୁ ଇନଷ୍ଟଲ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ଆପଣ ଏହି ଆପକୁ ଅପଡେଟ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;ରୁ ଏହି ଆପକୁ ଅପଡେଟ କରିବେ?&lt;/p&gt;&lt;p&gt;ଏହି ଆପ ସାଧାରଣତଃ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;ରୁ ଅପଡେଟ ପାଇଥାଏ। ଏକ ଭିନ୍ନ ସୋର୍ସରୁ ଅପଡେଟ କରି ଆପଣ ଆପଣଙ୍କ ଟାବଲେଟରେ ଯେ କୌଣସି ସୋର୍ସରୁ ଭବିଷ୍ୟତର ଅପଡେଟଗୁଡ଼ିକ ପାଇପାରନ୍ତି। ଆପ କାର୍ଯ୍ୟକ୍ଷମତା ପରିବର୍ତ୍ତନ ହୋଇପାରେ।&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;ରୁ ଏହି ଆପକୁ ଅପଡେଟ କରିବେ?&lt;/p&gt;&lt;p&gt;ଏହି ଆପ ସାଧାରଣତଃ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;ରୁ ଅପଡେଟ ପାଇଥାଏ। ଏକ ଭିନ୍ନ ସୋର୍ସରୁ ଅପଡେଟ କରି ଆପଣ ଆପଣଙ୍କ ଟିଭିରେ ଯେ କୌଣସି ସୋର୍ସରୁ ଭବିଷ୍ୟତର ଅପଡେଟଗୁଡ଼ିକ ପାଇପାରନ୍ତି। ଆପ କାର୍ଯ୍ୟକ୍ଷମତା ପରିବର୍ତ୍ତନ ହୋଇପାରେ।&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;ରୁ ଏହି ଆପକୁ ଅପଡେଟ କରିବେ?&lt;/p&gt;&lt;p&gt;ଏହି ଆପ ସାଧାରଣତଃ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;ରୁ ଅପଡେଟ ପାଇଥାଏ। ଏକ ଭିନ୍ନ ସୋର୍ସରୁ ଅପଡେଟ କରି ଆପଣ ଆପଣଙ୍କ ଫୋନରେ ଯେ କୌଣସି ସୋର୍ସରୁ ଭବିଷ୍ୟତର ଅପଡେଟଗୁଡ଼ିକ ପାଇପାରନ୍ତି। ଆପ କାର୍ଯ୍ୟକ୍ଷମତା ପରିବର୍ତ୍ତନ ହୋଇପାରେ।&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇନାହିଁ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ଏହି ପ୍ୟାକେଜ୍‌କୁ ଇନଷ୍ଟଲ୍‍ କରାଯିବାରୁ ଅବରୋଧ କରାଯାଇଥିଲା।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ପୂର୍ବରୁ ଥିବା ପ୍ୟାକେଜ୍‍ ସହ ଏହି ପ୍ୟାକେଜ୍‌ର ସମସ୍ୟା ଉପୁଯିବାରୁ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ ହୋଇପାରିଲା ନାହିଁ।"</string>

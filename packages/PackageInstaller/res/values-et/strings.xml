@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Rakendus on installitud."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Kas soovite selle rakenduse installida?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Kas soovite seda rakendust värskendada?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Update this app from &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;See rakendus saab tavaliselt värskendusi omanikult &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Muust allikast värskendamise korral võite edaspidi saada tahvelarvutis värskendusi mis tahes allikast. Rakenduse funktsioonid võivad muutuda.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Update this app from &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;See rakendus saab tavaliselt värskendusi omanikult &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Muust allikast värskendamise korral võite edaspidi saada teleris värskendusi mis tahes allikast. Rakenduse funktsioonid võivad muutuda.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Update this app from &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;See rakendus saab tavaliselt värskendusi omanikult &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Muust allikast värskendamise korral võite edaspidi saada telefonis värskendusi mis tahes allikast. Rakenduse funktsioonid võivad muutuda.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Rakendus pole installitud."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketi installimine blokeeriti."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Rakendust ei installitud, kuna pakett on olemasoleva paketiga vastuolus."</string>

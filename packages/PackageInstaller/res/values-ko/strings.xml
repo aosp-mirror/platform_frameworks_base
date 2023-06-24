@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"앱이 설치되었습니다."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"이 앱을 설치하시겠습니까?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"이 앱을 업데이트하시겠습니까?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;이 앱을 업데이트하세요. 이 앱은 보통&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;에서 업데이트를 받습니다. 다른 출처에서 업데이트를 받으면 향후 태블릿에 있는 어떤 출처에서든지 업데이트를 받을 수 있습니다. 앱 기능이 변경될 수 있습니다.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;이 앱을 업데이트하세요. 이 앱은 보통&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;에서 업데이트를 받습니다. 다른 출처에서 앱을 업데이트하면 향후 TV에 있는 어떤 출처에서든지 업데이트를 받을 수 있습니다. 앱 기능이 변경될 수 있습니다.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;이 앱을 업데이트하세요. 이 앱은 보통&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;에서 업데이트를 받습니다. 다른 출처에서 업데이트를 받으면 향후 휴대전화에 있는 어떤 출처든지 업데이트를 받을 수 있습니다. 앱 기능이 변경될 수 있습니다.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"앱이 설치되지 않았습니다."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"패키지 설치가 차단되었습니다."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"패키지가 기존 패키지와 충돌하여 앱이 설치되지 않았습니다."</string>
@@ -75,7 +72,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 제거 중…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"제거를 완료했습니다."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>를 제거했습니다."</string>
-    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론 삭제됨"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 복제 삭제됨"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"제거하지 못했습니다."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>을(를) 제거하지 못했습니다."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론 삭제 중…"</string>
@@ -99,7 +96,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"휴대전화와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 휴대전화 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"태블릿과 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 태블릿 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 TV 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
-    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 복제"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"계속"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"설정"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear 앱 설치/제거"</string>

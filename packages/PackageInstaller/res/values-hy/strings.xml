@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Հավելվածը տեղադրված է:"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Տեղադրե՞լ այս հավելվածը:"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Թարմացնե՞լ այս հավելվածը։"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Թարմացրեք այս հավելվածը &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>-ից&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Հավելվածը սովորաբար թարմացումները ստանում է &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>-ից&lt;/b&gt;։ Եթե թարմացնեք այլ աղբյուրից, հետագայում կարող եք ձեր պլանշետում թարմացումներ ստանալ ցանկացած աղբյուրից։ Հավելվածի գործառույթները կարող են փոխվել։&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Թարմացրեք այս հավելվածը &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>-ից&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Հավելվածը սովորաբար թարմացումները ստանում է &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>-ից&lt;/b&gt;։ Եթե թարմացնեք այլ աղբյուրից, հետագայում կարող եք ձեր հեռուստացույցում թարմացումներ ստանալ ցանկացած աղբյուրից։ Հավելվածի գործառույթները կարող են փոխվել։&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Թարմացրեք այս հավելվածը &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>-ից&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Հավելվածը սովորաբար թարմացումները ստանում է &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>-ից&lt;/b&gt;։ Եթե թարմացնեք այլ աղբյուրից, հետագայում կարող եք ձեր հեռախոսում թարմացումներ ստանալ ցանկացած աղբյուրից։ Հավելվածի գործառույթները կարող են փոխվել։&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Հավելվածը տեղադրված չէ:"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Փաթեթի տեղադրումն արգելափակվել է:"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Հավելվածը չի տեղադրվել, քանի որ տեղադրման փաթեթն ունի հակասություն առկա փաթեթի հետ:"</string>

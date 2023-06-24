@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"යෙදුම ස්ථාපනය කර ඇත."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"මෙම යෙදුම ස්ථාපනය කිරීමට ඔබට අවශ්‍යද?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ඔබට මෙම යෙදුම යාවත්කාලීන කිරීමට අවශ්‍යද?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;මෙම යෙදුම &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;වෙතින් යාවත්කාලීන කරන්න ද?&lt;/p&gt;&lt;p&gt;මෙම යෙදුම සාමාන්‍යයෙන් &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; වෙතින් යාවත්කාලීන ලබා ගනී. වෙනස් මූලාශ්‍රයකින් යාවත්කාලීන කිරීමෙන්, ඔබට ඔබේ ටැබ්ලටයෙහි ඕනෑම මූලාශ්‍රයකින් අනාගත යාවත්කාලීන ලැබීමට ඉඩ ඇත. යෙදුම් ක්‍රියාකාරිත්වය වෙනස් විය හැක.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;මෙම යෙදුම &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;වෙතින් යාවත්කාලීන කරන්න ද?&lt;/p&gt;&lt;p&gt;මෙම යෙදුම සාමාන්‍යයෙන් &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; වෙතින් යාවත්කාලීන ලබා ගනී. වෙනස් මූලාශ්‍රයකින් යාවත්කාලීන කිරීමෙන්, ඔබට ඔබේ TV මත ඕනෑම මූලාශ්‍රයකින් අනාගත යාවත්කාලීන ලැබීමට ඉඩ ඇත. යෙදුම් ක්‍රියාකාරිත්වය වෙනස් විය හැක.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;මෙම යෙදුම &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;වෙතින් යාවත්කාලීන කරන්න ද?&lt;/p&gt;&lt;p&gt;මෙම යෙදුම සාමාන්‍යයෙන් &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; වෙතින් යාවත්කාලීන ලබා ගනී. වෙනස් මූලාශ්‍රයකින් යාවත්කාලීන කිරීමෙන්, ඔබට ඔබේ දුරකථනයෙහි ඕනෑම මූලාශ්‍රයකින් අනාගත යාවත්කාලීන ලැබීමට ඉඩ ඇත. යෙදුම් ක්‍රියාකාරිත්වය වෙනස් විය හැක.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"යෙදුම ස්ථාපනය කර නැත."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"මෙම පැකේජය ස්ථාපනය කිරීම අවහිර කරන ලදි."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"පැකේජය දැනට පවතින පැකේජයක් සමග ගැටෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>

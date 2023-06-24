@@ -26,12 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Апликацијата е инсталирана."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Дали сакате да ја инсталирате апликацијава?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Дали сакате да ја ажурирате апликацијава?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7994800761970572198) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (2435174886412089791) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (7155138616126795839) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Ажурирајте ја апликацијава од &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Апликацијава вообичаено добива ажурирања од &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Со ажурирање од различен извор, може да добивате идни ажурирања од кој било извор на вашиот таблет. Може да дојде до промени во функционалноста на апликацијата.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Ажурирајте ја апликацијава од &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Апликацијава вообичаено добива ажурирања од &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Со ажурирање од различен извор, може да добивате идни ажурирања од кој било извор на вашиот телевизор. Може да дојде до промени во функционалноста на апликацијата.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Ажурирајте ја апликацијава од &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Апликацијава вообичаено добива ажурирања од &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Со ажурирање од различен извор, може да добивате идни ажурирања од кој било извор на вашиот телефон. Може да дојде до промени во функционалноста на апликацијата.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Апликацијата не е инсталирана."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Инсталирањето на пакетот е блокирано."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Апликација што не е инсталирана како пакет е во конфликт со постоечки пакет."</string>
