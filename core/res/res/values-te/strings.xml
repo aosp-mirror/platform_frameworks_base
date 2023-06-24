@@ -1353,7 +1353,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB టెథెరింగ్ ఆన్ చేయబడింది"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ద్వారా MIDI ఆన్ చేయబడింది"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ఉపకరణం కనెక్ట్ చేయబడింది"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఆప్షన్ల కోసం నొక్కండి."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఆప్షన్ల కోసం ట్యాప్ చేయండి."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"కనెక్ట్ చేయబడిన పరికరాన్ని ఛార్జ్ చేస్తోంది. మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"అనలాగ్ ఆడియో ఉపకరణం కనుగొనబడింది"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"జోడించిన పరికరం ఈ ఫోన్‌కు అనుకూలంగా లేదు. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
@@ -1681,7 +1681,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ఆన్"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ఆఫ్"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి కంట్రోల్‌ను ఇవ్వాలనుకుంటున్నారా?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెసిబిలిటీ కోసం యాప్‌లకు పూర్తి కంట్రోల్ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"యాక్సెసిబిలిటీ అవసరాలు ఉన్నప్పుడు మీకు సహాయం చేయడానికి యాప్‌లకు ఫుల్‌ కంట్రోల్‌ ఇవ్వడం సమంజసమే. అయితే అన్ని యాప్‌లకు అలా కంట్రోల్ ఇవ్వడం సరికాదు."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, కంట్రోల్ చేయగలగడం"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది. అంతే కాక, ఇతర యాప్‌లపై కంటెంట్‌ను డిస్‌ప్లే చేస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయగలగడం"</string>
@@ -2132,7 +2132,7 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"గ్రూప్ సంభాషణ"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"వ్యక్తిగతం"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"ఆఫీస్"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"వర్క్ ప్లేస్"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"వ్యక్తిగత వీక్షణ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"పని వీక్షణ"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"మీ IT అడ్మిన్ ద్వారా బ్లాక్ చేయబడింది"</string>
