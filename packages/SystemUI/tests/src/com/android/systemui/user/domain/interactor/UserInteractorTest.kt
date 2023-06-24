@@ -633,13 +633,11 @@ class UserInteractorTest : SysuiTestCase() {
 
             userRepository.setSelectedUserInfo(userInfos[1])
             runCurrent()
-            fakeBroadcastDispatcher.registeredReceivers.forEach {
-                it.onReceive(
-                    context,
-                    Intent(Intent.ACTION_USER_SWITCHED)
-                        .putExtra(Intent.EXTRA_USER_HANDLE, userInfos[1].id),
-                )
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_USER_SWITCHED)
+                    .putExtra(Intent.EXTRA_USER_HANDLE, userInfos[1].id),
+            )
             runCurrent()
 
             verify(callback1, atLeastOnce()).onUserStateChanged()
@@ -656,12 +654,10 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfos[0])
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
-            fakeBroadcastDispatcher.registeredReceivers.forEach {
-                it.onReceive(
-                    context,
-                    Intent(Intent.ACTION_USER_INFO_CHANGED),
-                )
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_USER_INFO_CHANGED),
+            )
 
             runCurrent()
 
@@ -676,13 +672,11 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfos[0])
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
-            fakeBroadcastDispatcher.registeredReceivers.forEach {
-                it.onReceive(
-                    context,
-                    Intent(Intent.ACTION_USER_UNLOCKED)
-                        .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_SYSTEM),
-                )
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_USER_UNLOCKED)
+                    .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_SYSTEM),
+            )
             runCurrent()
 
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
@@ -696,12 +690,10 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfos[0])
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
-            fakeBroadcastDispatcher.registeredReceivers.forEach {
-                it.onReceive(
-                    context,
-                    Intent(Intent.ACTION_USER_UNLOCKED).putExtra(Intent.EXTRA_USER_HANDLE, 1337),
-                )
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_USER_UNLOCKED).putExtra(Intent.EXTRA_USER_HANDLE, 1337),
+            )
 
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount)
         }

@@ -56,7 +56,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -86,6 +85,8 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -95,8 +96,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.keyguard.util.IndicationHelper;
 import com.android.systemui.log.LogLevel;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -227,7 +227,8 @@ public class KeyguardIndicationController {
     // triggered while the device is asleep
     private final AlarmTimeout mHideTransientMessageHandler;
     private final AlarmTimeout mHideBiometricMessageHandler;
-    private FeatureFlags mFeatureFlags;
+    private final FeatureFlags mFeatureFlags;
+    private final IndicationHelper mIndicationHelper;
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -259,7 +260,8 @@ public class KeyguardIndicationController {
             AlarmManager alarmManager,
             UserTracker userTracker,
             BouncerMessageInteractor bouncerMessageInteractor,
-            FeatureFlags flags
+            FeatureFlags flags,
+            IndicationHelper indicationHelper
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -286,6 +288,7 @@ public class KeyguardIndicationController {
         mUserTracker = userTracker;
         mBouncerMessageInteractor = bouncerMessageInteractor;
         mFeatureFlags = flags;
+        mIndicationHelper = indicationHelper;
 
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
@@ -1249,13 +1252,13 @@ public class KeyguardIndicationController {
         private void onFaceAuthError(int msgId, String errString) {
             CharSequence deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
             mFaceAcquiredMessageDeferral.reset();
-            if (shouldSuppressFaceError(msgId)) {
-                mKeyguardLogger.logBiometricMessage("suppressingFaceError", msgId, errString);
+            if (mIndicationHelper.shouldSuppressErrorMsg(FACE, msgId)) {
+                mKeyguardLogger.logBiometricMessage("KIC suppressingFaceError", msgId, errString);
                 return;
             }
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 handleFaceAuthTimeoutError(deferredFaceMessage);
-            } else if (isLockoutError(msgId)) {
+            } else if (mIndicationHelper.isFaceLockoutErrorMsg(msgId)) {
                 handleFaceLockoutError(errString);
             } else {
                 showErrorMessageNowOrLater(errString, null);
@@ -1263,26 +1266,13 @@ public class KeyguardIndicationController {
         }
 
         private void onFingerprintAuthError(int msgId, String errString) {
-            if (shouldSuppressFingerprintError(msgId)) {
-                mKeyguardLogger.logBiometricMessage("suppressingFingerprintError",
+            if (mIndicationHelper.shouldSuppressErrorMsg(FINGERPRINT, msgId)) {
+                mKeyguardLogger.logBiometricMessage("KIC suppressingFingerprintError",
                         msgId,
                         errString);
             } else {
                 showErrorMessageNowOrLater(errString, null);
             }
-        }
-
-        private boolean shouldSuppressFingerprintError(int msgId) {
-            return ((isPrimaryAuthRequired() && !isLockoutError(msgId))
-                    || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
-                    || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED
-                    || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED);
-        }
-
-        private boolean shouldSuppressFaceError(int msgId) {
-            return ((isPrimaryAuthRequired() && msgId != FaceManager.FACE_ERROR_LOCKOUT_PERMANENT)
-                    || msgId == FaceManager.FACE_ERROR_CANCELED
-                    || msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS);
         }
 
         @Override
@@ -1406,11 +1396,6 @@ public class KeyguardIndicationController {
         int followupMsgId = canUnlockWithFingerprint() ? R.string.keyguard_suggest_fingerprint
                 : R.string.keyguard_unlock;
         return mContext.getString(followupMsgId);
-    }
-
-    private static boolean isLockoutError(int msgId) {
-        return msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT
-                || msgId == FaceManager.FACE_ERROR_LOCKOUT;
     }
 
     private void handleFaceAuthTimeoutError(@Nullable CharSequence deferredFaceMessage) {

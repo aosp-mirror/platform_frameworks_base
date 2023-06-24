@@ -53,6 +53,11 @@ filegroup {
 }
 
 filegroup {
+    name: "FlickerTestsNotification-src",
+    srcs: ["src/**/notification/*.kt"],
+}
+
+filegroup {
     name: "FlickerTestsQuickswitch-src",
     srcs: ["src/**/quickswitch/*.kt"],
 }
@@ -142,6 +147,18 @@ android_test {
     srcs: [
         ":FlickerTestsBase-src",
         ":FlickerTestsAppLaunch-src",
+    ],
+}
+
+android_test {
+    name: "FlickerTestsNotification",
+    defaults: ["FlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestNotification.xml"],
+    package_name: "com.android.server.wm.flicker.notification",
+    instrumentation_target_package: "com.android.server.wm.flicker.notification",
+    srcs: [
+        ":FlickerTestsBase-src",
+        ":FlickerTestsNotification-src",
     ],
 }
 

@@ -16,6 +16,8 @@
 
 package android.service.dreams;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -630,7 +632,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Marks this dream as windowless. Only available to doze dreams.
+     * Marks this dream as windowless. It should be called in {@link #onCreate} method.
      *
      * @hide
      *
@@ -640,7 +642,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Returns whether this dream is windowless. Only available to doze dreams.
+     * Returns whether this dream is windowless.
      *
      * @hide
      */
@@ -1230,8 +1232,10 @@ public class DreamService extends Service implements Window.Callback {
 
         mDreamToken = dreamToken;
         mCanDoze = canDoze;
-        if (mWindowless && !mCanDoze) {
-            throw new IllegalStateException("Only doze dreams can be windowless");
+        // This is not a security check to prevent malicious dreams but a guard rail to stop
+        // third-party dreams from being windowless and not working well as a result.
+        if (mWindowless && !mCanDoze && !isCallerSystemUi()) {
+            throw new IllegalStateException("Only doze or SystemUI dreams can be windowless.");
         }
 
         mDispatchAfterOnAttachedToWindow = () -> {
@@ -1364,6 +1368,11 @@ public class DreamService extends Service implements Window.Callback {
             mWindow.setAttributes(lp);
             mWindow.getWindowManager().updateViewLayout(mWindow.getDecorView(), lp);
         }
+    }
+
+    private boolean isCallerSystemUi() {
+        return checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+                == PERMISSION_GRANTED;
     }
 
     private int applyFlags(int oldFlags, int flags, int mask) {
