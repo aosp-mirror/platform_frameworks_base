@@ -85,7 +85,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -184,18 +183,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     @NonNull private final UdfpsUtils mUdfpsUtils;
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
-
-    private final VibratorHelper mVibratorHelper;
-
-    private void vibrateSuccess(int modality) {
-        mVibratorHelper.vibrateAuthSuccess(
-                getClass().getSimpleName() + ", modality = " + modality + "BP::success");
-    }
-
-    private void vibrateError(int modality) {
-        mVibratorHelper.vibrateAuthError(
-                getClass().getSimpleName() + ", modality = " + modality + "BP::error");
-    }
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
@@ -776,7 +763,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor,
-            @NonNull VibratorHelper vibrator,
             @NonNull UdfpsUtils udfpsUtils) {
         mContext = context;
         mFeatureFlags = featureFlags;
@@ -798,7 +784,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         mUdfpsEnrolledForUser = new SparseBooleanArray();
         mSfpsEnrolledForUser = new SparseBooleanArray();
         mFaceEnrolledForUser = new SparseBooleanArray();
-        mVibratorHelper = vibrator;
         mUdfpsUtils = udfpsUtils;
         mApplicationCoroutineScope = applicationCoroutineScope;
 
@@ -987,8 +972,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     public void onBiometricAuthenticated(@Modality int modality) {
         if (DEBUG) Log.d(TAG, "onBiometricAuthenticated: ");
 
-        vibrateSuccess(modality);
-
         if (mCurrentDialog != null) {
             mCurrentDialog.onAuthenticationSucceeded(modality);
         } else {
@@ -1085,8 +1068,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             Log.d(TAG, String.format("onBiometricError(%d, %d, %d)", modality, error, vendorCode));
         }
 
-        vibrateError(modality);
-
         final boolean isLockout = (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT)
                 || (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
 
@@ -1103,7 +1084,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         if (mCurrentDialog != null) {
             if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
                 if (DEBUG) Log.d(TAG, "onBiometricError, lockout");
-                mCurrentDialog.animateToCredentialUI();
+                mCurrentDialog.animateToCredentialUI(true /* isError */);
             } else if (isSoftError) {
                 final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED)
                         ? getNotRecognizedString(modality)

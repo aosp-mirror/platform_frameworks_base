@@ -202,9 +202,6 @@ public class AuthControllerTest extends SysuiTestCase {
     private TestableAuthController mAuthController;
     private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
-    @Mock
-    private VibratorHelper mVibratorHelper;
-
     @Before
     public void setup() throws RemoteException {
         // TODO(b/278622168): remove with flag
@@ -267,7 +264,6 @@ public class AuthControllerTest extends SysuiTestCase {
                         true /* supportsSelfIllumination */,
                         true /* resetLockoutRequireHardwareAuthToken */));
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(faceProps);
-        when(mVibratorHelper.hasVibrator()).thenReturn(true);
 
         mAuthController = new TestableAuthController(mContextSpy);
 
@@ -550,7 +546,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
         verify(mDialog1, never()).onError(anyInt(), anyString());
-        verify(mDialog1).animateToCredentialUI();
+        verify(mDialog1).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -563,7 +559,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
         verify(mDialog1, never()).onError(anyInt(), anyString());
-        verify(mDialog1).animateToCredentialUI();
+        verify(mDialog1).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -578,7 +574,7 @@ public class AuthControllerTest extends SysuiTestCase {
         mAuthController.onBiometricError(modality, error, vendorCode);
         verify(mDialog1).onError(
                 eq(modality), eq(FaceManager.getErrorString(mContext, error, vendorCode)));
-        verify(mDialog1, never()).animateToCredentialUI();
+        verify(mDialog1, never()).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -593,7 +589,7 @@ public class AuthControllerTest extends SysuiTestCase {
         mAuthController.onBiometricError(modality, error, vendorCode);
         verify(mDialog1).onError(
                 eq(modality), eq(FaceManager.getErrorString(mContext, error, vendorCode)));
-        verify(mDialog1, never()).animateToCredentialUI();
+        verify(mDialog1, never()).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -1012,7 +1008,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     () -> mBiometricPromptCredentialInteractor, () -> mPromptSelectionInteractor,
                     () -> mCredentialViewModel, () -> mPromptViewModel,
                     mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mVibratorHelper, mUdfpsUtils);
+                    mBackgroundExecutor, mUdfpsUtils);
         }
 
         @Override
