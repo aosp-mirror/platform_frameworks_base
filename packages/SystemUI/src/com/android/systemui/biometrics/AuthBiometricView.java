@@ -737,7 +737,7 @@ public abstract class AuthBiometricView extends LinearLayout implements AuthBiom
         });
 
         mUseCredentialButton.setOnClickListener((view) -> {
-            startTransitionToCredentialUI();
+            startTransitionToCredentialUI(false /* isError */);
         });
 
         mConfirmButton.setOnClickListener((view) -> {
@@ -768,9 +768,12 @@ public abstract class AuthBiometricView extends LinearLayout implements AuthBiom
 
     /**
      * Kicks off the animation process and invokes the callback.
+     *
+     * @param isError if this was triggered due to an error and not a user action (unused,
+     *                previously for haptics).
      */
     @Override
-    public void startTransitionToCredentialUI() {
+    public void startTransitionToCredentialUI(boolean isError) {
         updateSize(AuthDialog.SIZE_LARGE);
         mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }

@@ -51,6 +51,7 @@ import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -99,6 +100,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     lateinit var windowToken: IBinder
     @Mock
     lateinit var interactionJankMonitor: InteractionJankMonitor
+    @Mock
+    lateinit var vibrator: VibratorHelper
 
     // TODO(b/278622168): remove with flag
     open val useNewBiometricPrompt = false
@@ -325,7 +328,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
-        container.animateToCredentialUI()
+        container.animateToCredentialUI(false)
         waitForIdleSync()
 
         assertThat(container.hasCredentialView()).isTrue()
@@ -514,7 +517,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         { authBiometricFingerprintViewModel },
         { promptSelectorInteractor },
         { bpCredentialInteractor },
-        PromptViewModel(promptSelectorInteractor),
+        PromptViewModel(promptSelectorInteractor, vibrator),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
         fakeExecutor
