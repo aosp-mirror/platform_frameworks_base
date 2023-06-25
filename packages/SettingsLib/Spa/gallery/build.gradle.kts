@@ -30,7 +30,7 @@ android {
 
     sourceSets {
         sourceSets.getByName("main") {
-            java.setSrcDirs(listOf("src"))
+            kotlin.setSrcDirs(listOf("src"))
             res.setSrcDirs(listOf("res"))
             manifest.srcFile("AndroidManifest.xml")
         }
