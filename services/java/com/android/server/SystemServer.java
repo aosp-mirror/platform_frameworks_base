@@ -51,7 +51,6 @@ import android.credentials.CredentialManager;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.graphics.GraphicsStatsService;
-import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
@@ -909,13 +908,6 @@ public final class SystemServer implements Dumpable {
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool tp = SystemServerInitThreadPool.start();
             mDumper.addDumpable(tp);
-
-            // Load preinstalled system fonts for system server, so that WindowManagerService, etc
-            // can start using Typeface. Note that fonts are required not only for text rendering,
-            // but also for some text operations (e.g. TextUtils.makeSafeForPresentation()).
-            if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
-                Typeface.loadPreinstalledSystemFontMap();
-            }
 
             // Attach JVMTI agent if this is a debuggable build and the system property is set.
             if (Build.IS_DEBUGGABLE) {

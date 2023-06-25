@@ -227,6 +227,12 @@ public final class FontManagerService extends IFontManager.Stub {
         mContext = context;
         mIsSafeMode = safeMode;
         initialize();
+
+        try {
+            Typeface.setSystemFontMap(getCurrentFontMap());
+        } catch (IOException | ErrnoException e) {
+            Slog.w(TAG, "Failed to set system font map of system_server");
+        }
     }
 
     @Nullable

@@ -20,7 +20,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.RemoteException;
@@ -59,8 +58,8 @@ class ModifierShortcutManager {
     private static final String ATTRIBUTE_CATEGORY = "category";
     private static final String ATTRIBUTE_SHIFT = "shift";
 
-    private final SparseArray<ShortcutInfo> mIntentShortcuts = new SparseArray<>();
-    private final SparseArray<ShortcutInfo> mShiftShortcuts = new SparseArray<>();
+    private final SparseArray<Intent> mIntentShortcuts = new SparseArray<>();
+    private final SparseArray<Intent> mShiftShortcuts = new SparseArray<>();
 
     private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
@@ -118,26 +117,26 @@ class ModifierShortcutManager {
             return null;
         }
 
-        ShortcutInfo shortcut = null;
+        Intent shortcutIntent = null;
 
         // If the Shift key is pressed, then search for the shift shortcuts.
-        SparseArray<ShortcutInfo> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
+        SparseArray<Intent> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
 
         // First try the exact keycode (with modifiers).
         int shortcutChar = kcm.get(keyCode, metaState);
         if (shortcutChar != 0) {
-            shortcut = shortcutMap.get(shortcutChar);
+            shortcutIntent = shortcutMap.get(shortcutChar);
         }
 
         // Next try the primary character on that key.
-        if (shortcut == null) {
+        if (shortcutIntent == null) {
             shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
             if (shortcutChar != 0) {
-                shortcut = shortcutMap.get(shortcutChar);
+                shortcutIntent = shortcutMap.get(shortcutChar);
             }
         }
 
-        return (shortcut != null) ? shortcut.intent : null;
+        return shortcutIntent;
     }
 
     private void loadShortcuts() {
@@ -173,12 +172,10 @@ class ModifierShortcutManager {
                 final boolean isShiftShortcut = (shiftName != null && shiftName.equals("true"));
 
                 final Intent intent;
-                final String title;
                 if (packageName != null && className != null) {
-                    ActivityInfo info = null;
                     ComponentName componentName = new ComponentName(packageName, className);
                     try {
-                        info = packageManager.getActivityInfo(componentName,
+                        packageManager.getActivityInfo(componentName,
                                 PackageManager.MATCH_DIRECT_BOOT_AWARE
                                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                         | PackageManager.MATCH_UNINSTALLED_PACKAGES);
@@ -187,7 +184,7 @@ class ModifierShortcutManager {
                                 new String[] { packageName });
                         componentName = new ComponentName(packages[0], className);
                         try {
-                            info = packageManager.getActivityInfo(componentName,
+                            packageManager.getActivityInfo(componentName,
                                     PackageManager.MATCH_DIRECT_BOOT_AWARE
                                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                             | PackageManager.MATCH_UNINSTALLED_PACKAGES);
@@ -201,21 +198,18 @@ class ModifierShortcutManager {
                     intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     intent.setComponent(componentName);
-                    title = info.loadLabel(packageManager).toString();
                 } else if (categoryName != null) {
                     intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, categoryName);
-                    title = "";
                 } else {
                     Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutName
                             + ": missing package/class or category attributes");
                     continue;
                 }
 
-                ShortcutInfo shortcut = new ShortcutInfo(title, intent);
                 if (isShiftShortcut) {
-                    mShiftShortcuts.put(shortcutChar, shortcut);
+                    mShiftShortcuts.put(shortcutChar, intent);
                 } else {
-                    mIntentShortcuts.put(shortcutChar, shortcut);
+                    mIntentShortcuts.put(shortcutChar, intent);
                 }
             }
         } catch (XmlPullParserException | IOException e) {
@@ -369,15 +363,5 @@ class ModifierShortcutManager {
         }
 
         return false;
-    }
-
-    private static final class ShortcutInfo {
-        public final String title;
-        public final Intent intent;
-
-        ShortcutInfo(String title, Intent intent) {
-            this.title = title;
-            this.intent = intent;
-        }
     }
 }
