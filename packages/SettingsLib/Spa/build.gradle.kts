@@ -25,13 +25,13 @@ plugins {
 }
 
 allprojects {
-    extra["jetpackComposeVersion"] = "1.4.0-beta01"
+    extra["jetpackComposeVersion"] = "1.6.0-alpha01"
 }
 
 subprojects {
     plugins.withType<AndroidBasePlugin> {
         configure<BaseExtension> {
-            compileSdkVersion(33)
+            compileSdkVersion(34)
 
             defaultConfig {
                 minSdk = 21
