@@ -245,7 +245,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         androidPackage.requestedPermissions.forEach { permissionName ->
             val permission = newState.systemState.permissions[permissionName]
                 ?: return@forEach
-            if (permission.isRemoved) {
+            if (permission.isRemoved || !permission.isRuntime) {
                 return@forEach
             }
             val isRequestedByOtherPackages = anyPackageInAppId(appId) {
