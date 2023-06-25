@@ -586,11 +586,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error de autenticación"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Ingresa tu bloqueo de pantalla para continuar"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Presiona con firmeza el sensor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Presiona el sensor con firmeza"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se pudo procesar la huella dactilar. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpia el sensor de huellas dactilares y vuelve a intentarlo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpia el sensor y vuelve a intentarlo"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Presiona con firmeza el sensor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Presiona el sensor con firmeza"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Moviste el dedo muy lento. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prueba con otra huella dactilar"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Demasiada luz"</string>
