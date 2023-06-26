@@ -100,6 +100,10 @@ class DesktopTasksController(
         }
     }
 
+    private val transitionAreaHeight
+        get() = context.resources.getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height)
+
     init {
         desktopMode = DesktopModeImpl()
         if (DesktopModeStatus.isProto2Enabled()) {
@@ -700,13 +704,12 @@ class DesktopTasksController(
             y: Float
     ) {
         if (taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-            val statusBarHeight = getStatusBarHeight(taskInfo)
-            if (y <= statusBarHeight && visualIndicator == null) {
+            if (y <= transitionAreaHeight && visualIndicator == null) {
                 visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
                         displayController, context, taskSurface, shellTaskOrganizer,
                         rootTaskDisplayAreaOrganizer)
                 visualIndicator?.createFullscreenIndicatorWithAnimatedBounds()
-            } else if (y > statusBarHeight && visualIndicator != null) {
+            } else if (y > transitionAreaHeight && visualIndicator != null) {
                 releaseVisualIndicator()
             }
         }
@@ -726,8 +729,7 @@ class DesktopTasksController(
             y: Float,
             windowDecor: DesktopModeWindowDecoration
     ) {
-        val statusBarHeight = getStatusBarHeight(taskInfo)
-        if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+        if (y <= transitionAreaHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
             windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(taskInfo, position)
         }
@@ -746,9 +748,9 @@ class DesktopTasksController(
             taskSurface: SurfaceControl,
             y: Float
     ) {
-        // If the motion event is above the status bar, return since we do not need to show the
-        // visual indicator at this point.
-        if (y < getStatusBarHeight(taskInfo)) {
+        // If the motion event is above the status bar and the visual indicator is not yet visible,
+        // return since we do not need to show the visual indicator at this point.
+        if (y < getStatusBarHeight(taskInfo) && visualIndicator == null) {
             return
         }
         if (visualIndicator == null) {
