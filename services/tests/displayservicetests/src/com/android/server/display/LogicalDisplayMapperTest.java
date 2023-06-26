@@ -65,6 +65,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
+import com.android.server.utils.FoldSettingWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -100,6 +101,7 @@ public class LogicalDisplayMapperTest {
 
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
+    @Mock FoldSettingWrapper mFoldSettingWrapperMock;
     @Mock Resources mResourcesMock;
     @Mock IPowerManager mIPowerManagerMock;
     @Mock IThermalService mIThermalServiceMock;
@@ -139,6 +141,7 @@ public class LogicalDisplayMapperTest {
 
         when(mContextMock.getSystemServiceName(PowerManager.class))
                 .thenReturn(Context.POWER_SERVICE);
+        when(mFoldSettingWrapperMock.shouldStayAwakeOnFold()).thenReturn(false);
         when(mContextMock.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         when(mContextMock.getResources()).thenReturn(mResourcesMock);
         when(mResourcesMock.getBoolean(
@@ -155,7 +158,7 @@ public class LogicalDisplayMapperTest {
         mHandler = new Handler(mLooper.getLooper());
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mDisplayDeviceRepo,
                 mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
-                mDeviceStateToLayoutMapSpy);
+                mDeviceStateToLayoutMapSpy, mFoldSettingWrapperMock);
     }
 
 
@@ -571,6 +574,17 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
+    public void testDeviceShouldNotSleepWhenFoldSettingTrue() {
+        when(mFoldSettingWrapperMock.shouldStayAwakeOnFold()).thenReturn(true);
+
+        assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
+                DEVICE_STATE_OPEN,
+                /* isOverrideActive= */false,
+                /* isInteractive= */true,
+                /* isBootCompleted= */true));
+    }
+
+    @Test
     public void testDeviceShouldNotBePutToSleep() {
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_OPEN,
                 DEVICE_STATE_CLOSED,
@@ -978,4 +992,3 @@ public class LogicalDisplayMapperTest {
         }
     }
 }
-

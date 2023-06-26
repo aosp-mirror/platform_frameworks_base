@@ -42,6 +42,7 @@ import android.view.DisplayInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
+import com.android.server.utils.FoldSettingWrapper;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -142,6 +143,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final Listener mListener;
     private final DisplayManagerService.SyncRoot mSyncRoot;
     private final LogicalDisplayMapperHandler mHandler;
+    private final FoldSettingWrapper mFoldSettingWrapper;
     private final PowerManager mPowerManager;
 
     /**
@@ -189,21 +191,23 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
-            @NonNull Handler handler) {
+            @NonNull Handler handler, FoldSettingWrapper foldSettingWrapper) {
         this(context, repo, listener, syncRoot, handler,
                 new DeviceStateToLayoutMap((isDefault) -> isDefault ? DEFAULT_DISPLAY
-                        : sNextNonDefaultDisplayId++));
+                        : sNextNonDefaultDisplayId++), foldSettingWrapper);
     }
 
     LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
-            @NonNull Handler handler, @NonNull DeviceStateToLayoutMap deviceStateToLayoutMap) {
+            @NonNull Handler handler, @NonNull DeviceStateToLayoutMap deviceStateToLayoutMap,
+            FoldSettingWrapper foldSettingWrapper) {
         mSyncRoot = syncRoot;
         mPowerManager = context.getSystemService(PowerManager.class);
         mInteractive = mPowerManager.isInteractive();
         mHandler = new LogicalDisplayMapperHandler(handler.getLooper());
         mDisplayDeviceRepo = repo;
         mListener = listener;
+        mFoldSettingWrapper = foldSettingWrapper;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mSupportsConcurrentInternalDisplays = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays);
@@ -531,9 +535,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      * Returns if the device should be put to sleep or not.
      *
      * Includes a check to verify that the device state that we are moving to, {@code pendingState},
-     * is the same as the physical state of the device, {@code baseState}. Different values for
-     * these parameters indicate a device state override is active, and we shouldn't put the device
-     * to sleep to provide a better user experience.
+     * is the same as the physical state of the device, {@code baseState}. Also if the
+     * 'Stay Awake On Fold' is not enabled. Different values for these parameters indicate a device
+     * state override is active, and we shouldn't put the device to sleep to provide a better user
+     * experience.
      *
      * @param pendingState device state we are moving to
      * @param currentState device state we are currently in
@@ -551,7 +556,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 && mDeviceStatesOnWhichToSleep.get(pendingState)
                 && !mDeviceStatesOnWhichToSleep.get(currentState)
                 && !isOverrideActive
-                && isInteractive && isBootCompleted;
+                && isInteractive && isBootCompleted && !mFoldSettingWrapper.shouldStayAwakeOnFold();
     }
 
     private boolean areAllTransitioningDisplaysOffLocked() {
