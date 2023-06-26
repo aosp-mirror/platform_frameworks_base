@@ -75,6 +75,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -101,6 +102,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SurfaceSession mSurfaceSession;
     @Mock private IconProvider mIconProvider;
     @Mock private ShellExecutor mMainExecutor;
+    @Mock private DefaultMixedHandler mMixedHandler;
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -131,6 +133,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
                 mTransactionPool, mMainExecutor, Optional.empty());
+        mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());
