@@ -78,7 +78,7 @@ class LockscreenSmartspaceController
 constructor(
         private val context: Context,
         private val featureFlags: FeatureFlags,
-        private val smartspaceManager: SmartspaceManager,
+        private val smartspaceManager: SmartspaceManager?,
         private val activityStarter: ActivityStarter,
         private val falsingManager: FalsingManager,
         private val systemClock: SystemClock,
@@ -380,6 +380,7 @@ constructor(
     }
 
     private fun connectSession() {
+        if (smartspaceManager == null) return
         if (datePlugin == null && weatherPlugin == null && plugin == null) return
         if (session != null || smartspaceViews.isEmpty()) {
             return

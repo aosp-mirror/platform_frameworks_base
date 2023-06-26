@@ -646,6 +646,7 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static SmartspaceManager provideSmartspaceManager(Context context) {
         return context.getSystemService(SmartspaceManager.class);
     }

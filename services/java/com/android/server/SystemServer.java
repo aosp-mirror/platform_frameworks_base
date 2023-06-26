@@ -1937,10 +1937,13 @@ public final class SystemServer implements Dumpable {
             }
 
             // Smartspace manager service
-            // TODO: add deviceHasConfigString(context, R.string.config_defaultSmartspaceService)
-            t.traceBegin("StartSmartspaceService");
-            mSystemServiceManager.startService(SMARTSPACE_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
+            if (deviceHasConfigString(context, R.string.config_defaultSmartspaceService)) {
+                t.traceBegin("StartSmartspaceService");
+                mSystemServiceManager.startService(SMARTSPACE_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "SmartspaceManagerService not defined by OEM or disabled by flag");
+            }
 
             t.traceBegin("InitConnectivityModuleConnector");
             try {
