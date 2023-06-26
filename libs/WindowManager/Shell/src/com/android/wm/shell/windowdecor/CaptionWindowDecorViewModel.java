@@ -193,7 +193,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         final DragPositioningCallback dragPositioningCallback =
                 new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
-                        null /* disallowedAreaForEndBounds */);
+                        0 /* disallowedAreaForEndBoundsHeight */);
         final CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, dragPositioningCallback);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);

@@ -845,7 +845,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.createResizeVeil();
 
         final DragPositioningCallback dragPositioningCallback = createDragPositioningCallback(
-                windowDecoration, taskInfo);
+                windowDecoration);
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
 
@@ -858,24 +858,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         incrementEventReceiverTasks(taskInfo.displayId);
     }
     private DragPositioningCallback createDragPositioningCallback(
-            @NonNull DesktopModeWindowDecoration windowDecoration,
-            @NonNull RunningTaskInfo taskInfo) {
-        final int screenWidth = mDisplayController.getDisplayLayout(taskInfo.displayId).width();
-        final Rect disallowedAreaForEndBounds;
-        if (DesktopModeStatus.isProto2Enabled()) {
-            disallowedAreaForEndBounds = new Rect(0, 0, screenWidth,
-                    getStatusBarHeight(taskInfo.displayId));
-        } else {
-            disallowedAreaForEndBounds = null;
-        }
+            @NonNull DesktopModeWindowDecoration windowDecoration) {
+        final int transitionAreaHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.desktop_mode_transition_area_height);
         if (!DesktopModeStatus.isVeiledResizeEnabled()) {
             return new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener,
-                    mTransactionFactory);
+                    mDisplayController, mDragStartListener, mTransactionFactory,
+                    transitionAreaHeight);
         } else {
             return new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener,
-                    mTransitions);
+                    mDisplayController, mDragStartListener, mTransitions,
+                    transitionAreaHeight);
         }
     }
 

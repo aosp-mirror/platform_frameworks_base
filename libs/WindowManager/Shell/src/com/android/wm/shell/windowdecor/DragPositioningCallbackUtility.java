@@ -83,8 +83,6 @@ public class DragPositioningCallbackUtility {
         // Make sure the new resizing destination in any direction falls within the stable bounds.
         // If not, set the bounds back to the old location that was valid to avoid conflicts with
         // some regions such as the gesture area.
-        displayController.getDisplayLayout(windowDecoration.mDisplay.getDisplayId())
-                .getStableBounds(stableBounds);
         if ((ctrlType & CTRL_TYPE_LEFT) != 0) {
             final int candidateLeft = repositionTaskBounds.left + (int) delta.x;
             repositionTaskBounds.left = (candidateLeft > stableBounds.left)
@@ -136,12 +134,29 @@ public class DragPositioningCallbackUtility {
                 repositionTaskBounds.top);
     }
 
-    static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
+    private static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
             PointF repositionStartPoint, float x, float y) {
         final float deltaX = x - repositionStartPoint.x;
         final float deltaY = y - repositionStartPoint.y;
         repositionTaskBounds.set(taskBoundsAtDragStart);
         repositionTaskBounds.offset((int) deltaX, (int) deltaY);
+    }
+
+    /**
+     * Updates repositionTaskBounds to the final bounds of the task after the drag is finished. If
+     * the bounds are outside of the stable bounds, they are shifted to place task at the top of the
+     * stable bounds.
+     */
+    static void onDragEnd(Rect repositionTaskBounds, Rect taskBoundsAtDragStart, Rect stableBounds,
+            PointF repositionStartPoint, float x, float y)  {
+        updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint,
+                x, y);
+
+        // If task is outside of stable bounds (in the status bar area), shift the task down.
+        if (stableBounds.top > repositionTaskBounds.top) {
+            final int yShift =  stableBounds.top - repositionTaskBounds.top;
+            repositionTaskBounds.offset(0, yShift);
+        }
     }
 
     /**
