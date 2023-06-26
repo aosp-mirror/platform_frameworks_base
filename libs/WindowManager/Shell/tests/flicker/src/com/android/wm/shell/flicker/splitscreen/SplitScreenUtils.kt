@@ -326,14 +326,14 @@ internal object SplitScreenUtils {
         dividerBar.drag(
             Point(
                 if (dragToRight) {
-                    displayBounds.width * 4 / 5
+                    displayBounds.right
                 } else {
-                    displayBounds.width * 1 / 5
+                    displayBounds.left
                 },
                 if (dragToBottom) {
-                    displayBounds.height * 4 / 5
+                    displayBounds.bottom
                 } else {
-                    displayBounds.height * 1 / 5
+                    displayBounds.top
                 }
             )
         )
