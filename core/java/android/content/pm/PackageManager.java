@@ -9500,7 +9500,8 @@ public abstract class PackageManager {
      * {@link PersistableBundle} objects to be shared with the apps being suspended and the
      * launcher to support customization that they might need to handle the suspended state.
      *
-     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this API.
+     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this API except for
+     * device owner and profile owner.
      *
      * @param packageNames The names of the packages to set the suspended status.
      * @param suspended If set to {@code true}, the packages will be suspended, if set to
@@ -9526,7 +9527,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
+    @RequiresPermission(value=Manifest.permission.SUSPEND_APPS, conditional=true)
     @Nullable
     public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspended,
             @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,
