@@ -187,6 +187,29 @@ public class MagnificationThumbnailTest {
                 .addView(eq(mMagnificationThumbnail.mThumbnailLayout), any());
         verify(mMockWindowManager, never())
                 .removeView(eq(mMagnificationThumbnail.mThumbnailLayout));
+        verify(mMockWindowManager, never())
+                .updateViewLayout(eq(mMagnificationThumbnail.mThumbnailLayout), any());
+    }
+
+    @Test
+    public void whenVisible_setBoundsUpdatesLayout() throws InterruptedException {
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
+                /* scale=   */ 2f,
+                /* centerX= */ 5,
+                /* centerY= */ 10
+        ));
+        runOnMainSync(() -> mMagnificationThumbnail.setThumbnailBounds(
+                new Rect(),
+                /* scale=   */ 2f,
+                /* centerX= */ 5,
+                /* centerY= */ 10
+        ));
+        idle();
+
+        verify(mMockWindowManager).updateViewLayout(
+                eq(mMagnificationThumbnail.mThumbnailLayout),
+                /* params= */ any()
+        );
     }
 
     private static void idle() {

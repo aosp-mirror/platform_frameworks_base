@@ -99,15 +99,17 @@ public class MagnificationThumbnail {
             Log.d(LOG_TAG, "setThumbnailBounds " + currentBounds);
         }
         mHandler.post(() -> {
-            mWindowBounds = currentBounds;
-            setBackgroundBounds();
+            refreshBackgroundBounds(currentBounds);
             if (mVisible) {
                 updateThumbnailMainThread(scale, centerX, centerY);
             }
         });
     }
 
-    private void setBackgroundBounds() {
+    @MainThread
+    private void refreshBackgroundBounds(Rect currentBounds) {
+        mWindowBounds = currentBounds;
+
         Point magnificationBoundary = getMagnificationThumbnailPadding(mContext);
         mThumbnailWidth = (int) (mWindowBounds.width() / BG_ASPECT_RATIO);
         mThumbnailHeight = (int) (mWindowBounds.height() / BG_ASPECT_RATIO);
@@ -117,6 +119,10 @@ public class MagnificationThumbnail {
         mBackgroundParams.height = mThumbnailHeight;
         mBackgroundParams.x = initX;
         mBackgroundParams.y = initY;
+
+        if (mVisible) {
+            mWindowManager.updateViewLayout(mThumbnailLayout, mBackgroundParams);
+        }
     }
 
     @MainThread
