@@ -549,8 +549,8 @@ public class TaskPersister implements PersisterQueue.Listener {
             // Write out one task.
             byte[] data = null;
             Task task = mTask;
-            if (DEBUG) Slog.d(TAG, "Writing task=" + task);
             synchronized (mService.mGlobalLock) {
+                if (DEBUG) Slog.d(TAG, "Writing task=" + task);
                 if (task.inRecents) {
                     // Still there.
                     try {
