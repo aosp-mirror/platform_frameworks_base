@@ -971,7 +971,7 @@ void NativeInputManager::notifyDropWindow(const sp<IBinder>& token, float x, flo
 void NativeInputManager::notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
                                                  const std::set<int32_t>& uids) {
     static const bool ENABLE_INPUT_DEVICE_USAGE_METRICS =
-            sysprop::InputProperties::enable_input_device_usage_metrics().value_or(true);
+            sysprop::InputProperties::enable_input_device_usage_metrics().value_or(false);
     if (!ENABLE_INPUT_DEVICE_USAGE_METRICS) return;
 
     mInputManager->getMetricsCollector().notifyDeviceInteraction(deviceId, timestamp, uids);
