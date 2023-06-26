@@ -2154,10 +2154,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
             try (SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs)) {
                 return statement.executeUpdateDelete();
             } finally {
-                // If schema was updated, close non-primary connections, otherwise they might
-                // have outdated schema information
+                // If schema was updated, close non-primary connections and clear prepared
+                // statement caches of active connections, otherwise they might have outdated
+                // schema information.
                 if (statementType == DatabaseUtils.STATEMENT_DDL) {
                     mConnectionPoolLocked.closeAvailableNonPrimaryConnectionsAndLogExceptions();
+                    mConnectionPoolLocked.clearAcquiredConnectionsPreparedStatementCache();
                 }
             }
         } finally {
