@@ -151,12 +151,6 @@ object Flags {
     // TODO(b/255607168): Tracking Bug
     @JvmField val DOZING_MIGRATION_1 = unreleasedFlag(213, "dozing_migration_1")
 
-    // TODO(b/252897742): Tracking Bug
-    @JvmField val NEW_ELLIPSE_DETECTION = unreleasedFlag(214, "new_ellipse_detection")
-
-    // TODO(b/252897742): Tracking Bug
-    @JvmField val NEW_UDFPS_OVERLAY = unreleasedFlag(215, "new_udfps_overlay")
-
     /**
      * Whether to enable the code powering customizable lock screen quick affordances.
      *

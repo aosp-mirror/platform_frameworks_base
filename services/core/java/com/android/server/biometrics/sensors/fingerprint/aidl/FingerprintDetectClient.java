@@ -22,7 +22,6 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -59,15 +58,13 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
             @NonNull FingerprintAuthenticateOptions options,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            @Nullable IUdfpsOverlay udfpsOverlay,
             boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, options.getUserId(),
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
-                null /* sideFpsController*/, udfpsOverlay);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
         mOptions = options;
     }
 
