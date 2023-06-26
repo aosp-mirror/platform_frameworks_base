@@ -22,6 +22,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -42,11 +43,15 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.util.AttributeSet;
 import android.util.SizeF;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -829,5 +834,72 @@ public class RemoteViewsTest {
         verify(visitor, times(1)).accept(eq(icon2S.getUri()));
         verify(visitor, times(1)).accept(eq(icon3S.getUri()));
         verify(visitor, times(1)).accept(eq(icon4S.getUri()));
+    }
+
+    @Test
+    public void layoutInflaterFactory_nothingSet_returnsNull() {
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        assertNull(rv.getLayoutInflaterFactory());
+    }
+
+    @Test
+    public void layoutInflaterFactory_replacesImageView_viewReplaced() {
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final View replacement = new FrameLayout(mContext);
+        replacement.setId(1337);
+
+        LayoutInflater.Factory2 factory = createLayoutInflaterFactory("ImageView", replacement);
+        rv.setLayoutInflaterFactory(factory);
+
+        // Now inflate the views.
+        View inflated = rv.apply(mContext, mContainer);
+
+        assertEquals(factory, rv.getLayoutInflaterFactory());
+        View replacedFrameLayout = inflated.findViewById(1337);
+        assertNotNull(replacedFrameLayout);
+        assertEquals(replacement, replacedFrameLayout);
+        // ImageView should be fully replaced.
+        assertNull(inflated.findViewById(R.id.image));
+    }
+
+    @Test
+    public void layoutInflaterFactory_replacesImageView_settersStillFunctional() {
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final TextView replacement = new TextView(mContext);
+        replacement.setId(R.id.text);
+        final String testText = "testText";
+        rv.setLayoutInflaterFactory(createLayoutInflaterFactory("TextView", replacement));
+        rv.setTextViewText(R.id.text, testText);
+
+
+        // Now inflate the views.
+        View inflated = rv.apply(mContext, mContainer);
+
+        TextView replacedTextView = inflated.findViewById(R.id.text);
+        assertSame(replacement, replacedTextView);
+        assertEquals(testText, replacedTextView.getText());
+    }
+
+    private static LayoutInflater.Factory2 createLayoutInflaterFactory(String viewTypeToReplace,
+            View replacementView) {
+        return new LayoutInflater.Factory2() {
+            @Nullable
+            @Override
+            public View onCreateView(@Nullable View parent, @NonNull String name,
+                                     @NonNull Context context, @NonNull AttributeSet attrs) {
+                if (viewTypeToReplace.equals(name)) {
+                    return replacementView;
+                }
+
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public View onCreateView(@NonNull String name, @NonNull Context context,
+                                     @NonNull AttributeSet attrs) {
+                return null;
+            }
+        };
     }
 }

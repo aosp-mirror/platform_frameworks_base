@@ -413,6 +413,13 @@ public class RemoteViews implements Parcelable, Filter {
     /** Class cookies of the Parcel this instance was read from. */
     private Map<Class, Object> mClassCookies;
 
+    /**
+     * {@link LayoutInflater.Factory2} which will be passed into a {@link LayoutInflater} instance
+     * used by this class.
+     */
+    @Nullable
+    private LayoutInflater.Factory2 mLayoutInflaterFactory2;
+
     private static final InteractionHandler DEFAULT_INTERACTION_HANDLER =
             (view, pendingIntent, response) ->
                     startPendingIntent(view, pendingIntent, response.getLaunchOptions(view));
@@ -429,6 +436,29 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setRemoteInputs(@IdRes int viewId, RemoteInput[] remoteInputs) {
         mActions.add(new SetRemoteInputsAction(viewId, remoteInputs));
+    }
+
+    /**
+     * Sets {@link LayoutInflater.Factory2} to be passed into {@link LayoutInflater} used
+     * by this class instance. It has to be set before the views are inflated to have any effect.
+     *
+     * The factory callbacks will be called on the background thread so the implementation needs
+     * to be thread safe.
+     *
+     * @hide
+     */
+    public void setLayoutInflaterFactory(@Nullable LayoutInflater.Factory2 factory) {
+        mLayoutInflaterFactory2 = factory;
+    }
+
+    /**
+     * Returns currently set {@link LayoutInflater.Factory2}.
+     *
+     * @hide
+     */
+    @Nullable
+    public LayoutInflater.Factory2 getLayoutInflaterFactory() {
+        return mLayoutInflaterFactory2;
     }
 
     /**
@@ -5662,6 +5692,9 @@ public class RemoteViews implements Parcelable, Filter {
         // we don't add a filter to the static version returned by getSystemService.
         inflater = inflater.cloneInContext(inflationContext);
         inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
+        if (mLayoutInflaterFactory2 != null) {
+            inflater.setFactory2(mLayoutInflaterFactory2);
+        }
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
         if (mViewId != View.NO_ID) {
             v.setId(mViewId);
