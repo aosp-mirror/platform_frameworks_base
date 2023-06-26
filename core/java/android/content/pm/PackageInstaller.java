@@ -3024,6 +3024,8 @@ public class PackageInstaller {
          *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
          *     <li>The app being installed targets:
          *          <ul>
+         *              <li>{@link android.os.Build.VERSION_CODES#Q API 29} or higher on
+         *              Android S  ({@link android.os.Build.VERSION_CODES#S API 31})</li>
          *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher on
          *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
          *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher <b>after</b>
