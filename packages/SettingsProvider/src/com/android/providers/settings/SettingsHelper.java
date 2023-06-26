@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
@@ -238,6 +239,7 @@ public class SettingsHelper {
             // If we fail to apply the setting, by definition nothing happened
             sendBroadcast = false;
             sendBroadcastSystemUI = false;
+            Log.e(TAG, "Failed to restore setting name: " + name + " + value: " + value, e);
         } finally {
             // If this was an element of interest, send the "we just restored it"
             // broadcast with the historical value now that the new value has
