@@ -1802,9 +1802,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final DisplayDeviceConfig.HighBrightnessModeData hbmData =
                 ddConfig != null ? ddConfig.getHighBrightnessModeData() : null;
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        return new HighBrightnessModeController(mHandler, info.width, info.height, displayToken,
-                displayUniqueId, PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, hbmData,
-                (sdrBrightness, maxDesiredHdrSdrRatio) ->
+        return mInjector.getHighBrightnessModeController(mHandler, info.width, info.height,
+                displayToken, displayUniqueId, PowerManager.BRIGHTNESS_MIN,
+                PowerManager.BRIGHTNESS_MAX, hbmData, (sdrBrightness, maxDesiredHdrSdrRatio) ->
                         mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness,
                                 maxDesiredHdrSdrRatio), modeChangeCallback, hbmMetadata, mContext);
     }
@@ -2173,7 +2173,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     @Override
     public void setBrightness(float brightnessValue, int userSerial) {
-        mDisplayBrightnessController.setBrightness(brightnessValue, userSerial);
+        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightnessValue),
+                userSerial);
     }
 
     @Override
@@ -2889,6 +2890,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     sensorValueToLux,
                     brightnessMapper
             );
+        }
+
+        HighBrightnessModeController getHighBrightnessModeController(Handler handler, int width,
+                int height, IBinder displayToken, String displayUniqueId, float brightnessMin,
+                float brightnessMax, DisplayDeviceConfig.HighBrightnessModeData hbmData,
+                HighBrightnessModeController.HdrBrightnessDeviceConfig hdrBrightnessCfg,
+                Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata,
+                Context context) {
+            return new HighBrightnessModeController(handler, width, height, displayToken,
+                    displayUniqueId, brightnessMin, brightnessMax, hbmData, hdrBrightnessCfg,
+                    hbmChangeCallback, hbmMetadata, context);
         }
     }
 
