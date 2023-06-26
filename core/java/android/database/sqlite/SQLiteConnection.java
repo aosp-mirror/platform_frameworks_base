@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.annotation.NonNull;
+import com.android.internal.annotations.GuardedBy;
 
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -110,8 +111,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private final int mConnectionId;
     private final boolean mIsPrimaryConnection;
     private final boolean mIsReadOnlyConnection;
-    private final PreparedStatementCache mPreparedStatementCache;
     private PreparedStatement mPreparedStatementPool;
+
+    // A lock access to the statement cache.
+    private final Object mCacheLock = new Object();
+    @GuardedBy("mCacheLock")
+    private final PreparedStatementCache mPreparedStatementCache;
 
     // The recent operations log.
     private final OperationLog mRecentOperations;
@@ -589,7 +594,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mConfiguration.updateParametersFrom(configuration);
 
         // Update prepared statement cache size.
-        mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
+        synchronized (mCacheLock) {
+            mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
+        }
 
         if (foreignKeyModeChanged) {
             setForeignKeyModeFromConfiguration();
@@ -624,7 +631,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     // Called by SQLiteConnectionPool only.
     // Returns true if the prepared statement cache contains the specified SQL.
     boolean isPreparedStatementInCache(String sql) {
-        return mPreparedStatementCache.get(sql) != null;
+        synchronized (mCacheLock) {
+            return mPreparedStatementCache.get(sql) != null;
+        }
     }
 
     /**
@@ -1059,12 +1068,14 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     /**
      * Return a {@link #PreparedStatement}, possibly from the cache.
      */
-    PreparedStatement acquirePreparedStatement(String sql) {
+    @GuardedBy("mCacheLock")
+    private PreparedStatement acquirePreparedStatementLI(String sql) {
         ++mPool.mTotalPrepareStatements;
         PreparedStatement statement = mPreparedStatementCache.get(sql);
         boolean skipCache = false;
         if (statement != null) {
             if (!statement.mInUse) {
+                statement.mInUse = true;
                 return statement;
             }
             // The statement is already in the cache but is in use (this statement appears
@@ -1096,9 +1107,19 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     /**
+     * Return a {@link #PreparedStatement}, possibly from the cache.
+     */
+    PreparedStatement acquirePreparedStatement(String sql) {
+        synchronized (mCacheLock) {
+            return acquirePreparedStatementLI(sql);
+        }
+    }
+
+    /**
      * Release a {@link #PreparedStatement} that was originally supplied by this connection.
      */
-    void releasePreparedStatement(PreparedStatement statement) {
+    @GuardedBy("mCacheLock")
+    private void releasePreparedStatementLI(PreparedStatement statement) {
         statement.mInUse = false;
         if (statement.mInCache) {
             try {
@@ -1118,6 +1139,15 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             }
         } else {
             finalizePreparedStatement(statement);
+        }
+    }
+
+    /**
+     * Release a {@link #PreparedStatement} that was originally supplied by this connection.
+     */
+    void releasePreparedStatement(PreparedStatement statement) {
+        synchronized (mCacheLock) {
+            releasePreparedStatementLI(statement);
         }
     }
 
@@ -1295,7 +1325,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mRecentOperations.dump(printer);
 
         if (verbose) {
-            mPreparedStatementCache.dump(printer);
+            synchronized (mCacheLock) {
+                mPreparedStatementCache.dump(printer);
+            }
         }
     }
 
@@ -1427,6 +1459,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         return sql.replaceAll("[\\s]*\\n+[\\s]*", " ");
     }
 
+    void clearPreparedStatementCache() {
+        synchronized (mCacheLock) {
+            mPreparedStatementCache.evictAll();
+        }
+    }
+
     /**
      * Holder type for a prepared statement.
      *
@@ -1469,8 +1507,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         public boolean mInUse;
     }
 
-    private final class PreparedStatementCache
-            extends LruCache<String, PreparedStatement> {
+    private final class PreparedStatementCache extends LruCache<String, PreparedStatement> {
         public PreparedStatementCache(int size) {
             super(size);
         }
