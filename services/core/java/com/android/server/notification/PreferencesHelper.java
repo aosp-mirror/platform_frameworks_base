@@ -30,9 +30,9 @@ import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
-import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
-import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -163,6 +163,9 @@ public class PreferencesHelper implements RankingConfig {
     @VisibleForTesting
     static final int DEFAULT_BUBBLE_PREFERENCE = BUBBLE_PREFERENCE_NONE;
     static final boolean DEFAULT_MEDIA_NOTIFICATION_FILTERING = true;
+
+    private static final int NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_APP = 0;
+    private static final int NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_USER = 1;
 
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
@@ -1110,10 +1113,18 @@ public class PreferencesHelper implements RankingConfig {
             if (!channel.equals(updatedChannel)) {
                 // only log if there are real changes
                 MetricsLogger.action(getChannelLog(updatedChannel, pkg)
-                        .setSubtype(fromUser ? 1 : 0));
+                        .setSubtype(fromUser ? NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_USER
+                                : NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_APP));
                 mNotificationChannelLogger.logNotificationChannelModified(updatedChannel, uid, pkg,
                         NotificationChannelLogger.getLoggingImportance(channel), fromUser);
                 changed = true;
+            }
+
+            if (fromUser && SystemUiSystemPropertiesFlags.getResolver().isEnabled(
+                    NotificationFlags.PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS)) {
+                updateChildrenConversationChannels(r, channel, updatedChannel);
+                // No need to update changed or needsDndChanged as the child channel(s) cannot be
+                // relevantly affected without the parent channel already having been.
             }
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
@@ -1127,6 +1138,101 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (changed) {
             updateConfig();
+        }
+    }
+
+    /**
+     * Updates conversation channels after user changes to their parent channel. See
+     * {@link #maybeUpdateChildConversationChannel}.
+     */
+    @GuardedBy("mPackagePreferences")
+    private void updateChildrenConversationChannels(@NonNull PackagePreferences packagePreferences,
+            @NonNull NotificationChannel oldParent, @NonNull NotificationChannel updatedParent) {
+        if (oldParent.equals(updatedParent)) {
+            return;
+        }
+        if (oldParent.isConversation()) {
+            return; // Can't have children.
+        }
+        for (NotificationChannel channel : packagePreferences.channels.values()) {
+            // Include deleted -- otherwise they will have old settings if later resurrected.
+            // Include demoted -- still attached to their parents.
+            if (channel.isConversation()
+                    && oldParent.getId().equals(channel.getParentChannelId())) {
+                maybeUpdateChildConversationChannel(packagePreferences.pkg, packagePreferences.uid,
+                        channel, oldParent, updatedParent);
+            }
+        }
+    }
+
+    /**
+     * Apply the diff between {@code oldParent} and {@code updatedParent} to the child
+     * {@code conversation} channel. Only fields that are not locked on the conversation channel
+     * (see {@link NotificationChannel#LOCKABLE_FIELDS }) will be updated (so that we don't override
+     * previous explicit user choices).
+     *
+     * <p>This will also log the change as if it was {@code fromUser=true}.
+     */
+    @GuardedBy("mPackagePreferences")
+    private void maybeUpdateChildConversationChannel(String pkg, int uid,
+            @NonNull NotificationChannel conversation, @NonNull NotificationChannel oldParent,
+            @NonNull NotificationChannel updatedParent) {
+        boolean changed = false;
+        int oldLoggingImportance = NotificationChannelLogger.getLoggingImportance(conversation);
+
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_PRIORITY) == 0
+                && oldParent.canBypassDnd() != updatedParent.canBypassDnd()) {
+            conversation.setBypassDnd(updatedParent.canBypassDnd());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_VISIBILITY) == 0
+                && oldParent.getLockscreenVisibility()
+                != updatedParent.getLockscreenVisibility()) {
+            conversation.setLockscreenVisibility(updatedParent.getLockscreenVisibility());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
+                && oldParent.getImportance() != updatedParent.getImportance()) {
+            conversation.setImportance(updatedParent.getImportance());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_LIGHTS) == 0
+                && (oldParent.shouldShowLights() != updatedParent.shouldShowLights()
+                || oldParent.getLightColor() != updatedParent.getLightColor())) {
+            conversation.enableLights(updatedParent.shouldShowLights());
+            conversation.setLightColor(updatedParent.getLightColor());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_SOUND) == 0
+                && !Objects.equals(oldParent.getSound(), updatedParent.getSound())) {
+            conversation.setSound(updatedParent.getSound(), updatedParent.getAudioAttributes());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_VIBRATION) == 0
+                && (!Arrays.equals(oldParent.getVibrationPattern(),
+                updatedParent.getVibrationPattern())
+                || oldParent.shouldVibrate() != updatedParent.shouldVibrate())) {
+            // enableVibration must be 2nd because setVibrationPattern may toggle it.
+            conversation.setVibrationPattern(updatedParent.getVibrationPattern());
+            conversation.enableVibration(updatedParent.shouldVibrate());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_SHOW_BADGE) == 0
+                && oldParent.canShowBadge() != updatedParent.canShowBadge()) {
+            conversation.setShowBadge(updatedParent.canShowBadge());
+            changed = true;
+        }
+        if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_ALLOW_BUBBLE) == 0
+                && oldParent.getAllowBubbles() != updatedParent.getAllowBubbles()) {
+            conversation.setAllowBubbles(updatedParent.getAllowBubbles());
+            changed = true;
+        }
+
+        if (changed) {
+            MetricsLogger.action(getChannelLog(conversation, pkg).setSubtype(
+                    NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_USER));
+            mNotificationChannelLogger.logNotificationChannelModified(conversation, uid, pkg,
+                    oldLoggingImportance, /* fromUser= */ true);
         }
     }
 
@@ -1838,8 +1944,8 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    @VisibleForTesting
-    void lockFieldsForUpdateLocked(NotificationChannel original, NotificationChannel update) {
+    private void lockFieldsForUpdateLocked(NotificationChannel original,
+            NotificationChannel update) {
         if (original.canBypassDnd() != update.canBypassDnd()) {
             update.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
         }
