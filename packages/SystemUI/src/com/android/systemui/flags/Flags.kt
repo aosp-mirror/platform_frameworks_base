@@ -146,6 +146,14 @@ object Flags {
     val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = releasedFlag(208,
         "lockscreen_without_secure_lock_when_dreaming")
 
+    // TODO(b/286092087): Tracking Bug
+    @JvmField
+    val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag(301, "enable_system_ui_dream_controller")
+
+    // TODO(b/288287730): Tracking Bug
+    @JvmField
+    val ENABLE_SYSTEM_UI_DREAM_HOSTING = unreleasedFlag(302, "enable_system_ui_dream_hosting")
+
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
