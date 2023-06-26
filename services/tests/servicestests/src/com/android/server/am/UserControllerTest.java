@@ -1342,6 +1342,10 @@ public class UserControllerTest {
             Message copy = new Message();
             copy.copyFrom(msg);
             mMessages.add(copy);
+            if (msg.getCallback() != null) {
+                msg.getCallback().run();
+                msg.setCallback(null);
+            }
             return super.sendMessageAtTime(msg, uptimeMillis);
         }
     }
