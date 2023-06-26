@@ -140,6 +140,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mFeatureFlags = new FakeFeatureFlags();
 
         mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, false);
+        mFeatureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, false);
 
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
