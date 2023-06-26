@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -107,7 +108,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private TunerService mTunerService;
     @Mock
-    private Provider<AutoTileManager> mAutoTiles;
+    private AutoTileManager mAutoTiles;
     @Mock
     private ShadeController mShadeController;
     @Mock
@@ -161,9 +162,10 @@ public class QSTileHostTest extends SysuiTestCase {
         mSecureSettings = new FakeSettings();
         saveSetting("");
         mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
-                mPluginManager, mTunerService, mAutoTiles, mShadeController,
+                mPluginManager, mTunerService, () -> mAutoTiles, mShadeController,
                 mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
                 mTileLifecycleManagerFactory, mUserFileManager, mFeatureFlags);
+        mMainExecutor.runAllReady();
 
         mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
             @Override
@@ -680,6 +682,17 @@ public class QSTileHostTest extends SysuiTestCase {
         assertEquals("spec1", proto.tiles[0].getSpec());
         assertEquals(CUSTOM_TILE.getPackageName(), proto.tiles[1].getComponentName().packageName);
         assertEquals(CUSTOM_TILE.getClassName(), proto.tiles[1].getComponentName().className);
+    }
+
+    @Test
+    public void testUserChange_flagOn_autoTileManagerNotified() {
+        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true);
+        int currentUser = mUserTracker.getUserId();
+        clearInvocations(mAutoTiles);
+        when(mUserTracker.getUserId()).thenReturn(currentUser + 1);
+
+        mQSTileHost.onTuningChanged(SETTING, "a,b");
+        verify(mAutoTiles).changeUser(UserHandle.of(currentUser + 1));
     }
 
     private SharedPreferences getSharedPreferencesForUser(int user) {
