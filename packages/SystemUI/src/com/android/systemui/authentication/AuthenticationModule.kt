@@ -16,8 +16,11 @@
 
 package com.android.systemui.authentication
 
+import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepositoryModule
 import dagger.Module
+import dagger.Provides
+import java.util.function.Function
 
 @Module(
     includes =
@@ -25,4 +28,12 @@ import dagger.Module
             AuthenticationRepositoryModule::class,
         ],
 )
-object AuthenticationModule
+object AuthenticationModule {
+
+    @Provides
+    fun getSecurityMode(
+        model: KeyguardSecurityModel,
+    ): Function<Int, KeyguardSecurityModel.SecurityMode> {
+        return Function { userId -> model.getSecurityMode(userId) }
+    }
+}
