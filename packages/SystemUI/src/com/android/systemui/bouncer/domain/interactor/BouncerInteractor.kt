@@ -35,6 +35,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -72,24 +75,28 @@ constructor(
     val throttling: StateFlow<AuthenticationThrottledModel?> = repository.throttling
 
     init {
+        // UNLOCKING SHOWS Gone.
+        //
+        // Move to the gone scene if the device becomes unlocked while on the bouncer scene.
         applicationScope.launch {
-            sceneInteractor.currentScene(containerName).collect { currentScene ->
-                if (currentScene.key == SceneKey.Bouncer) {
-                    when (getAuthenticationMethod()) {
-                        is AuthenticationMethodModel.None ->
-                            sceneInteractor.setCurrentScene(
-                                containerName,
-                                SceneModel(SceneKey.Gone),
-                            )
-                        is AuthenticationMethodModel.Swipe ->
-                            sceneInteractor.setCurrentScene(
-                                containerName,
-                                SceneModel(SceneKey.Lockscreen),
-                            )
-                        else -> Unit
+            sceneInteractor
+                .currentScene(containerName)
+                .flatMapLatest { currentScene ->
+                    if (currentScene.key == SceneKey.Bouncer) {
+                        authenticationInteractor.isUnlocked
+                    } else {
+                        flowOf(false)
                     }
                 }
-            }
+                .distinctUntilChanged()
+                .collect { isUnlocked ->
+                    if (isUnlocked) {
+                        sceneInteractor.setCurrentScene(
+                            containerName = containerName,
+                            scene = SceneModel(SceneKey.Gone),
+                        )
+                    }
+                }
         }
     }
 
@@ -119,7 +126,6 @@ constructor(
                     scene = SceneModel(SceneKey.Bouncer),
                 )
             } else {
-                authenticationInteractor.unlockDevice()
                 sceneInteractor.setCurrentScene(
                     containerName = containerName,
                     scene = SceneModel(SceneKey.Gone),

@@ -75,7 +75,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat((lockButtonIcon as? Icon.Resource)?.res)
                 .isEqualTo(R.drawable.ic_device_lock_on)
@@ -88,7 +88,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
 
             assertThat((lockButtonIcon as? Icon.Resource)?.res)
                 .isEqualTo(R.drawable.ic_device_lock_off)
@@ -99,7 +99,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -111,7 +111,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
         }
@@ -123,7 +123,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onLockButtonClicked()
@@ -138,7 +138,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
@@ -153,7 +153,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()
@@ -168,7 +168,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onLockButtonClicked()

@@ -71,7 +71,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice("container1")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
@@ -104,7 +104,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice("container1")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
@@ -134,7 +134,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = false)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice("container1")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.clearMessage()
@@ -158,7 +158,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice("container1")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
@@ -190,7 +190,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(emptyList())
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice("container1")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
@@ -226,7 +226,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.showOrUnlockDevice("container1")
@@ -239,7 +239,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene("container1"))
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             underTest.showOrUnlockDevice("container1")
 
@@ -254,7 +254,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             val customMessage = "Hello there!"
             underTest.showOrUnlockDevice("container1", customMessage)
@@ -268,13 +268,17 @@ class BouncerInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val throttling by collectLastValue(underTest.throttling)
             val message by collectLastValue(underTest.message)
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
+            val currentScene by
+                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
+            runCurrent()
+            underTest.showOrUnlockDevice(SceneTestUtils.CONTAINER_1)
+            runCurrent()
+            assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
             assertThat(throttling).isNull()
-            assertThat(message).isEqualTo("")
-            assertThat(isUnlocked).isFalse()
+            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
             repeat(BouncerInteractor.THROTTLE_EVERY) { times ->
                 // Wrong PIN.
                 assertThat(underTest.authenticate(listOf(6, 7, 8, 9))).isFalse()
@@ -285,9 +289,9 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(throttling).isNotNull()
             assertTryAgainMessage(message, BouncerInteractor.THROTTLE_DURATION_SEC)
 
-            // Correct PIN, but throttled, so doesn't unlock:
+            // Correct PIN, but throttled, so doesn't change away from the bouncer scene:
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isFalse()
-            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
             assertTryAgainMessage(message, BouncerInteractor.THROTTLE_DURATION_SEC)
 
             throttling?.totalDurationSec?.let { seconds ->
@@ -301,11 +305,28 @@ class BouncerInteractorTest : SysuiTestCase() {
             }
             assertThat(message).isEqualTo("")
             assertThat(throttling).isNull()
-            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
 
-            // Correct PIN and no longer throttled so unlocks:
+            // Correct PIN and no longer throttled so changes to the Gone scene:
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
-            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene?.key).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun switchesToGone_whenUnlocked() =
+        testScope.runTest {
+            utils.authenticationRepository.setUnlocked(false)
+            sceneInteractor.setCurrentScene(
+                SceneTestUtils.CONTAINER_1,
+                SceneModel(SceneKey.Bouncer)
+            )
+            val currentScene by
+                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+
+            utils.authenticationRepository.setUnlocked(true)
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
     private fun assertTryAgainMessage(

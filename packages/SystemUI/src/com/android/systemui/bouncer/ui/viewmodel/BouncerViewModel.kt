@@ -22,17 +22,19 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.shared.model.AuthenticationThrottledModel
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -83,25 +85,30 @@ constructor(
     }
 
     /** View-model for the current UI, based on the current authentication method. */
-    val authMethod: StateFlow<AuthMethodBouncerViewModel?>
-        get() =
-            flow {
-                    emit(null)
-                    emit(interactor.getAuthenticationMethod())
-                }
-                .map { authMethod ->
-                    when (authMethod) {
-                        is AuthenticationMethodModel.Pin -> pin
-                        is AuthenticationMethodModel.Password -> password
-                        is AuthenticationMethodModel.Pattern -> pattern
-                        else -> null
+    private val _authMethod =
+        MutableSharedFlow<AuthMethodBouncerViewModel?>(
+            replay = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
+    val authMethod: StateFlow<AuthMethodBouncerViewModel?> =
+        _authMethod.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null,
+        )
+
+    init {
+        applicationScope.launch {
+            _authMethod.subscriptionCount
+                .pairwise()
+                .map { (previousCount, currentCount) -> currentCount > previousCount }
+                .collect { subscriberAdded ->
+                    if (subscriberAdded) {
+                        reloadAuthMethod()
                     }
                 }
-                .stateIn(
-                    scope = applicationScope,
-                    started = SharingStarted.WhileSubscribed(),
-                    initialValue = null,
-                )
+        }
+    }
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<MessageViewModel> =
@@ -181,6 +188,17 @@ constructor(
         return MessageViewModel(
             text = message ?: "",
             isUpdateAnimated = throttling == null,
+        )
+    }
+
+    private suspend fun reloadAuthMethod() {
+        _authMethod.tryEmit(
+            when (interactor.getAuthenticationMethod()) {
+                is AuthenticationMethodModel.Pin -> pin
+                is AuthenticationMethodModel.Password -> password
+                is AuthenticationMethodModel.Pattern -> pattern
+                else -> null
+            }
         )
     }
 

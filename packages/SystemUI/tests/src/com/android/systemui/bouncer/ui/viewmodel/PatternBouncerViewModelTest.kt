@@ -74,7 +74,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onShown() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
@@ -82,9 +81,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(CORRECT_PATTERN)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.onShown()
@@ -92,14 +90,12 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PATTERN)
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
     @Test
     fun onDragStart() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
@@ -107,9 +103,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(CORRECT_PATTERN)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             runCurrent()
@@ -119,23 +114,20 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).isEmpty()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
     @Test
     fun onDragEnd_whenCorrect() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(CORRECT_PATTERN)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onDragStart()
@@ -169,14 +161,12 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onDragEnd()
 
-            assertThat(isUnlocked).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
     @Test
     fun onDragEnd_whenWrong() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
@@ -184,9 +174,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(CORRECT_PATTERN)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onDragStart()
@@ -204,14 +193,12 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(message?.text).isEqualTo(WRONG_PATTERN)
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
     @Test
     fun onDragEnd_correctAfterWrong() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
@@ -219,9 +206,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(CORRECT_PATTERN)
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onDragStart()
@@ -237,7 +223,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(message?.text).isEqualTo(WRONG_PATTERN)
-            assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Enter the correct pattern:
@@ -252,7 +237,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             underTest.onDragEnd()
 
-            assertThat(isUnlocked).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 

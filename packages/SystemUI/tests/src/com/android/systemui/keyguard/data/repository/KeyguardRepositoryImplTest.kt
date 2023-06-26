@@ -235,11 +235,10 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun isKeyguardUnlocked() =
         testScope.runTest {
             whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isKeyguardUnlocked.onEach { latest = it }.launchIn(this)
+            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardUnlocked)
 
             runCurrent()
-            assertThat(latest).isFalse()
+            assertThat(isKeyguardUnlocked).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
             verify(keyguardStateController).addCallback(captor.capture())
@@ -247,14 +246,12 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             whenever(keyguardStateController.isUnlocked).thenReturn(true)
             captor.value.onUnlockedChanged()
             runCurrent()
-            assertThat(latest).isTrue()
+            assertThat(isKeyguardUnlocked).isTrue()
 
             whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            captor.value.onUnlockedChanged()
+            captor.value.onKeyguardShowingChanged()
             runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            assertThat(isKeyguardUnlocked).isFalse()
         }
 
     @Test
