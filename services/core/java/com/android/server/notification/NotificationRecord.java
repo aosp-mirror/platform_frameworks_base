@@ -103,7 +103,7 @@ public final class NotificationRecord {
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
-    private final KeyguardManager mKeyguardManager;
+    private KeyguardManager mKeyguardManager;
     private final PowerManager mPowerManager;
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
@@ -1625,8 +1625,19 @@ public final class NotificationRecord {
     }
 
     boolean isLocked() {
-        return mKeyguardManager.isKeyguardLocked()
+        return getKeyguardManager().isKeyguardLocked()
                 || !mPowerManager.isInteractive();  // Unlocked AOD
+    }
+
+    /**
+     * For some early {@link NotificationRecord}, {@link KeyguardManager} can be {@code null} in
+     * the constructor. Retrieve it again if it is null.
+     */
+    private KeyguardManager getKeyguardManager() {
+        if (mKeyguardManager == null) {
+            mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        }
+        return mKeyguardManager;
     }
 
     @VisibleForTesting
