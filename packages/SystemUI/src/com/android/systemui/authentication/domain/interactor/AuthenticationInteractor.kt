@@ -25,9 +25,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /** Hosts application business logic related to authentication. */
 @SysUISingleton
@@ -38,12 +37,6 @@ constructor(
     private val repository: AuthenticationRepository,
 ) {
     /**
-     * The currently-configured authentication method. This determines how the authentication
-     * challenge is completed in order to unlock an otherwise locked device.
-     */
-    val authenticationMethod: StateFlow<AuthenticationMethodModel> = repository.authenticationMethod
-
-    /**
      * Whether the device is unlocked.
      *
      * A device that is not yet unlocked requires unlocking by completing an authentication
@@ -52,20 +45,18 @@ constructor(
      * Note that this state has no real bearing on whether the lock screen is showing or dismissed.
      */
     val isUnlocked: StateFlow<Boolean> =
-        combine(authenticationMethod, repository.isUnlocked) { authMethod, isUnlocked ->
-                isUnlockedWithAuthMethod(
-                    isUnlocked = isUnlocked,
-                    authMethod = authMethod,
-                )
+        repository.isUnlocked
+            .map { isUnlocked ->
+                if (getAuthenticationMethod() is AuthenticationMethodModel.None) {
+                    true
+                } else {
+                    isUnlocked
+                }
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue =
-                    isUnlockedWithAuthMethod(
-                        isUnlocked = repository.isUnlocked.value,
-                        authMethod = repository.authenticationMethod.value,
-                    )
+                initialValue = true,
             )
 
     /**
@@ -82,25 +73,20 @@ constructor(
      */
     val failedAuthenticationAttempts: StateFlow<Int> = repository.failedAuthenticationAttempts
 
-    init {
-        // UNLOCKS WHEN AUTH METHOD REMOVED.
-        //
-        // Unlocks the device if the auth method becomes None.
-        applicationScope.launch {
-            repository.authenticationMethod.collect {
-                if (it is AuthenticationMethodModel.None) {
-                    unlockDevice()
-                }
-            }
-        }
+    /**
+     * Returns the currently-configured authentication method. This determines how the
+     * authentication challenge is completed in order to unlock an otherwise locked device.
+     */
+    suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
+        return repository.getAuthenticationMethod()
     }
 
     /**
      * Returns `true` if the device currently requires authentication before content can be viewed;
      * `false` if content can be displayed without unlocking first.
      */
-    fun isAuthenticationRequired(): Boolean {
-        return !isUnlocked.value && authenticationMethod.value.isSecure
+    suspend fun isAuthenticationRequired(): Boolean {
+        return !isUnlocked.value && getAuthenticationMethod().isSecure
     }
 
     /**
@@ -133,8 +119,8 @@ constructor(
      * @return `true` if the authentication succeeded and the device is now unlocked; `false` when
      *   authentication failed, `null` if the check was not performed.
      */
-    fun authenticate(input: List<Any>, tryAutoConfirm: Boolean = false): Boolean? {
-        val authMethod = this.authenticationMethod.value
+    suspend fun authenticate(input: List<Any>, tryAutoConfirm: Boolean = false): Boolean? {
+        val authMethod = getAuthenticationMethod()
         if (tryAutoConfirm) {
             if ((authMethod as? AuthenticationMethodModel.Pin)?.autoConfirm != true) {
                 // Do not attempt to authenticate unless the PIN lock is set to auto-confirm.
@@ -176,28 +162,12 @@ constructor(
         repository.setUnlocked(true)
     }
 
-    /** See [authenticationMethod]. */
-    fun setAuthenticationMethod(authenticationMethod: AuthenticationMethodModel) {
-        repository.setAuthenticationMethod(authenticationMethod)
-    }
-
     /** See [isBypassEnabled]. */
     fun toggleBypassEnabled() {
         repository.setBypassEnabled(!repository.isBypassEnabled.value)
     }
 
     companion object {
-        private fun isUnlockedWithAuthMethod(
-            isUnlocked: Boolean,
-            authMethod: AuthenticationMethodModel,
-        ): Boolean {
-            return if (authMethod is AuthenticationMethodModel.None) {
-                true
-            } else {
-                isUnlocked
-            }
-        }
-
         /**
          * Returns a PIN code from the given list. It's assumed the given list elements are all
          * [Int] in the range [0-9].
