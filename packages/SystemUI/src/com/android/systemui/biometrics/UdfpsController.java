@@ -188,6 +188,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @Nullable private VelocityTracker mVelocityTracker;
     // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
     private int mActivePointerId = -1;
+    // Whether a pointer has been pilfered for current gesture
+    private boolean mPointerPilfered = false;
     // The timestamp of the most recent touch log.
     private long mTouchLogTime;
     // The timestamp of the most recent log of a touch InteractionEvent.
@@ -557,6 +559,11 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 || mPrimaryBouncerInteractor.isInTransit()) {
             return false;
         }
+        if (event.getAction() == MotionEvent.ACTION_DOWN
+                || event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+            // Reset on ACTION_DOWN, start of new gesture
+            mPointerPilfered = false;
+        }
 
         final TouchProcessorResult result = mTouchProcessor.processTouch(event, mActivePointerId,
                 mOverlayParams);
@@ -630,10 +637,11 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             shouldPilfer = true;
         }
 
-        // Execute the pilfer
-        if (shouldPilfer) {
+        // Pilfer only once per gesture
+        if (shouldPilfer && !mPointerPilfered) {
             mInputManager.pilferPointers(
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
+            mPointerPilfered = true;
         }
 
         return processedTouch.getTouchData().isWithinBounds(mOverlayParams.getNativeSensorBounds());
