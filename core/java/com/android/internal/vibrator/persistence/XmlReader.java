@@ -149,25 +149,19 @@ public final class XmlReader {
      * attribute is missing.
      */
     public static int readAttributeIntNonNegative(
-            TypedXmlPullParser parser, String attributeName, int defaultValue)
+            TypedXmlPullParser parser, String attrName, int defaultValue)
             throws XmlParserException {
-        if (parser.getAttributeIndex(NAMESPACE, attributeName) < 0) {
+        if (parser.getAttributeIndex(NAMESPACE, attrName) < 0) {
             return defaultValue;
         }
-        return readAttributeIntNonNegative(parser, attributeName);
+        return readAttributeIntNonNegative(parser, attrName);
     }
 
     /** Read attribute from current tag as a non-negative integer. */
     public static int readAttributeIntNonNegative(TypedXmlPullParser parser, String attrName)
             throws XmlParserException {
         String tagName = parser.getName();
-        int value;
-        try {
-            value = parser.getAttributeInt(NAMESPACE, attrName);
-        } catch (XmlPullParserException e) {
-            String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
-            throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);
-        }
+        int value = readAttributeInt(parser, attrName);
 
         XmlValidator.checkParserCondition(value >= 0,
                 "Unexpected %s = %d in tag %s, expected %s >= 0",
@@ -180,13 +174,7 @@ public final class XmlReader {
             TypedXmlPullParser parser, String attrName, int lowerInclusive, int upperInclusive)
             throws XmlParserException {
         String tagName = parser.getName();
-        int value;
-        try {
-            value = parser.getAttributeInt(NAMESPACE, attrName);
-        } catch (XmlPullParserException e) {
-            String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
-            throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);
-        }
+        int value = readAttributeInt(parser, attrName);
 
         XmlValidator.checkParserCondition(
                 value >= lowerInclusive && value <= upperInclusive,
@@ -206,18 +194,33 @@ public final class XmlReader {
             return defaultValue;
         }
         String tagName = parser.getName();
-        float value;
-        try {
-            // The method getAttributeFloat with default catches any Exception and returns default.
-            value = parser.getAttributeFloat(NAMESPACE, attrName);
-        } catch (XmlPullParserException e) {
-            String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
-            throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);
-        }
+        float value = readAttributeFloat(parser, attrName);
 
         XmlValidator.checkParserCondition(value >= lowerInclusive && value <= upperInclusive,
                 "Unexpected %s = %f in tag %s, expected %s in [%f, %f]",
                 attrName, value, tagName, attrName, lowerInclusive, upperInclusive);
         return value;
+    }
+
+    private static int readAttributeInt(TypedXmlPullParser parser, String attrName)
+            throws XmlParserException {
+        String tagName = parser.getName();
+        try {
+            return parser.getAttributeInt(NAMESPACE, attrName);
+        } catch (XmlPullParserException e) {
+            String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
+            throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);
+        }
+    }
+
+    private static float readAttributeFloat(TypedXmlPullParser parser, String attrName)
+            throws XmlParserException {
+        String tagName = parser.getName();
+        try {
+            return parser.getAttributeFloat(NAMESPACE, attrName);
+        } catch (XmlPullParserException e) {
+            String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
+            throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);
+        }
     }
 }
