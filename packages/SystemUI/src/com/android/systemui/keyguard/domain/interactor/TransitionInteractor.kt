@@ -15,6 +15,14 @@
  */
 
 package com.android.systemui.keyguard.domain.interactor
+
+import android.animation.ValueAnimator
+import android.util.Log
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionInfo
+import java.util.UUID
+
 /**
  * Each TransitionInteractor is responsible for determining under which conditions to notify
  * [KeyguardTransitionRepository] to signal a transition. When (and if) the transition occurs is
@@ -26,6 +34,50 @@ package com.android.systemui.keyguard.domain.interactor
  * MUST list implementing classes in dagger module [StartKeyguardTransitionModule] and also in the
  * 'when' clause of [KeyguardTransitionCoreStartable]
  */
-sealed class TransitionInteractor(val name: String) {
+sealed class TransitionInteractor(
+    val fromState: KeyguardState,
+) {
+    val name = this::class.simpleName ?: "UnknownTransitionInteractor"
+
+    abstract val transitionRepository: KeyguardTransitionRepository
+    abstract val transitionInteractor: KeyguardTransitionInteractor
     abstract fun start()
+
+    fun startTransitionTo(
+            toState: KeyguardState,
+            animator: ValueAnimator? = getDefaultAnimatorForTransitionsToState(toState),
+            resetIfCancelled: Boolean = false
+    ): UUID? {
+        if (
+            fromState != transitionInteractor.startedKeyguardState.value &&
+                fromState != transitionInteractor.finishedKeyguardState.value
+        ) {
+            Log.e(
+                name,
+                "startTransition: We were asked to transition from " +
+                    "$fromState to $toState, however we last finished a transition to " +
+                    "${transitionInteractor.finishedKeyguardState.value}, " +
+                    "and last started a transition to " +
+                    "${transitionInteractor.startedKeyguardState.value}. " +
+                    "Ignoring startTransition, but this should never happen."
+            )
+            return null
+        }
+
+        return transitionRepository.startTransition(
+            TransitionInfo(
+                name,
+                fromState,
+                toState,
+                animator,
+            ),
+            resetIfCancelled
+        )
+    }
+
+    /**
+     * Returns a ValueAnimator to be used for transitions to [toState], if one is not explicitly
+     * passed to [startTransitionTo].
+     */
+    abstract fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator?
 }

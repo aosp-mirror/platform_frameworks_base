@@ -22,12 +22,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -37,11 +35,14 @@ import kotlinx.coroutines.launch
 class FromOccludedTransitionInteractor
 @Inject
 constructor(
+    override val transitionRepository: KeyguardTransitionRepository,
+    override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(FromOccludedTransitionInteractor::class.simpleName!!) {
+) :
+    TransitionInteractor(
+        fromState = KeyguardState.OCCLUDED,
+    ) {
 
     override fun start() {
         listenForOccludedToLockscreen()
@@ -54,18 +55,11 @@ constructor(
     private fun listenForOccludedToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, ::Pair)
+                .sample(transitionInteractor.finishedKeyguardState, ::Pair)
                 .collect { pair ->
                     val (isAbleToDream, keyguardState) = pair
                     if (isAbleToDream && keyguardState == KeyguardState.OCCLUDED) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.OCCLUDED,
-                                KeyguardState.DREAMING,
-                                getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.DREAMING)
                     }
                 }
         }
@@ -77,7 +71,7 @@ constructor(
                 .sample(
                     combine(
                         keyguardInteractor.isKeyguardShowing,
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        transitionInteractor.startedKeyguardTransitionStep,
                         ::Pair
                     ),
                     ::toTriple
@@ -90,14 +84,7 @@ constructor(
                             isShowing &&
                             lastStartedKeyguardState.to == KeyguardState.OCCLUDED
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.OCCLUDED,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(TO_LOCKSCREEN_DURATION),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
                     }
                 }
         }
@@ -109,7 +96,7 @@ constructor(
                 .sample(
                     combine(
                         keyguardInteractor.isKeyguardShowing,
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        transitionInteractor.startedKeyguardTransitionStep,
                         ::Pair
                     ),
                     ::toTriple
@@ -122,14 +109,7 @@ constructor(
                             !isShowing &&
                             lastStartedKeyguardState.to == KeyguardState.OCCLUDED
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.OCCLUDED,
-                                KeyguardState.GONE,
-                                getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.GONE)
                     }
                 }
         }
@@ -140,7 +120,7 @@ constructor(
             keyguardInteractor.wakefulnessModel
                 .sample(
                     combine(
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        transitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Pair
                     ),
@@ -151,17 +131,8 @@ constructor(
                         lastStartedStep.to == KeyguardState.OCCLUDED &&
                             wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.OCCLUDED,
-                                if (isAodAvailable) {
-                                    KeyguardState.AOD
-                                } else {
-                                    KeyguardState.DOZING
-                                },
-                                getAnimator(),
-                            )
+                        startTransitionTo(
+                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
                         )
                     }
                 }
@@ -171,29 +142,26 @@ constructor(
     private fun listenForOccludedToAlternateBouncer() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (isAlternateBouncerShowing, lastStartedTransitionStep) ->
                     if (
                         isAlternateBouncerShowing &&
                             lastStartedTransitionStep.to == KeyguardState.OCCLUDED
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                ownerName = name,
-                                from = KeyguardState.OCCLUDED,
-                                to = KeyguardState.ALTERNATE_BOUNCER,
-                                animator = getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
                     }
                 }
         }
     }
 
-    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
+    override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
-            setInterpolator(Interpolators.LINEAR)
-            setDuration(duration.inWholeMilliseconds)
+            interpolator = Interpolators.LINEAR
+            duration =
+                when (toState) {
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
