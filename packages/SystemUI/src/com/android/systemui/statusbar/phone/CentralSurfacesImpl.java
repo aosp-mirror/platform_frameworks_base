@@ -2180,9 +2180,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     @Override
     public void setLockscreenUser(int newUserId) {
-        if (mLockscreenWallpaper != null && !mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
-            mLockscreenWallpaper.setCurrentUser(newUserId);
-        }
         if (mWallpaperSupported) {
             mWallpaperChangedReceiver.onReceive(mContext, null);
         }

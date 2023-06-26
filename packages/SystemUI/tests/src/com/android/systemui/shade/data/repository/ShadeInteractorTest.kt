@@ -84,6 +84,7 @@ class ShadeInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
+        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
         val refreshUsersScheduler =
             RefreshUsersScheduler(
