@@ -16,8 +16,6 @@
 
 package com.android.server.locksettings;
 
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import android.app.ActivityManager;
@@ -313,16 +311,8 @@ class LockSettingsShellCommand extends ShellCommand {
                 mLockPatternUtils.getRequestedPasswordMetrics(mCurrentUserId);
         final int requiredComplexity =
                 mLockPatternUtils.getRequestedPasswordComplexity(mCurrentUserId);
-        final List<PasswordValidationError> errors;
-        if (credential.isPassword() || credential.isPin()) {
-            errors = PasswordMetrics.validatePassword(requiredMetrics, requiredComplexity,
-                    credential.isPin(), credential.getCredential());
-        } else {
-            PasswordMetrics metrics = new PasswordMetrics(
-                    credential.isPattern() ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_NONE);
-            errors = PasswordMetrics.validatePasswordMetrics(
-                    requiredMetrics, requiredComplexity, metrics);
-        }
+        final List<PasswordValidationError> errors =
+                PasswordMetrics.validateCredential(requiredMetrics, requiredComplexity, credential);
         if (!errors.isEmpty()) {
             getOutPrintWriter().println(
                     "New credential doesn't satisfy admin policies: " + errors.get(0));

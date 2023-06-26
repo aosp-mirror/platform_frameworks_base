@@ -77,6 +77,26 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         testSetCredentialFailsWithoutLockScreen(PRIMARY_USER_ID, newPassword("password"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTooShortPatternFails() throws RemoteException {
+        mService.setLockCredential(newPattern("123"), nonePassword(), PRIMARY_USER_ID);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTooShortPinFails() throws RemoteException {
+        mService.setLockCredential(newPin("123"), nonePassword(), PRIMARY_USER_ID);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetTooShortPassword() throws RemoteException {
+        mService.setLockCredential(newPassword("123"), nonePassword(), PRIMARY_USER_ID);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetPasswordWithInvalidChars() throws RemoteException {
+        mService.setLockCredential(newPassword("§µ¿¶¥£"), nonePassword(), PRIMARY_USER_ID);
+    }
+
     @Test
     public void testSetPatternPrimaryUser() throws RemoteException {
         setAndVerifyCredential(PRIMARY_USER_ID, newPattern("123456789"));
@@ -94,7 +114,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     @Test
     public void testChangePatternPrimaryUser() throws RemoteException {
-        testChangeCredential(PRIMARY_USER_ID, newPassword("!£$%^&*(())"), newPattern("1596321"));
+        testChangeCredential(PRIMARY_USER_ID, newPassword("password"), newPattern("1596321"));
     }
 
     @Test
@@ -185,7 +205,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertNotNull(mGateKeeperService.getAuthToken(MANAGED_PROFILE_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
 
-        setCredential(PRIMARY_USER_ID, newPassword("pwd"), primaryPassword);
+        setCredential(PRIMARY_USER_ID, newPassword("password"), primaryPassword);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 profilePassword, MANAGED_PROFILE_USER_ID, 0 /* flags */)
                 .getResponseCode());

@@ -215,12 +215,12 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     @Test
     public void testChangeCredentialKeepsAuthSecret() throws RemoteException {
         LockscreenCredential password = newPassword("password");
-        LockscreenCredential badPassword = newPassword("new");
+        LockscreenCredential newPassword = newPassword("newPassword");
 
         initSpAndSetCredential(PRIMARY_USER_ID, password);
-        mService.setLockCredential(badPassword, password, PRIMARY_USER_ID);
+        mService.setLockCredential(newPassword, password, PRIMARY_USER_ID);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                badPassword, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
+                newPassword, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
 
         // Check the same secret was passed each time
         ArgumentCaptor<byte[]> secret = ArgumentCaptor.forClass(byte[].class);
