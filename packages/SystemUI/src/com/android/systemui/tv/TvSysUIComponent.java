@@ -27,6 +27,7 @@ import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.NotificationRowModule;
+import com.android.systemui.wallpapers.dagger.NoopWallpaperModule;
 
 import dagger.Subcomponent;
 
@@ -39,6 +40,7 @@ import dagger.Subcomponent;
         DefaultComponentBinder.class,
         DependencyProvider.class,
         KeyguardModule.class,
+        NoopWallpaperModule.class,
         NotificationRowModule.class,
         NotificationsModule.class,
         RecentsModule.class,
