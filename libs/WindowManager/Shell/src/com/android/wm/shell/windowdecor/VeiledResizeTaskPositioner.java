@@ -53,33 +53,35 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
     private final Rect mTaskBoundsAtDragStart = new Rect();
     private final PointF mRepositionStartPoint = new PointF();
     private final Rect mRepositionTaskBounds = new Rect();
-    // If a task move (not resize) finishes in this region, the positioner will not attempt to
+    // If a task move (not resize) finishes with the positions y less than this value, do not
     // finalize the bounds there using WCT#setBounds
-    private final Rect mDisallowedAreaForEndBounds;
+    private final int mDisallowedAreaForEndBoundsHeight;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     private int mCtrlType;
 
     public VeiledResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
             DesktopModeWindowDecoration windowDecoration, DisplayController displayController,
-            Rect disallowedAreaForEndBounds,
             DragPositioningCallbackUtility.DragStartListener dragStartListener,
-            Transitions transitions) {
-        this(taskOrganizer, windowDecoration, displayController, disallowedAreaForEndBounds,
-                dragStartListener, SurfaceControl.Transaction::new, transitions);
+            Transitions transitions,
+            int disallowedAreaForEndBoundsHeight) {
+        this(taskOrganizer, windowDecoration, displayController, dragStartListener,
+                SurfaceControl.Transaction::new, transitions, disallowedAreaForEndBoundsHeight);
     }
 
     public VeiledResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
             DesktopModeWindowDecoration windowDecoration, DisplayController displayController,
-            Rect disallowedAreaForEndBounds,
             DragPositioningCallbackUtility.DragStartListener dragStartListener,
-            Supplier<SurfaceControl.Transaction> supplier, Transitions transitions) {
+            Supplier<SurfaceControl.Transaction> supplier, Transitions transitions,
+            int disallowedAreaForEndBoundsHeight) {
         mTaskOrganizer = taskOrganizer;
         mDesktopWindowDecoration = windowDecoration;
         mDisplayController = displayController;
         mDragStartListener = dragStartListener;
-        mDisallowedAreaForEndBounds = new Rect(disallowedAreaForEndBounds);
         mTransactionSupplier = supplier;
         mTransitions = transitions;
+        mDisallowedAreaForEndBoundsHeight = disallowedAreaForEndBoundsHeight;
+        mDisplayController.getDisplayLayout(windowDecoration.mDisplay.getDisplayId())
+                .getStableBounds(mStableBounds);
     }
 
     @Override
@@ -110,8 +112,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             DragPositioningCallbackUtility.setPositionOnDrag(mDesktopWindowDecoration,
-                    mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t,
-                    x, y);
+                    mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);
             t.apply();
         }
     }
@@ -138,9 +139,9 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 // won't be called.
                 mDesktopWindowDecoration.hideResizeVeil();
             }
-        } else if (!mDisallowedAreaForEndBounds.contains((int) x, (int) y)) {
-            DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
-                    mTaskBoundsAtDragStart, mRepositionStartPoint, x, y);
+        } else if (y > mDisallowedAreaForEndBoundsHeight) {
+            DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
+                    mTaskBoundsAtDragStart, mStableBounds, mRepositionStartPoint, x, y);
             DragPositioningCallbackUtility.applyTaskBoundsChange(new WindowContainerTransaction(),
                     mDesktopWindowDecoration, mRepositionTaskBounds, mTaskOrganizer);
         }
