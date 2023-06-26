@@ -23,10 +23,14 @@ import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,16 +57,26 @@ class BouncerViewModelTest : SysuiTestCase() {
     @Test
     fun authMethod_nonNullForSecureMethods_nullForNotSecureMethods() =
         testScope.runTest {
+            var authMethodViewModel: AuthMethodBouncerViewModel? = null
+
             authMethodsToTest().forEach { authMethod ->
                 utils.authenticationRepository.setAuthenticationMethod(authMethod)
+                val job = underTest.authMethod.onEach { authMethodViewModel = it }.launchIn(this)
+                runCurrent()
 
-                val authMethodViewModel: AuthMethodBouncerViewModel? by
-                    collectLastValue(underTest.authMethod)
                 if (authMethod.isSecure) {
-                    assertThat(authMethodViewModel).isNotNull()
+                    assertWithMessage("View-model unexpectedly null for auth method $authMethod")
+                        .that(authMethodViewModel)
+                        .isNotNull()
                 } else {
-                    assertThat(authMethodViewModel).isNull()
+                    assertWithMessage(
+                            "View-model unexpectedly non-null for auth method $authMethod"
+                        )
+                        .that(authMethodViewModel)
+                        .isNull()
                 }
+
+                job.cancel()
             }
         }
 

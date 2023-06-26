@@ -42,10 +42,7 @@ class PinBouncerViewModel(
 
     /** The length of the hinted PIN, or `null` if pin length hint should not be shown. */
     val hintedPinLength: StateFlow<Int?> =
-        flow {
-                emit(null)
-                emit(interactor.getAuthenticationMethod())
-            }
+        flow { emit(interactor.getAuthenticationMethod()) }
             .map { authMethod ->
                 // Hinting is enabled for 6-digit codes only
                 autoConfirmPinLength(authMethod).takeIf { it == HINTING_PASSCODE_LENGTH }

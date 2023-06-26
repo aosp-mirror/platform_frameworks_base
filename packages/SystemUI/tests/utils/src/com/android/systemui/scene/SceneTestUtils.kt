@@ -26,6 +26,7 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -55,10 +56,12 @@ class SceneTestUtils(
         FakeAuthenticationRepository(
             delegate =
                 AuthenticationRepositoryImpl(
+                    applicationScope = applicationScope(),
                     getSecurityMode = { securityMode },
                     backgroundDispatcher = testDispatcher,
                     userRepository = FakeUserRepository(),
                     lockPatternUtils = mock(),
+                    keyguardRepository = FakeKeyguardRepository(),
                 ),
             onSecurityModeChanged = { securityMode = it },
         )

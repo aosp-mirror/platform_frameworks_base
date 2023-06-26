@@ -18,11 +18,17 @@ package com.android.systemui.authentication.data.repository
 
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class FakeAuthenticationRepository(
     private val delegate: AuthenticationRepository,
     private val onSecurityModeChanged: (SecurityMode) -> Unit,
 ) : AuthenticationRepository by delegate {
+
+    private val _isUnlocked = MutableStateFlow(false)
+    override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
     private var authenticationMethod: AuthenticationMethodModel = DEFAULT_AUTHENTICATION_METHOD
 
@@ -33,6 +39,10 @@ class FakeAuthenticationRepository(
     fun setAuthenticationMethod(authenticationMethod: AuthenticationMethodModel) {
         this.authenticationMethod = authenticationMethod
         onSecurityModeChanged(authenticationMethod.toSecurityMode())
+    }
+
+    fun setUnlocked(isUnlocked: Boolean) {
+        _isUnlocked.value = isUnlocked
     }
 
     companion object {

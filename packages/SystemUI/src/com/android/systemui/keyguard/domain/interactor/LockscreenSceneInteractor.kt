@@ -23,7 +23,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -110,24 +109,6 @@ constructor(
                         )
                     }
                 }
-        }
-
-        // SWIPE TO DISMISS Lockscreen.
-        //
-        // If switched from the lockscreen to the gone scene and the auth method was a swipe,
-        // unlocks the device.
-        applicationScope.launch {
-            sceneInteractor.currentScene(containerName).pairwise().collect {
-                (previousScene, currentScene) ->
-                if (
-                    authenticationInteractor.getAuthenticationMethod() is
-                        AuthenticationMethodModel.Swipe &&
-                        previousScene.key == SceneKey.Lockscreen &&
-                        currentScene.key == SceneKey.Gone
-                ) {
-                    authenticationInteractor.unlockDevice()
-                }
-            }
         }
     }
 
