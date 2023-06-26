@@ -158,6 +158,16 @@ public class LockscreenCredentialTest {
     }
 
     @Test
+    public void testPinWithInvalidChars() {
+        LockscreenCredential pin = LockscreenCredential.createPin("\n\n\n\n");
+        assertTrue(pin.hasInvalidChars());
+        try {
+            pin.validateBasicRequirements();
+            fail("should not be able to set PIN with invalid chars");
+        } catch (IllegalArgumentException expected) { }
+    }
+
+    @Test
     public void testSanitize() {
         LockscreenCredential password = LockscreenCredential.createPassword("password");
         password.zeroize();
