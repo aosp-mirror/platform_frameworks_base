@@ -48,6 +48,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.PrivacyType;
@@ -74,6 +75,7 @@ import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.DateFormatUtil;
 
 import java.io.PrintWriter;
@@ -121,9 +123,12 @@ public class PhoneStatusBarPolicy
     private final String mSlotCamera;
     private final String mSlotSensorsOff;
     private final String mSlotScreenRecord;
+    private final String mSlotConnectedDisplay;
     private final int mDisplayId;
     private final SharedPreferences mSharedPreferences;
     private final DateFormatUtil mDateFormatUtil;
+    private final JavaAdapter mJavaAdapter;
+    private final ConnectedDisplayInteractor mConnectedDisplayInteractor;
     private final TelecomManager mTelecomManager;
 
     private final Handler mHandler;
@@ -182,9 +187,13 @@ public class PhoneStatusBarPolicy
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
             PrivacyItemController privacyItemController,
-            PrivacyLogger privacyLogger) {
+            PrivacyLogger privacyLogger,
+            ConnectedDisplayInteractor connectedDisplayInteractor,
+            JavaAdapter javaAdapter
+    ) {
         mIconController = iconController;
         mCommandQueue = commandQueue;
+        mConnectedDisplayInteractor = connectedDisplayInteractor;
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
         mResources = resources;
@@ -211,8 +220,11 @@ public class PhoneStatusBarPolicy
         mTelecomManager = telecomManager;
         mRingerModeTracker = ringerModeTracker;
         mPrivacyLogger = privacyLogger;
+        mJavaAdapter = javaAdapter;
 
         mSlotCast = resources.getString(com.android.internal.R.string.status_bar_cast);
+        mSlotConnectedDisplay = resources.getString(
+                com.android.internal.R.string.status_bar_connected_display);
         mSlotHotspot = resources.getString(com.android.internal.R.string.status_bar_hotspot);
         mSlotBluetooth = resources.getString(com.android.internal.R.string.status_bar_bluetooth);
         mSlotTty = resources.getString(com.android.internal.R.string.status_bar_tty);
@@ -285,6 +297,10 @@ public class PhoneStatusBarPolicy
         mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast, null);
         mIconController.setIconVisibility(mSlotCast, false);
 
+        // connected display
+        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display, null);
+        mIconController.setIconVisibility(mSlotConnectedDisplay, false);
+
         // hotspot
         mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
                 mResources.getString(R.string.accessibility_status_bar_hotspot));
@@ -342,6 +358,8 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
+        mJavaAdapter.alwaysCollectFlow(mConnectedDisplayInteractor.getConnectedDisplayState(),
+                this::onConnectedDisplayAvailabilityChanged);
 
         mCommandQueue.addCallback(this);
     }
@@ -799,5 +817,15 @@ public class PhoneStatusBarPolicy
         // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
+    }
+
+    private void onConnectedDisplayAvailabilityChanged(ConnectedDisplayInteractor.State state) {
+        boolean visible = state != ConnectedDisplayInteractor.State.DISCONNECTED;
+
+        if (DEBUG) {
+            Log.d(TAG, "connected_display: " + (visible ? "showing" : "hiding") + " icon");
+        }
+
+        mIconController.setIconVisibility(mSlotConnectedDisplay, visible);
     }
 }
