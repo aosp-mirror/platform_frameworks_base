@@ -23,7 +23,6 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.ValueAnimator;
-import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -983,9 +982,9 @@ public class RippleDrawable extends LayerDrawable {
         RippleShader shader = new RippleShader();
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
-        final int color = clampAlpha(mMaskColorFilter == null
+        final int color = mMaskColorFilter == null
                 ? mState.mColor.getColorForState(getState(), Color.BLACK)
-                : mMaskColorFilter.getColor());
+                : mMaskColorFilter.getColor();
         final int effectColor = mState.mEffectColor.getColorForState(getState(), Color.MAGENTA);
         final float noisePhase = AnimationUtils.currentAnimationTimeMillis();
         shader.setColor(color, effectColor);
@@ -1006,13 +1005,6 @@ public class RippleDrawable extends LayerDrawable {
         p.setColorFilter(null);
         p.setColor(color);
         return properties;
-    }
-
-    private int clampAlpha(@ColorInt int color) {
-        if (Color.alpha(color) < 128) {
-            return  (color & 0x00FFFFFF) | 0x80000000;
-        }
-        return color;
     }
 
     @Override
@@ -1229,7 +1221,7 @@ public class RippleDrawable extends LayerDrawable {
 
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
-        final int color = clampAlpha(mState.mColor.getColorForState(getState(), Color.BLACK));
+        final int color = mState.mColor.getColorForState(getState(), Color.BLACK);
         final Paint p = mRipplePaint;
 
         if (mMaskColorFilter != null) {

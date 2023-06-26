@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import androidx.test.filters.SmallTest;
@@ -47,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class TouchInsetManagerTest extends SysuiTestCase {
     @Mock
-    private View mRootView;
+    private ViewGroup mRootView;
 
     @Mock
     private ViewRootImpl mRootViewImpl;
@@ -193,6 +194,7 @@ public class TouchInsetManagerTest extends SysuiTestCase {
     private View createView(Rect bounds) {
         final Rect rect = new Rect(bounds);
         final View view = Mockito.mock(View.class);
+        when(view.getRootView()).thenReturn(mRootView);
         doAnswer(invocation -> {
             ((Rect) invocation.getArgument(0)).set(rect);
             return null;

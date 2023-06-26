@@ -658,6 +658,9 @@ public abstract class AuthBiometricView extends LinearLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mIconController.onConfigurationChanged(newConfig);
+        if (mSavedState != null) {
+            updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
+        }
     }
 
     @Override

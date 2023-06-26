@@ -339,6 +339,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ਡੀਵਾਈਸਾਂ ਦੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ \'ਤੇ ਕੀਤੇ ਗਏ ਸੰਕੇਤਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਓ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ਡਿਸਪਲੇ ਦਾ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈ ਸਕਦੀ ਹੈ।"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"ਪੂਰਵ-ਝਲਕ ਦੇਖੋ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ਸਥਿਤੀ ਪੱਟੀ ਬੰਦ ਕਰੋ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਨੂੰ ਚਾਲੂ ਕਰਨ ਜਾਂ ਸਿਸਟਮ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਜੋੜਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ਸਥਿਤੀ ਪੱਟੀ ਬਣਨ ਦਿਓ"</string>
@@ -1839,6 +1840,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦੇਖੋ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ਬਾਹਰ ਜਾਣ ਲਈ, ਉਪਰੋਂ ਹੇਠਾਂ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ਸਮਝ ਲਿਆ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਘੁਮਾਓ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਤੋਂ ਬਾਹਰ ਆਓ"</string>
     <string name="done_label" msgid="7283767013231718521">"ਹੋ ਗਿਆ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ਘੰਟੇ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ਮਿੰਟ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>

@@ -19,6 +19,7 @@ package com.android.systemui.settings
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 
 /**
@@ -62,12 +63,35 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
     fun removeCallback(callback: Callback)
 
     /**
-     * Ćallback for notifying of changes.
+     * Callback for notifying of changes.
      */
     interface Callback {
 
         /**
+         * Same as {@link onUserChanging(Int, Context, CountDownLatch)} but the latch will be
+         * auto-decremented after the completion of this method.
+         */
+        @JvmDefault
+        fun onUserChanging(newUser: Int, userContext: Context) {}
+
+        /**
+         * Notifies that the current user is being changed.
+         * Override this method to run things while the screen is frozen for the user switch.
+         * Please use {@link #onUserChanged} if the task doesn't need to push the unfreezing of the
+         * screen further. Please be aware that code executed in this callback will lengthen the
+         * user switch duration. When overriding this method, countDown() MUST be called on the
+         * latch once execution is complete.
+         */
+        @JvmDefault
+        fun onUserChanging(newUser: Int, userContext: Context, latch: CountDownLatch) {
+            onUserChanging(newUser, userContext)
+            latch.countDown()
+        }
+
+        /**
          * Notifies that the current user has changed.
+         * Override this method to run things after the screen is unfrozen for the user switch.
+         * Please see {@link #onUserChanging} if you need to hide jank.
          */
         @JvmDefault
         fun onUserChanged(newUser: Int, userContext: Context) {}

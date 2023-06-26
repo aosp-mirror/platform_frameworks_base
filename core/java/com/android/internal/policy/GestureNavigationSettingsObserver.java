@@ -56,6 +56,9 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         }
     };
 
+    /**
+     * Registers the observer for all users.
+     */
     public void register() {
         ContentResolver r = mContext.getContentResolver();
         r.registerContentObserver(
@@ -67,6 +70,26 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         r.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
                 false, this, UserHandle.USER_ALL);
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                runnable -> mMainHandler.post(runnable),
+                mOnPropertiesChangedListener);
+    }
+
+    /**
+     * Registers the observer for the calling user.
+     */
+    public void registerForCallingUser() {
+        ContentResolver r = mContext.getContentResolver();
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT),
+                false, this);
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT),
+                false, this);
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
+                false, this);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 runnable -> mMainHandler.post(runnable),
@@ -86,12 +109,46 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         }
     }
 
+    /**
+     * Returns the left sensitivity for the current user.  To be used in code that runs primarily
+     * in one user's process.
+     */
     public int getLeftSensitivity(Resources userRes) {
-        return getSensitivity(userRes, Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT);
+        final float scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT, 1.0f, UserHandle.USER_CURRENT);
+        return (int) (getUnscaledInset(userRes) * scale);
     }
 
+    /**
+     * Returns the left sensitivity for the calling user.  To be used in code that runs in a
+     * per-user process.
+     */
+    @SuppressWarnings("NonUserGetterCalled")
+    public int getLeftSensitivityForCallingUser(Resources userRes) {
+        final float scale = Settings.Secure.getFloat(mContext.getContentResolver(),
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT, 1.0f);
+        return (int) (getUnscaledInset(userRes) * scale);
+    }
+
+    /**
+     * Returns the right sensitivity for the current user.  To be used in code that runs primarily
+     * in one user's process.
+     */
     public int getRightSensitivity(Resources userRes) {
-        return getSensitivity(userRes, Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT);
+        final float scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT, 1.0f, UserHandle.USER_CURRENT);
+        return (int) (getUnscaledInset(userRes) * scale);
+    }
+
+    /**
+     * Returns the right sensitivity for the calling user.  To be used in code that runs in a
+     * per-user process.
+     */
+    @SuppressWarnings("NonUserGetterCalled")
+    public int getRightSensitivityForCallingUser(Resources userRes) {
+        final float scale = Settings.Secure.getFloat(mContext.getContentResolver(),
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT, 1.0f);
+        return (int) (getUnscaledInset(userRes) * scale);
     }
 
     public boolean areNavigationButtonForcedVisible() {
@@ -99,7 +156,7 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) == 0;
     }
 
-    private int getSensitivity(Resources userRes, String side) {
+    private float getUnscaledInset(Resources userRes) {
         final DisplayMetrics dm = userRes.getDisplayMetrics();
         final float defaultInset = userRes.getDimension(
                 com.android.internal.R.dimen.config_backGestureInset) / dm.density;
@@ -110,8 +167,6 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
                 : defaultInset;
         final float inset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, backGestureInset,
                 dm);
-        final float scale = Settings.Secure.getFloatForUser(
-                mContext.getContentResolver(), side, 1.0f, UserHandle.USER_CURRENT);
-        return (int) (inset * scale);
+        return inset;
     }
 }

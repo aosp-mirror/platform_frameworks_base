@@ -16,6 +16,7 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
@@ -66,14 +67,16 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
@@ -90,7 +93,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         Dumpable {
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
-    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
+    private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final LightBarTransitionsController.Factory mLightBarTransitionsControllerFactory;
     private boolean mInitialized;
     private CommandQueue mCommandQueue;
@@ -101,6 +104,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private AutoHideController mAutoHideController;
     private LightBarController mLightBarController;
     private LightBarTransitionsController mLightBarTransitionsController;
+    private TaskStackChangeListeners mTaskStackChangeListeners;
     private Optional<Pip> mPipOptional;
     private int mDisplayId;
     private int mNavigationIconHints;
@@ -127,6 +131,14 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final DisplayManager mDisplayManager;
     private Context mWindowContext;
     private ScreenPinningNotify mScreenPinningNotify;
+    private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+        @Override
+        public void onLockTaskModeChanged(int mode) {
+            mSysUiState.setFlag(SYSUI_STATE_SCREEN_PINNING, mode == LOCK_TASK_MODE_PINNED)
+                    .commitUpdate(mDisplayId);
+        }
+    };
+
     private int mNavigationMode = -1;
     private final Consumer<Rect> mPipListener;
 
@@ -156,16 +168,20 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private BackAnimation mBackAnimation;
 
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Inject
     public TaskbarDelegate(Context context,
-            EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
-            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
-        mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
 
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
-        mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
+        mPipListener = (bounds) -> {
+            mEdgeBackGestureHandler.setPipStashExclusionBounds(bounds);
+        };
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mStatusBarKeyguardViewManager.setTaskbarDelegate(this);
     }
 
     public void setDependencies(CommandQueue commandQueue,
@@ -176,7 +192,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             AutoHideController autoHideController,
             LightBarController lightBarController,
             Optional<Pip> pipOptional,
-            BackAnimation backAnimation) {
+            BackAnimation backAnimation,
+            TaskStackChangeListeners taskStackChangeListeners) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -189,6 +206,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mPipOptional = pipOptional;
         mBackAnimation = backAnimation;
         mLightBarTransitionsController = createLightBarTransitionsController();
+        mTaskStackChangeListeners = taskStackChangeListeners;
+        mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
@@ -221,8 +240,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mOverviewProxyService.addCallback(this);
         onNavigationModeChanged(mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.init();
-        mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
         mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
@@ -234,6 +251,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
         mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
         mEdgeBackGestureHandler.onConfigurationChanged(mContext.getResources().getConfiguration());
+        mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
         mInitialized = true;
     }
 
@@ -245,14 +263,13 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mOverviewProxyService.removeCallback(this);
         mNavigationModeController.removeListener(this);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.destroy();
-        mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
         mWindowContext = null;
         mAutoHideController.setNavigationBar(null);
         mLightBarTransitionsController.destroy();
         mLightBarController.setNavigationBar(null);
         mPipOptional.ifPresent(this::removePipExclusionBoundsChangeListener);
+        mTaskStackChangeListeners.unregisterTaskStackListener(mTaskStackListener);
         mInitialized = false;
     }
 
@@ -300,8 +317,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isWindowVisible())
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
-                .setFlag(SYSUI_STATE_SCREEN_PINNING,
-                        ActivityManagerWrapper.getInstance().isScreenPinningActive())
                 .setFlag(SYSUI_STATE_IMMERSIVE_MODE, isImmersiveMode())
                 .commitUpdate(mDisplayId);
     }

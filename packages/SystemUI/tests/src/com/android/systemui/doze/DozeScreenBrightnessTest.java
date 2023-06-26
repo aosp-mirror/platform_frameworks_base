@@ -34,6 +34,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
@@ -57,6 +58,7 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeSensorManager;
+import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -94,6 +96,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     DevicePostureController mDevicePostureController;
     @Mock
     DozeLog mDozeLog;
+    @Mock
+    SystemSettings mSystemSettings;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeThreadFactory mFakeThreadFactory = new FakeThreadFactory(mFakeExecutor);
 
@@ -102,9 +106,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        Settings.System.putIntForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS, DEFAULT_BRIGHTNESS,
-                UserHandle.USER_CURRENT);
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(DEFAULT_BRIGHTNESS);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -131,7 +134,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mSystemSettings);
     }
 
     @Test
@@ -157,11 +161,10 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAod_usesLightSensorRespectingUserSetting() throws Exception {
+    public void testAod_usesLightSensorRespectingUserSetting() {
         int maxBrightness = 3;
-        Settings.System.putIntForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS, maxBrightness,
-                UserHandle.USER_CURRENT);
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(maxBrightness);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         assertEquals(maxBrightness, mServiceFake.screenBrightness);
@@ -238,7 +241,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mSystemSettings);
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
         reset(mDozeHost);
@@ -275,7 +279,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mSystemSettings);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
@@ -306,7 +311,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mSystemSettings);
 
         // GIVEN the device is in AOD
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
@@ -344,7 +350,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mSystemSettings);
 
         // GIVEN device is in AOD
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
@@ -386,7 +393,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mSystemSettings);
         verify(mDevicePostureController).addCallback(postureCallbackCaptor.capture());
 
         // GIVEN device is in AOD

@@ -42,4 +42,26 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
      * [android.app.StatusBarManager.registerNearbyMediaDevicesProvider] for more information.
      */
     fun areNearbyMediaDevicesEnabled() = featureFlags.isEnabled(Flags.MEDIA_NEARBY_DEVICES)
+
+    /** Check whether we show explicit indicator on UMO */
+    fun isExplicitIndicatorEnabled() = featureFlags.isEnabled(Flags.MEDIA_EXPLICIT_INDICATOR)
+
+    /**
+     * If true, keep active media controls for the lifetime of the MediaSession, regardless of
+     * whether the underlying notification was dismissed
+     */
+    fun isRetainingPlayersEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_SESSIONS)
+
+    /** Check whether we show the updated recommendation card. */
+    fun isRecommendationCardUpdateEnabled() =
+        featureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)
+
+    /** Check whether to get progress information for resume players */
+    fun isResumeProgressEnabled() = featureFlags.isEnabled(Flags.MEDIA_RESUME_PROGRESS)
+
+    /** If true, do not automatically dismiss the recommendation card */
+    fun isPersistentSsCardEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_RECOMMENDATIONS)
+
+    /** Check whether we allow remote media to generate resume controls */
+    fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
 }

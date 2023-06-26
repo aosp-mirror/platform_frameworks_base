@@ -24,7 +24,7 @@ interface LaunchableView {
      * Set whether this view should block/postpone all calls to [View.setVisibility]. This ensures
      * that this view:
      * - remains invisible during the launch animation given that it is ghosted and already drawn
-     * somewhere else.
+     *   somewhere else.
      * - remains invisible as long as a dialog expanded from it is shown.
      * - restores its expected visibility once the dialog expanded from it is dismissed.
      *
@@ -35,8 +35,7 @@ interface LaunchableView {
      *
      * Note that calls to [View.setTransitionVisibility] shouldn't be blocked.
      *
-     * @param block whether we should block/postpone all calls to `setVisibility` and
-     * `setTransitionVisibility`.
+     * @param block whether we should block/postpone all calls to `setVisibility`.
      */
     fun setShouldBlockVisibilityChanges(block: Boolean)
 }

@@ -96,7 +96,11 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             Slog.d(TAG, "Remove onClientFinished: " + clientMonitor + ", success: " + success);
-            mCallback.onClientFinished(InternalCleanupClient.this, success);
+            if (mUnknownHALTemplates.isEmpty()) {
+                mCallback.onClientFinished(InternalCleanupClient.this, success);
+            } else {
+                startCleanupUnknownHalTemplates();
+            }
         }
     };
 

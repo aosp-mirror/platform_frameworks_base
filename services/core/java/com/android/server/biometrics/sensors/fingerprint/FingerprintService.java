@@ -343,7 +343,8 @@ public class FingerprintService extends SystemService {
             final FingerprintSensorPropertiesInternal sensorProps =
                     provider.second.getSensorProperties(sensorId);
             if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
-                    && sensorProps != null && sensorProps.isAnyUdfpsType()) {
+                    && sensorProps != null && (sensorProps.isAnyUdfpsType()
+                    || sensorProps.isAnySidefpsType())) {
                 try {
                     return authenticateWithPrompt(operationId, sensorProps, callingUid,
                             callingUserId, receiver, opPackageName, ignoreEnrollmentState);
@@ -449,13 +450,6 @@ public class FingerprintService extends SystemService {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "detectFingerprint called from non-sysui package: " + opPackageName);
-                return -1;
-            }
-
-            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
-                // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
-                // ever be invoked when the user is encrypted or lockdown.
-                Slog.e(TAG, "detectFingerprint invoked when user is not encrypted or lockdown");
                 return -1;
             }
 

@@ -26,6 +26,7 @@ import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -34,6 +35,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.LatencyTracker;
 
 import java.io.PrintWriter;
@@ -358,14 +360,19 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
              * Starts the latency tracking log for keyphrase hotword invocation.
              * The measurement covers from when the SoundTrigger HAL emits an event to when the
              * {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
+             *
+             * <p>The session is only started if the {@link PhraseRecognitionEvent} has a status of
+             * {@link RecognitionStatus#SUCCESS}
              */
             private void startKeyphraseEventLatencyTracking(PhraseRecognitionEvent event) {
-                String latencyTrackerTag = null;
-                if (event.phraseExtras.length > 0) {
-                    latencyTrackerTag = "KeyphraseId=" + event.phraseExtras[0].id;
+                if (event.common.status != RecognitionStatus.SUCCESS
+                        || ArrayUtils.isEmpty(event.phraseExtras)) {
+                    return;
                 }
+
                 LatencyTracker latencyTracker = LatencyTracker.getInstance(mContext);
-                // To avoid adding cancel to all of the different failure modes between here and
+                String latencyTrackerTag = "KeyphraseId=" + event.phraseExtras[0].id;
+                // To avoid adding cancel to all the different failure modes between here and
                 // showing the system UI, we defensively cancel once.
                 // Either we hit the LatencyTracker timeout of 15 seconds or we defensively cancel
                 // here if any error occurs.

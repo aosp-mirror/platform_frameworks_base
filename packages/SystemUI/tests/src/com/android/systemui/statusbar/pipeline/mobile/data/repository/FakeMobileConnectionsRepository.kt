@@ -26,6 +26,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionsRepository
@@ -54,20 +55,26 @@ class FakeMobileConnectionsRepository(
     private val _subscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
     override val subscriptions = _subscriptions
 
-    private val _activeMobileDataSubscriptionId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    private val _activeMobileDataSubscriptionId = MutableStateFlow<Int?>(null)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
+
+    private val _activeMobileRepository = MutableStateFlow<MobileConnectionRepository?>(null)
+    override val activeMobileDataRepository = _activeMobileRepository
+
+    override val activeSubChangedInGroupEvent: MutableSharedFlow<Unit> = MutableSharedFlow()
+
+    private val _defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    override val defaultDataSubId = _defaultDataSubId
 
     private val _mobileConnectivity = MutableStateFlow(MobileConnectivityModel())
     override val defaultMobileNetworkConnectivity = _mobileConnectivity
 
     private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()
+
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         return subIdRepos[subId]
             ?: FakeMobileConnectionRepository(subId, tableLogBuffer).also { subIdRepos[subId] = it }
     }
-
-    private val _globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
-    override val globalMobileDataSettingChangedEvent = _globalMobileDataSettingChangedEvent
 
     override val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config())
 
@@ -81,16 +88,23 @@ class FakeMobileConnectionsRepository(
         _subscriptions.value = subs
     }
 
+    fun setDefaultDataSubId(id: Int) {
+        _defaultDataSubId.value = id
+    }
+
     fun setMobileConnectivity(model: MobileConnectivityModel) {
         _mobileConnectivity.value = model
     }
 
-    suspend fun triggerGlobalMobileDataSettingChangedEvent() {
-        _globalMobileDataSettingChangedEvent.emit(Unit)
-    }
-
     fun setActiveMobileDataSubscriptionId(subId: Int) {
-        _activeMobileDataSubscriptionId.value = subId
+        // Simulate the filtering that the repo does
+        if (subId == INVALID_SUBSCRIPTION_ID) {
+            _activeMobileDataSubscriptionId.value = null
+            _activeMobileRepository.value = null
+        } else {
+            _activeMobileDataSubscriptionId.value = subId
+            _activeMobileRepository.value = getRepoForSubId(subId)
+        }
     }
 
     fun setMobileConnectionRepositoryMap(connections: Map<Int, MobileConnectionRepository>) {

@@ -19,7 +19,6 @@ package com.android.systemui.motiontool
 import android.view.WindowManagerGlobal
 import com.android.app.motiontool.DdmHandleMotionTool
 import com.android.app.motiontool.MotionToolManager
-import com.android.app.viewcapture.ViewCapture
 import com.android.systemui.CoreStartable
 import dagger.Binds
 import dagger.Module
@@ -38,17 +37,12 @@ interface MotionToolModule {
         }
 
         @Provides
-        fun provideMotionToolManager(
-            viewCapture: ViewCapture,
-            windowManagerGlobal: WindowManagerGlobal
-        ): MotionToolManager {
-            return MotionToolManager.getInstance(viewCapture, windowManagerGlobal)
+        fun provideMotionToolManager(windowManagerGlobal: WindowManagerGlobal): MotionToolManager {
+            return MotionToolManager.getInstance(windowManagerGlobal)
         }
 
         @Provides
         fun provideWindowManagerGlobal(): WindowManagerGlobal = WindowManagerGlobal.getInstance()
-
-        @Provides fun provideViewCapture(): ViewCapture = ViewCapture.getInstance()
     }
 
     @Binds

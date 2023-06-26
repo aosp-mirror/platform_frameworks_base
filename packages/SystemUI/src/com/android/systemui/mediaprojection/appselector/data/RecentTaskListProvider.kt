@@ -70,6 +70,8 @@ constructor(
                 RECENT_IGNORE_UNAVAILABLE,
                 userTracker.userId,
                 backgroundExecutor
-            ) { tasks -> continuation.resume(tasks) }
+            ) { tasks ->
+                continuation.resume(tasks)
+            }
         }
 }

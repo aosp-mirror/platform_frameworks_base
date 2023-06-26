@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/work_profile_first_run"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:paddingStart="16dp"
+    android:paddingEnd="4dp"
+    android:paddingVertical="16dp"
+    android:visibility="gone">
+    <ImageView
+        android:id="@+id/screenshot_message_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="12dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_work_app_badge"/>
+
+    <TextView
+        android:id="@+id/screenshot_message_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="start|center_vertical"
+        android:textSize="18sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:lineHeight="24sp"
+        />
+
+    <FrameLayout
+        android:id="@+id/message_dismiss_button"
+        android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
+        android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
+        android:contentDescription="@string/screenshot_dismiss_work_profile">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/overlay_cancel"/>
+    </FrameLayout>
+</LinearLayout>

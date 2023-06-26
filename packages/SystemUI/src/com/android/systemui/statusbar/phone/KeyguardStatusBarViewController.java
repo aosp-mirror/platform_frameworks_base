@@ -21,9 +21,6 @@ import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -36,15 +33,19 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.animation.Animator;
+import androidx.core.animation.AnimatorListenerAdapter;
+import androidx.core.animation.ValueAnimator;
 
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.animation.InterpolatorsAndroidX;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -58,7 +59,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.fragment.StatusBarIconBlocklistKt;
-import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventAnimator;
+import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventDefaultAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -74,8 +75,11 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+import kotlin.Unit;
+
 /** View Controller for {@link com.android.systemui.statusbar.phone.KeyguardStatusBarView}. */
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
+    private static final String TAG = "KeyguardStatusBarViewController";
     private static final AnimationProperties KEYGUARD_HUN_PROPERTIES =
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
@@ -121,7 +125,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 public void onDensityOrFontScaleChanged() {
                     mView.loadDimens();
                     // The animator is dependent on resources for offsets
-                    mSystemEventAnimator = new StatusBarSystemEventAnimator(mView, getResources());
+                    mSystemEventAnimator =
+                            getSystemEventAnimator(mSystemEventAnimator.isAnimationRunning());
                 }
 
                 @Override
@@ -164,7 +169,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     private final ValueAnimator.AnimatorUpdateListener mAnimatorUpdateListener =
             animation -> {
-                mKeyguardStatusBarAnimateAlpha = (float) animation.getAnimatedValue();
+                mKeyguardStatusBarAnimateAlpha =
+                        (float) ((ValueAnimator) animation).getAnimatedValue();
                 updateViewState();
             };
 
@@ -245,7 +251,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private int mStatusBarState;
     private boolean mDozing;
     private boolean mShowingKeyguardHeadsUp;
-    private StatusBarSystemEventAnimator mSystemEventAnimator;
+    private StatusBarSystemEventDefaultAnimator mSystemEventAnimator;
+    private float mSystemEventAnimatorAlpha = 1;
 
     /**
      * The alpha value to be set on the View. If -1, this value is to be ignored.
@@ -321,7 +328,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
         mView.setKeyguardUserAvatarEnabled(
                 !mStatusBarUserChipViewModel.getChipEnabled());
-        mSystemEventAnimator = new StatusBarSystemEventAnimator(mView, r);
+        mSystemEventAnimator = getSystemEventAnimator(/* isAnimationRunning */ false);
 
         mDisableStateTracker = new DisableStateTracker(
                 /* mask1= */ DISABLE_SYSTEM_INFO,
@@ -355,7 +362,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mView.setOnApplyWindowInsetsListener(
                 (view, windowInsets) -> mView.updateWindowInsets(windowInsets, mInsetsProvider));
         mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.getUriFor(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON),
+                Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
                 false,
                 mVolumeSettingObserver,
                 UserHandle.USER_ALL);
@@ -422,7 +429,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar in. */
     public void animateKeyguardStatusBarIn() {
-        mLogger.d("animating status bar in");
+        mLogger.log(TAG, LogLevel.DEBUG, "animating status bar in");
         if (mDisableStateTracker.isDisabled()) {
             // If our view is disabled, don't allow us to animate in.
             return;
@@ -432,18 +439,18 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
         anim.addUpdateListener(mAnimatorUpdateListener);
         anim.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        anim.setInterpolator(InterpolatorsAndroidX.LINEAR_OUT_SLOW_IN);
         anim.start();
     }
 
     /** Animate the keyguard status bar out. */
     public void animateKeyguardStatusBarOut(long startDelay, long duration) {
-        mLogger.d("animating status bar out");
+        mLogger.log(TAG, LogLevel.DEBUG, "animating status bar out");
         ValueAnimator anim = ValueAnimator.ofFloat(mView.getAlpha(), 0f);
         anim.addUpdateListener(mAnimatorUpdateListener);
         anim.setStartDelay(startDelay);
         anim.setDuration(duration);
-        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        anim.setInterpolator(InterpolatorsAndroidX.LINEAR_OUT_SLOW_IN);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -477,6 +484,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                     * (1.0f - mKeyguardHeadsUpShowingAmount);
         }
 
+        if (mSystemEventAnimator.isAnimationRunning()) {
+            newAlpha = Math.min(newAlpha, mSystemEventAnimatorAlpha);
+        }
+
         boolean hideForBypass =
                 mFirstBypassAttempt && mKeyguardUpdateMonitor.shouldListenForFace()
                         || mDelayShowingKeyguardStatusBar;
@@ -485,7 +496,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                         && !mDozing
                         && !hideForBypass
                         && !mDisableStateTracker.isDisabled()
-                ? View.VISIBLE : View.INVISIBLE;
+                        ? View.VISIBLE : View.INVISIBLE;
 
         updateViewState(newAlpha, newVisibility);
     }
@@ -611,4 +622,15 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             updateBlockedIcons();
         }
     };
+
+    private StatusBarSystemEventDefaultAnimator getSystemEventAnimator(boolean isAnimationRunning) {
+        return new StatusBarSystemEventDefaultAnimator(getResources(), (alpha) -> {
+            mSystemEventAnimatorAlpha = alpha;
+            updateViewState();
+            return Unit.INSTANCE;
+        }, (translationX) -> {
+            mView.setTranslationX(translationX);
+            return Unit.INSTANCE;
+        }, isAnimationRunning);
+    }
 }

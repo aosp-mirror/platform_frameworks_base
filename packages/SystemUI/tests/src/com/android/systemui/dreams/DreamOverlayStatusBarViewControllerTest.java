@@ -31,6 +31,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -47,6 +48,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -109,6 +111,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     View mStatusBarItemView;
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
+    @Mock
+    UserTracker mUserTracker;
 
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mCallbackCaptor;
@@ -125,6 +129,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 .thenReturn(NOTIFICATION_INDICATOR_FORMATTER_STRING);
         doCallRealMethod().when(mView).setVisibility(anyInt());
         doCallRealMethod().when(mView).getVisibility();
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mController = new DreamOverlayStatusBarViewController(
                 mView,
@@ -140,7 +145,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
-                mDreamOverlayStateController);
+                mDreamOverlayStateController,
+                mUserTracker);
     }
 
     @Test
@@ -282,7 +288,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
-                mDreamOverlayStateController);
+                mDreamOverlayStateController,
+                mUserTracker);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());

@@ -284,4 +284,26 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         // THEN the lock icon is shown
         verify(mLockIconView).setContentDescription(LOCKED_LABEL);
     }
+
+    @Test
+    public void lockIconShows_afterUnlockStateChanges() {
+        // GIVEN lock icon controller is initialized and view is attached
+        init(/* useMigrationFlag= */false);
+        captureKeyguardStateCallback();
+        captureKeyguardUpdateMonitorCallback();
+
+        // GIVEN user has unlocked with a biometric auth (ie: face auth)
+        // and biometric running state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
+                BiometricSourceType.FACE);
+        reset(mLockIconView);
+
+        // WHEN the unlocked state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(false);
+        mKeyguardStateCallback.onUnlockedChanged();
+
+        // THEN the lock icon is shown
+        verify(mLockIconView).setContentDescription(LOCKED_LABEL);
+    }
 }

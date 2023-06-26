@@ -25,7 +25,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoModeMobileConnectionDataSource
@@ -33,12 +35,12 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.validMobileEvent
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -71,17 +73,19 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: MobileRepositorySwitcher
     private lateinit var realRepo: MobileConnectionsRepositoryImpl
     private lateinit var demoRepo: DemoMobileConnectionsRepository
-    private lateinit var mockDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var mobileDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var wifiDataSource: DemoModeWifiDataSource
     private lateinit var logFactory: TableLogBufferFactory
+    private lateinit var wifiRepository: FakeWifiRepository
 
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: MobileInputLogger
+    @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var dumpManager: DumpManager
 
-    private val globalSettings = FakeSettings()
     private val fakeNetworkEventsFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val mobileMappings = FakeMobileMappingsProxy()
 
@@ -96,10 +100,15 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
 
-        mockDataSource =
+        mobileDataSource =
             mock<DemoModeMobileConnectionDataSource>().also {
                 whenever(it.mobileEvents).thenReturn(fakeNetworkEventsFlow)
             }
+        wifiDataSource =
+            mock<DemoModeWifiDataSource>().also {
+                whenever(it.wifiEvents).thenReturn(MutableStateFlow(null))
+            }
+        wifiRepository = FakeWifiRepository()
 
         realRepo =
             MobileConnectionsRepositoryImpl(
@@ -107,18 +116,20 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                summaryLogger,
                 mobileMappings,
                 fakeBroadcastDispatcher,
-                globalSettings,
                 context,
                 IMMEDIATE,
                 scope,
+                wifiRepository,
                 mock(),
             )
 
         demoRepo =
             DemoMobileConnectionsRepository(
-                dataSource = mockDataSource,
+                mobileDataSource = mobileDataSource,
+                wifiDataSource = wifiDataSource,
                 scope = scope,
                 context = context,
                 logFactory = logFactory,

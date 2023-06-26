@@ -45,12 +45,17 @@ constructor(
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
 ) {
+    data class PreviewMode(
+        val isInPreviewMode: Boolean = false,
+        val shouldHighlightSelectedAffordance: Boolean = false,
+    )
+
     /**
      * Whether this view-model instance is powering the preview experience that renders exclusively
      * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
      * experience.
      */
-    private val isInPreviewMode = MutableStateFlow(false)
+    private val previewMode = MutableStateFlow(PreviewMode())
 
     /**
      * ID of the slot that's currently selected in the preview that renders exclusively in the
@@ -87,8 +92,8 @@ constructor(
         keyguardInteractor.isDozing.map { !it }.distinctUntilChanged()
     /** An observable for the alpha level for the entire bottom area. */
     val alpha: Flow<Float> =
-        isInPreviewMode.flatMapLatest { isInPreviewMode ->
-            if (isInPreviewMode) {
+        previewMode.flatMapLatest {
+            if (it.isInPreviewMode) {
                 flowOf(1f)
             } else {
                 bottomAreaInteractor.alpha.distinctUntilChanged()
@@ -129,9 +134,18 @@ constructor(
      * lock screen.
      *
      * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
+     * @param shouldHighlightSelectedAffordance Whether the selected quick affordance should be
+     *   highlighted (while all others are dimmed to make the selected one stand out).
      */
-    fun enablePreviewMode(initiallySelectedSlotId: String?) {
-        isInPreviewMode.value = true
+    fun enablePreviewMode(
+        initiallySelectedSlotId: String?,
+        shouldHighlightSelectedAffordance: Boolean,
+    ) {
+        previewMode.value =
+            PreviewMode(
+                isInPreviewMode = true,
+                shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
+            )
         onPreviewSlotSelected(
             initiallySelectedSlotId ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
         )
@@ -150,9 +164,9 @@ constructor(
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
-        return isInPreviewMode.flatMapLatest { isInPreviewMode ->
+        return previewMode.flatMapLatest { previewMode ->
             combine(
-                    if (isInPreviewMode) {
+                    if (previewMode.isInPreviewMode) {
                         quickAffordanceInteractor.quickAffordanceAlwaysVisible(position = position)
                     } else {
                         quickAffordanceInteractor.quickAffordance(position = position)
@@ -161,11 +175,19 @@ constructor(
                     areQuickAffordancesFullyOpaque,
                     selectedPreviewSlotId,
                 ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId ->
+                    val isSelected = selectedPreviewSlotId == position.toSlotId()
                     model.toViewModel(
-                        animateReveal = !isInPreviewMode && animateReveal,
-                        isClickable = isFullyOpaque && !isInPreviewMode,
+                        animateReveal = !previewMode.isInPreviewMode && animateReveal,
+                        isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
                         isSelected =
-                            (isInPreviewMode && selectedPreviewSlotId == position.toSlotId()),
+                            previewMode.isInPreviewMode &&
+                                previewMode.shouldHighlightSelectedAffordance &&
+                                isSelected,
+                        isDimmed =
+                            previewMode.isInPreviewMode &&
+                                previewMode.shouldHighlightSelectedAffordance &&
+                                !isSelected,
+                        forceInactive = previewMode.isInPreviewMode
                     )
                 }
                 .distinctUntilChanged()
@@ -176,6 +198,8 @@ constructor(
         animateReveal: Boolean,
         isClickable: Boolean,
         isSelected: Boolean,
+        isDimmed: Boolean,
+        forceInactive: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -191,9 +215,10 @@ constructor(
                         )
                     },
                     isClickable = isClickable,
-                    isActivated = activationState is ActivationState.Active,
+                    isActivated = !forceInactive && activationState is ActivationState.Active,
                     isSelected = isSelected,
                     useLongPress = quickAffordanceInteractor.useLongPress,
+                    isDimmed = isDimmed,
                 )
             is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
         }

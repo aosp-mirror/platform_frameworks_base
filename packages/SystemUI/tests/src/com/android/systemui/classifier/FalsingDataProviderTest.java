@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -50,18 +51,21 @@ public class FalsingDataProviderTest extends ClassifierTest {
     private FalsingDataProvider mDataProvider;
     @Mock
     private BatteryController mBatteryController;
+    @Mock
+    private FoldStateListener mFoldStateListener;
     private final DockManagerFake mDockManager = new DockManagerFake();
+    private DisplayMetrics mDisplayMetrics;
 
     @Before
     public void setup() {
         super.setup();
         MockitoAnnotations.initMocks(this);
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        displayMetrics.xdpi = 100;
-        displayMetrics.ydpi = 100;
-        displayMetrics.widthPixels = 1000;
-        displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(displayMetrics, mBatteryController, mDockManager);
+        mDisplayMetrics = new DisplayMetrics();
+        mDisplayMetrics.xdpi = 100;
+        mDisplayMetrics.ydpi = 100;
+        mDisplayMetrics.widthPixels = 1000;
+        mDisplayMetrics.heightPixels = 1000;
+        mDataProvider = createWithFoldCapability(false);
     }
 
     @After
@@ -71,16 +75,17 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     @Test
-    public void test_trackMotionEvents() {
+    public void test_trackMotionEvents_dropUpEvent() {
         mDataProvider.onMotionEvent(appendDownEvent(2, 9));
         mDataProvider.onMotionEvent(appendMoveEvent(4, 7));
-        mDataProvider.onMotionEvent(appendUpEvent(6, 5));
+        mDataProvider.onMotionEvent(appendMoveEvent(6, 5));
+        mDataProvider.onMotionEvent(appendUpEvent(0, 0)); // event will be dropped
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
         assertThat(motionEventList.size()).isEqualTo(3);
         assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_DOWN);
         assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
-        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_UP);
+        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
         assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
         assertThat(motionEventList.get(1).getEventTime()).isEqualTo(2L);
         assertThat(motionEventList.get(2).getEventTime()).isEqualTo(3L);
@@ -90,6 +95,28 @@ public class FalsingDataProviderTest extends ClassifierTest {
         assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
         assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
         assertThat(motionEventList.get(2).getY()).isEqualTo(5f);
+    }
+
+    @Test
+    public void test_trackMotionEvents_keepUpEvent() {
+        mDataProvider.onMotionEvent(appendDownEvent(2, 9));
+        mDataProvider.onMotionEvent(appendMoveEvent(4, 7));
+        mDataProvider.onMotionEvent(appendUpEvent(0, 0, 100));
+        List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
+
+        assertThat(motionEventList.size()).isEqualTo(3);
+        assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_DOWN);
+        assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_UP);
+        assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
+        assertThat(motionEventList.get(1).getEventTime()).isEqualTo(2L);
+        assertThat(motionEventList.get(2).getEventTime()).isEqualTo(100);
+        assertThat(motionEventList.get(0).getX()).isEqualTo(2f);
+        assertThat(motionEventList.get(1).getX()).isEqualTo(4f);
+        assertThat(motionEventList.get(2).getX()).isEqualTo(0f);
+        assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
+        assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
+        assertThat(motionEventList.get(2).getY()).isEqualTo(0f);
     }
 
     @Test
@@ -315,5 +342,45 @@ public class FalsingDataProviderTest extends ClassifierTest {
     public void test_MotionEventComplete_A11yAction() {
         mDataProvider.onA11yAction();
         assertThat(mDataProvider.isA11yAction()).isTrue();
+    }
+
+    @Test
+    public void test_UnfoldedState_Folded() {
+        FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
+        when(mFoldStateListener.getFolded()).thenReturn(true);
+        assertThat(falsingDataProvider.isUnfolded()).isFalse();
+    }
+
+    @Test
+    public void test_UnfoldedState_Unfolded() {
+        FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
+        when(mFoldStateListener.getFolded()).thenReturn(false);
+        assertThat(falsingDataProvider.isUnfolded()).isTrue();
+    }
+
+    @Test
+    public void test_Nonfoldabled_TrueFoldState() {
+        FalsingDataProvider falsingDataProvider = createWithFoldCapability(false);
+        when(mFoldStateListener.getFolded()).thenReturn(true);
+        assertThat(falsingDataProvider.isUnfolded()).isFalse();
+    }
+
+    @Test
+    public void test_Nonfoldabled_FalseFoldState() {
+        FalsingDataProvider falsingDataProvider = createWithFoldCapability(false);
+        when(mFoldStateListener.getFolded()).thenReturn(false);
+        assertThat(falsingDataProvider.isUnfolded()).isFalse();
+    }
+
+    @Test
+    public void test_Nonfoldabled_NullFoldState() {
+        FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
+        when(mFoldStateListener.getFolded()).thenReturn(null);
+        assertThat(falsingDataProvider.isUnfolded()).isFalse();
+    }
+
+    private FalsingDataProvider createWithFoldCapability(boolean foldable) {
+        return new FalsingDataProvider(
+                mDisplayMetrics, mBatteryController, mFoldStateListener, mDockManager, foldable);
     }
 }

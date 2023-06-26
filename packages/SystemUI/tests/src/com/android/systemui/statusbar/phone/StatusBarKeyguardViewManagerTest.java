@@ -16,7 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.flags.Flags.MODERN_BOUNCER;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,9 +35,14 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
@@ -54,13 +60,18 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.BouncerView;
 import com.android.systemui.keyguard.data.BouncerViewDelegate;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -102,10 +113,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private View mNotificationContainer;
     @Mock private KeyguardBypassController mBypassController;
-    @Mock private KeyguardBouncer.Factory mKeyguardBouncerFactory;
     @Mock private KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
     @Mock private KeyguardMessageAreaController mKeyguardMessageAreaController;
-    @Mock private StatusBarKeyguardViewManager.AlternateBouncer mAlternateBouncer;
     @Mock private KeyguardMessageArea mKeyguardMessageArea;
     @Mock private ShadeController mShadeController;
     @Mock private SysUIUnfoldComponent mSysUiUnfoldComponent;
@@ -115,18 +124,26 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
     @Mock private PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
     @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private BouncerView mBouncerView;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
+    @Mock private OnBackAnimationCallback mBouncerViewDelegateBackCallback;
+    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Mock private WindowInsetsController mWindowInsetsController;
+    @Mock private TaskbarDelegate mTaskbarDelegate;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private KeyguardBouncer.PrimaryBouncerExpansionCallback mBouncerExpansionCallback;
+    private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
+            mBouncerExpansionCallback;
     private FakeKeyguardStateController mKeyguardStateController =
             spy(new FakeKeyguardStateController());
 
-    @Mock private ViewRootImpl mViewRootImpl;
-    @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    @Mock
+    private ViewRootImpl mViewRootImpl;
+    @Mock
+    private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor
-    private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
+    private ArgumentCaptor<OnBackInvokedCallback> mBackCallbackCaptor;
 
 
     @Before
@@ -137,8 +154,15 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mKeyguardMessageAreaFactory.create(any(KeyguardMessageArea.class)))
                 .thenReturn(mKeyguardMessageAreaController);
         when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
+        when(mBouncerViewDelegate.getBackCallback()).thenReturn(mBouncerViewDelegateBackCallback);
+        when(mFeatureFlags
+                .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM))
+                .thenReturn(true);
 
-        when(mFeatureFlags.isEnabled(MODERN_BOUNCER)).thenReturn(true);
+        when(mCentralSurfaces.getNotificationShadeWindowView())
+                .thenReturn(mNotificationShadeWindowView);
+        when(mNotificationShadeWindowView.getWindowInsetsController())
+                .thenReturn(mWindowInsetsController);
 
         mStatusBarKeyguardViewManager =
                 new StatusBarKeyguardViewManager(
@@ -154,7 +178,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(NotificationShadeWindowController.class),
                         mKeyguardStateController,
                         mock(NotificationMediaManager.class),
-                        mKeyguardBouncerFactory,
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,
@@ -163,7 +186,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mFeatureFlags,
                         mPrimaryBouncerCallbackInteractor,
                         mPrimaryBouncerInteractor,
-                        mBouncerView) {
+                        mBouncerView,
+                        mAlternateBouncerInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -179,8 +203,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mNotificationContainer,
                 mBypassController);
         mStatusBarKeyguardViewManager.show(null);
-        ArgumentCaptor<KeyguardBouncer.PrimaryBouncerExpansionCallback> callbackArgumentCaptor =
-                ArgumentCaptor.forClass(KeyguardBouncer.PrimaryBouncerExpansionCallback.class);
+        ArgumentCaptor<PrimaryBouncerExpansionCallback> callbackArgumentCaptor =
+                ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);
         verify(mPrimaryBouncerCallbackInteractor).addBouncerExpansionCallback(
                 callbackArgumentCaptor.capture());
         mBouncerExpansionCallback = callbackArgumentCaptor.getValue();
@@ -189,7 +213,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void dismissWithAction_AfterKeyguardGoneSetToFalse() {
         OnDismissAction action = () -> false;
-        Runnable cancelAction = () -> {};
+        Runnable cancelAction = () -> {
+        };
         mStatusBarKeyguardViewManager.dismissWithAction(
                 action, cancelAction, false /* afterKeyguardGone */);
         verify(mPrimaryBouncerInteractor).setDismissAction(eq(action), eq(cancelAction));
@@ -253,7 +278,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mPrimaryBouncerInteractor.isInTransit()).thenReturn(true);
 
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
-        verify(mPrimaryBouncerInteractor).setPanelExpansion(eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mPrimaryBouncerInteractor).setPanelExpansion(eq(EXPANSION_HIDDEN));
     }
 
     @Test
@@ -281,7 +306,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncerInteractor, never()).setPanelExpansion(anyFloat());
@@ -298,7 +323,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_DISMISS_BOUNCER);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncerInteractor, never()).setPanelExpansion(anyFloat());
@@ -309,7 +334,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncerInteractor, never()).setPanelExpansion(anyFloat());
@@ -326,7 +351,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_SHOW_BOUNCER);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncerInteractor, never()).setPanelExpansion(anyFloat());
@@ -337,21 +362,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncerInteractor, never()).setPanelExpansion(anyFloat());
-    }
-
-    @Test
-    public void setOccluded_animatesPanelExpansion_onlyIfBouncerHidden() {
-        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
-        verify(mCentralSurfaces).animateKeyguardUnoccluding();
-
-        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
-        clearInvocations(mCentralSurfaces);
-        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
-        verify(mCentralSurfaces, never()).animateKeyguardUnoccluding();
     }
 
     @Test
@@ -434,37 +448,35 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void testShowing_whenAlternateAuthShowing() {
-        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncer.isShowingAlternateBouncer()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
         assertTrue(
-                "Is showing not accurate when alternative auth showing",
+                "Is showing not accurate when alternative bouncer is visible",
                 mStatusBarKeyguardViewManager.isBouncerShowing());
     }
 
     @Test
     public void testWillBeShowing_whenAlternateAuthShowing() {
-        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncer.isShowingAlternateBouncer()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
         assertTrue(
-                "Is or will be showing not accurate when alternative auth showing",
+                "Is or will be showing not accurate when alternate bouncer is visible",
                 mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing());
     }
 
     @Test
-    public void testHideAlternateBouncer_onShowBouncer() {
-        // GIVEN alt auth is showing
-        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
+    public void testHideAlternateBouncer_onShowPrimaryBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN alt bouncer is showing
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mAlternateBouncer.isShowingAlternateBouncer()).thenReturn(true);
-        reset(mAlternateBouncer);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
         // WHEN showBouncer is called
         mStatusBarKeyguardViewManager.showPrimaryBouncer(true);
 
         // THEN alt bouncer should be hidden
-        verify(mAlternateBouncer).hideAlternateBouncer();
+        verify(mAlternateBouncerInteractor).hide();
     }
 
     @Test
@@ -479,11 +491,9 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void testShowAltAuth_unlockingWithBiometricNotAllowed() {
-        // GIVEN alt auth exists, unlocking with biometric isn't allowed
-        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
+        // GIVEN cannot use alternate bouncer
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
-                .thenReturn(false);
+        when(mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()).thenReturn(false);
 
         // WHEN showGenericBouncer is called
         final boolean scrimmed = true;
@@ -491,21 +501,19 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         // THEN regular bouncer is shown
         verify(mPrimaryBouncerInteractor).show(eq(scrimmed));
-        verify(mAlternateBouncer, never()).showAlternateBouncer();
     }
 
     @Test
     public void testShowAlternateBouncer_unlockingWithBiometricAllowed() {
-        // GIVEN alt auth exists, unlocking with biometric is allowed
-        mStatusBarKeyguardViewManager.setAlternateBouncer(mAlternateBouncer);
+        // GIVEN will show alternate bouncer
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        when(mAlternateBouncerInteractor.show()).thenReturn(true);
 
         // WHEN showGenericBouncer is called
         mStatusBarKeyguardViewManager.showBouncer(true);
 
         // THEN alt auth bouncer is shown
-        verify(mAlternateBouncer).showAlternateBouncer();
+        verify(mAlternateBouncerInteractor).show();
         verify(mPrimaryBouncerInteractor, never()).show(anyBoolean());
     }
 
@@ -543,12 +551,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
                 eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
-                mOnBackInvokedCallback.capture());
+                mBackCallbackCaptor.capture());
 
         /* verify that the same callback is unregistered when the bouncer becomes invisible */
         mBouncerExpansionCallback.onVisibilityChanged(false);
         verify(mOnBackInvokedDispatcher).unregisterOnBackInvokedCallback(
-                eq(mOnBackInvokedCallback.getValue()));
+                eq(mBackCallbackCaptor.getValue()));
     }
 
     @Test
@@ -557,15 +565,60 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         /* capture the predictive back callback during registration */
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
                 eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
-                mOnBackInvokedCallback.capture());
+                mBackCallbackCaptor.capture());
 
         when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
         when(mCentralSurfaces.shouldKeyguardHideImmediately()).thenReturn(true);
         /* invoke the back callback directly */
-        mOnBackInvokedCallback.getValue().onBackInvoked();
+        mBackCallbackCaptor.getValue().onBackInvoked();
 
         /* verify that the bouncer will be hidden as a result of the invocation */
         verify(mCentralSurfaces).setBouncerShowing(eq(false));
+    }
+
+    @Test
+    public void testPredictiveBackCallback_noBackAnimationForFullScreenBouncer() {
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
+                .thenReturn(KeyguardSecurityModel.SecurityMode.SimPin);
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+        /* capture the predictive back callback during registration */
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                mBackCallbackCaptor.capture());
+        assertTrue(mBackCallbackCaptor.getValue() instanceof OnBackAnimationCallback);
+
+        OnBackAnimationCallback backCallback =
+                (OnBackAnimationCallback) mBackCallbackCaptor.getValue();
+
+        BackEvent event = new BackEvent(0, 0, 0, BackEvent.EDGE_LEFT);
+        backCallback.onBackStarted(event);
+        verify(mBouncerViewDelegateBackCallback, never()).onBackStarted(any());
+    }
+
+    @Test
+    public void testPredictiveBackCallback_forwardsBackDispatches() {
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+        /* capture the predictive back callback during registration */
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                mBackCallbackCaptor.capture());
+        assertTrue(mBackCallbackCaptor.getValue() instanceof OnBackAnimationCallback);
+
+        OnBackAnimationCallback backCallback =
+                (OnBackAnimationCallback) mBackCallbackCaptor.getValue();
+
+        BackEvent event = new BackEvent(0, 0, 0, BackEvent.EDGE_LEFT);
+        backCallback.onBackStarted(event);
+        verify(mBouncerViewDelegateBackCallback).onBackStarted(eq(event));
+
+        backCallback.onBackProgressed(event);
+        verify(mBouncerViewDelegateBackCallback).onBackProgressed(eq(event));
+
+        backCallback.onBackInvoked();
+        verify(mBouncerViewDelegateBackCallback).onBackInvoked();
+
+        backCallback.onBackCancelled();
+        verify(mBouncerViewDelegateBackCallback).onBackCancelled();
     }
 
     @Test
@@ -589,6 +642,14 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHideTaskbar() {
+        when(mTaskbarDelegate.isInitialized()).thenReturn(true);
+        mStatusBarKeyguardViewManager.setTaskbarDelegate(mTaskbarDelegate);
+        mStatusBarKeyguardViewManager.updateNavigationBarVisibility(false);
+        verify(mWindowInsetsController).hide(WindowInsets.Type.navigationBars());
+    }
+
+    @Test
     public void hideAlternateBouncer_beforeCentralSurfacesRegistered() {
         mStatusBarKeyguardViewManager =
                 new StatusBarKeyguardViewManager(
@@ -604,7 +665,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(NotificationShadeWindowController.class),
                         mKeyguardStateController,
                         mock(NotificationMediaManager.class),
-                        mKeyguardBouncerFactory,
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,
@@ -613,7 +673,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mFeatureFlags,
                         mPrimaryBouncerCallbackInteractor,
                         mPrimaryBouncerInteractor,
-                        mBouncerView) {
+                        mBouncerView,
+                        mAlternateBouncerInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -622,5 +683,123 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         // the following call before registering centralSurfaces should NOT throw a NPE:
         mStatusBarKeyguardViewManager.hideAlternateBouncer(true);
+    }
+
+    @Test
+    public void testResetHideBouncerWhenShowing_alternateBouncerHides() {
+        // GIVEN the keyguard is showing
+        reset(mAlternateBouncerInteractor);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        // WHEN SBKV is reset with hideBouncerWhenShowing=true
+        mStatusBarKeyguardViewManager.reset(true);
+
+        // THEN alternate bouncer is hidden
+        verify(mAlternateBouncerInteractor).hide();
+    }
+
+    @Test
+    public void testResetHideBouncerWhenShowingIsFalse_alternateBouncerHides() {
+        // GIVEN the keyguard is showing
+        reset(mAlternateBouncerInteractor);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        // WHEN SBKV is reset with hideBouncerWhenShowing=false
+        mStatusBarKeyguardViewManager.reset(false);
+
+        // THEN alternate bouncer is NOT hidden
+        verify(mAlternateBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void testAlternateBouncerToShowPrimaryBouncer_updatesScrimControllerOnce() {
+        // GIVEN the alternate bouncer has shown and calls to hide()  will result in successfully
+        // hiding it
+        when(mAlternateBouncerInteractor.hide()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(false);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
+
+        // WHEN request to show primary bouncer
+        mStatusBarKeyguardViewManager.showPrimaryBouncer(true);
+
+        // THEN the scrim isn't updated from StatusBarKeyguardViewManager
+        verify(mCentralSurfaces, never()).updateScrimController();
+    }
+
+    @Test
+    public void testAlternateBouncerOnTouch_actionDownThenUp_noMinTimeShown_noHideAltBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN the alternate bouncer has shown for a minimum amount of time
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(false);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN ACTION_DOWN and ACTION_UP touch event comes
+        boolean touchHandledDown = mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
+        boolean touchHandledUp = mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
+
+        // THEN the touches are handled (doesn't let touches through to underlying views)
+        assertTrue(touchHandledDown);
+        assertTrue(touchHandledUp);
+
+        // THEN alternate bouncer does NOT attempt to hide since min showing time wasn't met
+        verify(mAlternateBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void testAlternateBouncerOnTouch_actionDownThenUp_handlesTouch_hidesAltBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN the alternate bouncer has shown for a minimum amount of time
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN ACTION_DOWN and ACTION_UP touch event comes
+        boolean touchHandledDown = mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
+        boolean touchHandledUp = mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
+
+        // THEN the touches are handled
+        assertTrue(touchHandledDown);
+        assertTrue(touchHandledUp);
+
+        // THEN alternate bouncer attempts to hide
+        verify(mAlternateBouncerInteractor).hide();
+    }
+
+    @Test
+    public void testAlternateBouncerOnTouch_actionUp_doesNotHideAlternateBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN the alternate bouncer has shown for a minimum amount of time
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN only ACTION_UP touch event comes
+        mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
+
+        // THEN the alternateBouncer doesn't hide
+        verify(mAlternateBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void testAlternateBouncerOnTouch_actionOutside_hidesAlternateBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN the alternate bouncer has shown for a minimum amount of time
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN only ACTION_OUTSIDE touch event comes
+        mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_OUTSIDE, 0f, 0f, 0));
+
+        // THEN the alternateBouncer hides
+        verify(mAlternateBouncerInteractor).hide();
     }
 }

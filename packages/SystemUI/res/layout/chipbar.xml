@@ -23,16 +23,19 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <!-- Extra marginBottom to give room for the drop shadow. -->
     <LinearLayout
         android:id="@+id/chipbar_inner"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="@dimen/media_ttt_chip_outer_padding"
-        android:background="@drawable/media_ttt_chip_background"
+        android:padding="@dimen/chipbar_outer_padding"
+        android:background="@drawable/chipbar_background"
         android:layout_marginTop="20dp"
         android:layout_marginStart="@dimen/notification_side_paddings"
         android:layout_marginEnd="@dimen/notification_side_paddings"
+        android:translationZ="4dp"
+        android:layout_marginBottom="8dp"
         android:clipToPadding="false"
         android:gravity="center_vertical"
         android:alpha="0.0"
@@ -40,8 +43,8 @@
 
         <com.android.internal.widget.CachingIconView
             android:id="@+id/start_icon"
-            android:layout_width="@dimen/media_ttt_app_icon_size"
-            android:layout_height="@dimen/media_ttt_app_icon_size"
+            android:layout_width="@dimen/chipbar_start_icon_size"
+            android:layout_height="@dimen/chipbar_start_icon_size"
             android:layout_marginEnd="12dp"
             android:alpha="0.0"
             />
@@ -51,48 +54,46 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="@dimen/media_ttt_text_size"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/chipbar_text_size"
+            android:textColor="@color/chipbar_text_and_icon_color"
             android:alpha="0.0"
             />
 
         <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
-        <ProgressBar
+        <ImageView
             android:id="@+id/loading"
-            android:indeterminate="true"
-            android:layout_width="@dimen/media_ttt_status_icon_size"
-            android:layout_height="@dimen/media_ttt_status_icon_size"
-            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
-            android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
-            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="@dimen/chipbar_end_icon_size"
+            android:layout_height="@dimen/chipbar_end_icon_size"
+            android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
+            android:src="@drawable/ic_progress_activity"
+            android:tint="@android:color/system_accent2_700"
             android:alpha="0.0"
             />
 
         <ImageView
             android:id="@+id/error"
-            android:layout_width="@dimen/media_ttt_status_icon_size"
-            android:layout_height="@dimen/media_ttt_status_icon_size"
-            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:layout_width="@dimen/chipbar_end_icon_size"
+            android:layout_height="@dimen/chipbar_end_icon_size"
+            android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
             android:src="@drawable/ic_warning"
-            android:tint="@color/GM2_red_500"
+            android:tint="@color/GM2_red_600"
             android:alpha="0.0"
             />
 
-        <!-- TODO(b/245610654): Re-name all the media-specific dimens to chipbar dimens instead. -->
         <TextView
             android:id="@+id/end_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?androidprv:attr/textColorOnAccent"
-            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
-            android:textSize="@dimen/media_ttt_text_size"
-            android:paddingStart="@dimen/media_ttt_chip_outer_padding"
-            android:paddingEnd="@dimen/media_ttt_chip_outer_padding"
-            android:paddingTop="@dimen/media_ttt_undo_button_vertical_padding"
-            android:paddingBottom="@dimen/media_ttt_undo_button_vertical_padding"
-            android:layout_marginTop="@dimen/media_ttt_undo_button_vertical_negative_margin"
-            android:layout_marginBottom="@dimen/media_ttt_undo_button_vertical_negative_margin"
-            android:background="@drawable/media_ttt_undo_background"
+            android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
+            android:textSize="@dimen/chipbar_text_size"
+            android:paddingStart="@dimen/chipbar_outer_padding"
+            android:paddingEnd="@dimen/chipbar_outer_padding"
+            android:paddingTop="@dimen/chipbar_end_button_vertical_padding"
+            android:paddingBottom="@dimen/chipbar_end_button_vertical_padding"
+            android:layout_marginTop="@dimen/chipbar_end_button_vertical_negative_margin"
+            android:layout_marginBottom="@dimen/chipbar_end_button_vertical_negative_margin"
+            android:background="@drawable/chipbar_end_button_background"
             android:alpha="0.0"
             />
 

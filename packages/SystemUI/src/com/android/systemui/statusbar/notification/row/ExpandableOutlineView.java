@@ -24,12 +24,16 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.RoundableState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.util.DumpUtilsKt;
+
+import java.io.PrintWriter;
 
 /**
  * Like {@link ExpandableView}, but setting an outline for the height and clipping.
@@ -43,7 +47,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private float mOutlineAlpha = -1f;
     private boolean mAlwaysRoundBothCorners;
     private Path mTmpPath = new Path();
-    private int mBackgroundTop;
 
     /**
      * {@code false} if the children views of the {@link ExpandableOutlineView} are translated when
@@ -59,7 +62,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 // Only when translating just the contents, does the outline need to be shifted.
                 int translation = !mDismissUsingRowTranslationX ? (int) getTranslation() : 0;
                 int left = Math.max(translation, 0);
-                int top = mClipTopAmount + mBackgroundTop;
+                int top = mClipTopAmount;
                 int right = getWidth() + Math.min(translation, 0);
                 int bottom = Math.max(getActualHeight() - mClipBottomAmount, top);
                 outline.setRect(left, top, right, bottom);
@@ -92,7 +95,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                     ? (int) getTranslation() : 0;
             int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
             left = Math.max(translation, 0) - halfExtraWidth;
-            top = mClipTopAmount + mBackgroundTop;
+            top = mClipTopAmount;
             right = getWidth() + halfExtraWidth + Math.min(translation, 0);
             // If the top is rounded we want the bottom to be at most at the top roundness, in order
             // to avoid the shadow changing when scrolling up.
@@ -228,13 +231,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         super.applyRoundnessAndInvalidate();
     }
 
-    protected void setBackgroundTop(int backgroundTop) {
-        if (mBackgroundTop != backgroundTop) {
-            mBackgroundTop = backgroundTop;
-            invalidateOutline();
-        }
-    }
-
     public void onDensityOrFontScaleChanged() {
         initDimens();
         applyRoundnessAndInvalidate();
@@ -349,5 +345,19 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     public Path getCustomClipPath(View child) {
         return null;
+    }
+
+    @Override
+    public void dump(PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
+        super.dump(pw, args);
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            pw.println("Roundness: " + getRoundableState().debugString());
+            if (DUMP_VERBOSE) {
+                pw.println("mCustomOutline: " + mCustomOutline + " mOutlineRect: " + mOutlineRect);
+                pw.println("mOutlineAlpha: " + mOutlineAlpha);
+                pw.println("mAlwaysRoundBothCorners: " + mAlwaysRoundBothCorners);
+            }
+        });
     }
 }

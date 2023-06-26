@@ -38,7 +38,6 @@ import javax.inject.Inject
 
 /**
  * Manager to display a dialog to prompt user to enable controls related Settings:
- *
  * * [Settings.Secure.LOCKSCREEN_SHOW_CONTROLS]
  * * [Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS]
  */
@@ -46,20 +45,19 @@ interface ControlsSettingsDialogManager {
 
     /**
      * Shows the corresponding dialog. In order for a dialog to appear, the following must be true
-     *
      * * At least one of the Settings in [ControlsSettingsRepository] are `false`.
      * * The dialog has not been seen by the user too many times (as defined by
-     * [MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG]).
+     *   [MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG]).
      *
      * When the dialogs are shown, the following outcomes are possible:
      * * User cancels the dialog by clicking outside or going back: we register that the dialog was
-     * seen but the settings don't change.
+     *   seen but the settings don't change.
      * * User responds negatively to the dialog: we register that the user doesn't want to change
-     * the settings (dialog will not appear again) and the settings don't change.
+     *   the settings (dialog will not appear again) and the settings don't change.
      * * User responds positively to the dialog: the settings are set to `true` and the dialog will
-     * not appear again.
+     *   not appear again.
      * * SystemUI closes the dialogs (for example, the activity showing it is closed). In this case,
-     * we don't modify anything.
+     *   we don't modify anything.
      *
      * Of those four scenarios, only the first three will cause [onAttemptCompleted] to be called.
      * It will also be called if the dialogs are not shown.
@@ -157,17 +155,18 @@ internal constructor(
         d.show()
     }
 
-    private fun turnOnSettingSecurely(settings: List<String>) {
+    private fun turnOnSettingSecurely(settings: List<String>, onComplete: () -> Unit) {
         val action =
             ActivityStarter.OnDismissAction {
                 settings.forEach { setting ->
                     secureSettings.putIntForUser(setting, 1, userTracker.userId)
                 }
+                onComplete()
                 true
             }
         activityStarter.dismissKeyguardThenExecute(
             action,
-            /* cancel */ null,
+            /* cancel */ onComplete,
             /* afterKeyguardGone */ true
         )
     }
@@ -188,7 +187,11 @@ internal constructor(
                 if (!showDeviceControlsInLockscreen) {
                     settings.add(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS)
                 }
-                turnOnSettingSecurely(settings)
+                // If we are toggling the flag, we want to call onComplete after the keyguard is
+                // dismissed (and the setting is turned on), to pass the correct value.
+                turnOnSettingSecurely(settings, onComplete)
+            } else {
+                onComplete()
             }
             if (attempts != MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG) {
                 prefs
@@ -196,7 +199,6 @@ internal constructor(
                     .putInt(PREFS_SETTINGS_DIALOG_ATTEMPTS, MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
                     .apply()
             }
-            onComplete()
         }
 
         override fun onCancel(dialog: DialogInterface?) {

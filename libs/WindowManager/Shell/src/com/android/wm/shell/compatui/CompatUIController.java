@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.InsetsSourceControl;
@@ -41,7 +42,6 @@ import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
-import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -49,6 +49,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -91,6 +92,18 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final SparseArray<CompatUIWindowManager> mActiveCompatLayouts = new SparseArray<>(0);
 
     /**
+     * {@link SparseArray} that maps task ids to {@link RestartDialogWindowManager} that are
+     * currently visible
+     */
+    private final SparseArray<RestartDialogWindowManager> mTaskIdToRestartDialogWindowManagerMap =
+            new SparseArray<>(0);
+
+    /**
+     * {@link Set} of task ids for which we need to display a restart confirmation dialog
+     */
+    private Set<Integer> mSetOfTaskIdsShowingRestartDialog = new HashSet<>();
+
+    /**
      * The active Letterbox Education layout if there is one (there can be at most one active).
      *
      * <p>An active layout is a layout that is eligible to be shown for the associated task but
@@ -98,6 +111,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     @Nullable
     private LetterboxEduWindowManager mActiveLetterboxEduLayout;
+
+    /**
+     * The active Reachability UI layout.
+     */
+    @Nullable
+    private ReachabilityEduWindowManager mActiveReachabilityEduLayout;
 
     /** Avoid creating display context frequently for non-default display. */
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
@@ -111,11 +130,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final ShellExecutor mMainExecutor;
     private final Lazy<Transitions> mTransitionsLazy;
     private final DockStateReader mDockStateReader;
-
-    private CompatUICallback mCallback;
-
+    private final CompatUIConfiguration mCompatUIConfiguration;
     // Only show each hint once automatically in the process life.
     private final CompatUIHintsState mCompatUIHintsState;
+    private final CompatUIShellCommandHandler mCompatUIShellCommandHandler;
+
+    private CompatUICallback mCallback;
 
     // Indicates if the keyguard is currently showing, in which case compat UIs shouldn't
     // be shown.
@@ -130,7 +150,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
             SyncTransactionQueue syncQueue,
             ShellExecutor mainExecutor,
             Lazy<Transitions> transitionsLazy,
-            DockStateReader dockStateReader) {
+            DockStateReader dockStateReader,
+            CompatUIConfiguration compatUIConfiguration,
+            CompatUIShellCommandHandler compatUIShellCommandHandler) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -140,14 +162,17 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mMainExecutor = mainExecutor;
         mTransitionsLazy = transitionsLazy;
         mCompatUIHintsState = new CompatUIHintsState();
-        shellInit.addInitCallback(this::onInit, this);
         mDockStateReader = dockStateReader;
+        mCompatUIConfiguration = compatUIConfiguration;
+        mCompatUIShellCommandHandler = compatUIShellCommandHandler;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     private void onInit() {
         mShellController.addKeyguardChangeListener(this);
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
+        mCompatUIShellCommandHandler.onInit();
     }
 
     /** Sets the callback for UI interactions. */
@@ -164,6 +189,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     public void onCompatInfoChanged(TaskInfo taskInfo,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        if (taskInfo != null && !taskInfo.topActivityInSizeCompat) {
+            mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
+        }
         if (taskInfo.configuration == null || taskListener == null) {
             // Null token means the current foreground activity is not in compatibility mode.
             removeLayouts(taskInfo.taskId);
@@ -172,6 +200,10 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
         createOrUpdateCompatLayout(taskInfo, taskListener);
         createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
+        createOrUpdateRestartDialogLayout(taskInfo, taskListener);
+        if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
+            createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+        }
     }
 
     @Override
@@ -278,7 +310,21 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new CompatUIWindowManager(context,
                 taskInfo, mSyncQueue, mCallback, taskListener,
-                mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState);
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState,
+                mCompatUIConfiguration, this::onRestartButtonClicked);
+    }
+
+    private void onRestartButtonClicked(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> taskInfoState) {
+        if (mCompatUIConfiguration.isRestartDialogEnabled()
+                && mCompatUIConfiguration.shouldShowRestartDialogAgain(
+                taskInfoState.first)) {
+            // We need to show the dialog
+            mSetOfTaskIdsShowingRestartDialog.add(taskInfoState.first.taskId);
+            onCompatInfoChanged(taskInfoState.first, taskInfoState.second);
+        } else {
+            mCallback.onSizeCompatRestartButtonClicked(taskInfoState.first.taskId);
+        }
     }
 
     private void createOrUpdateLetterboxEduLayout(TaskInfo taskInfo,
@@ -318,14 +364,111 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new LetterboxEduWindowManager(context, taskInfo,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                mTransitionsLazy.get(),
-                this::onLetterboxEduDismissed,
-                mDockStateReader);
+                mTransitionsLazy.get(), this::onLetterboxEduDismissed, mDockStateReader,
+                mCompatUIConfiguration);
     }
 
-    private void onLetterboxEduDismissed() {
+    private void onLetterboxEduDismissed(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
         mActiveLetterboxEduLayout = null;
+        // We need to update the UI
+        createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second);
     }
+
+    private void createOrUpdateRestartDialogLayout(TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        RestartDialogWindowManager layout =
+                mTaskIdToRestartDialogWindowManagerMap.get(taskInfo.taskId);
+        if (layout != null) {
+            if (layout.needsToBeRecreated(taskInfo, taskListener)) {
+                mTaskIdToRestartDialogWindowManagerMap.remove(taskInfo.taskId);
+                layout.release();
+            } else {
+                layout.setRequestRestartDialog(
+                        mSetOfTaskIdsShowingRestartDialog.contains(taskInfo.taskId));
+                // UI already exists, update the UI layout.
+                if (!layout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(layout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mTaskIdToRestartDialogWindowManagerMap.remove(taskInfo.taskId);
+                }
+                return;
+            }
+        }
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        layout = createRestartDialogWindowManager(context, taskInfo, taskListener);
+        layout.setRequestRestartDialog(
+                mSetOfTaskIdsShowingRestartDialog.contains(taskInfo.taskId));
+        if (layout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, add it the active layouts.
+            mTaskIdToRestartDialogWindowManagerMap.put(taskInfo.taskId, layout);
+        }
+    }
+
+    @VisibleForTesting
+    RestartDialogWindowManager createRestartDialogWindowManager(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new RestartDialogWindowManager(context, taskInfo, mSyncQueue, taskListener,
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mTransitionsLazy.get(),
+                this::onRestartDialogCallback, this::onRestartDialogDismissCallback,
+                mCompatUIConfiguration);
+    }
+
+    private void onRestartDialogCallback(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
+        mTaskIdToRestartDialogWindowManagerMap.remove(stateInfo.first.taskId);
+        mCallback.onSizeCompatRestartButtonClicked(stateInfo.first.taskId);
+    }
+
+    private void onRestartDialogDismissCallback(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
+        mSetOfTaskIdsShowingRestartDialog.remove(stateInfo.first.taskId);
+        onCompatInfoChanged(stateInfo.first, stateInfo.second);
+    }
+
+    private void createOrUpdateReachabilityEduLayout(TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        if (mActiveReachabilityEduLayout != null) {
+            // UI already exists, update the UI layout.
+            if (!mActiveReachabilityEduLayout.updateCompatInfo(taskInfo, taskListener,
+                    showOnDisplay(mActiveReachabilityEduLayout.getDisplayId()))) {
+                // The layout is no longer eligible to be shown, remove from active layouts.
+                mActiveReachabilityEduLayout = null;
+            }
+            return;
+        }
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        ReachabilityEduWindowManager newLayout = createReachabilityEduWindowManager(context,
+                taskInfo, taskListener);
+        if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, make it the active layout.
+            if (mActiveReachabilityEduLayout != null) {
+                // Release the previous layout since at most one can be active.
+                // Since letterbox reachability education is only shown once to the user,
+                // releasing the previous layout is only a precaution.
+                mActiveReachabilityEduLayout.release();
+            }
+            mActiveReachabilityEduLayout = newLayout;
+        }
+    }
+
+    @VisibleForTesting
+    ReachabilityEduWindowManager createReachabilityEduWindowManager(Context context,
+            TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new ReachabilityEduWindowManager(context, taskInfo, mSyncQueue,
+                taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                mCompatUIConfiguration, mMainExecutor);
+    }
+
 
     private void removeLayouts(int taskId) {
         final CompatUIWindowManager layout = mActiveCompatLayouts.get(taskId);
@@ -337,6 +480,19 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (mActiveLetterboxEduLayout != null && mActiveLetterboxEduLayout.getTaskId() == taskId) {
             mActiveLetterboxEduLayout.release();
             mActiveLetterboxEduLayout = null;
+        }
+
+        final RestartDialogWindowManager restartLayout =
+                mTaskIdToRestartDialogWindowManagerMap.get(taskId);
+        if (restartLayout != null) {
+            restartLayout.release();
+            mTaskIdToRestartDialogWindowManagerMap.remove(taskId);
+            mSetOfTaskIdsShowingRestartDialog.remove(taskId);
+        }
+        if (mActiveReachabilityEduLayout != null
+                && mActiveReachabilityEduLayout.getTaskId() == taskId) {
+            mActiveReachabilityEduLayout.release();
+            mActiveReachabilityEduLayout = null;
         }
     }
 
@@ -381,6 +537,17 @@ public class CompatUIController implements OnDisplaysChangedListener,
         }
         if (mActiveLetterboxEduLayout != null && condition.test(mActiveLetterboxEduLayout)) {
             callback.accept(mActiveLetterboxEduLayout);
+        }
+        for (int i = 0; i < mTaskIdToRestartDialogWindowManagerMap.size(); i++) {
+            final int taskId = mTaskIdToRestartDialogWindowManagerMap.keyAt(i);
+            final RestartDialogWindowManager layout =
+                    mTaskIdToRestartDialogWindowManagerMap.get(taskId);
+            if (layout != null && condition.test(layout)) {
+                callback.accept(layout);
+            }
+        }
+        if (mActiveReachabilityEduLayout != null && condition.test(mActiveReachabilityEduLayout)) {
+            callback.accept(mActiveReachabilityEduLayout);
         }
     }
 

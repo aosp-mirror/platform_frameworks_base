@@ -196,9 +196,9 @@ class FooterActionsViewModel(
      * Observe the device monitoring dialog requests and show the dialog accordingly. This function
      * will suspend indefinitely and will need to be cancelled to stop observing.
      *
-     * Important: [quickSettingsContext] must be the [Context] associated to the [Quick Settings
-     * fragment][com.android.systemui.qs.QSFragment], and the call to this function must be
-     * cancelled when that fragment is destroyed.
+     * Important: [quickSettingsContext] must be the [Context] associated to the
+     * [Quick Settings fragment][com.android.systemui.qs.QSFragment], and the call to this function
+     * must be cancelled when that fragment is destroyed.
      */
     suspend fun observeDeviceMonitoringDialogRequests(quickSettingsContext: Context) {
         footerActionsInteractor.deviceMonitoringDialogRequests.collect {
@@ -230,7 +230,7 @@ class FooterActionsViewModel(
             return
         }
 
-        footerActionsInteractor.showUserSwitcher(context, expandable)
+        footerActionsInteractor.showUserSwitcher(expandable)
     }
 
     private fun onSettingsButtonClicked(expandable: Expandable) {

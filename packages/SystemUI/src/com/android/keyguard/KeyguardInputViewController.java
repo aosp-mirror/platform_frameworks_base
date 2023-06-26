@@ -51,26 +51,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     // The following is used to ignore callbacks from SecurityViews that are no longer current
     // (e.g. face unlock). This avoids unwanted asynchronous events from messing with the
     // state for the current security method.
-    private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
-        @Override
-        public void userActivity() { }
-        @Override
-        public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) { }
-        @Override
-        public boolean isVerifyUnlockOnly() {
-            return false;
-        }
-        @Override
-        public void dismiss(boolean securityVerified, int targetUserId,
-                SecurityMode expectedSecurityMode) { }
-        @Override
-        public void dismiss(boolean authenticated, int targetId,
-                boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) { }
-        @Override
-        public void onUserInput() { }
-        @Override
-        public void reset() {}
-    };
+    private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {};
 
     protected KeyguardInputViewController(T view, SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback,
@@ -121,6 +102,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     @Override
     public void reset() {
+        mMessageAreaController.setMessage("", false);
     }
 
     @Override

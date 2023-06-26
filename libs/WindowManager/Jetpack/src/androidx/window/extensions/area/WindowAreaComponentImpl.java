@@ -25,12 +25,12 @@ import android.hardware.devicestate.DeviceStateRequest;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
+import androidx.window.extensions.core.util.function.Consumer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * Reference implementation of androidx.window.extensions.area OEM interface for use with
@@ -187,6 +187,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentStatus() {
+        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+            return WindowAreaComponent.STATUS_UNSUPPORTED;
+        }
+
         if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
                 || isRearDisplayActive()) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
@@ -251,5 +255,38 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 updateStatusConsumers(getCurrentStatus());
             }
         }
+    }
+
+    @Override
+    public void addRearDisplayPresentationStatusListener(
+            @NonNull Consumer<ExtensionWindowAreaStatus> consumer) {
+        throw new UnsupportedOperationException(
+                "addRearDisplayPresentationStatusListener is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void removeRearDisplayPresentationStatusListener(
+            @NonNull Consumer<ExtensionWindowAreaStatus> consumer) {
+        throw new UnsupportedOperationException(
+                "removeRearDisplayPresentationStatusListener is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void startRearDisplayPresentationSession(@NonNull Activity activity,
+            @NonNull Consumer<@WindowAreaSessionState Integer> consumer) {
+        throw new UnsupportedOperationException(
+                "startRearDisplayPresentationSession is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void endRearDisplayPresentationSession() {
+        throw new UnsupportedOperationException(
+                "endRearDisplayPresentationSession is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public ExtensionWindowAreaPresentation getRearDisplayPresentation() {
+        throw new UnsupportedOperationException(
+                "getRearDisplayPresentation is not supported in API_VERSION=2");
     }
 }

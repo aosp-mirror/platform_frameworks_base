@@ -44,11 +44,11 @@ internal object SnappingFlingBehaviorDefaults {
 /**
  * Create and remember a snapping [FlingBehavior] to be used with [LazyListState].
  *
- * TODO: move this to a new module and make it public
- *
  * @param lazyListState The [LazyListState] to update.
  * @param decayAnimationSpec The decay animation spec to use for decayed flings.
  * @param snapAnimationSpec The animation spec to use when snapping.
+ *
+ * TODO: move this to a new module and make it public
  */
 @Composable
 internal fun rememberSnappingFlingBehavior(
