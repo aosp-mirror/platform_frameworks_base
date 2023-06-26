@@ -68,41 +68,37 @@ constructor(
                     )
             )
 
-    /**
-     * The currently-configured authentication method. This determines how the authentication
-     * challenge is completed in order to unlock an otherwise locked device.
-     */
-    val authenticationMethod: StateFlow<AuthenticationMethodModel> =
-        authenticationInteractor.authenticationMethod
-
     /** The current authentication throttling state. If `null`, there's no throttling. */
     val throttling: StateFlow<AuthenticationThrottledModel?> = repository.throttling
 
     init {
         applicationScope.launch {
-            combine(
-                    sceneInteractor.currentScene(containerName),
-                    authenticationInteractor.authenticationMethod,
-                    ::Pair,
-                )
-                .collect { (currentScene, authMethod) ->
-                    if (currentScene.key == SceneKey.Bouncer) {
-                        when (authMethod) {
-                            is AuthenticationMethodModel.None ->
-                                sceneInteractor.setCurrentScene(
-                                    containerName,
-                                    SceneModel(SceneKey.Gone),
-                                )
-                            is AuthenticationMethodModel.Swipe ->
-                                sceneInteractor.setCurrentScene(
-                                    containerName,
-                                    SceneModel(SceneKey.Lockscreen),
-                                )
-                            else -> Unit
-                        }
+            sceneInteractor.currentScene(containerName).collect { currentScene ->
+                if (currentScene.key == SceneKey.Bouncer) {
+                    when (getAuthenticationMethod()) {
+                        is AuthenticationMethodModel.None ->
+                            sceneInteractor.setCurrentScene(
+                                containerName,
+                                SceneModel(SceneKey.Gone),
+                            )
+                        is AuthenticationMethodModel.Swipe ->
+                            sceneInteractor.setCurrentScene(
+                                containerName,
+                                SceneModel(SceneKey.Lockscreen),
+                            )
+                        else -> Unit
                     }
                 }
+            }
         }
+    }
+
+    /**
+     * Returns the currently-configured authentication method. This determines how the
+     * authentication challenge is completed in order to unlock an otherwise locked device.
+     */
+    suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
+        return authenticationInteractor.getAuthenticationMethod()
     }
 
     /**
@@ -115,18 +111,20 @@ constructor(
         containerName: String,
         message: String? = null,
     ) {
-        if (authenticationInteractor.isAuthenticationRequired()) {
-            repository.setMessage(message ?: promptMessage(authenticationMethod.value))
-            sceneInteractor.setCurrentScene(
-                containerName = containerName,
-                scene = SceneModel(SceneKey.Bouncer),
-            )
-        } else {
-            authenticationInteractor.unlockDevice()
-            sceneInteractor.setCurrentScene(
-                containerName = containerName,
-                scene = SceneModel(SceneKey.Gone),
-            )
+        applicationScope.launch {
+            if (authenticationInteractor.isAuthenticationRequired()) {
+                repository.setMessage(message ?: promptMessage(getAuthenticationMethod()))
+                sceneInteractor.setCurrentScene(
+                    containerName = containerName,
+                    scene = SceneModel(SceneKey.Bouncer),
+                )
+            } else {
+                authenticationInteractor.unlockDevice()
+                sceneInteractor.setCurrentScene(
+                    containerName = containerName,
+                    scene = SceneModel(SceneKey.Gone),
+                )
+            }
         }
     }
 
@@ -135,7 +133,7 @@ constructor(
      * method.
      */
     fun resetMessage() {
-        repository.setMessage(promptMessage(authenticationMethod.value))
+        applicationScope.launch { repository.setMessage(promptMessage(getAuthenticationMethod())) }
     }
 
     /** Removes the user-facing message. */
@@ -160,7 +158,7 @@ constructor(
      * @return `true` if the authentication succeeded and the device is now unlocked; `false` when
      *   authentication failed, `null` if the check was not performed.
      */
-    fun authenticate(
+    suspend fun authenticate(
         input: List<Any>,
         tryAutoConfirm: Boolean = false,
     ): Boolean? {
@@ -198,7 +196,7 @@ constructor(
                     repository.setThrottling(null)
                     clearMessage()
                 }
-            else -> repository.setMessage(errorMessage(authenticationMethod.value))
+            else -> repository.setMessage(errorMessage(getAuthenticationMethod()))
         }
 
         return isAuthenticated

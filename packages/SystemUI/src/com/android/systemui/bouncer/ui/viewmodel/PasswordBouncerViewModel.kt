@@ -17,12 +17,15 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel(
+    private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
 ) :
@@ -50,10 +53,13 @@ class PasswordBouncerViewModel(
 
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
     fun onAuthenticateKeyPressed() {
-        if (interactor.authenticate(password.value.toCharArray().toList()) != true) {
-            showFailureAnimation()
-        }
-
+        val password = _password.value.toCharArray().toList()
         _password.value = ""
+
+        applicationScope.launch {
+            if (interactor.authenticate(password) != true) {
+                showFailureAnimation()
+            }
+        }
     }
 }

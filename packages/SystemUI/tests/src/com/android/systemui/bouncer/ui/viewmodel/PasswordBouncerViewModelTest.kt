@@ -28,7 +28,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -40,8 +40,8 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class PasswordBouncerViewModelTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val authenticationInteractor =
         utils.authenticationInteractor(
             repository = utils.authenticationRepository(),
@@ -58,6 +58,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         )
     private val underTest =
         PasswordBouncerViewModel(
+            applicationScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
         )
@@ -75,7 +76,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
@@ -98,7 +99,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
@@ -106,6 +107,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
+            runCurrent()
 
             underTest.onPasswordInputChanged("password")
 
@@ -120,7 +122,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
@@ -143,7 +145,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
@@ -168,7 +170,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
             authenticationInteractor.lockDevice()
