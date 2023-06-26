@@ -20,6 +20,7 @@ import static android.os.VibrationEffect.Composition.PRIMITIVE_CLICK;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_LOW_TICK;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_SPIN;
 import static android.os.VibrationEffect.Composition.PRIMITIVE_TICK;
+import static android.os.vibrator.persistence.VibrationXmlParser.isSupportedMimeType;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,6 +49,20 @@ import java.util.Map;
 @Presubmit
 @RunWith(JUnit4.class)
 public class VibrationEffectXmlSerializationTest {
+
+    @Test
+    public void isSupportedMimeType_onlySupportsVibrationXmlMimeType() {
+        // Single MIME type supported
+        assertThat(isSupportedMimeType(
+                VibrationXmlParser.APPLICATION_VIBRATION_XML_MIME_TYPE)).isTrue();
+        assertThat(isSupportedMimeType("application/vnd.android.haptics.vibration+xml")).isTrue();
+        // without xml suffix not supported
+        assertThat(isSupportedMimeType("application/vnd.android.haptics.vibration")).isFalse();
+        // different top-level not supported
+        assertThat(isSupportedMimeType("haptics/vnd.android.haptics.vibration+xml")).isFalse();
+        // different type not supported
+        assertThat(isSupportedMimeType("application/vnd.android.vibration+xml")).isFalse();
+    }
 
     @Test
     public void testPrimitives_allSucceed() throws IOException {
