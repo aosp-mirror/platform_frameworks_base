@@ -120,6 +120,7 @@ class AutoAddTracker @VisibleForTesting constructor(
 
                     val tilesToRemove = restoredAutoAdded.filter { it !in restoredTiles }
                     if (tilesToRemove.isNotEmpty()) {
+                        Log.d(TAG, "Removing tiles: $tilesToRemove")
                         qsHost.removeTiles(tilesToRemove)
                     }
                     val tiles = synchronized(autoAdded) {
@@ -255,6 +256,7 @@ class AutoAddTracker @VisibleForTesting constructor(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Current user: $userId")
+        pw.println("Restored tiles: $restoredTiles")
         pw.println("Added tiles: $autoAdded")
     }
 
