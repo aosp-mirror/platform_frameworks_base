@@ -234,7 +234,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mExecutor,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer"))));
 
-        mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
+        mScreenDecorations = spy(new ScreenDecorations(mContext, mSecureSettings,
                 mCommandRegistry, mUserTracker, mDisplayTracker, mDotViewController,
                 mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
@@ -1230,7 +1230,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mFaceScanningProviders.add(mFaceScanningDecorProvider);
         when(mFaceScanningProviderFactory.getProviders()).thenReturn(mFaceScanningProviders);
         when(mFaceScanningProviderFactory.getHasProviders()).thenReturn(true);
-        ScreenDecorations screenDecorations = new ScreenDecorations(mContext, mExecutor,
+        ScreenDecorations screenDecorations = new ScreenDecorations(mContext,
                 mSecureSettings, mCommandRegistry, mUserTracker, mDisplayTracker,
                 mDotViewController,
                 mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,

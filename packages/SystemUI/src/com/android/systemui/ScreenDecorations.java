@@ -69,7 +69,6 @@ import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.DebugRoundedCornerDelegate;
 import com.android.systemui.decor.DebugRoundedCornerModel;
@@ -98,7 +97,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -133,7 +131,6 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     @VisibleForTesting
     protected boolean mIsRegistered;
     private final Context mContext;
-    private final Executor mMainExecutor;
     private final CommandRegistry mCommandRegistry;
     private final SecureSettings mSecureSettings;
     @VisibleForTesting
@@ -317,7 +314,6 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
     @Inject
     public ScreenDecorations(Context context,
-            @Main Executor mainExecutor,
             SecureSettings secureSettings,
             CommandRegistry commandRegistry,
             UserTracker userTracker,
@@ -329,7 +325,6 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             ScreenDecorationsLogger logger,
             AuthController authController) {
         mContext = context;
-        mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
         mCommandRegistry = commandRegistry;
         mUserTracker = userTracker;
