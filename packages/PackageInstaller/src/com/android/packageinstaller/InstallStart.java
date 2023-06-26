@@ -269,9 +269,16 @@ public class InstallStart extends Activity {
     }
 
     private boolean isCallerSessionOwner(int originatingUid, int sessionId) {
+        if (originatingUid == Process.ROOT_UID) {
+            return true;
+        }
         PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
-        int installerUid = packageInstaller.getSessionInfo(sessionId).getInstallerUid();
-        return (originatingUid == Process.ROOT_UID) || (originatingUid == installerUid);
+        PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
+        if (sessionInfo == null) {
+            return false;
+        }
+        int installerUid = sessionInfo.getInstallerUid();
+        return originatingUid == installerUid;
     }
 
     private void checkDevicePolicyRestriction() {
