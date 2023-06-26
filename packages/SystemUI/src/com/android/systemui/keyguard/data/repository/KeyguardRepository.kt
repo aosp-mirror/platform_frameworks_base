@@ -302,7 +302,15 @@ constructor(
                             trySendWithFailureLogging(
                                 keyguardStateController.isUnlocked,
                                 TAG,
-                                "updated isKeyguardUnlocked"
+                                "updated isKeyguardUnlocked due to onUnlockedChanged"
+                            )
+                        }
+
+                        override fun onKeyguardShowingChanged() {
+                            trySendWithFailureLogging(
+                                keyguardStateController.isUnlocked,
+                                TAG,
+                                "updated isKeyguardUnlocked due to onKeyguardShowingChanged"
                             )
                         }
                     }

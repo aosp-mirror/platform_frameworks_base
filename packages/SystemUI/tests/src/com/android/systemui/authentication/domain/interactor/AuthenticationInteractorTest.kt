@@ -66,30 +66,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun unlockDevice() =
-        testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
-            assertThat(isUnlocked).isFalse()
-
-            underTest.unlockDevice()
-            runCurrent()
-
-            assertThat(isUnlocked).isTrue()
-        }
-
-    @Test
-    fun biometricUnlock() =
-        testScope.runTest {
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
-            assertThat(isUnlocked).isFalse()
-
-            underTest.biometricUnlock()
-            runCurrent()
-
-            assertThat(isUnlocked).isTrue()
-        }
-
-    @Test
     fun toggleBypassEnabled() =
         testScope.runTest {
             val isBypassEnabled by collectLastValue(underTest.isBypassEnabled)
@@ -105,7 +81,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_lockedAndSecured_true() =
         testScope.runTest {
-            underTest.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
@@ -117,7 +93,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_lockedAndNotSecured_false() =
         testScope.runTest {
-            underTest.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
 
@@ -127,7 +103,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_unlockedAndSecured_false() =
         testScope.runTest {
-            underTest.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
@@ -139,7 +115,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun isAuthenticationRequired_unlockedAndNotSecured_false() =
         testScope.runTest {
-            underTest.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
 
@@ -147,67 +123,55 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticate_withCorrectPin_returnsTrueAndUnlocksDevice() =
+    fun authenticate_withCorrectPin_returnsTrue() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
-            assertThat(isUnlocked).isTrue()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
-    fun authenticate_withIncorrectPin_returnsFalseAndDoesNotUnlockDevice() =
+    fun authenticate_withIncorrectPin_returnsFalse() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
-    fun authenticate_withEmptyPin_returnsFalseAndDoesNotUnlockDevice() =
+    fun authenticate_withEmptyPin_returnsFalse() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf())).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
-    fun authenticate_withCorrectMaxLengthPin_returnsTrueAndUnlocksDevice() =
+    fun authenticate_withCorrectMaxLengthPin_returnsTrue() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(9999999999999999)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(List(16) { 9 })).isTrue()
-            assertThat(isUnlocked).isTrue()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
-    fun authenticate_withCorrectTooLongPin_returnsFalseAndDoesNotUnlockDevice() =
+    fun authenticate_withCorrectTooLongPin_returnsFalse() =
         testScope.runTest {
             // Max pin length is 16 digits. To avoid issues with overflows, this test ensures
             // that all pins > 16 decimal digits are rejected.
@@ -216,52 +180,42 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(DevicePolicyManager.MAX_PASSWORD_LENGTH).isLessThan(17)
 
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(99999999999999999)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(List(17) { 9 })).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
-    fun authenticate_withCorrectPassword_returnsTrueAndUnlocksDevice() =
+    fun authenticate_withCorrectPassword_returnsTrue() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate("password".toList())).isTrue()
-            assertThat(isUnlocked).isTrue()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
-    fun authenticate_withIncorrectPassword_returnsFalseAndDoesNotUnlockDevice() =
+    fun authenticate_withIncorrectPassword_returnsFalse() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate("alohomora".toList())).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
-    fun authenticate_withCorrectPattern_returnsTrueAndUnlocksDevice() =
+    fun authenticate_withCorrectPattern_returnsTrue() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(
                     listOf(
@@ -280,7 +234,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(
                     underTest.authenticate(
@@ -301,15 +254,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isTrue()
-            assertThat(isUnlocked).isTrue()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
-    fun authenticate_withIncorrectPattern_returnsFalseAndDoesNotUnlockDevice() =
+    fun authenticate_withIncorrectPattern_returnsFalse() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern(
                     listOf(
@@ -328,7 +279,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(
                     underTest.authenticate(
@@ -349,22 +299,18 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmPinAndEmptyInput_returnsNullAndHasNoEffect() =
+    fun tryAutoConfirm_withAutoConfirmPinAndEmptyInput_returnsNull() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(), tryAutoConfirm = true)).isNull()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
@@ -372,14 +318,11 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNullAndHasNoEffect() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3), tryAutoConfirm = true)).isNull()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
@@ -387,14 +330,11 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 4, 4), tryAutoConfirm = true)).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
@@ -402,15 +342,12 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4, 5), tryAutoConfirm = true))
                 .isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
@@ -418,14 +355,11 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = true)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 4, 4), tryAutoConfirm = true)).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(1)
         }
 
@@ -433,14 +367,11 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNullAndHasNoEffects() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin(1234, autoConfirm = false)
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isNull()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 
@@ -448,14 +379,11 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withoutCorrectPassword_returnsNullAndHasNoEffects() =
         testScope.runTest {
             val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            assertThat(isUnlocked).isFalse()
 
             assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true)).isNull()
-            assertThat(isUnlocked).isFalse()
             assertThat(failedAttemptCount).isEqualTo(0)
         }
 }

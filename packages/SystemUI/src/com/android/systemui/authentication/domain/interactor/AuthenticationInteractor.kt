@@ -90,22 +90,6 @@ constructor(
     }
 
     /**
-     * Unlocks the device, assuming that the authentication challenge has been completed
-     * successfully.
-     */
-    fun unlockDevice() {
-        repository.setUnlocked(true)
-    }
-
-    /**
-     * Locks the device. From now on, the device will remain locked until [authenticate] is called
-     * with the correct input.
-     */
-    fun lockDevice() {
-        repository.setUnlocked(false)
-    }
-
-    /**
      * Attempts to authenticate the user and unlock the device.
      *
      * If [tryAutoConfirm] is `true`, authentication is attempted if and only if the auth method
@@ -146,7 +130,6 @@ constructor(
 
         if (isSuccessful) {
             repository.setFailedAuthenticationAttempts(0)
-            repository.setUnlocked(true)
         } else {
             repository.setFailedAuthenticationAttempts(
                 repository.failedAuthenticationAttempts.value + 1
@@ -154,12 +137,6 @@ constructor(
         }
 
         return isSuccessful
-    }
-
-    /** Triggers a biometric-powered unlock of the device. */
-    fun biometricUnlock() {
-        // TODO(b/280883900): only allow this if the biometric is enabled and there's a match.
-        repository.setUnlocked(true)
     }
 
     /** See [isBypassEnabled]. */
