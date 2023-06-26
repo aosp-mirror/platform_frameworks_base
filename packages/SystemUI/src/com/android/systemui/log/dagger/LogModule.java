@@ -488,4 +488,12 @@ public class LogModule {
     public static LogBuffer provideDreamLogBuffer(LogBufferFactory factory) {
         return factory.create("DreamLog", 250);
     }
+
+    /** Provides a {@link LogBuffer} for display metrics related logs. */
+    @Provides
+    @SysUISingleton
+    @DisplayMetricsRepoLog
+    public static LogBuffer provideDisplayMetricsRepoLogBuffer(LogBufferFactory factory) {
+        return factory.create("DisplayMetricsRepo", 50);
+    }
 }
