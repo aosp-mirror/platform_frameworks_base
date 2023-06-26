@@ -6543,4 +6543,8 @@
          environment to protect the user's privacy when the device is being repaired.
          Off by default, since OEMs may have had a similar feature on their devices. -->
     <bool name="config_repairModeSupported">false</bool>
+
+    <!-- Enables or disables the "Share" action item shown in the context menu that appears upon
+        long-pressing on selected text. Enabled by default. -->
+    <bool name="config_textShareSupported">true</bool>
 </resources>
