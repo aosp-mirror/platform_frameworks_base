@@ -83,6 +83,8 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
     @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
 
+    @Mock private lateinit var autoAddInteractor: AutoAddInteractor
+
     @Mock private lateinit var userTracker: UserTracker
 
     @Mock private lateinit var logger: QSPipelineLogger
@@ -100,6 +102,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         featureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true)
+        featureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, true)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
 
@@ -107,6 +110,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
         underTest =
             CurrentTilesInteractorImpl(
+                autoAddInteractor = autoAddInteractor,
                 tileSpecRepository = tileSpecRepository,
                 installedTilesComponentRepository = installedTilesPackageRepository,
                 userRepository = userRepository,
@@ -646,6 +650,11 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             assertThat(tiles!!.size).isEqualTo(3)
             assertThat(tiles!![1].spec).isEqualTo(CUSTOM_TILE_SPEC)
         }
+
+    @Test
+    fun autoAddInteractor_initted() {
+        verify(autoAddInteractor).init(underTest)
+    }
 
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
         this.state = state

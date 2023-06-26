@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.qs.pipeline.dagger
 
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
 import javax.inject.Qualifier
 
-/** A [LogBuffer] for the new QS Pipeline for logging changes to the set of current tiles. */
-@Qualifier @MustBeDocumented @Retention(RetentionPolicy.RUNTIME) annotation class QSTileListLog
+/** A [LogBuffer] for the QS pipeline to track auto-added tiles */
+@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class QSAutoAddLog
