@@ -683,7 +683,7 @@ public abstract class Context {
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
     /**
-     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
+     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a {@code long}
      * value that is compatible to {@link BindServiceFlags}.
      */
     public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
