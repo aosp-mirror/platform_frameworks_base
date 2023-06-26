@@ -22,6 +22,8 @@ import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
@@ -55,7 +57,12 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
+        val interactor =
+            KeyguardTransitionInteractorFactory.create(
+                    scope = TestScope().backgroundScope,
+                    repository = repository,
+                )
+                .keyguardTransitionInteractor
         underTest = DreamingToLockscreenTransitionViewModel(interactor, mock())
     }
 
