@@ -19,7 +19,7 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_COLLAPSE
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_EXPAND
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_HIDE

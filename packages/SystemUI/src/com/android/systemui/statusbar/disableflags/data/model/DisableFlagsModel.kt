@@ -20,7 +20,7 @@ import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
 import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 
 /**

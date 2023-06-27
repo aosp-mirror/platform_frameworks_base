@@ -22,11 +22,11 @@ import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
-import com.android.systemui.log.LogLevel.WTF
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.WARNING
+import com.android.systemui.log.core.LogLevel.WTF
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason
 import com.android.systemui.statusbar.notification.collection.NotifCollection.FutureDismissal

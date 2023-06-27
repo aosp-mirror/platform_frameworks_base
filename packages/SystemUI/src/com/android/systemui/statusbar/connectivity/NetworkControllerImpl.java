@@ -74,7 +74,7 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
-import com.android.systemui.log.LogLevel;
+import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.settings.UserTracker;

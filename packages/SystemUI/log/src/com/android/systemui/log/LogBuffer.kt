@@ -19,6 +19,10 @@ package com.android.systemui.log
 import android.os.Trace
 import android.util.Log
 import com.android.systemui.common.buffer.RingBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.util.concurrent.ArrayBlockingQueue
@@ -291,12 +295,6 @@ constructor(
         }
     }
 }
-
-/**
- * A function that will be called immediately to store relevant data on the log message. The value
- * of `this` will be the LogMessage to be initialized.
- */
-typealias MessageInitializer = LogMessage.() -> Unit
 
 private const val TAG = "LogBuffer"
 private val FROZEN_MESSAGE = LogMessageImpl.create()
