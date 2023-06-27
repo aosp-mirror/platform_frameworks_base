@@ -396,6 +396,16 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    public void updateInputInfo(TvInputInfo info) {
+        synchronized (mLock) {
+            if (!mInputMap.containsKey(info.getId())) {
+                return;
+            }
+            Slog.w(TAG, "update inputInfo for input id " + info.getId());
+            mInputMap.put(info.getId(), info);
+        }
+    }
+
     /**
      * Create a TvInputHardware object with a specific deviceId. One service at a time can access
      * the object, and if more than one process attempts to create hardware with the same deviceId,

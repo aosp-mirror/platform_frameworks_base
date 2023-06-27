@@ -1067,6 +1067,11 @@ public final class TvInputManagerService extends SystemService {
         }
         inputState.info = inputInfo;
         inputState.uid = getInputUid(inputInfo);
+        ServiceState serviceState = userState.serviceStateMap.get(inputInfo.getComponent());
+        if (serviceState != null && serviceState.isHardware) {
+            serviceState.hardwareInputMap.put(inputInfo.getId(), inputInfo);
+            mTvInputHardwareManager.updateInputInfo(inputInfo);
+        }
 
         int n = userState.mCallbacks.beginBroadcast();
         for (int i = 0; i < n; ++i) {
