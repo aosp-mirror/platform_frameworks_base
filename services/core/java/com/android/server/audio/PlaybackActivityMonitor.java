@@ -957,6 +957,7 @@ public final class PlaybackActivityMonitor
             players = (HashMap<Integer, AudioPlaybackConfiguration>) mPlayers.clone();
         }
         mFadingManager.unfadeOutUid(uid, players);
+        mDuckingManager.unduckUid(uid, players);
     }
 
     //=================================================================
