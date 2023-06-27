@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.shared.model
 
 import android.hardware.face.FaceManager
+import android.os.SystemClock.elapsedRealtime
 
 /**
  * Authentication status provided by
@@ -38,8 +39,12 @@ data class AcquiredAuthenticationStatus(val acquiredInfo: Int) : AuthenticationS
 object FailedAuthenticationStatus : AuthenticationStatus()
 
 /** Face authentication error message */
-data class ErrorAuthenticationStatus(val msgId: Int, val msg: String? = null) :
-    AuthenticationStatus() {
+data class ErrorAuthenticationStatus(
+    val msgId: Int,
+    val msg: String? = null,
+    // present to break equality check if the same error occurs repeatedly.
+    val createdAt: Long = elapsedRealtime()
+) : AuthenticationStatus() {
     /**
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
      * authentication is locked out.

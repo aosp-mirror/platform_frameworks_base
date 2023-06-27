@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.hardware.biometrics.BiometricFaceConstants
 import android.os.Handler
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -30,6 +31,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInte
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -39,6 +41,7 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -90,6 +93,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
+                mContext,
                 testScope.backgroundScope,
                 dispatcher,
                 faceAuthRepository,
@@ -141,6 +145,22 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     Pair(FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED, true)
                 )
+        }
+
+    @Test
+    fun whenFaceIsLockedOutAnyAttemptsToTriggerFaceAuthMustProvideLockoutError() =
+        testScope.runTest {
+            underTest.start()
+            val authenticationStatus = collectLastValue(underTest.authenticationStatus)
+            faceAuthRepository.setLockedOut(true)
+
+            underTest.onDeviceLifted()
+
+            val outputValue = authenticationStatus()!! as ErrorAuthenticationStatus
+            assertThat(outputValue.msgId)
+                .isEqualTo(BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT)
+            assertThat(outputValue.msg).isEqualTo("Face Unlock unavailable")
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
         }
 
     @Test
