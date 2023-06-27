@@ -93,6 +93,16 @@ public final class VibrationXmlParser {
     private static final String TAG = "VibrationXmlParser";
 
     /**
+     * The MIME type for a xml holding a vibration.
+     *
+     * <p>This should match the type registered at android.mime.types.
+     *
+     * @hide
+     */
+    public static final String APPLICATION_VIBRATION_XML_MIME_TYPE =
+            "application/vnd.android.haptics.vibration+xml";
+
+    /**
      * Allows {@link VibrationEffect} instances created via non-public APIs to be parsed/serialized.
      *
      * <p>Note that the XML schema for non-public APIs is not backwards compatible. This is intended
@@ -109,6 +119,24 @@ public final class VibrationXmlParser {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
+
+    /**
+     * Returns whether this parser supports parsing files of the given MIME type.
+     *
+     * <p>Returns false for {@code null} value.
+     *
+     * <p><em>Note: MIME type matching in the Android framework is case-sensitive, unlike the formal
+     * RFC definitions. As a result, you should always write these elements with lower case letters,
+     * or use {@link android.content.Intent#normalizeMimeType} to ensure that they are converted to
+     * lower case.</em>
+     *
+     * @hide
+     */
+    public static boolean isSupportedMimeType(@Nullable String mimeType) {
+        // NOTE: prefer using MimeTypeFilter.matches() if MIME_TYPE_VIBRATION_XML becomes a filter
+        // or if more than one MIME type is supported by this parser.
+        return APPLICATION_VIBRATION_XML_MIME_TYPE.equals(mimeType);
+    }
 
     /**
      * Parses XML content from given input stream into a {@link VibrationEffect}.

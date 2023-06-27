@@ -81,12 +81,11 @@ public final class VibrationXmlSerializer {
      * Serializes a {@link VibrationEffect} to XML and writes output to given {@link Writer}.
      *
      * <p>This method will only write into the {@link Writer} if the effect can successfully
-     * be represented by the XML serialization. It will return {@code false} otherwise, and not
-     * write any data.
+     * be represented by the XML serialization. It will throw an exception otherwise.
      *
      * @throws SerializationFailedException serialization of input effect failed, no data was
-     *                                      written into given {@link Writer}
-     * @throws IOException error writing to given {@link Writer}
+     *                                      written into given {@link Writer}.
+     * @throws IOException error writing to given {@link Writer}.
      *
      * @hide
      */
@@ -139,10 +138,14 @@ public final class VibrationXmlSerializer {
     /**
      * Exception thrown when a {@link VibrationEffect} instance serialization fails.
      *
+     * <p>The serialization can fail if a given vibration cannot be represented using the public
+     * format, or if it uses hidden APIs that are not supported for serialization (e.g.
+     * {@link VibrationEffect.WaveformBuilder}).
+     *
      * @hide
      */
     @TestApi
-    public static final class SerializationFailedException extends IllegalStateException {
+    public static final class SerializationFailedException extends RuntimeException {
         SerializationFailedException(VibrationEffect effect, Throwable cause) {
             super("Serialization failed for vibration effect " + effect, cause);
         }
