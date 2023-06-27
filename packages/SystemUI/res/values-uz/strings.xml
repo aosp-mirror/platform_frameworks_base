@@ -176,7 +176,7 @@
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Barmoq izi bilan ochish sozlanmadi. Sozlamalarni ochib, qaytadan urining."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Yuz bilan ochishni qayta sozlash"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Yuz bilan ochish"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Yuz bilan ochish funksiyasini sozlash"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Yuz bilan ochishni sozlash"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Yuz bilan ochish funksiyasini qayta sozlash uchun joriy yuz modelingiz oʻchirib tashlanadi.\n\nTelefonni qulfdan chiqarish maqsadida yuzingizdan foydalanish uchun bu funksiyani qayta sozlashingiz kerak."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Yuz bilan ochish sozlanmadimi. Sozlamalarni ochib, qaytadan urining."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Barmoq izi skaneriga tegining"</string>

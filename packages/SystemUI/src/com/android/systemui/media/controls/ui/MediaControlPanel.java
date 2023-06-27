@@ -34,7 +34,6 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
@@ -252,13 +251,6 @@ public class MediaControlPanel {
     private boolean mWasPlaying = false;
     private boolean mButtonClicked = false;
 
-    private ContentObserver mAnimationScaleObserver = new ContentObserver(null) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateAnimatorDurationScale();
-        }
-    };
-
     /**
      * Initialize a new control panel
      *
@@ -318,10 +310,6 @@ public class MediaControlPanel {
         mFeatureFlags = featureFlags;
 
         mGlobalSettings = globalSettings;
-        mGlobalSettings.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-                mAnimationScaleObserver
-        );
         updateAnimatorDurationScale();
     }
 
@@ -405,7 +393,10 @@ public class MediaControlPanel {
         updateSeekBarVisibility();
     }
 
-    private void updateAnimatorDurationScale() {
+    /**
+     * Reloads animator duration scale.
+     */
+    void updateAnimatorDurationScale() {
         if (mSeekBarObserver != null) {
             mSeekBarObserver.setAnimationEnabled(
                     mGlobalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f);

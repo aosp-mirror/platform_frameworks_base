@@ -481,7 +481,7 @@ public abstract class Context {
      * If binding from a top app and its target SDK version is at or above
      * {@link android.os.Build.VERSION_CODES#R}, the app needs to
      * explicitly use BIND_INCLUDE_CAPABILITIES flag to pass all capabilities to the service so the
-     * other app can have while-use-use access such as location, camera, microphone from background.
+     * other app can have while-in-use access such as location, camera, microphone from background.
      * If binding from a top app and its target SDK version is below
      * {@link android.os.Build.VERSION_CODES#R}, BIND_INCLUDE_CAPABILITIES is implicit.
      */
@@ -678,7 +678,7 @@ public abstract class Context {
      * </p>
      *
      * <em>This flag is NOT compatible with {@link BindServiceFlags}. If you need to use
-     * {@link BindServiceFlags}, you must use {@link #BIND_EXTERNAL_SERVICE_LONG} instead.
+     * {@link BindServiceFlags}, you must use {@link #BIND_EXTERNAL_SERVICE_LONG} instead.</em>
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 

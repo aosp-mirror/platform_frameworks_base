@@ -1263,7 +1263,7 @@
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
-    <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشت به بازی، ضربه بزنید"</string>
+    <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"برای برگشتن به بازی، ضربه بزنید"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"انتخاب بازی"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"برای عملکرد بهتر، هربار فقط یکی از این بازی‌ها را می‌توان باز کرد."</string>
     <string name="old_app_action" msgid="725331621042848590">"به <xliff:g id="OLD_APP">%1$s</xliff:g> برگردید"</string>

@@ -2097,7 +2097,10 @@ public class TelecomManager {
      * For a self-managed {@link ConnectionService}, a {@link SecurityException} will be thrown if
      * the {@link PhoneAccount} has {@link PhoneAccount#CAPABILITY_SELF_MANAGED} and the calling app
      * does not have {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
-     *
+     * <p>
+     * <p>
+     * <b>Note</b>: {@link android.app.Notification.CallStyle} notifications should be posted after
+     * the call is added to Telecom in order for the notification to be non-dismissible.
      * @param phoneAccount A {@link PhoneAccountHandle} registered with
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
@@ -2345,7 +2348,10 @@ public class TelecomManager {
      * {@link PhoneAccount} with the {@link PhoneAccount#CAPABILITY_PLACE_EMERGENCY_CALLS}
      * capability, depending on external factors, such as network conditions and Modem/SIM status.
      * </p>
-     *
+     * <p>
+     * <p>
+     * <b>Note</b>: {@link android.app.Notification.CallStyle} notifications should be posted after
+     * the call is placed in order for the notification to be non-dismissible.
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */
@@ -2679,9 +2685,11 @@ public class TelecomManager {
 
     /**
      * Add a call to the Android system service Telecom. This allows the system to start tracking an
-     * incoming or outgoing call with the specified {@link CallAttributes}. Once the call is ready
-     * to be disconnected, use the {@link CallControl#disconnect(DisconnectCause, Executor,
-     * OutcomeReceiver)} which is provided by the {@code pendingControl#onResult(CallControl)}.
+     * incoming or outgoing call with the specified {@link CallAttributes}.  Once a call is added,
+     * a {@link android.app.Notification.CallStyle} notification should be posted and when the
+     * call is ready to be disconnected, use {@link CallControl#disconnect(DisconnectCause,
+     * Executor, OutcomeReceiver)} which is provided by the
+     * {@code pendingControl#onResult(CallControl)}.
      * <p>
      * <p>
      * <p>

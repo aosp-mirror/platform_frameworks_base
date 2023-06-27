@@ -25,7 +25,6 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.database.ContentObserver
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -113,7 +112,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
@@ -239,7 +237,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
             this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
     @Mock private lateinit var globalSettings: GlobalSettings
-    @Captor private lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -281,7 +278,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     lockscreenUserManager,
                     broadcastDialogController,
                     fakeFeatureFlag,
-                    globalSettings,
+                    globalSettings
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -291,12 +288,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     return mockAnimator
                 }
             }
-
-        verify(globalSettings)
-            .registerContentObserver(
-                eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
-                settingsObserverCaptor.capture()
-            )
 
         initGutsViewHolderMocks()
         initMediaViewHolderMocks()
@@ -986,7 +977,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // When the setting changes,
         globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
-        settingsObserverCaptor.value!!.onChange(false)
+        player.updateAnimatorDurationScale()
 
         // Then the seekbar is set to not animate
         assertThat(seekBarObserver.animationEnabled).isFalse()

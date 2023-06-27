@@ -979,7 +979,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         if (ar.pictureInPictureArgs != null && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
-            if (didCommitTransientLaunch()) {
+            if (!ar.getTask().isVisibleRequested() || didCommitTransientLaunch()) {
                 // force enable pip-on-task-switch now that we've committed to actually launching
                 // to the transient activity.
                 ar.supportsEnterPipOnTaskSwitch = true;
@@ -1008,7 +1008,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         // Legacy pip-entry (not via isAutoEnterEnabled).
-        if (didCommitTransientLaunch() && ar.supportsPictureInPicture()) {
+        if ((!ar.getTask().isVisibleRequested() || didCommitTransientLaunch())
+                && ar.supportsPictureInPicture()) {
             // force enable pip-on-task-switch now that we've committed to actually launching to the
             // transient activity, and then recalculate whether we can attempt pip.
             ar.supportsEnterPipOnTaskSwitch = true;
@@ -2665,7 +2666,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mStateValidators.add(() -> {
             for (int i = mTargets.size() - 1; i >= 0; --i) {
                 final ChangeInfo change = mTargets.get(i);
-                if (!change.mContainer.isVisibleRequested()) continue;
+                if (!change.mContainer.isVisibleRequested()
+                        || change.mContainer.mSurfaceControl == null) {
+                    continue;
+                }
                 Slog.e(TAG, "Force show for visible " + change.mContainer
                         + " which may be hidden by transition unexpectedly");
                 change.mContainer.getSyncTransaction().show(change.mContainer.mSurfaceControl);

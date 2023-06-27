@@ -694,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonga tik qarab turing"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonga tik qarab turing"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonga tik qarab turing"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Yuzingizni berkitayotgan narsalarni olib tashlang."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Yuzingiz yaxshi koʻrinmayapti."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Ekranning yuqori qismini, shuningdek, qora panelni ham tozalang"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Ilovalar ishga tushirilmoqda."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Tizimni yuklashni tugatish."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Quvvat tugmasini bosdingiz — bu odatda ekranni oʻchiradi.\n\nBarmoq izini qoʻshish vaqtida tugmaga yengilgina tegining."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sozlashni yakunlash uchun ekranni oʻchiring"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Yakunlash uchun ekranni oʻchiring"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Faolsizlantirish"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Barmoq izi tasdiqlashda davom etilsinmi?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Quvvat tugmasini bosdingiz. Bu odatda ekranni oʻchiradi.\n\nBarmoq izingizni tasdiqlash uchun tugmaga yengilgina tegining."</string>
@@ -2331,7 +2331,7 @@
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Ikki ekranli rejim ishlamaydi"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Quvvatni tejash yoniqligi uchun hozir ikki ekranli rejim ishlamaydi. Buni Sozlamalarda faolsizlantirishingiz mumkin."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Sozlamalarni ochish"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Faolsizlantirish"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Oʻchirish"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> sozlandi"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Klaviatura terilmasi bunga sozlandi: <xliff:g id="LAYOUT_1">%s</xliff:g>. Oʻzgartirish uchun ustiga bosing."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Klaviatura terilmasi bunga sozlandi: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Oʻzgartirish uchun ustiga bosing."</string>

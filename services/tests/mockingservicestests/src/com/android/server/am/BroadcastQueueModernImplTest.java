@@ -66,6 +66,7 @@ import static org.mockito.Mockito.times;
 
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
@@ -550,6 +551,33 @@ public final class BroadcastQueueModernImplTest {
         assertEquals(BroadcastProcessQueue.REASON_FOREGROUND, queue.getRunnableAtReason());
 
         queue.setProcessAndUidState(mProcess, false, false);
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
+    @Test
+    public void testRunnableAt_processTop() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants, PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        doReturn(ActivityManager.PROCESS_STATE_TOP).when(mProcess).getSetProcState();
+        queue.setProcessAndUidState(mProcess, false, false);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isLessThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_TOP_PROCESS, queue.getRunnableAtReason());
+
+        doReturn(ActivityManager.PROCESS_STATE_SERVICE).when(mProcess).getSetProcState();
+        queue.setProcessAndUidState(mProcess, false, false);
+
+        // The new process state will only be taken into account the next time a broadcast
+        // is sent to the process.
+        enqueueOrReplaceBroadcast(queue, makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver())), 0);
         assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
     }

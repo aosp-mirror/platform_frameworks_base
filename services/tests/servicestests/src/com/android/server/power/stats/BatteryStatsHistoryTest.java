@@ -93,8 +93,6 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testAtraceBinaryState1() {
-        mHistory.forceRecordAllHistory();
-
         InOrder inOrder = Mockito.inOrder(mTracer);
         Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
 
@@ -112,8 +110,6 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testAtraceBinaryState2() {
-        mHistory.forceRecordAllHistory();
-
         InOrder inOrder = Mockito.inOrder(mTracer);
         Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
 
@@ -131,8 +127,6 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testAtraceNumericalState() {
-        mHistory.forceRecordAllHistory();
-
         InOrder inOrder = Mockito.inOrder(mTracer);
         Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
 
@@ -150,8 +144,6 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testAtraceInstantEvent() {
-        mHistory.forceRecordAllHistory();
-
         InOrder inOrder = Mockito.inOrder(mTracer);
         Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
 

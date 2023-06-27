@@ -175,7 +175,8 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                         : handle.getComponentName().getShortClassName(),
                         phoneAccount != null ? phoneAccount.getExtras().getString(
                                 CrossDeviceSyncController.EXTRA_CALL_FACILITATOR_ID)
-                                : handle.getComponentName().getPackageName());
+                                : handle.getComponentName().getPackageName(),
+                        handle.getComponentName().flattenToString());
         call.setFacilitator(callFacilitator);
         call.setDirection(android.companion.Telecom.Call.OUTGOING);
         call.setCallerId(connectionRequest.getAddress().getSchemeSpecificPart());

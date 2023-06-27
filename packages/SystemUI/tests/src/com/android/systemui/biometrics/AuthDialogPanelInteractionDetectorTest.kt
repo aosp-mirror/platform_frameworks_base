@@ -20,12 +20,12 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.ShadeExpansionStateManager
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnit
@@ -63,10 +63,10 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testEnableDetector_expandOnly_shouldPostRunnable() {
+    fun testEnableDetector_expandOnly_shouldNotPostRunnable() {
         detector.enable(action)
         shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, false, 0f)
-        verify(action).run()
+        verifyZeroInteractions(action)
     }
 
     @Test
@@ -83,5 +83,15 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
         detector.disable()
         shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
         verifyZeroInteractions(action)
+    }
+
+    @Test
+    fun testFromOpenState_becomeStateClose_enableDetector_shouldNotPostRunnable() {
+        // STATE_OPEN is 2
+        shadeExpansionStateManager.updateState(2)
+        detector.enable(action)
+        shadeExpansionStateManager.onPanelExpansionChanged(0.5f, false, false, 0f)
+        verifyZeroInteractions(action)
+        Assert.assertEquals(true, shadeExpansionStateManager.isClosed())
     }
 }

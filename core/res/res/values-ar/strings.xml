@@ -1220,7 +1220,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"يستمر التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"تستمر عملية <xliff:g id="PROCESS">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_restart" msgid="2789618625210505419">"فتح التطبيق مرة أخرى"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"إرسال تعليقات"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"إرسال ملاحظات"</string>
     <string name="aerr_close" msgid="3398336821267021852">"إغلاق"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"كتم الصوت حتى إعادة تشغيل الجهاز"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"انتظار"</string>

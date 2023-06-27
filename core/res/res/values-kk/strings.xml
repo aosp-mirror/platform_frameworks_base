@@ -629,7 +629,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Саусақ ізін тану мүмкін емес. Қайталап көріңіз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Саусақ ізін оқу сканерін тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сканерді тазалап, әрекетті қайталаңыз."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сканерді қатты басыңыз."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сканерді қатты басыңыз"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Басқа саусақ ізін байқап көріңіз."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
@@ -681,20 +681,20 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Жарық жеткіліксіз"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонды алшақ ұстаңыз."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай жылжытыңыз."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай жылжытыңыз."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай жылжытыңыз"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай жылжытыңыз"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Құрылғының камерасына тура қараңыз."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Бетіңіз көрінбей тұр. Телефонды көз деңгейінде ұстаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Бет танылмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Басыңыздың қалпын сәл өзгертіңіз."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға тура қараңыз."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға тура қараңыз."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға тура қараңыз."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға тура қараңыз"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға тура қараңыз"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға тура қараңыз"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алыңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
