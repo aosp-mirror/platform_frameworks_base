@@ -209,6 +209,39 @@ public class LongSparseArray<E> implements Cloneable {
     }
 
     /**
+     * Returns the index of the first element whose key is greater than or equal to the given key.
+     *
+     * @param key The key for which to search the array.
+     * @return The smallest {@code index} for which {@code (keyAt(index) >= key)} is
+     * {@code true}, or {@link #size() size} if no such {@code index} exists.
+     * @hide
+     */
+    public int firstIndexOnOrAfter(long key) {
+        if (mGarbage) {
+            gc();
+        }
+        final int index = Arrays.binarySearch(mKeys, 0, size(), key);
+        return (index >= 0) ? index : -index - 1;
+    }
+
+    /**
+     * Returns the index of the last element whose key is less than or equal to the given key.
+     *
+     * @param key The key for which to search the array.
+     * @return The largest {@code index} for which {@code (keyAt(index) <= key)} is
+     * {@code true}, or {@code -1} if no such {@code index} exists.
+     * @hide
+     */
+    public int lastIndexOnOrBefore(long key) {
+        final int index = firstIndexOnOrAfter(key);
+
+        if (index < size() && keyAt(index) == key) {
+            return index;
+        }
+        return index - 1;
+    }
+
+    /**
      * Adds a mapping from the specified key to the specified value,
      * replacing the previous mapping from the specified key if there
      * was one.

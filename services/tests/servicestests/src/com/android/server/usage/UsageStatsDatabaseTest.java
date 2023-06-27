@@ -31,7 +31,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
-import android.util.TimeSparseArray;
+import android.util.LongSparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -568,7 +568,7 @@ public class UsageStatsDatabaseTest {
         mUsageStatsDatabase.forceIndexFiles();
         final int len = mUsageStatsDatabase.mSortedStatFiles.length;
         for (int i = 0; i < len; i++) {
-            final TimeSparseArray<AtomicFile> files =  mUsageStatsDatabase.mSortedStatFiles[i];
+            final LongSparseArray<AtomicFile> files =  mUsageStatsDatabase.mSortedStatFiles[i];
             // The stats file for each interval type equals to max allowed.
             assertEquals(UsageStatsDatabase.MAX_FILES_PER_INTERVAL_TYPE[i],
                     files.size());

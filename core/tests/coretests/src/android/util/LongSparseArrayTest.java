@@ -51,4 +51,73 @@ public class LongSparseArrayTest {
                     .isFalse();
         }
     }
+
+    @Test
+    public void firstIndexOnOrAfter() {
+        final LongSparseArray<Object> longSparseArray = new LongSparseArray<>();
+
+        // Values don't matter for this test.
+        longSparseArray.put(51, new Object());
+        longSparseArray.put(10, new Object());
+        longSparseArray.put(59, new Object());
+
+        assertThat(longSparseArray.size()).isEqualTo(3);
+
+        // Testing any number arbitrarily smaller than 10.
+        assertThat(longSparseArray.firstIndexOnOrAfter(-141213)).isEqualTo(0);
+        for (long time = -43; time <= 10; time++) {
+            assertThat(longSparseArray.firstIndexOnOrAfter(time)).isEqualTo(0);
+        }
+
+        for (long time = 11; time <= 51; time++) {
+            assertThat(longSparseArray.firstIndexOnOrAfter(time)).isEqualTo(1);
+        }
+
+        for (long time = 52; time <= 59; time++) {
+            assertThat(longSparseArray.firstIndexOnOrAfter(time)).isEqualTo(2);
+        }
+
+        for (long time = 60; time <= 102; time++) {
+            assertThat(longSparseArray.firstIndexOnOrAfter(time)).isEqualTo(3);
+        }
+        // Testing any number arbitrarily larger than 59.
+        assertThat(longSparseArray.firstIndexOnOrAfter(15332)).isEqualTo(3);
+    }
+
+    @Test
+    public void lastIndexOnOrBefore() {
+        final LongSparseArray<Object> longSparseArray = new LongSparseArray<>();
+
+        // Values don't matter for this test.
+        longSparseArray.put(21, new Object());
+        longSparseArray.put(4, new Object());
+        longSparseArray.put(91, new Object());
+        longSparseArray.put(39, new Object());
+
+        assertThat(longSparseArray.size()).isEqualTo(4);
+
+        // Testing any number arbitrarily smaller than 4.
+        assertThat(longSparseArray.lastIndexOnOrBefore(-1478133)).isEqualTo(-1);
+        for (long time = -42; time < 4; time++) {
+            assertThat(longSparseArray.lastIndexOnOrBefore(time)).isEqualTo(-1);
+        }
+
+        for (long time = 4; time < 21; time++) {
+            assertThat(longSparseArray.lastIndexOnOrBefore(time)).isEqualTo(0);
+        }
+
+        for (long time = 21; time < 39; time++) {
+            assertThat(longSparseArray.lastIndexOnOrBefore(time)).isEqualTo(1);
+        }
+
+        for (long time = 39; time < 91; time++) {
+            assertThat(longSparseArray.lastIndexOnOrBefore(time)).isEqualTo(2);
+        }
+
+        for (long time = 91; time < 109; time++) {
+            assertThat(longSparseArray.lastIndexOnOrBefore(time)).isEqualTo(3);
+        }
+        // Testing any number arbitrarily larger than 91.
+        assertThat(longSparseArray.lastIndexOnOrBefore(1980732)).isEqualTo(3);
+    }
 }

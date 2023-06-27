@@ -106,7 +106,7 @@ public class CpuWakeupStatsTest {
         for (int i = 0; i < 100; i++) {
             final long now = mRandom.nextLong(retention + 1, 100 * retention);
             obj.noteWakeupTimeAndReason(now, i, KERNEL_REASON_SOUND_TRIGGER_IRQ);
-            assertThat(obj.mWakeupEvents.closestIndexOnOrBefore(now - retention)).isLessThan(0);
+            assertThat(obj.mWakeupEvents.lastIndexOnOrBefore(now - retention)).isLessThan(0);
         }
     }
 

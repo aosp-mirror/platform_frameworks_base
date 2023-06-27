@@ -46,10 +46,10 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.SparseIntArray;
-import android.util.TimeSparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -1024,7 +1024,7 @@ class UserUsageStatsService {
     }
 
     private void dumpFileDetailsForInterval(IndentingPrintWriter ipw, int interval) {
-        final TimeSparseArray<AtomicFile> files = mDatabase.mSortedStatFiles[interval];
+        final LongSparseArray<AtomicFile> files = mDatabase.mSortedStatFiles[interval];
         final int numFiles = files.size();
         for (int i = 0; i < numFiles; i++) {
             final long filename = files.keyAt(i);
