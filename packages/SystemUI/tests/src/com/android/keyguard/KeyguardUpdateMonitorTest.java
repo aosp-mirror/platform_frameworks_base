@@ -2935,6 +2935,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 TelephonyManager.SIM_STATE_UNKNOWN);
     }
 
+    @Test
+    public void testOnSimStateChanged_HandleSimStateNotReady() {
+        KeyguardUpdateMonitorCallback keyguardUpdateMonitorCallback = spy(
+                KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback);
+        mKeyguardUpdateMonitor.handleSimStateChange(-1, 0, TelephonyManager.SIM_STATE_NOT_READY);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(-1, 0,
+                TelephonyManager.SIM_STATE_NOT_READY);
+    }
+
     private void verifyFingerprintAuthenticateNeverCalled() {
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
