@@ -117,6 +117,7 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -208,7 +209,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
@@ -238,7 +238,7 @@ import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public final class NotificationPanelViewController implements ShadeSurface, Dumpable {
 
     public static final String TAG = NotificationPanelView.class.getSimpleName();
@@ -1407,11 +1407,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBottomArea = keyguardBottomArea;
     }
 
-    void setOpenCloseListener(OpenCloseListener openCloseListener) {
+    @Override
+    public void setOpenCloseListener(OpenCloseListener openCloseListener) {
         mOpenCloseListener = openCloseListener;
     }
 
-    void setTrackingStartedListener(TrackingStartedListener trackingStartedListener) {
+    @Override
+    public void setTrackingStartedListener(TrackingStartedListener trackingStartedListener) {
         mTrackingStartedListener = trackingStartedListener;
     }
 
@@ -3378,11 +3380,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ViewGroupFadeHelper.reset(mView);
     }
 
-    void addOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
+    @Override
+    public void addOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().addOnGlobalLayoutListener(listener);
     }
 
-    void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
+    @Override
+    public void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
     }
 
@@ -3847,8 +3851,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return !isFullyCollapsed() && !mTracking && !mClosing;
     }
 
-    /** Collapses the shade instantly without animation. */
-    void instantCollapse() {
+    @Override
+    public void instantCollapse() {
         abortAnimations();
         setExpandedFraction(0f);
         if (mExpanding) {
@@ -4021,8 +4025,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mFixedDuration = NO_FIXED_DURATION;
     }
 
-    /** */
-    boolean postToView(Runnable action) {
+    @Override
+    public boolean postToView(Runnable action) {
         return mView.post(action);
     }
 
@@ -5112,19 +5116,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             return super.performAccessibilityAction(host, action, args);
         }
-    }
-
-    /** Listens for when touch tracking begins. */
-    interface TrackingStartedListener {
-        void onTrackingStarted();
-    }
-
-    /** Listens for when shade begins opening of finishes closing. */
-    interface OpenCloseListener {
-        /** Called when the shade finishes closing. */
-        void onClosingFinished();
-        /** Called when the shade starts opening. */
-        void onOpenStarted();
     }
 }
 
