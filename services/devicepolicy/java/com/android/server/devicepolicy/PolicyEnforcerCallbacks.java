@@ -302,4 +302,14 @@ final class PolicyEnforcerCallbacks {
             Slogf.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
         }
     }
+
+    static boolean setUsbDataSignalingEnabled(@Nullable Boolean value, @NonNull Context context) {
+        return Binder.withCleanCallingIdentity(() -> {
+            Objects.requireNonNull(context);
+
+            boolean enabled = value == null || value;
+            DevicePolicyManagerService.updateUsbDataSignal(context, enabled);
+            return true;
+        });
+    }
 }

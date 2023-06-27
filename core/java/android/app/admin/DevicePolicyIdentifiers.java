@@ -160,6 +160,14 @@ public final class DevicePolicyIdentifiers {
     public static final String CROSS_PROFILE_WIDGET_PROVIDER_POLICY = "crossProfileWidgetProvider";
 
     /**
+     * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
+
+    /**
      * @hide
      */
     public static final String USER_RESTRICTION_PREFIX = "userRestriction_";

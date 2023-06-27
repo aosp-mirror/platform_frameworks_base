@@ -540,6 +540,7 @@ package android.app.admin {
     field public static final String PERMITTED_INPUT_METHODS_POLICY = "permittedInputMethods";
     field public static final String PERSONAL_APPS_SUSPENDED_POLICY = "personalAppsSuspended";
     field public static final String SCREEN_CAPTURE_DISABLED_POLICY = "screenCaptureDisabled";
+    field public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
   }
 
   public class DevicePolicyManager {

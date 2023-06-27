@@ -140,8 +140,8 @@ public class EnableAdbPreferenceControllerTest {
     public void updateState_settingsOn_shouldCheck() {
         when(mUserManager.isAdminUser()).thenReturn(true);
         when(mDevicePolicyManager.getProfileOwner()).thenReturn(TEST_COMPONENT_NAME);
-        when(mDevicePolicyManager.isUsbDataSignalingEnabledForUser(
-                UserHandle.myUserId())).thenReturn(true);
+        when(mDevicePolicyManager.isUsbDataSignalingEnabled(
+                )).thenReturn(true);
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.ADB_ENABLED, 1);
         mPreference.setChecked(false);
@@ -156,8 +156,8 @@ public class EnableAdbPreferenceControllerTest {
     public void updateState_settingsOff_shouldUncheck() {
         when(mUserManager.isAdminUser()).thenReturn(true);
         when(mDevicePolicyManager.getProfileOwner()).thenReturn(TEST_COMPONENT_NAME);
-        when(mDevicePolicyManager.isUsbDataSignalingEnabledForUser(
-                UserHandle.myUserId())).thenReturn(true);
+        when(mDevicePolicyManager.isUsbDataSignalingEnabled(
+                )).thenReturn(true);
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.ADB_ENABLED, 0);
         mPreference.setChecked(true);
