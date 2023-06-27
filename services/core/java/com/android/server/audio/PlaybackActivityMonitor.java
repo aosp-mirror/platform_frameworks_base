@@ -1208,6 +1208,17 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    protected @NonNull List<Integer> getFocusDuckedUids() {
+        final ArrayList<Integer> duckedUids;
+        synchronized (mPlayerLock) {
+            duckedUids = new ArrayList(mDuckingManager.mDuckers.keySet());
+        }
+        if (DEBUG) {
+            Log.i(TAG, "current ducked UIDs: " + duckedUids);
+        }
+        return duckedUids;
+    }
+
     //=================================================================
     // For logging
     private static final class PlayerEvent extends EventLogger.Event {
