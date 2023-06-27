@@ -195,7 +195,9 @@ constructor(
         set(value) {
             if (visible && field != value) {
                 field = value
+                iconContainer.setQsExpansionTransitioning(value > 0f && value < 1.0f)
                 updatePosition()
+                updateIgnoredSlots()
             }
         }
 
@@ -215,6 +217,8 @@ constructor(
 
             view.onApplyWindowInsets(insets)
         }
+
+    private var singleCarrier = false
 
     private val demoModeReceiver =
         object : DemoMode {
@@ -479,17 +483,20 @@ constructor(
     private fun updateListeners() {
         mShadeCarrierGroupController.setListening(visible)
         if (visible) {
-            updateSingleCarrier(mShadeCarrierGroupController.isSingleCarrier)
+            singleCarrier = mShadeCarrierGroupController.isSingleCarrier
+            updateIgnoredSlots()
             mShadeCarrierGroupController.setOnSingleCarrierChangedListener {
-                updateSingleCarrier(it)
+                singleCarrier = it
+                updateIgnoredSlots()
             }
         } else {
             mShadeCarrierGroupController.setOnSingleCarrierChangedListener(null)
         }
     }
 
-    private fun updateSingleCarrier(singleCarrier: Boolean) {
-        if (singleCarrier) {
+    private fun updateIgnoredSlots() {
+        // switching from QQS to QS state halfway through the transition
+        if (singleCarrier || qsExpandedFraction < 0.5) {
             iconContainer.removeIgnoredSlots(carrierIconSlots)
         } else {
             iconContainer.addIgnoredSlots(carrierIconSlots)

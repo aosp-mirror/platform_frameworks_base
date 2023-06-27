@@ -64,6 +64,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private boolean mNeedsUnderflow;
     // Individual StatusBarIconViews draw their etc dots centered in this width
     private int mIconDotFrameWidth;
+    private boolean mQsExpansionTransitioning;
     private boolean mShouldRestrictIcons = true;
     // Used to count which states want to be visible during layout
     private ArrayList<StatusIconState> mLayoutStates = new ArrayList<>();
@@ -85,6 +86,10 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+    }
+
+    public void setQsExpansionTransitioning(boolean expansionTransitioning) {
+        mQsExpansionTransitioning = expansionTransitioning;
     }
 
     public void setShouldRestrictIcons(boolean should) {
@@ -386,6 +391,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             StatusIconState vs = getViewStateFromChild(child);
             if (vs != null) {
                 vs.applyToView(child);
+                vs.qsExpansionTransitioning = mQsExpansionTransitioning;
             }
         }
     }
@@ -420,6 +426,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         /// StatusBarIconView.STATE_*
         public int visibleState = STATE_ICON;
         public boolean justAdded = true;
+        public boolean qsExpansionTransitioning = false;
 
         // How far we are from the end of the view actually is the most relevant for animation
         float distanceToViewEnd = -1;
@@ -462,12 +469,13 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             }
 
             icon.setVisibleState(visibleState, animateVisibility);
-            if (animationProperties != null) {
+            if (animationProperties != null && !qsExpansionTransitioning) {
                 animateTo(view, animationProperties);
             } else {
                 super.applyToView(view);
             }
 
+            qsExpansionTransitioning = false;
             justAdded = false;
             distanceToViewEnd = currentDistanceToEnd;
 
