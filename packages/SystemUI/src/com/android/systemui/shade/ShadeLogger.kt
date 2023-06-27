@@ -90,7 +90,7 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 double1 = event.y.toDouble()
             },
             {
-                "$str1\neventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
+                "$str1: eventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
             }
         )
     }
@@ -277,6 +277,42 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             { "NPVC flingExpands called with vel: $long1, vectorVel: $long2, " +
                     "interactionType: $int1, minVelocityPxPerSecond: $double1 " +
                     "expansionOverHalf: $bool1, allowExpandForSmallExpansion: $bool2" }
+        )
+    }
+
+    fun logEndMotionEvent(
+        msg: String,
+        forceCancel: Boolean,
+        expand: Boolean,
+    )
+    {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = msg
+                bool1 = forceCancel
+                bool2 = expand
+            },
+            { "$str1; force=$bool1; expand=$bool2" }
+        )
+    }
+
+    fun logPanelClosedOnDown(
+        msg: String,
+        panelClosedOnDown: Boolean,
+        expandFraction: Float,
+    )
+    {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = msg
+                bool1 = panelClosedOnDown
+                double1 = expandFraction.toDouble()
+            },
+            { "$str1; mPanelClosedOnDown=$bool1; mExpandedFraction=$double1" }
         )
     }
 
