@@ -26,7 +26,6 @@ import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
-import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -902,7 +901,7 @@ final class DefaultPermissionGrantPolicy {
 
         // Companion devices
         grantSystemFixedPermissionsToSystemPackage(pm,
-                CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, userId,
+                getDefaultCompanionDeviceManagerPackage(), userId,
                 ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
 
         // Ringtone Picker
@@ -950,6 +949,10 @@ final class DefaultPermissionGrantPolicy {
 
     private String getDefaultDockManagerPackage() {
         return mContext.getString(R.string.config_defaultDockManagerPackageName);
+    }
+
+    private String getDefaultCompanionDeviceManagerPackage() {
+        return mContext.getString(R.string.config_companionDeviceManagerPackage);
     }
 
     @SafeVarargs

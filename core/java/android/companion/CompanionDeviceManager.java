@@ -209,14 +209,6 @@ public final class CompanionDeviceManager {
     public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
 
     /**
-     * The package name of the companion device discovery component.
-     *
-     * @hide
-     */
-    public static final String COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME =
-            "com.android.companiondevicemanager";
-
-    /**
      * Callback for applications to receive updates about and the outcome of
      * {@link AssociationRequest} issued via {@code associate()} call.
      *
