@@ -2221,7 +2221,7 @@ public class GameManagerServiceTests {
         String[] packages = {mPackageName};
         when(mMockPackageManager.getPackagesForUid(DEFAULT_PACKAGE_UID)).thenReturn(packages);
         gameManagerService.mUidObserver.onUidStateChanged(
-                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
         verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME, true);
     }
 
@@ -2238,12 +2238,12 @@ public class GameManagerServiceTests {
         doAnswer(inv -> powerState.put(inv.getArgument(0), inv.getArgument(1)))
                 .when(mMockPowerManager).setPowerMode(anyInt(), anyBoolean());
         gameManagerService.mUidObserver.onUidStateChanged(
-                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
         assertTrue(powerState.get(Mode.GAME));
         gameManagerService.mUidObserver.onUidStateChanged(
                 DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
         gameManagerService.mUidObserver.onUidStateChanged(
-                somePackageId, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
+                somePackageId, ActivityManager.PROCESS_STATE_TOP, 0, 0);
         assertTrue(powerState.get(Mode.GAME));
         gameManagerService.mUidObserver.onUidStateChanged(
                 somePackageId, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
@@ -2260,13 +2260,13 @@ public class GameManagerServiceTests {
         int somePackageId = DEFAULT_PACKAGE_UID + 1;
         when(mMockPackageManager.getPackagesForUid(somePackageId)).thenReturn(packages2);
         gameManagerService.mUidObserver.onUidStateChanged(
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
+        gameManagerService.mUidObserver.onUidStateChanged(
+                somePackageId, ActivityManager.PROCESS_STATE_TOP, 0, 0);
+        gameManagerService.mUidObserver.onUidStateChanged(
                 DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
         gameManagerService.mUidObserver.onUidStateChanged(
                 somePackageId, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
-        gameManagerService.mUidObserver.onUidStateChanged(
-                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
-        gameManagerService.mUidObserver.onUidStateChanged(
-                somePackageId, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
         verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME, true);
         verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME, false);
     }
@@ -2277,9 +2277,9 @@ public class GameManagerServiceTests {
         String[] packages = {mPackageName};
         when(mMockPackageManager.getPackagesForUid(DEFAULT_PACKAGE_UID)).thenReturn(packages);
         gameManagerService.mUidObserver.onUidStateChanged(
-                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
         gameManagerService.mUidObserver.onUidStateChanged(
-                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
         verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME, false);
     }
 
