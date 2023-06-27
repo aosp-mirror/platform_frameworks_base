@@ -17,7 +17,7 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -94,7 +94,7 @@ class ExternalCaptureStateTracker implements ICaptureStateNotifier {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Exception caught while setting capture state", e);
+            Slog.e(TAG, "Exception caught while setting capture state", e);
         }
     }
 
@@ -102,7 +102,7 @@ class ExternalCaptureStateTracker implements ICaptureStateNotifier {
      * Called by native code when the remote service died.
      */
     private void binderDied() {
-        Log.w(TAG, "Audio policy service died");
+        Slog.w(TAG, "Audio policy service died");
         mNeedToConnect.release();
     }
 }

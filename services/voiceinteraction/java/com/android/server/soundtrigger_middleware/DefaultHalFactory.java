@@ -22,7 +22,7 @@ import android.os.HwBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +62,7 @@ class DefaultHalFactory implements HalFactory {
                         android.hardware.soundtrigger3.ISoundTriggerHw.class.getCanonicalName()
                                 + "/default";
                 if (ServiceManager.isDeclared(aidlServiceName)) {
-                    Log.i(TAG, "Connecting to default soundtrigger3.ISoundTriggerHw");
+                    Slog.i(TAG, "Connecting to default soundtrigger3.ISoundTriggerHw");
                     return new SoundTriggerHw3Compat(ServiceManager.waitForService(aidlServiceName),
                             () -> {
                                 // This property needs to be defined in an init.rc script and
@@ -72,7 +72,7 @@ class DefaultHalFactory implements HalFactory {
                 }
 
                 // Fallback to soundtrigger-V2.x (HIDL).
-                Log.i(TAG, "Connecting to default soundtrigger-V2.x.ISoundTriggerHw");
+                Slog.i(TAG, "Connecting to default soundtrigger-V2.x.ISoundTriggerHw");
                 ISoundTriggerHw driver = ISoundTriggerHw.getService(true);
                 return SoundTriggerHw2Compat.create(driver, () -> {
                     // This property needs to be defined in an init.rc script and
@@ -81,7 +81,7 @@ class DefaultHalFactory implements HalFactory {
                 }, mCaptureStateNotifier);
             } else if (mockHal == USE_MOCK_HAL_V2) {
                 // Use V2 mock.
-                Log.i(TAG, "Connecting to mock soundtrigger-V2.x.ISoundTriggerHw");
+                Slog.i(TAG, "Connecting to mock soundtrigger-V2.x.ISoundTriggerHw");
                 HwBinder.setTrebleTestingOverride(true);
                 try {
                     ISoundTriggerHw driver = ISoundTriggerHw.getService("mock", true);
@@ -89,7 +89,7 @@ class DefaultHalFactory implements HalFactory {
                         try {
                             driver.debug(null, new ArrayList<>(Arrays.asList("reboot")));
                         } catch (Exception e) {
-                            Log.e(TAG, "Failed to reboot mock HAL", e);
+                            Slog.e(TAG, "Failed to reboot mock HAL", e);
                         }
                     }, mCaptureStateNotifier);
                 } finally {
@@ -100,14 +100,14 @@ class DefaultHalFactory implements HalFactory {
                 final String aidlServiceName =
                         android.hardware.soundtrigger3.ISoundTriggerHw.class.getCanonicalName()
                                 + "/mock";
-                Log.i(TAG, "Connecting to mock soundtrigger3.ISoundTriggerHw");
+                Slog.i(TAG, "Connecting to mock soundtrigger3.ISoundTriggerHw");
                 return new SoundTriggerHw3Compat(ServiceManager.waitForService(aidlServiceName),
                         () -> {
                             try {
                                 ServiceManager.waitForService(aidlServiceName).shellCommand(null,
                                         null, null, new String[]{"reboot"}, null, null);
                             } catch (Exception e) {
-                                Log.e(TAG, "Failed to reboot mock HAL", e);
+                                Slog.e(TAG, "Failed to reboot mock HAL", e);
                             }
                         });
             } else {
