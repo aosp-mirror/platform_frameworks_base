@@ -546,6 +546,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     private volatile long mLastStopAppSwitchesTime;
 
+    @GuardedBy("itself")
     private final List<AnrController> mAnrController = new ArrayList<>();
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
@@ -733,7 +734,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private boolean mShowDialogs = true;
 
     /** Set if we are shutting down the system, similar to sleeping. */
-    boolean mShuttingDown = false;
+    volatile boolean mShuttingDown;
 
     /**
      * We want to hold a wake lock while running a voice interaction session, since
@@ -2298,14 +2299,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Register an {@link AnrController} to control the ANR dialog behavior */
     public void registerAnrController(AnrController controller) {
-        synchronized (mGlobalLock) {
+        synchronized (mAnrController) {
             mAnrController.add(controller);
         }
     }
 
     /** Unregister an {@link AnrController} */
     public void unregisterAnrController(AnrController controller) {
-        synchronized (mGlobalLock) {
+        synchronized (mAnrController) {
             mAnrController.remove(controller);
         }
     }
@@ -2321,7 +2322,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final ArrayList<AnrController> controllers;
-        synchronized (mGlobalLock) {
+        synchronized (mAnrController) {
             controllers = new ArrayList<>(mAnrController);
         }
 
@@ -6034,15 +6035,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isShuttingDown() {
-            synchronized (mGlobalLock) {
-                return mShuttingDown;
-            }
+            return mShuttingDown;
         }
 
         @Override
         public boolean shuttingDown(boolean booted, int timeout) {
+            mShuttingDown = true;
             synchronized (mGlobalLock) {
-                mShuttingDown = true;
                 mRootWindowContainer.prepareForShutdown();
                 updateEventDispatchingLocked(booted);
                 notifyTaskPersisterLocked(null, true);
