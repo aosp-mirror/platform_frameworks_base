@@ -66,7 +66,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1048,9 +1047,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     // ----- CommandQueue Callbacks -----
 
     @Override
-    public void setImeWindowStatus(int displayId, IBinder token,
-            @InputMethodService.ImeWindowVisibility int vis,
-            @InputMethodService.BackDispositionMode int backDisposition, boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
         if (displayId != mDisplayId) {
             return;
         }
