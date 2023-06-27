@@ -673,30 +673,35 @@ class MediaRouter2ServiceImpl {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            RoutingSessionInfo systemSessionInfo = null;
             synchronized (mLock) {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
                 List<RoutingSessionInfo> sessionInfos;
                 if (hasModifyAudioRoutingPermission) {
                     if (setDeviceRouteSelected) {
-                        systemSessionInfo = userRecord.mHandler.mSystemProvider
+                        // Return a fake system session that shows the device route as selected and
+                        // available bluetooth routes as transferable.
+                        return userRecord.mHandler.mSystemProvider
                                 .generateDeviceRouteSelectedSessionInfo(packageName);
                     } else {
                         sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
                         if (sessionInfos != null && !sessionInfos.isEmpty()) {
-                            systemSessionInfo = new RoutingSessionInfo.Builder(sessionInfos.get(0))
-                                    .setClientPackageName(packageName).build();
+                            // Return a copy of the current system session with no modification,
+                            // except setting the client package name.
+                            return new RoutingSessionInfo.Builder(sessionInfos.get(0))
+                                    .setClientPackageName(packageName)
+                                    .build();
                         } else {
                             Slog.w(TAG, "System provider does not have any session info.");
                         }
                     }
                 } else {
-                    systemSessionInfo = new RoutingSessionInfo.Builder(
-                            userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
-                            .setClientPackageName(packageName).build();
+                    return new RoutingSessionInfo.Builder(
+                                    userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
+                            .setClientPackageName(packageName)
+                            .build();
                 }
             }
-            return systemSessionInfo;
+            return null;
         } finally {
             Binder.restoreCallingIdentity(token);
         }

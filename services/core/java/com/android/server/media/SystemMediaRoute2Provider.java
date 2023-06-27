@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -253,6 +254,16 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         return mDefaultSessionInfo;
     }
 
+    /**
+     * Builds a system {@link RoutingSessionInfo} with the selected route set to the currently
+     * selected <b>device</b> route (wired or built-in, but not bluetooth) and transferable routes
+     * set to the currently available (connected) bluetooth routes.
+     *
+     * <p>The session's client package name is set to the provided package name.
+     *
+     * <p>Returns {@code null} if there are no registered system sessions.
+     */
+    @Nullable
     public RoutingSessionInfo generateDeviceRouteSelectedSessionInfo(String packageName) {
         synchronized (mLock) {
             if (mSessionInfos.isEmpty()) {
