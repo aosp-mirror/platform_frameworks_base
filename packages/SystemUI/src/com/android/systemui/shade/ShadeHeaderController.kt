@@ -131,6 +131,7 @@ constructor(
     private val date: TextView = header.findViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
     private val mShadeCarrierGroup: ShadeCarrierGroup = header.findViewById(R.id.carrier_group)
+    private val systemIcons: View = header.findViewById(R.id.shade_header_system_icons)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -249,6 +250,14 @@ constructor(
                     header.paddingTop,
                     header.paddingRight,
                     header.paddingBottom
+                )
+                systemIcons.setPaddingRelative(
+                    resources.getDimensionPixelSize(
+                        R.dimen.shade_header_system_icons_padding_start
+                    ),
+                    systemIcons.paddingTop,
+                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_end),
+                    systemIcons.paddingBottom
                 )
             }
 
