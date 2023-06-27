@@ -29,6 +29,7 @@ import android.view.DisplayCutout
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -127,6 +128,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     var viewVisibility = View.GONE
     var viewAlpha = 1f
 
+    private val systemIcons = LinearLayout(context)
     private lateinit var shadeHeaderController: ShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
     private val configurationController = FakeConfigurationController()
@@ -146,6 +148,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
             .thenReturn(batteryMeterView)
 
         whenever<StatusIconContainer>(view.findViewById(R.id.statusIcons)).thenReturn(statusIcons)
+        whenever<View>(view.findViewById(R.id.shade_header_system_icons)).thenReturn(systemIcons)
 
         viewContext = Mockito.spy(context)
         whenever(view.context).thenReturn(viewContext)
@@ -437,6 +440,17 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         shadeHeaderController.largeScreenActive = false
 
         verify(view).setTransition(ShadeHeaderController.HEADER_TRANSITION_ID)
+    }
+
+    @Test
+    fun testLargeScreenActive_collapseActionRun_onSystemIconsClick() {
+        shadeHeaderController.largeScreenActive = true
+        var wasRun = false
+        shadeHeaderController.shadeCollapseAction = Runnable { wasRun = true }
+
+        systemIcons.performClick()
+
+        assertThat(wasRun).isTrue()
     }
 
     @Test
