@@ -1565,6 +1565,10 @@ public class Tuner implements AutoCloseable  {
         mFrontendCiCamLock.lock();
         mFrontendLock.lock();
         try {
+            if (mFrontendHandle == null) {
+                Log.d(TAG, "Operation cannot be done without frontend");
+                return RESULT_INVALID_STATE;
+            }
             if (mFeOwnerTuner != null) {
                 Log.d(TAG, "Operation cannot be done by sharee of tuner");
                 return RESULT_INVALID_STATE;
@@ -1632,6 +1636,10 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         acquireTRMSLock("disconnectFrontendToCiCam()");
         try {
+            if (mFrontendHandle == null) {
+                Log.d(TAG, "Operation cannot be done without frontend");
+                return RESULT_INVALID_STATE;
+            }
             if (mFeOwnerTuner != null) {
                 Log.d(TAG, "Operation cannot be done by sharee of tuner");
                 return RESULT_INVALID_STATE;
