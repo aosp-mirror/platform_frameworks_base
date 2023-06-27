@@ -17,34 +17,20 @@
 
 <device name="Android">
 
-    <array name="cpu.clusters.cores">
-        <value>1</value>
-        <value>2</value>
-    </array>
-
-    <array name="cpu.core_speeds.cluster0">
-        <value>300000</value>
-    </array>
-
-    <array name="cpu.core_speeds.cluster1">
-        <value>300000</value>
-        <value>1000000</value>
-    </array>
-
-    <array name="cpu.core_power.cluster0">
+    <array name="cpu.scaling_step_power.policy0">
         <value>10</value>
     </array>
 
-    <array name="cpu.core_power.cluster1">
+    <array name="cpu.scaling_step_power.policy4">
         <value>25</value>
         <value>35</value>
     </array>
 
-    <array name="cpu.power_brackets.cluster0">
+    <array name="cpu.power_brackets.policy0">
         <value>1</value>
     </array>
 
-    <array name="cpu.power_brackets.cluster1">
+    <array name="cpu.power_brackets.policy4">
         <value>1</value>
         <value>0</value>
     </array>

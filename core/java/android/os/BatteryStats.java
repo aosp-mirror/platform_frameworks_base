@@ -54,6 +54,7 @@ import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.CpuScalingPolicies;
 
 import com.google.android.collect.Lists;
 
@@ -1008,9 +1009,11 @@ public abstract class BatteryStats {
          * @param cluster the index of the CPU cluster.
          * @param step the index of the CPU speed. This is not the actual speed of the CPU.
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
-         * @see com.android.internal.os.PowerProfile#getNumCpuClusters()
-         * @see com.android.internal.os.PowerProfile#getNumSpeedStepsInCpuCluster(int)
+         * @see com.android.internal.os.CpuScalingPolicies#getPolicies
+         * @see com.android.internal.os.CpuScalingPolicies#getFrequencies
+         * @deprecated Unused except in tests
          */
+        @Deprecated
         public abstract long getTimeAtCpuSpeed(int cluster, int step, int which);
 
         /**
@@ -1648,11 +1651,9 @@ public abstract class BatteryStats {
     public abstract long getNextMaxDailyDeadline();
 
     /**
-     * Returns the total number of frequencies across all CPU clusters.
+     * Returns the CPU scaling policies.
      */
-    public abstract int getCpuFreqCount();
-
-    public abstract long[] getCpuFreqs();
+    public abstract CpuScalingPolicies getCpuScalingPolicies();
 
     public final static class HistoryTag {
         public String string;
@@ -3390,8 +3391,8 @@ public abstract class BatteryStats {
      *     cluster1-speeed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...
      * </pre>
      *
-     * @see com.android.internal.os.PowerProfile#getNumCpuClusters()
-     * @see com.android.internal.os.PowerProfile#getNumSpeedStepsInCpuCluster(int)
+     * @see com.android.internal.os.CpuScalingPolicies#getPolicies
+     * @see com.android.internal.os.CpuScalingPolicies#getFrequencies
      */
     @Nullable
     public abstract long[] getSystemServiceTimeAtCpuSpeeds();
@@ -4677,12 +4678,14 @@ public abstract class BatteryStats {
                             proportionalAttributionCalculator.getProportionalPowerMah(consumer)));
         }
 
-        final long[] cpuFreqs = getCpuFreqs();
-        if (cpuFreqs != null) {
+        final CpuScalingPolicies scalingPolicies = getCpuScalingPolicies();
+        if (scalingPolicies != null) {
             sb.setLength(0);
-            for (int i = 0; i < cpuFreqs.length; ++i) {
-                if (i != 0) sb.append(',');
-                sb.append(cpuFreqs[i]);
+            for (int policy : scalingPolicies.getPolicies()) {
+                for (int frequency : scalingPolicies.getFrequencies(policy)) {
+                    if (sb.length() != 0) sb.append(',');
+                    sb.append(frequency);
+                }
             }
             dumpLine(pw, 0 /* uid */, category, GLOBAL_CPU_FREQ_DATA, sb.toString());
         }
@@ -4994,11 +4997,12 @@ public abstract class BatteryStats {
             }
 
             // If the cpuFreqs is null, then don't bother checking for cpu freq times.
-            if (cpuFreqs != null) {
+            if (scalingPolicies != null) {
                 final long[] cpuFreqTimeMs = u.getCpuFreqTimes(which);
                 // If total cpuFreqTimes is null, then we don't need to check for
                 // screenOffCpuFreqTimes.
-                if (cpuFreqTimeMs != null && cpuFreqTimeMs.length == cpuFreqs.length) {
+                if (cpuFreqTimeMs != null
+                        && cpuFreqTimeMs.length == scalingPolicies.getScalingStepCount()) {
                     sb.setLength(0);
                     for (int i = 0; i < cpuFreqTimeMs.length; ++i) {
                         if (i != 0) sb.append(',');
@@ -5018,7 +5022,8 @@ public abstract class BatteryStats {
                             cpuFreqTimeMs.length, sb.toString());
                 }
 
-                final long[] timesInFreqMs = new long[getCpuFreqCount()];
+                final long[] timesInFreqMs =
+                        new long[getCpuScalingPolicies().getScalingStepCount()];
                 for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
                     if (u.getCpuFreqTimes(timesInFreqMs, procState)) {
                         sb.setLength(0);
@@ -6000,14 +6005,18 @@ public abstract class BatteryStats {
             }
         }
 
-        final long[] cpuFreqs = getCpuFreqs();
-        if (cpuFreqs != null) {
+        final CpuScalingPolicies scalingPolicies = getCpuScalingPolicies();
+        if (scalingPolicies != null) {
             sb.setLength(0);
-            sb.append("  CPU freqs:");
-            for (int i = 0; i < cpuFreqs.length; ++i) {
-                sb.append(' ').append(cpuFreqs[i]);
+            sb.append("  CPU scaling: ");
+            for (int policy : scalingPolicies.getPolicies()) {
+                sb.append(" policy").append(policy).append(':');
+                for (int frequency : scalingPolicies.getFrequencies(policy)) {
+                    sb.append(' ').append(frequency);
+                }
             }
-            pw.println(sb.toString());
+
+            pw.println(sb);
             pw.println();
         }
 
@@ -6628,7 +6637,7 @@ public abstract class BatteryStats {
                 pw.println(sb.toString());
             }
 
-            final long[] timesInFreqMs = new long[getCpuFreqCount()];
+            final long[] timesInFreqMs = new long[getCpuScalingPolicies().getScalingStepCount()];
             for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
                 if (u.getCpuFreqTimes(timesInFreqMs, procState)) {
                     sb.setLength(0);
@@ -8078,12 +8087,13 @@ public abstract class BatteryStats {
             proto.write(UidProto.Cpu.USER_DURATION_MS, roundUsToMs(u.getUserCpuTimeUs(which)));
             proto.write(UidProto.Cpu.SYSTEM_DURATION_MS, roundUsToMs(u.getSystemCpuTimeUs(which)));
 
-            final long[] cpuFreqs = getCpuFreqs();
-            if (cpuFreqs != null) {
+            final CpuScalingPolicies scalingPolicies = getCpuScalingPolicies();
+            if (scalingPolicies != null) {
                 final long[] cpuFreqTimeMs = u.getCpuFreqTimes(which);
                 // If total cpuFreqTimes is null, then we don't need to check for
                 // screenOffCpuFreqTimes.
-                if (cpuFreqTimeMs != null && cpuFreqTimeMs.length == cpuFreqs.length) {
+                if (cpuFreqTimeMs != null
+                        && cpuFreqTimeMs.length == scalingPolicies.getScalingStepCount()) {
                     long[] screenOffCpuFreqTimeMs = u.getScreenOffCpuFreqTimes(which);
                     if (screenOffCpuFreqTimeMs == null) {
                         screenOffCpuFreqTimeMs = new long[cpuFreqTimeMs.length];
@@ -8100,8 +8110,9 @@ public abstract class BatteryStats {
                 }
             }
 
-            final long[] timesInFreqMs = new long[getCpuFreqCount()];
-            final long[] timesInFreqScreenOffMs = new long[getCpuFreqCount()];
+            final int stepCount = getCpuScalingPolicies().getScalingStepCount();
+            final long[] timesInFreqMs = new long[stepCount];
+            final long[] timesInFreqScreenOffMs = new long[stepCount];
             for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
                 if (u.getCpuFreqTimes(timesInFreqMs, procState)) {
                     if (!u.getScreenOffCpuFreqTimes(timesInFreqScreenOffMs, procState)) {
@@ -8571,10 +8582,12 @@ public abstract class BatteryStats {
         dumpDurationSteps(proto, SystemProto.DISCHARGE_STEP, getDischargeLevelStepTracker());
 
         // CPU frequencies (GLOBAL_CPU_FREQ_DATA)
-        final long[] cpuFreqs = getCpuFreqs();
-        if (cpuFreqs != null) {
-            for (long i : cpuFreqs) {
-                proto.write(SystemProto.CPU_FREQUENCY, i);
+        final CpuScalingPolicies scalingPolicies = getCpuScalingPolicies();
+        if (scalingPolicies != null) {
+            for (int policy : scalingPolicies.getPolicies()) {
+                for (int frequency : scalingPolicies.getFrequencies(policy)) {
+                    proto.write(SystemProto.CPU_FREQUENCY, frequency);
+                }
             }
         }
 

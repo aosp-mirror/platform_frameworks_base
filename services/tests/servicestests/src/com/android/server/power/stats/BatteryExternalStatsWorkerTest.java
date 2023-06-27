@@ -42,6 +42,7 @@ import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 
 import org.junit.Before;
@@ -214,6 +215,15 @@ public class BatteryExternalStatsWorkerTest {
     public class TestBatteryStatsImpl extends BatteryStatsImpl {
         public TestBatteryStatsImpl(Context context) {
             mPowerProfile = new PowerProfile(context, true /* forTest */);
+
+            SparseArray<int[]> cpusByPolicy = new SparseArray<>();
+            cpusByPolicy.put(0, new int[]{0, 1, 2, 3});
+            cpusByPolicy.put(4, new int[]{4, 5, 6, 7});
+            SparseArray<int[]> freqsByPolicy = new SparseArray<>();
+            freqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
+            freqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
+            mCpuScalingPolicies = new CpuScalingPolicies(freqsByPolicy, freqsByPolicy);
+
             initTimersAndCounters();
         }
     }

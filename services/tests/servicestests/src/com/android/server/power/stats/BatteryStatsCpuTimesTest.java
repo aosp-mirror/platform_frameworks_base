@@ -32,25 +32,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.BatteryStats;
 import android.os.UserHandle;
+import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
-import com.android.internal.os.PowerProfile;
 import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
@@ -95,8 +95,6 @@ public class BatteryStatsCpuTimesTest {
     SystemServerCpuThreadReader mSystemServerCpuThreadReader;
     @Mock
     BatteryStatsImpl.UserInfoProvider mUserInfoProvider;
-    @Mock
-    PowerProfile mPowerProfile;
 
     private MockClock mClocks;
     private MockBatteryStatsImpl mBatteryStatsImpl;
@@ -108,6 +106,7 @@ public class BatteryStatsCpuTimesTest {
 
         mClocks = new MockClock();
         mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks)
+                .setTestCpuScalingPolicies()
                 .setKernelCpuUidUserSysTimeReader(mCpuUidUserSysTimeReader)
                 .setKernelCpuUidFreqTimeReader(mCpuUidFreqTimeReader)
                 .setKernelCpuUidActiveTimeReader(mCpuUidActiveTimeReader)
@@ -119,18 +118,14 @@ public class BatteryStatsCpuTimesTest {
     @Test
     public void testUpdateCpuTimeLocked() {
         // PRECONDITIONS
-        mBatteryStatsImpl.setPowerProfile(mPowerProfile);
         mBatteryStatsImpl.setOnBatteryInternal(false);
         final int numClusters = 3;
         initKernelCpuSpeedReaders(numClusters);
-        final long[] freqs = {1, 12, 123, 12, 1234};
-        when(mCpuUidFreqTimeReader.readFreqs(mPowerProfile)).thenReturn(freqs);
 
         // RUN
         mBatteryStatsImpl.updateCpuTimeLocked(false, false, null);
 
         // VERIFY
-        assertArrayEquals("Unexpected cpu freqs", freqs, mBatteryStatsImpl.getCpuFreqs());
         verify(mCpuUidUserSysTimeReader).readDelta(anyBoolean(), isNull());
         verify(mCpuUidFreqTimeReader).readDelta(anyBoolean(), isNull());
         for (int i = 0; i < numClusters; ++i) {
@@ -153,9 +148,8 @@ public class BatteryStatsCpuTimesTest {
         verify(mUserInfoProvider).refreshUserIds();
         verify(mCpuUidUserSysTimeReader).readDelta(anyBoolean(),
                 any(KernelCpuUidUserSysTimeReader.Callback.class));
-        // perClusterTimesAvailable is called twice, once in updateCpuTimeLocked() and the other
-        // in readKernelUidCpuFreqTimesLocked.
-        verify(mCpuUidFreqTimeReader, times(2)).perClusterTimesAvailable();
+        verify(mCpuUidFreqTimeReader).perClusterTimesAvailable();
+        verify(mCpuUidFreqTimeReader).allUidTimesAvailable();
         verify(mCpuUidFreqTimeReader).readDelta(anyBoolean(),
                 any(KernelCpuUidFreqTimeReader.Callback.class));
         verify(mCpuUidActiveTimeReader).readAbsolute(
@@ -210,15 +204,25 @@ public class BatteryStatsCpuTimesTest {
         // PRECONDITIONS
         updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final long[][] clusterSpeedTimesMs = {{20, 30}, {40, 50, 60}};
+
+        CpuScalingPolicies scalingPolicies = new CpuScalingPolicies(
+                new SparseArray<>() {{
+                    for (int i = 0; i < clusterSpeedTimesMs.length; i++) {
+                        put(i, new int[]{i});
+                    }
+                }},
+                new SparseArray<>() {{
+                    for (int i = 0; i < clusterSpeedTimesMs.length; i++) {
+                        put(i, new int[clusterSpeedTimesMs[i].length]);
+                    }
+                }});
+        mBatteryStatsImpl.setCpuScalingPolicies(scalingPolicies);
+
         initKernelCpuSpeedReaders(clusterSpeedTimesMs.length);
         for (int i = 0; i < clusterSpeedTimesMs.length; ++i) {
             when(mKernelCpuSpeedReaders[i].readDelta()).thenReturn(clusterSpeedTimesMs[i]);
         }
-        when(mPowerProfile.getNumCpuClusters()).thenReturn(clusterSpeedTimesMs.length);
-        for (int i = 0; i < clusterSpeedTimesMs.length; ++i) {
-            when(mPowerProfile.getNumSpeedStepsInCpuCluster(i))
-                    .thenReturn(clusterSpeedTimesMs[i].length);
-        }
+
         final SparseLongArray updatedUids = new SparseLongArray();
         final int[] testUids = {10012, 10014, 10016};
         final int[] cpuTimeUs = {89, 31, 43};
@@ -626,14 +630,19 @@ public class BatteryStatsCpuTimesTest {
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
         });
-        final long[] freqs = {1, 12, 123, 12, 1234};
+        CpuScalingPolicies scalingPolicies = new CpuScalingPolicies(
+                new SparseArray<>() {{
+                    put(0, new int[]{0});
+                    put(1, new int[]{1});
+                }},
+                new SparseArray<>() {{
+                    put(0, new int[]{1, 12, 123});
+                    put(1, new int[]{12, 1234});
+                }});
+        mBatteryStatsImpl.setCpuScalingPolicies(scalingPolicies);
         // Derived from freqs above, 2 clusters with {3, 2} freqs in each of them.
         final int[] clusterFreqs = {3, 2};
-        when(mPowerProfile.getNumCpuClusters()).thenReturn(clusterFreqs.length);
-        for (int i = 0; i < clusterFreqs.length; ++i) {
-            when(mPowerProfile.getNumSpeedStepsInCpuCluster(i))
-                    .thenReturn(clusterFreqs[i]);
-        }
+
         final long[][] uidTimesMs = {
                 {4, 10, 5, 9, 4},
                 {5, 1, 12, 2, 10},
@@ -736,14 +745,21 @@ public class BatteryStatsCpuTimesTest {
         };
         final ArrayList<BatteryStatsImpl.StopwatchTimer> partialTimers
                 = getPartialTimers(partialTimerUids);
-        final long[] freqs = {1, 12, 123, 12, 1234};
+
+        CpuScalingPolicies scalingPolicies = new CpuScalingPolicies(
+                new SparseArray<>() {{
+                    put(0, new int[]{0});
+                    put(1, new int[]{1});
+                }},
+                new SparseArray<>() {{
+                    put(0, new int[]{1, 12, 123});
+                    put(1, new int[]{12, 1234});
+                }});
+        mBatteryStatsImpl.setCpuScalingPolicies(scalingPolicies);
+
         // Derived from freqs above, 2 clusters with {3, 2} freqs in each of them.
         final int[] clusterFreqs = {3, 2};
-        when(mPowerProfile.getNumCpuClusters()).thenReturn(clusterFreqs.length);
-        for (int i = 0; i < clusterFreqs.length; ++i) {
-            when(mPowerProfile.getNumSpeedStepsInCpuCluster(i))
-                    .thenReturn(clusterFreqs[i]);
-        }
+
         final long[][] uidTimesMs = {
                 {4, 10, 5, 9, 4},
                 {5, 1, 12, 2, 10},
@@ -764,7 +780,7 @@ public class BatteryStatsCpuTimesTest {
         mBatteryStatsImpl.readKernelUidCpuFreqTimesLocked(partialTimers, true, false, null);
 
         // VERIFY
-        final long[][] expectedWakeLockUidTimesUs = new long[clusterFreqs.length][];
+        final long[][] expectedWakeLockUidTimesUs = new long[2][];
         for (int cluster = 0; cluster < clusterFreqs.length; ++cluster) {
             expectedWakeLockUidTimesUs[cluster] = new long[clusterFreqs[cluster]];
         }
@@ -1357,11 +1373,7 @@ public class BatteryStatsCpuTimesTest {
 
     private void updateTimeBasesLocked(boolean unplugged, int screenState,
             long upTime, long realTime) {
-        // Set PowerProfile=null before calling updateTimeBasesLocked to avoid execution of
-        // BatteryStatsImpl.updateCpuTimeLocked
-        mBatteryStatsImpl.setPowerProfile(null);
         mBatteryStatsImpl.updateTimeBasesLocked(unplugged, screenState, upTime, realTime);
-        mBatteryStatsImpl.setPowerProfile(mPowerProfile);
     }
 
     private void initKernelCpuSpeedReaders(int count) {

@@ -65,15 +65,14 @@ public class CpuPowerCalculatorTest {
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePower(PowerProfile.POWER_CPU_ACTIVE, 720)
-            .setNumCpuClusters(2)
-            .setNumSpeedStepsInCpuCluster(0, 2)
-            .setNumSpeedStepsInCpuCluster(1, 2)
-            .setAveragePowerForCpuCluster(0, 360)
-            .setAveragePowerForCpuCluster(1, 480)
-            .setAveragePowerForCpuCore(0, 0, 300)
-            .setAveragePowerForCpuCore(0, 1, 400)
-            .setAveragePowerForCpuCore(1, 0, 500)
-            .setAveragePowerForCpuCore(1, 1, 600);
+            .setCpuScalingPolicy(0, new int[]{0, 1}, new int[]{100, 200})
+            .setCpuScalingPolicy(2, new int[]{2, 3}, new int[]{300, 400})
+            .setAveragePowerForCpuScalingPolicy(0, 360)
+            .setAveragePowerForCpuScalingPolicy(2, 480)
+            .setAveragePowerForCpuScalingStep(0, 0, 300)
+            .setAveragePowerForCpuScalingStep(0, 1, 400)
+            .setAveragePowerForCpuScalingStep(2, 0, 500)
+            .setAveragePowerForCpuScalingStep(2, 1, 600);
 
     private final KernelCpuSpeedReader[] mMockKernelCpuSpeedReaders = new KernelCpuSpeedReader[]{
             mock(KernelCpuSpeedReader.class),
@@ -179,7 +178,8 @@ public class CpuPowerCalculatorTest {
         mStatsRule.getUidStats(APP_UID1).getProcessStatsLocked("bar").addCpuTimeLocked(5432, 2345);
 
         CpuPowerCalculator calculator =
-                new CpuPowerCalculator(mStatsRule.getPowerProfile());
+                new CpuPowerCalculator(mStatsRule.getCpuScalingPolicies(),
+                        mStatsRule.getPowerProfile());
 
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
@@ -246,8 +246,8 @@ public class CpuPowerCalculatorTest {
         mStatsRule.getUidStats(APP_UID1).getProcessStatsLocked("foo").addCpuTimeLocked(4321, 1234);
         mStatsRule.getUidStats(APP_UID1).getProcessStatsLocked("bar").addCpuTimeLocked(5432, 2345);
 
-        CpuPowerCalculator calculator =
-                new CpuPowerCalculator(mStatsRule.getPowerProfile());
+        CpuPowerCalculator calculator = new CpuPowerCalculator(mStatsRule.getCpuScalingPolicies(),
+                mStatsRule.getPowerProfile());
 
         mStatsRule.apply(calculator);
 
@@ -287,7 +287,6 @@ public class CpuPowerCalculatorTest {
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
         when(mMockCpuUidFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
-        when(mMockCpuUidFreqTimeReader.readFreqs(any())).thenReturn(new long[]{100, 200, 300, 400});
 
         when(mMockKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
 
@@ -353,8 +352,8 @@ public class CpuPowerCalculatorTest {
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
         mStatsRule.getBatteryStats().updateCpuTimesForAllUids();
 
-        CpuPowerCalculator calculator =
-                new CpuPowerCalculator(mStatsRule.getPowerProfile());
+        CpuPowerCalculator calculator = new CpuPowerCalculator(mStatsRule.getCpuScalingPolicies(),
+                mStatsRule.getPowerProfile());
 
         mStatsRule.apply(new BatteryUsageStatsQuery.Builder()
                 .powerProfileModeledOnly()
@@ -461,8 +460,8 @@ public class CpuPowerCalculatorTest {
         clusterChargesUC[1] += 20000000;
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, clusterChargesUC);
 
-        CpuPowerCalculator calculator =
-                new CpuPowerCalculator(mStatsRule.getPowerProfile());
+        CpuPowerCalculator calculator = new CpuPowerCalculator(mStatsRule.getCpuScalingPolicies(),
+                mStatsRule.getPowerProfile());
 
         mStatsRule.apply(new BatteryUsageStatsQuery.Builder()
                 .includePowerModels()

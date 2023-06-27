@@ -50,6 +50,7 @@ import android.view.Display;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.LongArrayMultiStateCounter;
@@ -70,9 +71,6 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SuppressWarnings("GuardedBy")
 public class BatteryStatsImplTest {
-    private static final long[] CPU_FREQS = {1, 2, 3, 4, 5};
-    private static final int NUM_CPU_FREQS = CPU_FREQS.length;
-
     @Mock
     private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
     @Mock
@@ -83,6 +81,16 @@ public class BatteryStatsImplTest {
     private KernelWakelockReader mKernelWakelockReader;
     private KernelWakelockStats mKernelWakelockStats = new KernelWakelockStats();
 
+    private static final int NUM_CPU_FREQS = 5;
+
+    private final CpuScalingPolicies mCpuScalingPolicies = new CpuScalingPolicies(
+            new SparseArray<>() {{
+                put(0, new int[1]);
+            }},
+            new SparseArray<>() {{
+                put(0, new int[NUM_CPU_FREQS]);
+            }});
+
     private final MockClock mMockClock = new MockClock();
     private MockBatteryStatsImpl mBatteryStatsImpl;
 
@@ -91,13 +99,13 @@ public class BatteryStatsImplTest {
         MockitoAnnotations.initMocks(this);
 
         when(mKernelUidCpuFreqTimeReader.isFastCpuTimesReader()).thenReturn(true);
-        when(mKernelUidCpuFreqTimeReader.readFreqs(any())).thenReturn(CPU_FREQS);
         when(mKernelUidCpuFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         when(mKernelWakelockReader.readKernelWakelockStats(
                 any(KernelWakelockStats.class))).thenReturn(mKernelWakelockStats);
         mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock)
                 .setPowerProfile(mPowerProfile)
+                .setCpuScalingPolicies(mCpuScalingPolicies)
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
                 .setKernelWakelockReader(mKernelWakelockReader);

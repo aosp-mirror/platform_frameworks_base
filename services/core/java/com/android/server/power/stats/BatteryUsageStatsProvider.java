@@ -31,6 +31,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class BatteryUsageStatsProvider {
     private final BatteryStats mStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final PowerProfile mPowerProfile;
+    private final CpuScalingPolicies mCpuScalingPolicies;
     private final Object mLock = new Object();
     private List<PowerCalculator> mPowerCalculators;
 
@@ -63,6 +65,7 @@ public class BatteryUsageStatsProvider {
         mPowerProfile = stats instanceof BatteryStatsImpl
                 ? ((BatteryStatsImpl) stats).getPowerProfile()
                 : new PowerProfile(context);
+        mCpuScalingPolicies = stats.getCpuScalingPolicies();
     }
 
     private List<PowerCalculator> getPowerCalculators() {
@@ -72,7 +75,7 @@ public class BatteryUsageStatsProvider {
 
                 // Power calculators are applied in the order of registration
                 mPowerCalculators.add(new BatteryChargeCalculator());
-                mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new CpuPowerCalculator(mCpuScalingPolicies, mPowerProfile));
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
                 if (!BatteryStats.checkWifiOnly(mContext)) {
@@ -97,7 +100,8 @@ public class BatteryUsageStatsProvider {
                 // It is important that SystemServicePowerCalculator be applied last,
                 // because it re-attributes some of the power estimated by the other
                 // calculators.
-                mPowerCalculators.add(new SystemServicePowerCalculator(mPowerProfile));
+                mPowerCalculators.add(
+                        new SystemServicePowerCalculator(mCpuScalingPolicies, mPowerProfile));
             }
         }
         return mPowerCalculators;

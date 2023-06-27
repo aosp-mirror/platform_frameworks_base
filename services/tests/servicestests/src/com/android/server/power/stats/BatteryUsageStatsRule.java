@@ -34,6 +34,7 @@ import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 
@@ -59,6 +60,9 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private BatteryUsageStats mBatteryUsageStats;
     private boolean mScreenOn;
+    private boolean mDefaultCpuScalingPolicy = true;
+    private SparseArray<int[]> mCpusByPolicy = new SparseArray<>();
+    private SparseArray<int[]> mFreqsByPolicy = new SparseArray<>();
 
     public BatteryUsageStatsRule() {
         this(0, null);
@@ -74,11 +78,31 @@ public class BatteryUsageStatsRule implements TestRule {
         mMockClock.currentTime = currentTime;
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
         mBatteryStats.setPowerProfile(mPowerProfile);
+
+        mCpusByPolicy.put(0, new int[]{0, 1, 2, 3});
+        mCpusByPolicy.put(4, new int[]{4, 5, 6, 7});
+        mFreqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
+        mFreqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
+        mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
+
         mBatteryStats.onSystemReady();
     }
 
     public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
         mPowerProfile.forceInitForTesting(mContext, xmlId);
+        return this;
+    }
+
+    public BatteryUsageStatsRule setCpuScalingPolicy(int policy, int[] relatedCpus,
+            int[] frequencies) {
+        if (mDefaultCpuScalingPolicy) {
+            mCpusByPolicy.clear();
+            mFreqsByPolicy.clear();
+            mDefaultCpuScalingPolicy = false;
+        }
+        mCpusByPolicy.put(policy, relatedCpus);
+        mFreqsByPolicy.put(policy, frequencies);
+        mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
         return this;
     }
 
@@ -103,23 +127,14 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
-    public BatteryUsageStatsRule setNumCpuClusters(int number) {
-        when(mPowerProfile.getNumCpuClusters()).thenReturn(number);
+    public BatteryUsageStatsRule setAveragePowerForCpuScalingPolicy(int policy, double value) {
+        when(mPowerProfile.getAveragePowerForCpuScalingPolicy(policy)).thenReturn(value);
         return this;
     }
 
-    public BatteryUsageStatsRule setNumSpeedStepsInCpuCluster(int cluster, int speeds) {
-        when(mPowerProfile.getNumSpeedStepsInCpuCluster(cluster)).thenReturn(speeds);
-        return this;
-    }
-
-    public BatteryUsageStatsRule setAveragePowerForCpuCluster(int cluster, double value) {
-        when(mPowerProfile.getAveragePowerForCpuCluster(cluster)).thenReturn(value);
-        return this;
-    }
-
-    public BatteryUsageStatsRule setAveragePowerForCpuCore(int cluster, int step, double value) {
-        when(mPowerProfile.getAveragePowerForCpuCore(cluster, step)).thenReturn(value);
+    public BatteryUsageStatsRule setAveragePowerForCpuScalingStep(int policy, int step,
+            double value) {
+        when(mPowerProfile.getAveragePowerForCpuScalingStep(policy, step)).thenReturn(value);
         return this;
     }
 
@@ -191,6 +206,12 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public PowerProfile getPowerProfile() {
         return mPowerProfile;
+    }
+
+    public CpuScalingPolicies getCpuScalingPolicies() {
+        synchronized (mBatteryStats) {
+            return mBatteryStats.getCpuScalingPolicies();
+        }
     }
 
     public MockBatteryStatsImpl getBatteryStats() {

@@ -16,18 +16,18 @@
 
 package com.android.server.power.stats;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.usage.NetworkStatsManager;
 import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.Clock;
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
@@ -73,7 +73,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         };
 
         mCpuUidFreqTimeReader = mock(KernelCpuUidFreqTimeReader.class);
-        when(mCpuUidFreqTimeReader.readFreqs(any())).thenReturn(new long[]{100, 200});
         mKernelWakelockReader = null;
     }
 
@@ -136,8 +135,25 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
             @NonNull NetworkStatsManager networkStatsManager) {
         return mNetworkStats;
     }
+
     public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
         mPowerProfile = powerProfile;
+        setTestCpuScalingPolicies();
+        return this;
+    }
+
+    public MockBatteryStatsImpl setTestCpuScalingPolicies() {
+        SparseArray<int[]> cpusByPolicy = new SparseArray<>();
+        cpusByPolicy.put(0, new int[]{0});
+        SparseArray<int[]> freqsByPolicy = new SparseArray<>();
+        freqsByPolicy.put(0, new int[]{100, 200, 300});
+
+        setCpuScalingPolicies(new CpuScalingPolicies(freqsByPolicy, freqsByPolicy));
+        return this;
+    }
+
+    public MockBatteryStatsImpl setCpuScalingPolicies(CpuScalingPolicies cpuScalingPolicies) {
+        mCpuScalingPolicies = cpuScalingPolicies;
         return this;
     }
 
