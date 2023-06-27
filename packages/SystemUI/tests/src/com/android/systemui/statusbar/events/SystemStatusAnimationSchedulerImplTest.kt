@@ -69,6 +69,8 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
     @Mock private lateinit var listener: SystemStatusAnimationCallback
 
+    @Mock private lateinit var logger: SystemStatusAnimationSchedulerLogger
+
     private lateinit var systemClock: FakeSystemClock
     private lateinit var chipAnimationController: SystemEventChipAnimationController
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
@@ -538,7 +540,8 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
                 statusBarWindowController,
                 dumpManager,
                 systemClock,
-                CoroutineScope(StandardTestDispatcher(testScope.testScheduler))
+                CoroutineScope(StandardTestDispatcher(testScope.testScheduler)),
+                logger
             )
         // add a mock listener
         systemStatusAnimationScheduler.addCallback(listener)

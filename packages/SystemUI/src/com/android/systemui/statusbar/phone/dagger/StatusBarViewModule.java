@@ -16,22 +16,16 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import android.view.LayoutInflater;
-
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelView;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -69,12 +63,6 @@ import javax.inject.Named;
 public abstract class StatusBarViewModule {
 
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
-
-    /** */
-    @Binds
-    @CentralSurfacesComponent.CentralSurfacesScope
-    abstract ShadeViewController bindsShadeViewController(
-            NotificationPanelViewController notificationPanelViewController);
 
     @Binds
     @IntoSet
@@ -145,17 +133,4 @@ public abstract class StatusBarViewModule {
                 statusBarWindowStateController,
                 keyguardUpdateMonitor);
     }
-
-    /**
-     * Constructs a new, unattached {@link KeyguardBottomAreaView}.
-     *
-     * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
-     */
-    @Provides
-    public static KeyguardBottomAreaView providesKeyguardBottomAreaView(
-            NotificationPanelView npv, LayoutInflater layoutInflater) {
-        return (KeyguardBottomAreaView) layoutInflater.inflate(R
-                .layout.keyguard_bottom_area, npv, false);
-    }
-
 }

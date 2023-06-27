@@ -1061,8 +1061,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 displayHasContent = true;
             } else if (displayContent != null &&
                     (!mObscureApplicationContentOnSecondaryDisplays
+                            || displayContent.isKeyguardAlwaysUnlocked()
                             || (obscured && type == TYPE_KEYGUARD_DIALOG))) {
-                // Allow full screen keyguard presentation dialogs to be seen.
+                // Allow full screen keyguard presentation dialogs to be seen, or simply ignore the
+                // keyguard if this display is always unlocked.
                 displayHasContent = true;
             }
             if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {

@@ -3792,7 +3792,7 @@
          keyboard is connected -->
     <string name="show_ime">Keep it on screen while physical keyboard is active</string>
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
-    <string name="hardware">Show virtual keyboard</string>
+    <string name="hardware">Use on-screen keyboard</string>
 
     <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>

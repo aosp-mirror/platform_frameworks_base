@@ -268,9 +268,9 @@ public final class AmbientLuxTest {
         controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
-        setEstimatedBrightnessAndUpdate(controller, luxOverride);
-        assertEquals(controller.mPendingAmbientColorTemperature,
-                ambientColorTemperature, 0.001);
+            setEstimatedBrightnessAndUpdate(controller, luxOverride);
+            assertEquals(controller.mPendingAmbientColorTemperature,
+                    ambientColorTemperature, 0.001);
         }
     }
 
@@ -286,9 +286,9 @@ public final class AmbientLuxTest {
         controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
         for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
-        setEstimatedBrightnessAndUpdate(controller, luxOverride);
-        assertEquals(controller.mPendingAmbientColorTemperature,
-                ambientColorTemperature, 0.001);
+            setEstimatedBrightnessAndUpdate(controller, luxOverride);
+            assertEquals(controller.mPendingAmbientColorTemperature,
+                    ambientColorTemperature, 0.001);
         }
     }
 
@@ -366,22 +366,22 @@ public final class AmbientLuxTest {
 
     @Test
     public void testSpline_InvalidCombinations() throws Exception {
-            setBrightnesses(100.0f, 200.0f);
-            setBiases(0.0f, 1.0f);
-            setHighLightBrightnesses(150.0f, 250.0f);
-            setHighLightBiases(0.0f, 1.0f);
+        setBrightnesses(100.0f, 200.0f);
+        setBiases(0.0f, 1.0f);
+        setHighLightBrightnesses(150.0f, 250.0f);
+        setHighLightBiases(0.0f, 1.0f);
 
-            DisplayWhiteBalanceController controller =
-                    DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
-            final float ambientColorTemperature = 8000.0f;
-            setEstimatedColorTemperature(controller, ambientColorTemperature);
-            controller.mBrightnessFilter = spy(new AmbientFilterStubber());
+        DisplayWhiteBalanceController controller =
+                DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
+        final float ambientColorTemperature = 8000.0f;
+        setEstimatedColorTemperature(controller, ambientColorTemperature);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
 
-            for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
-                setEstimatedBrightnessAndUpdate(controller, luxOverride);
-                assertEquals(controller.mPendingAmbientColorTemperature,
-                        ambientColorTemperature, 0.001);
-            }
+        for (float luxOverride = 0.1f; luxOverride <= 10000; luxOverride *= 10) {
+            setEstimatedBrightnessAndUpdate(controller, luxOverride);
+            assertEquals(controller.mPendingAmbientColorTemperature,
+                    ambientColorTemperature, 0.001);
+        }
     }
 
     @Test
@@ -486,7 +486,7 @@ public final class AmbientLuxTest {
     private void mockResourcesFloat(int id, float floatValue) {
         doAnswer(new Answer<Void>() {
             public Void answer(InvocationOnMock invocation) {
-                TypedValue value = (TypedValue)invocation.getArgument(1);
+                TypedValue value = (TypedValue) invocation.getArgument(1);
                 value.type = TypedValue.TYPE_FLOAT;
                 value.data = Float.floatToIntBits(floatValue);
                 return null;

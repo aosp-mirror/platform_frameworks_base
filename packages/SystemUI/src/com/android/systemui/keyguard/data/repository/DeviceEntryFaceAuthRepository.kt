@@ -254,13 +254,17 @@ constructor(
 
     private fun observeFaceDetectGatingChecks() {
         // Face detection can run only when lockscreen bypass is enabled
-        // & detection is supported & biometric unlock is not allowed.
+        // & detection is supported
+        //   & biometric unlock is not allowed
+        //     or user is trusted by trust manager & we want to run face detect to dismiss keyguard
         listOf(
                 canFaceAuthOrDetectRun(faceDetectLog),
                 logAndObserve(isBypassEnabled, "isBypassEnabled", faceDetectLog),
                 logAndObserve(
-                    biometricSettingsRepository.isNonStrongBiometricAllowed.isFalse(),
-                    "nonStrongBiometricIsNotAllowed",
+                    biometricSettingsRepository.isNonStrongBiometricAllowed
+                        .isFalse()
+                        .or(trustRepository.isCurrentUserTrusted),
+                    "nonStrongBiometricIsNotAllowedOrCurrentUserIsTrusted",
                     faceDetectLog
                 ),
                 // We don't want to run face detect if fingerprint can be used to unlock the device
@@ -312,18 +316,19 @@ constructor(
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() }.isFalse(),
-                    "deviceNotSleepingOrNotStartingToSleep",
+                    keyguardRepository.wakefulness.map { it.isStartingToSleep() }.isFalse(),
+                    "deviceNotStartingToSleep",
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    combine(
-                        keyguardInteractor.isSecureCameraActive,
-                        alternateBouncerInteractor.isVisible
-                    ) { a, b ->
-                        !a || b
-                    },
-                    "secureCameraNotActiveOrAltBouncerIsShowing",
+                    keyguardInteractor.isSecureCameraActive
+                        .isFalse()
+                        .or(
+                            alternateBouncerInteractor.isVisible.or(
+                                keyguardInteractor.primaryBouncerShowing
+                            )
+                        ),
+                    "secureCameraNotActiveOrAnyBouncerIsShowing",
                     tableLogBuffer
                 ),
                 logAndObserve(
@@ -365,6 +370,7 @@ constructor(
                     "nonStrongBiometricIsAllowed",
                     faceAuthLog
                 ),
+                logAndObserve(isAuthenticated.isFalse(), "faceNotAuthenticated", faceAuthLog),
             )
             .reduce(::and)
             .distinctUntilChanged()
@@ -638,6 +644,10 @@ constructor(
 /** Combine two boolean flows by and-ing both of them */
 private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a && b }
+
+/** Combine two boolean flows by or-ing both of them */
+private fun Flow<Boolean>.or(anotherFlow: Flow<Boolean>) =
+    this.combine(anotherFlow) { a, b -> a || b }
 
 /** "Not" the given flow. The return [Flow] will be true when [this] flow is false. */
 private fun Flow<Boolean>.isFalse(): Flow<Boolean> {

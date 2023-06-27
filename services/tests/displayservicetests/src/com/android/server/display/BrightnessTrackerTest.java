@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.display;
@@ -395,8 +395,8 @@ public class BrightnessTrackerTest {
         final long currentTime = mInjector.currentTimeMillis();
         notifyBrightnessChanged(mTracker, brightness, displayId, new float[] {1000.0f},
                 new long[] {TimeUnit.NANOSECONDS.toMillis(mInjector.elapsedRealtimeNanos())});
-        List<BrightnessChangeEvent> eventsNoPackage
-                = mTracker.getEvents(0, false).getList();
+        List<BrightnessChangeEvent> eventsNoPackage =
+                mTracker.getEvents(0, false).getList();
         List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         mTracker.stop();
 
@@ -1037,9 +1037,9 @@ public class BrightnessTrackerTest {
         }
 
         void setBrightnessMode(boolean isBrightnessModeAutomatic) {
-          mIsBrightnessModeAutomatic = isBrightnessModeAutomatic;
-          mContentObserver.dispatchChange(false, null);
-          waitForHandler();
+            mIsBrightnessModeAutomatic = isBrightnessModeAutomatic;
+            mContentObserver.dispatchChange(false, null);
+            waitForHandler();
         }
 
         void sendScreenChange(boolean screenOn) {
@@ -1184,8 +1184,8 @@ public class BrightnessTrackerTest {
 
         @Override
         public int getNightDisplayColorTemperature(Context context) {
-          return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
-                  mDefaultNightModeColorTemperature);
+            return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
+                    mDefaultNightModeColorTemperature);
         }
 
         @Override

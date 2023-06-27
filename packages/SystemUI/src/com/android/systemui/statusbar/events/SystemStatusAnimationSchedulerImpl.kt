@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.events
 
 import android.os.Process
 import android.provider.DeviceConfig
-import android.util.Log
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.AnimatorSet
@@ -69,7 +68,8 @@ constructor(
     private val statusBarWindowController: StatusBarWindowController,
     dumpManager: DumpManager,
     private val systemClock: SystemClock,
-    @Application private val coroutineScope: CoroutineScope
+    @Application private val coroutineScope: CoroutineScope,
+    private val logger: SystemStatusAnimationSchedulerLogger?
 ) : SystemStatusAnimationScheduler {
 
     companion object {
@@ -121,6 +121,10 @@ constructor(
                     }
                 }
         }
+
+        coroutineScope.launch {
+            animationState.collect { logger?.logAnimationStateUpdate(it) }
+        }
     }
 
     @SystemAnimationState override fun getAnimationState(): Int = animationState.value
@@ -140,32 +144,17 @@ constructor(
         ) {
             // a event can only be scheduled if no other event is in progress or it has a higher
             // priority. If a persistent dot is currently displayed, don't schedule the event.
-            if (DEBUG) {
-                Log.d(TAG, "scheduling event $event")
-            }
-
+            logger?.logScheduleEvent(event)
             scheduleEvent(event)
         } else if (currentlyDisplayedEvent?.shouldUpdateFromEvent(event) == true) {
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "updating current event from: $event. animationState=${animationState.value}"
-                )
-            }
+            logger?.logUpdateEvent(event, animationState.value)
             currentlyDisplayedEvent?.updateFromEvent(event)
             if (event.forceVisible) hasPersistentDot = true
         } else if (scheduledEvent.value?.shouldUpdateFromEvent(event) == true) {
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "updating scheduled event from: $event. animationState=${animationState.value}"
-                )
-            }
+            logger?.logUpdateEvent(event, animationState.value)
             scheduledEvent.value?.updateFromEvent(event)
         } else {
-            if (DEBUG) {
-                Log.d(TAG, "ignoring event $event")
-            }
+            logger?.logIgnoreEvent(event)
         }
     }
 
@@ -356,6 +345,7 @@ constructor(
     }
 
     private fun notifyTransitionToPersistentDot(): Animator? {
+        logger?.logTransitionToPersistentDotCallbackInvoked()
         val anims: List<Animator> =
             listeners.mapNotNull {
                 it.onSystemStatusAnimationTransitionToPersistentDot(
@@ -373,6 +363,7 @@ constructor(
 
     private fun notifyHidePersistentDot(): Animator? {
         Assert.isMainThread()
+        logger?.logHidePersistentDotCallbackInvoked()
         val anims: List<Animator> = listeners.mapNotNull { it.onHidePersistentDot() }
 
         if (animationState.value == SHOWING_PERSISTENT_DOT) {
@@ -424,5 +415,4 @@ constructor(
     }
 }
 
-private const val DEBUG = false
 private const val TAG = "SystemStatusAnimationSchedulerImpl"

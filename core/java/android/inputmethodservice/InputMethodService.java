@@ -52,6 +52,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
@@ -158,7 +160,6 @@ import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.RingBuffer;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -481,53 +482,43 @@ public class InputMethodService extends AbstractInputMethodService {
     public static final int BACK_DISPOSITION_ADJUST_NOTHING = 3;
 
     /**
-     * Enum values to be used for {@link #setBackDisposition(int)}.
+     * Enum flag to be used for {@link #setBackDisposition(int)}.
      *
      * @hide
      */
-    @IntDef(prefix = { "BACK_DISPOSITION_" }, value = {
-            BACK_DISPOSITION_DEFAULT,
-            BACK_DISPOSITION_WILL_NOT_DISMISS,
-            BACK_DISPOSITION_WILL_DISMISS,
-            BACK_DISPOSITION_ADJUST_NOTHING,
-    })
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(SOURCE)
+    @IntDef(value = {BACK_DISPOSITION_DEFAULT, BACK_DISPOSITION_WILL_NOT_DISMISS,
+            BACK_DISPOSITION_WILL_DISMISS, BACK_DISPOSITION_ADJUST_NOTHING},
+            prefix = "BACK_DISPOSITION_")
     public @interface BackDispositionMode {}
 
     /**
-     * Enum flags to be used for {@link #setImeWindowStatus}, representing the current state of the
-     * IME window visibility.
-     *
      * @hide
-     */
-    @IntDef(flag = true, prefix = { "IME_" }, value = {
-            IME_ACTIVE,
-            IME_VISIBLE,
-            IME_VISIBLE_IMPERCEPTIBLE,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ImeWindowVisibility {}
-
-    /**
      * The IME is active.  It may or may not be visible.
-     * @hide
      */
     public static final int IME_ACTIVE = 0x1;
 
     /**
-     * The IME is perceptibly visible to the user.
      * @hide
+     * The IME is perceptibly visible to the user.
      */
     public static final int IME_VISIBLE = 0x2;
 
     /**
+     * @hide
+     * The IME is active and ready with views but set invisible.
+     * This flag cannot be combined with {@link #IME_VISIBLE}.
+     */
+    public static final int IME_INVISIBLE = 0x4;
+
+    /**
+     * @hide
      * The IME is visible, but not yet perceptible to the user (e.g. fading in)
      * by {@link android.view.WindowInsetsController}.
      *
      * @see InputMethodManager#reportPerceptible
-     * @hide
      */
-    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x4;
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -640,17 +631,8 @@ public class InputMethodService extends AbstractInputMethodService {
     
     int mStatusIcon;
 
-    /**
-     * Latest value reported of back disposition mode.
-     */
     @BackDispositionMode
     int mBackDisposition;
-
-    /**
-     * Latest value reported of IME window visibility flags.
-     */
-    @ImeWindowVisibility
-    private int mImeWindowVisibility;
 
     private Object mLock = new Object();
     @GuardedBy("mLock")
@@ -1228,14 +1210,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mImeSurfaceRemoverRunnable = null;
     }
 
-    private void setImeWindowStatus(@ImeWindowVisibility int vis,
-            @BackDispositionMode int backDisposition) {
-        if (vis == mImeWindowVisibility && backDisposition == mBackDisposition) {
-            return;
-        }
-        mImeWindowVisibility = Preconditions.checkFlagsArgument(vis, IME_ACTIVE | IME_VISIBLE);
-        mBackDisposition = backDisposition;
-        mPrivOps.setImeWindowStatusAsync(mImeWindowVisibility, mBackDisposition);
+    private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
+        mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
     }
 
     /** Set region of the keyboard to be avoided from back gesture */
@@ -1909,11 +1885,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param disposition disposition mode to be set
      */
     public void setBackDisposition(@BackDispositionMode int disposition) {
-        if (disposition < BACK_DISPOSITION_MIN || disposition > BACK_DISPOSITION_MAX) {
+        if (disposition == mBackDisposition) {
+            return;
+        }
+        if (disposition > BACK_DISPOSITION_MAX || disposition < BACK_DISPOSITION_MIN) {
             Log.e(TAG, "Invalid back disposition value (" + disposition + ") specified.");
             return;
         }
-        setImeWindowStatus(mImeWindowVisibility, disposition);
+        mBackDisposition = disposition;
+        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
     }
 
     /**
@@ -2887,8 +2867,14 @@ public class InputMethodService extends AbstractInputMethodService {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
+        final int previousImeWindowStatus =
+                (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
+                        ? (!mWindowVisible ? IME_INVISIBLE : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
-        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+        final int nextImeWindowStatus = mapToImeWindowStatus();
+        if (previousImeWindowStatus != nextImeWindowStatus) {
+            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
+        }
 
         mNavigationBarController.onWindowShown();
         // compute visibility
@@ -4099,9 +4085,9 @@ public class InputMethodService extends AbstractInputMethodService {
         };
     }
 
-    @ImeWindowVisibility
     private int mapToImeWindowStatus() {
-        return IME_ACTIVE | (mDecorViewVisible ? IME_VISIBLE : 0);
+        return IME_ACTIVE
+                | (isInputViewShown() ? IME_VISIBLE : 0);
     }
 
     private boolean isAutomotive() {
