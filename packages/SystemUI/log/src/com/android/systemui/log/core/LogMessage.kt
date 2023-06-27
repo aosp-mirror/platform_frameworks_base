@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.log.core
 
 import android.icu.text.SimpleDateFormat
 import java.io.PrintWriter
@@ -65,6 +65,12 @@ interface LogMessage {
         exception?.printStackTrace(writer)
     }
 }
+
+/**
+ * A function that will be called immediately to store relevant data on the log message. The value
+ * of `this` will be the LogMessage to be initialized.
+ */
+typealias MessageInitializer = LogMessage.() -> Unit
 
 /**
  * A function that will be called if and when the message needs to be dumped to logcat or a bug

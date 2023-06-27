@@ -24,9 +24,9 @@ import android.view.View
 import com.android.systemui.log.ConstantStringsLogger
 import com.android.systemui.log.ConstantStringsLoggerImpl
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.VERBOSE
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.log.dagger.QSConfigLog
 import com.android.systemui.log.dagger.QSLog
 import com.android.systemui.plugins.qs.QSTile

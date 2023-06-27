@@ -20,8 +20,8 @@ import android.icu.text.SimpleDateFormat
 import android.permission.PermissionGroupUsage
 import com.android.systemui.log.dagger.PrivacyLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogMessage
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
 import com.android.systemui.privacy.PrivacyDialog
 import com.android.systemui.privacy.PrivacyItem
 import java.util.Locale
