@@ -254,13 +254,17 @@ constructor(
 
     private fun observeFaceDetectGatingChecks() {
         // Face detection can run only when lockscreen bypass is enabled
-        // & detection is supported & biometric unlock is not allowed.
+        // & detection is supported
+        //   & biometric unlock is not allowed
+        //     or user is trusted by trust manager & we want to run face detect to dismiss keyguard
         listOf(
                 canFaceAuthOrDetectRun(faceDetectLog),
                 logAndObserve(isBypassEnabled, "isBypassEnabled", faceDetectLog),
                 logAndObserve(
-                    biometricSettingsRepository.isNonStrongBiometricAllowed.isFalse(),
-                    "nonStrongBiometricIsNotAllowed",
+                    biometricSettingsRepository.isNonStrongBiometricAllowed
+                        .isFalse()
+                        .or(trustRepository.isCurrentUserTrusted),
+                    "nonStrongBiometricIsNotAllowedOrCurrentUserIsTrusted",
                     faceDetectLog
                 ),
                 // We don't want to run face detect if fingerprint can be used to unlock the device

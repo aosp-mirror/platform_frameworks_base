@@ -626,6 +626,27 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun authenticateFallbacksToDetectionWhenUserIsAlreadyTrustedByTrustManager() =
+        testScope.runTest {
+            whenever(faceManager.sensorPropertiesInternal)
+                .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = true)))
+            whenever(bypassController.bypassEnabled).thenReturn(true)
+            underTest = createDeviceEntryFaceAuthRepositoryImpl()
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            trustRepository.setCurrentUserTrusted(true)
+            assertThat(canFaceAuthRun()).isFalse()
+            underTest.authenticate(
+                FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER,
+                fallbackToDetection = true
+            )
+            faceAuthenticateIsNotCalled()
+
+            faceDetectIsCalled()
+        }
+
+    @Test
     fun everythingWorksWithFaceAuthRefactorFlagDisabled() =
         testScope.runTest {
             featureFlags.set(FACE_AUTH_REFACTOR, false)
