@@ -3560,6 +3560,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
+        mShadeLog.logEndMotionEvent("endMotionEvent called", forceCancel, false);
         mTrackingPointer = -1;
         mAmbientState.setSwipingUp(false);
         if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
@@ -3581,15 +3582,19 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             } else if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
                 if (onKeyguard) {
                     expand = true;
+                    mShadeLog.logEndMotionEvent("endMotionEvent: cancel while on keyguard",
+                            forceCancel, expand);
                 } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
                     expand = false;
                 } else {
                     // If we get a cancel, put the shade back to the state it was in when the
                     // gesture started
                     expand = !mPanelClosedOnDown;
+                    mShadeLog.logEndMotionEvent("endMotionEvent: cancel", forceCancel, expand);
                 }
             } else {
                 expand = flingExpands(vel, vectorVel, x, y);
+                mShadeLog.logEndMotionEvent("endMotionEvent: flingExpands", forceCancel, expand);
             }
 
             mDozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
@@ -4685,6 +4690,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mTouchSlopExceeded = mTouchSlopExceededBeforeDown;
                     mMotionAborted = false;
                     mPanelClosedOnDown = isFullyCollapsed();
+                    mShadeLog.logPanelClosedOnDown("intercept down touch", mPanelClosedOnDown,
+                            mExpandedFraction);
                     mCollapsedAndHeadsUpOnDown = false;
                     mHasLayoutedSinceDown = false;
                     mUpdateFlingOnLayout = false;
@@ -4898,6 +4905,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                     mMinExpandHeight = 0.0f;
                     mPanelClosedOnDown = isFullyCollapsed();
+                    mShadeLog.logPanelClosedOnDown("handle down touch", mPanelClosedOnDown,
+                            mExpandedFraction);
                     mHasLayoutedSinceDown = false;
                     mUpdateFlingOnLayout = false;
                     mMotionAborted = false;
