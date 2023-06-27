@@ -13827,13 +13827,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Helper method to set {@code rect} to the text content's non-clipped area in the view's
-     * coordinates.
+     * Helper method to set {@code rect} to this TextView's non-clipped area in its own coordinates.
+     * This method obtains the view's visible rectangle whereas the method
+     * {@link #getContentVisibleRect} returns the text layout's visible rectangle.
      *
      * @return true if at least part of the text content is visible; false if the text content is
      * completely clipped or translated out of the visible area.
      */
-    private boolean getContentVisibleRect(Rect rect) {
+    private boolean getViewVisibleRect(Rect rect) {
         if (!getLocalVisibleRect(rect)) {
             return false;
         }
@@ -13842,6 +13843,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // view's coordinates. So we need to offset it with the negative scrolled amount to convert
         // it to view's coordinate.
         rect.offset(-getScrollX(), -getScrollY());
+        return true;
+    }
+
+    /**
+     * Helper method to set {@code rect} to the text content's non-clipped area in the view's
+     * coordinates.
+     *
+     * @return true if at least part of the text content is visible; false if the text content is
+     * completely clipped or translated out of the visible area.
+     */
+    private boolean getContentVisibleRect(Rect rect) {
+        if (!getViewVisibleRect(rect)) {
+            return false;
+        }
         // Clip the view's visible rect with the text layout's visible rect.
         return rect.intersect(getCompoundPaddingLeft(), getCompoundPaddingTop(),
                 getWidth() - getCompoundPaddingRight(), getHeight() - getCompoundPaddingBottom());
@@ -13971,14 +13986,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         builder.setMatrix(viewToScreenMatrix);
 
         if (includeEditorBounds) {
-            final RectF editorBounds = new RectF();
-            editorBounds.set(0 /* left */, 0 /* top */,
-                    getWidth(), getHeight());
-            final RectF handwritingBounds = new RectF(
-                    -getHandwritingBoundsOffsetLeft(),
-                    -getHandwritingBoundsOffsetTop(),
-                    getWidth() + getHandwritingBoundsOffsetRight(),
-                    getHeight() + getHandwritingBoundsOffsetBottom());
+            if (mTempRect == null) {
+                mTempRect = new Rect();
+            }
+            final Rect bounds = mTempRect;
+            final RectF editorBounds;
+            final RectF handwritingBounds;
+            if (getViewVisibleRect(bounds)) {
+                editorBounds = new RectF(bounds);
+                handwritingBounds = new RectF(editorBounds);
+                handwritingBounds.top -= getHandwritingBoundsOffsetTop();
+                handwritingBounds.left -= getHandwritingBoundsOffsetLeft();
+                handwritingBounds.bottom += getHandwritingBoundsOffsetBottom();
+                handwritingBounds.right += getHandwritingBoundsOffsetRight();
+            } else {
+                // The editor is not visible at all, return empty rectangles. We still need to
+                // return an EditorBoundsInfo because IME has subscribed the EditorBoundsInfo.
+                editorBounds = new RectF();
+                handwritingBounds = new RectF();
+            }
             EditorBoundsInfo.Builder boundsBuilder = new EditorBoundsInfo.Builder();
             EditorBoundsInfo editorBoundsInfo = boundsBuilder.setEditorBounds(editorBounds)
                     .setHandwritingBounds(handwritingBounds).build();
