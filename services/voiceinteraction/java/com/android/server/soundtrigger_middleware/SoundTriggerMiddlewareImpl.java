@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +85,7 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareIntern
             try {
                 modules.add(new SoundTriggerModule(halFactory, audioSessionProvider));
             } catch (Exception e) {
-                Log.e(TAG, "Failed to add a SoundTriggerModule instance", e);
+                Slog.e(TAG, "Failed to add a SoundTriggerModule instance", e);
             }
         }
 
