@@ -135,17 +135,6 @@ public final class PasswordMetrics implements Parcelable {
         }
     }
 
-    private static boolean hasInvalidCharacters(byte[] password) {
-        // Allow non-control Latin-1 characters only.
-        for (byte b : password) {
-            char c = (char) b;
-            if (c < 32 || c > 127) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -534,32 +523,6 @@ public final class PasswordMetrics implements Parcelable {
         }
         PasswordMetrics actualMetrics = computeForCredential(credential);
         return validatePasswordMetrics(adminMetrics, minComplexity, actualMetrics);
-    }
-
-    /**
-     * Validates a proposed lockscreen credential against minimum metrics and complexity.
-     *
-     * @param adminMetrics minimum metrics to satisfy admin requirements
-     * @param minComplexity minimum complexity imposed by the requester
-     * @param isPin whether to validate as a PIN (true) or password (false)
-     * @param password the proposed lockscreen credential as a byte[].  Must be the value from
-     *                 {@link LockscreenCredential#getCredential()}.
-     *
-     * @return a list of validation errors. An empty list means the credential is OK.
-     *
-     * TODO: merge this into validateCredential() and remove the redundant hasInvalidCharacters(),
-     *       once all external callers are removed
-     */
-    public static List<PasswordValidationError> validatePassword(
-            PasswordMetrics adminMetrics, int minComplexity, boolean isPin, byte[] password) {
-
-        if (hasInvalidCharacters(password)) {
-            return Collections.singletonList(
-                    new PasswordValidationError(CONTAINS_INVALID_CHARACTERS, 0));
-        }
-
-        final PasswordMetrics enteredMetrics = computeForPasswordOrPin(password, isPin);
-        return validatePasswordMetrics(adminMetrics, minComplexity, enteredMetrics);
     }
 
     /**
