@@ -27,6 +27,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,6 +51,7 @@ import javax.inject.Inject;
 public final class RingtonePickerViewModel extends ViewModel {
 
     static final int RINGTONE_TYPE_UNKNOWN = -1;
+
     /**
      * Keep the currently playing ringtone around when changing orientation, so that it
      * can be stopped later, after the activity is recreated.
@@ -72,15 +74,86 @@ public final class RingtonePickerViewModel extends ViewModel {
     private int mSampleItemPosition = ITEM_POSITION_UNKNOWN;
     /** The position in the list of the 'Default' item. */
     private int mDefaultItemPosition = ITEM_POSITION_UNKNOWN;
-    /** The number of static items in the list. */
+    /** The number of fixed items in the list. */
     private int mFixedItemCount;
     private ListenableFuture<Uri> mAddCustomRingtoneFuture;
     private RingtoneManager mRingtoneManager;
 
     /**
+     * Stable ID for the ringtone that is currently selected (may be -1 if no ringtone is selected).
+     */
+    private long mSelectedItemId = -1;
+    private int mSelectedItemPosition = ITEM_POSITION_UNKNOWN;
+
+    /**
      * The ringtone that's currently playing.
      */
     private Ringtone mCurrentRingtone;
+
+    private PickerConfig mPickerConfig;
+
+    public enum PickerType {
+        RINGTONE_PICKER,
+        SOUND_PICKER,
+        VIBRATION_PICKER
+    }
+
+    /**
+     * Holds immutable info on the picker that should be displayed.
+     */
+    static final class PickerConfig {
+        public final String title;
+        /**
+         * Id of the user to which the ringtone picker should list the ringtones.
+         */
+        public final int userId;
+        /**
+         * Ringtone type.
+         */
+        public final int ringtoneType;
+        /**
+         * Whether this list has the 'Default' item.
+         */
+        public final boolean hasDefaultItem;
+        /**
+         * The Uri to play when the 'Default' item is clicked.
+         */
+        public final Uri uriForDefaultItem;
+        /**
+         * Whether this list has the 'Silent' item.
+         */
+        public final boolean hasSilentItem;
+        /**
+         * AudioAttributes flags.
+         */
+        public final int audioAttributesFlags;
+        /**
+         * The Uri to place a checkmark next to.
+         */
+        public final Uri existingUri;
+        /**
+         * In the buttonless (watch-only) version we don't show the OK/Cancel buttons.
+         */
+        public final boolean showOkCancelButtons;
+
+        public final PickerType mPickerType;
+
+        PickerConfig(String title, int userId, int ringtoneType,
+                boolean hasDefaultItem, Uri uriForDefaultItem, boolean hasSilentItem,
+                int audioAttributesFlags, Uri existingUri, boolean showOkCancelButtons,
+                PickerType pickerType) {
+            this.title = title;
+            this.userId = userId;
+            this.ringtoneType = ringtoneType;
+            this.hasDefaultItem = hasDefaultItem;
+            this.uriForDefaultItem = uriForDefaultItem;
+            this.hasSilentItem = hasSilentItem;
+            this.audioAttributesFlags = audioAttributesFlags;
+            this.existingUri = existingUri;
+            this.showOkCancelButtons = showOkCancelButtons;
+            this.mPickerType = pickerType;
+        }
+    }
 
     @Inject
     RingtonePickerViewModel(RingtoneManagerFactory ringtoneManagerFactory,
@@ -89,6 +162,13 @@ public final class RingtonePickerViewModel extends ViewModel {
         mRingtoneManagerFactory = ringtoneManagerFactory;
         mRingtoneFactory = ringtoneFactory;
         mListeningExecutorService = listeningExecutorServiceFactory.createSingleThreadExecutor();
+    }
+
+    @NonNull
+    PickerConfig getPickerConfig() {
+        return requireNonNull(mPickerConfig,
+                "PickerConfig was never set. Did you forget to call "
+                        + "RingtonePickerViewModel#init?");
     }
 
     @StringRes
@@ -138,10 +218,11 @@ public final class RingtonePickerViewModel extends ViewModel {
         }
     }
 
-    void initRingtoneManager(int type) {
+    void init(@NonNull PickerConfig pickerConfig) {
         mRingtoneManager = mRingtoneManagerFactory.create();
-        if (type != RINGTONE_TYPE_UNKNOWN) {
-            mRingtoneManager.setType(type);
+        mPickerConfig = pickerConfig;
+        if (pickerConfig.ringtoneType != RINGTONE_TYPE_UNKNOWN) {
+            mRingtoneManager.setType(pickerConfig.ringtoneType);
         }
     }
 
@@ -166,7 +247,7 @@ public final class RingtonePickerViewModel extends ViewModel {
      */
     void cancelPendingAsyncTasks() {
         if (mAddCustomRingtoneFuture != null && !mAddCustomRingtoneFuture.isDone()) {
-            mAddCustomRingtoneFuture.cancel(/*mayInterruptIfRunning=*/true);
+            mAddCustomRingtoneFuture.cancel(/* mayInterruptIfRunning= */ true);
         }
     }
 
@@ -180,36 +261,48 @@ public final class RingtonePickerViewModel extends ViewModel {
         return mRingtoneManager.getCursor();
     }
 
-    Uri getRingtoneUri(int ringtonePosition) {
+    Uri getRingtoneUri(int position) {
         requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
-        return mRingtoneManager.getRingtoneUri(ringtonePosition);
+        return mRingtoneManager.getRingtoneUri(mapListPositionToRingtonePosition(position));
     }
 
     int getRingtonePosition(Uri uri) {
         requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
-        return mRingtoneManager.getRingtonePosition(uri);
+        return mapRingtonePositionToListPosition(mRingtoneManager.getRingtonePosition(uri));
     }
 
     /**
-     * Returns the position of the item in the list before header views were added.
+     * Maps the item position in the list, to its equivalent position in the RingtoneManager.
      *
-     * @param itemPosition the position of item in the list with any added headers.
-     * @return position of the item in the list ignoring headers.
+     * @param itemPosition the position of item in the list.
+     * @return position of the item in the RingtoneManager.
      */
-    int itemPositionToRingtonePosition(int itemPosition) {
+    private int mapListPositionToRingtonePosition(int itemPosition) {
+        // If the manager position is -1 (for not found), then return that.
+        if (itemPosition < 0) return itemPosition;
+
         return itemPosition - mFixedItemCount;
     }
 
-    int getFixedItemCount() {
-        return mFixedItemCount;
+    /**
+     * Maps the item position in the RingtoneManager, to its equivalent position in the list.
+     *
+     * @param itemPosition the position of the item in the RingtoneManager.
+     * @return position of the item in the list.
+     */
+    private int mapRingtonePositionToListPosition(int itemPosition) {
+        // If the manager position is -1 (for not found), then return that.
+        if (itemPosition < 0) return itemPosition;
+
+        return itemPosition + mFixedItemCount;
     }
 
     void resetFixedItemCount() {
         mFixedItemCount = 0;
     }
 
-    void incrementFixedItemCount() {
-        mFixedItemCount++;
+    int incrementAndGetFixedItemCount() {
+        return mFixedItemCount++;
     }
 
     void setDefaultItemPosition(int defaultItemPosition) {
@@ -232,6 +325,22 @@ public final class RingtonePickerViewModel extends ViewModel {
         mSampleItemPosition = sampleItemPosition;
     }
 
+    public int getSelectedItemPosition() {
+        return mSelectedItemPosition;
+    }
+
+    public void setSelectedItemPosition(int selectedItemPosition) {
+        mSelectedItemPosition = selectedItemPosition;
+    }
+
+    public void setSelectedItemId(long selectedItemId) {
+        mSelectedItemId = selectedItemId;
+    }
+
+    public long getSelectedItemId() {
+        return mSelectedItemId;
+    }
+
     void onPause(boolean isChangingConfigurations) {
         if (!isChangingConfigurations) {
             stopAnyPlayingRingtone();
@@ -247,19 +356,19 @@ public final class RingtonePickerViewModel extends ViewModel {
     }
 
     @Nullable
-    Uri getCurrentlySelectedRingtoneUri(int checkedItem, Uri defaultUri) {
-        if (checkedItem == ITEM_POSITION_UNKNOWN) {
-            // When the getCheckItem is POS_UNKNOWN, it is not the case we expected.
+    Uri getCurrentlySelectedRingtoneUri() {
+        if (mSelectedItemPosition == ITEM_POSITION_UNKNOWN) {
+            // When the selected item is POS_UNKNOWN, it is not the case we expected.
             // We return null for this case.
             return null;
-        } else if (checkedItem == mDefaultItemPosition) {
+        } else if (mSelectedItemPosition == mDefaultItemPosition) {
             // Use the default Uri that they originally gave us.
-            return defaultUri;
-        } else if (checkedItem == mSilentItemPosition) {
+            return mPickerConfig.uriForDefaultItem;
+        } else if (mSelectedItemPosition == mSilentItemPosition) {
             // Use a null Uri for the 'Silent' item.
             return null;
         } else {
-            return getRingtoneUri(itemPositionToRingtonePosition(checkedItem));
+            return getRingtoneUri(mSelectedItemPosition);
         }
     }
 
@@ -280,7 +389,8 @@ public final class RingtonePickerViewModel extends ViewModel {
                 mCurrentRingtone.setStreamType(mRingtoneManager.inferStreamType());
             }
         } else {
-            mCurrentRingtone = mRingtoneManager.getRingtone(position);
+            mCurrentRingtone = mRingtoneManager.getRingtone(
+                    mapListPositionToRingtonePosition(position));
         }
 
         if (mCurrentRingtone != null) {
