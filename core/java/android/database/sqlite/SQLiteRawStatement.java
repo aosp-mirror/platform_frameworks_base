@@ -31,10 +31,10 @@ import java.lang.ref.Reference;
 import java.util.Objects;
 
 /**
- * Represents a SQLite statement. The methods correspond very closely to SQLite APIs that operate
- * on a sqlite_stmt object. See the SQLite API documentation for complete details.  In general,
- * the APIs in this class correspond to the SQLite APIs with the same name, except that snake-case
- * is changed to camel-case.
+ * A {@link SQLiteRawStatement} represents a SQLite prepared statement. The methods correspond very
+ * closely to SQLite APIs that operate on a sqlite_stmt object.  In general, each API in this class
+ * corresponds to a single SQLite API.
+
  * <p>
  * A {@link SQLiteRawStatement} must be created through a database, and there must be a
  * transaction open at the time. Statements are implicitly closed when the outermost transaction
@@ -66,8 +66,9 @@ import java.util.Objects;
  *     database.endTransaction();
  * }
  * </pre></code>
- * Note that this class is unrelated to {@link SQLiteStatement}.
- * @hide
+ * Note that {@link SQLiteRawStatement} is unrelated to {@link SQLiteStatement}.
+ *
+ * @see <a href="http://sqlite.org/c3ref/stmt.html">sqlite3_stmt</a>
  */
 public final class SQLiteRawStatement implements Closeable {
 
@@ -114,24 +115,46 @@ public final class SQLiteRawStatement implements Closeable {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, SQLITE_NULL})
+    @IntDef(value = {
+                SQLITE_DATA_TYPE_INTEGER,
+                SQLITE_DATA_TYPE_FLOAT,
+                SQLITE_DATA_TYPE_TEXT,
+                SQLITE_DATA_TYPE_BLOB,
+                SQLITE_DATA_TYPE_NULL})
     public @interface SQLiteDataType {}
 
-    public static final int SQLITE_INTEGER  = 1;
-    public static final int SQLITE_FLOAT = 2;
-    public static final int SQLITE_TEXT = 3;
-    public static final int SQLITE_BLOB = 4;
-    public static final int SQLITE_NULL = 5;
+    /**
+     * The constant returned by {@link #getColumnType} when the column value is SQLITE_INTEGER.
+     */
+    public static final int SQLITE_DATA_TYPE_INTEGER  = 1;
 
     /**
-     * SQLite error codes that are used by this class.  Refer to the sqlite documentation for
-     * other error codes.
+     * The constant returned by {@link #getColumnType} when the column value is SQLITE_FLOAT.
      */
-    public static final int SQLITE_OK = 0;
-    public static final int SQLITE_BUSY = 5;
-    public static final int SQLITE_LOCKED = 6;
-    public static final int SQLITE_ROW = 100;
-    public static final int SQLITE_DONE = 101;
+    public static final int SQLITE_DATA_TYPE_FLOAT = 2;
+
+    /**
+     * The constant returned by {@link #getColumnType} when the column value is SQLITE_TEXT.
+     */
+    public static final int SQLITE_DATA_TYPE_TEXT = 3;
+
+    /**
+     * The constant returned by {@link #getColumnType} when the column value is SQLITE_BLOB.
+     */
+    public static final int SQLITE_DATA_TYPE_BLOB = 4;
+
+    /**
+     * The constant returned by {@link #getColumnType} when the column value is SQLITE_NULL.
+     */
+    public static final int SQLITE_DATA_TYPE_NULL = 5;
+
+    /**
+     * SQLite error codes that are used by this class.
+     */
+    private static final int SQLITE_BUSY = 5;
+    private static final int SQLITE_LOCKED = 6;
+    private static final int SQLITE_ROW = 100;
+    private static final int SQLITE_DONE = 101;
 
     /**
      * Create the statement with empty bindings. The construtor will throw
@@ -201,6 +224,7 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Return true if the statement is still open and false otherwise.
+     *
      * @return True if the statement is open.
      */
     public boolean isOpen() {
@@ -208,9 +232,12 @@ public final class SQLiteRawStatement implements Closeable {
     }
 
     /**
-     * Step to the next result. This returns true if the statement stepped to a new row, and
+     * Step to the next result row. This returns true if the statement stepped to a new row, and
      * false if the statement is done.  The method throws on any other result, including a busy or
      * locked database.  If WAL is enabled then the database should never be locked or busy.
+     *
+     * @see <a href="http://sqlite.org/c3ref/step.html">sqlite3_step</a>
+     *
      * @return True if a row is available and false otherwise.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteDatabaseLockedException if the database is locked or busy.
@@ -239,11 +266,14 @@ public final class SQLiteRawStatement implements Closeable {
     }
 
     /**
-     * Step to the next result. This returns the raw error code code from the native method.  The
+     * Step to the next result. This returns the raw result code code from the native method.  The
      * expected values are SQLITE_ROW and SQLITE_DONE.  For other return values, clients must
-     * decode the error and handle it themselves.
+     * decode the error and handle it themselves.  http://sqlite.org/rescode.html for the current
+     * list of result codes.
+     *
      * @return The native result code from the sqlite3_step() operation.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
+     * @hide
      */
     public int stepNoThrow() {
         throwIfInvalid();
@@ -255,8 +285,10 @@ public final class SQLiteRawStatement implements Closeable {
     }
 
     /**
-     * Reset the statement. The sqlite3 API returns an error code if the last call to step
-     * generated an error; this function discards those error codes.
+     * Reset the statement.
+     *
+     * @see <a href="http://sqlite.org/c3ref/reset.html">sqlite3_reset</a>
+     *
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteException if a native error occurs.
      */
@@ -271,6 +303,9 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Clear all parameter bindings.
+     *
+     * @see <a href="http://sqlite.org/c3ref/clear_bindings.html">sqlite3_clear_bindings</a>
+     *
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteException if a native error occurs.
      */
@@ -285,10 +320,14 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Return the number of parameters in the statement.
+     *
+     * @see
+     * <a href="http://sqlite.org/c3ref/bind_parameter_count.html">sqlite3_bind_parameter_count</a>
+     *
      * @return The number of parameters in the statement.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      */
-    public int bindParameterCount() {
+    public int getParameterCount() {
         throwIfInvalid();
         try {
             return nativeBindParameterCount(mStatement);
@@ -300,11 +339,15 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the index of the parameter with specified name.  If the name does not match any
      * parameter, 0 is returned.
+     *
+     * @see
+     * <a href="http://sqlite.org/c3ref/bind_parameter_index.html">sqlite3_bind_parameter_index</a>
+     *
      * @param name The name of a parameter.
      * @return The index of the parameter or 0 if the name does not identify a parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      */
-    public int bindParameterIndex(@NonNull String name) {
+    public int getParameterIndex(@NonNull String name) {
         Objects.requireNonNull(name);
         throwIfInvalid();
         try {
@@ -317,16 +360,19 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the name of the parameter at the specified index.  Null is returned if there is no
      * such parameter or if the parameter does not have a name.
-     * @param parameter The index of the parameter.
+     *
+     * @see
+     * <a href="http://sqlite.org/c3ref/bind_parameter_name.html">sqlite3_bind_parameter_name</a>
+     *
+     * @param parameterIndex The index of the parameter.
      * @return The name of the parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
-     * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      */
     @Nullable
-    public String bindParameterName(int parameter) {
+    public String getParameterName(int parameterIndex) {
         throwIfInvalid();
         try {
-            return nativeBindParameterName(mStatement, parameter);
+            return nativeBindParameterName(mStatement, parameterIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -335,17 +381,20 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Bind a blob to a parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds.
-     * @param parameter The index of the parameter in the query. It is one-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_blob</a>
+     *
+     * @param parameterIndex The index of the parameter in the query. It is one-based.
      * @param value The value to be bound to the parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindBlob(int parameter, @NonNull byte[] value) throws SQLiteException {
+    public void bindBlob(int parameterIndex, @NonNull byte[] value) throws SQLiteException {
         Objects.requireNonNull(value);
         throwIfInvalid();
         try {
-            nativeBindBlob(mStatement, parameter, value, 0, value.length);
+            nativeBindBlob(mStatement, parameterIndex, value, 0, value.length);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -355,7 +404,10 @@ public final class SQLiteRawStatement implements Closeable {
      * Bind a blob to a parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds.  The sub-array value[offset] to value[offset+length-1] is
      * bound.
-     * @param parameter The index of the parameter in the query. It is one-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_blob</a>
+     *
+     * @param parameterIndex The index of the parameter in the query. It is one-based.
      * @param value The value to be bound to the parameter.
      * @param offset An offset into the value array
      * @param length The number of bytes to bind from the value array.
@@ -364,13 +416,13 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindBlob(int parameter, @NonNull byte[] value, int offset, int length)
+    public void bindBlob(int parameterIndex, @NonNull byte[] value, int offset, int length)
             throws SQLiteException {
         Objects.requireNonNull(value);
         throwIfInvalid();
         throwIfInvalidBounds(value.length, offset, length);
         try {
-            nativeBindBlob(mStatement, parameter, value, offset, length);
+            nativeBindBlob(mStatement, parameterIndex, value, offset, length);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -379,16 +431,19 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Bind a double to a parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds.
-     * @param parameter The index of the parameter in the query. It is one-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_double</a>
+     *
+     * @param parameterIndex The index of the parameter in the query. It is one-based.
      * @param value The value to be bound to the parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindDouble(int parameter, double value) throws SQLiteException {
+    public void bindDouble(int parameterIndex, double value) throws SQLiteException {
         throwIfInvalid();
         try {
-            nativeBindDouble(mStatement, parameter, value);
+            nativeBindDouble(mStatement, parameterIndex, value);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -397,15 +452,18 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Bind an int to a parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds.
-     * @param parameter The index of the parameter in the query. It is one-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_int</a>
+     *
+     * @param parameterIndex The index of the parameter in the query. It is one-based.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindInt(int parameter, int value) throws SQLiteException {
+    public void bindInt(int parameterIndex, int value) throws SQLiteException {
         throwIfInvalid();
         try {
-            nativeBindInt(mStatement, parameter, value);
+            nativeBindInt(mStatement, parameterIndex, value);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -414,15 +472,18 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Bind a long to the parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_int64</a>
+     *
      * @param value The value to be bound to the parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindLong(int parameter, long value) throws SQLiteException {
+    public void bindLong(int parameterIndex, long value) throws SQLiteException {
         throwIfInvalid();
         try {
-            nativeBindLong(mStatement, parameter, value);
+            nativeBindLong(mStatement, parameterIndex, value);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -431,15 +492,18 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Bind a null to the parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds.
-     * @param parameter The index of the parameter in the query. It is one-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_null</a>
+     *
+     * @param parameterIndex The index of the parameter in the query. It is one-based.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindNull(int parameter) throws SQLiteException {
+    public void bindNull(int parameterIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            nativeBindNull(mStatement, parameter);
+            nativeBindNull(mStatement, parameterIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -448,17 +512,20 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Bind a string to the parameter. Parameter indices start at 1. The function throws if the
      * parameter index is out of bounds. The string may not be null.
-     * @param parameter The index of the parameter in the query. It is one-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/bind_blob.html">sqlite3_bind_text16</a>
+     *
+     * @param parameterIndex The index of the parameter in the query. It is one-based.
      * @param value The value to be bound to the parameter.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindText(int parameter, @NonNull String value) throws SQLiteException {
+    public void bindText(int parameterIndex, @NonNull String value) throws SQLiteException {
         Objects.requireNonNull(value);
         throwIfInvalid();
         try {
-            nativeBindText(mStatement, parameter, value);
+            nativeBindText(mStatement, parameterIndex, value);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -466,10 +533,13 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Return the number of columns in the current result row.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_count.html">sqlite3_column_count</a>
+     *
      * @return The number of columns in the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      */
-    public int getResultColumnsCount() {
+    public int getResultColumnCount() {
         throwIfInvalid();
         try {
             return nativeColumnCount(mStatement);
@@ -480,17 +550,20 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Return the type of the column in the result row. Column indices start at 0.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_type</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The type of the value in the column of the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
     @SQLiteDataType
-    public int getType(int column) throws SQLiteException {
+    public int getColumnType(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnType(mStatement, column);
+            return nativeColumnType(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -499,17 +572,20 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the name of the column in the result row. Column indices start at 0. This throws
      * an exception if column is not in the result.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_name.html">sqlite3_column_name</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The name of the column in the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteOutOfMemoryException if the database cannot allocate memory for the name.
      */
     @NonNull
-    public String getName(int column) throws SQLiteException {
+    public String getColumnName(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnName(mStatement, column);
+            return nativeColumnName(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -517,20 +593,24 @@ public final class SQLiteRawStatement implements Closeable {
 
     /**
      * Return the length of the column value in the result row. Column indices start at 0. This
-     * returns 0 for a null and number of bytes for text or blob. Numeric values are converted to
-     * a string and the length of the string is returned. Note that this cannot be used to
-     * distinguish a null value from an empty text or blob.  Note that this returns the number of
-     * bytes in the text value, not the number of characters.
-     * @param column The index of a column in the result row. It is zero-based.
+     * returns 0 for a null and number of bytes for text or blob. Numeric values are converted to a
+     * string and the length of the string is returned.  See the sqlite documentation for
+     * details. Note that this cannot be used to distinguish a null value from an empty text or
+     * blob.  Note that this returns the number of bytes in the text value, not the number of
+     * characters.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_bytes</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The length, in bytes, of the value in the column.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public int getLength(int column) throws SQLiteException {
+    public int getColumnLength(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnBytes(mStatement, column);
+            return nativeColumnBytes(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -540,39 +620,23 @@ public final class SQLiteRawStatement implements Closeable {
      * Return the column value of the result row as a blob. Column indices start at 0. This
      * throws an exception if column is not in the result.  This returns null if the column value
      * is null.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * The column value will be converted if it is not of type {@link #SQLITE_DATA_TYPE_BLOB}; see
+     * the sqlite documentation for details.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_blob</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The value of the column as a blob, or null if the column is NULL.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
     @Nullable
-    public byte[] getBlob(int column) throws SQLiteException {
+    public byte[] getColumnBlob(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnBlob(mStatement, column);
-        } finally {
-            Reference.reachabilityFence(this);
-        }
-    }
-
-    /**
-     * Copy the column value of the result row, interpreted as a blob, into the buffer. Column
-     * indices start at 0. This throws an exception if column is not in the result row. Bytes are
-     * copied into the buffer until the buffer is full or the end of the blob value is reached.
-     * The function returns the number of bytes copied.
-     * @param column The index of a column in the result row. It is zero-based.
-     * @param buffer A pre-allocated array to be filled with the value of the column.
-     * @return the number of bytes that were copied
-     * @throws IllegalStateException if the statement is closed or this is a foreign thread.
-     * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
-     * @throws SQLiteException if a native error occurs.
-     */
-    public int getBlob(int column, @NonNull byte[] buffer) throws SQLiteException {
-        Objects.requireNonNull(buffer);
-        throwIfInvalid();
-        try {
-            return nativeColumnBuffer(mStatement, column, buffer, 0, buffer.length, 0);
+            return nativeColumnBlob(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -584,7 +648,13 @@ public final class SQLiteRawStatement implements Closeable {
      * copied into the buffer starting at the offset. Bytes are copied from the blob starting at
      * srcOffset.  Length bytes are copied unless the column value has fewer bytes available. The
      * function returns the number of bytes copied.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * The column value will be converted if it is not of type {@link #SQLITE_DATA_TYPE_BLOB}; see
+     * the sqlite documentation for details.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_blob</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @param buffer A pre-allocated array to be filled with the value of the column.
      * @param offset An offset into the buffer: copying starts here.
      * @param length The number of bytes to copy.
@@ -595,13 +665,14 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public int getBlob(int column, @NonNull byte[] buffer, int offset, int length, int srcOffset)
+    public int readColumnBlob(int columnIndex, @NonNull byte[] buffer, int offset,
+            int length, int srcOffset)
             throws SQLiteException {
         Objects.requireNonNull(buffer);
         throwIfInvalid();
         throwIfInvalidBounds(buffer.length, offset, length);
         try {
-            return nativeColumnBuffer(mStatement, column, buffer, offset, length, srcOffset);
+            return nativeColumnBuffer(mStatement, columnIndex, buffer, offset, length, srcOffset);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -610,16 +681,22 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the column value as a double. Column indices start at 0. This throws an exception
      * if column is not in the result.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * The column value will be converted if it is not of type {@link #SQLITE_DATA_TYPE_FLOAT}; see
+     * the sqlite documentation for details.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_double</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The value of a column as a double.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public double getDouble(int column) throws SQLiteException {
+    public double getColumnDouble(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnDouble(mStatement, column);
+            return nativeColumnDouble(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -628,16 +705,22 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the column value as a int. Column indices start at 0. This throws an exception if
      * column is not in the result.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * The column value will be converted if it is not of type {@link #SQLITE_DATA_TYPE_INTEGER};
+     * see the sqlite documentation for details.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_int</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The value of the column as an int.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public int getInt(int column) throws SQLiteException {
+    public int getColumnInt(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnInt(mStatement, column);
+            return nativeColumnInt(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -646,16 +729,22 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the column value as a long. Column indices start at 0. This throws an exception if
      * column is not in the result.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * The column value will be converted if it is not of type {@link #SQLITE_DATA_TYPE_INTEGER};
+     * see the sqlite documentation for details.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_long</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The value of the column as an long.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public long getLong(int column) throws SQLiteException {
+    public long getColumnLong(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnLong(mStatement, column);
+            return nativeColumnLong(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -664,17 +753,23 @@ public final class SQLiteRawStatement implements Closeable {
     /**
      * Return the column value as a text. Column indices start at 0. This throws an exception if
      * column is not in the result.
-     * @param column The index of a column in the result row. It is zero-based.
+     *
+     * The column value will be converted if it is not of type {@link #SQLITE_DATA_TYPE_TEXT}; see
+     * the sqlite documentation for details.
+     *
+     * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_text16</a>
+     *
+     * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The value of the column as a string.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
     @NonNull
-    public String getText(int column) throws SQLiteException {
+    public String getColumnText(int columnIndex) throws SQLiteException {
         throwIfInvalid();
         try {
-            return nativeColumnText(mStatement, column);
+            return nativeColumnText(mStatement, columnIndex);
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -732,14 +827,16 @@ public final class SQLiteRawStatement implements Closeable {
     private static native void nativeBindText(long stmt, int param, String val);
 
     /**
-     * Methods that return information (including the values) of columns from the current result
-     * row.
+     * Methods that return information about the columns int the current result row.
      */
     @FastNative
     private static native int nativeColumnType(long stmt, int col);
     @FastNative
     private static native String nativeColumnName(long stmt, int col);
 
+    /**
+     * Methods that return information about the value columns in the current result row.
+     */
     @FastNative
     private static native int nativeColumnBytes(long stmt, int col);
 

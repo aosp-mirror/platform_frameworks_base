@@ -187,7 +187,7 @@ public class SQLiteRawStatementTest {
                 for (int i = 0; s.step() && i < 5; i++) {
                     boolean r = t.step();
                     assertTrue(r);
-                    assertEquals(t.getInt(0), s.getInt(0));
+                    assertEquals(t.getColumnInt(0), s.getColumnInt(0));
                     found++;
                 }
                 assertFalse(t.step());
@@ -240,7 +240,7 @@ public class SQLiteRawStatementTest {
             try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
                 boolean r = s.step();
                 assertTrue(r);
-                int rows = s.getInt(0);
+                int rows = s.getColumnInt(0);
                 assertEquals(10, rows);
             }
             mDatabase.setTransactionSuccessful();
@@ -254,10 +254,10 @@ public class SQLiteRawStatementTest {
             final String query = "SELECT i, d, t FROM t1 WHERE t = 'text03value'";
             try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
                 assertTrue(s.step());
-                assertEquals(3, s.getResultColumnsCount());
-                int vi = s.getInt(0);
-                double vd = s.getDouble(1);
-                String vt = s.getText(2);
+                assertEquals(3, s.getResultColumnCount());
+                int vi = s.getColumnInt(0);
+                double vd = s.getColumnDouble(1);
+                String vt = s.getColumnText(2);
                 assertEquals(3 * 3, vi);
                 assertEquals(2.5 * 3, vd, 0.1);
                 assertEquals("text03value", vt);
@@ -273,10 +273,10 @@ public class SQLiteRawStatementTest {
             final String query = "SELECT i, d, t FROM t1 WHERE i == 20";
             try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
                 assertTrue(s.step());
-                assertEquals(3, s.getResultColumnsCount());
-                assertEquals(20, s.getInt(0));
-                assertEquals(0.0, s.getDouble(1), 0.01);
-                assertEquals(null, s.getText(2));
+                assertEquals(3, s.getResultColumnCount());
+                assertEquals(20, s.getColumnInt(0));
+                assertEquals(0.0, s.getColumnDouble(1), 0.01);
+                assertEquals(null, s.getColumnText(2));
                 // No more rows.
                 assertFalse(s.step());
             }
@@ -383,7 +383,7 @@ public class SQLiteRawStatementTest {
 
             // Verify that a statement cannot be accessed once closed.
             try {
-                s.getResultColumnsCount();
+                s.getResultColumnCount();
                 fail("accessed closed statement");
             } catch (AssertionError e) {
                 // Pass on the fail from the try-block before the generic catch below can see it.
@@ -495,7 +495,7 @@ public class SQLiteRawStatementTest {
                 // Fetch the entire reference array.
                 s.bindInt(1, 1);
                 assertTrue(s.step());
-                byte[] a = s.getBlob(0);
+                byte[] a = s.getColumnBlob(0);
                 assertTrue(Arrays.equals(src, a));
                 s.reset();
 
@@ -503,21 +503,21 @@ public class SQLiteRawStatementTest {
                 s.bindInt(1, 2);
                 assertTrue(s.step());
                 byte[] c = new byte[src.length];
-                assertEquals(8, s.getBlob(0, c, 0, c.length, 0));
+                assertEquals(8, s.readColumnBlob(0, c, 0, c.length, 0));
                 assertTrue(Arrays.equals(src, 4, 4+8, c, 0, 0+8));
                 s.reset();
 
                 // Fetch the null.
                 s.bindInt(1, 3);
                 assertTrue(s.step());
-                assertEquals(null, s.getBlob(0));
+                assertEquals(null, s.getColumnBlob(0));
                 s.reset();
 
                 // Fetch the null and ensure the buffer is not modified.
                 for (int i = 0; i < c.length; i++) c[i] = 0;
                 s.bindInt(1, 3);
                 assertTrue(s.step());
-                assertEquals(0, s.getBlob(0, c, 0, c.length, 0));
+                assertEquals(0, s.readColumnBlob(0, c, 0, c.length, 0));
                 for (int i = 0; i < c.length; i++) assertEquals(0, c[i]);
                 s.reset();
             }
@@ -553,17 +553,17 @@ public class SQLiteRawStatementTest {
         mDatabase.beginTransaction();
         try {
             try (SQLiteRawStatement s = mDatabase.createRawStatement(sql)) {
-                assertEquals(3, s.bindParameterCount());
+                assertEquals(3, s.getParameterCount());
 
-                assertEquals(1, s.bindParameterIndex(":1"));
-                assertEquals(2, s.bindParameterIndex("?2"));
-                assertEquals(3, s.bindParameterIndex("@FOO"));
-                assertEquals(0, s.bindParameterIndex("@BAR"));
+                assertEquals(1, s.getParameterIndex(":1"));
+                assertEquals(2, s.getParameterIndex("?2"));
+                assertEquals(3, s.getParameterIndex("@FOO"));
+                assertEquals(0, s.getParameterIndex("@BAR"));
 
-                assertEquals(":1", s.bindParameterName(1));
-                assertEquals("?2", s.bindParameterName(2));
-                assertEquals("@FOO", s.bindParameterName(3));
-                assertEquals(null, s.bindParameterName(4));
+                assertEquals(":1", s.getParameterName(1));
+                assertEquals("?2", s.getParameterName(2));
+                assertEquals("@FOO", s.getParameterName(3));
+                assertEquals(null, s.getParameterName(4));
             }
         } finally {
             mDatabase.endTransaction();
@@ -574,7 +574,7 @@ public class SQLiteRawStatementTest {
         try {
             try (SQLiteRawStatement s = mDatabase.createRawStatement(sql)) {
                 // Error case.  The name is not supposed to be null.
-                assertEquals(0, s.bindParameterIndex(null));
+                assertEquals(0, s.getParameterIndex(null));
                 fail("expected a NullPointerException");
             }
         } catch (NullPointerException e) {
@@ -631,7 +631,7 @@ public class SQLiteRawStatementTest {
             int found = 0;
             try (var s = mDatabase.createRawStatement(query)) {
                 for (int i = 0; s.step(); i++) {
-                    int vi = s.getInt(0);
+                    int vi = s.getColumnInt(0);
                     int expected = i * 3;
                     assertEquals(expected, vi);
                     found = i;
@@ -705,7 +705,7 @@ public class SQLiteRawStatementTest {
             for (int i = 0; i < loops; i++) {
                 try (var s = mDatabase.createRawStatement(query)) {
                     assertTrue(s.step());
-                    int vi = s.getInt(0);
+                    int vi = s.getColumnInt(0);
                     int expected = 0;
                     assertEquals(expected, vi);
                 }
@@ -775,7 +775,7 @@ public class SQLiteRawStatementTest {
                 for (int i = 0; i < size; i++) {
                     assertTrue(s.step());
                     for (int j = 0; j < 12; j++) {
-                        assertEquals(s.getInt(j), wideVal(i, j));
+                        assertEquals(s.getColumnInt(j), wideVal(i, j));
                     }
                 }
             }
@@ -820,7 +820,7 @@ public class SQLiteRawStatementTest {
             long start = SystemClock.uptimeMillis();
             try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
                 while (s.step()) {
-                    s.getInt(0);
+                    s.getColumnInt(0);
                 }
             }
             long elapsed = SystemClock.uptimeMillis() - start;
@@ -866,7 +866,7 @@ public class SQLiteRawStatementTest {
                     // No row is returned by this query.
                     assertFalse(r);
                     s.reset();
-                    assertEquals(i + 1, mDatabase.lastInsertRowId());
+                    assertEquals(i + 1, mDatabase.getLastInsertRowId());
                 }
             }
             mDatabase.setTransactionSuccessful();
@@ -889,7 +889,7 @@ public class SQLiteRawStatementTest {
                     // No row is returned by this query.
                     assertFalse(r);
                     s.reset();
-                    assertEquals(size + i + 1, mDatabase.lastInsertRowId());
+                    assertEquals(size + i + 1, mDatabase.getLastInsertRowId());
                 }
             }
             mDatabase.setTransactionSuccessful();
@@ -920,12 +920,12 @@ public class SQLiteRawStatementTest {
 
         mDatabase.beginTransactionReadOnly();
         try (SQLiteRawStatement s = mDatabase.createRawStatement(sql)) {
-            assertEquals(1, s.bindParameterIndex(head));
-            assertEquals(head, s.bindParameterName(1));
+            assertEquals(1, s.getParameterIndex(head));
+            assertEquals(head, s.getParameterName(1));
             s.bindInt(1, 20);
             assertTrue(s.step());
-            assertEquals(2, s.getInt(0));
-            assertEquals(cat, s.getName(0));
+            assertEquals(2, s.getColumnInt(0));
+            assertEquals(cat, s.getColumnName(0));
         } finally {
             mDatabase.endTransaction();
         }
