@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.util.Log;
@@ -197,6 +198,37 @@ public class AudioDeviceBrokerTest {
         // Verify that the sticky intent is broadcasted
         verify(mSpySystemServer, times(1)).broadcastStickyIntentToCurrentProfileGroup(
                 any(Intent.class));
+    }
+
+    /**
+     * Test that constructing an AdiDeviceState instance requires a non-null address for a
+     * wireless type, but can take null for a non-wireless type;
+     * @throws Exception
+     */
+    @Test
+    public void testAdiDeviceStateNullAddressCtor() throws Exception {
+        try {
+            new AdiDeviceState(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
+                    AudioManager.DEVICE_OUT_SPEAKER, null);
+            new AdiDeviceState(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                    AudioManager.DEVICE_OUT_BLUETOOTH_A2DP, null);
+            Assert.fail();
+        } catch (NullPointerException e) { }
+    }
+
+    @Test
+    public void testAdiDeviceStateStringSerialization() throws Exception {
+        Log.i(TAG, "starting testAdiDeviceStateStringSerialization");
+        final AdiDeviceState devState = new AdiDeviceState(
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, AudioManager.DEVICE_OUT_SPEAKER, "bla");
+        devState.setHasHeadTracker(false);
+        devState.setHeadTrackerEnabled(false);
+        devState.setSAEnabled(true);
+        final String persistString = devState.toPersistableString();
+        final AdiDeviceState result = AdiDeviceState.fromPersistedString(persistString);
+        Log.i(TAG, "original:" + devState);
+        Log.i(TAG, "result  :" + result);
+        Assert.assertEquals(devState, result);
     }
 
     private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection,
