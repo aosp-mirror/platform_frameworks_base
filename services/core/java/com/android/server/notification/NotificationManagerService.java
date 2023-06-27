@@ -9503,14 +9503,19 @@ public class NotificationManagerService extends SystemService {
      * Determine whether the userId applies to the notification in question, either because
      * they match exactly, or one of them is USER_ALL (which is treated as a wildcard).
      */
-    private static boolean notificationMatchesUserId(NotificationRecord r, int userId) {
-        return
+    private static boolean notificationMatchesUserId(NotificationRecord r, int userId,
+            boolean isAutogroupSummary) {
+        if (isAutogroupSummary) {
+            return r.getUserId() == userId;
+        } else {
+            return
                 // looking for USER_ALL notifications? match everything
-                   userId == UserHandle.USER_ALL
-                // a notification sent to USER_ALL matches any query
-                || r.getUserId() == UserHandle.USER_ALL
-                // an exact user match
-                || r.getUserId() == userId;
+                userId == UserHandle.USER_ALL
+                        // a notification sent to USER_ALL matches any query
+                        || r.getUserId() == UserHandle.USER_ALL
+                        // an exact user match
+                        || r.getUserId() == userId;
+        }
     }
 
     /**
@@ -9519,7 +9524,7 @@ public class NotificationManagerService extends SystemService {
      * because it matches one of the users profiles.
      */
     private boolean notificationMatchesCurrentProfiles(NotificationRecord r, int userId) {
-        return notificationMatchesUserId(r, userId)
+        return notificationMatchesUserId(r, userId, false)
                 || mUserProfiles.isCurrentProfile(r.getUserId());
     }
 
@@ -9588,7 +9593,7 @@ public class NotificationManagerService extends SystemService {
                 if (!notificationMatchesCurrentProfiles(r, userId)) {
                     continue;
                 }
-            } else if (!notificationMatchesUserId(r, userId)) {
+            } else if (!notificationMatchesUserId(r, userId, false)) {
                 continue;
             }
             // Don't remove notifications to all, if there's no package name specified
@@ -9826,7 +9831,7 @@ public class NotificationManagerService extends SystemService {
         final int len = list.size();
         for (int i = 0; i < len; i++) {
             NotificationRecord r = list.get(i);
-            if (notificationMatchesUserId(r, userId) && r.getGroupKey().equals(groupKey)
+            if (notificationMatchesUserId(r, userId, false) && r.getGroupKey().equals(groupKey)
                     && r.getSbn().getPackageName().equals(pkg)) {
                 records.add(r);
             }
@@ -9868,8 +9873,8 @@ public class NotificationManagerService extends SystemService {
         final int len = list.size();
         for (int i = 0; i < len; i++) {
             NotificationRecord r = list.get(i);
-            if (notificationMatchesUserId(r, userId) && r.getSbn().getId() == id &&
-                    TextUtils.equals(r.getSbn().getTag(), tag)
+            if (notificationMatchesUserId(r, userId, (r.getFlags() & GroupHelper.BASE_FLAGS) != 0)
+                    && r.getSbn().getId() == id && TextUtils.equals(r.getSbn().getTag(), tag)
                     && r.getSbn().getPackageName().equals(pkg)) {
                 return r;
             }
@@ -9883,8 +9888,8 @@ public class NotificationManagerService extends SystemService {
         final int len = list.size();
         for (int i = 0; i < len; i++) {
             NotificationRecord r = list.get(i);
-            if (notificationMatchesUserId(r, userId) && r.getSbn().getId() == id &&
-                    TextUtils.equals(r.getSbn().getTag(), tag)
+            if (notificationMatchesUserId(r, userId, false) && r.getSbn().getId() == id
+                    && TextUtils.equals(r.getSbn().getTag(), tag)
                     && r.getSbn().getPackageName().equals(pkg)) {
                 matching.add(r);
             }

@@ -867,13 +867,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     private NotificationRecord generateNotificationRecord(NotificationChannel channel, int userId) {
+        return generateNotificationRecord(channel, 1, userId);
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
+            int userId) {
         if (channel == null) {
             channel = mTestNotificationChannel;
         }
         Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id, "tag", mUid, 0,
                 nb.build(), new UserHandle(userId), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
@@ -10707,6 +10712,51 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // make sure the summary was removed and not re-posted
         assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void testUngroupingAutoSummary_differentUsers() throws Exception {
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, USER_SYSTEM);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, USER_SYSTEM);
+
+        // add notifications + summary for USER_SYSTEM
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.addNotification(mService.createAutoGroupSummary(nr1.getUserId(),
+                nr1.getSbn().getPackageName(), nr1.getKey(), GroupHelper.BASE_FLAGS));
+
+        // add notifications + summary for USER_ALL
+        NotificationRecord nr0_all =
+                generateNotificationRecord(mTestNotificationChannel, 2, UserHandle.USER_ALL);
+        NotificationRecord nr1_all =
+                generateNotificationRecord(mTestNotificationChannel, 3, UserHandle.USER_ALL);
+
+        mService.addNotification(nr0_all);
+        mService.addNotification(nr1_all);
+        mService.addNotification(mService.createAutoGroupSummary(nr0_all.getUserId(),
+                nr0_all.getSbn().getPackageName(), nr0_all.getKey(), GroupHelper.BASE_FLAGS));
+
+        // cancel both children for USER_ALL
+        mBinderService.cancelNotificationWithTag(PKG, PKG, nr0_all.getSbn().getTag(),
+                nr0_all.getSbn().getId(), UserHandle.USER_ALL);
+        mBinderService.cancelNotificationWithTag(PKG, PKG, nr1_all.getSbn().getTag(),
+                nr1_all.getSbn().getId(), UserHandle.USER_ALL);
+        waitForIdle();
+
+        // group helper would send 'remove summary' event
+        mService.clearAutogroupSummaryLocked(UserHandle.USER_ALL,
+                nr0_all.getSbn().getPackageName());
+        waitForIdle();
+
+        // make sure the right summary was removed
+        assertThat(mService.getNotificationCount(nr0_all.getSbn().getPackageName(),
+                UserHandle.USER_ALL, 0, null)).isEqualTo(0);
+
+        // the USER_SYSTEM notifications + summary were not removed
+        assertThat(mService.getNotificationCount(nr0.getSbn().getPackageName(),
+                USER_SYSTEM, 0, null)).isEqualTo(3);
     }
 
     @Test
