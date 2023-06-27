@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.display;
@@ -206,11 +206,11 @@ public class BrightnessMappingStrategyTest {
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
 
         strategy.setBrightnessConfiguration(null);
-        final int N = DISPLAY_LEVELS_BACKLIGHT.length;
+        final int n = DISPLAY_LEVELS_BACKLIGHT.length;
         final float expectedBrightness =
-                (float) DISPLAY_LEVELS_BACKLIGHT[N - 1] / PowerManager.BRIGHTNESS_ON;
+                (float) DISPLAY_LEVELS_BACKLIGHT[n - 1] / PowerManager.BRIGHTNESS_ON;
         assertEquals(expectedBrightness,
-                strategy.getBrightness(LUX_LEVELS[N - 1]), 0.0001f /*tolerance*/);
+                strategy.getBrightness(LUX_LEVELS[n - 1]), 0.0001f /*tolerance*/);
     }
 
     @Test
@@ -270,10 +270,10 @@ public class BrightnessMappingStrategyTest {
 
         // Check that null returns us to the default configuration.
         strategy.setBrightnessConfiguration(null);
-        final int N = DISPLAY_LEVELS_NITS.length;
-        final float expectedBrightness = DISPLAY_LEVELS_NITS[N - 1] / DISPLAY_RANGE_NITS[1];
+        final int n = DISPLAY_LEVELS_NITS.length;
+        final float expectedBrightness = DISPLAY_LEVELS_NITS[n - 1] / DISPLAY_RANGE_NITS[1];
         assertEquals(expectedBrightness,
-                strategy.getBrightness(LUX_LEVELS[N - 1]), 0.0001f /*tolerance*/);
+                strategy.getBrightness(LUX_LEVELS[n - 1]), 0.0001f /*tolerance*/);
     }
 
     @Test

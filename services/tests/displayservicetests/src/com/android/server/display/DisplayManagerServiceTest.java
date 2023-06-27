@@ -142,7 +142,7 @@ public class DisplayManagerServiceTest {
     private static final float FLOAT_TOLERANCE = 0.01f;
 
     private static final String VIRTUAL_DISPLAY_NAME = "Test Virtual Display";
-    private static final String PACKAGE_NAME = "com.android.frameworks.servicestests";
+    private static final String PACKAGE_NAME = "com.android.frameworks.displayservicetests";
     private static final long STANDARD_DISPLAY_EVENTS = DisplayManager.EVENT_FLAG_DISPLAY_ADDED
                     | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
                     | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
@@ -238,7 +238,7 @@ public class DisplayManagerServiceTest {
         boolean getHdrOutputConversionSupport() {
             return true;
         }
-   }
+    }
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();
 

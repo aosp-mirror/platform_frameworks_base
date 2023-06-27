@@ -22,11 +22,20 @@ android_test {
         "src/**/*.java",
     ],
 
+    libs: [
+        "android.test.mock",
+    ],
+
     static_libs: [
-        "services.core",
-        "androidx.test.runner",
-        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "display-core-libs",
+        "frameworks-base-testutils",
+        "junit",
+        "junit-params",
+        "platform-compat-test-rules",
         "platform-test-annotations",
+        "services.core",
+        "servicestests-utils",
     ],
 
     defaults: [
@@ -46,4 +55,11 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+java_library {
+    name: "display-core-libs",
+    srcs: [
+        "src/com/android/server/display/TestUtils.java",
+    ],
 }
