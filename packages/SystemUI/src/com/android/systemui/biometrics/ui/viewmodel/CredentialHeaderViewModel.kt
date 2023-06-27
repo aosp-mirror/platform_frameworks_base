@@ -10,4 +10,5 @@ interface CredentialHeaderViewModel {
     val subtitle: String
     val description: String
     val icon: Drawable
+    val showEmergencyCallButton: Boolean
 }

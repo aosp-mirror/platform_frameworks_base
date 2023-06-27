@@ -48,6 +48,7 @@ public class PromptInfo implements Parcelable {
     private boolean mAllowBackgroundAuthentication;
     private boolean mIgnoreEnrollmentState;
     private boolean mIsForLegacyFingerprintManager = false;
+    private boolean mShowEmergencyCallButton = false;
 
     public PromptInfo() {
 
@@ -72,6 +73,7 @@ public class PromptInfo implements Parcelable {
         mAllowBackgroundAuthentication = in.readBoolean();
         mIgnoreEnrollmentState = in.readBoolean();
         mIsForLegacyFingerprintManager = in.readBoolean();
+        mShowEmergencyCallButton = in.readBoolean();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -111,6 +113,7 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mAllowBackgroundAuthentication);
         dest.writeBoolean(mIgnoreEnrollmentState);
         dest.writeBoolean(mIsForLegacyFingerprintManager);
+        dest.writeBoolean(mShowEmergencyCallButton);
     }
 
     // LINT.IfChange
@@ -228,6 +231,10 @@ public class PromptInfo implements Parcelable {
         mAllowedSensorIds.add(sensorId);
     }
 
+    public void setShowEmergencyCallButton(boolean showEmergencyCallButton) {
+        mShowEmergencyCallButton = showEmergencyCallButton;
+    }
+
     // Getters
 
     public CharSequence getTitle() {
@@ -308,5 +315,9 @@ public class PromptInfo implements Parcelable {
 
     public boolean isForLegacyFingerprintManager() {
         return mIsForLegacyFingerprintManager;
+    }
+
+    public boolean isShowEmergencyCallButton() {
+        return mShowEmergencyCallButton;
     }
 }

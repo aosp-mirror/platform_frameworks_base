@@ -221,6 +221,7 @@
         <attr name="descriptionTextAppearance" format="reference" />
         <attr name="passwordTextAppearance" format="reference" />
         <attr name="errorTextAppearance" format="reference"/>
+        <attr name="errorTextAppearanceLand" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="LogAccessPermissionGrantDialog">
