@@ -1413,7 +1413,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directories returned
      * by {@link #getFilesDir()}, etc.
@@ -1501,7 +1501,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directories returned
      * by {@link #getFilesDir()}, etc.
@@ -1812,7 +1812,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directory returned by
      * {@link #getCacheDir()}.
