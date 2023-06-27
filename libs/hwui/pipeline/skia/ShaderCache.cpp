@@ -79,7 +79,7 @@ bool ShaderCache::validateCache(const void* identity, ssize_t size) {
 
 void ShaderCache::initShaderDiskCache(const void* identity, ssize_t size) {
     ATRACE_NAME("initShaderDiskCache");
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard lock(mMutex);
 
     // Emulators can switch between different renders either as part of config
     // or snapshot migration. Also, program binaries may not work well on some
@@ -92,7 +92,7 @@ void ShaderCache::initShaderDiskCache(const void* identity, ssize_t size) {
 }
 
 void ShaderCache::setFilename(const char* filename) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard lock(mMutex);
     mFilename = filename;
 }
 
@@ -104,7 +104,7 @@ BlobCache* ShaderCache::getBlobCacheLocked() {
 sk_sp<SkData> ShaderCache::load(const SkData& key) {
     ATRACE_NAME("ShaderCache::load");
     size_t keySize = key.size();
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard lock(mMutex);
     if (!mInitialized) {
         return nullptr;
     }
@@ -181,13 +181,18 @@ void ShaderCache::saveToDiskLocked() {
             auto key = sIDKey;
             set(mBlobCache.get(), &key, sizeof(key), mIDHash.data(), mIDHash.size());
         }
+        // The most straightforward way to make ownership shared
+        mMutex.unlock();
+        mMutex.lock_shared();
         mBlobCache->writeToFile();
+        mMutex.unlock_shared();
+        mMutex.lock();
     }
 }
 
 void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /*description*/) {
     ATRACE_NAME("ShaderCache::store");
-    std::lock_guard<std::mutex> lock(mMutex);
+    std::lock_guard lock(mMutex);
     mNumShadersCachedInRam++;
     ATRACE_FORMAT("HWUI RAM cache: %d shaders", mNumShadersCachedInRam);
 
@@ -229,7 +234,7 @@ void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /
         mSavePending = true;
         std::thread deferredSaveThread([this]() {
             usleep(mDeferredSaveDelayMs * 1000);  // milliseconds to microseconds
-            std::lock_guard<std::mutex> lock(mMutex);
+            std::lock_guard lock(mMutex);
             // Store file on disk if there a new shader or Vulkan pipeline cache size changed.
             if (mCacheDirty || mNewPipelineCacheSize != mOldPipelineCacheSize) {
                 saveToDiskLocked();
@@ -245,11 +250,12 @@ void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /
 
 void ShaderCache::onVkFrameFlushed(GrDirectContext* context) {
     {
-        std::lock_guard<std::mutex> lock(mMutex);
-
+        mMutex.lock_shared();
         if (!mInitialized || !mTryToStorePipelineCache) {
+            mMutex.unlock_shared();
             return;
         }
+        mMutex.unlock_shared();
     }
     mInStoreVkPipelineInProgress = true;
     context->storeVkPipelineCacheData();
