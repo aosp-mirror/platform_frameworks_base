@@ -980,23 +980,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void setUdfpsOverlay(@NonNull IUdfpsOverlay controller) {
-        if (mService == null) {
-            Slog.w(TAG, "setUdfpsOverlay: no fingerprint service");
-            return;
-        }
-
-        try {
-            mService.setUdfpsOverlay(controller);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Forwards BiometricStateListener to FingerprintService
      * @param listener new BiometricStateListener being added
      * @hide

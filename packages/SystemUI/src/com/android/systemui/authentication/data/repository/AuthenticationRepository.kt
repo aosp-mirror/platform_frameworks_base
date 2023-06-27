@@ -16,13 +16,25 @@
 
 package com.android.systemui.authentication.data.repository
 
+import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.user.data.repository.UserRepository
 import dagger.Binds
 import dagger.Module
+import java.util.function.Function
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** Defines interface for classes that can access authentication-related application state. */
 interface AuthenticationRepository {
@@ -38,12 +50,6 @@ interface AuthenticationRepository {
     val isUnlocked: StateFlow<Boolean>
 
     /**
-     * The currently-configured authentication method. This determines how the authentication
-     * challenge is completed in order to unlock an otherwise locked device.
-     */
-    val authenticationMethod: StateFlow<AuthenticationMethodModel>
-
-    /**
      * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
      * dismisses once the authentication challenge is completed. For example, completing a biometric
      * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
@@ -57,11 +63,11 @@ interface AuthenticationRepository {
      */
     val failedAuthenticationAttempts: StateFlow<Int>
 
-    /** See [isUnlocked]. */
-    fun setUnlocked(isUnlocked: Boolean)
-
-    /** See [authenticationMethod]. */
-    fun setAuthenticationMethod(authenticationMethod: AuthenticationMethodModel)
+    /**
+     * Returns the currently-configured authentication method. This determines how the
+     * authentication challenge is completed in order to unlock an otherwise locked device.
+     */
+    suspend fun getAuthenticationMethod(): AuthenticationMethodModel
 
     /** See [isBypassEnabled]. */
     fun setBypassEnabled(isBypassEnabled: Boolean)
@@ -70,18 +76,23 @@ interface AuthenticationRepository {
     fun setFailedAuthenticationAttempts(failedAuthenticationAttempts: Int)
 }
 
-class AuthenticationRepositoryImpl @Inject constructor() : AuthenticationRepository {
-    // TODO(b/280883900): get data from real data sources in SysUI.
+class AuthenticationRepositoryImpl
+@Inject
+constructor(
+    @Application private val applicationScope: CoroutineScope,
+    private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val userRepository: UserRepository,
+    private val lockPatternUtils: LockPatternUtils,
+    keyguardRepository: KeyguardRepository,
+) : AuthenticationRepository {
 
-    private val _isUnlocked = MutableStateFlow(false)
-    override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
-
-    private val _authenticationMethod =
-        MutableStateFlow<AuthenticationMethodModel>(
-            AuthenticationMethodModel.Pin(listOf(1, 2, 3, 4), autoConfirm = false)
+    override val isUnlocked: StateFlow<Boolean> =
+        keyguardRepository.isKeyguardUnlocked.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false,
         )
-    override val authenticationMethod: StateFlow<AuthenticationMethodModel> =
-        _authenticationMethod.asStateFlow()
 
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled.asStateFlow()
@@ -90,16 +101,43 @@ class AuthenticationRepositoryImpl @Inject constructor() : AuthenticationReposit
     override val failedAuthenticationAttempts: StateFlow<Int> =
         _failedAuthenticationAttempts.asStateFlow()
 
-    override fun setUnlocked(isUnlocked: Boolean) {
-        _isUnlocked.value = isUnlocked
+    override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
+        return withContext(backgroundDispatcher) {
+            val selectedUserId = userRepository.getSelectedUserInfo().id
+            when (getSecurityMode.apply(selectedUserId)) {
+                KeyguardSecurityModel.SecurityMode.PIN,
+                KeyguardSecurityModel.SecurityMode.SimPin ->
+                    AuthenticationMethodModel.Pin(
+                        code = listOf(1, 2, 3, 4), // TODO(b/280883900): remove this
+                        autoConfirm = lockPatternUtils.isAutoPinConfirmEnabled(selectedUserId),
+                    )
+                KeyguardSecurityModel.SecurityMode.Password,
+                KeyguardSecurityModel.SecurityMode.SimPuk ->
+                    AuthenticationMethodModel.Password(
+                        password = "password", // TODO(b/280883900): remove this
+                    )
+                KeyguardSecurityModel.SecurityMode.Pattern ->
+                    AuthenticationMethodModel.Pattern(
+                        coordinates =
+                            listOf(
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 0),
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 1),
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 2),
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(1, 1),
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 0),
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 1),
+                                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 2),
+                            ), // TODO(b/280883900): remove this
+                    )
+                KeyguardSecurityModel.SecurityMode.None -> AuthenticationMethodModel.None
+                KeyguardSecurityModel.SecurityMode.Invalid -> error("Invalid security mode!")
+                null -> error("Invalid security is null!")
+            }
+        }
     }
 
     override fun setBypassEnabled(isBypassEnabled: Boolean) {
         _isBypassEnabled.value = isBypassEnabled
-    }
-
-    override fun setAuthenticationMethod(authenticationMethod: AuthenticationMethodModel) {
-        _authenticationMethod.value = authenticationMethod
     }
 
     override fun setFailedAuthenticationAttempts(failedAuthenticationAttempts: Int) {

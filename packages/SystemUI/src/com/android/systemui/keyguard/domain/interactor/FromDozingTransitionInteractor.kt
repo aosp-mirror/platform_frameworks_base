@@ -23,10 +23,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -35,11 +33,14 @@ import kotlinx.coroutines.launch
 class FromDozingTransitionInteractor
 @Inject
 constructor(
+    override val transitionRepository: KeyguardTransitionRepository,
+    override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(FromDozingTransitionInteractor::class.simpleName!!) {
+) :
+    TransitionInteractor(
+        fromState = KeyguardState.DOZING,
+    ) {
 
     override fun start() {
         listenForDozingToLockscreen()
@@ -49,20 +50,13 @@ constructor(
     private fun listenForDozingToLockscreen() {
         scope.launch {
             keyguardInteractor.wakefulnessModel
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (wakefulnessModel, lastStartedTransition) ->
                     if (
                         wakefulnessModel.isStartingToWakeOrAwake() &&
                             lastStartedTransition.to == KeyguardState.DOZING
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DOZING,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
                     }
                 }
         }
@@ -71,29 +65,22 @@ constructor(
     private fun listenForDozingToGone() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (biometricUnlockState, lastStartedTransition) ->
                     if (
                         lastStartedTransition.to == KeyguardState.DOZING &&
                             isWakeAndUnlock(biometricUnlockState)
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DOZING,
-                                KeyguardState.GONE,
-                                getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.GONE)
                     }
                 }
         }
     }
 
-    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
+    override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
-            setInterpolator(Interpolators.LINEAR)
-            setDuration(duration.inWholeMilliseconds)
+            interpolator = Interpolators.LINEAR
+            duration = DEFAULT_DURATION.inWholeMilliseconds
         }
     }
 

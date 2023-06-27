@@ -22,10 +22,13 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.shared.model.AuthenticationThrottledModel
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -66,6 +69,7 @@ constructor(
 
     private val password: PasswordBouncerViewModel by lazy {
         PasswordBouncerViewModel(
+            applicationScope = applicationScope,
             interactor = interactor,
             isInputEnabled = isInputEnabled,
         )
@@ -81,14 +85,30 @@ constructor(
     }
 
     /** View-model for the current UI, based on the current authentication method. */
+    private val _authMethod =
+        MutableSharedFlow<AuthMethodBouncerViewModel?>(
+            replay = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
     val authMethod: StateFlow<AuthMethodBouncerViewModel?> =
-        interactor.authenticationMethod
-            .map { authMethod -> toViewModel(authMethod) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = toViewModel(interactor.authenticationMethod.value),
-            )
+        _authMethod.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null,
+        )
+
+    init {
+        applicationScope.launch {
+            _authMethod.subscriptionCount
+                .pairwise()
+                .map { (previousCount, currentCount) -> currentCount > previousCount }
+                .collect { subscriberAdded ->
+                    if (subscriberAdded) {
+                        reloadAuthMethod()
+                    }
+                }
+        }
+    }
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<MessageViewModel> =
@@ -125,7 +145,7 @@ constructor(
             interactor.throttling
                 .map { model ->
                     model?.let {
-                        when (interactor.authenticationMethod.value) {
+                        when (interactor.getAuthenticationMethod()) {
                             is AuthenticationMethodModel.Pin ->
                                 R.string.kg_too_many_failed_pin_attempts_dialog_message
                             is AuthenticationMethodModel.Password ->
@@ -161,17 +181,6 @@ constructor(
         _throttlingDialogMessage.value = null
     }
 
-    private fun toViewModel(
-        authMethod: AuthenticationMethodModel,
-    ): AuthMethodBouncerViewModel? {
-        return when (authMethod) {
-            is AuthenticationMethodModel.Pin -> pin
-            is AuthenticationMethodModel.Password -> password
-            is AuthenticationMethodModel.Pattern -> pattern
-            else -> null
-        }
-    }
-
     private fun toMessageViewModel(
         message: String?,
         throttling: AuthenticationThrottledModel?,
@@ -179,6 +188,17 @@ constructor(
         return MessageViewModel(
             text = message ?: "",
             isUpdateAnimated = throttling == null,
+        )
+    }
+
+    private suspend fun reloadAuthMethod() {
+        _authMethod.tryEmit(
+            when (interactor.getAuthenticationMethod()) {
+                is AuthenticationMethodModel.Pin -> pin
+                is AuthenticationMethodModel.Password -> password
+                is AuthenticationMethodModel.Pattern -> pattern
+                else -> null
+            }
         )
     }
 

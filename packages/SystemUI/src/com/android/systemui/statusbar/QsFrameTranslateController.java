@@ -18,19 +18,19 @@ package com.android.systemui.statusbar;
 
 import android.view.View;
 
+import com.android.systemui.display.data.repository.DisplayMetricsRepository;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 /**
  * Calculates and moves the QS frame vertically.
  */
 public abstract class QsFrameTranslateController {
 
-    protected CentralSurfaces mCentralSurfaces;
+    protected DisplayMetricsRepository mDisplayMetricsRepository;
 
-    public QsFrameTranslateController(CentralSurfaces centralSurfaces) {
-        mCentralSurfaces = centralSurfaces;
+    public QsFrameTranslateController(DisplayMetricsRepository displayMetricsRepository) {
+        mDisplayMetricsRepository = displayMetricsRepository;
     }
 
     /**

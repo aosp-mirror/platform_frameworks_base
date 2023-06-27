@@ -26,7 +26,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -38,8 +37,8 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class LockscreenSceneInteractorTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor =
         utils.authenticationInteractor(
@@ -61,10 +60,10 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isDeviceLocked by collectLastValue(underTest.isDeviceLocked)
 
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
             assertThat(isDeviceLocked).isTrue()
 
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             assertThat(isDeviceLocked).isFalse()
         }
 
@@ -73,8 +72,8 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isSwipeToDismissEnabled by collectLastValue(underTest.isSwipeToDismissEnabled)
 
-            authenticationInteractor.lockDevice()
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setUnlocked(false)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
 
             assertThat(isSwipeToDismissEnabled).isTrue()
         }
@@ -84,8 +83,8 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isSwipeToDismissEnabled by collectLastValue(underTest.isSwipeToDismissEnabled)
 
-            authenticationInteractor.unlockDevice()
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setUnlocked(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
 
             assertThat(isSwipeToDismissEnabled).isFalse()
         }
@@ -94,8 +93,10 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
     fun dismissLockScreen_deviceLockedWithSecureAuthMethod_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.lockDevice()
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setUnlocked(false)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
             underTest.dismissLockscreen()
@@ -107,8 +108,10 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
     fun dismissLockScreen_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.unlockDevice()
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setUnlocked(true)
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
             underTest.dismissLockscreen()
@@ -120,8 +123,8 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
     fun dismissLockScreen_deviceLockedWithInsecureAuthMethod_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.lockDevice()
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setUnlocked(false)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
             underTest.dismissLockscreen()
@@ -136,58 +139,13 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Gone))
             runCurrent()
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
 
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-        }
-
-    @Test
-    fun deviceBiometricUnlockedInLockScreen_bypassEnabled_switchesToGone() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.lockDevice()
-            sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Lockscreen))
-            if (!authenticationInteractor.isBypassEnabled.value) {
-                authenticationInteractor.toggleBypassEnabled()
-            }
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-
-            authenticationInteractor.biometricUnlock()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
-    fun deviceBiometricUnlockedInLockScreen_bypassNotEnabled_doesNotSwitch() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.lockDevice()
-            sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Lockscreen))
-            if (authenticationInteractor.isBypassEnabled.value) {
-                authenticationInteractor.toggleBypassEnabled()
-            }
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-
-            authenticationInteractor.biometricUnlock()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-        }
-
-    @Test
-    fun switchFromLockScreenToGone_authMethodSwipe_unlocksDevice() =
-        testScope.runTest {
-            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
-            sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Lockscreen))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
-            assertThat(isUnlocked).isFalse()
-
-            sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Gone))
-
-            assertThat(isUnlocked).isTrue()
         }
 
     @Test
@@ -195,7 +153,9 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Lockscreen))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             assertThat(isUnlocked).isFalse()
 
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Gone))
@@ -210,7 +170,7 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Shade))
             runCurrent()
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
             runCurrent()
             assertThat(isUnlocked).isFalse()
 
@@ -220,29 +180,16 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun authMethodChangedToNone_onLockScreenScene_dismissesLockScreen() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Lockscreen))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
-
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.None)
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
     fun authMethodChangedToNone_notOnLockScreenScene_doesNotDismissLockScreen() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
             runCurrent()
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.QuickSettings))
             runCurrent()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.QuickSettings))
 
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
 
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.QuickSettings))
         }

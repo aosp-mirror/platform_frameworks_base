@@ -40,7 +40,6 @@ import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
@@ -123,7 +122,6 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull private final HalResultController mHalResultController;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ISidefpsController mSidefpsController;
-    @Nullable private IUdfpsOverlay mUdfpsOverlay;
     @NonNull private final BiometricContext mBiometricContext;
     // for requests that do not use biometric prompt
     @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
@@ -597,9 +595,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mSensorProperties.sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_ENROLL,
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
-                    mBiometricContext,
-                    mUdfpsOverlayController, mSidefpsController, mUdfpsOverlay,
-                    enrollReason);
+                    mBiometricContext, mUdfpsOverlayController, mSidefpsController, enrollReason);
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
@@ -644,8 +640,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
                     mLazyDaemon, token, id, listener, options,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
-                    mBiometricContext, mUdfpsOverlayController, mUdfpsOverlay,
-                    isStrongBiometric);
+                    mBiometricContext, mUdfpsOverlayController, isStrongBiometric);
             mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
         });
 
@@ -668,7 +663,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric,
                     mTaskStackListener, mLockoutTracker,
-                    mUdfpsOverlayController, mSidefpsController, mUdfpsOverlay,
+                    mUdfpsOverlayController, mSidefpsController,
                     allowBackgroundAuthentication, mSensorProperties,
                     Utils.getCurrentStrength(mSensorId));
             mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
@@ -853,11 +848,6 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void setSidefpsController(@NonNull ISidefpsController controller) {
         mSidefpsController = controller;
-    }
-
-    @Override
-    public void setUdfpsOverlay(@NonNull IUdfpsOverlay controller) {
-        mUdfpsOverlay = controller;
     }
 
     @Override

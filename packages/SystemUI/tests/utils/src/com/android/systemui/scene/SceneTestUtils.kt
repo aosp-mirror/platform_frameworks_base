@@ -16,20 +16,28 @@
 
 package com.android.systemui.scene
 
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository.Companion.toSecurityMode
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 
 /**
@@ -39,9 +47,25 @@ import kotlinx.coroutines.test.TestScope
 @OptIn(ExperimentalCoroutinesApi::class)
 class SceneTestUtils(
     test: SysuiTestCase,
-    private val testScope: TestScope? = null,
 ) {
-
+    val testDispatcher: TestDispatcher by lazy { StandardTestDispatcher() }
+    val testScope: TestScope by lazy { TestScope(testDispatcher) }
+    private var securityMode: SecurityMode =
+        FakeAuthenticationRepository.DEFAULT_AUTHENTICATION_METHOD.toSecurityMode()
+    val authenticationRepository: FakeAuthenticationRepository by lazy {
+        FakeAuthenticationRepository(
+            delegate =
+                AuthenticationRepositoryImpl(
+                    applicationScope = applicationScope(),
+                    getSecurityMode = { securityMode },
+                    backgroundDispatcher = testDispatcher,
+                    userRepository = FakeUserRepository(),
+                    lockPatternUtils = mock(),
+                    keyguardRepository = FakeKeyguardRepository(),
+                ),
+            onSecurityModeChanged = { securityMode = it },
+        )
+    }
     private val context = test.context
 
     fun fakeSceneContainerRepository(
@@ -82,7 +106,7 @@ class SceneTestUtils(
     }
 
     fun authenticationRepository(): AuthenticationRepository {
-        return AuthenticationRepositoryImpl()
+        return authenticationRepository
     }
 
     fun authenticationInteractor(
@@ -92,17 +116,6 @@ class SceneTestUtils(
             applicationScope = applicationScope(),
             repository = repository,
         )
-    }
-
-    private fun applicationScope(): CoroutineScope {
-        return checkNotNull(testScope) {
-                """
-                TestScope not initialized, please create a TestScope and inject it into
-                SceneTestUtils.
-            """
-                    .trimIndent()
-            }
-            .backgroundScope
     }
 
     fun bouncerInteractor(
@@ -152,6 +165,10 @@ class SceneTestUtils(
             sceneInteractor = sceneInteractor,
             containerName = CONTAINER_1,
         )
+    }
+
+    private fun applicationScope(): CoroutineScope {
+        return testScope.backgroundScope
     }
 
     companion object {

@@ -1,0 +1,13 @@
+{
+  "presubmit": [
+    {
+      "name": "DisplayServiceTests",
+      "options": [
+        {"include-filter": "com.android.server.display"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ]
+}

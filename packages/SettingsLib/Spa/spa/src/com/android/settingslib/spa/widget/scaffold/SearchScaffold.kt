@@ -163,7 +163,6 @@ private fun SearchTopAppBar(
     BackHandler { onClose() }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     val focusRequester = remember { FocusRequester() }
@@ -186,8 +185,9 @@ private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> 
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { hideKeyboardAction() }),
         singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Transparent,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),

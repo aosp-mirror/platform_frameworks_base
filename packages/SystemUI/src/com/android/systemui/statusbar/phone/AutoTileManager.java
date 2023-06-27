@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
@@ -82,7 +84,8 @@ public class AutoTileManager implements UserAwareController {
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
     private final ManagedProfileController mManagedProfileController;
-    private final NightDisplayListener mNightDisplayListener;
+    private final NightDisplayListenerModule.Builder mNightDisplayListenerBuilder;
+    private NightDisplayListener mNightDisplayListener;
     private final CastController mCastController;
     private final DeviceControlsController mDeviceControlsController;
     private final WalletController mWalletController;
@@ -98,7 +101,7 @@ public class AutoTileManager implements UserAwareController {
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
-            NightDisplayListener nightDisplayListener,
+            NightDisplayListenerModule.Builder nightDisplayListenerBuilder,
             CastController castController,
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
@@ -114,7 +117,7 @@ public class AutoTileManager implements UserAwareController {
         mHotspotController = hotspotController;
         mDataSaverController = dataSaverController;
         mManagedProfileController = managedProfileController;
-        mNightDisplayListener = nightDisplayListener;
+        mNightDisplayListenerBuilder = nightDisplayListenerBuilder;
         mCastController = castController;
         mReduceBrightColorsController = reduceBrightColorsController;
         mIsReduceBrightColorsAvailable = isReduceBrightColorsAvailable;
@@ -157,6 +160,10 @@ public class AutoTileManager implements UserAwareController {
             mDataSaverController.addCallback(mDataSaverListener);
         }
         mManagedProfileController.addCallback(mProfileCallback);
+
+        mNightDisplayListener = mNightDisplayListenerBuilder
+                .setUser(mCurrentUser.getIdentifier())
+                .build();
         if (!mAutoTracker.isAdded(NIGHT)
                 && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             mNightDisplayListener.setCallback(mNightDisplayCallback);
@@ -193,7 +200,8 @@ public class AutoTileManager implements UserAwareController {
         mHotspotController.removeCallback(mHotspotCallback);
         mDataSaverController.removeCallback(mDataSaverListener);
         mManagedProfileController.removeCallback(mProfileCallback);
-        if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
+        if (ColorDisplayManager.isNightDisplayAvailable(mContext)
+                && mNightDisplayListener != null) {
             mNightDisplayListener.setCallback(null);
         }
         if (mIsReduceBrightColorsAvailable) {

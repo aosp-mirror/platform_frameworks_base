@@ -2674,7 +2674,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mStateValidators.add(() -> {
             for (int i = mTargets.size() - 1; i >= 0; --i) {
                 final ChangeInfo change = mTargets.get(i);
-                if (!change.mContainer.isVisibleRequested()) continue;
+                if (!change.mContainer.isVisibleRequested()
+                        || change.mContainer.mSurfaceControl == null) {
+                    continue;
+                }
                 Slog.e(TAG, "Force show for visible " + change.mContainer
                         + " which may be hidden by transition unexpectedly");
                 change.mContainer.getSyncTransaction().show(change.mContainer.mSurfaceControl);

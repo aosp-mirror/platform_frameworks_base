@@ -19,5 +19,5 @@ import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 import javax.inject.Qualifier
 
-/** A {@link LogBuffer} for the new QS Pipeline for logging changes to the set of current tiles. */
+/** A [LogBuffer] for the new QS Pipeline for logging changes to the set of current tiles. */
 @Qualifier @MustBeDocumented @Retention(RetentionPolicy.RUNTIME) annotation class QSTileListLog

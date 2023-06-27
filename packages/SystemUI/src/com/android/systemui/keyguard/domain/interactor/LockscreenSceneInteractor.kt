@@ -23,7 +23,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -61,23 +60,16 @@ constructor(
 
     /** Whether it's currently possible to swipe up to dismiss the lockscreen. */
     val isSwipeToDismissEnabled: StateFlow<Boolean> =
-        combine(
-                authenticationInteractor.isUnlocked,
-                authenticationInteractor.authenticationMethod,
-            ) { isUnlocked, authMethod ->
-                isSwipeToUnlockEnabled(
-                    isUnlocked = isUnlocked,
-                    authMethod = authMethod,
-                )
+        authenticationInteractor.isUnlocked
+            .map { isUnlocked ->
+                !isUnlocked &&
+                    authenticationInteractor.getAuthenticationMethod() is
+                        AuthenticationMethodModel.Swipe
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    isSwipeToUnlockEnabled(
-                        isUnlocked = authenticationInteractor.isUnlocked.value,
-                        authMethod = authenticationInteractor.authenticationMethod.value,
-                    ),
+                initialValue = false,
             )
 
     init {
@@ -118,63 +110,11 @@ constructor(
                     }
                 }
         }
-
-        // SWIPE TO DISMISS Lockscreen.
-        //
-        // If switched from the lockscreen to the gone scene and the auth method was a swipe,
-        // unlocks the device.
-        applicationScope.launch {
-            combine(
-                    authenticationInteractor.authenticationMethod,
-                    sceneInteractor.currentScene(containerName).pairwise(),
-                    ::Pair,
-                )
-                .collect { (authMethod, scenes) ->
-                    val (previousScene, currentScene) = scenes
-                    if (
-                        authMethod is AuthenticationMethodModel.Swipe &&
-                            previousScene.key == SceneKey.Lockscreen &&
-                            currentScene.key == SceneKey.Gone
-                    ) {
-                        authenticationInteractor.unlockDevice()
-                    }
-                }
-        }
-
-        // DISMISS Lockscreen IF AUTH METHOD IS REMOVED.
-        //
-        // If the auth method becomes None while on the lockscreen scene, dismisses the lock
-        // screen.
-        applicationScope.launch {
-            combine(
-                    authenticationInteractor.authenticationMethod,
-                    sceneInteractor.currentScene(containerName),
-                    ::Pair,
-                )
-                .collect { (authMethod, scene) ->
-                    if (
-                        scene.key == SceneKey.Lockscreen &&
-                            authMethod == AuthenticationMethodModel.None
-                    ) {
-                        sceneInteractor.setCurrentScene(
-                            containerName = containerName,
-                            scene = SceneModel(SceneKey.Gone),
-                        )
-                    }
-                }
-        }
     }
 
     /** Attempts to dismiss the lockscreen. This will cause the bouncer to show, if needed. */
     fun dismissLockscreen() {
         bouncerInteractor.showOrUnlockDevice(containerName = containerName)
-    }
-
-    private fun isSwipeToUnlockEnabled(
-        isUnlocked: Boolean,
-        authMethod: AuthenticationMethodModel,
-    ): Boolean {
-        return !isUnlocked && authMethod is AuthenticationMethodModel.Swipe
     }
 
     @AssistedFactory

@@ -29,7 +29,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -41,8 +40,8 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class LockscreenSceneViewModelTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor =
         utils.authenticationInteractor(
@@ -73,10 +72,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun lockButtonIcon_whenLocked() =
         testScope.runTest {
             val lockButtonIcon by collectLastValue(underTest.lockButtonIcon)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat((lockButtonIcon as? Icon.Resource)?.res)
                 .isEqualTo(R.drawable.ic_device_lock_on)
@@ -86,10 +85,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun lockButtonIcon_whenUnlocked() =
         testScope.runTest {
             val lockButtonIcon by collectLastValue(underTest.lockButtonIcon)
-            authenticationInteractor.setAuthenticationMethod(
+            utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setUnlocked(true)
 
             assertThat((lockButtonIcon as? Icon.Resource)?.res)
                 .isEqualTo(R.drawable.ic_device_lock_off)
@@ -99,8 +98,8 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_swipeToUnlockedEnabled_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -109,8 +108,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_swipeToUnlockedNotEnabled_bouncer() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
         }
@@ -119,8 +120,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onLockButtonClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onLockButtonClicked()
@@ -132,8 +135,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
@@ -145,8 +150,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()
@@ -158,8 +165,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun onLockButtonClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onLockButtonClicked()

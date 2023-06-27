@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -107,7 +108,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private TunerService mTunerService;
     @Mock
-    private Provider<AutoTileManager> mAutoTiles;
+    private AutoTileManager mAutoTiles;
     @Mock
     private ShadeController mShadeController;
     @Mock
@@ -140,6 +141,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mFeatureFlags = new FakeFeatureFlags();
 
         mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, false);
+        mFeatureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, false);
 
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -160,9 +162,10 @@ public class QSTileHostTest extends SysuiTestCase {
         mSecureSettings = new FakeSettings();
         saveSetting("");
         mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
-                mPluginManager, mTunerService, mAutoTiles, mShadeController,
+                mPluginManager, mTunerService, () -> mAutoTiles, mShadeController,
                 mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
                 mTileLifecycleManagerFactory, mUserFileManager, mFeatureFlags);
+        mMainExecutor.runAllReady();
 
         mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
             @Override
@@ -296,11 +299,20 @@ public class QSTileHostTest extends SysuiTestCase {
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
         mQSTileHost.dump(pw, new String[]{});
-        String output = "QSTileHost:\n"
-                + TestTile1.class.getSimpleName() + ":\n"
-                + "    " + MOCK_STATE_STRING + "\n"
-                + TestTile2.class.getSimpleName() + ":\n"
-                + "    " + MOCK_STATE_STRING + "\n";
+
+        String output = "QSTileHost:" + "\n"
+                + "tile specs: [spec1, spec2]" + "\n"
+                + "current user: 0" + "\n"
+                + "is dirty: false" + "\n"
+                + "tiles:" + "\n"
+                + "TestTile1:" + "\n"
+                + "    MockState" + "\n"
+                + "TestTile2:" + "\n"
+                + "    MockState" + "\n";
+
+        System.out.println(output);
+        System.out.println(w.getBuffer().toString());
+
         assertEquals(output, w.getBuffer().toString());
     }
 
@@ -670,6 +682,17 @@ public class QSTileHostTest extends SysuiTestCase {
         assertEquals("spec1", proto.tiles[0].getSpec());
         assertEquals(CUSTOM_TILE.getPackageName(), proto.tiles[1].getComponentName().packageName);
         assertEquals(CUSTOM_TILE.getClassName(), proto.tiles[1].getComponentName().className);
+    }
+
+    @Test
+    public void testUserChange_flagOn_autoTileManagerNotified() {
+        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true);
+        int currentUser = mUserTracker.getUserId();
+        clearInvocations(mAutoTiles);
+        when(mUserTracker.getUserId()).thenReturn(currentUser + 1);
+
+        mQSTileHost.onTuningChanged(SETTING, "a,b");
+        verify(mAutoTiles).changeUser(UserHandle.of(currentUser + 1));
     }
 
     private SharedPreferences getSharedPreferencesForUser(int user) {
