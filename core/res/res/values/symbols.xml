@@ -3109,6 +3109,7 @@
   <java-symbol type="string" name="status_bar_sync_failing" />
   <java-symbol type="string" name="status_bar_sync_active" />
   <java-symbol type="string" name="status_bar_cast" />
+  <java-symbol type="string" name="status_bar_connected_display" />
   <java-symbol type="string" name="status_bar_hotspot" />
   <java-symbol type="string" name="status_bar_location" />
   <java-symbol type="string" name="status_bar_bluetooth" />
