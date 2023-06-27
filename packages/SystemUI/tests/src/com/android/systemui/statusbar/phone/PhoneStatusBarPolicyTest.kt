@@ -27,6 +27,8 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.screenrecord.RecordingController
@@ -46,9 +48,17 @@ import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.RingerModeTracker
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.util.time.FakeSystemClock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,6 +67,8 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -64,11 +76,13 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     companion object {
         private const val ALARM_SLOT = "alarm"
+        private const val CONNECTED_DISPLAY_SLOT = "connected_display"
     }
 
     @Mock private lateinit var iconController: StatusBarIconController
@@ -101,6 +115,9 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     @Captor
     private lateinit var alarmCallbackCaptor:
         ArgumentCaptor<NextAlarmController.NextAlarmChangeCallback>
+
+    private val testScope = TestScope(UnconfinedTestDispatcher())
+    private val fakeConnectedDisplayStateProvider = FakeConnectedDisplayStateProvider()
 
     private lateinit var executor: FakeExecutor
     private lateinit var statusBarPolicy: PhoneStatusBarPolicy
@@ -164,6 +181,57 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         verify(iconController).setIconVisibility(ALARM_SLOT, true)
     }
 
+    @Test
+    fun connectedDisplay_connected_iconShown() =
+        testScope.runTest {
+            statusBarPolicy.init()
+            clearInvocations(iconController)
+
+            fakeConnectedDisplayStateProvider.emit(State.CONNECTED)
+            runCurrent()
+
+            verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
+        }
+
+    @Test
+    fun connectedDisplay_disconnected_iconHidden() =
+        testScope.runTest {
+            statusBarPolicy.init()
+            clearInvocations(iconController)
+
+            fakeConnectedDisplayStateProvider.emit(State.DISCONNECTED)
+
+            verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, false)
+        }
+
+    @Test
+    fun connectedDisplay_disconnectedThenConnected_iconShown() =
+        testScope.runTest {
+            statusBarPolicy.init()
+            clearInvocations(iconController)
+
+            fakeConnectedDisplayStateProvider.emit(State.CONNECTED)
+            fakeConnectedDisplayStateProvider.emit(State.DISCONNECTED)
+            fakeConnectedDisplayStateProvider.emit(State.CONNECTED)
+
+            inOrder(iconController).apply {
+                verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
+                verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, false)
+                verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
+            }
+        }
+
+    @Test
+    fun connectedDisplay_connectSecureDisplay_iconShown() =
+        testScope.runTest {
+            statusBarPolicy.init()
+            clearInvocations(iconController)
+
+            fakeConnectedDisplayStateProvider.emit(State.CONNECTED_SECURE)
+
+            verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
+        }
+
     private fun createAlarmInfo(): AlarmManager.AlarmClockInfo {
         return AlarmManager.AlarmClockInfo(10L, null)
     }
@@ -200,7 +268,16 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             dateFormatUtil,
             ringerModeTracker,
             privacyItemController,
-            privacyLogger
+            privacyLogger,
+            fakeConnectedDisplayStateProvider,
+            JavaAdapter(testScope.backgroundScope)
         )
+    }
+
+    private class FakeConnectedDisplayStateProvider : ConnectedDisplayInteractor {
+        private val flow = MutableSharedFlow<State>()
+        suspend fun emit(value: State) = flow.emit(value)
+        override val connectedDisplayState: Flow<State>
+            get() = flow
     }
 }
