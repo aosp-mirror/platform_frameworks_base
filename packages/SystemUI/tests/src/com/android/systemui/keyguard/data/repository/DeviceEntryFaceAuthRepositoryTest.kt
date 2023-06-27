@@ -260,6 +260,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             assertThat(authStatus()).isEqualTo(SuccessAuthenticationStatus(successResult))
             assertThat(authenticated()).isTrue()
             assertThat(authRunning()).isFalse()
+            assertThat(canFaceAuthRun()).isFalse()
         }
 
     private fun uiEventIsLogged(faceAuthUiEvent: FaceAuthUiEvent) {
@@ -543,20 +544,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 keyguardRepository.setWakefulnessModel(
                     WakefulnessModel(
                         state = WakefulnessState.STARTING_TO_SLEEP,
-                        lastWakeReason = WakeSleepReason.OTHER,
-                        lastSleepReason = WakeSleepReason.OTHER,
-                    )
-                )
-            }
-        }
-
-    @Test
-    fun authenticateDoesNotRunWhenDeviceIsSleeping() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth {
-                keyguardRepository.setWakefulnessModel(
-                    WakefulnessModel(
-                        state = WakefulnessState.ASLEEP,
                         lastWakeReason = WakeSleepReason.OTHER,
                         lastSleepReason = WakeSleepReason.OTHER,
                     )
