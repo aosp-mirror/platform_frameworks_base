@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Trace
 import android.provider.Settings
+import com.android.systemui.log.core.LogLevel
 
 /**
  * Version of [LogcatEchoTracker] for debuggable builds

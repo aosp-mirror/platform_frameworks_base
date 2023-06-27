@@ -21,7 +21,7 @@ import android.view.View
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent
 import com.android.systemui.log.dagger.LSShadeTransitionLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import javax.inject.Inject

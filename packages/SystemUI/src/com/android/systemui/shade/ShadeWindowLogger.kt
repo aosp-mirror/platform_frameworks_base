@@ -21,9 +21,9 @@ import com.android.systemui.log.dagger.ShadeWindowLog
 import com.android.systemui.log.ConstantStringsLogger
 import com.android.systemui.log.ConstantStringsLoggerImpl
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogMessage
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogMessage
 import javax.inject.Inject
 
 private const val TAG = "systemui.shadewindow"

@@ -20,7 +20,7 @@ import android.app.StatusBarManager
 import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.media.taptotransfer.common.MediaTttLoggerUtils
 import javax.inject.Inject
 

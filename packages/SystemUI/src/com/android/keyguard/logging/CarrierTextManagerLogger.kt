@@ -19,7 +19,7 @@ package com.android.keyguard.logging
 import androidx.annotation.IntDef
 import com.android.keyguard.CarrierTextManager.CarrierTextCallbackInfo
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.CarrierTextManagerLog
 import javax.inject.Inject
 

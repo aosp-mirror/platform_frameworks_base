@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.log.core
 
 import android.util.Log
 
