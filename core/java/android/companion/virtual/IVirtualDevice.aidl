@@ -23,6 +23,8 @@ import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.companion.virtual.camera.IVirtualCamera;
+import android.companion.virtual.camera.VirtualCameraHalConfig;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.Point;
@@ -232,4 +234,10 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterIntentInterceptor(in IVirtualDeviceIntentInterceptor intentInterceptor);
+
+    /**
+     * Creates a new VirtualCamera and registers it with the VirtualCameraProvider.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void registerVirtualCamera(in IVirtualCamera camera);
 }
