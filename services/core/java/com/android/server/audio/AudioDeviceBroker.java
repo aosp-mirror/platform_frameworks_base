@@ -46,6 +46,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -63,8 +64,11 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-/** @hide */
-/*package*/ final class AudioDeviceBroker {
+/**
+ * @hide
+ * (non final for mocking/spying)
+ */
+public class AudioDeviceBroker {
 
     private static final String TAG = "AS.AudioDeviceBroker";
 
@@ -1462,6 +1466,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     final int capturePreset = msg.arg1;
                     mDeviceInventory.onSaveClearPreferredDevicesForCapturePreset(capturePreset);
                 } break;
+                case MSG_PERSIST_AUDIO_DEVICE_SETTINGS:
+                    onPersistAudioDeviceSettings();
+                    break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -1533,6 +1540,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
     //
     // process set volume for Le Audio, obj is BleVolumeInfo
     private static final int MSG_II_SET_LE_AUDIO_OUT_VOLUME = 46;
+
+    private static final int MSG_PERSIST_AUDIO_DEVICE_SETTINGS = 54;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -1918,5 +1927,96 @@ import java.util.concurrent.atomic.AtomicBoolean;
         synchronized (mDeviceStateLock) {
             return mDeviceInventory.getDeviceSensorUuid(device);
         }
+    }
+
+    /**
+     * post a message to persist the audio device settings.
+     * Message is delayed by 1s on purpose in case of successive changes in quick succession (at
+     * init time for instance)
+     * Note this method is made public to work around a Mockito bug where it needs to be public
+     * in order to be mocked by a test a the same package
+     * (see https://code.google.com/archive/p/mockito/issues/127)
+     */
+    public void persistAudioDeviceSettings() {
+        sendMsg(MSG_PERSIST_AUDIO_DEVICE_SETTINGS, SENDMSG_REPLACE, /*delay*/ 1000);
+    }
+
+    void onPersistAudioDeviceSettings() {
+        final String deviceSettings = mDeviceInventory.getDeviceSettings();
+        Log.v(TAG, "saving audio device settings: " + deviceSettings);
+        final SettingsAdapter settings = mAudioService.getSettings();
+        boolean res = settings.putSecureStringForUser(mAudioService.getContentResolver(),
+                Settings.Secure.AUDIO_DEVICE_INVENTORY,
+                deviceSettings, UserHandle.USER_CURRENT);
+        if (!res) {
+            Log.e(TAG, "error saving audio device settings: " + deviceSettings);
+        }
+    }
+
+    void onReadAudioDeviceSettings() {
+        final SettingsAdapter settingsAdapter = mAudioService.getSettings();
+        final ContentResolver contentResolver = mAudioService.getContentResolver();
+        String settings = settingsAdapter.getSecureStringForUser(contentResolver,
+                Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
+        if (settings == null) {
+            Log.i(TAG, "reading spatial audio device settings from legacy key"
+                    + Settings.Secure.SPATIAL_AUDIO_ENABLED);
+            // legacy string format for key SPATIAL_AUDIO_ENABLED has the same order of fields like
+            // the strings for key AUDIO_DEVICE_INVENTORY. This will ensure to construct valid
+            // device settings when calling {@link #setDeviceSettings()}
+            settings = settingsAdapter.getSecureStringForUser(contentResolver,
+                    Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
+            if (settings == null) {
+                Log.i(TAG, "no spatial audio device settings stored with legacy key");
+            } else if (!settings.equals("")) {
+                // Delete old key value and update the new key
+                if (!settingsAdapter.putSecureStringForUser(contentResolver,
+                        Settings.Secure.SPATIAL_AUDIO_ENABLED,
+                        /*value=*/"",
+                        UserHandle.USER_CURRENT)) {
+                    Log.w(TAG, "cannot erase the legacy audio device settings with key "
+                            + Settings.Secure.SPATIAL_AUDIO_ENABLED);
+                }
+                if (!settingsAdapter.putSecureStringForUser(contentResolver,
+                        Settings.Secure.AUDIO_DEVICE_INVENTORY,
+                        settings,
+                        UserHandle.USER_CURRENT)) {
+                    Log.e(TAG, "error updating the new audio device settings with key "
+                            + Settings.Secure.AUDIO_DEVICE_INVENTORY);
+                }
+            }
+        }
+
+        if (settings != null && !settings.equals("")) {
+            setDeviceSettings(settings);
+        }
+    }
+
+    void setDeviceSettings(String settings) {
+        mDeviceInventory.setDeviceSettings(settings);
+    }
+
+    /** Test only method. */
+    String getDeviceSettings() {
+        return mDeviceInventory.getDeviceSettings();
+    }
+
+    List<AdiDeviceState> getImmutableDeviceInventory() {
+        return mDeviceInventory.getImmutableDeviceInventory();
+    }
+
+    void addDeviceStateToInventory(AdiDeviceState deviceState) {
+        mDeviceInventory.addDeviceStateToInventory(deviceState);
+    }
+
+    AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
+            int canonicalType) {
+        return mDeviceInventory.findDeviceStateForAudioDeviceAttributes(ada, canonicalType);
+    }
+
+    //------------------------------------------------
+    // for testing purposes only
+    void clearDeviceInventory() {
+        mDeviceInventory.clearDeviceInventory();
     }
 }
