@@ -327,8 +327,6 @@ public class DisplayPolicy {
     private WindowState mTopFullscreenOpaqueWindowState;
     private boolean mTopIsFullscreen;
     private int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
-    private boolean mForceConsumeSystemBars;
-    private boolean mForceShowSystemBars;
 
     /**
      * Windows that provides gesture insets. If multiple windows provide gesture insets at the same
@@ -1286,18 +1284,10 @@ public class DisplayPolicy {
         return ANIMATION_STYLEABLE;
     }
 
-    /**
-     * @return true if the system bars are forced to be consumed
-     */
+    // TODO (b/277891341): Remove this and related usages. This has been replaced by
+    //                     InsetsSource#FLAG_FORCE_CONSUMING.
     public boolean areSystemBarsForcedConsumedLw() {
-        return mForceConsumeSystemBars;
-    }
-
-    /**
-     * @return true if the system bars are forced to stay visible
-     */
-    public boolean areSystemBarsForcedShownLw() {
-        return mForceShowSystemBars;
+        return false;
     }
 
     /**
@@ -1694,7 +1684,8 @@ public class DisplayPolicy {
      * @return Whether the top fullscreen app hides the given type of system bar.
      */
     boolean topAppHidesSystemBar(@InsetsType int type) {
-        if (mTopFullscreenOpaqueWindowState == null || mForceShowSystemBars) {
+        if (mTopFullscreenOpaqueWindowState == null
+                || getInsetsPolicy().areTypesForciblyShowing(type)) {
             return false;
         }
         return !mTopFullscreenOpaqueWindowState.isRequestedVisible(type);
@@ -2371,14 +2362,7 @@ public class DisplayPolicy {
         final boolean freeformRootTaskVisible =
                 defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
-        // We need to force showing system bars when adjacent tasks or freeform roots visible.
-        mForceShowSystemBars = adjacentTasksVisible || freeformRootTaskVisible;
-        // We need to force the consumption of the system bars if they are force shown or if they
-        // are controlled by a remote insets controller.
-        mForceConsumeSystemBars = mForceShowSystemBars
-                || getInsetsPolicy().remoteInsetsControllerControlsSystemBars(win)
-                || getInsetsPolicy().forcesShowingNavigationBars(win);
-        mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
+        getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible, freeformRootTaskVisible);
 
         final boolean topAppHidesStatusBar = topAppHidesSystemBar(Type.statusBars());
         if (getStatusBar() != null) {
