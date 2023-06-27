@@ -903,6 +903,33 @@ public class HdmiControlServiceTest {
         assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isFalse();
     }
 
+    @Test
+    public void multipleVendorCommandListeners_receiveCallback() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        VendorCommandListener secondVendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(secondVendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandNoId =
+                HdmiCecMessageBuilder.buildVendorCommand(sourceAddress, destAddress, params);
+        mNativeWrapper.onCecMessage(vendorCommandNoId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(vendorCmdListener.mParamsCorrect).isTrue();
+
+        assertThat(secondVendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(secondVendorCmdListener.mParamsCorrect).isTrue();
+    }
+
     private static class VendorCommandListener extends IHdmiVendorCommandListener.Stub {
         boolean mVendorCommandCallbackReceived = false;
         boolean mParamsCorrect = false;
