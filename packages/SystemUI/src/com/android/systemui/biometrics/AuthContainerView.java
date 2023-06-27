@@ -250,7 +250,7 @@ public class AuthContainerView extends LinearLayout
                 .setMessage(messageBody)
                 .setPositiveButton(android.R.string.ok, null)
                 .create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         alertDialog.show();
     }
 
@@ -263,7 +263,7 @@ public class AuthContainerView extends LinearLayout
                 .setOnDismissListener(
                         dialog -> animateAway(AuthDialogCallback.DISMISSED_ERROR))
                 .create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         alertDialog.show();
     }
 
