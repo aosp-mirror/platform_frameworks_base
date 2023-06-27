@@ -242,6 +242,18 @@ public class TaskInfo {
     public boolean isLetterboxDoubleTapEnabled;
 
     /**
+     * Whether the user aspect ratio settings button is enabled
+     * @hide
+     */
+    public boolean topActivityEligibleForUserAspectRatioButton;
+
+    /**
+     * Hint about the letterbox state of the top activity.
+     * @hide
+     */
+    public boolean topActivityBoundsLetterboxed;
+
+    /**
      * Whether the update comes from a letterbox double-tap action from the user or not.
      * @hide
      */
@@ -460,7 +472,8 @@ public class TaskInfo {
     public boolean hasCompatUI() {
         return hasCameraCompatControl() || topActivityInSizeCompat
                 || topActivityEligibleForLetterboxEducation
-                || isLetterboxDoubleTapEnabled;
+                || isLetterboxDoubleTapEnabled
+                || topActivityEligibleForUserAspectRatioButton;
     }
 
     /**
@@ -510,6 +523,8 @@ public class TaskInfo {
                 && supportsMultiWindow == that.supportsMultiWindow
                 && displayAreaFeatureId == that.displayAreaFeatureId
                 && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
+                && topActivityEligibleForUserAspectRatioButton
+                    == that.topActivityEligibleForUserAspectRatioButton
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
@@ -543,6 +558,8 @@ public class TaskInfo {
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
                 && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
+                && topActivityEligibleForUserAspectRatioButton
+                    == that.topActivityEligibleForUserAspectRatioButton
                 && topActivityEligibleForLetterboxEducation
                     == that.topActivityEligibleForLetterboxEducation
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
@@ -606,6 +623,8 @@ public class TaskInfo {
         displayAreaFeatureId = source.readInt();
         cameraCompatControlState = source.readInt();
         isLetterboxDoubleTapEnabled = source.readBoolean();
+        topActivityEligibleForUserAspectRatioButton = source.readBoolean();
+        topActivityBoundsLetterboxed = source.readBoolean();
         isFromLetterboxDoubleTap = source.readBoolean();
         topActivityLetterboxVerticalPosition = source.readInt();
         topActivityLetterboxHorizontalPosition = source.readInt();
@@ -660,6 +679,8 @@ public class TaskInfo {
         dest.writeInt(displayAreaFeatureId);
         dest.writeInt(cameraCompatControlState);
         dest.writeBoolean(isLetterboxDoubleTapEnabled);
+        dest.writeBoolean(topActivityEligibleForUserAspectRatioButton);
+        dest.writeBoolean(topActivityBoundsLetterboxed);
         dest.writeBoolean(isFromLetterboxDoubleTap);
         dest.writeInt(topActivityLetterboxVerticalPosition);
         dest.writeInt(topActivityLetterboxHorizontalPosition);
@@ -701,8 +722,11 @@ public class TaskInfo {
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "
                         + topActivityEligibleForLetterboxEducation
-                + " topActivityLetterboxed= " + isLetterboxDoubleTapEnabled
-                + " isFromDoubleTap= " + isFromLetterboxDoubleTap
+                + " isLetterboxDoubleTapEnabled= " + isLetterboxDoubleTapEnabled
+                + " topActivityEligibleForUserAspectRatioButton= "
+                + topActivityEligibleForUserAspectRatioButton
+                + " topActivityBoundsLetterboxed= " + topActivityBoundsLetterboxed
+                + " isFromLetterboxDoubleTap= " + isFromLetterboxDoubleTap
                 + " topActivityLetterboxVerticalPosition= " + topActivityLetterboxVerticalPosition
                 + " topActivityLetterboxHorizontalPosition= "
                         + topActivityLetterboxHorizontalPosition
