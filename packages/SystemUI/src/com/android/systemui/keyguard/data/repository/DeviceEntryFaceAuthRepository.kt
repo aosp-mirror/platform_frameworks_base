@@ -317,13 +317,14 @@ constructor(
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    combine(
-                        keyguardInteractor.isSecureCameraActive,
-                        alternateBouncerInteractor.isVisible
-                    ) { a, b ->
-                        !a || b
-                    },
-                    "secureCameraNotActiveOrAltBouncerIsShowing",
+                    keyguardInteractor.isSecureCameraActive
+                        .isFalse()
+                        .or(
+                            alternateBouncerInteractor.isVisible.or(
+                                keyguardInteractor.primaryBouncerShowing
+                            )
+                        ),
+                    "secureCameraNotActiveOrAnyBouncerIsShowing",
                     tableLogBuffer
                 ),
                 logAndObserve(
@@ -639,6 +640,10 @@ constructor(
 /** Combine two boolean flows by and-ing both of them */
 private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a && b }
+
+/** Combine two boolean flows by or-ing both of them */
+private fun Flow<Boolean>.or(anotherFlow: Flow<Boolean>) =
+    this.combine(anotherFlow) { a, b -> a || b }
 
 /** "Not" the given flow. The return [Flow] will be true when [this] flow is false. */
 private fun Flow<Boolean>.isFalse(): Flow<Boolean> {
