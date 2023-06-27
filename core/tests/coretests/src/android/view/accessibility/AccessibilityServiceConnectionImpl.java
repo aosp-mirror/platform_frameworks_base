@@ -225,8 +225,16 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
     }
 
     @Override
-    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {}
+    public void attachAccessibilityOverlayToDisplay(
+            int interactionId,
+            int displayId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {}
 
     @Override
-    public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc) {}
+    public void attachAccessibilityOverlayToWindow(
+            int interactionId,
+            int accessibilityWindowId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {}
 }

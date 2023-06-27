@@ -99,6 +99,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     /** @hide */
     public static final int UNDEFINED_CONNECTION_ID = -1;
     /** @hide */
+    @TestApi
     public static final int UNDEFINED_WINDOW_ID = -1;
     /** @hide */
     public static final int ANY_WINDOW_ID = -2;

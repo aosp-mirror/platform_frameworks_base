@@ -319,7 +319,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
 
-        void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc);
+        void attachAccessibilityOverlayToDisplay(
+                int interactionId,
+                int displayId,
+                SurfaceControl sc,
+                IAccessibilityInteractionConnectionCallback callback);
 
     }
 
@@ -2654,17 +2658,26 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+    public void attachAccessibilityOverlayToDisplay(
+            int interactionId,
+            int displayId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mSystemSupport.attachAccessibilityOverlayToDisplay(displayId, sc);
+            mSystemSupport.attachAccessibilityOverlayToDisplay(
+                    interactionId, displayId, sc, callback);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
-    public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc)
+    public void attachAccessibilityOverlayToWindow(
+            int interactionId,
+            int accessibilityWindowId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback)
             throws RemoteException {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -2677,10 +2690,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                                 mSystemSupport.getCurrentUserIdLocked(),
                                 resolveAccessibilityWindowIdLocked(accessibilityWindowId));
                 if (connection == null) {
-                    Slog.e(LOG_TAG, "unable to get remote accessibility connection.");
+                    callback.sendAttachOverlayResult(
+                            AccessibilityService.OVERLAY_RESULT_INVALID, interactionId);
                     return;
                 }
-                connection.getRemote().attachAccessibilityOverlayToWindow(sc);
+                connection
+                        .getRemote()
+                        .attachAccessibilityOverlayToWindow(sc, interactionId, callback);
             }
 
         } finally {
