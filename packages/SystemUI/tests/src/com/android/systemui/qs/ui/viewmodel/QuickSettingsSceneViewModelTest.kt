@@ -27,7 +27,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -39,8 +38,8 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor =
         utils.authenticationInteractor(
@@ -70,8 +69,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
@@ -83,8 +84,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()

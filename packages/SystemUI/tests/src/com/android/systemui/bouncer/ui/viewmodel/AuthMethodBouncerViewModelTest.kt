@@ -24,7 +24,6 @@ import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,8 +34,8 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val authenticationInteractor =
         utils.authenticationInteractor(
             utils.authenticationRepository(),
@@ -55,7 +54,9 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun animateFailure() =
         testScope.runTest {
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.Pin(1234))
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin(1234)
+            )
             val animateFailure by collectLastValue(underTest.animateFailure)
             assertThat(animateFailure).isFalse()
 

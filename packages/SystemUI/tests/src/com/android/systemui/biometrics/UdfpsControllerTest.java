@@ -1316,12 +1316,22 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // WHEN ACTION_DOWN is received
         when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
                 processorResultDown);
-        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        MotionEvent event = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         mBiometricExecutor.runAllReady();
-        downEvent.recycle();
 
-        // THEN the touch is pilfered
+        // WHEN ACTION_MOVE is received after
+        final TouchProcessorResult processorResultUnchanged =
+                new TouchProcessorResult.ProcessedTouch(
+                        InteractionEvent.UNCHANGED, 1 /* pointerId */, touchData);
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultUnchanged);
+        event.setAction(ACTION_MOVE);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricExecutor.runAllReady();
+        event.recycle();
+
+        // THEN only pilfer once on the initial down
         verify(mInputManager).pilferPointers(any());
     }
 

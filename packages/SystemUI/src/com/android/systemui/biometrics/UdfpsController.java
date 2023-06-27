@@ -75,6 +75,8 @@ import com.android.systemui.biometrics.udfps.NormalizedTouchData;
 import com.android.systemui.biometrics.udfps.SinglePointerTouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessorResult;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -82,9 +84,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -189,6 +189,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @Nullable private VelocityTracker mVelocityTracker;
     // The ID of the pointer for which ACTION_DOWN has occurred. -1 means no pointer is active.
     private int mActivePointerId = -1;
+    // Whether a pointer has been pilfered for current gesture
+    private boolean mPointerPilfered = false;
     // The timestamp of the most recent touch log.
     private long mTouchLogTime;
     // The timestamp of the most recent log of a touch InteractionEvent.
@@ -258,10 +260,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
-            if (mFeatureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
-                return;
-            }
-
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(mContext, mFingerprintManager, mInflater,
                             mWindowManager, mAccessibilityManager, mStatusBarStateController,
@@ -279,10 +277,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         @Override
         public void hideUdfpsOverlay(int sensorId) {
-            if (mFeatureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
-                return;
-            }
-
             mFgExecutor.execute(() -> {
                 if (mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
                     // if we get here, we expect keyguardUpdateMonitor's fingerprintRunningState
@@ -560,6 +554,11 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 || mPrimaryBouncerInteractor.isInTransit()) {
             return false;
         }
+        if (event.getAction() == MotionEvent.ACTION_DOWN
+                || event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+            // Reset on ACTION_DOWN, start of new gesture
+            mPointerPilfered = false;
+        }
 
         final TouchProcessorResult result = mTouchProcessor.processTouch(event, mActivePointerId,
                 mOverlayParams);
@@ -633,10 +632,11 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             shouldPilfer = true;
         }
 
-        // Execute the pilfer
-        if (shouldPilfer) {
+        // Pilfer only once per gesture
+        if (shouldPilfer && !mPointerPilfered) {
             mInputManager.pilferPointers(
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
+            mPointerPilfered = true;
         }
 
         return processedTouch.getTouchData().isWithinBounds(mOverlayParams.getNativeSensorBounds());

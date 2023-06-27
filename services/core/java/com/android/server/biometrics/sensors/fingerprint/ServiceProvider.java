@@ -28,7 +28,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 
@@ -133,12 +132,6 @@ public interface ServiceProvider extends
     void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
-
-    /**
-     * Sets udfps overlay
-     * @param controller udfps overlay
-     */
-    void setUdfpsOverlay(@NonNull IUdfpsOverlay controller);
 
     void onPowerPressed();
 
