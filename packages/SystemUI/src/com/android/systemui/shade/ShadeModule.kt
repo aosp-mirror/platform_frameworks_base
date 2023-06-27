@@ -215,9 +215,15 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun providesLockIconView(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            keyguardRootView: KeyguardRootView,
+            notificationPanelView: NotificationPanelView,
+            featureFlags: FeatureFlags
         ): LockIconView {
-            return notificationShadeWindowView.findViewById(R.id.lock_icon_view)
+            if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+                return keyguardRootView.findViewById(R.id.lock_icon_view)
+            } else {
+                return notificationPanelView.findViewById(R.id.lock_icon_view)
+            }
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
