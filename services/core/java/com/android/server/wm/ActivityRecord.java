@@ -4574,6 +4574,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         task.forAllActivities(fromActivity -> {
             if (fromActivity == this) return true;
+            // The snapshot starting window could remove itself when receive resized request without
+            // redraw, so transfer it to a different size activity could only cause flicker.
+            // By schedule remove snapshot starting window, the remove process will happen when
+            // transition ready, transition ready means the app window is drawn.
+            final StartingData tmpStartingData = fromActivity.mStartingData;
+            if (tmpStartingData != null && tmpStartingData.mAssociatedTask == null
+                    && mTransitionController.isCollecting(fromActivity)
+                    && tmpStartingData instanceof SnapshotStartingData) {
+                final Rect fromBounds = fromActivity.getBounds();
+                final Rect myBounds = getBounds();
+                if (!fromBounds.equals(myBounds)) {
+                    // Mark as no animation, so these changes won't merge into playing transition.
+                    if (mTransitionController.inPlayingTransition(fromActivity)) {
+                        mTransitionController.setNoAnimation(this);
+                        mTransitionController.setNoAnimation(fromActivity);
+                    }
+                    fromActivity.removeStartingWindow();
+                    return true;
+                }
+            }
             return !fromActivity.isVisibleRequested() && transferStartingWindow(fromActivity);
         });
     }
