@@ -649,6 +649,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             switch (simState) {
                 case TelephonyManager.SIM_STATE_NOT_READY:
                 case TelephonyManager.SIM_STATE_ABSENT:
+                case TelephonyManager.SIM_STATE_UNKNOWN:
+                    mPendingPinLock = false;
                     // only force lock screen in case of missing sim if user hasn't
                     // gone through setup wizard
                     synchronized (KeyguardViewMediator.this) {
@@ -712,9 +714,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             resetStateLocked();
                         }
                     }
-                    break;
-                case TelephonyManager.SIM_STATE_UNKNOWN:
-                    mPendingPinLock = false;
                     break;
                 default:
                     if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
