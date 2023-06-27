@@ -83,6 +83,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -2998,6 +2999,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.handleSimStateChange(-1, 0, TelephonyManager.SIM_STATE_UNKNOWN);
         verify(keyguardUpdateMonitorCallback).onSimStateChanged(-1, 0,
                 TelephonyManager.SIM_STATE_UNKNOWN);
+    }
+
+    @Test
+    public void onAuthEnrollmentChangesCallbacksAreNotified() {
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+        ArgumentCaptor<AuthController.Callback> authCallback = ArgumentCaptor.forClass(
+                AuthController.Callback.class);
+        verify(mAuthController).addCallback(authCallback.capture());
+
+        mKeyguardUpdateMonitor.registerCallback(callback);
+
+        authCallback.getValue().onEnrollmentsChanged(TYPE_FINGERPRINT);
+        mTestableLooper.processAllMessages();
+        verify(callback).onBiometricEnrollmentStateChanged(BiometricSourceType.FINGERPRINT);
+
+        authCallback.getValue().onEnrollmentsChanged(BiometricAuthenticator.TYPE_FACE);
+        mTestableLooper.processAllMessages();
+        verify(callback).onBiometricEnrollmentStateChanged(BiometricSourceType.FACE);
     }
 
     private void verifyFingerprintAuthenticateNeverCalled() {
