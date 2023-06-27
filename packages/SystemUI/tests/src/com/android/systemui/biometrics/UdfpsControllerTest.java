@@ -440,6 +440,16 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void showUdfpsOverlay_callsListener() throws RemoteException {
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mFingerprintManager).onUdfpsUiEvent(FingerprintManager.UDFPS_UI_OVERLAY_SHOWN,
+                TEST_REQUEST_ID, mOpticalProps.sensorId);
+    }
+
+    @Test
     public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
@@ -759,17 +769,20 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 inOrder.verify(mAlternateTouchProvider).onUiReady();
                 inOrder.verify(mLatencyTracker).onActionEnd(
                         eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
-                verify(mFingerprintManager, never()).onUiReady(anyLong(), anyInt());
+                verify(mFingerprintManager, never()).onUdfpsUiEvent(
+                        eq(FingerprintManager.UDFPS_UI_READY), anyLong(), anyInt());
             } else {
                 InOrder inOrder = inOrder(mFingerprintManager, mLatencyTracker);
-                inOrder.verify(mFingerprintManager).onUiReady(eq(TEST_REQUEST_ID),
+                inOrder.verify(mFingerprintManager).onUdfpsUiEvent(
+                        eq(FingerprintManager.UDFPS_UI_READY), eq(TEST_REQUEST_ID),
                         eq(testParams.sensorProps.sensorId));
                 inOrder.verify(mLatencyTracker).onActionEnd(
                         eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
                 verify(mAlternateTouchProvider, never()).onUiReady();
             }
         } else {
-            verify(mFingerprintManager, never()).onUiReady(anyLong(), anyInt());
+            verify(mFingerprintManager, never()).onUdfpsUiEvent(
+                    eq(FingerprintManager.UDFPS_UI_READY), anyLong(), anyInt());
             verify(mAlternateTouchProvider, never()).onUiReady();
             verify(mLatencyTracker, never()).onActionEnd(
                     eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));

@@ -829,13 +829,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void onUiReady(long requestId, int sensorId) {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId,
+            int sensorId) {
         mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
             if (!(client instanceof Udfps)) {
-                Slog.w(TAG, "onUiReady received during client: " + client);
+                Slog.w(TAG, "onUdfpsUiEvent received during client: " + client);
                 return;
             }
-            ((Udfps) client).onUiReady();
+            ((Udfps) client).onUdfpsUiEvent(event);
         });
     }
 

@@ -356,7 +356,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 UdfpsController.this.mAlternateTouchProvider.onUiReady();
             } else {
                 final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
-                UdfpsController.this.mFingerprintManager.onUiReady(requestId, sensorId);
+                UdfpsController.this.mFingerprintManager.onUdfpsUiEvent(
+                        FingerprintManager.UDFPS_UI_READY, requestId, sensorId);
             }
         }
     }
@@ -960,6 +961,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mOnFingerDown = false;
             mAttemptedToDismissKeyguard = false;
             mOrientationListener.enable();
+            if (mFingerprintManager != null) {
+                mFingerprintManager.onUdfpsUiEvent(FingerprintManager.UDFPS_UI_OVERLAY_SHOWN,
+                        overlay.getRequestId(), mSensorProps.sensorId);
+            }
         } else {
             Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
         }
@@ -1101,7 +1106,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
             });
         } else {
-            mFingerprintManager.onUiReady(requestId, mSensorProps.sensorId);
+            mFingerprintManager.onUdfpsUiEvent(FingerprintManager.UDFPS_UI_READY, requestId,
+                    mSensorProps.sensorId);
             mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
         }
     }

@@ -27,6 +27,7 @@ import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlay;
@@ -363,9 +364,11 @@ class FingerprintAuthenticationClient
     }
 
     @Override
-    public void onUiReady() {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         try {
-            getFreshDaemon().getSession().onUiReady();
+            if (event == FingerprintManager.UDFPS_UI_READY) {
+                getFreshDaemon().getSession().onUiReady();
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

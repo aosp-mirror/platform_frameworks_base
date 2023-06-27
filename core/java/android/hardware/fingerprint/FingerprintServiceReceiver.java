@@ -75,4 +75,9 @@ public class FingerprintServiceReceiver extends IFingerprintServiceReceiver.Stub
     public void onUdfpsPointerUp(int sensorId) throws RemoteException {
 
     }
+
+    @Override
+    public void onUdfpsOverlayShown() throws RemoteException {
+
+    }
 }
