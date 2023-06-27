@@ -2442,6 +2442,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
         final SparseArray<IAccessibilityInputMethodSession> accessibilityInputMethodSessions =
                 createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
+        if (mBindingController.supportsStylusHandwriting() && hasSupportedStylusLocked()) {
+            mHwController.setInkWindowInitializer(new InkWindowInitializer());
+        }
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.mSession, accessibilityInputMethodSessions,
                 (session.mChannel != null ? session.mChannel.dup() : null),
