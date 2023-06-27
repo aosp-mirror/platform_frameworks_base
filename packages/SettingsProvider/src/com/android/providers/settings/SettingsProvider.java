@@ -520,6 +520,13 @@ public class SettingsProvider extends ContentProvider {
                 break;
             }
 
+            case Settings.CALL_METHOD_RESET_SYSTEM: {
+                final int mode = getResetModeEnforcingPermission(args);
+                String tag = getSettingTag(args);
+                resetSystemSetting(requestingUserId, mode, tag);
+                break;
+            }
+
             case Settings.CALL_METHOD_DELETE_CONFIG: {
                 int rows  = deleteConfigSetting(name) ? 1 : 0;
                 Bundle result = new Bundle();
@@ -1875,8 +1882,8 @@ public class SettingsProvider extends ContentProvider {
                     + requestingUserId + ")");
         }
 
-        return mutateSystemSetting(name, value, requestingUserId, MUTATION_OPERATION_INSERT,
-                overrideableByRestore);
+        return mutateSystemSetting(name, value, /* tag= */ null, requestingUserId,
+                MUTATION_OPERATION_INSERT, /* mode= */ 0, overrideableByRestore);
     }
 
     private boolean deleteSystemSetting(String name, int requestingUserId) {
@@ -1896,15 +1903,25 @@ public class SettingsProvider extends ContentProvider {
         return mutateSystemSetting(name, value, requestingUserId, MUTATION_OPERATION_UPDATE);
     }
 
+    private void resetSystemSetting(int requestingUserId, int mode, String tag) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "resetSystemSetting(" + requestingUserId + ", "
+                    + mode + ", " + tag + ")");
+        }
+
+        mutateSystemSetting(null, null, tag, requestingUserId, MUTATION_OPERATION_RESET, mode,
+                false);
+    }
+
     private boolean mutateSystemSetting(String name, String value, int runAsUserId, int operation) {
         // overrideableByRestore = false as by default settings values shouldn't be overrideable by
         // restore.
-        return mutateSystemSetting(name, value, runAsUserId, operation,
-                /* overrideableByRestore */ false);
+        return mutateSystemSetting(name, value, /* tag= */ null, runAsUserId, operation,
+                /* mode= */ 0, /* overrideableByRestore */ false);
     }
 
-    private boolean mutateSystemSetting(String name, String value, int runAsUserId, int operation,
-            boolean overrideableByRestore) {
+    private boolean mutateSystemSetting(String name, String value, String tag, int runAsUserId,
+            int operation, int mode, boolean overrideableByRestore) {
         final String callingPackage = getCallingPackage();
         if (!hasWriteSecureSettingsPermission()) {
             // If the caller doesn't hold WRITE_SECURE_SETTINGS, we verify whether this
@@ -1975,6 +1992,12 @@ public class SettingsProvider extends ContentProvider {
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, value, null, false, callingPackage,
                             false, null);
+                }
+
+                case MUTATION_OPERATION_RESET: {
+                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SYSTEM,
+                            UserHandle.USER_SYSTEM, callingPackage, mode, tag);
+                    return true;
                 }
             }
             Slog.e(LOG_TAG, "Unknown operation code: " + operation);

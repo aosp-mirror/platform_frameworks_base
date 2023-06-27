@@ -11676,6 +11676,8 @@ package android.provider {
 
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean, boolean);
+    method public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
   }
 
   public static final class SimPhonebookContract.SimRecords {
