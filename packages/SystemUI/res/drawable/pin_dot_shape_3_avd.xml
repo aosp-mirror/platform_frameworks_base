@@ -22,9 +22,7 @@
                 <group
                     android:name="_R_G_L_0_G"
                     android:translateX="15"
-                    android:translateY="15"
-                    android:scaleX="0"
-                    android:scaleY="0">
+                    android:translateY="15">
                     <path
                         android:name="_R_G_L_0_G_D_0_P_0"
                         android:fillColor="#ffffff"
@@ -124,32 +122,6 @@
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.7,0 0.6,1 1.0,1.0" />
                     </aapt:attr>
                 </objectAnimator>
-            </set>
-        </aapt:attr>
-    </target>
-    <target android:name="_R_G_L_0_G">
-        <aapt:attr name="android:animation">
-            <set android:ordering="together">
-                <objectAnimator
-                    android:propertyName="scaleY"
-                    android:duration="0"
-                    android:startOffset="0"
-                    android:valueFrom="0"
-                    android:valueTo="1"
-                    android:valueType="floatType" />
-            </set>
-        </aapt:attr>
-    </target>
-    <target android:name="_R_G_L_0_G">
-        <aapt:attr name="android:animation">
-            <set android:ordering="together">
-                <objectAnimator
-                    android:propertyName="scaleY"
-                    android:duration="0"
-                    android:startOffset="367"
-                    android:valueFrom="1"
-                    android:valueTo="0"
-                    android:valueType="floatType" />
             </set>
         </aapt:attr>
     </target>
