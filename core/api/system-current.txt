@@ -15221,7 +15221,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setGatewayAddresses(@NonNull java.util.List<java.net.InetAddress>);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setHandoverFailureMode(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setId(int);
-    method @NonNull public android.telephony.data.DataCallResponse.Builder setInterfaceName(@NonNull String);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setInterfaceName(@Nullable String);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setLinkStatus(int);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setMtu(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV4(int);
