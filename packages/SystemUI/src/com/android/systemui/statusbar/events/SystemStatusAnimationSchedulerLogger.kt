@@ -2,7 +2,7 @@ package com.android.systemui.statusbar.events
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import javax.inject.Inject
 
 /** Logs for the SystemStatusAnimationScheduler. */
