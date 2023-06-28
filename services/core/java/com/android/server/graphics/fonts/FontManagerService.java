@@ -269,6 +269,9 @@ public final class FontManagerService extends IFontManager.Stub {
         synchronized (mUpdatableFontDirLock) {
             mUpdatableFontDir = createUpdatableFontDir();
             if (mUpdatableFontDir == null) {
+                // If fs-verity is not supported, load preinstalled system font map and use it for
+                // all apps.
+                Typeface.loadPreinstalledSystemFontMap();
                 setSerializedFontMap(serializeSystemServerFontMap());
                 return;
             }
