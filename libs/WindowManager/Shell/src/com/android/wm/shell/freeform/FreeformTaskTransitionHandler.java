@@ -130,7 +130,7 @@ public class FreeformTaskTransitionHandler
             if (!animations.isEmpty()) return;
             mMainExecutor.execute(() -> {
                 mAnimations.remove(transition);
-                finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+                finishCallback.onTransitionFinished(null /* wct */);
             });
         };
         for (TransitionInfo.Change change : info.getChanges()) {

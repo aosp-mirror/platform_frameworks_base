@@ -168,7 +168,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         startTransaction.apply();
         mDesktopWindowDecoration.hideResizeVeil();
         mCtrlType = CTRL_TYPE_UNDEFINED;
-        finishCallback.onTransitionFinished(null, null);
+        finishCallback.onTransitionFinished(null);
         return true;
     }
 

@@ -62,7 +62,6 @@ import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
 import androidx.annotation.BinderThread;
@@ -829,7 +828,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                     ready.mStartT.apply();
                 }
                 // finish now since there's nothing to animate. Calls back into processReadyQueue
-                onFinish(ready, null, null);
+                onFinish(ready, null);
                 return;
             }
             playTransition(ready);
@@ -849,7 +848,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                 + " in case they can be merged", ready, playing);
         mTracer.logMergeRequested(ready.mInfo.getDebugId(), playing.mInfo.getDebugId());
         playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
-                playing.mToken, (wct, cb) -> onMerged(playing, ready));
+                playing.mToken, (wct) -> onMerged(playing, ready));
     }
 
     private void onMerged(@NonNull ActiveTransition playing, @NonNull ActiveTransition merged) {
@@ -899,7 +898,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try firstHandler %s",
                     active.mHandler);
             boolean consumed = active.mHandler.startAnimation(active.mToken, active.mInfo,
-                    active.mStartT, active.mFinishT, (wct, cb) -> onFinish(active, wct, cb));
+                    active.mStartT, active.mFinishT, (wct) -> onFinish(active, wct));
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
                 mTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
@@ -908,7 +907,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         }
         // Otherwise give every other handler a chance
         active.mHandler = dispatchTransition(active.mToken, active.mInfo, active.mStartT,
-                active.mFinishT, (wct, cb) -> onFinish(active, wct, cb), active.mHandler);
+                active.mFinishT, (wct) -> onFinish(active, wct), active.mHandler);
     }
 
     /**
@@ -985,8 +984,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     private void onFinish(ActiveTransition active,
-            @Nullable WindowContainerTransaction wct,
-            @Nullable WindowContainerTransactionCallback wctCB) {
+            @Nullable WindowContainerTransaction wct) {
         final Track track = mTracks.get(active.getTrack());
         if (track.mActiveTransition != active) {
             Log.e(TAG, "Trying to finish a non-running transition. Either remote crashed or "
@@ -1035,11 +1033,11 @@ public class Transitions implements RemoteCallable<Transitions>,
         // Now perform all the finish callbacks (starting with the playing one and then all the
         // transitions merged into it).
         releaseSurfaces(active.mInfo);
-        mOrganizer.finishTransition(active.mToken, wct, wctCB);
+        mOrganizer.finishTransition(active.mToken, wct);
         if (active.mMerged != null) {
             for (int iM = 0; iM < active.mMerged.size(); ++iM) {
                 ActiveTransition merged = active.mMerged.get(iM);
-                mOrganizer.finishTransition(merged.mToken, null /* wct */, null /* wctCB */);
+                mOrganizer.finishTransition(merged.mToken, null /* wct */);
                 releaseSurfaces(merged.mInfo);
             }
             active.mMerged.clear();
@@ -1178,7 +1176,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                     forceFinish.mHandler.onTransitionConsumed(
                             forceFinish.mToken, true /* aborted */, null /* finishTransaction */);
                 }
-                onFinish(forceFinish, null, null);
+                onFinish(forceFinish, null);
             }
         }
         if (track.isIdle() || mReadyDuringSync.isEmpty()) {
@@ -1198,7 +1196,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge sync %s"
                     + " into %s via a SLEEP proxy", nextSync, playing);
             playing.mHandler.mergeAnimation(nextSync.mToken, dummyInfo, dummyT,
-                    playing.mToken, (wct, cb) -> {});
+                    playing.mToken, (wct) -> {});
             // it's possible to complete immediately. If that happens, just repeat the signal
             // loop until we either finish everything or start playing an animation that isn't
             // finishing immediately.
@@ -1226,11 +1224,8 @@ public class Transitions implements RemoteCallable<Transitions>,
          * The transition must not touch the surfaces after this has been called.
          *
          * @param wct A WindowContainerTransaction to run along with the transition clean-up.
-         * @param wctCB A sync callback that will be run when the transition clean-up is done and
-         *              wct has been applied.
          */
-        void onTransitionFinished(@Nullable WindowContainerTransaction wct,
-                @Nullable WindowContainerTransactionCallback wctCB);
+        void onTransitionFinished(@Nullable WindowContainerTransaction wct);
     }
 
     /**
