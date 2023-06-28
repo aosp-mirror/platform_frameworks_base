@@ -723,11 +723,13 @@ public class AudioDeviceInventory {
         }
     }
 
+    /** only public for mocking/spying, do not call outside of AudioService */
     // @GuardedBy("mDeviceBroker.mSetModeLock")
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
-    void onSetBtActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo btInfo,
-                             @AudioSystem.AudioFormatNativeEnumForBtCodec int codec,
-                             int streamType) {
+    @VisibleForTesting
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
+    public void onSetBtActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo btInfo,
+                                    @AudioSystem.AudioFormatNativeEnumForBtCodec int codec,
+                                    int streamType) {
         if (AudioService.DEBUG_DEVICES) {
             Log.d(TAG, "onSetBtActiveDevice"
                     + " btDevice=" + btInfo.mDevice
@@ -815,7 +817,7 @@ public class AudioDeviceInventory {
     }
 
 
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     /*package*/ void onBluetoothDeviceConfigChange(
             @NonNull AudioDeviceBroker.BtDeviceInfo btInfo,
             @AudioSystem.AudioFormatNativeEnumForBtCodec int codec, int event) {
@@ -1579,7 +1581,7 @@ public class AudioDeviceInventory {
      * @param device the device whose connection state is queried
      * @return true if connected
      */
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     public boolean isDeviceConnected(@NonNull AudioDeviceAttributes device) {
         final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
                 device.getAddress());
@@ -1736,7 +1738,7 @@ public class AudioDeviceInventory {
         }
     }
 
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     /*package*/ void onBtProfileDisconnected(int profile) {
         switch (profile) {
             case BluetoothProfile.HEADSET:
@@ -1803,7 +1805,7 @@ public class AudioDeviceInventory {
         disconnectLeAudio(AudioSystem.DEVICE_OUT_BLE_BROADCAST);
     }
 
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     private void disconnectHeadset() {
         boolean disconnect = false;
         synchronized (mDevicesLock) {
@@ -1846,7 +1848,7 @@ public class AudioDeviceInventory {
     /**
      * Set a Bluetooth device to active.
      */
-    @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     public int setBluetoothActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo info) {
         int delay;
         synchronized (mDevicesLock) {

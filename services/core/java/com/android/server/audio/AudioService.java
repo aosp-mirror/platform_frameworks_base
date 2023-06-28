@@ -4359,7 +4359,9 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /*package*/ int getBluetoothContextualVolumeStream() {
+    /** only public for mocking/spying, do not call outside of AudioService */
+    @VisibleForTesting
+    public int getBluetoothContextualVolumeStream() {
         return getBluetoothContextualVolumeStream(mMode.get());
     }
 
