@@ -3732,8 +3732,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean isDragResizeChanged = isDragResizeChanged();
         final boolean forceRelayout = syncWithBuffers || isDragResizeChanged;
         final DisplayContent displayContent = getDisplayContent();
-        final boolean alwaysConsumeSystemBars =
-                displayContent.getDisplayPolicy().areSystemBarsForcedConsumedLw();
         final int displayId = displayContent.getDisplayId();
 
         if (isDragResizeChanged) {
@@ -3745,7 +3743,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
-                    getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
+                    getCompatInsetsState(), forceRelayout, displayId,
                     syncWithBuffers ? mSyncSeqId : -1, isDragResizing);
             if (drawPending && prevRotation >= 0 && prevRotation != mLastReportedConfiguration
                     .getMergedConfiguration().windowConfiguration.getRotation()) {

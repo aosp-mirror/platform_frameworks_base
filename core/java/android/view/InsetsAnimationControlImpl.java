@@ -40,6 +40,7 @@ import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
@@ -63,7 +64,6 @@ import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
-import android.view.WindowManager.LayoutParams;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.ImeTracker;
 
@@ -401,8 +401,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private Insets getInsetsFromState(InsetsState state, Rect frame,
             @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
-                false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
-                LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
+                false /* isScreenRound */, SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode */,
                 0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, TYPE_APPLICATION,
                 WINDOWING_MODE_UNDEFINED, idSideMap).getInsets(mTypes);
     }
