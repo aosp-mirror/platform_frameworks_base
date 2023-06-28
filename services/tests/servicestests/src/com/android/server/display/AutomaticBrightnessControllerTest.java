@@ -85,7 +85,7 @@ public class AutomaticBrightnessControllerTest {
     @Mock HysteresisLevels mAmbientBrightnessThresholdsIdle;
     @Mock HysteresisLevels mScreenBrightnessThresholdsIdle;
     @Mock Handler mNoOpHandler;
-    @Mock HighBrightnessModeController mHbmController;
+    @Mock BrightnessRangeController mBrightnessRangeController;
     @Mock BrightnessThrottler mBrightnessThrottler;
 
     @Before
@@ -134,12 +134,15 @@ public class AutomaticBrightnessControllerTest {
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
                 mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
                 mAmbientBrightnessThresholdsIdle, mScreenBrightnessThresholdsIdle,
-                mContext, mHbmController, mBrightnessThrottler, mIdleBrightnessMappingStrategy,
-                AMBIENT_LIGHT_HORIZON_SHORT, AMBIENT_LIGHT_HORIZON_LONG, userLux, userBrightness
+                mContext, mBrightnessRangeController, mBrightnessThrottler,
+                mIdleBrightnessMappingStrategy, AMBIENT_LIGHT_HORIZON_SHORT,
+                AMBIENT_LIGHT_HORIZON_LONG, userLux, userBrightness
         );
 
-        when(mHbmController.getCurrentBrightnessMax()).thenReturn(BRIGHTNESS_MAX_FLOAT);
-        when(mHbmController.getCurrentBrightnessMin()).thenReturn(BRIGHTNESS_MIN_FLOAT);
+        when(mBrightnessRangeController.getCurrentBrightnessMax()).thenReturn(
+                BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessRangeController.getCurrentBrightnessMin()).thenReturn(
+                BRIGHTNESS_MIN_FLOAT);
         // Disable brightness throttling by default. Individual tests can enable it as needed.
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
         when(mBrightnessThrottler.isThrottled()).thenReturn(false);
