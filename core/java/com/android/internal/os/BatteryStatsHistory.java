@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.BitDescription;
-import android.os.BatteryStats.CpuUsageDetails;
-import android.os.BatteryStats.EnergyConsumerDetails;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.HistoryStepDetails;
 import android.os.BatteryStats.HistoryTag;
@@ -124,10 +122,8 @@ public class BatteryStatsHistory {
     // therefore the tag value is written in the parcel
     static final int TAG_FIRST_OCCURRENCE_FLAG = 0x8000;
 
-    static final int EXTENSION_MEASURED_ENERGY_HEADER_FLAG = 0x00000001;
-    static final int EXTENSION_MEASURED_ENERGY_FLAG = 0x00000002;
-    static final int EXTENSION_CPU_USAGE_HEADER_FLAG = 0x00000004;
-    static final int EXTENSION_CPU_USAGE_FLAG = 0x00000008;
+    static final int EXTENSION_POWER_STATS_DESCRIPTOR_FLAG = 0x00000001;
+    static final int EXTENSION_POWER_STATS_FLAG = 0x00000002;
 
     // For state1, trace everything except the wakelock bit (which can race with
     // suspend) and the running bit (which isn't meaningful in traces).
@@ -200,9 +196,7 @@ public class BatteryStatsHistory {
     private long mTrackRunningHistoryElapsedRealtimeMs = 0;
     private long mTrackRunningHistoryUptimeMs = 0;
     private long mHistoryBaseTimeMs;
-    private boolean mMeasuredEnergyHeaderWritten = false;
-    private boolean mCpuUsageHeaderWritten = false;
-    private final VarintParceler mVarintParceler = new VarintParceler();
+    private ArraySet<PowerStats.Descriptor> mWrittenPowerStatsDescriptors = new ArraySet<>();
     private byte mLastHistoryStepLevel = 0;
     private boolean mMutable = true;
     private final BatteryStatsHistory mWritableHistory;
@@ -384,8 +378,7 @@ public class BatteryStatsHistory {
         mLastHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryUptimeMs = 0;
-        mMeasuredEnergyHeaderWritten = false;
-        mCpuUsageHeaderWritten = false;
+        mWrittenPowerStatsDescriptors.clear();
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
@@ -1050,11 +1043,11 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * Records measured energy data.
+     * Records a PowerStats snapshot.
      */
-    public void recordEnergyConsumerDetails(long elapsedRealtimeMs, long uptimeMs,
-            EnergyConsumerDetails energyConsumerDetails) {
-        mHistoryCur.energyConsumerDetails = energyConsumerDetails;
+    public void recordPowerStats(long elapsedRealtimeMs, long uptimeMs,
+            PowerStats powerStats) {
+        mHistoryCur.powerStats = powerStats;
         mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
@@ -1279,17 +1272,6 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * Records CPU usage by a specific UID.  The recorded data is the delta from
-     * the previous record for the same UID.
-     */
-    public void recordCpuUsage(long elapsedRealtimeMs, long uptimeMs,
-            CpuUsageDetails cpuUsageDetails) {
-        mHistoryCur.cpuUsageDetails = cpuUsageDetails;
-        mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
-        writeHistoryItem(elapsedRealtimeMs, uptimeMs);
-    }
-
-    /**
      * Writes changes to a HistoryItem state bitmap to Atrace.
      */
     private void recordTraceCounters(int oldval, int newval, int mask,
@@ -1355,7 +1337,7 @@ public class BatteryStatsHistory {
             mTraceLastState2 = cur.states2;
         }
 
-        if (!mHaveBatteryLevel || !mRecordingHistory) {
+        if ((!mHaveBatteryLevel || !mRecordingHistory) && cur.powerStats == null) {
             return;
         }
 
@@ -1391,8 +1373,7 @@ public class BatteryStatsHistory {
                 && mHistoryLastWritten.batteryPlugType == cur.batteryPlugType
                 && mHistoryLastWritten.batteryTemperature == cur.batteryTemperature
                 && mHistoryLastWritten.batteryVoltage == cur.batteryVoltage
-                && mHistoryLastWritten.energyConsumerDetails == null
-                && mHistoryLastWritten.cpuUsageDetails == null) {
+                && mHistoryLastWritten.powerStats == null) {
             // We can merge this new change in with the last one.  Merging is
             // allowed as long as only the states have changed, and within those states
             // as long as no bit has changed both between now and the last entry, as
@@ -1454,8 +1435,7 @@ public class BatteryStatsHistory {
             for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
                 entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
-            mMeasuredEnergyHeaderWritten = false;
-            mCpuUsageHeaderWritten = false;
+            mWrittenPowerStatsDescriptors.clear();
 
             // Make a copy of mHistoryCur.
             HistoryItem copy = new HistoryItem();
@@ -1477,8 +1457,7 @@ public class BatteryStatsHistory {
             copy.eventCode = HistoryItem.EVENT_NONE;
             copy.eventTag = null;
             copy.tagsFirstOccurrence = false;
-            copy.energyConsumerDetails = null;
-            copy.cpuUsageDetails = null;
+            copy.powerStats = null;
             writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_RESET);
         }
         writeHistoryItem(elapsedRealtimeMs, uptimeMs, cur, HistoryItem.CMD_UPDATE);
@@ -1506,8 +1485,7 @@ public class BatteryStatsHistory {
         cur.eventCode = HistoryItem.EVENT_NONE;
         cur.eventTag = null;
         cur.tagsFirstOccurrence = false;
-        cur.energyConsumerDetails = null;
-        cur.cpuUsageDetails = null;
+        cur.powerStats = null;
         if (DEBUG) {
             Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                     + " now " + mHistoryBuffer.dataPosition()
@@ -1638,16 +1616,10 @@ public class BatteryStatsHistory {
         if (stateIntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_STATE_FLAG;
         }
-        if (cur.energyConsumerDetails != null) {
-            extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_FLAG;
-            if (!mMeasuredEnergyHeaderWritten) {
-                extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG;
-            }
-        }
-        if (cur.cpuUsageDetails != null) {
-            extensionFlags |= EXTENSION_CPU_USAGE_FLAG;
-            if (!mCpuUsageHeaderWritten) {
-                extensionFlags |= BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG;
+        if (cur.powerStats != null) {
+            extensionFlags |= BatteryStatsHistory.EXTENSION_POWER_STATS_FLAG;
+            if (!mWrittenPowerStatsDescriptors.contains(cur.powerStats.descriptor)) {
+                extensionFlags |= BatteryStatsHistory.EXTENSION_POWER_STATS_DESCRIPTOR_FLAG;
             }
         }
         if (extensionFlags != 0) {
@@ -1773,37 +1745,13 @@ public class BatteryStatsHistory {
         dest.writeDouble(cur.wifiRailChargeMah);
         if (extensionFlags != 0) {
             dest.writeInt(extensionFlags);
-            if (cur.energyConsumerDetails != null) {
-                if (DEBUG) {
-                    Slog.i(TAG, "WRITE DELTA: measuredEnergyDetails=" + cur.energyConsumerDetails);
+            if (cur.powerStats != null) {
+                if ((extensionFlags & BatteryStatsHistory.EXTENSION_POWER_STATS_DESCRIPTOR_FLAG)
+                        != 0) {
+                    cur.powerStats.descriptor.writeSummaryToParcel(dest);
+                    mWrittenPowerStatsDescriptors.add(cur.powerStats.descriptor);
                 }
-                if (!mMeasuredEnergyHeaderWritten) {
-                    EnergyConsumerDetails.EnergyConsumer[] consumers =
-                            cur.energyConsumerDetails.consumers;
-                    dest.writeInt(consumers.length);
-                    for (EnergyConsumerDetails.EnergyConsumer consumer : consumers) {
-                        dest.writeInt(consumer.type);
-                        dest.writeInt(consumer.ordinal);
-                        dest.writeString(consumer.name);
-                    }
-                    mMeasuredEnergyHeaderWritten = true;
-                }
-                mVarintParceler.writeLongArray(dest, cur.energyConsumerDetails.chargeUC);
-            }
-
-            if (cur.cpuUsageDetails != null) {
-                if (DEBUG) {
-                    Slog.i(TAG, "WRITE DELTA: cpuUsageDetails=" + cur.cpuUsageDetails);
-                }
-                if (!mCpuUsageHeaderWritten) {
-                    dest.writeInt(cur.cpuUsageDetails.cpuBracketDescriptions.length);
-                    for (String desc: cur.cpuUsageDetails.cpuBracketDescriptions) {
-                        dest.writeString(desc);
-                    }
-                    mCpuUsageHeaderWritten = true;
-                }
-                dest.writeInt(cur.cpuUsageDetails.uid);
-                mVarintParceler.writeLongArray(dest, cur.cpuUsageDetails.cpuUsageMs);
+                cur.powerStats.writeToParcel(dest);
             }
         }
     }
@@ -2054,13 +2002,15 @@ public class BatteryStatsHistory {
      * fewer bytes.  It is a bit more expensive than just writing the long into the parcel,
      * but at scale saves a lot of storage and allows recording of longer battery history.
      */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final class VarintParceler {
         /**
          * Writes an array of longs into Parcel using the varint format, see
          * https://developers.google.com/protocol-buffers/docs/encoding#varints
          */
         public void writeLongArray(Parcel parcel, long[] values) {
+            if (values.length == 0) {
+                return;
+            }
             int out = 0;
             int shift = 0;
             for (long value : values) {
@@ -2092,6 +2042,9 @@ public class BatteryStatsHistory {
          * Reads a long written with {@link #writeLongArray}
          */
         public void readLongArray(Parcel parcel, long[] values) {
+            if (values.length == 0) {
+                return;
+            }
             int in = parcel.readInt();
             int available = 4;
             for (int i = 0; i < values.length; i++) {

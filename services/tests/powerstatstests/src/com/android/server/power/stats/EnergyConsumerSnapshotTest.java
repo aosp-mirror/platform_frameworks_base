@@ -26,7 +26,6 @@ import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerAttribution;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
-import android.os.BatteryStats;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 
@@ -238,17 +237,6 @@ public final class EnergyConsumerSnapshotTest {
     }
 
     @Test
-    public void getMeasuredEnergyDetails() {
-        final EnergyConsumerSnapshot snapshot = new EnergyConsumerSnapshot(ALL_ID_CONSUMER_MAP);
-        snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
-        EnergyConsumerDeltaData delta = snapshot.updateAndGetDelta(RESULTS_1, VOLTAGE_1);
-        BatteryStats.EnergyConsumerDetails details = snapshot.getEnergyConsumerDetails(delta);
-        assertThat(details.consumers).hasLength(4);
-        assertThat(details.chargeUC).isEqualTo(new long[]{2667, 3200000, 0, 0});
-        assertThat(details.toString()).isEqualTo("DISPLAY=2667 HPU=3200000 GPU=0 IPU &_=0");
-    }
-
-    @Test
     public void testUpdateAndGetDelta_updatesCameraCharge() {
         EnergyConsumer cameraConsumer =
                 createEnergyConsumer(7, 0, EnergyConsumerType.CAMERA, "CAMERA");
@@ -266,12 +254,8 @@ public final class EnergyConsumerSnapshotTest {
                 createEnergyConsumerResult(cameraConsumer.id, 90_000, null, null),
         };
         EnergyConsumerDeltaData delta = snapshot.updateAndGetDelta(result1, VOLTAGE_1);
-
-        // Verify that the delta between the two results is reported.
-        BatteryStats.EnergyConsumerDetails details = snapshot.getEnergyConsumerDetails(delta);
-        assertThat(details.consumers).hasLength(1);
         long expectedDeltaUC = calculateChargeConsumedUC(60_000, VOLTAGE_1, 90_000, VOLTAGE_1);
-        assertThat(details.chargeUC[0]).isEqualTo(expectedDeltaUC);
+        assertThat(delta.cameraChargeUC).isEqualTo(expectedDeltaUC);
     }
 
     private static EnergyConsumer createEnergyConsumer(int id, int ord, byte type, String name) {

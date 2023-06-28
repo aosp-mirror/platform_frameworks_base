@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.BatteryConsumer;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseArray;
@@ -137,6 +138,20 @@ public final class PowerStats {
             return new Descriptor(powerComponentId, name, statsArrayLength, uidStatsArrayLength,
                     extras);
         }
+
+        @Override
+        public String toString() {
+            if (extras != null) {
+                extras.size();  // Unparcel
+            }
+            return "PowerStats.Descriptor{"
+                    + "powerComponentId=" + powerComponentId
+                    + ", name='" + name + '\''
+                    + ", statsArrayLength=" + statsArrayLength
+                    + ", uidStatsArrayLength=" + uidStatsArrayLength
+                    + ", extras=" + extras
+                    + '}';
+        }
     }
 
     /**
@@ -251,6 +266,23 @@ public final class PowerStats {
     }
 
     /**
+     * Formats the stats as a string suitable to be included in the Battery History dump.
+     */
+    public String formatForBatteryHistory(String uidPrefix) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("duration=").append(durationMs).append(" ").append(descriptor.name);
+        if (stats.length > 0) {
+            sb.append("=").append(Arrays.toString(stats));
+        }
+        for (int i = 0; i < uidStats.size(); i++) {
+            sb.append(uidPrefix)
+                    .append(UserHandle.formatUid(uidStats.keyAt(i)))
+                    .append(": ").append(Arrays.toString(uidStats.valueAt(i)));
+        }
+        return sb.toString();
+    }
+
+    /**
      * Prints the contents of the stats snapshot.
      */
     public void dump(IndentingPrintWriter pw) {
@@ -265,5 +297,10 @@ public final class PowerStats {
             pw.println();
         }
         pw.decreaseIndent();
+    }
+
+    @Override
+    public String toString() {
+        return "PowerStats: " + formatForBatteryHistory(" UID ");
     }
 }

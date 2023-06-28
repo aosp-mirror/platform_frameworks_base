@@ -36,15 +36,9 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private final BatteryStats.HistoryStepDetails mReadHistoryStepDetails =
             new BatteryStats.HistoryStepDetails();
     private final SparseArray<BatteryStats.HistoryTag> mHistoryTags = new SparseArray<>();
-    private BatteryStats.EnergyConsumerDetails mEnergyConsumerDetails;
-    private BatteryStats.CpuUsageDetails mCpuUsageDetails;
-    private final BatteryStatsHistory.VarintParceler mVarintParceler =
-            new BatteryStatsHistory.VarintParceler();
-
+    private final PowerStats.DescriptorRegistry mDescriptorRegistry =
+            new PowerStats.DescriptorRegistry();
     private final BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
-
-    private static final int MAX_ENERGY_CONSUMER_COUNT = 100;
-    private static final int MAX_CPU_BRACKET_COUNT = 100;
 
     public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history) {
         mBatteryStatsHistory = history;
@@ -229,74 +223,17 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
         cur.wifiRailChargeMah = src.readDouble();
         if ((cur.states2 & BatteryStats.HistoryItem.STATE2_EXTENSIONS_FLAG) != 0) {
             final int extensionFlags = src.readInt();
-            if ((extensionFlags & BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG) != 0) {
-                if (mEnergyConsumerDetails == null) {
-                    mEnergyConsumerDetails = new BatteryStats.EnergyConsumerDetails();
-                }
-
-                final int consumerCount = src.readInt();
-                if (consumerCount > MAX_ENERGY_CONSUMER_COUNT) {
-                    // Check to avoid a heap explosion in case the parcel is corrupted
-                    throw new IllegalStateException(
-                            "EnergyConsumer count too high: " + consumerCount
-                                    + ". Max = " + MAX_ENERGY_CONSUMER_COUNT);
-                }
-                mEnergyConsumerDetails.consumers =
-                        new BatteryStats.EnergyConsumerDetails.EnergyConsumer[consumerCount];
-                mEnergyConsumerDetails.chargeUC = new long[consumerCount];
-                for (int i = 0; i < consumerCount; i++) {
-                    BatteryStats.EnergyConsumerDetails.EnergyConsumer consumer =
-                            new BatteryStats.EnergyConsumerDetails.EnergyConsumer();
-                    consumer.type = src.readInt();
-                    consumer.ordinal = src.readInt();
-                    consumer.name = src.readString();
-                    mEnergyConsumerDetails.consumers[i] = consumer;
-                }
+            if ((extensionFlags & BatteryStatsHistory.EXTENSION_POWER_STATS_DESCRIPTOR_FLAG) != 0) {
+                PowerStats.Descriptor descriptor = PowerStats.Descriptor.readSummaryFromParcel(src);
+                mDescriptorRegistry.register(descriptor);
             }
-
-            if ((extensionFlags & BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_FLAG) != 0) {
-                if (mEnergyConsumerDetails == null) {
-                    throw new IllegalStateException("MeasuredEnergyDetails without a header");
-                }
-
-                mVarintParceler.readLongArray(src, mEnergyConsumerDetails.chargeUC);
-                cur.energyConsumerDetails = mEnergyConsumerDetails;
+            if ((extensionFlags & BatteryStatsHistory.EXTENSION_POWER_STATS_FLAG) != 0) {
+                cur.powerStats = PowerStats.readFromParcel(src, mDescriptorRegistry);
             } else {
-                cur.energyConsumerDetails = null;
-            }
-
-            if ((extensionFlags & BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG) != 0) {
-                mCpuUsageDetails = new BatteryStats.CpuUsageDetails();
-                final int cpuBracketCount = src.readInt();
-                if (cpuBracketCount > MAX_CPU_BRACKET_COUNT) {
-                    // Check to avoid a heap explosion in case the parcel is corrupted
-                    throw new IllegalStateException("Too many CPU brackets: " + cpuBracketCount
-                            + ". Max = " + MAX_CPU_BRACKET_COUNT);
-                }
-                mCpuUsageDetails.cpuBracketDescriptions = new String[cpuBracketCount];
-                for (int i = 0; i < cpuBracketCount; i++) {
-                    mCpuUsageDetails.cpuBracketDescriptions[i] = src.readString();
-                }
-                mCpuUsageDetails.cpuUsageMs =
-                        new long[mCpuUsageDetails.cpuBracketDescriptions.length];
-            } else if (mCpuUsageDetails != null) {
-                mCpuUsageDetails.cpuBracketDescriptions = null;
-            }
-
-            if ((extensionFlags & BatteryStatsHistory.EXTENSION_CPU_USAGE_FLAG) != 0) {
-                if (mCpuUsageDetails == null) {
-                    throw new IllegalStateException("CpuUsageDetails without a header");
-                }
-
-                mCpuUsageDetails.uid = src.readInt();
-                mVarintParceler.readLongArray(src, mCpuUsageDetails.cpuUsageMs);
-                cur.cpuUsageDetails = mCpuUsageDetails;
-            } else {
-                cur.cpuUsageDetails = null;
+                cur.powerStats = null;
             }
         } else {
-            cur.energyConsumerDetails = null;
-            cur.cpuUsageDetails = null;
+            cur.powerStats = null;
         }
     }
 

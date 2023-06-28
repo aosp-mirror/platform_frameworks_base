@@ -24,11 +24,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.os.BatteryManager;
 import android.os.BatteryStats;
-import android.os.BatteryStats.CpuUsageDetails;
-import android.os.BatteryStats.EnergyConsumerDetails;
 import android.os.BatteryStats.HistoryItem;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.telephony.NetworkRegistrationInfo;
 import android.util.Log;
@@ -38,6 +36,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.PowerStats;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -275,47 +274,15 @@ public class BatteryStatsHistoryTest {
     }
 
     @Test
-    public void testRecordMeasuredEnergyDetails() {
-        mHistory.forceRecordAllHistory();
-        mHistory.startRecordingHistory(0, 0, /* reset */ true);
-        mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
-                1234);
+    public void recordPowerStats() {
+        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(42, "foo", 1, 2, new Bundle());
+        PowerStats powerStats = new PowerStats(descriptor);
+        powerStats.durationMs = 100;
+        powerStats.stats[0] = 200;
+        powerStats.uidStats.put(300, new long[]{400, 500});
+        powerStats.uidStats.put(600, new long[]{700, 800});
 
-        EnergyConsumerDetails details = new EnergyConsumerDetails();
-        EnergyConsumerDetails.EnergyConsumer consumer1 =
-                new EnergyConsumerDetails.EnergyConsumer();
-        consumer1.type = 42;
-        consumer1.ordinal = 0;
-        consumer1.name = "A";
-
-        EnergyConsumerDetails.EnergyConsumer consumer2 =
-                new EnergyConsumerDetails.EnergyConsumer();
-        consumer2.type = 777;
-        consumer2.ordinal = 0;
-        consumer2.name = "B/0";
-
-        EnergyConsumerDetails.EnergyConsumer consumer3 =
-                new EnergyConsumerDetails.EnergyConsumer();
-        consumer3.type = 777;
-        consumer3.ordinal = 1;
-        consumer3.name = "B/1";
-
-        EnergyConsumerDetails.EnergyConsumer consumer4 =
-                new EnergyConsumerDetails.EnergyConsumer();
-        consumer4.type = 314;
-        consumer4.ordinal = 1;
-        consumer4.name = "C";
-
-        details.consumers =
-                new EnergyConsumerDetails.EnergyConsumer[]{consumer1, consumer2, consumer3,
-                        consumer4};
-        details.chargeUC = new long[details.consumers.length];
-        for (int i = 0; i < details.chargeUC.length; i++) {
-            details.chargeUC[i] = 100L * i;
-        }
-        details.chargeUC[3] = BatteryStats.POWER_DATA_UNAVAILABLE;
-
-        mHistory.recordEnergyConsumerDetails(200, 200, details);
+        mHistory.recordPowerStats(200, 200, powerStats);
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate();
         BatteryStats.HistoryItem item;
@@ -325,62 +292,10 @@ public class BatteryStatsHistoryTest {
 
         String dump = toString(item, /* checkin */ false);
         assertThat(dump).contains("+200ms");
-        assertThat(dump).contains("ext=energy:A=0 B/0=100 B/1=200");
-        assertThat(dump).doesNotContain("C=");
-
-        String checkin = toString(item, /* checkin */ true);
-        assertThat(checkin).contains("XE");
-        assertThat(checkin).contains("A=0,B/0=100,B/1=200");
-        assertThat(checkin).doesNotContain("C=");
-    }
-
-    @Test
-    public void cpuUsageDetails() {
-        mHistory.forceRecordAllHistory();
-        mHistory.startRecordingHistory(0, 0, /* reset */ true);
-        mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
-                1234);
-
-        CpuUsageDetails details = new CpuUsageDetails();
-        details.cpuBracketDescriptions = new String[] {"low", "Med", "HIGH"};
-        details.uid = 10123;
-        details.cpuUsageMs = new long[] { 100, 200, 300};
-        mHistory.recordCpuUsage(200, 200, details);
-
-        details.uid = 10321;
-        details.cpuUsageMs = new long[] { 400, 500, 600};
-        mHistory.recordCpuUsage(300, 300, details);
-
-        BatteryStatsHistoryIterator iterator = mHistory.iterate();
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
-        assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
-
-        assertThat(item = iterator.next()).isNotNull();
-
-        String dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+200ms");
-        assertThat(dump).contains("ext=cpu:u0a123: 100, 200, 300");
-        assertThat(dump).contains("ext=cpu-bracket:0:low");
-        assertThat(dump).contains("ext=cpu-bracket:1:Med");
-        assertThat(dump).contains("ext=cpu-bracket:2:HIGH");
-
-        String checkin = toString(item, /* checkin */ true);
-        assertThat(checkin).contains("XB,3,0,low");
-        assertThat(checkin).contains("XB,3,1,Med");
-        assertThat(checkin).contains("XB,3,2,HIGH");
-        assertThat(checkin).contains("XC,10123,100,200,300");
-
-        assertThat(item = iterator.next()).isNotNull();
-
-        dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+300ms");
-        assertThat(dump).contains("ext=cpu:u0a321: 400, 500, 600");
-        // Power bracket descriptions are written only once
-        assertThat(dump).doesNotContain("ext=cpu-bracket");
-
-        checkin = toString(item, /* checkin */ true);
-        assertThat(checkin).doesNotContain("XB");
-        assertThat(checkin).contains("XC,10321,400,500,600");
+        assertThat(dump).contains("duration=100");
+        assertThat(dump).contains("foo=[200]");
+        assertThat(dump).contains("300: [400, 500]");
+        assertThat(dump).contains("600: [700, 800]");
     }
 
     @Test
@@ -596,6 +511,7 @@ public class BatteryStatsHistoryTest {
                 0xffffffffffffffffL};
 
         // Parcel subarrays of different lengths and assert the size of the resulting parcel
+        testVarintParceler(Arrays.copyOfRange(values, 0, 0), 0);
         testVarintParceler(Arrays.copyOfRange(values, 0, 1), 4);   // v. 8
         testVarintParceler(Arrays.copyOfRange(values, 0, 2), 4);   // v. 16
         testVarintParceler(Arrays.copyOfRange(values, 0, 3), 4);   // v. 24
