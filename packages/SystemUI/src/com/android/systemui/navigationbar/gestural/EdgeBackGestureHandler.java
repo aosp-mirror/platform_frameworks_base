@@ -1023,7 +1023,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
             boolean isBackAllowedCommon = !mDisabledForQuickstep && mIsBackGestureAllowed
                     && !mGestureBlockingActivityRunning
-                    && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
+                    && !QuickStepContract.isBackGestureDisabled(mSysUiFlags,
+                            mIsTrackpadThreeFingerSwipe)
                     && !isTrackpadScroll(mIsTrackpadGestureFeaturesEnabled, ev);
             if (mIsTrackpadThreeFingerSwipe) {
                 // Trackpad back gestures don't have zones, so we don't need to check if the down
@@ -1056,8 +1057,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             + " disp=%s, wl=%d, il=%d, wr=%d, ir=%d, excl=%s]",
                     curTime, curTimeStr, mAllowGesture, mIsTrackpadThreeFingerSwipe,
                     mIsOnLeftEdge, mDeferSetIsOnLeftEdge, mIsBackGestureAllowed,
-                    QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisabledForQuickstep,
-                    mGestureBlockingActivityRunning, mIsInPip, mDisplaySize,
+                    QuickStepContract.isBackGestureDisabled(mSysUiFlags,
+                            mIsTrackpadThreeFingerSwipe),
+                    mDisabledForQuickstep, mGestureBlockingActivityRunning, mIsInPip, mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
         } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {

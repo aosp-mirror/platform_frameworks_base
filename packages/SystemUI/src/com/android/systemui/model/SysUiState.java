@@ -114,7 +114,7 @@ public class SysUiState implements Dumpable {
         pw.print("  mSysUiStateFlags="); pw.println(mFlags);
         pw.println("    " + QuickStepContract.getSystemUiStateString(mFlags));
         pw.print("    backGestureDisabled=");
-        pw.println(QuickStepContract.isBackGestureDisabled(mFlags));
+        pw.println(QuickStepContract.isBackGestureDisabled(mFlags, false /* forTrackpad */));
         pw.print("    assistantGestureDisabled=");
         pw.println(QuickStepContract.isAssistantGestureDisabled(mFlags));
     }
