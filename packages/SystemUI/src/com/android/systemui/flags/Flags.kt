@@ -279,6 +279,10 @@ object Flags {
     @JvmField
     val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon")
 
+    // TODO(b/288276738): Tracking bug.
+    @JvmField
+    val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
