@@ -18,5 +18,5 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="#1F1F1F" />
-    <corners android:radius="@dimen/notification_corner_radius" />
+    <corners android:radius="@dimen/controls_panel_corner_radius" />
 </shape>

@@ -30,4 +30,8 @@ class MediaTttFlags @Inject constructor(private val featureFlags: FeatureFlags) 
     /** Check whether the flag for the receiver success state is enabled. */
     fun isMediaTttReceiverSuccessRippleEnabled(): Boolean =
         featureFlags.isEnabled(Flags.MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE)
+
+    /** True if the media transfer chip can be dismissed via a gesture. */
+    fun isMediaTttDismissGestureEnabled(): Boolean =
+        featureFlags.isEnabled(Flags.MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE)
 }

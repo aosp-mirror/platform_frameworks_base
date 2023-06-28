@@ -16,7 +16,6 @@
 
 package com.android.systemui.clipboardoverlay.dagger;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -28,6 +27,7 @@ import android.view.LayoutInflater;
 
 import com.android.systemui.R;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayView;
+import com.android.systemui.settings.DisplayTracker;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -46,8 +46,9 @@ public interface ClipboardOverlayModule {
      */
     @Provides
     @OverlayWindowContext
-    static Context provideWindowContext(DisplayManager displayManager, Context context) {
-        Display display = displayManager.getDisplay(DEFAULT_DISPLAY);
+    static Context provideWindowContext(DisplayManager displayManager,
+            DisplayTracker displayTracker, Context context) {
+        Display display = displayManager.getDisplay(displayTracker.getDefaultDisplayId());
         return context.createWindowContext(display, TYPE_SCREENSHOT, null);
     }
 

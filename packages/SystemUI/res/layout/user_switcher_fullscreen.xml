@@ -46,7 +46,7 @@
           app:layout_constraintEnd_toEndOf="parent"
           app:flow_horizontalBias="0.5"
           app:flow_verticalAlign="center"
-          app:flow_wrapMode="chain"
+          app:flow_wrapMode="chain2"
           app:flow_horizontalGap="@dimen/user_switcher_fullscreen_horizontal_gap"
           app:flow_verticalGap="44dp"
           app:flow_horizontalStyle="packed"/>

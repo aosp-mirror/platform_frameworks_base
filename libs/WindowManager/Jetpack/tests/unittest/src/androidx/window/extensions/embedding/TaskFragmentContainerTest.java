@@ -154,14 +154,49 @@ public class TaskFragmentContainerTest {
                 null /* pendingAppearedIntent */, taskContainer, mController,
                 null /* pairedPrimaryContainer */);
         doReturn(container1).when(mController).getContainerWithActivity(mActivity);
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         // The activity is requested to be reparented, so don't finish it.
-        container0.finish(true /* shouldFinishDependent */, mPresenter, wct, mController);
+        container0.finish(true /* shouldFinishDependent */, mPresenter, mTransaction, mController);
 
         verify(mTransaction, never()).finishActivity(any());
-        verify(mPresenter).deleteTaskFragment(wct, container0.getTaskFragmentToken());
+        verify(mPresenter).deleteTaskFragment(mTransaction, container0.getTaskFragmentToken());
         verify(mController).removeContainer(container0);
+    }
+
+    @Test
+    public void testFinish_alwaysFinishPlaceholder() {
+        // Register container1 as a placeholder
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container0 = new TaskFragmentContainer(mActivity,
+                null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
+        final TaskFragmentInfo info0 = createMockTaskFragmentInfo(container0, mActivity);
+        container0.setInfo(mTransaction, info0);
+        final Activity placeholderActivity = createMockActivity();
+        final TaskFragmentContainer container1 = new TaskFragmentContainer(placeholderActivity,
+                null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
+        final TaskFragmentInfo info1 = createMockTaskFragmentInfo(container1, placeholderActivity);
+        container1.setInfo(mTransaction, info1);
+        final SplitAttributes splitAttributes = new SplitAttributes.Builder().build();
+        final SplitPlaceholderRule rule = new SplitPlaceholderRule.Builder(new Intent(),
+                mActivity::equals, (java.util.function.Predicate) i -> false,
+                (java.util.function.Predicate) w -> true)
+                .setDefaultSplitAttributes(splitAttributes)
+                .build();
+        mController.registerSplit(mTransaction, container0, mActivity, container1, rule,
+                splitAttributes);
+
+        // The placeholder TaskFragment should be finished even if the primary is finished with
+        // shouldFinishDependent = false.
+        container0.finish(false /* shouldFinishDependent */, mPresenter, mTransaction, mController);
+
+        assertTrue(container0.isFinished());
+        assertTrue(container1.isFinished());
+        verify(mPresenter).deleteTaskFragment(mTransaction, container0.getTaskFragmentToken());
+        verify(mPresenter).deleteTaskFragment(mTransaction, container1.getTaskFragmentToken());
+        verify(mController).removeContainer(container0);
+        verify(mController).removeContainer(container1);
     }
 
     @Test
@@ -493,13 +528,31 @@ public class TaskFragmentContainerTest {
         final TaskFragmentContainer tf1 = new TaskFragmentContainer(
                 null /* pendingAppearedActivity */, new Intent(), taskContainer, mController,
                 null /* pairedPrimaryTaskFragment */);
-        taskContainer.mContainers.add(tf0);
-        taskContainer.mContainers.add(tf1);
 
         // When tf2 is created with using tf0 as pairedPrimaryContainer, tf2 should be inserted
         // right above tf0.
         final TaskFragmentContainer tf2 = new TaskFragmentContainer(
                 null /* pendingAppearedActivity */, new Intent(), taskContainer, mController, tf0);
+        assertEquals(0, taskContainer.indexOf(tf0));
+        assertEquals(1, taskContainer.indexOf(tf2));
+        assertEquals(2, taskContainer.indexOf(tf1));
+    }
+
+    @Test
+    public void testNewContainerWithPairedPendingAppearedActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer tf0 = new TaskFragmentContainer(
+                createMockActivity(), null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
+        final TaskFragmentContainer tf1 = new TaskFragmentContainer(
+                null /* pendingAppearedActivity */, new Intent(), taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
+
+        // When tf2 is created with pendingAppearedActivity, tf2 should be inserted below any
+        // TaskFragment without any Activity.
+        final TaskFragmentContainer tf2 = new TaskFragmentContainer(
+                createMockActivity(), null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
         assertEquals(0, taskContainer.indexOf(tf0));
         assertEquals(1, taskContainer.indexOf(tf2));
         assertEquals(2, taskContainer.indexOf(tf1));

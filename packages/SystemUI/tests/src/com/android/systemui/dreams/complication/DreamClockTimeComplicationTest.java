@@ -29,7 +29,9 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.shared.condition.Monitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,10 +71,13 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     @Mock
     private ComplicationLayoutParams mLayoutParams;
 
+    private Monitor mMonitor;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mDreamClockTimeViewHolderProvider.get()).thenReturn(mDreamClockTimeViewHolder);
+        mMonitor = SelfExecutingMonitor.createInstance();
     }
 
     /**
@@ -83,7 +88,8 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
         final DreamClockTimeComplication.Registrant registrant =
                 new DreamClockTimeComplication.Registrant(
                         mDreamOverlayStateController,
-                        mComplication);
+                        mComplication,
+                        mMonitor);
         registrant.start();
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
     }

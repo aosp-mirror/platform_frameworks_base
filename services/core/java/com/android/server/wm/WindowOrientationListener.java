@@ -88,14 +88,19 @@ public abstract class WindowOrientationListener {
 
     private final Object mLock = new Object();
 
+    @Surface.Rotation
+    private final int mDefaultRotation;
+
     /**
      * Creates a new WindowOrientationListener.
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
+     * @param defaultRotation Default rotation of the display.
      */
-    public WindowOrientationListener(Context context, Handler handler) {
-        this(context, handler, SensorManager.SENSOR_DELAY_UI);
+    public WindowOrientationListener(Context context, Handler handler,
+            @Surface.Rotation int defaultRotation) {
+        this(context, handler, defaultRotation, SensorManager.SENSOR_DELAY_UI);
     }
 
     /**
@@ -103,7 +108,7 @@ public abstract class WindowOrientationListener {
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
-     * @param wmService WindowManagerService to read the device config from.
+     * @param defaultRotation Default rotation of the display.
      * @param rate at which sensor events are processed (see also
      * {@link android.hardware.SensorManager SensorManager}). Use the default
      * value of {@link android.hardware.SensorManager#SENSOR_DELAY_NORMAL
@@ -111,10 +116,11 @@ public abstract class WindowOrientationListener {
      *
      * This constructor is private since no one uses it.
      */
-    private WindowOrientationListener(
-            Context context, Handler handler, int rate) {
+    private WindowOrientationListener(Context context, Handler handler,
+            @Surface.Rotation int defaultRotation, int rate) {
         mContext = context;
         mHandler = handler;
+        mDefaultRotation = defaultRotation;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
         List<Sensor> l = mSensorManager.getSensorList(Sensor.TYPE_DEVICE_ORIENTATION);
@@ -1159,7 +1165,7 @@ public abstract class WindowOrientationListener {
                                 "Reusing the last rotation resolution: " + mLastRotationResolution);
                         finalizeRotation(mLastRotationResolution);
                     } else {
-                        finalizeRotation(Surface.ROTATION_0);
+                        finalizeRotation(mDefaultRotation);
                     }
                     return;
                 }

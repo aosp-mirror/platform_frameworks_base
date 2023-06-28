@@ -28,9 +28,9 @@
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Сымсыз зарядталуда"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядталып жатыр."</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядталуда"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жылдам зарядталуда"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жылдам зарядтау"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Баяу зарядталуда"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны қорғау үшін, зарядтау оңтайландырылды"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны қорғау үшін зарядтау оңтайландырылды"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Ашу үшін \"Мәзір\" пернесін басыңыз."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Желі құлыптаулы"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM картасы жоқ."</string>
@@ -90,5 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Әдепкі"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Көпіршік"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналогтық"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Жалғастыру үшін құрылғының құлпын ашыңыз"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Жалғастыру үшін құлыпты ашыңыз"</string>
 </resources>

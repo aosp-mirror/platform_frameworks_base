@@ -60,6 +60,7 @@ class UserSwitchDialog(
         setView(gridFrame)
 
         adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
+        adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
     }
 
     companion object {

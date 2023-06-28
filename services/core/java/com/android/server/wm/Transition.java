@@ -45,6 +45,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
+import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
@@ -1736,7 +1737,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         ? activityRecord.getOrganizedTaskFragment()
                         : taskFragment.getOrganizedTaskFragment();
                 if (organizedTf != null && organizedTf.getAnimationParams()
-                        .getAnimationBackgroundColor() != 0) {
+                        .getAnimationBackgroundColor() != DEFAULT_ANIMATION_BACKGROUND_COLOR) {
                     // This window is embedded and has an animation background color set on the
                     // TaskFragment. Pass this color with this window, so the handler can use it as
                     // the animation background color if needed,
@@ -1748,10 +1749,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     final Task parentTask = activityRecord != null
                             ? activityRecord.getTask()
                             : taskFragment.getTask();
-                    backgroundColor = ColorUtils.setAlphaComponent(
-                            parentTask.getTaskDescription().getBackgroundColor(), 255);
+                    backgroundColor = parentTask.getTaskDescription().getBackgroundColor();
                 }
-                change.setBackgroundColor(backgroundColor);
+                // Set to opaque for animation background to prevent it from exposing the blank
+                // background or content below.
+                change.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor, 255));
             }
 
             change.setRotation(info.mRotation, endRotation);

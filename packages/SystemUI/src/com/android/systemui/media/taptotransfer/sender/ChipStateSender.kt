@@ -23,7 +23,6 @@ import androidx.annotation.StringRes
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
-import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
 
 /**
  * A class enumerating all the possible states of the media tap-to-transfer chip on the sender
@@ -34,8 +33,8 @@ import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
  *   state should not have the chip be displayed.
  * @property transferStatus the transfer status that the chip state represents.
  * @property endItem the item that should be displayed in the end section of the chip.
- * @property timeout the amount of time this chip should display on the screen before it times out
- *   and disappears.
+ * @property timeoutLength how long the chip should display on the screen before it times out and
+ *   disappears.
  */
 enum class ChipStateSender(
     @StatusBarManager.MediaTransferSenderState val stateInt: Int,
@@ -43,7 +42,7 @@ enum class ChipStateSender(
     @StringRes val stringResId: Int?,
     val transferStatus: TransferStatus,
     val endItem: SenderEndItem?,
-    val timeout: Int = DEFAULT_TIMEOUT_MILLIS,
+    val timeoutLength: TimeoutLength = TimeoutLength.DEFAULT,
 ) {
     /**
      * A state representing that the two devices are close but not close enough to *start* a cast to
@@ -56,6 +55,9 @@ enum class ChipStateSender(
         R.string.media_move_closer_to_start_cast,
         transferStatus = TransferStatus.NOT_STARTED,
         endItem = null,
+        // Give this view more time in case the loading view takes a bit to come in. (We don't want
+        // this view to disappear and then the loading view to appear quickly afterwards.)
+        timeoutLength = TimeoutLength.LONG,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
             return nextState == FAR_FROM_RECEIVER ||
@@ -75,6 +77,7 @@ enum class ChipStateSender(
         R.string.media_move_closer_to_end_cast,
         transferStatus = TransferStatus.NOT_STARTED,
         endItem = null,
+        timeoutLength = TimeoutLength.LONG,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
             return nextState == FAR_FROM_RECEIVER ||
@@ -92,7 +95,9 @@ enum class ChipStateSender(
         R.string.media_transfer_playing_different_device,
         transferStatus = TransferStatus.IN_PROGRESS,
         endItem = SenderEndItem.Loading,
-        timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
+        // Give this view more time in case the succeeded/failed view takes a bit to come in. (We
+        // don't want this view to disappear and then the next view to appear quickly afterwards.)
+        timeoutLength = TimeoutLength.LONG,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
             return nextState == FAR_FROM_RECEIVER ||
@@ -111,7 +116,7 @@ enum class ChipStateSender(
         R.string.media_transfer_playing_this_device,
         transferStatus = TransferStatus.IN_PROGRESS,
         endItem = SenderEndItem.Loading,
-        timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
+        timeoutLength = TimeoutLength.LONG,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
             return nextState == FAR_FROM_RECEIVER ||
@@ -136,9 +141,9 @@ enum class ChipStateSender(
         ),
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_START_CAST ||
-                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+            // Since _SUCCEEDED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -158,9 +163,9 @@ enum class ChipStateSender(
         ),
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_END_CAST ||
-                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+            // Since _SUCCEEDED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -173,9 +178,9 @@ enum class ChipStateSender(
         endItem = SenderEndItem.Error,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_START_CAST ||
-                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+            // Since _FAILED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -188,9 +193,9 @@ enum class ChipStateSender(
         endItem = SenderEndItem.Error,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_END_CAST ||
-                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+            // Since _FAILED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -210,9 +215,9 @@ enum class ChipStateSender(
         }
 
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState.transferStatus == TransferStatus.NOT_STARTED ||
-                    nextState.transferStatus == TransferStatus.IN_PROGRESS
+            // When far away, we can go to any state that represents the start of a transfer
+            // sequence.
+            return stateIsStartOfSequence(nextState)
         }
     };
 
@@ -227,6 +232,20 @@ enum class ChipStateSender(
         return Text.Loaded(context.getString(stringResId!!, otherDeviceName))
     }
 
+    /**
+     * Returns true if moving from this state to [nextState] is a valid transition.
+     *
+     * In general, we expect a media transfer go to through a sequence of states:
+     * For push-to-receiver:
+     *   - ALMOST_CLOSE_TO_START_CAST => TRANSFER_TO_RECEIVER_TRIGGERED =>
+     *     TRANSFER_TO_RECEIVER_(SUCCEEDED|FAILED)
+     *   - ALMOST_CLOSE_TO_END_CAST => TRANSFER_TO_THIS_DEVICE_TRIGGERED =>
+     *     TRANSFER_TO_THIS_DEVICE_(SUCCEEDED|FAILED)
+     *
+     * This method should validate that the states go through approximately that sequence.
+     *
+     * See b/221265848 for more details.
+     */
     abstract fun isValidNextState(nextState: ChipStateSender): Boolean
 
     companion object {
@@ -276,6 +295,18 @@ enum class ChipStateSender(
 
             return currentState.isValidNextState(desiredState)
         }
+
+        /**
+         * Returns true if [state] represents a state at the beginning of a sequence and false
+         * otherwise.
+         */
+        private fun stateIsStartOfSequence(state: ChipStateSender): Boolean {
+            return state == FAR_FROM_RECEIVER ||
+                state.transferStatus == TransferStatus.NOT_STARTED ||
+                // It's possible to skip the NOT_STARTED phase and go immediately into the
+                // IN_PROGRESS phase.
+                state.transferStatus == TransferStatus.IN_PROGRESS
+        }
     }
 }
 
@@ -299,9 +330,16 @@ sealed class SenderEndItem {
     ) : SenderEndItem()
 }
 
-// Give the Transfer*Triggered states a longer timeout since those states represent an active
-// process and we should keep the user informed about it as long as possible (but don't allow it to
-// continue indefinitely).
-private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 30000
+/** Represents how long the chip should be visible before it times out. */
+enum class TimeoutLength {
+    /** A default timeout used for temporary displays at the top of the screen. */
+    DEFAULT,
+    /**
+     * A longer timeout. Should be used when the status is pending (e.g. loading), so that the user
+     * remains informed about the process for longer and so that the UI has more time to resolve the
+     * pending state before disappearing.
+     */
+    LONG,
+}
 
 private const val TAG = "ChipStateSender"

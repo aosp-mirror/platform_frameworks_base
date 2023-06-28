@@ -19,7 +19,6 @@ package com.android.systemui.user.domain.interactor
 
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
@@ -28,24 +27,27 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.test.filters.SmallTest
-import com.android.internal.R.drawable.ic_account_circle
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -53,36 +55,39 @@ import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.advanceUntilIdle
+import junit.framework.Assert.assertNotNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class UserInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
     @Mock private lateinit var activityManager: ActivityManager
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
@@ -90,10 +95,12 @@ class UserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var dialogShower: UserSwitchDialogController.DialogShower
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
+    @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: UserInteractor
 
-    private lateinit var testCoroutineScope: TestCoroutineScope
+    private lateinit var testScope: TestScope
     private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var telephonyRepository: FakeTelephonyRepository
@@ -112,16 +119,20 @@ class UserInteractorTest : SysuiTestCase() {
             SUPERVISED_USER_CREATION_APP_PACKAGE,
         )
 
-        featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
         telephonyRepository = FakeTelephonyRepository()
-        testCoroutineScope = TestCoroutineScope()
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
         val refreshUsersScheduler =
             RefreshUsersScheduler(
-                applicationScope = testCoroutineScope,
-                mainDispatcher = IMMEDIATE,
+                applicationScope = testScope.backgroundScope,
+                mainDispatcher = testDispatcher,
                 repository = userRepository,
             )
         underTest =
@@ -132,23 +143,28 @@ class UserInteractorTest : SysuiTestCase() {
                 keyguardInteractor =
                     KeyguardInteractor(
                         repository = keyguardRepository,
+                        commandQueue = commandQueue,
+                        featureFlags = featureFlags,
+                        bouncerRepository = FakeKeyguardBouncerRepository(),
                     ),
                 manager = manager,
-                applicationScope = testCoroutineScope,
+                headlessSystemUserMode = headlessSystemUserMode,
+                applicationScope = testScope.backgroundScope,
                 telephonyInteractor =
                     TelephonyInteractor(
                         repository = telephonyRepository,
                     ),
                 broadcastDispatcher = fakeBroadcastDispatcher,
-                backgroundDispatcher = IMMEDIATE,
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
+                backgroundDispatcher = testDispatcher,
                 activityManager = activityManager,
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor =
                     GuestUserInteractor(
                         applicationContext = context,
-                        applicationScope = testCoroutineScope,
-                        mainDispatcher = IMMEDIATE,
-                        backgroundDispatcher = IMMEDIATE,
+                        applicationScope = testScope.backgroundScope,
+                        mainDispatcher = testDispatcher,
+                        backgroundDispatcher = testDispatcher,
                         manager = manager,
                         repository = userRepository,
                         deviceProvisionedController = deviceProvisionedController,
@@ -163,8 +179,20 @@ class UserInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun `testKeyguardUpdateMonitor_onKeyguardGoingAway`() =
+        testScope.runTest {
+            val argumentCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+            verify(keyguardUpdateMonitor).registerCallback(argumentCaptor.capture())
+
+            argumentCaptor.value.onKeyguardGoingAway()
+
+            val lastValue = collectLastValue(underTest.dialogDismissRequests)
+            assertNotNull(lastValue)
+        }
+
+    @Test
     fun `onRecordSelected - user`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -179,7 +207,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `onRecordSelected - switch to guest user`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -193,7 +221,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `onRecordSelected - enter guest mode`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -202,6 +230,7 @@ class UserInteractorTest : SysuiTestCase() {
             whenever(manager.createGuest(any())).thenReturn(guestUserInfo)
 
             underTest.onRecordSelected(UserRecord(isGuest = true), dialogShower)
+            runCurrent()
 
             verify(dialogShower).dismiss()
             verify(manager).createGuest(any())
@@ -210,7 +239,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `onRecordSelected - action`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -224,81 +253,72 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `users - switcher enabled`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var value: List<UserModel>? = null
-            val job = underTest.users.onEach { value = it }.launchIn(this)
-            assertUsers(models = value, count = 3, includeGuest = true)
+            val value = collectLastValue(underTest.users)
 
-            job.cancel()
+            assertUsers(models = value(), count = 3, includeGuest = true)
         }
 
     @Test
     fun `users - switches to second user`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var value: List<UserModel>? = null
-            val job = underTest.users.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.users)
             userRepository.setSelectedUserInfo(userInfos[1])
 
-            assertUsers(models = value, count = 2, selectedIndex = 1)
-            job.cancel()
+            assertUsers(models = value(), count = 2, selectedIndex = 1)
         }
 
     @Test
     fun `users - switcher not enabled`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = false))
 
-            var value: List<UserModel>? = null
-            val job = underTest.users.onEach { value = it }.launchIn(this)
-            assertUsers(models = value, count = 1)
-
-            job.cancel()
+            val value = collectLastValue(underTest.users)
+            assertUsers(models = value(), count = 1)
         }
 
     @Test
     fun selectedUser() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var value: UserModel? = null
-            val job = underTest.selectedUser.onEach { value = it }.launchIn(this)
-            assertUser(value, id = 0, isSelected = true)
+            val value = collectLastValue(underTest.selectedUser)
+            assertUser(value(), id = 0, isSelected = true)
 
             userRepository.setSelectedUserInfo(userInfos[1])
-            assertUser(value, id = 1, isSelected = true)
-
-            job.cancel()
+            assertUser(value(), id = 1, isSelected = true)
         }
 
     @Test
     fun `actions - device unlocked`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
 
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             keyguardRepository.setKeyguardShowing(false)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value)
+            runCurrent()
+
+            assertThat(value())
                 .isEqualTo(
                     listOf(
                         UserActionModel.ENTER_GUEST_MODE,
@@ -307,13 +327,11 @@ class UserInteractorTest : SysuiTestCase() {
                         UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
                     )
                 )
-
-            job.cancel()
         }
 
     @Test
     fun `actions - device unlocked - full screen`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
 
@@ -321,10 +339,9 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             keyguardRepository.setKeyguardShowing(false)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value)
+            assertThat(value())
                 .isEqualTo(
                     listOf(
                         UserActionModel.ADD_USER,
@@ -333,46 +350,38 @@ class UserInteractorTest : SysuiTestCase() {
                         UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
                     )
                 )
-
-            job.cancel()
         }
 
     @Test
     fun `actions - device unlocked user not primary - empty list`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             keyguardRepository.setKeyguardShowing(false)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value).isEqualTo(emptyList<UserActionModel>())
-
-            job.cancel()
+            assertThat(value()).isEqualTo(emptyList<UserActionModel>())
         }
 
     @Test
     fun `actions - device unlocked user is guest - empty list`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = true)
             assertThat(userInfos[1].isGuest).isTrue()
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             keyguardRepository.setKeyguardShowing(false)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value).isEqualTo(emptyList<UserActionModel>())
-
-            job.cancel()
+            assertThat(value()).isEqualTo(emptyList<UserActionModel>())
         }
 
     @Test
     fun `actions - device locked add from lockscreen set - full list`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -383,10 +392,9 @@ class UserInteractorTest : SysuiTestCase() {
                 )
             )
             keyguardRepository.setKeyguardShowing(false)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value)
+            assertThat(value())
                 .isEqualTo(
                     listOf(
                         UserActionModel.ENTER_GUEST_MODE,
@@ -395,13 +403,11 @@ class UserInteractorTest : SysuiTestCase() {
                         UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
                     )
                 )
-
-            job.cancel()
         }
 
     @Test
     fun `actions - device locked add from lockscreen set - full list - full screen`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
@@ -413,10 +419,9 @@ class UserInteractorTest : SysuiTestCase() {
                 )
             )
             keyguardRepository.setKeyguardShowing(false)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value)
+            assertThat(value())
                 .isEqualTo(
                     listOf(
                         UserActionModel.ADD_USER,
@@ -425,39 +430,33 @@ class UserInteractorTest : SysuiTestCase() {
                         UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
                     )
                 )
-
-            job.cancel()
         }
 
     @Test
     fun `actions - device locked - only  manage user is shown`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             keyguardRepository.setKeyguardShowing(true)
-            var value: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { value = it }.launchIn(this)
+            val value = collectLastValue(underTest.actions)
 
-            assertThat(value).isEqualTo(listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT))
-
-            job.cancel()
+            assertThat(value()).isEqualTo(listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT))
         }
 
     @Test
     fun `executeAction - add user - dialog shown`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             keyguardRepository.setKeyguardShowing(false)
-            var dialogRequest: ShowDialogRequestModel? = null
-            val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
             val dialogShower: UserSwitchDialogController.DialogShower = mock()
 
             underTest.executeAction(UserActionModel.ADD_USER, dialogShower)
-            assertThat(dialogRequest)
+            assertThat(dialogRequest())
                 .isEqualTo(
                     ShowDialogRequestModel.ShowAddUserDialog(
                         userHandle = userInfos[0].userHandle,
@@ -468,14 +467,12 @@ class UserInteractorTest : SysuiTestCase() {
                 )
 
             underTest.onDialogShown()
-            assertThat(dialogRequest).isNull()
-
-            job.cancel()
+            assertThat(dialogRequest()).isNull()
         }
 
     @Test
-    fun `executeAction - add supervised user - starts activity`() =
-        runBlocking(IMMEDIATE) {
+    fun `executeAction - add supervised user - dismisses dialog and starts activity`() =
+        testScope.runTest {
             underTest.executeAction(UserActionModel.ADD_SUPERVISED_USER)
 
             val intentCaptor = kotlinArgumentCaptor<Intent>()
@@ -487,7 +484,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `executeAction - navigate to manage users`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             underTest.executeAction(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT)
 
             val intentCaptor = kotlinArgumentCaptor<Intent>()
@@ -497,7 +494,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `executeAction - guest mode`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -505,110 +502,103 @@ class UserInteractorTest : SysuiTestCase() {
             val guestUserInfo = createUserInfo(id = 1337, name = "guest", isGuest = true)
             whenever(manager.createGuest(any())).thenReturn(guestUserInfo)
             val dialogRequests = mutableListOf<ShowDialogRequestModel?>()
-            val showDialogsJob =
-                underTest.dialogShowRequests
-                    .onEach {
-                        dialogRequests.add(it)
-                        if (it != null) {
-                            underTest.onDialogShown()
-                        }
+            backgroundScope.launch {
+                underTest.dialogShowRequests.collect {
+                    dialogRequests.add(it)
+                    if (it != null) {
+                        underTest.onDialogShown()
                     }
-                    .launchIn(this)
-            val dismissDialogsJob =
-                underTest.dialogDismissRequests
-                    .onEach {
-                        if (it != null) {
-                            underTest.onDialogDismissed()
-                        }
+                }
+            }
+            backgroundScope.launch {
+                underTest.dialogDismissRequests.collect {
+                    if (it != null) {
+                        underTest.onDialogDismissed()
                     }
-                    .launchIn(this)
+                }
+            }
 
             underTest.executeAction(UserActionModel.ENTER_GUEST_MODE)
+            runCurrent()
 
             assertThat(dialogRequests)
                 .contains(
                     ShowDialogRequestModel.ShowUserCreationDialog(isGuest = true),
                 )
             verify(activityManager).switchUser(guestUserInfo.id)
-
-            showDialogsJob.cancel()
-            dismissDialogsJob.cancel()
         }
 
     @Test
     fun `selectUser - already selected guest re-selected - exit guest dialog`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = true)
             val guestUserInfo = userInfos[1]
             assertThat(guestUserInfo.isGuest).isTrue()
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(guestUserInfo)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
-            var dialogRequest: ShowDialogRequestModel? = null
-            val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
 
             underTest.selectUser(
                 newlySelectedUserId = guestUserInfo.id,
                 dialogShower = dialogShower,
             )
 
-            assertThat(dialogRequest)
+            assertThat(dialogRequest())
                 .isInstanceOf(ShowDialogRequestModel.ShowExitGuestDialog::class.java)
             verify(dialogShower, never()).dismiss()
-            job.cancel()
         }
 
     @Test
     fun `selectUser - currently guest non-guest selected - exit guest dialog`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = true)
             val guestUserInfo = userInfos[1]
             assertThat(guestUserInfo.isGuest).isTrue()
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(guestUserInfo)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
-            var dialogRequest: ShowDialogRequestModel? = null
-            val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
 
             underTest.selectUser(newlySelectedUserId = userInfos[0].id, dialogShower = dialogShower)
 
-            assertThat(dialogRequest)
+            assertThat(dialogRequest())
                 .isInstanceOf(ShowDialogRequestModel.ShowExitGuestDialog::class.java)
             verify(dialogShower, never()).dismiss()
-            job.cancel()
         }
 
     @Test
     fun `selectUser - not currently guest - switches users`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
-            var dialogRequest: ShowDialogRequestModel? = null
-            val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
 
             underTest.selectUser(newlySelectedUserId = userInfos[1].id, dialogShower = dialogShower)
 
-            assertThat(dialogRequest).isNull()
+            assertThat(dialogRequest()).isNull()
             verify(activityManager).switchUser(userInfos[1].id)
             verify(dialogShower).dismiss()
-            job.cancel()
         }
 
     @Test
     fun `Telephony call state changes - refreshes users`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
+            runCurrent()
+
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
             telephonyRepository.setCallState(1)
+            runCurrent()
 
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
         }
 
     @Test
     fun `User switched broadcast`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -617,9 +607,11 @@ class UserInteractorTest : SysuiTestCase() {
             val callback2: UserInteractor.UserCallback = mock()
             underTest.addCallback(callback1)
             underTest.addCallback(callback2)
+            runCurrent()
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
             userRepository.setSelectedUserInfo(userInfos[1])
+            runCurrent()
             fakeBroadcastDispatcher.registeredReceivers.forEach {
                 it.onReceive(
                     context,
@@ -627,16 +619,17 @@ class UserInteractorTest : SysuiTestCase() {
                         .putExtra(Intent.EXTRA_USER_HANDLE, userInfos[1].id),
                 )
             }
+            runCurrent()
 
-            verify(callback1).onUserStateChanged()
-            verify(callback2).onUserStateChanged()
+            verify(callback1, atLeastOnce()).onUserStateChanged()
+            verify(callback2, atLeastOnce()).onUserStateChanged()
             assertThat(userRepository.secondaryUserId).isEqualTo(userInfos[1].id)
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
         }
 
     @Test
     fun `User info changed broadcast`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -649,12 +642,14 @@ class UserInteractorTest : SysuiTestCase() {
                 )
             }
 
+            runCurrent()
+
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
         }
 
     @Test
     fun `System user unlocked broadcast - refresh users`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -667,13 +662,14 @@ class UserInteractorTest : SysuiTestCase() {
                         .putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_SYSTEM),
                 )
             }
+            runCurrent()
 
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
         }
 
     @Test
     fun `Non-system user unlocked broadcast - do not refresh users`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -691,14 +687,14 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun userRecords() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             keyguardRepository.setKeyguardShowing(false)
 
-            testCoroutineScope.advanceUntilIdle()
+            runCurrent()
 
             assertRecords(
                 records = underTest.userRecords.value,
@@ -717,7 +713,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun userRecordsFullScreen() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
@@ -725,7 +721,7 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfos[0])
             keyguardRepository.setKeyguardShowing(false)
 
-            testCoroutineScope.advanceUntilIdle()
+            runCurrent()
 
             assertRecords(
                 records = underTest.userRecords.value,
@@ -744,7 +740,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun selectedUserRecord() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             userRepository.setUserInfos(userInfos)
@@ -762,95 +758,78 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun `users - secondary user - guest user can be switched to`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var res: List<UserModel>? = null
-            val job = underTest.users.onEach { res = it }.launchIn(this)
-            assertThat(res?.size == 3).isTrue()
-            assertThat(res?.find { it.isGuest }).isNotNull()
-            job.cancel()
+            val res = collectLastValue(underTest.users)
+            assertThat(res()?.size == 3).isTrue()
+            assertThat(res()?.find { it.isGuest }).isNotNull()
         }
 
     @Test
     fun `users - secondary user - no guest action`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var res: List<UserActionModel>? = null
-            val job = underTest.actions.onEach { res = it }.launchIn(this)
-            assertThat(res?.find { it == UserActionModel.ENTER_GUEST_MODE }).isNull()
-            job.cancel()
+            val res = collectLastValue(underTest.actions)
+            assertThat(res()?.find { it == UserActionModel.ENTER_GUEST_MODE }).isNull()
         }
 
     @Test
     fun `users - secondary user - no guest user record`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var res: List<UserRecord>? = null
-            val job = underTest.userRecords.onEach { res = it }.launchIn(this)
-            assertThat(res?.find { it.isGuest }).isNull()
-            job.cancel()
+            assertThat(underTest.userRecords.value.find { it.isGuest }).isNull()
         }
 
     @Test
     fun `show user switcher - full screen disabled - shows dialog switcher`() =
-        runBlocking(IMMEDIATE) {
-            var dialogRequest: ShowDialogRequestModel? = null
+        testScope.runTest {
             val expandable = mock<Expandable>()
-            underTest.showUserSwitcher(context, expandable)
+            underTest.showUserSwitcher(expandable)
 
-            val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
 
             // Dialog is shown.
-            assertThat(dialogRequest).isEqualTo(ShowDialogRequestModel.ShowUserSwitcherDialog)
+            assertThat(dialogRequest())
+                .isEqualTo(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
 
             underTest.onDialogShown()
-            assertThat(dialogRequest).isNull()
-
-            job.cancel()
+            assertThat(dialogRequest()).isNull()
         }
 
     @Test
-    fun `show user switcher - full screen enabled - launches activity`() {
-        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+    fun `show user switcher - full screen enabled - launches full screen dialog`() =
+        testScope.runTest {
+            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
-        val expandable = mock<Expandable>()
-        underTest.showUserSwitcher(context, expandable)
+            val expandable = mock<Expandable>()
+            underTest.showUserSwitcher(expandable)
 
-        // Dialog is shown.
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(activityStarter)
-            .startActivity(
-                intentCaptor.capture(),
-                /* dismissShade= */ eq(true),
-                /* ActivityLaunchAnimator.Controller= */ nullable(),
-                /* showOverLockscreenWhenLocked= */ eq(true),
-                eq(UserHandle.SYSTEM),
-            )
-        assertThat(intentCaptor.value.component)
-            .isEqualTo(
-                ComponentName(
-                    context,
-                    UserSwitcherActivity::class.java,
-                )
-            )
-    }
+            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
+
+            // Dialog is shown.
+            assertThat(dialogRequest())
+                    .isEqualTo(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
+
+            underTest.onDialogShown()
+            assertThat(dialogRequest()).isNull()
+        }
 
     @Test
     fun `users - secondary user - managed profile is not included`() =
-        runBlocking(IMMEDIATE) {
-            var userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
+        testScope.runTest {
+            val userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
             userInfos.add(
                 UserInfo(
                     50,
@@ -863,23 +842,63 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
-            var res: List<UserModel>? = null
-            val job = underTest.users.onEach { res = it }.launchIn(this)
-            assertThat(res?.size == 3).isTrue()
-            job.cancel()
+            val res = collectLastValue(underTest.users)
+            assertThat(res()?.size == 3).isTrue()
         }
 
     @Test
     fun `current user is not primary and user switcher is disabled`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[1])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = false))
-            var selectedUser: UserModel? = null
-            val job = underTest.selectedUser.onEach { selectedUser = it }.launchIn(this)
-            assertThat(selectedUser).isNotNull()
-            job.cancel()
+            val selectedUser = collectLastValue(underTest.selectedUser)
+            assertThat(selectedUser()).isNotNull()
+        }
+
+    @Test
+    fun userRecords_isActionAndNoUsersUnlocked_actionIsDisabled() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            whenever(manager.getUserSwitchability(any()))
+                .thenReturn(UserManager.SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED)
+            val userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(
+                UserSwitcherSettingsModel(
+                    isUserSwitcherEnabled = true,
+                    isAddUsersFromLockscreen = true
+                )
+            )
+
+            runCurrent()
+            underTest.userRecords.value
+                .filter { it.info == null }
+                .forEach { action -> assertThat(action.isSwitchToEnabled).isFalse() }
+        }
+
+    @Test
+    fun userRecords_isActionAndNoUsersUnlocked_actionIsDisabled_HeadlessMode() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            whenever(headlessSystemUserMode.isHeadlessSystemUserMode()).thenReturn(true)
+            whenever(manager.isUserUnlocked(anyInt())).thenReturn(false)
+            val userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(
+                UserSwitcherSettingsModel(
+                    isUserSwitcherEnabled = true,
+                    isAddUsersFromLockscreen = true
+                )
+            )
+
+            runCurrent()
+            underTest.userRecords.value
+                .filter { it.info == null }
+                .forEach { action -> assertThat(action.isSwitchToEnabled).isFalse() }
         }
 
     private fun assertUsers(
@@ -1017,7 +1036,6 @@ class UserInteractorTest : SysuiTestCase() {
     }
 
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
         private val ICON = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         private val GUEST_ICON: Drawable = mock()
         private const val SUPERVISED_USER_CREATION_APP_PACKAGE = "supervisedUserCreation"

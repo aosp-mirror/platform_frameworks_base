@@ -62,7 +62,9 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
             fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
 
             runCurrent()
-            values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT },)
+            values.assertEffectsMatchPredicates(
+                { it == DEFAULT_REVEAL_EFFECT },
+            )
 
             // We got a source but still have no sensor locations, so should be sticking with
             // the default effect.
@@ -71,14 +73,18 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
             )
 
             runCurrent()
-            values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT },)
+            values.assertEffectsMatchPredicates(
+                { it == DEFAULT_REVEAL_EFFECT },
+            )
 
             // We got a location for the face sensor, but we unlocked with fingerprint.
             val faceLocation = Point(250, 0)
             fakeKeyguardRepository.setFaceSensorLocation(faceLocation)
 
             runCurrent()
-            values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT },)
+            values.assertEffectsMatchPredicates(
+                { it == DEFAULT_REVEAL_EFFECT },
+            )
 
             // Now we have fingerprint sensor locations, and wake and unlock via fingerprint.
             val fingerprintLocation = Point(500, 500)

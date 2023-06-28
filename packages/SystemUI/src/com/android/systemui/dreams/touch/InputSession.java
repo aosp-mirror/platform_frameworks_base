@@ -21,10 +21,10 @@ import static com.android.systemui.dreams.touch.dagger.DreamTouchModule.PILFER_O
 
 import android.os.Looper;
 import android.view.Choreographer;
-import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 
@@ -55,8 +55,9 @@ public class InputSession {
     public InputSession(@Named(INPUT_SESSION_NAME) String sessionName,
             InputChannelCompat.InputEventListener inputEventListener,
             GestureDetector.OnGestureListener gestureListener,
+            DisplayTracker displayTracker,
             @Named(PILFER_ON_GESTURE_CONSUME) boolean pilferOnGestureConsume) {
-        mInputMonitor = new InputMonitorCompat(sessionName, Display.DEFAULT_DISPLAY);
+        mInputMonitor = new InputMonitorCompat(sessionName, displayTracker.getDefaultDisplayId());
         mGestureDetector = new GestureDetector(gestureListener);
 
         mInputEventReceiver = mInputMonitor.getInputReceiver(Looper.getMainLooper(),

@@ -142,16 +142,21 @@ public abstract class SourceStampVerifier {
 
     private static SourceStampVerificationResult verify(
             RandomAccessFile apk, byte[] sourceStampCertificateDigest, byte[] manifestBytes) {
+        SignatureInfo signatureInfo;
         try {
-            SignatureInfo signatureInfo =
+            signatureInfo =
                     ApkSigningBlockUtils.findSignature(apk, SOURCE_STAMP_BLOCK_ID);
+        } catch (IOException | SignatureNotFoundException | RuntimeException e) {
+            return SourceStampVerificationResult.notPresent();
+        }
+        try {
             Map<Integer, Map<Integer, byte[]>> signatureSchemeApkContentDigests =
                     getSignatureSchemeApkContentDigests(apk, manifestBytes);
             return verify(
                     signatureInfo,
                     getSignatureSchemeDigests(signatureSchemeApkContentDigests),
                     sourceStampCertificateDigest);
-        } catch (IOException | SignatureNotFoundException | RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             return SourceStampVerificationResult.notVerified();
         }
     }

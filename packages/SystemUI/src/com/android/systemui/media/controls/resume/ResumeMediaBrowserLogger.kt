@@ -52,10 +52,12 @@ class ResumeMediaBrowserLogger @Inject constructor(@MediaBrowserLog private val 
      * event.
      *
      * @param isBrowserConnected true if there's a currently connected
+     *
      * ```
      *     [android.media.browse.MediaBrowser] and false otherwise.
      * @param componentName
      * ```
+     *
      * the component name for the [ResumeMediaBrowser] that triggered this log.
      */
     fun logSessionDestroyed(isBrowserConnected: Boolean, componentName: ComponentName) =

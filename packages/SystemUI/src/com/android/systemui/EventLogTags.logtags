@@ -61,3 +61,8 @@ option java_package com.android.systemui;
 ##       4: SYSTEM_REGISTER_USER     System sysui registers user's callbacks
 ##       5: SYSTEM_UNREGISTER_USER   System sysui unregisters user's callbacks (after death)
 36060 sysui_recents_connection (type|1),(user|1)
+
+# ---------------------------
+# KeyguardViewMediator.java
+# ---------------------------
+36080 sysui_keyguard (isOccluded|1),(animate|1)

@@ -26,7 +26,6 @@ import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Surface;
@@ -36,7 +35,8 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.LongRunning;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
@@ -58,17 +58,20 @@ public class ImageWallpaper extends WallpaperService {
     private volatile int mPages = 1;
     private boolean mPagesComputed = false;
 
+    private final UserTracker mUserTracker;
+
     // used for most tasks (call canvas.drawBitmap, load/unload the bitmap)
-    @Background
-    private final DelayableExecutor mBackgroundExecutor;
+    @LongRunning
+    private final DelayableExecutor mLongExecutor;
 
     // wait at least this duration before unloading the bitmap
     private static final int DELAY_UNLOAD_BITMAP = 2000;
 
     @Inject
-    public ImageWallpaper(@Background DelayableExecutor backgroundExecutor) {
+    public ImageWallpaper(@LongRunning DelayableExecutor longExecutor, UserTracker userTracker) {
         super();
-        mBackgroundExecutor = backgroundExecutor;
+        mLongExecutor = longExecutor;
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -101,7 +104,7 @@ public class ImageWallpaper extends WallpaperService {
             setFixedSizeAllowed(true);
             setShowForAllUsers(true);
             mWallpaperLocalColorExtractor = new WallpaperLocalColorExtractor(
-                    mBackgroundExecutor,
+                    mLongExecutor,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
@@ -198,7 +201,7 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void drawFrame() {
-            mBackgroundExecutor.execute(this::drawFrameSynchronized);
+            mLongExecutor.execute(this::drawFrameSynchronized);
         }
 
         private void drawFrameSynchronized() {
@@ -253,7 +256,7 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void unloadBitmapIfNotUsed() {
-            mBackgroundExecutor.execute(this::unloadBitmapIfNotUsedSynchronized);
+            mLongExecutor.execute(this::unloadBitmapIfNotUsedSynchronized);
         }
 
         private void unloadBitmapIfNotUsedSynchronized() {
@@ -288,7 +291,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
-                bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
+                bitmap = mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
                 if (bitmap != null
                         && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
                     throw new RuntimeException("Wallpaper is too large to draw!");
@@ -300,9 +303,9 @@ public class ImageWallpaper extends WallpaperService {
                 // default wallpaper can't be loaded.
                 Log.w(TAG, "Unable to load wallpaper!", exception);
                 mWallpaperManager.clearWallpaper(
-                        WallpaperManager.FLAG_SYSTEM, UserHandle.USER_CURRENT);
+                        WallpaperManager.FLAG_SYSTEM, mUserTracker.getUserId());
                 try {
-                    bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
+                    bitmap = mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);
                     bitmap = null;
@@ -337,7 +340,7 @@ public class ImageWallpaper extends WallpaperService {
                  *   - the mini bitmap from color extractor is recomputed
                  *   - the DELAY_UNLOAD_BITMAP has passed
                  */
-                mBackgroundExecutor.executeDelayed(
+                mLongExecutor.executeDelayed(
                         this::unloadBitmapIfNotUsedSynchronized, DELAY_UNLOAD_BITMAP);
             }
             // even if the bitmap cannot be loaded, call reportEngineShown

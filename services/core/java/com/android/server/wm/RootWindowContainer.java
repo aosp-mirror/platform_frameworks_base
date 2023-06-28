@@ -1046,31 +1046,28 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * manager may choose to mirror or blank the display.
      */
     boolean handleNotObscuredLocked(WindowState w, boolean obscured, boolean syswin) {
-        final WindowManager.LayoutParams attrs = w.mAttrs;
-        final int attrFlags = attrs.flags;
         final boolean onScreen = w.isOnScreen();
-        final boolean canBeSeen = w.isDisplayed();
-        final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
         ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
                 "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w"
                         + ".isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",
                 w, w.mHasSurface, onScreen, w.isDisplayed(), w.mAttrs.userActivityTimeout);
-        if (w.mHasSurface && onScreen) {
-            if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
-                mUserActivityTimeout = w.mAttrs.userActivityTimeout;
-                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "mUserActivityTimeout set to %d",
-                        mUserActivityTimeout);
-            }
+        if (!onScreen) {
+            return false;
         }
-        if (w.mHasSurface && canBeSeen) {
+        if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
+            mUserActivityTimeout = w.mAttrs.userActivityTimeout;
+            ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "mUserActivityTimeout set to %d",
+                    mUserActivityTimeout);
+        }
+        if (w.isDrawn() || (w.mActivityRecord != null && w.mActivityRecord.firstWindowDrawn
+                && w.mActivityRecord.isVisibleRequested())) {
             if (!syswin && w.mAttrs.screenBrightness >= 0
                     && Float.isNaN(mScreenBrightnessOverride)) {
                 mScreenBrightnessOverride = w.mAttrs.screenBrightness;
             }
 
-            final int type = attrs.type;
             // This function assumes that the contents of the default display are processed first
             // before secondary displays.
             final DisplayContent displayContent = w.getDisplayContent();
@@ -1084,11 +1081,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 displayHasContent = true;
             } else if (displayContent != null &&
                     (!mObscureApplicationContentOnSecondaryDisplays
-                            || (obscured && type == TYPE_KEYGUARD_DIALOG))) {
+                            || (obscured && w.mAttrs.type == TYPE_KEYGUARD_DIALOG))) {
                 // Allow full screen keyguard presentation dialogs to be seen.
                 displayHasContent = true;
             }
-            if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
+            if ((w.mAttrs.privateFlags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
                 mSustainedPerformanceModeCurrent = true;
             }
         }
@@ -2282,11 +2279,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     resumedOnDisplay[0] |= curResult;
                     return;
                 }
-                if (rootTask.getDisplayArea().isTopRootTask(rootTask)
-                        && topRunningActivity.isState(RESUMED)) {
-                    // Kick off any lingering app transitions from the MoveTaskToFront
-                    // operation, but only consider the top task and root-task on that
-                    // display.
+                if (topRunningActivity.isState(RESUMED)
+                        && topRunningActivity == rootTask.getDisplayArea().topRunningActivity()) {
+                    // Kick off any lingering app transitions form the MoveTaskToFront operation,
+                    // but only consider the top activity on that display.
                     rootTask.executeAppTransition(targetOptions);
                 } else {
                     resumedOnDisplay[0] |= topRunningActivity.makeActiveIfNeeded(target);

@@ -21,16 +21,19 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardHostViewController
+import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -43,13 +46,17 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -59,48 +66,32 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
-    @Mock
-    private lateinit var view: NotificationShadeWindowView
-    @Mock
-    private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
-    @Mock
-    private lateinit var centralSurfaces: CentralSurfaces
-    @Mock
-    private lateinit var dockManager: DockManager
-    @Mock
-    private lateinit var notificationPanelViewController: NotificationPanelViewController
-    @Mock
-    private lateinit var notificationShadeDepthController: NotificationShadeDepthController
-    @Mock
-    private lateinit var notificationShadeWindowController: NotificationShadeWindowController
-    @Mock
-    private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
-    private lateinit var ambientState: AmbientState
-    @Mock
-    private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
-    @Mock
-    private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
-    @Mock
-    private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
-    @Mock
-    private lateinit var statusBarWindowStateController: StatusBarWindowStateController
+    @Mock private lateinit var view: NotificationShadeWindowView
+    @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
+    @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var dockManager: DockManager
+    @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
+    @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
+    @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
+    @Mock private lateinit var ambientState: AmbientState
+    @Mock private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
+    @Mock private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
+    @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    @Mock private lateinit var statusBarWindowStateController: StatusBarWindowStateController
     @Mock
     private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
-    @Mock
-    private lateinit var lockIconViewController: LockIconViewController
-    @Mock
-    private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
-    @Mock
-    private lateinit var pulsingGestureListener: PulsingGestureListener
-    @Mock
-    private lateinit var notificationInsetsController: NotificationInsetsController
+    @Mock private lateinit var lockIconViewController: LockIconViewController
+    @Mock private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
+    @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
+    @Mock private lateinit var notificationInsetsController: NotificationInsetsController
+    @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
-    @Mock lateinit var keyguardBouncerContainer: ViewGroup
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
-    @Mock lateinit var keyguardHostViewController: KeyguardHostViewController
+    @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
+    @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    @Mock
+    lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
 
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -111,35 +102,45 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(view.bottom).thenReturn(VIEW_BOTTOM)
-        underTest = NotificationShadeWindowViewController(
-            lockscreenShadeTransitionController,
-            FalsingCollectorFake(),
-            sysuiStatusBarStateController,
-            dockManager,
-            notificationShadeDepthController,
-            view,
-            notificationPanelViewController,
-            ShadeExpansionStateManager(),
-            stackScrollLayoutController,
-            statusBarKeyguardViewManager,
-            statusBarWindowStateController,
-            lockIconViewController,
-            centralSurfaces,
-            notificationShadeWindowController,
-            keyguardUnlockAnimationController,
-            notificationInsetsController,
-            ambientState,
-            pulsingGestureListener,
-            featureFlags,
-            keyguardBouncerViewModel,
-            keyguardBouncerComponentFactory
-        )
+        whenever(view.findViewById<ViewGroup>(R.id.keyguard_bouncer_container))
+            .thenReturn(mock(ViewGroup::class.java))
+        whenever(keyguardBouncerComponentFactory.create(any(ViewGroup::class.java)))
+            .thenReturn(keyguardBouncerComponent)
+        whenever(keyguardBouncerComponent.securityContainerController)
+            .thenReturn(keyguardSecurityContainerController)
+        whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
+            .thenReturn(emptyFlow<TransitionStep>())
+        underTest =
+            NotificationShadeWindowViewController(
+                lockscreenShadeTransitionController,
+                FalsingCollectorFake(),
+                sysuiStatusBarStateController,
+                dockManager,
+                notificationShadeDepthController,
+                view,
+                notificationPanelViewController,
+                ShadeExpansionStateManager(),
+                stackScrollLayoutController,
+                statusBarKeyguardViewManager,
+                statusBarWindowStateController,
+                lockIconViewController,
+                centralSurfaces,
+                notificationShadeWindowController,
+                keyguardUnlockAnimationController,
+                notificationInsetsController,
+                ambientState,
+                pulsingGestureListener,
+                keyguardBouncerViewModel,
+                keyguardBouncerComponentFactory,
+                alternateBouncerInteractor,
+                keyguardTransitionInteractor,
+                primaryBouncerToGoneTransitionViewModel,
+            )
         underTest.setupExpandedStatusBar()
 
-        interactionEventHandlerCaptor =
-            ArgumentCaptor.forClass(InteractionEventHandler::class.java)
+        interactionEventHandlerCaptor = ArgumentCaptor.forClass(InteractionEventHandler::class.java)
         verify(view).setInteractionEventHandler(interactionEventHandlerCaptor.capture())
-            interactionEventHandler = interactionEventHandlerCaptor.value
+        interactionEventHandler = interactionEventHandlerCaptor.value
     }
 
     // Note: So far, these tests only cover interactions with the status bar view controller. More
@@ -169,14 +170,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Test
     fun handleDispatchTouchEvent_downTouchBelowViewThenAnotherTouch_sendsTouchToSb() {
         underTest.setStatusBarViewController(phoneStatusBarViewController)
-        val downEvBelow = MotionEvent.obtain(
-            0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0
-        )
+        val downEvBelow =
+            MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0)
         interactionEventHandler.handleDispatchTouchEvent(downEvBelow)
 
-        val nextEvent = MotionEvent.obtain(
-            0L, 0L, MotionEvent.ACTION_MOVE, 0f, VIEW_BOTTOM + 5f, 0
-        )
+        val nextEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, VIEW_BOTTOM + 5f, 0)
         whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
 
         val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
@@ -268,6 +266,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testGetBouncerContainer() {
+        Mockito.clearInvocations(view)
         underTest.bouncerContainer
         verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
     }
@@ -276,6 +275,20 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun testGetKeyguardMessageArea() {
         underTest.keyguardMessageArea
         verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
+    }
+
+    @Test
+    fun handleDispatchTouchEvent_statusBarViewControllerOnTouch_returnsTrue() {
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+
+        // GIVEN the statusBarKeyguardViewManager will handle any touches
+        whenever(statusBarKeyguardViewManager.onTouch(any())).thenReturn(true)
+
+        // WHEN a touch is dispatched
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
+
+        // THEN handleDispatchTouchEvent returns true
+        assertThat(returnVal).isTrue()
     }
 }
 

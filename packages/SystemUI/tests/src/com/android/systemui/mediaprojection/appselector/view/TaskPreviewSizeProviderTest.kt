@@ -19,12 +19,14 @@ package com.android.systemui.mediaprojection.appselector.view
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Insets
 import android.graphics.Rect
 import android.util.DisplayMetrics.DENSITY_DEFAULT
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
+import androidx.core.view.WindowInsetsCompat.Type
 import androidx.test.filters.SmallTest
-import com.android.internal.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
 import com.android.systemui.statusbar.policy.FakeConfigurationController
@@ -94,7 +96,13 @@ class TaskPreviewSizeProviderTest : SysuiTestCase() {
     }
 
     private fun givenTaskbarSize(size: Int) {
-        whenever(resources.getDimensionPixelSize(eq(R.dimen.taskbar_frame_height))).thenReturn(size)
+        val windowInsets =
+            WindowInsets.Builder()
+                .setInsets(Type.tappableElement(), Insets.of(Rect(0, 0, 0, size)))
+                .build()
+        val windowMetrics = WindowMetrics(windowManager.maximumWindowMetrics.bounds, windowInsets)
+        whenever(windowManager.maximumWindowMetrics).thenReturn(windowMetrics)
+        whenever(windowManager.currentWindowMetrics).thenReturn(windowMetrics)
     }
 
     private fun givenDisplay(width: Int, height: Int, isTablet: Boolean = false) {

@@ -31,7 +31,13 @@ interface ControlsUiController {
     }
 
     fun show(parent: ViewGroup, onDismiss: Runnable, activityContext: Context)
-    fun hide()
+
+    /**
+     * Hide the controls content if it's attached to this parent.
+     */
+    fun hide(parent: ViewGroup)
+
+    val isShowing: Boolean
 
     /**
      * Returns the preferred activity to start, depending on if the user has favorited any
@@ -58,6 +64,8 @@ interface ControlsUiController {
      * This element will be the one that appears when the user first opens the controls activity.
      */
     fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem
+
+    fun onSizeChange()
 }
 
 sealed class SelectedItem {

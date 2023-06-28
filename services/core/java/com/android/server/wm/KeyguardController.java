@@ -188,6 +188,7 @@ class KeyguardController {
                 keyguardShowing ? 1 : 0,
                 aodShowing ? 1 : 0,
                 state.mKeyguardGoingAway ? 1 : 0,
+                state.mOccluded ? 1 : 0,
                 "setKeyguardShown");
 
         // Update the task snapshot if the screen will not be turned off. To make sure that the
@@ -199,7 +200,8 @@ class KeyguardController {
         //   handle the snapshot.
         // - The display state is ON. Because if AOD is not on or pulsing, the display state will
         //   be OFF or DOZE (the path of screen off may have handled it).
-        if (((aodShowing ^ keyguardShowing) || (aodShowing && aodChanged && keyguardChanged))
+        if (displayId == DEFAULT_DISPLAY
+                && ((aodShowing ^ keyguardShowing) || (aodShowing && aodChanged && keyguardChanged))
                 && !state.mKeyguardGoingAway && Display.isOnState(
                         mRootWindowContainer.getDefaultDisplay().getDisplayInfo().state)) {
             mWindowManager.mTaskSnapshotController.snapshotForSleeping(DEFAULT_DISPLAY);
@@ -255,9 +257,10 @@ class KeyguardController {
         try {
             EventLogTags.writeWmSetKeyguardShown(
                     displayId,
-                    1 /* keyguardShowing */,
+                    state.mKeyguardShowing ? 1 : 0,
                     state.mAodShowing ? 1 : 0,
                     1 /* keyguardGoingAway */,
+                    state.mOccluded ? 1 : 0,
                     "keyguardGoingAway");
             final int transitFlags = convertTransitFlags(flags);
             final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
@@ -661,8 +664,7 @@ class KeyguardController {
                 display.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
 
-            if (mTopTurnScreenOnActivity != lastTurnScreenOnActivity
-                    && mTopTurnScreenOnActivity != null
+            if (mTopTurnScreenOnActivity != null
                     && !mService.mWindowManager.mPowerManager.isInteractive()
                     && (mRequestDismissKeyguard || occludedByActivity)) {
                 controller.mTaskSupervisor.wakeUp("handleTurnScreenOn");
@@ -671,6 +673,15 @@ class KeyguardController {
 
             boolean hasChange = false;
             if (lastOccluded != mOccluded) {
+                if (mDisplayId == DEFAULT_DISPLAY) {
+                    EventLogTags.writeWmSetKeyguardShown(
+                            mDisplayId,
+                            mKeyguardShowing ? 1 : 0,
+                            mAodShowing ? 1 : 0,
+                            mKeyguardGoingAway ? 1 : 0,
+                            mOccluded ? 1 : 0,
+                            "updateVisibility");
+                }
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
                 hasChange = true;
             } else if (!lastKeyguardGoingAway && mKeyguardGoingAway) {

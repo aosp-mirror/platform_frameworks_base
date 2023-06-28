@@ -106,6 +106,10 @@ android_test {
         ":PackageParserTestApp5",
     ],
     resource_zips: [":PackageManagerServiceServerTests_apks_as_resources"],
+
+    data: [
+        ":StubTestApp",
+    ],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory

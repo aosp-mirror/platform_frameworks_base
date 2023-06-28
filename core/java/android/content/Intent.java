@@ -5737,18 +5737,17 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS =
-            "android.intent.extra.EXTRA_CHOOSER_CUSTOM_ACTIONS";
+            "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
 
     /**
      * Optional argument to be used with {@link #ACTION_CHOOSER}.
-     * A {@link android.app.PendingIntent} to be sent when the user wants to do payload reselection
-     * in the sharesheet.
-     * A reselection action allows the user to return to the source app to change the content being
-     * shared.
+     * A {@link android.app.PendingIntent} to be sent when the user wants to modify the content that
+     * they're sharing. This can be used to allow the user to return to the source app to, for
+     * example, select different media.
      * @hide
      */
-    public static final String EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION =
-            "android.intent.extra.EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION";
+    public static final String EXTRA_CHOOSER_MODIFY_SHARE_ACTION =
+            "android.intent.extra.CHOOSER_MODIFY_SHARE_ACTION";
 
     /**
      * An {@code ArrayList} of {@code String} annotations describing content for

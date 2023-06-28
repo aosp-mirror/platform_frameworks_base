@@ -49,7 +49,6 @@ import com.android.internal.util.ArrayUtils;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -256,19 +255,17 @@ public class ThumbnailUtils {
 
         // get orientation
         if (MediaFile.isExifMimeType(mimeType)) {
-            try (FileInputStream is = new FileInputStream(file)) {
-                exif = new ExifInterface(is.getFD());
-                switch (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0)) {
-                    case ExifInterface.ORIENTATION_ROTATE_90:
-                        orientation = 90;
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_180:
-                        orientation = 180;
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_270:
-                        orientation = 270;
-                        break;
-                }
+            exif = new ExifInterface(file);
+            switch (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0)) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    orientation = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    orientation = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    orientation = 270;
+                    break;
             }
         }
 

@@ -27,7 +27,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxWidth="@dimen/biometric_auth_pattern_view_max_size"
     android:layout_gravity="center_horizontal|bottom"
     android:clipChildren="false"
     android:clipToPadding="false">

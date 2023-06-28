@@ -63,11 +63,10 @@ class AddUserDialog(
                 }
 
                 // Use broadcast instead of ShadeController, as this dialog may have started in
-                // another
-                // process where normal dagger bindings are not available.
+                // another process where normal dagger bindings are not available.
                 broadcastSender.sendBroadcastAsUser(
                     Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
-                    UserHandle.CURRENT
+                    userHandle
                 )
 
                 context.startActivityAsUser(

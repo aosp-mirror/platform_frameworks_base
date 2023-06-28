@@ -65,7 +65,7 @@ android_library {
         "src/**/*.kt",
     ],
 
-    min_sdk_version: "29",
+    min_sdk_version: "30",
 
 }
 

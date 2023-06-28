@@ -33,14 +33,13 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel.Companion.NO_INTERNET
 import com.google.common.truth.Truth.assertThat
@@ -68,7 +67,6 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
     private lateinit var underTest: WifiViewModel
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -94,7 +92,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     airplaneModeRepository,
                     connectivityRepository,
                 ),
-                logger,
+                tableLogBuffer,
                 scope,
             )
     }
@@ -125,7 +123,6 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     airplaneModeViewModel,
                     connectivityConstants,
                     context,
-                    logger,
                     tableLogBuffer,
                     interactor,
                     scope,
@@ -206,7 +203,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 // Enabled = false => no networks shown
                 TestCase(
                     enabled = false,
-                    network = WifiNetworkModel.CarrierMerged,
+                    network =
+                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
                 TestCase(
@@ -228,7 +226,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 // forceHidden = true => no networks shown
                 TestCase(
                     forceHidden = true,
-                    network = WifiNetworkModel.CarrierMerged,
+                    network =
+                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
                 TestCase(
@@ -369,39 +368,37 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
                 // network = CarrierMerged => not shown
                 TestCase(
-                    network = WifiNetworkModel.CarrierMerged,
+                    enabled = true,
+                    isDefault = true,
+                    forceHidden = false,
+                    network =
+                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
 
-                // network = Inactive => not shown
+                // isDefault = false => no networks shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Inactive,
                     expected = null,
                 ),
-
-                // network = Unavailable => not shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Unavailable,
                     expected = null,
                 ),
-
-                // network = Active & validated = false => not shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
                     expected = null,
                 ),
 
-                // network = Active & validated = true => shown
+                // Even though this network is active and validated, we still doesn't want it shown
+                // because wifi isn't the default connection (b/272509965).
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 4),
-                    expected =
-                        Expected(
-                            iconResource = WIFI_FULL_ICONS[4],
-                            contentDescription = { context ->
-                                context.getString(WIFI_CONNECTION_STRENGTH[4])
-                            },
-                            description = "Full internet level 4 icon",
-                        ),
+                    expected = null,
                 ),
             )
     }

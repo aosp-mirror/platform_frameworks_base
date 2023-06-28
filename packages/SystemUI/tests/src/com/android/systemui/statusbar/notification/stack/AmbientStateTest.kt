@@ -20,6 +20,8 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.mock
@@ -39,6 +41,8 @@ class AmbientStateTest : SysuiTestCase() {
     private val sectionProvider = StackScrollAlgorithm.SectionProvider { _, _ -> false }
     private val bypassController = StackScrollAlgorithm.BypassController { false }
     private val statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
+    private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
+    private val featureFlags = mock<FeatureFlags>()
 
     private lateinit var sut: AmbientState
 
@@ -51,6 +55,8 @@ class AmbientStateTest : SysuiTestCase() {
                 sectionProvider,
                 bypassController,
                 statusBarKeyguardViewManager,
+                largeScreenShadeInterpolator,
+                featureFlags
             )
     }
 

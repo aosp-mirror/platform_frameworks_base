@@ -57,7 +57,8 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-class ImageExporter {
+/** A class to help with exporting screenshot to storage. */
+public class ImageExporter {
     private static final String TAG = LogConfig.logTag(ImageExporter.class);
 
     static final Duration PENDING_ENTRY_TTL = Duration.ofHours(24);
@@ -90,7 +91,7 @@ class ImageExporter {
     private final FeatureFlags mFlags;
 
     @Inject
-    ImageExporter(ContentResolver resolver, FeatureFlags flags) {
+    public ImageExporter(ContentResolver resolver, FeatureFlags flags) {
         mResolver = resolver;
         mFlags = flags;
     }
@@ -148,7 +149,7 @@ class ImageExporter {
      *
      * @return a listenable future result
      */
-    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
+    public ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
             UserHandle owner) {
         return export(executor, requestId, bitmap, ZonedDateTime.now(), owner);
     }
@@ -181,13 +182,14 @@ class ImageExporter {
         );
     }
 
-    static class Result {
-        Uri uri;
-        UUID requestId;
-        String fileName;
-        long timestamp;
-        CompressFormat format;
-        boolean published;
+    /** The result returned by the task exporting screenshots to storage. */
+    public static class Result {
+        public Uri uri;
+        public UUID requestId;
+        public String fileName;
+        public long timestamp;
+        public CompressFormat format;
+        public boolean published;
 
         @Override
         public String toString() {

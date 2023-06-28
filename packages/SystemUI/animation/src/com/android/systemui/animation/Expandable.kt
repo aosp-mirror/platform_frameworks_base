@@ -26,7 +26,7 @@ interface Expandable {
      * currently not attached or visible).
      *
      * @param cujType the CUJ type from the [com.android.internal.jank.InteractionJankMonitor]
-     * associated to the launch that will use this controller.
+     *   associated to the launch that will use this controller.
      */
     fun activityLaunchController(cujType: Int? = null): ActivityLaunchAnimator.Controller?
 

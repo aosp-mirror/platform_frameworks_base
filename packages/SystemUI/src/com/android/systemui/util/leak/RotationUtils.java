@@ -1,15 +1,17 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.android.systemui.util.leak;
@@ -26,7 +28,27 @@ import android.view.Surface;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class RotationUtils {
+/**
+ * Utility class that provides device orientation.
+ *
+ * <p>Consider using {@link Surface.Rotation} or add a function that respects device aspect ratio
+ * and {@code android.internal.R.bool.config_reverseDefaultRotation}.
+ *
+ * <p>If you only care about the rotation, use {@link Surface.Rotation}, as it always gives the
+ * counter clock-wise rotation. (e.g. If you have a device that has a charging port at the bottom,
+ * rotating three times in counter clock direction will give you {@link Surface#ROTATION_270} while
+ * having the charging port on the left side of the device.)
+ *
+ * <p>If you need whether the device is in portrait or landscape (or their opposites), please add a
+ * function here that respects the device aspect ratio and
+ * {@code android.internal.R.bool.config_reverseDefaultRotation} together.
+ *
+ * <p>Note that {@code android.internal.R.bool.config_reverseDefaultRotation} does not change the
+ * winding order. In other words, the rotation order (counter clock-wise) will remain the same. It
+ * only flips the device orientation, such that portrait becomes upside down, landscape becomes
+ * seascape.
+ */
+public final class RotationUtils {
 
     public static final int ROTATION_NONE = 0;
     public static final int ROTATION_LANDSCAPE = 1;

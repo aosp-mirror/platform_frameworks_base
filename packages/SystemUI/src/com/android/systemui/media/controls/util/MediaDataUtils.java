@@ -16,10 +16,15 @@
 
 package com.android.systemui.media.controls.util;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.text.TextUtils;
+
+import androidx.core.math.MathUtils;
+import androidx.media.utils.MediaConstants;
 
 /**
  * Utility class with common methods for media controls
@@ -49,5 +54,37 @@ public class MediaDataUtils {
                         ? packageManager.getApplicationLabel(applicationInfo)
                         : unknownName);
         return applicationName;
+    }
+
+    /**
+     * Check the bundle for extras indicating the progress percentage
+     *
+     * @param extras
+     * @return the progress value between 0-1 inclusive if prsent, otherwise null
+     */
+    public static Double getDescriptionProgress(@Nullable Bundle extras) {
+        if (extras == null
+                || !extras.containsKey(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS)) {
+            return null;
+        }
+
+        int status = extras.getInt(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS);
+        switch (status) {
+            case MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED:
+                return 0.0;
+            case MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED:
+                return 1.0;
+            case MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED: {
+                if (extras
+                        .containsKey(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE)) {
+                    double percent = extras
+                            .getDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE);
+                    return MathUtils.clamp(percent, 0.0, 1.0);
+                } else {
+                    return 0.5;
+                }
+            }
+        }
+        return null;
     }
 }

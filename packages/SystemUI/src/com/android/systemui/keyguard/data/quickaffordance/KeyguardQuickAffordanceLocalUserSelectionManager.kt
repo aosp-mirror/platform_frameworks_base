@@ -102,7 +102,8 @@ constructor(
                     // setup).
                     emit(Unit)
                 }
-            ) { _, _ -> }
+            ) { _, _ ->
+            }
             .flatMapLatest {
                 conflatedCallbackFlow {
                     // We want to instantiate a new SharedPreferences instance each time either the

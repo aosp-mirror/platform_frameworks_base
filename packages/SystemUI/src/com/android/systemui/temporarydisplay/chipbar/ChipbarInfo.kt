@@ -18,7 +18,8 @@ package com.android.systemui.temporarydisplay.chipbar
 
 import android.os.VibrationEffect
 import android.view.View
-import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
+import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
@@ -28,17 +29,19 @@ import com.android.systemui.temporarydisplay.ViewPriority
  * A container for all the state needed to display a chipbar via [ChipbarCoordinator].
  *
  * @property startIcon the icon to display at the start of the chipbar (on the left in LTR locales;
- * on the right in RTL locales).
+ *   on the right in RTL locales).
  * @property text the text to display.
  * @property endItem an optional end item to display at the end of the chipbar (on the right in LTR
- * locales; on the left in RTL locales).
+ *   locales; on the left in RTL locales).
  * @property vibrationEffect an optional vibration effect when the chipbar is displayed
+ * @property allowSwipeToDismiss true if users are allowed to swipe up to dismiss this chipbar.
  */
 data class ChipbarInfo(
     val startIcon: TintedIcon,
     val text: Text,
     val endItem: ChipbarEndItem?,
     val vibrationEffect: VibrationEffect? = null,
+    val allowSwipeToDismiss: Boolean = false,
     override val windowTitle: String,
     override val wakeReason: String,
     override val timeoutMs: Int,
@@ -46,7 +49,7 @@ data class ChipbarInfo(
     override val priority: ViewPriority,
 ) : TemporaryViewInfo() {
     companion object {
-        @AttrRes const val DEFAULT_ICON_TINT_ATTR = android.R.attr.textColorPrimary
+        @ColorRes val DEFAULT_ICON_TINT = R.color.chipbar_text_and_icon_color
     }
 }
 

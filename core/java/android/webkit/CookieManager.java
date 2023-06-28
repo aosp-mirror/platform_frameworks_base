@@ -103,15 +103,22 @@ public abstract class CookieManager {
      * will be ignored if it is expired. To set multiple cookies, your application should invoke
      * this method multiple times.
      *
-     * <p>The {@code value} parameter must follow the format of the {@code Set-Cookie} HTTP
-     * response header defined by
-     * <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03">RFC6265bis</a>.
-     * This is a key-value pair of the form {@code "key=value"}, optionally followed by a list of
-     * cookie attributes delimited with semicolons (ex. {@code "key=value; Max-Age=123"}). Please
-     * consult the RFC specification for a list of valid attributes.
+     * <p>The {@code value} parameter must follow the format of the {@code Set-Cookie} HTTP response
+     * header. This is a key-value pair of the form {@code "key=value"}, optionally followed by a
+     * list of cookie attributes delimited with semicolons (ex. {@code "key=value; Max-Age=123"}).
+     * For the header format and attributes supported by WebView, see the <a href=
+     * "https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie">{@code Set-Cookie}
+     * documentation on MDN</a>.
      *
-     * <p class="note"><b>Note:</b> if specifying a {@code value} containing the {@code "Secure"}
-     * attribute, {@code url} must use the {@code "https://"} scheme.
+     * <p class="note">
+     * <b>Notes:</b>
+     * <ul>
+     * <li>If specifying a {@code value} containing the {@code "Secure"} attribute,
+     * {@code url} must use the {@code "https://"} scheme.</li>
+     * <li>if specifying a {@code value} containing the {@code "Partitioned"}
+     * attribute, the cookie will be set for the top-level partition of the
+     * {@code url}.</li>
+     * </ul>
      *
      * @param url the URL for which the cookie is to be set
      * @param value the cookie as a string, using the format of the 'Set-Cookie'
@@ -125,12 +132,12 @@ public abstract class CookieManager {
      * will be ignored if it is expired. To set multiple cookies, your application should invoke
      * this method multiple times.
      *
-     * <p>The {@code value} parameter must follow the format of the {@code Set-Cookie} HTTP
-     * response header defined by
-     * <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03">RFC6265bis</a>.
-     * This is a key-value pair of the form {@code "key=value"}, optionally followed by a list of
-     * cookie attributes delimited with semicolons (ex. {@code "key=value; Max-Age=123"}). Please
-     * consult the RFC specification for a list of valid attributes.
+     * <p>The {@code value} parameter must follow the format of the {@code Set-Cookie} HTTP response
+     * header. This is a key-value pair of the form {@code "key=value"}, optionally followed by a
+     * list of cookie attributes delimited with semicolons (ex. {@code "key=value; Max-Age=123"}).
+     * For the header format and attributes supported by WebView, see the <a href=
+     * "https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie">{@code Set-Cookie}
+     * documentation on MDN</a>.
      *
      * <p>This method is asynchronous. If a {@link ValueCallback} is provided,
      * {@link ValueCallback#onReceiveValue} will be called on the current
@@ -140,8 +147,15 @@ public abstract class CookieManager {
      * completes or whether it succeeded, and in this case it is safe to call the method from a
      * thread without a Looper.
      *
-     * <p class="note"><b>Note:</b> if specifying a {@code value} containing the {@code "Secure"}
-     * attribute, {@code url} must use the {@code "https://"} scheme.
+     * <p class="note">
+     * <b>Notes:</b>
+     * <ul>
+     * <li>If specifying a {@code value} containing the {@code "Secure"} attribute,
+     * {@code url} must use the {@code "https://"} scheme.</li>
+     * <li>if specifying a {@code value} containing the {@code "Partitioned"}
+     * attribute, the cookie will be set for the top-level partition of the
+     * {@code url}.</li>
+     * </ul>
      *
      * @param url the URL for which the cookie is to be set
      * @param value the cookie as a string, using the format of the 'Set-Cookie'
@@ -156,6 +170,10 @@ public abstract class CookieManager {
      * cookies are associated with this URL, in which case each cookie will be delimited by {@code
      * "; "} characters (semicolon followed by a space). Each key-value pair will be of the form
      * {@code "key=value"}.
+     *
+     * <p class="note">
+     * <b>Note:</b> Any cookies set with the {@code "Partitioned"} attribute will only be returned
+     * for the top-level partition of {@code url}.
      *
      * @param url the URL for which the cookies are requested
      * @return value the cookies as a string, using the format of the 'Cookie'

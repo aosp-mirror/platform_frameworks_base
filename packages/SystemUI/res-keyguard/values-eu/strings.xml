@@ -30,14 +30,14 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bizkor kargatzen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mantso kargatzen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzea optimizatu da bateria ez kaltetzeko"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bateria ez kaltetzeko, kargatzeko modua optimizatu da"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Desblokeatzeko, sakatu Menua."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sarea blokeatuta dago"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ez dago SIMik"</string>
     <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Gehitu SIM bat."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIMa falta da, edo ezin da irakurri. Gehitu SIM bat."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Ezin da erabili SIMa."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Betiko desaktibatu da SIMa.\n Jarri harremanetan operadorearekin beste SIM bat eskuratzeko."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Betiko desaktibatu da SIMa.\n Jarri operadorearekin harremanetan beste SIM bat eskuratzeko."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIMa blokeatuta dago."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIMa PUKaren bidez desblokeatu behar da."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIMa desblokeatzen…"</string>
@@ -58,7 +58,7 @@
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Idatzi \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartelaren PINa."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Desgaitu eSIM txartela gailua zerbitzu mugikorrik gabe erabiltzeko."</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak lortzeko, jarri operadorearekin harremanetan."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Desgaitu egin da \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak jakiteko, jarri operadorearekin harremanetan."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Desgaitu egin da \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIMa. Aurrera egiteko, idatzi PUK kodea. Xehetasunak jakiteko, jarri operadorearekin harremanetan."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIMa desblokeatzen…"</string>

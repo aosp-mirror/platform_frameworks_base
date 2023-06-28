@@ -22,6 +22,7 @@ import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
@@ -1114,12 +1115,19 @@ public class LauncherAppsService extends SystemService {
 
             // Flag for bubble
             ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
-            if (options != null && options.isApplyActivityFlagsForBubbles()) {
-                // Flag for bubble to make behaviour match documentLaunchMode=always.
-                intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            if (options != null) {
+                if (options.isApplyActivityFlagsForBubbles()) {
+                    // Flag for bubble to make behaviour match documentLaunchMode=always.
+                    intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                }
+                if (options.isApplyMultipleTaskFlagForShortcut()) {
+                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                }
+                if (options.isApplyNoUserActionFlagForShortcut()) {
+                    intents[0].addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+                }
             }
-
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intents[0].setSourceBounds(sourceBounds);
 

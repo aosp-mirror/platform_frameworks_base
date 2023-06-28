@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
@@ -25,63 +26,91 @@ import android.graphics.PointF;
 import android.view.MotionEvent;
 
 /**
- * A detector for touch inputs that differentiates between drag and click inputs.
+ * A detector for touch inputs that differentiates between drag and click inputs. It receives a flow
+ * of {@link MotionEvent} and generates a new flow of motion events with slop in consideration to
+ * the event handler. In particular, it always passes down, up and cancel events. It'll pass move
+ * events only when there is at least one move event that's beyond the slop threshold. For the
+ * purpose of convenience it also passes all events of other actions.
+ *
  * All touch events must be passed through this class to track a drag event.
  */
-public class DragDetector {
+class DragDetector {
+    private final MotionEventHandler mEventHandler;
+
+    private final PointF mInputDownPoint = new PointF();
     private int mTouchSlop;
-    private PointF mInputDownPoint;
     private boolean mIsDragEvent;
     private int mDragPointerId;
-    public DragDetector(int touchSlop) {
-        mTouchSlop = touchSlop;
-        mInputDownPoint = new PointF();
-        mIsDragEvent = false;
-        mDragPointerId = -1;
+
+    private boolean mResultOfDownAction;
+
+    DragDetector(MotionEventHandler eventHandler) {
+        resetState();
+        mEventHandler = eventHandler;
     }
 
     /**
-     * Determine if {@link MotionEvent} is part of a drag event.
-     * @return {@code true} if this is a drag event, {@code false} if not
-     */
-    public boolean detectDragEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
+     * The receiver of the {@link MotionEvent} flow.
+     *
+     * @return the result returned by {@link #mEventHandler}, or the result when
+     * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
+    */
+    boolean onMotionEvent(MotionEvent ev) {
+        final boolean isTouchScreen =
+                (ev.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+        if (!isTouchScreen) {
+            // Only touches generate noisy moves, so mouse/trackpad events don't need to filtered
+            // to take the slop threshold into consideration.
+            return mEventHandler.handleMotionEvent(ev);
+        }
+        switch (ev.getActionMasked()) {
             case ACTION_DOWN: {
                 mDragPointerId = ev.getPointerId(0);
                 float rawX = ev.getRawX(0);
                 float rawY = ev.getRawY(0);
                 mInputDownPoint.set(rawX, rawY);
-                return false;
+                mResultOfDownAction = mEventHandler.handleMotionEvent(ev);
+                return mResultOfDownAction;
             }
             case ACTION_MOVE: {
                 if (!mIsDragEvent) {
                     int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
-                    if (Math.hypot(dx, dy) > mTouchSlop) {
-                        mIsDragEvent = true;
-                    }
+                    // Touches generate noisy moves, so only once the move is past the touch
+                    // slop threshold should it be considered a drag.
+                    mIsDragEvent = Math.hypot(dx, dy) > mTouchSlop;
                 }
-                return mIsDragEvent;
+                // The event handler should only be notified about 'move' events if a drag has been
+                // detected.
+                if (mIsDragEvent) {
+                    return mEventHandler.handleMotionEvent(ev);
+                } else {
+                    return mResultOfDownAction;
+                }
             }
-            case ACTION_UP: {
-                boolean result = mIsDragEvent;
-                mIsDragEvent = false;
-                mInputDownPoint.set(0, 0);
-                mDragPointerId = -1;
-                return result;
-            }
+            case ACTION_UP:
             case ACTION_CANCEL: {
-                mIsDragEvent = false;
-                mInputDownPoint.set(0, 0);
-                mDragPointerId = -1;
-                return false;
+                resetState();
+                return mEventHandler.handleMotionEvent(ev);
             }
+            default:
+                return mEventHandler.handleMotionEvent(ev);
         }
-        return mIsDragEvent;
     }
 
-    public void setTouchSlop(int touchSlop) {
+    void setTouchSlop(int touchSlop) {
         mTouchSlop = touchSlop;
+    }
+
+    private void resetState() {
+        mIsDragEvent = false;
+        mInputDownPoint.set(0, 0);
+        mDragPointerId = -1;
+        mResultOfDownAction = false;
+    }
+
+    interface MotionEventHandler {
+        boolean handleMotionEvent(MotionEvent ev);
     }
 }

@@ -53,6 +53,14 @@
             // GWP-ASan's CTS test ensures that recoverable tombstones work,
             // which is emitted by the NativeTombstoneManager.
             "name": "CtsGwpAsanTestCases"
+        },
+        {
+            "name": "FrameworksVcnTests",
+            "file_patterns": ["VcnManagementService\\.java"]
+        },
+        {
+            "name": "CtsVcnTestCases",
+            "file_patterns": ["VcnManagementService\\.java"]
         }
     ],
     "presubmit-large": [

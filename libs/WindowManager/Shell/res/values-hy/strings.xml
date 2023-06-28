@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Վերևի էկրանը՝ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Վերևի էկրանը՝ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Ներքևի էկրանը՝ լիաէկրան"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Հավելվածը ձախ կողմում"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Հավելվածը աջ կողմում"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Հավելվածը վերևում"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Հավելվածը ներքևում"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Ինչպես օգտվել մեկ ձեռքի ռեժիմից"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Դուրս գալու համար մատը սահեցրեք էկրանի ներքևից վերև կամ հպեք հավելվածի վերևում որևէ տեղ։"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Գործարկել մեկ ձեռքի ռեժիմը"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Կրկնակի հպեք հավելվածի կողքին՝ այն տեղափոխելու համար"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Եղավ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Ծավալեք՝ ավելին իմանալու համար։"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Վերագործարկե՞լ հավելվածը"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Դուք կարող եք վերագործարկել հավելվածը, որպեսզի այն ավելի լավ ցուցադրվի ձեր էկրանին, սակայն ձեր առաջընթացը և չպահված փոփոխությունները կկորեն"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Չեղարկել"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Վերագործարկել"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Այլևս ցույց չտալ"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Կրկնակի հպեք՝\nհավելվածը տեղափոխելու համար"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Ծավալել"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Ծալել"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Փակել"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Հետ"</string>
     <string name="handle_text" msgid="1766582106752184456">"Նշիչ"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Հավելվածի պատկերակ"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Լիաէկրան"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Համակարգչի ռեժիմ"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Տրոհված էկրան"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Ավելին"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Լողացող պատուհան"</string>
+    <string name="select_text" msgid="5139083974039906583">"Ընտրել"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Սքրինշոթ"</string>
+    <string name="close_text" msgid="4986518933445178928">"Փակել"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Փակել ընտրացանկը"</string>
 </resources>

@@ -1955,7 +1955,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         1f);
                 mBackScreenshots.put(r.mActivityComponent.flattenToString(), backBuffer);
             }
-            child.asActivityRecord().inHistory = true;
+            addingActivity.inHistory = true;
             task.onDescendantActivityAdded(taskHadActivity, activityType, addingActivity);
         }
     }
@@ -2246,8 +2246,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // task, because they should not be affected by insets.
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
-                } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
-                        && isEmbeddedWithBoundsOverride()) {
+                } else if (windowingMode == WINDOWING_MODE_MULTI_WINDOW && mIsEmbedded
+                        && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =
@@ -2501,13 +2501,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    /** Records the starting bounds of the closing organized TaskFragment. */
-    void setClosingChangingStartBoundsIfNeeded() {
+    /**
+     * Returns {@code true} if the starting bounds of the closing organized TaskFragment is
+     * recorded. Otherwise, return {@code false}.
+     */
+    boolean setClosingChangingStartBoundsIfNeeded() {
         if (isOrganizedTaskFragment() && mDisplayContent != null
                 && mDisplayContent.mChangingContainers.remove(this)) {
             mDisplayContent.mClosingChangingContainers.put(
                     this, new Rect(mSurfaceFreezer.mFreezeBounds));
+            return true;
         }
+        return false;
     }
 
     @Override

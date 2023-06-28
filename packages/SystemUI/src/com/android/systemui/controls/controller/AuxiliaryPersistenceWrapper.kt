@@ -21,8 +21,10 @@ import android.app.job.JobParameters
 import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
+import android.os.PersistableBundle
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.backup.BackupHelper
+import com.android.systemui.settings.UserFileManagerImpl
 import java.io.File
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
@@ -33,14 +35,14 @@ import java.util.concurrent.TimeUnit
  * This file is a copy of the `controls_favorites.xml` file restored from a back up. It is used to
  * keep track of controls that were restored but its corresponding app has not been installed yet.
  */
-class AuxiliaryPersistenceWrapper @VisibleForTesting internal constructor(
-    wrapper: ControlsFavoritePersistenceWrapper
-) {
+class AuxiliaryPersistenceWrapper
+@VisibleForTesting
+internal constructor(wrapper: ControlsFavoritePersistenceWrapper) {
 
     constructor(
         file: File,
         executor: Executor
-    ): this(ControlsFavoritePersistenceWrapper(file, executor))
+    ) : this(ControlsFavoritePersistenceWrapper(file, executor))
 
     companion object {
         const val AUXILIARY_FILE_NAME = "aux_controls_favorites.xml"
@@ -48,9 +50,7 @@ class AuxiliaryPersistenceWrapper @VisibleForTesting internal constructor(
 
     private var persistenceWrapper: ControlsFavoritePersistenceWrapper = wrapper
 
-    /**
-     * Access the current list of favorites as tracked by the auxiliary file
-     */
+    /** Access the current list of favorites as tracked by the auxiliary file */
     var favorites: List<StructureInfo> = emptyList()
         private set
 
@@ -73,18 +73,20 @@ class AuxiliaryPersistenceWrapper @VisibleForTesting internal constructor(
      * exist, it will be initialized to an empty list.
      */
     fun initialize() {
-        favorites = if (persistenceWrapper.fileExists) {
-            persistenceWrapper.readFavorites()
-        } else {
-            emptyList()
-        }
+        favorites =
+            if (persistenceWrapper.fileExists) {
+                persistenceWrapper.readFavorites()
+            } else {
+                emptyList()
+            }
     }
 
     /**
      * Gets the list of favorite controls as persisted in the auxiliary file for a given component.
      *
-     * When the favorites for that application are returned, they will be removed from the
-     * auxiliary file immediately, so they won't be retrieved again.
+     * When the favorites for that application are returned, they will be removed from the auxiliary
+     * file immediately, so they won't be retrieved again.
+     *
      * @param componentName the name of the service that provided the controls
      * @return a list of structures with favorites
      */
@@ -103,20 +105,20 @@ class AuxiliaryPersistenceWrapper @VisibleForTesting internal constructor(
         }
     }
 
-    /**
-     * [JobService] to delete the auxiliary file after a week.
-     */
+    /** [JobService] to delete the auxiliary file after a week. */
     class DeletionJobService : JobService() {
         companion object {
-            @VisibleForTesting
-            internal val DELETE_FILE_JOB_ID = 1000
+            @VisibleForTesting internal val DELETE_FILE_JOB_ID = 1000
+            @VisibleForTesting internal val USER = "USER"
             private val WEEK_IN_MILLIS = TimeUnit.DAYS.toMillis(7)
-            fun getJobForContext(context: Context): JobInfo {
+            fun getJobForContext(context: Context, targetUserId: Int): JobInfo {
                 val jobId = DELETE_FILE_JOB_ID + context.userId
                 val componentName = ComponentName(context, DeletionJobService::class.java)
+                val bundle = PersistableBundle().also { it.putInt(USER, targetUserId) }
                 return JobInfo.Builder(jobId, componentName)
                     .setMinimumLatency(WEEK_IN_MILLIS)
                     .setPersisted(true)
+                    .setExtras(bundle)
                     .build()
             }
         }
@@ -127,8 +129,14 @@ class AuxiliaryPersistenceWrapper @VisibleForTesting internal constructor(
         }
 
         override fun onStartJob(params: JobParameters): Boolean {
+            val userId = params.getExtras()?.getInt(USER, 0) ?: 0
             synchronized(BackupHelper.controlsDataLock) {
-                baseContext.deleteFile(AUXILIARY_FILE_NAME)
+                val file =
+                    UserFileManagerImpl.createFile(
+                        userId = userId,
+                        fileName = AUXILIARY_FILE_NAME,
+                    )
+                baseContext.deleteFile(file.getPath())
             }
             return false
         }

@@ -16,22 +16,24 @@
 
 package com.android.systemui.unfold.updates
 
+import android.content.Context
+import android.hardware.display.DisplayManager
+import android.os.Looper
 import android.testing.AndroidTestingRunner
-import android.view.IRotationWatcher
-import android.view.IWindowManager
+import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
-import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.mockito.whenever
+import com.android.systemui.utils.os.FakeHandler
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
@@ -42,19 +44,23 @@ class RotationChangeProviderTest : SysuiTestCase() {
 
     private lateinit var rotationChangeProvider: RotationChangeProvider
 
-    @Mock lateinit var windowManagerInterface: IWindowManager
+    @Mock lateinit var displayManager: DisplayManager
     @Mock lateinit var listener: RotationListener
-    @Captor lateinit var rotationWatcher: ArgumentCaptor<IRotationWatcher>
-    private val fakeExecutor = FakeExecutor(FakeSystemClock())
+    @Mock lateinit var display: Display
+    @Captor lateinit var displayListener: ArgumentCaptor<DisplayManager.DisplayListener>
+    private val fakeHandler = FakeHandler(Looper.getMainLooper())
+
+    private lateinit var spyContext: Context
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        rotationChangeProvider =
-            RotationChangeProvider(windowManagerInterface, context, fakeExecutor)
+        spyContext = spy(context)
+        whenever(spyContext.display).thenReturn(display)
+        rotationChangeProvider = RotationChangeProvider(displayManager, spyContext, fakeHandler)
         rotationChangeProvider.addCallback(listener)
-        fakeExecutor.runAllReady()
-        verify(windowManagerInterface).watchRotation(rotationWatcher.capture(), anyInt())
+        fakeHandler.dispatchQueuedMessages()
+        verify(displayManager).registerDisplayListener(displayListener.capture(), any())
     }
 
     @Test
@@ -70,15 +76,16 @@ class RotationChangeProviderTest : SysuiTestCase() {
         verify(listener).onRotationChanged(42)
 
         rotationChangeProvider.removeCallback(listener)
-        fakeExecutor.runAllReady()
+        fakeHandler.dispatchQueuedMessages()
         sendRotationUpdate(43)
 
-        verify(windowManagerInterface).removeRotationWatcher(any())
+        verify(displayManager).unregisterDisplayListener(any())
         verifyNoMoreInteractions(listener)
     }
 
     private fun sendRotationUpdate(newRotation: Int) {
-        rotationWatcher.value.onRotationChanged(newRotation)
-        fakeExecutor.runAllReady()
+        whenever(display.rotation).thenReturn(newRotation)
+        displayListener.allValues.forEach { it.onDisplayChanged(display.displayId) }
+        fakeHandler.dispatchQueuedMessages()
     }
 }

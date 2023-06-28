@@ -27,13 +27,28 @@
         android:layout_height="wrap_content"
         />
 
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/app_icon"
-        android:background="@drawable/media_ttt_chip_background_receiver"
-        android:layout_width="@dimen/media_ttt_icon_size_receiver"
-        android:layout_height="@dimen/media_ttt_icon_size_receiver"
-        android:layout_gravity="center|bottom"
+    <FrameLayout
+        android:id="@+id/icon_container_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:alpha="0.0"
-        />
+        >
+        <com.android.systemui.media.taptotransfer.receiver.ReceiverChipRippleView
+            android:id="@+id/icon_glow_ripple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <!-- Add a bottom margin to avoid the glow of the icon ripple from being cropped by screen
+        bounds while animating with the icon -->
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/app_icon"
+            android:background="@drawable/media_ttt_chip_background_receiver"
+            android:layout_width="@dimen/media_ttt_icon_size_receiver"
+            android:layout_height="@dimen/media_ttt_icon_size_receiver"
+            android:layout_gravity="center|bottom"
+            android:layout_marginBottom="@dimen/media_ttt_receiver_icon_bottom_margin"
+            />
+    </FrameLayout>
 
 </FrameLayout>

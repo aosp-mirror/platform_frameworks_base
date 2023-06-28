@@ -15,6 +15,7 @@
  */
 package com.android.systemui.flags
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -22,14 +23,16 @@ import javax.inject.Named
 /** Module containing shared code for all FeatureFlag implementations. */
 @Module
 interface FlagsCommonModule {
+    @Binds fun bindsRestarter(impl: ConditionalRestarter): Restarter
+
     companion object {
         const val ALL_FLAGS = "all_flags"
 
         @JvmStatic
         @Provides
         @Named(ALL_FLAGS)
-        fun providesAllFlags(): Map<Int, Flag<*>> {
-            return FlagsFactory.knownFlags.map { it.value.id to it.value }.toMap()
+        fun providesAllFlags(): Map<String, Flag<*>> {
+            return FlagsFactory.knownFlags
         }
     }
 }

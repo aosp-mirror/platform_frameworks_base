@@ -390,7 +390,7 @@ public class Installer extends SystemService {
                     args[j] = mArgs.get(i + j);
                 }
                 final CreateAppDataResult[] results = installer.createAppDataBatched(args);
-                for (int j = 0; j < args.length; j++) {
+                for (int j = 0; j < results.length; j++) {
                     final CreateAppDataResult result = results[j];
                     final CompletableFuture<Long> future = mFutures.get(i + j);
                     if (result.exceptionCode == 0) {
