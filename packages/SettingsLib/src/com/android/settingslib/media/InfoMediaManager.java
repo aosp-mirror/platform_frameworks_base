@@ -91,6 +91,7 @@ public class InfoMediaManager extends MediaManager {
     MediaRouter2Manager mRouterManager;
     @VisibleForTesting
     String mPackageName;
+    boolean mIsScanning = false;
 
     private MediaDevice mCurrentConnectedDevice;
     private LocalBluetoothManager mBluetoothManager;
@@ -110,22 +111,29 @@ public class InfoMediaManager extends MediaManager {
 
     @Override
     public void startScan() {
-        mMediaDevices.clear();
-        mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
-        mRouterManager.registerScanRequest();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                && !TextUtils.isEmpty(mPackageName)) {
-            RouteListingPreference routeListingPreference =
-                    mRouterManager.getRouteListingPreference(mPackageName);
-            Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference, mPreferenceItemMap);
+        if (!mIsScanning) {
+            mMediaDevices.clear();
+            mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+            mRouterManager.registerScanRequest();
+            mIsScanning = true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                    && !TextUtils.isEmpty(mPackageName)) {
+                RouteListingPreference routeListingPreference =
+                        mRouterManager.getRouteListingPreference(mPackageName);
+                Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference,
+                        mPreferenceItemMap);
+            }
+            refreshDevices();
         }
-        refreshDevices();
     }
 
     @Override
     public void stopScan() {
-        mRouterManager.unregisterCallback(mMediaRouterCallback);
-        mRouterManager.unregisterScanRequest();
+        if (mIsScanning) {
+            mRouterManager.unregisterCallback(mMediaRouterCallback);
+            mRouterManager.unregisterScanRequest();
+            mIsScanning = false;
+        }
     }
 
     /**
@@ -701,19 +709,18 @@ public class InfoMediaManager extends MediaManager {
                 List<MediaRoute2Info> selectedRouteInfos, List<MediaRoute2Info> infolist,
                 List<RouteListingPreference.Item> preferenceRouteListing) {
             final List<MediaRoute2Info> sortedInfoList = new ArrayList<>(selectedRouteInfos);
+            infolist.removeAll(selectedRouteInfos);
+            sortedInfoList.addAll(infolist.stream().filter(
+                    MediaRoute2Info::isSystemRoute).collect(Collectors.toList()));
             for (RouteListingPreference.Item item : preferenceRouteListing) {
                 for (MediaRoute2Info info : infolist) {
                     if (item.getRouteId().equals(info.getId())
-                            && !selectedRouteInfos.contains(info)) {
+                            && !selectedRouteInfos.contains(info)
+                            && !info.isSystemRoute()) {
                         sortedInfoList.add(info);
                         break;
                     }
                 }
-            }
-            if (sortedInfoList.size() != infolist.size()) {
-                infolist.removeAll(sortedInfoList);
-                sortedInfoList.addAll(infolist.stream().filter(
-                        MediaRoute2Info::isSystemRoute).collect(Collectors.toList()));
             }
             return sortedInfoList;
         }
