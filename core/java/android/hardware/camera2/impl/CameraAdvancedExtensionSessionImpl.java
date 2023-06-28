@@ -526,7 +526,11 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         synchronized (mInterfaceLock) {
             if (mInitialized) {
                 try {
-                    mCaptureSession.stopRepeating();
+                    try {
+                        mCaptureSession.stopRepeating();
+                    } catch (IllegalStateException e) {
+                        // OK: already be closed, nothing else to do
+                    }
                     mSessionProcessor.stopRepeating();
                     mSessionProcessor.onCaptureSessionEnd();
                     mSessionClosed = true;

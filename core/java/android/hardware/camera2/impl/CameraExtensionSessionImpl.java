@@ -111,6 +111,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private int mPreviewProcessorType = IPreviewExtenderImpl.PROCESSOR_TYPE_NONE;
 
     private boolean mInitialized;
+    private boolean mSessionClosed;
     // Enable/Disable internal preview/(repeating request). Extensions expect
     // that preview/(repeating request) is enabled and active at any point in time.
     // In case the client doesn't explicitly enable repeating requests, the framework
@@ -278,6 +279,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mInitialized = false;
+        mSessionClosed = false;
         mInitializeHandler = new InitializeSessionHandler();
         mSessionId = sessionId;
         mSupportedRequestKeys = requestKeys;
@@ -775,7 +777,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         synchronized (mInterfaceLock) {
             if (mInitialized) {
                 mInternalRepeatingRequestEnabled = false;
-                mCaptureSession.stopRepeating();
+                try {
+                    mCaptureSession.stopRepeating();
+                } catch (IllegalStateException e) {
+                    // OK: already be closed, nothing else to do
+                    mSessionClosed = true;
+                }
 
                 ArrayList<CaptureStageImpl> captureStageList = new ArrayList<>();
                 try {
@@ -793,13 +800,14 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     Log.e(TAG, "Failed to disable extension! Extension service does not "
                             + "respond!");
                 }
-                if (!captureStageList.isEmpty()) {
+                if (!captureStageList.isEmpty() && !mSessionClosed) {
                     CaptureRequest disableRequest = createRequest(mCameraDevice, captureStageList,
                             mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW);
                     mCaptureSession.capture(disableRequest,
                             new CloseRequestHandler(mRepeatingRequestImageCallback), mHandler);
                 }
 
+                mSessionClosed = true;
                 mStatsAggregator.commit(/*isFinal*/true); // Commit stats before closing session
                 mCaptureSession.close();
             }
@@ -854,6 +862,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mHandlerThread.quit();
 
             try {
+                if (!mSessionClosed) {
+                    // return value is omitted. nothing can do after session is closed.
+                    mPreviewExtender.onDisableSession();
+                    mImageExtender.onDisableSession();
+                }
                 mPreviewExtender.onDeInit();
                 mImageExtender.onDeInit();
             } catch (RemoteException e) {
