@@ -73,7 +73,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -588,11 +587,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testConnectionRepository_invalidSubId_throws() =
+    fun testConnectionRepository_invalidSubId_doesNotThrow() =
         testScope.runTest {
-            assertThrows(IllegalArgumentException::class.java) {
-                underTest.getRepoForSubId(SUB_1_ID)
-            }
+            underTest.getRepoForSubId(SUB_1_ID)
+            // No exception
         }
 
     @Test
