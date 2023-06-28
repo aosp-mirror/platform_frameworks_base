@@ -347,12 +347,19 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testExitSplitScreenAfterFolded() {
-        when(mMainStage.isActive()).thenReturn(true);
+    public void testExitSplitScreenAfterFoldedAndWakeUp() {
         when(mMainStage.isFocused()).thenReturn(true);
         when(mMainStage.getTopVisibleChildTaskId()).thenReturn(INVALID_TASK_ID);
+        mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().setVisible(true).build();
+        mMainStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().setVisible(true).build();
+        when(mStageCoordinator.isSplitActive()).thenReturn(true);
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
 
         mStageCoordinator.onFoldedStateChanged(true);
+
+        assertEquals(mStageCoordinator.mTopStageAfterFoldDismiss, STAGE_TYPE_MAIN);
+
+        mStageCoordinator.onFinishedWakingUp();
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());

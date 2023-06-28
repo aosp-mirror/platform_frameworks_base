@@ -55,6 +55,7 @@ import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -345,6 +346,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             return;
         }
         wct.reorder(mChildrenTaskInfo.get(taskId).token, onTop /* onTop */);
+    }
+
+    void doForAllChildTasks(Consumer<Integer> consumer) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            consumer.accept(taskInfo.taskId);
+        }
     }
 
     /** Collects all the current child tasks and prepares transaction to evict them to display. */

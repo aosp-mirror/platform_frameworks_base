@@ -270,7 +270,6 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public void prepareStartTransaction(Transaction transaction) {
         mUnfoldBackgroundController.ensureBackground(transaction);
-        mSplitScreenController.get().get().updateSplitScreenSurfaces(transaction);
     }
 
     @Override
