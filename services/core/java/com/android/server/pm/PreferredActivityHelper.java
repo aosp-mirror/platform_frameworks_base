@@ -661,6 +661,7 @@ final class PreferredActivityHelper {
             final Iterator<PreferredActivity> it = pir.filterIterator();
             while (it.hasNext()) {
                 final PreferredActivity pa = it.next();
+                if (pa == null) continue;
                 final String prefPackageName = pa.mPref.mComponent.getPackageName();
                 if (packageName == null
                         || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
