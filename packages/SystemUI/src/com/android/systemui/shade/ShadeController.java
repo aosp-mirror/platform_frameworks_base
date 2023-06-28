@@ -165,7 +165,8 @@ public interface ShadeController {
             NotificationShadeWindowViewController notificationShadeWindowViewController);
 
     /** */
-    void setShadeViewController(ShadeViewController shadeViewController);
+    void setNotificationPanelViewController(
+            NotificationPanelViewController notificationPanelViewController);
 
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {

@@ -56,7 +56,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var assistManager: AssistManager
     @Mock private lateinit var gutsManager: NotificationGutsManager
-    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock private lateinit var nswvc: NotificationShadeWindowViewController
     @Mock private lateinit var display: Display
 
@@ -82,7 +82,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 Lazy { gutsManager },
             )
         shadeController.setNotificationShadeWindowViewController(nswvc)
-        shadeController.setShadeViewController(shadeViewController)
+        shadeController.setNotificationPanelViewController(notificationPanelViewController)
     }
 
     @Test
@@ -91,9 +91,9 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
         // Trying to open it does nothing.
         shadeController.animateExpandShade()
-        verify(shadeViewController, never()).expandToNotifications()
+        verify(notificationPanelViewController, never()).expandToNotifications()
         shadeController.animateExpandQs()
-        verify(shadeViewController, never()).expand(ArgumentMatchers.anyBoolean())
+        verify(notificationPanelViewController, never()).expand(ArgumentMatchers.anyBoolean())
     }
 
     @Test
@@ -102,15 +102,15 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
         // Can now be opened.
         shadeController.animateExpandShade()
-        verify(shadeViewController).expandToNotifications()
+        verify(notificationPanelViewController).expandToNotifications()
         shadeController.animateExpandQs()
-        verify(shadeViewController).expandToQs()
+        verify(notificationPanelViewController).expandToQs()
     }
 
     @Test
     fun cancelExpansionAndCollapseShade_callsCancelCurrentTouch() {
         // GIVEN the shade is tracking a touch
-        whenever(shadeViewController.isTracking).thenReturn(true)
+        whenever(notificationPanelViewController.isTracking).thenReturn(true)
 
         // WHEN cancelExpansionAndCollapseShade is called
         shadeController.cancelExpansionAndCollapseShade()
@@ -122,7 +122,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Test
     fun cancelExpansionAndCollapseShade_doesNotCallAnimateCollapseShade_whenCollapsed() {
         // GIVEN the shade is tracking a touch
-        whenever(shadeViewController.isTracking).thenReturn(false)
+        whenever(notificationPanelViewController.isTracking).thenReturn(false)
 
         // WHEN cancelExpansionAndCollapseShade is called
         shadeController.cancelExpansionAndCollapseShade()
