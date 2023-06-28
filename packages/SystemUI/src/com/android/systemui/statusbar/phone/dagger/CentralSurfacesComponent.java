@@ -21,8 +21,10 @@ import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.ST
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.systemui.scene.ui.view.WindowRootView;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -85,6 +87,14 @@ public interface CentralSurfacesComponent {
      * Creates a NotificationShadeWindowViewController.
      */
     NotificationShadeWindowViewController getNotificationShadeWindowViewController();
+
+    /**
+     * Creates a NotificationPanelViewController.
+     */
+    NotificationPanelViewController getNotificationPanelViewController();
+
+    /** Creates a QuickSettingsController. */
+    QuickSettingsController getQuickSettingsController();
 
     /**
      * Creates a StatusBarHeadsUpChangeListener.
