@@ -414,7 +414,7 @@ public final class ContentCaptureManager {
     /** @hide */
     public static final boolean DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER = false;
     /** @hide */
-    public static final int DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE = 1000;
+    public static final int DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE = 5000;
     /** @hide */
     public static final int DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE = 150;
 
