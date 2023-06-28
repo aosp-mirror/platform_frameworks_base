@@ -31,6 +31,7 @@
 
 using aidl::android::hardware::power::IPowerHintSession;
 using aidl::android::hardware::power::SessionHint;
+using aidl::android::hardware::power::SessionMode;
 using aidl::android::hardware::power::WorkDuration;
 
 using android::base::StringPrintf;
@@ -40,6 +41,15 @@ namespace android {
 static power::PowerHalController gPowerHalController;
 static std::unordered_map<jlong, std::shared_ptr<IPowerHintSession>> gSessionMap;
 static std::mutex gSessionMapLock;
+
+static int64_t getHintSessionPreferredRate() {
+    int64_t rate = -1;
+    auto result = gPowerHalController.getHintSessionPreferredRate();
+    if (result.isOk()) {
+        rate = result.value();
+    }
+    return rate;
+}
 
 static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
                                std::vector<int32_t> threadIds, int64_t durationNanos) {
@@ -93,18 +103,18 @@ static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadId
     appSession->setThreads(threadIds);
 }
 
-static int64_t getHintSessionPreferredRate() {
-    int64_t rate = -1;
-    auto result = gPowerHalController.getHintSessionPreferredRate();
-    if (result.isOk()) {
-        rate = result.value();
-    }
-    return rate;
+static void setMode(int64_t session_ptr, SessionMode mode, bool enabled) {
+    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    appSession->setMode(mode, enabled);
 }
 
 // ----------------------------------------------------------------------------
 static void nativeInit(JNIEnv* env, jobject obj) {
     gPowerHalController.init();
+}
+
+static jlong nativeGetHintSessionPreferredRate(JNIEnv* /* env */, jclass /* clazz */) {
+    return static_cast<jlong>(getHintSessionPreferredRate());
 }
 
 static jlong nativeCreateHintSession(JNIEnv* env, jclass /* clazz */, jint tgid, jint uid,
@@ -165,14 +175,16 @@ static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr,
     setThreads(session_ptr, threadIds);
 }
 
-static jlong nativeGetHintSessionPreferredRate(JNIEnv* /* env */, jclass /* clazz */) {
-    return static_cast<jlong>(getHintSessionPreferredRate());
+static void nativeSetMode(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint mode,
+                          jboolean enabled) {
+    setMode(session_ptr, static_cast<SessionMode>(mode), enabled);
 }
 
 // ----------------------------------------------------------------------------
 static const JNINativeMethod sHintManagerServiceMethods[] = {
         /* name, signature, funcPtr */
         {"nativeInit", "()V", (void*)nativeInit},
+        {"nativeGetHintSessionPreferredRate", "()J", (void*)nativeGetHintSessionPreferredRate},
         {"nativeCreateHintSession", "(II[IJ)J", (void*)nativeCreateHintSession},
         {"nativePauseHintSession", "(J)V", (void*)nativePauseHintSession},
         {"nativeResumeHintSession", "(J)V", (void*)nativeResumeHintSession},
@@ -181,7 +193,7 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeReportActualWorkDuration", "(J[J[J)V", (void*)nativeReportActualWorkDuration},
         {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
         {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
-        {"nativeGetHintSessionPreferredRate", "()J", (void*)nativeGetHintSessionPreferredRate},
+        {"nativeSetMode", "(JIZ)V", (void*)nativeSetMode},
 };
 
 int register_android_server_HintManagerService(JNIEnv* env) {

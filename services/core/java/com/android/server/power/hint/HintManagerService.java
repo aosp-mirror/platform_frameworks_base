@@ -171,6 +171,8 @@ public final class HintManagerService extends SystemService {
     public static class NativeWrapper {
         private native void nativeInit();
 
+        private static native long nativeGetHintSessionPreferredRate();
+
         private static native long nativeCreateHintSession(int tgid, int uid, int[] tids,
                 long durationNanos);
 
@@ -190,11 +192,16 @@ public final class HintManagerService extends SystemService {
 
         private static native void nativeSetThreads(long halPtr, int[] tids);
 
-        private static native long nativeGetHintSessionPreferredRate();
+        private static native void nativeSetMode(long halPtr, int mode, boolean enabled);
 
         /** Wrapper for HintManager.nativeInit */
         public void halInit() {
             nativeInit();
+        }
+
+        /** Wrapper for HintManager.nativeGetHintSessionPreferredRate */
+        public long halGetHintSessionPreferredRate() {
+            return nativeGetHintSessionPreferredRate();
         }
 
         /** Wrapper for HintManager.nativeCreateHintSession */
@@ -234,15 +241,16 @@ public final class HintManagerService extends SystemService {
             nativeSendHint(halPtr, hint);
         }
 
-        /** Wrapper for HintManager.nativeGetHintSessionPreferredRate */
-        public long halGetHintSessionPreferredRate() {
-            return nativeGetHintSessionPreferredRate();
-        }
-
         /** Wrapper for HintManager.nativeSetThreads */
         public void halSetThreads(long halPtr, int[] tids) {
             nativeSetThreads(halPtr, tids);
         }
+
+        /** Wrapper for HintManager.setMode */
+        public void halSetMode(long halPtr, int mode, boolean enabled) {
+            nativeSetMode(halPtr, mode, enabled);
+        }
+
     }
 
     @VisibleForTesting
@@ -552,7 +560,7 @@ public final class HintManagerService extends SystemService {
                 if (mHalSessionPtr == 0 || !updateHintAllowed()) {
                     return;
                 }
-                Preconditions.checkArgument(hint >= 0, "the hint ID the hint value should be"
+                Preconditions.checkArgument(hint >= 0, "the hint ID value should be"
                         + " greater than zero.");
                 mNativeWrapper.halSendHint(mHalSessionPtr, hint);
             }
@@ -591,6 +599,18 @@ public final class HintManagerService extends SystemService {
 
         public int[] getThreadIds() {
             return mThreadIds;
+        }
+
+        @Override
+        public void setMode(int mode, boolean enabled) {
+            synchronized (mLock) {
+                if (mHalSessionPtr == 0 || !updateHintAllowed()) {
+                    return;
+                }
+                Preconditions.checkArgument(mode >= 0, "the mode Id value should be"
+                        + " greater than zero.");
+                mNativeWrapper.halSetMode(mHalSessionPtr, mode, enabled);
+            }
         }
 
         private void onProcStateChanged() {

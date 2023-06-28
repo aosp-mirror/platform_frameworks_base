@@ -23,4 +23,5 @@ oneway interface IHintSession {
     void reportActualWorkDuration(in long[] actualDurationNanos, in long[] timeStampNanos);
     void close();
     void sendHint(int hint);
+    void setMode(int mode, boolean enabled);
 }

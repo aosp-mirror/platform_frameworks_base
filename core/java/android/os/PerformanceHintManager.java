@@ -51,6 +51,15 @@ public final class PerformanceHintManager {
     }
 
     /**
+     * Get preferred update rate information for this device.
+     *
+     * @return the preferred update rate supported by device software
+     */
+    public long getPreferredUpdateRateNanos() {
+        return nativeGetPreferredUpdateRateNanos(mNativeManagerPtr);
+    }
+
+    /**
      * Creates a {@link Session} for the given set of threads and sets their initial target work
      * duration.
      *
@@ -78,35 +87,22 @@ public final class PerformanceHintManager {
     }
 
     /**
-     * Get preferred update rate information for this device.
-     *
-     * @return the preferred update rate supported by device software
-     */
-    public long getPreferredUpdateRateNanos() {
-        return nativeGetPreferredUpdateRateNanos(mNativeManagerPtr);
-    }
-
-    /**
      * A Session represents a group of threads with an inter-related workload such that hints for
      * their performance should be considered as a unit. The threads in a given session should be
-     * long-life and not created or destroyed dynamically.
+     * long-lived and not created or destroyed dynamically.
      *
-     * <p>Each session is expected to have a periodic workload with a target duration for each
-     * cycle. The cycle duration is likely greater than the target work duration to allow other
-     * parts of the pipeline to run within the available budget. For example, a renderer thread may
-     * work at 60hz in order to produce frames at the display's frame but have a target work
-     * duration of only 6ms.</p>
+     * The work duration API can be used with periodic workloads to dynamically adjust thread
+     * performance and keep the work on schedule while optimizing the available power budget.
+     * When using the work duration API, the starting target duration should be specified
+     * while creating the session, but can later be adjusted with
+     * {@link #updateTargetWorkDuration(long)}. While using the work duration API, the client is be
+     * expected to call {@link #reportActualWorkDuration(long)} each cycle to report the actual
+     * time taken to complete to the system.
      *
-     * <p>Any call in this class will change its internal data, so you must do your own thread
-     * safety to protect from racing.</p>
+     * Any call in this class will change its internal data, so you must do your own thread
+     * safety to protect from racing.
      *
-     * <p>Note that the target work duration can be {@link #updateTargetWorkDuration(long) updated}
-     * if workloads change.</p>
-     *
-     * <p>After each cycle of work, the client is expected to
-     * {@link #reportActualWorkDuration(long) report} the actual time taken to complete.</p>
-     *
-     * <p>All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.</p>
+     * All timings should be in {@link SystemClock#elapsedRealtimeNanos()}.
      */
     public static class Session implements Closeable {
         private long mNativeSessionPtr;
@@ -186,9 +182,9 @@ public final class PerformanceHintManager {
         /**
          * Reports the actual duration for the last cycle of work.
          *
-         * <p>The system will attempt to adjust the core placement of the threads within the thread
+         * The system will attempt to adjust the core placement of the threads within the thread
          * group and/or the frequency of the core on which they are run to bring the actual duration
-         * close to the target duration.</p>
+         * close to the target duration.
          *
          * @param actualDurationNanos how long the thread group took to complete its last task in
          *     nanoseconds
@@ -202,7 +198,7 @@ public final class PerformanceHintManager {
         /**
          * Ends the current hint session.
          *
-         * <p>Once called, you should not call anything else on this object.</p>
+         * Once called, you should not call anything else on this object.
          */
         public void close() {
             if (mNativeSessionPtr != 0) {
@@ -227,6 +223,16 @@ public final class PerformanceHintManager {
             } finally {
                 Reference.reachabilityFence(this);
             }
+        }
+
+        /**
+         * This tells the session that these threads can be
+         * safely scheduled to prefer power efficiency over performance.
+         *
+         * @param enabled The flag that sets whether this session uses power-efficient scheduling.
+         */
+        public void setPreferPowerEfficiency(boolean enabled) {
+            nativeSetPreferPowerEfficiency(mNativeSessionPtr, enabled);
         }
 
         /**
@@ -275,4 +281,6 @@ public final class PerformanceHintManager {
     private static native void nativeCloseSession(long nativeSessionPtr);
     private static native void nativeSendHint(long nativeSessionPtr, int hint);
     private static native void nativeSetThreads(long nativeSessionPtr, int[] tids);
+    private static native void nativeSetPreferPowerEfficiency(long nativeSessionPtr,
+            boolean enabled);
 }

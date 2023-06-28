@@ -27,10 +27,11 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -73,6 +74,7 @@ public class HintManagerServiceTest {
     private static final int TGID = Process.getThreadGroupLeader(TID);
     private static final int[] SESSION_TIDS_A = new int[] {TID};
     private static final int[] SESSION_TIDS_B = new int[] {TID};
+    private static final int[] SESSION_TIDS_C = new int[] {TID};
     private static final long[] DURATIONS_THREE = new long[] {1L, 100L, 1000L};
     private static final long[] TIMESTAMPS_THREE = new long[] {1L, 2L, 3L};
     private static final long[] DURATIONS_ZERO = new long[] {};
@@ -94,6 +96,8 @@ public class HintManagerServiceTest {
               eq(DEFAULT_TARGET_DURATION))).thenReturn(1L);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_B),
               eq(DEFAULT_TARGET_DURATION))).thenReturn(2L);
+        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_C),
+              eq(0L))).thenReturn(1L);
         when(mAmInternalMock.getIsolatedProcesses(anyInt())).thenReturn(null);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
@@ -138,6 +142,10 @@ public class HintManagerServiceTest {
         IHintSession b = service.getBinderServiceInstance().createHintSession(token,
                 SESSION_TIDS_B, DEFAULT_TARGET_DURATION);
         assertNotEquals(a, b);
+
+        IHintSession c = service.getBinderServiceInstance().createHintSession(token,
+                SESSION_TIDS_C, 0L);
+        assertNotNull(c);
     }
 
     @Test
@@ -338,4 +346,35 @@ public class HintManagerServiceTest {
         a.setThreads(SESSION_TIDS_A);
         verify(mNativeWrapperMock, never()).halSetThreads(anyLong(), any());
     }
+
+    @Test
+    public void testSetMode() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+
+        AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+
+        a.setMode(0, true);
+        verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
+                eq(0), eq(true));
+
+        a.setMode(0, false);
+        verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
+                eq(0), eq(false));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.setMode(-1, true);
+        });
+
+        reset(mNativeWrapperMock);
+        // Set session to background, then the duration would not be updated.
+        service.mUidObserver.onUidStateChanged(
+                a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
+        FgThread.getHandler().runWithScissors(() -> { }, 500);
+        assertFalse(a.updateHintAllowed());
+        a.setMode(0, true);
+        verify(mNativeWrapperMock, never()).halSetMode(anyLong(), anyInt(), anyBoolean());
+    }
+
 }

@@ -34,26 +34,28 @@ struct APerformanceHintManager;
 struct APerformanceHintSession;
 
 typedef APerformanceHintManager* (*APH_getManager)();
+typedef int64_t (*APH_getPreferredUpdateRateNanos)(APerformanceHintManager* manager);
 typedef APerformanceHintSession* (*APH_createSession)(APerformanceHintManager*, const int32_t*,
                                                       size_t, int64_t);
-typedef int64_t (*APH_getPreferredUpdateRateNanos)(APerformanceHintManager* manager);
 typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
 typedef void (*APH_sendHint)(APerformanceHintSession*, int32_t);
 typedef int (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
 typedef void (*APH_getThreadIds)(APerformanceHintSession*, int32_t* const, size_t* const);
+typedef void (*APH_setPreferPowerEfficiency)(APerformanceHintSession*, bool);
 
 bool gAPerformanceHintBindingInitialized = false;
 APH_getManager gAPH_getManagerFn = nullptr;
-APH_createSession gAPH_createSessionFn = nullptr;
 APH_getPreferredUpdateRateNanos gAPH_getPreferredUpdateRateNanosFn = nullptr;
+APH_createSession gAPH_createSessionFn = nullptr;
 APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
 APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
 APH_closeSession gAPH_closeSessionFn = nullptr;
 APH_sendHint gAPH_sendHintFn = nullptr;
 APH_setThreads gAPH_setThreadsFn = nullptr;
 APH_getThreadIds gAPH_getThreadIdsFn = nullptr;
+APH_setPreferPowerEfficiency gAPH_setPreferPowerEfficiencyFn = nullptr;
 
 void ensureAPerformanceHintBindingInitialized() {
     if (gAPerformanceHintBindingInitialized) return;
@@ -65,16 +67,16 @@ void ensureAPerformanceHintBindingInitialized() {
     LOG_ALWAYS_FATAL_IF(gAPH_getManagerFn == nullptr,
                         "Failed to find required symbol APerformanceHint_getManager!");
 
-    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
-    LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_createSession!");
-
     gAPH_getPreferredUpdateRateNanosFn =
             (APH_getPreferredUpdateRateNanos)dlsym(handle_,
                                                    "APerformanceHint_getPreferredUpdateRateNanos");
     LOG_ALWAYS_FATAL_IF(gAPH_getPreferredUpdateRateNanosFn == nullptr,
                         "Failed to find required symbol "
                         "APerformanceHint_getPreferredUpdateRateNanos!");
+
+    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
+    LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
+                        "Failed to find required symbol APerformanceHint_createSession!");
 
     gAPH_updateTargetWorkDurationFn =
             (APH_updateTargetWorkDuration)dlsym(handle_,
@@ -96,8 +98,7 @@ void ensureAPerformanceHintBindingInitialized() {
 
     gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
     LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
-                        "Failed to find required symbol "
-                        "APerformanceHint_sendHint!");
+                        "Failed to find required symbol APerformanceHint_sendHint!");
 
     gAPH_setThreadsFn = (APH_setThreads)dlsym(handle_, "APerformanceHint_setThreads");
     LOG_ALWAYS_FATAL_IF(gAPH_setThreadsFn == nullptr,
@@ -106,6 +107,13 @@ void ensureAPerformanceHintBindingInitialized() {
     gAPH_getThreadIdsFn = (APH_getThreadIds)dlsym(handle_, "APerformanceHint_getThreadIds");
     LOG_ALWAYS_FATAL_IF(gAPH_getThreadIdsFn == nullptr,
                         "Failed to find required symbol APerformanceHint_getThreadIds!");
+
+    gAPH_setPreferPowerEfficiencyFn =
+            (APH_setPreferPowerEfficiency)dlsym(handle_,
+                                                "APerformanceHint_setPreferPowerEfficiency");
+    LOG_ALWAYS_FATAL_IF(gAPH_setPreferPowerEfficiencyFn == nullptr,
+                        "Failed to find required symbol"
+                        "APerformanceHint_setPreferPowerEfficiency!");
 
     gAPerformanceHintBindingInitialized = true;
 }
@@ -223,6 +231,13 @@ static jintArray nativeGetThreadIds(JNIEnv* env, jclass clazz, jlong nativeSessi
     return jintArr;
 }
 
+static void nativeSetPreferPowerEfficiency(JNIEnv* env, jclass clazz, jlong nativeSessionPtr,
+                                           jboolean enabled) {
+    ensureAPerformanceHintBindingInitialized();
+    gAPH_setPreferPowerEfficiencyFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                                    enabled);
+}
+
 static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeAcquireManager", "()J", (void*)nativeAcquireManager},
         {"nativeGetPreferredUpdateRateNanos", "(J)J", (void*)nativeGetPreferredUpdateRateNanos},
@@ -233,6 +248,7 @@ static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
         {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
         {"nativeGetThreadIds", "(J)[I", (void*)nativeGetThreadIds},
+        {"nativeSetPreferPowerEfficiency", "(JZ)V", (void*)nativeSetPreferPowerEfficiency},
 };
 
 int register_android_os_PerformanceHintManager(JNIEnv* env) {
