@@ -517,9 +517,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private final WatchedArrayMap<String, String> mRenamedPackages =
             new WatchedArrayMap<String, String>();
 
-    // For every user, it is used to find the package name of the default Browser App.
+    // For every user, it is used to find the package name of the default browser app pending to be
+    // applied, either on first boot after upgrade, or after backup & restore but before app is
+    // installed.
     @Watched
-    final WatchedSparseArray<String> mDefaultBrowserApp = new WatchedSparseArray<String>();
+    final WatchedSparseArray<String> mPendingDefaultBrowser = new WatchedSparseArray<>();
 
     // TODO(b/161161364): This seems unused, and is probably not relevant in the new API, but should
     //  verify.
@@ -592,7 +594,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mNextAppLinkGeneration.registerObserver(mObserver);
-        mDefaultBrowserApp.registerObserver(mObserver);
+        mPendingDefaultBrowser.registerObserver(mObserver);
         mPendingPackages.registerObserver(mObserver);
         mPastSignatures.registerObserver(mObserver);
         mKeySetRefs.registerObserver(mObserver);
@@ -787,7 +789,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
-        mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
+        mPendingDefaultBrowser.snapshot(r.mPendingDefaultBrowser);
         // mReadMessages
         mPendingPackages = r.mPendingPackagesSnapshot.snapshot();
         mPendingPackagesSnapshot = new SnapshotCache.Sealed<>();
@@ -1507,8 +1509,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         return cpir;
     }
 
-    String removeDefaultBrowserPackageNameLPw(int userId) {
-        return (userId == UserHandle.USER_ALL) ? null : mDefaultBrowserApp.removeReturnOld(userId);
+    String getPendingDefaultBrowserLPr(int userId) {
+        return mPendingDefaultBrowser.get(userId);
+    }
+
+    void setPendingDefaultBrowserLPw(String defaultBrowser, int userId) {
+        mPendingDefaultBrowser.put(userId, defaultBrowser);
+    }
+
+    String removePendingDefaultBrowserLPw(int userId) {
+        return mPendingDefaultBrowser.removeReturnOld(userId);
     }
 
     private File getUserSystemDirectory(int userId) {
@@ -1693,7 +1703,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             throws XmlPullParserException, IOException {
         String defaultBrowser = readDefaultApps(parser);
         if (defaultBrowser != null) {
-            mDefaultBrowserApp.put(userId, defaultBrowser);
+            mPendingDefaultBrowser.put(userId, defaultBrowser);
         }
     }
 
@@ -2098,7 +2108,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        String defaultBrowser = mDefaultBrowserApp.get(userId);
+        String defaultBrowser = mPendingDefaultBrowser.get(userId);
         writeDefaultApps(serializer, defaultBrowser);
     }
 
