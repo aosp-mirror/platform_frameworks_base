@@ -21,6 +21,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -63,6 +64,12 @@ import javax.inject.Named;
 public abstract class StatusBarViewModule {
 
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
+
+    /** */
+    @Binds
+    @CentralSurfacesComponent.CentralSurfacesScope
+    abstract ShadeViewController bindsShadeViewController(
+            NotificationPanelViewController notificationPanelViewController);
 
     @Binds
     @IntoSet

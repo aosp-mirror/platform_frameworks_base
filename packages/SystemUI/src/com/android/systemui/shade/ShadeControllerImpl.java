@@ -70,8 +70,7 @@ public final class ShadeControllerImpl implements ShadeController {
 
     private boolean mExpandedVisible;
 
-    // TODO(b/237661616): Rename this variable to mShadeViewController.
-    private ShadeViewController mNotificationPanelViewController;
+    private NotificationPanelViewController mNotificationPanelViewController;
     private NotificationPresenter mPresenter;
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private ShadeVisibilityListener mShadeVisibilityListener;
@@ -427,11 +426,12 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
-    public void setShadeViewController(ShadeViewController shadeViewController) {
-        mNotificationPanelViewController = shadeViewController;
+    public void setNotificationPanelViewController(
+            NotificationPanelViewController notificationPanelViewController) {
+        mNotificationPanelViewController = notificationPanelViewController;
         mNotificationPanelViewController.setTrackingStartedListener(this::runPostCollapseRunnables);
         mNotificationPanelViewController.setOpenCloseListener(
-                new OpenCloseListener() {
+                new NotificationPanelViewController.OpenCloseListener() {
                     @Override
                     public void onClosingFinished() {
                         ShadeControllerImpl.this.onClosingFinished();
