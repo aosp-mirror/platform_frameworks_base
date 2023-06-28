@@ -52,9 +52,8 @@ class SceneWindowRootView(
                                     setOnBackInvokedDispatcher(viewRootImpl.onBackInvokedDispatcher)
                                 }
 
-                            override fun getLifecycle(): Lifecycle {
-                                return this@repeatWhenAttached.lifecycle
-                            }
+                            override val lifecycle: Lifecycle =
+                                this@repeatWhenAttached.lifecycle
                         }
                     )
 

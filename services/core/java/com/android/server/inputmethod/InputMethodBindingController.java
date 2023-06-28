@@ -352,7 +352,6 @@ final class InputMethodBindingController {
                     clearCurMethodAndSessions();
                     mService.clearInputShownLocked();
                     mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
-                    mService.resetSystemUiLocked();
                 }
             }
         }

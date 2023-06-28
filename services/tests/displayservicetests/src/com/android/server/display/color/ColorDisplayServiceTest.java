@@ -1093,15 +1093,15 @@ public class ColorDisplayServiceTest {
     @Test
     public void compositionColorSpaces_invalidResources() {
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
-            .thenReturn(new int[] {
-               ColorDisplayManager.COLOR_MODE_NATURAL,
-               // Missing second color mode
-            });
+                .thenReturn(new int[] {
+                        ColorDisplayManager.COLOR_MODE_NATURAL,
+                        // Missing second color mode
+                });
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
-            .thenReturn(new int[] {
-               Display.COLOR_MODE_SRGB,
-               Display.COLOR_MODE_DISPLAY_P3
-            });
+                .thenReturn(new int[] {
+                        Display.COLOR_MODE_SRGB,
+                        Display.COLOR_MODE_DISPLAY_P3
+                });
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
         verify(mDisplayTransformManager).setColorMode(
@@ -1111,13 +1111,13 @@ public class ColorDisplayServiceTest {
     @Test
     public void compositionColorSpaces_validResources_validColorMode() {
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
-            .thenReturn(new int[] {
-               ColorDisplayManager.COLOR_MODE_NATURAL
-            });
+                .thenReturn(new int[] {
+                        ColorDisplayManager.COLOR_MODE_NATURAL
+                });
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
-            .thenReturn(new int[] {
-               Display.COLOR_MODE_SRGB,
-            });
+                .thenReturn(new int[] {
+                        Display.COLOR_MODE_SRGB,
+                });
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
         verify(mDisplayTransformManager).setColorMode(
@@ -1127,13 +1127,13 @@ public class ColorDisplayServiceTest {
     @Test
     public void compositionColorSpaces_validResources_invalidColorMode() {
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
-            .thenReturn(new int[] {
-               ColorDisplayManager.COLOR_MODE_NATURAL
-            });
+                .thenReturn(new int[] {
+                        ColorDisplayManager.COLOR_MODE_NATURAL
+                });
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
-            .thenReturn(new int[] {
-               Display.COLOR_MODE_SRGB,
-            });
+                .thenReturn(new int[] {
+                        Display.COLOR_MODE_SRGB,
+                });
         setColorMode(ColorDisplayManager.COLOR_MODE_BOOSTED);
         startService();
         verify(mDisplayTransformManager).setColorMode(
@@ -1143,7 +1143,7 @@ public class ColorDisplayServiceTest {
     @Test
     public void getColorMode_noAvailableModes_returnsNotSet() {
         when(mResourcesSpy.getIntArray(R.array.config_availableColorModes))
-                .thenReturn(new int[] {});
+                    .thenReturn(new int[] {});
         startService();
         verify(mDisplayTransformManager, never()).setColorMode(anyInt(), any(), anyInt());
         assertThat(mBinderService.getColorMode()).isEqualTo(-1);

@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
 import com.android.systemui.statusbar.policy.BatteryController
@@ -70,6 +71,12 @@ abstract class ShadeModule {
     @IntoMap
     @ClassKey(AuthRippleController::class)
     abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeViewController(
+        notificationPanelViewController: NotificationPanelViewController
+    ): ShadeViewController
 
     companion object {
         const val SHADE_HEADER = "large_screen_shade_header"
@@ -163,6 +170,20 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationPanelView {
             return notificationShadeWindowView.findViewById(R.id.notification_panel)
+        }
+
+        /**
+         * Constructs a new, unattached [KeyguardBottomAreaView].
+         *
+         * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
+         */
+        @Provides
+        fun providesKeyguardBottomAreaView(
+            npv: NotificationPanelView,
+            layoutInflater: LayoutInflater,
+        ): KeyguardBottomAreaView {
+            return layoutInflater.inflate(R.layout.keyguard_bottom_area, npv, false)
+                as KeyguardBottomAreaView
         }
 
         @Provides

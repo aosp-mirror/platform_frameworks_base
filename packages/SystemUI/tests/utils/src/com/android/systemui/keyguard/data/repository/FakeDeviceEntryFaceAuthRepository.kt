@@ -41,7 +41,9 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
     fun setDetectionStatus(status: DetectionStatus) {
         _detectionStatus.value = status
     }
-    override val isLockedOut = MutableStateFlow(false)
+
+    private val _isLockedOut = MutableStateFlow(false)
+    override val isLockedOut = _isLockedOut
     private val _runningAuthRequest = MutableStateFlow<Pair<FaceAuthUiEvent, Boolean>?>(null)
     val runningAuthRequest: StateFlow<Pair<FaceAuthUiEvent, Boolean>?> =
         _runningAuthRequest.asStateFlow()
@@ -54,6 +56,10 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
     override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
         _runningAuthRequest.value = uiEvent to fallbackToDetection
         _isAuthRunning.value = true
+    }
+
+    fun setLockedOut(value: Boolean) {
+        _isLockedOut.value = value
     }
 
     override fun cancel() {

@@ -46,6 +46,7 @@
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_connected_display</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
@@ -72,6 +73,7 @@
     <string translatable="false" name="status_bar_sync_failing">sync_failing</string>
     <string translatable="false" name="status_bar_sync_active">sync_active</string>
     <string translatable="false" name="status_bar_cast">cast</string>
+    <string translatable="false" name="status_bar_connected_display">connected_display</string>
     <string translatable="false" name="status_bar_hotspot">hotspot</string>
     <string translatable="false" name="status_bar_location">location</string>
     <string translatable="false" name="status_bar_bluetooth">bluetooth</string>
