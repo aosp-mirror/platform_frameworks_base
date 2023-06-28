@@ -187,6 +187,7 @@ constructor(
 
     /**
      * Handle request to change the current position in the media track.
+     *
      * @param position Place to seek to in the track.
      */
     @AnyThread
@@ -235,6 +236,24 @@ constructor(
             else true
         _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration)
         checkIfPollingNeeded()
+    }
+
+    /**
+     * Set the progress to a fixed percentage value that cannot be changed by the user.
+     *
+     * @param percent value between 0 and 1
+     */
+    fun updateStaticProgress(percent: Double) {
+        val position = (percent * 100).toInt()
+        _data =
+            Progress(
+                enabled = true,
+                seekAvailable = false,
+                playing = false,
+                scrubbing = false,
+                elapsedTime = position,
+                duration = 100,
+            )
     }
 
     /**

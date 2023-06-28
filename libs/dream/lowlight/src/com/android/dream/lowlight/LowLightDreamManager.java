@@ -111,7 +111,7 @@ public final class LowLightDreamManager {
 
         mAmbientLightMode = ambientLightMode;
 
-        mDreamManager.setSystemDreamComponent(mAmbientLightMode == AMBIENT_LIGHT_MODE_LOW_LIGHT
-                ? mLowLightDreamComponent : null);
+        boolean shouldEnterLowLight = mAmbientLightMode == AMBIENT_LIGHT_MODE_LOW_LIGHT;
+        mDreamManager.setSystemDreamComponent(shouldEnterLowLight ? mLowLightDreamComponent : null);
     }
 }

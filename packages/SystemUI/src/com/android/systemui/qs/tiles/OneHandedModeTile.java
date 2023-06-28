@@ -47,6 +47,9 @@ import javax.inject.Inject;
 
 /** Quick settings tile: One-handed mode **/
 public class OneHandedModeTile extends QSTileImpl<BooleanState> {
+
+    public static final String TILE_SPEC = "onehanded";
+
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_one_handed_mode);
     private final SettingObserver mSetting;

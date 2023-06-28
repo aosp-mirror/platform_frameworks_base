@@ -17,7 +17,9 @@
 package com.android.systemui.settings.dagger;
 
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.UserManager;
 
@@ -25,6 +27,8 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.DisplayTrackerImpl;
 import com.android.systemui.settings.UserContentResolverProvider;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserFileManager;
@@ -57,13 +61,24 @@ public abstract class MultiUserUtilsModule {
     static UserTracker provideUserTracker(
             Context context,
             UserManager userManager,
+            IActivityManager iActivityManager,
             DumpManager dumpManager,
             @Background Handler handler
     ) {
         int startingUser = ActivityManager.getCurrentUser();
-        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, dumpManager, handler);
+        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, iActivityManager,
+                dumpManager, handler);
         tracker.initialize(startingUser);
         return tracker;
+    }
+
+    @SysUISingleton
+    @Provides
+    static DisplayTracker provideDisplayTracker(
+            DisplayManager displayManager,
+            @Background Handler handler
+    ) {
+        return new DisplayTrackerImpl(displayManager, handler);
     }
 
     @Binds

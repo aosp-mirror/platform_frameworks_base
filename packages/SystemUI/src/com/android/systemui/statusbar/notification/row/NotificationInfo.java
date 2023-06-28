@@ -204,10 +204,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean wasShownHighPriority,
-            AssistantFeedbackController assistantFeedbackController)
+            AssistantFeedbackController assistantFeedbackController,
+            MetricsLogger metricsLogger)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
-        mMetricsLogger = Dependency.get(MetricsLogger.class);
+        mMetricsLogger = metricsLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mChannelEditorDialogController = channelEditorDialogController;
         mAssistantFeedbackController = assistantFeedbackController;

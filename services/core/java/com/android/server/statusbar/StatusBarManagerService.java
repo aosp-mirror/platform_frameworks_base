@@ -152,6 +152,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
     static final long REQUEST_LISTENING_MUST_MATCH_PACKAGE = 172251878L;
 
+    /**
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    static final long REQUEST_LISTENING_OTHER_USER_NOOP = 242194868L;
+
     private final Context mContext;
 
     private final Handler mHandler = new Handler();
@@ -712,6 +719,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 try {
                     mBar.enterStageSplitFromRunningApp(leftOrTop);
                 } catch (RemoteException ex) { }
+            }
+        }
+
+        @Override
+        public void showMediaOutputSwitcher(String packageName) {
+            if (mBar != null) {
+                try {
+                    mBar.showMediaOutputSwitcher(packageName);
+                } catch (RemoteException ex) {
+                }
             }
         }
     };
@@ -1849,7 +1866,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
             // Check current user
             if (userId != currentUser) {
-                throw new IllegalArgumentException("User " + userId + " is not the current user.");
+                if (CompatChanges.isChangeEnabled(REQUEST_LISTENING_OTHER_USER_NOOP, callingUid)) {
+                    return;
+                } else {
+                    throw new IllegalArgumentException(
+                            "User " + userId + " is not the current user.");
+                }
             }
         }
         if (mBar != null) {

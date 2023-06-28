@@ -16,6 +16,8 @@
 
 package com.android.server.location.injector;
 
+import static com.android.server.location.LocationManagerService.TAG;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.android.server.FgThread;
 
@@ -67,8 +70,12 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                 }
 
                 synchronized (SystemEmergencyHelper.this) {
-                    mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
-                            intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                    try {
+                        mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
+                                intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                    } catch (IllegalStateException e) {
+                        Log.w(TAG, "Failed to call TelephonyManager.isEmergencyNumber().", e);
+                    }
                 }
             }
         }, new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));

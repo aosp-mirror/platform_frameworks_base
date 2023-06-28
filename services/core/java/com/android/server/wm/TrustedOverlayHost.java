@@ -80,6 +80,12 @@ class TrustedOverlayHost {
         }
     }
 
+    void setVisibility(SurfaceControl.Transaction t, boolean visible) {
+        if (mSurfaceControl != null) {
+            t.setVisibility(mSurfaceControl, visible);
+        }
+    }
+
     void addOverlay(SurfaceControlViewHost.SurfacePackage p, SurfaceControl currentParent) {
         requireOverlaySurfaceControl();
         mOverlays.add(p);

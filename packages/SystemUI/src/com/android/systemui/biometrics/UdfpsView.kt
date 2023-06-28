@@ -111,10 +111,6 @@ class UdfpsView(
         }
     }
 
-    fun onTouchOutsideView() {
-        animationViewController?.onTouchOutsideView()
-    }
-
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         Log.v(TAG, "onAttachedToWindow")

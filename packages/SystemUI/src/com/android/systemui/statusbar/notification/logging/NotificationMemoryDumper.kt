@@ -18,9 +18,12 @@
 package com.android.systemui.statusbar.notification.logging
 
 import android.stats.sysui.NotificationEnums
+import android.util.Log
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.dump.DumpsysTableLogger
+import com.android.systemui.dump.Row
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -33,6 +36,7 @@ constructor(val dumpManager: DumpManager, val notificationPipeline: NotifPipelin
 
     fun init() {
         dumpManager.registerNormalDumpable(javaClass.simpleName, this)
+        Log.i("NotificationMemory", "Registered dumpable.")
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -45,27 +49,36 @@ constructor(val dumpManager: DumpManager, val notificationPipeline: NotifPipelin
 
     /** Renders a table of notification object usage into passed [PrintWriter]. */
     private fun dumpNotificationObjects(pw: PrintWriter, memoryUse: List<NotificationMemoryUsage>) {
-        pw.println("Notification Object Usage")
-        pw.println("-----------")
-        pw.println(
-            "Package".padEnd(35) +
-                "\t\tSmall\tLarge\t${"Style".padEnd(15)}\t\tStyle\tBig\tExtend.\tExtras\tCustom"
-        )
-        pw.println("".padEnd(35) + "\t\tIcon\tIcon\t${"".padEnd(15)}\t\tIcon\tPicture\t \t \tView")
-        pw.println()
-
-        memoryUse.forEach { use ->
-            pw.println(
-                use.packageName.padEnd(35) +
-                    "\t\t" +
-                    "${use.objectUsage.smallIcon}\t${use.objectUsage.largeIcon}\t" +
-                    (styleEnumToString(use.objectUsage.style).take(15) ?: "").padEnd(15) +
-                    "\t\t${use.objectUsage.styleIcon}\t" +
-                    "${use.objectUsage.bigPicture}\t${use.objectUsage.extender}\t" +
-                    "${use.objectUsage.extras}\t${use.objectUsage.hasCustomView}\t" +
-                    use.notificationKey
+        val columns =
+            listOf(
+                "Package",
+                "Small Icon",
+                "Large Icon",
+                "Style",
+                "Style Icon",
+                "Big Picture",
+                "Extender",
+                "Extras",
+                "Custom View",
+                "Key"
             )
-        }
+        val rows: List<Row> =
+            memoryUse.map {
+                listOf(
+                    it.packageName,
+                    toKb(it.objectUsage.smallIcon),
+                    toKb(it.objectUsage.largeIcon),
+                    styleEnumToString(it.objectUsage.style),
+                    toKb(it.objectUsage.styleIcon),
+                    toKb(it.objectUsage.bigPicture),
+                    toKb(it.objectUsage.extender),
+                    toKb(it.objectUsage.extras),
+                    it.objectUsage.hasCustomView.toString(),
+                    // | is a  field delimiter in the output format so we need to replace
+                    // it to avoid breakage.
+                    it.notificationKey.replace('|', '│')
+                )
+            }
 
         // Calculate totals for easily glanceable summary.
         data class Totals(
@@ -88,18 +101,23 @@ constructor(val dumpManager: DumpManager, val notificationPipeline: NotifPipelin
                 t
             }
 
-        pw.println()
-        pw.println("TOTALS")
-        pw.println(
-            "".padEnd(35) +
-                "\t\t" +
-                "${toKb(totals.smallIcon)}\t${toKb(totals.largeIcon)}\t" +
-                "".padEnd(15) +
-                "\t\t${toKb(totals.styleIcon)}\t" +
-                "${toKb(totals.bigPicture)}\t${toKb(totals.extender)}\t" +
-                toKb(totals.extras)
-        )
-        pw.println()
+        val totalsRow: List<Row> =
+            listOf(
+                listOf(
+                    "TOTALS",
+                    toKb(totals.smallIcon),
+                    toKb(totals.largeIcon),
+                    "",
+                    toKb(totals.styleIcon),
+                    toKb(totals.bigPicture),
+                    toKb(totals.extender),
+                    toKb(totals.extras),
+                    "",
+                    ""
+                )
+            )
+        val tableLogger = DumpsysTableLogger("Notification Object Usage", columns, rows + totalsRow)
+        tableLogger.printTableData(pw)
     }
 
     /** Renders a table of notification view usage into passed [PrintWriter] */
@@ -116,40 +134,65 @@ constructor(val dumpManager: DumpManager, val notificationPipeline: NotifPipelin
             var softwareBitmapsPenalty: Int = 0,
         )
 
-        val totals = Totals()
-        pw.println("Notification View Usage")
-        pw.println("-----------")
-        pw.println("View Type".padEnd(24) + "\tSmall\tLarge\tStyle\tCustom\tSoftware")
-        pw.println("".padEnd(24) + "\tIcon\tIcon\tUse\tView\tBitmaps")
-        pw.println()
-        memoryUse
-            .filter { it.viewUsage.isNotEmpty() }
-            .forEach { use ->
-                pw.println(use.packageName + " " + use.notificationKey)
-                use.viewUsage.forEach { view ->
-                    pw.println(
-                        "  ${view.viewType.toString().padEnd(24)}\t${view.smallIcon}" +
-                            "\t${view.largeIcon}\t${view.style}" +
-                            "\t${view.customViews}\t${view.softwareBitmapsPenalty}"
-                    )
-
-                    if (view.viewType == ViewType.TOTAL) {
-                        totals.smallIcon += view.smallIcon
-                        totals.largeIcon += view.largeIcon
-                        totals.style += view.style
-                        totals.customViews += view.customViews
-                        totals.softwareBitmapsPenalty += view.softwareBitmapsPenalty
+        val columns =
+            listOf(
+                "Package",
+                "View Type",
+                "Small Icon",
+                "Large Icon",
+                "Style Use",
+                "Custom View",
+                "Software Bitmaps",
+                "Key"
+            )
+        val rows =
+            memoryUse
+                .filter { it.viewUsage.isNotEmpty() }
+                .flatMap { use ->
+                    use.viewUsage.map { view ->
+                        listOf(
+                            use.packageName,
+                            view.viewType.toString(),
+                            toKb(view.smallIcon),
+                            toKb(view.largeIcon),
+                            toKb(view.style),
+                            toKb(view.customViews),
+                            toKb(view.softwareBitmapsPenalty),
+                            // | is a  field delimiter in the output format so we need to replace
+                            // it to avoid breakage.
+                            use.notificationKey.replace('|', '│')
+                        )
                     }
                 }
+
+        val totals = Totals()
+        memoryUse
+            .filter { it.viewUsage.isNotEmpty() }
+            .map { it.viewUsage.firstOrNull { view -> view.viewType == ViewType.TOTAL } }
+            .filterNotNull()
+            .forEach { view ->
+                totals.smallIcon += view.smallIcon
+                totals.largeIcon += view.largeIcon
+                totals.style += view.style
+                totals.customViews += view.customViews
+                totals.softwareBitmapsPenalty += view.softwareBitmapsPenalty
             }
-        pw.println()
-        pw.println("TOTALS")
-        pw.println(
-            "  ${"".padEnd(24)}\t${toKb(totals.smallIcon)}" +
-                "\t${toKb(totals.largeIcon)}\t${toKb(totals.style)}" +
-                "\t${toKb(totals.customViews)}\t${toKb(totals.softwareBitmapsPenalty)}"
-        )
-        pw.println()
+
+        val totalsRow: List<Row> =
+            listOf(
+                listOf(
+                    "TOTALS",
+                    "",
+                    toKb(totals.smallIcon),
+                    toKb(totals.largeIcon),
+                    toKb(totals.style),
+                    toKb(totals.customViews),
+                    toKb(totals.softwareBitmapsPenalty),
+                    ""
+                )
+            )
+        val tableLogger = DumpsysTableLogger("Notification View Usage", columns, rows + totalsRow)
+        tableLogger.printTableData(pw)
     }
 
     private fun styleEnumToString(styleEnum: Int): String =
@@ -168,6 +211,10 @@ constructor(val dumpManager: DumpManager, val notificationPipeline: NotifPipelin
         }
 
     private fun toKb(bytes: Int): String {
-        return (bytes / 1024).toString() + " KB"
+        if (bytes == 0) {
+            return "--"
+        }
+
+        return "%.2f KB".format(bytes / 1024f)
     }
 }

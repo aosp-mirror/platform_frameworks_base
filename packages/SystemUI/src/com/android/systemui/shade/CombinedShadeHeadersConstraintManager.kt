@@ -31,7 +31,7 @@ operator fun ConstraintChange?.plus(other: ConstraintChange?): ConstraintChange?
 
 /**
  * Contains all changes that need to be performed to the different [ConstraintSet] in
- * [LargeScreenShadeHeaderController].
+ * [ShadeHeaderController].
  */
 data class ConstraintsChanges(
     val qqsConstraintsChanges: ConstraintChange? = null,
@@ -46,7 +46,7 @@ data class ConstraintsChanges(
 }
 
 /**
- * Determines [ConstraintChanges] for [LargeScreenShadeHeaderController] based on configurations.
+ * Determines [ConstraintChanges] for [ShadeHeaderController] based on configurations.
  *
  * Given that the number of different scenarios is not that large, having specific methods instead
  * of a full map between state and [ConstraintSet] was preferred.

@@ -16,14 +16,21 @@
 
 package com.android.systemui.util.kotlin
 
+import com.android.systemui.util.time.SystemClock
+import com.android.systemui.util.time.SystemClockImpl
+import kotlinx.coroutines.CoroutineStart
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 /**
  * Returns a new [Flow] that combines the two most recent emissions from [this] using [transform].
@@ -167,3 +174,89 @@ fun <A, B, C> Flow<A>.sample(other: Flow<B>, transform: suspend (A, B) -> C): Fl
  * Note that the returned Flow will not emit anything until [other] has emitted at least one value.
  */
 fun <A> Flow<*>.sample(other: Flow<A>): Flow<A> = sample(other) { _, a -> a }
+
+/**
+ * Returns a flow that mirrors the original flow, but delays values following emitted values for the
+ * given [periodMs]. If the original flow emits more than one value during this period, only the
+ * latest value is emitted.
+ *
+ * Example:
+ *
+ * ```kotlin
+ * flow {
+ *     emit(1)     // t=0ms
+ *     delay(90)
+ *     emit(2)     // t=90ms
+ *     delay(90)
+ *     emit(3)     // t=180ms
+ *     delay(1010)
+ *     emit(4)     // t=1190ms
+ *     delay(1010)
+ *     emit(5)     // t=2200ms
+ * }.throttle(1000)
+ * ```
+ *
+ * produces the following emissions at the following times
+ *
+ * ```text
+ * 1 (t=0ms), 3 (t=1000ms), 4 (t=2000ms), 5 (t=3000ms)
+ * ```
+ */
+fun <T> Flow<T>.throttle(periodMs: Long): Flow<T> = this.throttle(periodMs, SystemClockImpl())
+
+/**
+ * Returns a flow that mirrors the original flow, but delays values following emitted values for the
+ * given [periodMs] as reported by the given [clock]. If the original flow emits more than one value
+ * during this period, only The latest value is emitted.
+ *
+ * Example:
+ *
+ * ```kotlin
+ * flow {
+ *     emit(1)     // t=0ms
+ *     delay(90)
+ *     emit(2)     // t=90ms
+ *     delay(90)
+ *     emit(3)     // t=180ms
+ *     delay(1010)
+ *     emit(4)     // t=1190ms
+ *     delay(1010)
+ *     emit(5)     // t=2200ms
+ * }.throttle(1000)
+ * ```
+ *
+ * produces the following emissions at the following times
+ *
+ * ```text
+ * 1 (t=0ms), 3 (t=1000ms), 4 (t=2000ms), 5 (t=3000ms)
+ * ```
+ */
+fun <T> Flow<T>.throttle(periodMs: Long, clock: SystemClock): Flow<T> = channelFlow {
+    coroutineScope {
+        var previousEmitTimeMs = 0L
+        var delayJob: Job? = null
+        var sendJob: Job? = null
+        val outerScope = this
+
+        collect {
+            delayJob?.cancel()
+            sendJob?.join()
+            val currentTimeMs = clock.elapsedRealtime()
+            val timeSinceLastEmit = currentTimeMs - previousEmitTimeMs
+            val timeUntilNextEmit = max(0L, periodMs - timeSinceLastEmit)
+            if (timeUntilNextEmit > 0L) {
+                // We create delayJob to allow cancellation during the delay period
+                delayJob = launch {
+                    delay(timeUntilNextEmit)
+                    sendJob = outerScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                        send(it)
+                        previousEmitTimeMs = clock.elapsedRealtime()
+                    }
+                }
+            } else {
+                send(it)
+                previousEmitTimeMs = currentTimeMs
+            }
+        }
+    }
+}

@@ -1,0 +1,4 @@
+
+per-file PackageMonitorTest.java = file:/core/java/android/content/pm/OWNERS
+
+per-file Overlay* = file:/core/java/android/content/res/OWNERS

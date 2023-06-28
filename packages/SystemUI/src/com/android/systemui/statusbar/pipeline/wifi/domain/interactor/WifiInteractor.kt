@@ -21,8 +21,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,24 +58,29 @@ interface WifiInteractor {
 }
 
 @SysUISingleton
-class WifiInteractorImpl @Inject constructor(
+class WifiInteractorImpl
+@Inject
+constructor(
     connectivityRepository: ConnectivityRepository,
     wifiRepository: WifiRepository,
 ) : WifiInteractor {
 
-    override val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
-        when (info) {
-            is WifiNetworkModel.Unavailable -> null
-            is WifiNetworkModel.Inactive -> null
-            is WifiNetworkModel.CarrierMerged -> null
-            is WifiNetworkModel.Active -> when {
-                info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
-                    info.passpointProviderFriendlyName
-                info.ssid != WifiManager.UNKNOWN_SSID -> info.ssid
-                else -> null
+    override val ssid: Flow<String?> =
+        wifiRepository.wifiNetwork.map { info ->
+            when (info) {
+                is WifiNetworkModel.Unavailable -> null
+                is WifiNetworkModel.Invalid -> null
+                is WifiNetworkModel.Inactive -> null
+                is WifiNetworkModel.CarrierMerged -> null
+                is WifiNetworkModel.Active ->
+                    when {
+                        info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
+                            info.passpointProviderFriendlyName
+                        info.ssid != WifiManager.UNKNOWN_SSID -> info.ssid
+                        else -> null
+                    }
             }
         }
-    }
 
     override val isEnabled: Flow<Boolean> = wifiRepository.isWifiEnabled
 
@@ -85,7 +90,6 @@ class WifiInteractorImpl @Inject constructor(
 
     override val activity: StateFlow<DataActivityModel> = wifiRepository.wifiActivity
 
-    override val isForceHidden: Flow<Boolean> = connectivityRepository.forceHiddenSlots.map {
-        it.contains(ConnectivitySlot.WIFI)
-    }
+    override val isForceHidden: Flow<Boolean> =
+        connectivityRepository.forceHiddenSlots.map { it.contains(ConnectivitySlot.WIFI) }
 }

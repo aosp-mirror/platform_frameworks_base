@@ -40,6 +40,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
@@ -81,8 +82,8 @@ import java.util.function.IntConsumer;
 public final class PermissionControllerManager {
     private static final String TAG = PermissionControllerManager.class.getSimpleName();
 
-    private static final long REQUEST_TIMEOUT_MILLIS = 60000;
-    private static final long UNBIND_TIMEOUT_MILLIS = 10000;
+    private static final long REQUEST_TIMEOUT_MILLIS = 60000L * Build.HW_TIMEOUT_MULTIPLIER;
+    private static final long UNBIND_TIMEOUT_MILLIS = 10000L * Build.HW_TIMEOUT_MULTIPLIER;
     private static final int CHUNK_SIZE = 4 * 1024;
 
     private static final Object sLock = new Object();

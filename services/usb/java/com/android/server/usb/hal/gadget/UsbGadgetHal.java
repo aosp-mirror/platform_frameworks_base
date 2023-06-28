@@ -29,69 +29,6 @@ import java.lang.String;
  */
 public interface UsbGadgetHal {
     /**
-     * Power role: This USB port can act as a source (provide power).
-     * @hide
-     */
-    public static final int HAL_POWER_ROLE_SOURCE = 1;
-
-    /**
-     * Power role: This USB port can act as a sink (receive power).
-     * @hide
-     */
-    public static final int HAL_POWER_ROLE_SINK = 2;
-
-    @IntDef(prefix = { "HAL_POWER_ROLE_" }, value = {
-            HAL_POWER_ROLE_SOURCE,
-            HAL_POWER_ROLE_SINK
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface HalUsbPowerRole{}
-
-    /**
-     * Data role: This USB port can act as a host (access data services).
-     * @hide
-     */
-    public static final int HAL_DATA_ROLE_HOST = 1;
-
-    /**
-     * Data role: This USB port can act as a device (offer data services).
-     * @hide
-     */
-    public static final int HAL_DATA_ROLE_DEVICE = 2;
-
-    @IntDef(prefix = { "HAL_DATA_ROLE_" }, value = {
-            HAL_DATA_ROLE_HOST,
-            HAL_DATA_ROLE_DEVICE
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface HalUsbDataRole{}
-
-    /**
-     * This USB port can act as a downstream facing port (host).
-     *
-     * @hide
-     */
-    public static final int HAL_MODE_DFP = 1;
-
-    /**
-     * This USB port can act as an upstream facing port (device).
-     *
-     * @hide
-     */
-    public static final int HAL_MODE_UFP = 2;
-    @IntDef(prefix = { "HAL_MODE_" }, value = {
-            HAL_MODE_DFP,
-            HAL_MODE_UFP,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface HalUsbPortMode{}
-
-    /**
-     * UsbPortManager would call this when the system is done booting.
-     */
-    public void systemReady();
-
-    /**
      * This function is used to query the USB functions included in the
      * current USB configuration.
      *

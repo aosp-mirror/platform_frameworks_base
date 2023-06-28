@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ด้านบน 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ด้านบน 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"เต็มหน้าจอด้านล่าง"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"แยกไปทางซ้าย"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"แยกไปทางขวา"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"แยกไปด้านบน"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"แยกไปด้านล่าง"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"การใช้โหมดมือเดียว"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"หากต้องการออก ให้เลื่อนขึ้นจากด้านล่างของหน้าจอหรือแตะที่ใดก็ได้เหนือแอป"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"เริ่มโหมดมือเดียว"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"แตะสองครั้งด้านนอกแอปเพื่อเปลี่ยนตำแหน่ง"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"รับทราบ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ขยายเพื่อดูข้อมูลเพิ่มเติม"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"รีสตาร์ทเพื่อรับมุมมองที่ดียิ่งขึ้นใช่ไหม"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"คุณรีสตาร์ทแอปเพื่อรับมุมมองที่ดียิ่งขึ้นบนหน้าจอได้ แต่ความคืบหน้าและการเปลี่ยนแปลงใดๆ ที่ไม่ได้บันทึกอาจหายไป"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ยกเลิก"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"รีสตาร์ท"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ไม่ต้องแสดงข้อความนี้อีก"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"แตะสองครั้ง\nเพื่อย้ายแอปนี้"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ขยายใหญ่สุด"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ย่อ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ปิด"</string>
     <string name="back_button_text" msgid="1469718707134137085">"กลับ"</string>
     <string name="handle_text" msgid="1766582106752184456">"แฮนเดิล"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"ไอคอนแอป"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"เต็มหน้าจอ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"โหมดเดสก์ท็อป"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"แยกหน้าจอ"</string>
     <string name="more_button_text" msgid="3655388105592893530">"เพิ่มเติม"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ล่องลอย"</string>
+    <string name="select_text" msgid="5139083974039906583">"เลือก"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ภาพหน้าจอ"</string>
+    <string name="close_text" msgid="4986518933445178928">"ปิด"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"ปิดเมนู"</string>
 </resources>

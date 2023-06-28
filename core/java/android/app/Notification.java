@@ -6189,10 +6189,8 @@ public class Notification implements Parcelable
         private RemoteViews generateActionButton(Action action, boolean emphasizedMode,
                 StandardTemplateParams p) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    emphasizedMode ? getEmphasizedActionLayoutResource()
-                            : tombstone ? getActionTombstoneLayoutResource()
-                                    : getActionLayoutResource());
+            final RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
+                    getActionButtonLayoutResource(emphasizedMode, tombstone));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
@@ -6204,6 +6202,12 @@ public class Notification implements Parcelable
                 // change the background bgColor
                 CharSequence title = action.title;
                 int buttonFillColor = getColors(p).getSecondaryAccentColor();
+                if (tombstone) {
+                    buttonFillColor = setAlphaComponentByFloatDimen(mContext,
+                            ContrastColorUtil.resolveSecondaryColor(
+                                    mContext, getColors(p).getBackgroundColor(), mInNightMode),
+                            R.dimen.notification_action_disabled_container_alpha);
+                }
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
@@ -6219,8 +6223,14 @@ public class Notification implements Parcelable
                     title = ensureColorSpanContrast(title, buttonFillColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
-                final int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
+                int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
+                if (tombstone) {
+                    textColor = setAlphaComponentByFloatDimen(mContext,
+                            ContrastColorUtil.resolveSecondaryColor(
+                                    mContext, getColors(p).getBackgroundColor(), mInNightMode),
+                            R.dimen.notification_action_disabled_content_alpha);
+                }
                 button.setTextColor(R.id.action0, textColor);
                 // We only want about 20% alpha for the ripple
                 final int rippleColor = (textColor & 0x00ffffff) | 0x33000000;
@@ -6248,6 +6258,26 @@ public class Notification implements Parcelable
                 button.setIntTag(R.id.action0, R.id.notification_action_index_tag, actionIndex);
             }
             return button;
+        }
+
+        private int getActionButtonLayoutResource(boolean emphasizedMode, boolean tombstone) {
+            if (emphasizedMode) {
+                return tombstone ? getEmphasizedTombstoneActionLayoutResource()
+                        : getEmphasizedActionLayoutResource();
+            } else {
+                return tombstone ? getActionTombstoneLayoutResource()
+                        : getActionLayoutResource();
+            }
+        }
+
+        /**
+         * Set the alpha component of {@code color} to be {@code alphaDimenResId}.
+         */
+        private static int setAlphaComponentByFloatDimen(Context context, @ColorInt int color,
+                @DimenRes int alphaDimenResId) {
+            final TypedValue alphaValue = new TypedValue();
+            context.getResources().getValue(alphaDimenResId, alphaValue, true);
+            return ColorUtils.setAlphaComponent(color, Math.round(alphaValue.getFloat() * 255));
         }
 
         /**
@@ -6729,6 +6759,10 @@ public class Notification implements Parcelable
             return R.layout.notification_material_action_emphasized;
         }
 
+        private int getEmphasizedTombstoneActionLayoutResource() {
+            return R.layout.notification_material_action_emphasized_tombstone;
+        }
+
         private int getActionTombstoneLayoutResource() {
             return R.layout.notification_material_action_tombstone;
         }
@@ -6935,8 +6969,10 @@ public class Notification implements Parcelable
     /**
      * Returns whether an app can colorize due to the android.permission.USE_COLORIZED_NOTIFICATIONS
      * permission. The permission is checked when a notification is enqueued.
+     *
+     * @hide
      */
-    private boolean hasColorizedPermission() {
+    public boolean hasColorizedPermission() {
         return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
     }
 
@@ -7948,8 +7984,6 @@ public class Notification implements Parcelable
          * @hide
          */
         public MessagingStyle setShortcutIcon(@Nullable Icon conversationIcon) {
-            // TODO(b/228941516): This icon should be downscaled to avoid using too much memory,
-            // see reduceImageSizes.
             mShortcutIcon = conversationIcon;
             return this;
         }

@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 
@@ -52,6 +53,7 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
     private ConfigurationController mConfigurationController;
     @Mock
     private ActivityStarter mActivityStarter;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private DumpManager mDumpManager = new DumpManager();
 
     private KeyguardSliceViewController mController;
@@ -63,7 +65,7 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
         when(mView.getContext()).thenReturn(mContext);
         mController = new KeyguardSliceViewController(
                 mView, mActivityStarter, mConfigurationController,
-                mTunerService, mDumpManager);
+                mTunerService, mDumpManager, mDisplayTracker);
         mController.setupUri(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
     }
 

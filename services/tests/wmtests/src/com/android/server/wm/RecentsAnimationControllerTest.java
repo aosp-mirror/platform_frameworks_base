@@ -468,7 +468,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         spyOn(mDisplayContent.mFixedRotationTransitionListener);
         final ActivityRecord recents = mock(ActivityRecord.class);
-        recents.mOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        recents.setOverrideOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         doReturn(ORIENTATION_PORTRAIT).when(recents)
                 .getRequestedConfigurationOrientation(anyBoolean());
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recents);

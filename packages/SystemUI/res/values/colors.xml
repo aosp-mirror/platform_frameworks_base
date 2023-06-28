@@ -161,6 +161,7 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#EA4335</color>
+    <color name="GM2_red_600">#B3261E</color>
     <color name="GM2_red_700">#C5221F</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
@@ -207,6 +208,11 @@
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
     <color name="controls_task_view_bg">#CC191C1D</color>
 
+    <!-- Keyboard backlight indicator-->
+    <color name="backlight_indicator_step_filled">#F6E388</color>
+    <color name="backlight_indicator_step_empty">#494740</color>
+    <color name="backlight_indicator_background">#32302A</color>
+
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>
 
@@ -223,6 +229,9 @@
     <color name="wallet_card_border">#33FFFFFF</color>
 
     <color name="people_tile_background">@color/material_dynamic_secondary95</color>
+
+    <!-- Chipbar -->
+    <color name="chipbar_text_and_icon_color">@android:color/system_accent2_900</color>
 
     <!-- Internet Dialog -->
     <!-- Material next state on color-->

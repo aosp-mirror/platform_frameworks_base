@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Bovenste scherm 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Bovenste scherm 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Onderste scherm op volledig scherm"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Gesplitst scherm links"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Gesplitst scherm rechts"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Gesplitst scherm boven"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Gesplitst scherm onder"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bediening met 1 hand gebruiken"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Als je wilt afsluiten, swipe je omhoog vanaf de onderkant van het scherm of tik je ergens boven de app"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bediening met 1 hand starten"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik naast een app om deze opnieuw te positioneren"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Uitvouwen voor meer informatie."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Opnieuw opstarten voor een betere weergave?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Je kunt de app opnieuw opstarten zodat deze er beter uitziet op je scherm, maar je kunt je voortgang of niet-opgeslagen wijzigingen kwijtraken"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Annuleren"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Opnieuw opstarten"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Niet opnieuw tonen"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Dubbeltik om\ndeze app te verplaatsen"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximaliseren"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimaliseren"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Sluiten"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Terug"</string>
     <string name="handle_text" msgid="1766582106752184456">"Gebruikersnaam"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"App-icoon"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Volledig scherm"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Gesplitst scherm"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Meer"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Zwevend"</string>
+    <string name="select_text" msgid="5139083974039906583">"Selecteren"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
+    <string name="close_text" msgid="4986518933445178928">"Sluiten"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Menu sluiten"</string>
 </resources>

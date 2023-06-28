@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
 import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -28,15 +31,17 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -50,6 +55,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
@@ -59,6 +65,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeControllerImpl;
@@ -88,9 +95,12 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -139,6 +149,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private InteractionJankMonitor mJankMonitor;
+    @Mock
+    private UserTracker mUserTracker;
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private ExpandableNotificationRow mNotificationRow;
     private ExpandableNotificationRow mBubbleNotificationRow;
@@ -183,6 +195,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mVisibilityProvider.obtain(any(NotificationEntry.class), anyBoolean()))
                 .thenAnswer(invocation -> NotificationVisibility.obtain(
                         invocation.<NotificationEntry>getArgument(0).getKey(), 0, 1, false));
+        when(mUserTracker.getUserHandle()).thenReturn(
+                UserHandle.of(ActivityManager.getCurrentUser()));
 
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
@@ -222,7 +236,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mActivityLaunchAnimator,
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),
-                        mock(FeatureFlags.class)
+                        mock(FeatureFlags.class),
+                        mUserTracker
                 );
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
@@ -390,5 +405,41 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // THEN display should try wake up for the full screen intent
         verify(mCentralSurfaces).wakeUpForFullScreenIntent();
+    }
+
+    @Test
+    public void testOnFullScreenIntentWhenDozing_logToStatsd() {
+        final int kTestUid = 12345;
+        final String kTestActivityName = "TestActivity";
+        // GIVEN entry that can has a full screen intent that can show
+        PendingIntent mockFullScreenIntent = mock(PendingIntent.class);
+        when(mockFullScreenIntent.getCreatorUid()).thenReturn(kTestUid);
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.name = kTestActivityName;
+        when(mockFullScreenIntent.queryIntentComponents(anyInt()))
+                .thenReturn(Arrays.asList(resolveInfo));
+        Notification.Builder nb = new Notification.Builder(mContext, "a")
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFullScreenIntent(mockFullScreenIntent, true);
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0,
+                "tag" + System.currentTimeMillis(), 0, 0,
+                nb.build(), new UserHandle(0), null, 0);
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(entry.getImportance()).thenReturn(NotificationManager.IMPORTANCE_HIGH);
+        when(entry.getSbn()).thenReturn(sbn);
+        MockitoSession mockingSession = mockitoSession()
+                .mockStatic(FrameworkStatsLog.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+
+        // WHEN
+        mNotificationActivityStarter.launchFullScreenIntent(entry);
+
+        // THEN the full screen intent should be logged to statsd.
+        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.FULL_SCREEN_INTENT_LAUNCHED,
+                kTestUid, kTestActivityName));
+        mockingSession.finishMocking();
     }
 }

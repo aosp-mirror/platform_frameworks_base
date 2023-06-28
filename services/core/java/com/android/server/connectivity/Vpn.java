@@ -1389,7 +1389,7 @@ public class Vpn {
         }
 
         // Check that the caller is authorized.
-        enforceControlPermission();
+        enforceControlPermissionOrInternalCaller();
 
         // Stop an existing always-on VPN from being dethroned by other apps.
         if (mAlwaysOn && !isCurrentPreparedPackage(newPackage)) {

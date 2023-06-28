@@ -20,8 +20,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_STORAGE;
 import static com.android.systemui.screenshot.LogConfig.logTag;
-import static com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType.QUICK_SHARE_ACTION;
-import static com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType.REGULAR_SMART_ACTIONS;
+import static com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType;
 
 import android.app.ActivityTaskManager;
 import android.app.Notification;
@@ -155,7 +154,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
                     mScreenshotSmartActions.getSmartActionsFuture(
-                            mScreenshotId, uri, image, mSmartActionsProvider, REGULAR_SMART_ACTIONS,
+                            mScreenshotId, uri, image, mSmartActionsProvider,
+                            ScreenshotSmartActionType.REGULAR_SMART_ACTIONS,
                             smartActionsEnabled, user);
             List<Notification.Action> smartActions = new ArrayList<>();
             if (smartActionsEnabled) {
@@ -166,7 +166,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 smartActions.addAll(buildSmartActions(
                         mScreenshotSmartActions.getSmartActions(
                                 mScreenshotId, smartActionsFuture, timeoutMs,
-                                mSmartActionsProvider, REGULAR_SMART_ACTIONS),
+                                mSmartActionsProvider,
+                                ScreenshotSmartActionType.REGULAR_SMART_ACTIONS),
                         mContext));
             }
 
@@ -476,7 +477,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         CompletableFuture<List<Notification.Action>> quickShareActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture(
                         mScreenshotId, null, image, mSmartActionsProvider,
-                        QUICK_SHARE_ACTION,
+                        ScreenshotSmartActionType.QUICK_SHARE_ACTION,
                         true /* smartActionsEnabled */, user);
         int timeoutMs = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -485,7 +486,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         List<Notification.Action> quickShareActions =
                 mScreenshotSmartActions.getSmartActions(
                         mScreenshotId, quickShareActionsFuture, timeoutMs,
-                        mSmartActionsProvider, QUICK_SHARE_ACTION);
+                        mSmartActionsProvider,
+                        ScreenshotSmartActionType.QUICK_SHARE_ACTION);
         if (!quickShareActions.isEmpty()) {
             mQuickShareData.quickShareAction = quickShareActions.get(0);
             mParams.mQuickShareActionsReadyListener.onActionsReady(mQuickShareData);

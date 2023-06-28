@@ -180,6 +180,10 @@ void SkiaVulkanPipeline::onContextDestroyed() {
     }
 }
 
+const SkM44& SkiaVulkanPipeline::getPixelSnapMatrix() const {
+    return mVkSurface->getPixelSnapMatrix();
+}
+
 } /* namespace skiapipeline */
 } /* namespace uirenderer */
 } /* namespace android */

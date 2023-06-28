@@ -33,16 +33,16 @@ import com.android.systemui.backup.BackupHelper
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.FakeSelectedComponentRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.io.File
-import java.util.Optional
-import java.util.function.Consumer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -58,6 +58,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -67,6 +68,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.io.File
+import java.util.*
+import java.util.function.Consumer
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -88,6 +92,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var userTracker: UserTracker
     @Mock
     private lateinit var userFileManager: UserFileManager
+    @Mock
+    private lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
 
     @Captor
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
@@ -100,10 +106,10 @@ class ControlsControllerImplTest : SysuiTestCase() {
             ArgumentCaptor<ControlsBindingController.LoadCallback>
 
     @Captor
-    private lateinit var userTrackerCallbackCaptor: ArgumentCaptor<UserTracker.Callback>
-    @Captor
     private lateinit var listingCallbackCaptor:
             ArgumentCaptor<ControlsListingController.ControlsListingCallback>
+
+    private val preferredPanelRepository = FakeSelectedComponentRepository()
 
     private lateinit var delayableExecutor: FakeExecutor
     private lateinit var controller: ControlsControllerImpl
@@ -144,6 +150,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf())
         `when`(userTracker.userHandle).thenReturn(UserHandle.of(user))
 
         delayableExecutor = FakeExecutor(FakeSystemClock())
@@ -164,18 +171,16 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 wrapper,
                 delayableExecutor,
                 uiController,
+                preferredPanelRepository,
                 bindingController,
                 listingController,
                 userFileManager,
                 userTracker,
+                authorizedPanelsRepository,
                 Optional.of(persistenceWrapper),
                 mock(DumpManager::class.java)
         )
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
-
-        verify(userTracker).addCallback(
-            capture(userTrackerCallbackCaptor), any()
-        )
 
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
@@ -220,14 +225,37 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 mContext,
                 delayableExecutor,
                 uiController,
+                preferredPanelRepository,
                 bindingController,
                 listingController,
                 userFileManager,
                 userTracker,
+                authorizedPanelsRepository,
                 Optional.of(persistenceWrapper),
                 mock(DumpManager::class.java)
         )
         assertEquals(listOf(TEST_STRUCTURE_INFO), controller_other.getFavorites())
+    }
+
+    @Test
+    fun testAddAuthorizedPackagesFromSavedFavoritesOnStart() {
+        clearInvocations(authorizedPanelsRepository)
+        `when`(persistenceWrapper.readFavorites()).thenReturn(listOf(TEST_STRUCTURE_INFO))
+        ControlsControllerImpl(
+                mContext,
+                delayableExecutor,
+                uiController,
+                preferredPanelRepository,
+                bindingController,
+                listingController,
+                userFileManager,
+                userTracker,
+                authorizedPanelsRepository,
+                Optional.of(persistenceWrapper),
+                mock(DumpManager::class.java)
+        )
+        verify(authorizedPanelsRepository)
+                .addAuthorizedPanels(setOf(TEST_STRUCTURE_INFO.componentName.packageName))
     }
 
     @Test
@@ -513,7 +541,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         reset(persistenceWrapper)
 
-        userTrackerCallbackCaptor.value.onUserChanged(otherUser, mContext)
+        controller.changeUser(UserHandle.of(otherUser))
 
         verify(persistenceWrapper).changeFileAndBackupManager(any(), any())
         verify(persistenceWrapper).readFavorites()
@@ -918,6 +946,34 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(userFileManager, times(2))
             .getFile(ControlsFavoritePersistenceWrapper.FILE_NAME, context.user.identifier)
         assertThat(userStructure.file).isNotNull()
+    }
+
+    @Test
+    fun testBindForPanel() {
+        controller.bindComponentForPanel(TEST_COMPONENT)
+        verify(bindingController).bindServiceForPanel(TEST_COMPONENT)
+    }
+
+    @Test
+    fun testRemoveFavoriteRemovesFavorite() {
+        val componentName = ComponentName(context, "test.Cls")
+        controller.addFavorite(
+                componentName,
+                "test structure",
+                ControlInfo(
+                        controlId = "testId",
+                        controlTitle = "Test Control",
+                        controlSubtitle = "test control subtitle",
+                        deviceType = DeviceTypes.TYPE_LIGHT,
+                ),
+        )
+
+        controller.removeFavorites(componentName)
+        delayableExecutor.runAllReady()
+
+        verify(authorizedPanelsRepository)
+                .removeAuthorizedPanels(eq(setOf(componentName.packageName)))
+        assertThat(controller.getFavorites()).isEmpty()
     }
 }
 

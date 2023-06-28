@@ -40,7 +40,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.graphics.drawable.Icon;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
@@ -49,14 +48,14 @@ import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -67,7 +66,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
@@ -76,11 +74,8 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
-import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
-import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
@@ -120,16 +115,17 @@ public class NotificationTestHelper {
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
     private ExpandableNotificationRow mRow;
-    private HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotifBindPipeline mBindPipeline;
     private final NotifCollectionListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
     private final IconManager mIconManager;
-    private StatusBarStateController mStatusBarStateController;
+    private final StatusBarStateController mStatusBarStateController;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     public final OnUserInteractionCallback mOnUserInteractionCallback;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
+    private FeatureFlags mFeatureFlags;
 
     public NotificationTestHelper(
             Context context,
@@ -144,21 +140,7 @@ public class NotificationTestHelper {
         mStatusBarStateController = mock(StatusBarStateController.class);
         mGroupMembershipManager = mock(GroupMembershipManager.class);
         mGroupExpansionManager = mock(GroupExpansionManager.class);
-        mHeadsUpManager = new HeadsUpManagerPhone(
-                mContext,
-                mock(HeadsUpManagerLogger.class),
-                mStatusBarStateController,
-                mock(KeyguardBypassController.class),
-                mock(GroupMembershipManager.class),
-                mock(VisualStabilityProvider.class),
-                mock(ConfigurationControllerImpl.class),
-                new Handler(mTestLooper.getLooper()),
-                mock(AccessibilityManagerWrapper.class),
-                mock(UiEventLogger.class),
-                mock(ShadeExpansionStateManager.class)
-        );
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
-        mHeadsUpManager.mHandler = new Handler(mTestLooper.getLooper());
+        mHeadsUpManager = mock(HeadsUpManagerPhone.class);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
                 mock(LauncherApps.class),
@@ -193,10 +175,15 @@ public class NotificationTestHelper {
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
+        mFeatureFlags = mock(FeatureFlags.class);
     }
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
         mDefaultInflationFlags = defaultInflationFlags;
+    }
+
+    public void setFeatureFlags(FeatureFlags featureFlags) {
+        mFeatureFlags = featureFlags;
     }
 
     public ExpandableNotificationRowLogger getMockLogger() {
@@ -561,7 +548,9 @@ public class NotificationTestHelper {
                 mock(NotificationGutsManager.class),
                 mock(MetricsLogger.class),
                 mock(SmartReplyConstants.class),
-                mock(SmartReplyController.class));
+                mock(SmartReplyController.class),
+                mFeatureFlags,
+                mock(IStatusBarService.class));
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);

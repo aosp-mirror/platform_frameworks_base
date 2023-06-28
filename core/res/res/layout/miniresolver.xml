@@ -50,6 +50,7 @@
             android:paddingTop="16dp"
             android:layout_below="@id/icon"
             android:layout_centerHorizontal="true"
+            android:fontFamily="@string/config_headlineFontFamily"
             android:textSize="24sp"
             android:lineHeight="32sp"
             android:gravity="center"

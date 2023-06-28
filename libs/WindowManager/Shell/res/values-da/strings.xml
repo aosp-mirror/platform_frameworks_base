@@ -47,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Øverste 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Øverste 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Vis nederste del i fuld skærm"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Vis i venstre side"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Vis i højre side"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Vis øverst"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Vis nederst"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Brug af enhåndstilstand"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Du kan afslutte ved at stryge opad fra bunden af skærmen eller trykke et vilkårligt sted over appen"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Start enhåndstilstand"</string>
@@ -82,14 +86,25 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tryk to gange uden for en app for at justere dens placering"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Udvid for at få flere oplysninger."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Vil du genstarte for at få en bedre visning?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Du kan genstarte appen, så den ser bedre ud på din skærm, men du mister muligvis dine fremskridt og de ændringer, der ikke gemt"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Annuller"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Genstart"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Vis ikke igen"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Tryk to gange\nfor at flytte appen"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimér"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimer"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Luk"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Tilbage"</string>
     <string name="handle_text" msgid="1766582106752184456">"Håndtag"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Appikon"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Fuld skærm"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Computertilstand"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Opdelt skærm"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mere"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Svævende"</string>
+    <string name="select_text" msgid="5139083974039906583">"Vælg"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
+    <string name="close_text" msgid="4986518933445178928">"Luk"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Luk menu"</string>
 </resources>

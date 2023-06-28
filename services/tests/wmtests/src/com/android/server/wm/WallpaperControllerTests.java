@@ -52,6 +52,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -61,6 +62,7 @@ import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
 
@@ -338,6 +340,29 @@ public class WallpaperControllerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testWallpaperReportConfigChange() {
+        final WindowState wallpaperWindow = createWallpaperWindow(mDisplayContent);
+        createWallpaperTargetWindow(mDisplayContent);
+        final WallpaperWindowToken wallpaperToken = wallpaperWindow.mToken.asWallpaperToken();
+        makeWindowVisible(wallpaperWindow);
+        wallpaperWindow.mLayoutSeq = mDisplayContent.mLayoutSeq;
+        // Assume the token was invisible and the latest config was reported.
+        wallpaperToken.commitVisibility(false);
+        wallpaperWindow.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
+                new MergedConfiguration(), true /* useLatestConfig */, false /* relayoutVisible */);
+        assertTrue(wallpaperWindow.isLastConfigReportedToClient());
+
+        final Rect bounds = wallpaperToken.getBounds();
+        wallpaperToken.setBounds(new Rect(0, 0, bounds.width() / 2, bounds.height() / 2));
+        assertFalse(wallpaperWindow.isLastConfigReportedToClient());
+        // If there is a pending config change when changing to visible, it should tell the client
+        // to redraw by WindowState#reportResized.
+        wallpaperToken.commitVisibility(true);
+        waitUntilHandlersIdle();
+        assertTrue(wallpaperWindow.isLastConfigReportedToClient());
+    }
+
+    @Test
     public void testWallpaperTokenVisibility() {
         final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
         final WindowState wallpaperWindow = createWallpaperWindow(dc);
@@ -391,7 +416,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         dc.updateOrientation();
         dc.sendNewConfiguration();
         spyOn(wallpaperWindow);
-        doReturn(new Rect(0, 0, width, height)).when(wallpaperWindow).getLastReportedBounds();
+        doReturn(new Rect(0, 0, width, height)).when(wallpaperWindow).getParentFrame();
     }
 
     @Test

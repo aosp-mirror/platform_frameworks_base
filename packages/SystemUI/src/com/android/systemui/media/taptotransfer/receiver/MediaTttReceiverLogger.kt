@@ -13,14 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.media.taptotransfer.receiver
 
-import java.lang.annotation.Documented
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-import javax.inject.Qualifier
+import android.app.StatusBarManager
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.media.taptotransfer.common.MediaTttLoggerUtils
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.temporarydisplay.TemporaryViewLogger
+import javax.inject.Inject
 
-@Qualifier
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-annotation class MediaTttReceiverLogger
+/** A logger for all events related to the media tap-to-transfer receiver experience. */
+@SysUISingleton
+class MediaTttReceiverLogger
+@Inject
+constructor(
+    @MediaTttReceiverLogBuffer buffer: LogBuffer,
+) : TemporaryViewLogger<ChipReceiverInfo>(buffer, TAG) {
+
+    /** Logs a change in the chip state for the given [mediaRouteId]. */
+    fun logStateChange(
+        stateName: String,
+        mediaRouteId: String,
+        packageName: String?,
+    ) {
+        MediaTttLoggerUtils.logStateChange(buffer, TAG, stateName, mediaRouteId, packageName)
+    }
+
+    /** Logs an error in trying to update to [displayState]. */
+    fun logStateChangeError(@StatusBarManager.MediaTransferReceiverState displayState: Int) {
+        MediaTttLoggerUtils.logStateChangeError(buffer, TAG, displayState)
+    }
+
+    /** Logs that we couldn't find information for [packageName]. */
+    fun logPackageNotFound(packageName: String) {
+        MediaTttLoggerUtils.logPackageNotFound(buffer, TAG, packageName)
+    }
+
+    companion object {
+        private const val TAG = "MediaTttReceiver"
+    }
+}

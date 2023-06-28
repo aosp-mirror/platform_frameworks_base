@@ -1,19 +1,24 @@
 package com.android.systemui.navigationbar
 
+import android.app.ActivityManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler
 import com.android.systemui.recents.OverviewProxyService
+import com.android.systemui.shared.system.QuickStepContract
+import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.AutoHideController
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.LightBarTransitionsController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.wm.shell.back.BackAnimation
 import com.android.wm.shell.pip.Pip
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -30,9 +35,8 @@ class TaskbarDelegateTest : SysuiTestCase() {
     val MODE_GESTURE = 0;
     val MODE_THREE_BUTTON = 1;
 
+    private lateinit var mTaskStackChangeListeners: TaskStackChangeListeners
     private lateinit var mTaskbarDelegate: TaskbarDelegate
-    @Mock
-    lateinit var mEdgeBackGestureHandlerFactory : EdgeBackGestureHandler.Factory
     @Mock
     lateinit var mEdgeBackGestureHandler : EdgeBackGestureHandler
     @Mock
@@ -61,19 +65,22 @@ class TaskbarDelegateTest : SysuiTestCase() {
     lateinit var mBackAnimation: BackAnimation
     @Mock
     lateinit var mCurrentSysUiState: NavBarHelper.CurrentSysuiState
+    @Mock
+    lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        `when`(mEdgeBackGestureHandlerFactory.create(context)).thenReturn(mEdgeBackGestureHandler)
+        `when`(mNavBarHelper.edgeBackGestureHandler).thenReturn(mEdgeBackGestureHandler)
         `when`(mLightBarControllerFactory.create(any())).thenReturn(mLightBarTransitionController)
         `when`(mNavBarHelper.currentSysuiState).thenReturn(mCurrentSysUiState)
         `when`(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState)
-        mTaskbarDelegate = TaskbarDelegate(context, mEdgeBackGestureHandlerFactory,
-                mLightBarControllerFactory)
+        mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
+        mTaskbarDelegate = TaskbarDelegate(context, mLightBarControllerFactory,
+            mStatusBarKeyguardViewManager)
         mTaskbarDelegate.setDependencies(mCommandQueue, mOverviewProxyService, mNavBarHelper,
         mNavigationModeController, mSysUiState, mDumpManager, mAutoHideController,
-                mLightBarController, mOptionalPip, mBackAnimation)
+                mLightBarController, mOptionalPip, mBackAnimation, mTaskStackChangeListeners)
     }
 
     @Test
@@ -89,5 +96,16 @@ class TaskbarDelegateTest : SysuiTestCase() {
         `when`(mNavigationModeController.addListener(any())).thenReturn(MODE_GESTURE)
         mTaskbarDelegate.init(DISPLAY_ID)
         verify(mEdgeBackGestureHandler, times(1)).onNavigationModeChanged(MODE_GESTURE)
+    }
+
+    @Test
+    fun screenPinningEnabled_updatesSysuiState() {
+        mTaskbarDelegate.init(DISPLAY_ID)
+        mTaskStackChangeListeners.listenerImpl.onLockTaskModeChanged(
+            ActivityManager.LOCK_TASK_MODE_PINNED)
+        verify(mSysUiState, times(1)).setFlag(
+            ArgumentMatchers.eq(QuickStepContract.SYSUI_STATE_SCREEN_PINNING),
+            ArgumentMatchers.eq(true)
+        )
     }
 }

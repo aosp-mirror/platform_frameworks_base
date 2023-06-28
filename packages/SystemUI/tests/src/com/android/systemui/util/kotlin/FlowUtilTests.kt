@@ -19,9 +19,12 @@ package com.android.systemui.util.kotlin
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +38,10 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -228,6 +235,170 @@ class SampleFlowTest : SysuiTestCase() {
                 3 to 3,
                 4 to 3,
             )
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+class ThrottleFlowTest : SysuiTestCase() {
+
+    @Test
+    fun doesNotAffectEmissions_whenDelayAtLeastEqualToPeriod() = runTest {
+        // Arrange
+        val choreographer = createChoreographer(this)
+        val output = mutableListOf<Int>()
+        val collectJob = backgroundScope.launch {
+            flow {
+                emit(1)
+                delay(1000)
+                emit(2)
+            }.throttle(1000, choreographer.fakeClock).toList(output)
+        }
+
+        // Act
+        choreographer.advanceAndRun(0)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(999)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(1)
+
+        // Assert
+        assertThat(output).containsExactly(1, 2)
+
+        // Cleanup
+        collectJob.cancel()
+    }
+
+    @Test
+    fun delaysEmissions_withShorterThanPeriodDelay_untilPeriodElapses() = runTest {
+        // Arrange
+        val choreographer = createChoreographer(this)
+        val output = mutableListOf<Int>()
+        val collectJob = backgroundScope.launch {
+            flow {
+                emit(1)
+                delay(500)
+                emit(2)
+            }.throttle(1000, choreographer.fakeClock).toList(output)
+        }
+
+        // Act
+        choreographer.advanceAndRun(0)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(500)
+        choreographer.advanceAndRun(499)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(1)
+
+        // Assert
+        assertThat(output).containsExactly(1, 2)
+
+        // Cleanup
+        collectJob.cancel()
+    }
+
+    @Test
+    fun filtersAllButLastEmission_whenMultipleEmissionsInPeriod() = runTest {
+        // Arrange
+        val choreographer = createChoreographer(this)
+        val output = mutableListOf<Int>()
+        val collectJob = backgroundScope.launch {
+            flow {
+                emit(1)
+                delay(500)
+                emit(2)
+                delay(500)
+                emit(3)
+            }.throttle(1000, choreographer.fakeClock).toList(output)
+        }
+
+        // Act
+        choreographer.advanceAndRun(0)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(500)
+        choreographer.advanceAndRun(499)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(1)
+
+        // Assert
+        assertThat(output).containsExactly(1, 3)
+
+        // Cleanup
+        collectJob.cancel()
+    }
+
+    @Test
+    fun filtersAllButLastEmission_andDelaysIt_whenMultipleEmissionsInShorterThanPeriod() = runTest {
+        // Arrange
+        val choreographer = createChoreographer(this)
+        val output = mutableListOf<Int>()
+        val collectJob = backgroundScope.launch {
+            flow {
+                emit(1)
+                delay(500)
+                emit(2)
+                delay(250)
+                emit(3)
+            }.throttle(1000, choreographer.fakeClock).toList(output)
+        }
+
+        // Act
+        choreographer.advanceAndRun(0)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(500)
+        choreographer.advanceAndRun(250)
+        choreographer.advanceAndRun(249)
+
+        // Assert
+        assertThat(output).containsExactly(1)
+
+        // Act
+        choreographer.advanceAndRun(1)
+
+        // Assert
+        assertThat(output).containsExactly(1, 3)
+
+        // Cleanup
+        collectJob.cancel()
+    }
+
+    private fun createChoreographer(testScope: TestScope) = object {
+        val fakeClock = FakeSystemClock()
+
+        fun advanceAndRun(millis: Long) {
+            fakeClock.advanceTime(millis)
+            testScope.advanceTimeBy(millis)
+            testScope.runCurrent()
+        }
     }
 }
 

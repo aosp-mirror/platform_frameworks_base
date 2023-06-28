@@ -143,6 +143,13 @@ class DesktopModeTaskRepository {
     }
 
     /**
+     * Get number of tasks that are marked as visible
+     */
+    fun getVisibleTaskCount(): Int {
+        return visibleTasks.size
+    }
+
+    /**
      * Add (or move if it already exists) the task to the top of the ordered list.
      */
     fun addOrMoveFreeformTaskToTop(taskId: Int) {

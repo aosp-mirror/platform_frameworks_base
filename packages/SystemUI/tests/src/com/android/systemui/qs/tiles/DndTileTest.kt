@@ -136,7 +136,8 @@ class DndTileTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        tile.handleSetListening(false)
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test

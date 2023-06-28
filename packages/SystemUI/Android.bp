@@ -204,6 +204,45 @@ filegroup {
     path: "tests/utils/src",
 }
 
+filegroup {
+    name: "SystemUI-tests-robolectric-pilots",
+    srcs: [
+        // data
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/CameraQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/DoNotDisturbQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FakeKeyguardQuickAffordanceConfig.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FlashlightQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/HomeControlsKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLegacySettingSyncerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLocalUserSelectionManagerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceRemoteUserSelectionManagerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/QrCodeScannerKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/QuickAccessWalletKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/KeyguardQuickAffordanceRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/KeyguardRepositoryImplTest.kt",
+        // domain
+        "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/LightRevealScrimInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
+        // ui
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/GoneToDreamingTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
+    ],
+    path: "tests/src",
+}
+
 java_library {
     name: "SystemUI-tests-concurrency",
     srcs: [
@@ -271,6 +310,7 @@ android_library {
         "LowLightDreamLib",
         "motion_tool_lib",
         "androidx.core_core-animation-testing-nodeps",
+        "androidx.compose.ui_ui",
     ],
 }
 
@@ -317,8 +357,16 @@ android_app {
     defaults: [
         "platform_app_defaults",
         "SystemUI_app_defaults",
+        "SystemUI_compose_defaults",
     ],
     manifest: "tests/AndroidManifest-base.xml",
+
+    srcs: [
+        "src/**/*.kt",
+        "src/**/*.java",
+        "src/**/I*.aidl",
+        ":ReleaseJavaFiles",
+    ],
     static_libs: [
         "SystemUI-tests-base",
     ],
@@ -332,6 +380,9 @@ android_app {
     certificate: "platform",
     privileged: true,
     resource_dirs: [],
+    kotlincflags: ["-Xjvm-default=all"],
+
+    plugins: ["dagger2-compiler"],
 }
 
 android_robolectric_test {
@@ -339,6 +390,13 @@ android_robolectric_test {
     srcs: [
         "tests/robolectric/src/**/*.kt",
         "tests/robolectric/src/**/*.java",
+        ":SystemUI-tests-utils",
+        ":SystemUI-tests-robolectric-pilots",
+    ],
+    static_libs: [
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
+        "inline-mockito-robolectric-prebuilt",
     ],
     libs: [
         "android.test.runner",
@@ -346,7 +404,9 @@ android_robolectric_test {
         "android.test.mock",
         "truth-prebuilt",
     ],
-    kotlincflags: ["-Xjvm-default=enable"],
+
+    upstream: true,
+
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
 }

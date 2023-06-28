@@ -46,42 +46,38 @@ public class LowLightDreamManagerTest {
     @Mock
     private ComponentName mDreamComponent;
 
+    LowLightDreamManager mLowLightDreamManager;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        mLowLightDreamManager = new LowLightDreamManager(mDreamManager,
+                mDreamComponent);
     }
 
     @Test
     public void setAmbientLightMode_lowLight_setSystemDream() {
-        final LowLightDreamManager lowLightDreamManager = new LowLightDreamManager(mDreamManager,
-                mDreamComponent);
-
-        lowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_LOW_LIGHT);
+        mLowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_LOW_LIGHT);
 
         verify(mDreamManager).setSystemDreamComponent(mDreamComponent);
     }
 
     @Test
     public void setAmbientLightMode_regularLight_clearSystemDream() {
-        final LowLightDreamManager lowLightDreamManager = new LowLightDreamManager(mDreamManager,
-                mDreamComponent);
-
-        lowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_REGULAR);
+        mLowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_REGULAR);
 
         verify(mDreamManager).setSystemDreamComponent(null);
     }
 
     @Test
     public void setAmbientLightMode_defaultUnknownMode_clearSystemDream() {
-        final LowLightDreamManager lowLightDreamManager = new LowLightDreamManager(mDreamManager,
-                mDreamComponent);
-
         // Set to low light first.
-        lowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_LOW_LIGHT);
+        mLowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_LOW_LIGHT);
         clearInvocations(mDreamManager);
 
         // Return to default unknown mode.
-        lowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_UNKNOWN);
+        mLowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_UNKNOWN);
 
         verify(mDreamManager).setSystemDreamComponent(null);
     }

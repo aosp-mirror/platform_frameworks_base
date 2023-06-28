@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Sisendseadmed"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Androidi klaviatuur"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Inglise (Ühendkuningriik)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Inglise (ÜK)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Inglise (USA)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Inglise (USA), rahvusvaheline stiil"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Inglise (USA), Colemaki stiil"</string>

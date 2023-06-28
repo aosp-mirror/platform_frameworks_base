@@ -45,7 +45,7 @@
           android:id="@+id/user_switcher_header"
           android:textDirection="locale"
           android:layout_width="@dimen/bouncer_user_switcher_width"
-          android:layout_height="wrap_content" />
+          android:layout_height="match_parent" />
     </com.android.keyguard.KeyguardUserSwitcherAnchor>
 
 </LinearLayout>

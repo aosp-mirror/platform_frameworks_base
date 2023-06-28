@@ -76,7 +76,7 @@ class KeyguardLiftController @Inject constructor(
                 FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
             )
             keyguardUpdateMonitor.requestActiveUnlock(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.WAKE,
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE,
                 "KeyguardLiftController")
         }
     }

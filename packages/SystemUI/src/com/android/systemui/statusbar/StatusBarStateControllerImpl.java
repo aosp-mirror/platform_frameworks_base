@@ -57,6 +57,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.util.Compile;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -127,6 +128,11 @@ public class StatusBarStateControllerImpl implements
      * If the device is currently dozing or not.
      */
     private boolean mIsDozing;
+
+    /**
+     * If the device is currently dreaming or not.
+     */
+    private boolean mIsDreaming;
 
     /**
      * If the status bar is currently expanded or not.
@@ -291,6 +297,34 @@ public class StatusBarStateControllerImpl implements
         }
 
         return true;
+    }
+
+    @Override
+    public boolean setIsDreaming(boolean isDreaming) {
+        if (Log.isLoggable(TAG, Log.DEBUG) || Compile.IS_DEBUG) {
+            Log.d(TAG, "setIsDreaming:" + isDreaming);
+        }
+        if (mIsDreaming == isDreaming) {
+            return false;
+        }
+
+        mIsDreaming = isDreaming;
+
+        synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setIsDreaming";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onDreamingChanged(isDreaming);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isDreaming() {
+        return mIsDreaming;
     }
 
     @Override
@@ -553,6 +587,7 @@ public class StatusBarStateControllerImpl implements
         pw.println(" mLeaveOpenOnKeyguardHide=" + mLeaveOpenOnKeyguardHide);
         pw.println(" mKeyguardRequested=" + mKeyguardRequested);
         pw.println(" mIsDozing=" + mIsDozing);
+        pw.println(" mIsDreaming=" + mIsDreaming);
         pw.println(" mListeners{" + mListeners.size() + "}=");
         for (RankedListener rl : mListeners) {
             pw.println("    " + rl.mListener);
