@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification
 
 import com.android.systemui.log.dagger.NotifInteractionLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import javax.inject.Inject
 

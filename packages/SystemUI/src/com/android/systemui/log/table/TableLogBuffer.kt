@@ -21,8 +21,8 @@ import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.log.TableLogBufferBase
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter

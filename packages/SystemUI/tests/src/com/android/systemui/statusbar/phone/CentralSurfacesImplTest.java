@@ -450,7 +450,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mAssistManager,
                 () -> mNotificationGutsManager
         ));
-        mShadeController.setNotificationPanelViewController(mNotificationPanelViewController);
+        mShadeController.setShadeViewController(mNotificationPanelViewController);
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
         mShadeController.setNotificationPresenter(mNotificationPresenter);
@@ -490,9 +490,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mMetricsLogger,
                 mShadeLogger,
                 mUiBgExecutor,
+                mNotificationPanelViewController,
                 mNotificationMediaManager,
                 mLockscreenUserManager,
                 mRemoteInputManager,
+                mQuickSettingsController,
                 mUserSwitcherController,
                 mBatteryController,
                 mColorExtractor,
@@ -587,8 +589,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // TODO: we should be able to call mCentralSurfaces.start() and have all the below values
         // initialized automatically and make NPVC private.
         mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
-        mCentralSurfaces.mShadeSurface = mNotificationPanelViewController;
-        mCentralSurfaces.mQsController = mQuickSettingsController;
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
         mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;

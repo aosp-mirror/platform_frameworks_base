@@ -117,6 +117,7 @@ class ShadeInteractorTest : SysuiTestCase() {
             )
         underTest =
             ShadeInteractor(
+                testScope.backgroundScope,
                 disableFlagsRepository,
                 keyguardRepository,
                 userSetupRepository,
@@ -124,6 +125,20 @@ class ShadeInteractorTest : SysuiTestCase() {
                 userInteractor,
             )
     }
+
+    @Test
+    fun isShadeEnabled_matchesDisableFlagsRepo() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.isShadeEnabled)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(disable2 = DISABLE2_NOTIFICATION_SHADE)
+            assertThat(actual).isFalse()
+
+            disableFlagsRepository.disableFlags.value = DisableFlagsModel(disable2 = DISABLE2_NONE)
+
+            assertThat(actual).isTrue()
+        }
 
     @Test
     fun isExpandToQsEnabled_deviceNotProvisioned_false() =

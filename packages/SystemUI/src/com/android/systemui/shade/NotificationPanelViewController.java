@@ -117,6 +117,7 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -208,7 +209,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
@@ -238,7 +238,7 @@ import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public final class NotificationPanelViewController implements ShadeSurface, Dumpable {
 
     public static final String TAG = NotificationPanelView.class.getSimpleName();
@@ -1407,11 +1407,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBottomArea = keyguardBottomArea;
     }
 
-    void setOpenCloseListener(OpenCloseListener openCloseListener) {
+    @Override
+    public void setOpenCloseListener(OpenCloseListener openCloseListener) {
         mOpenCloseListener = openCloseListener;
     }
 
-    void setTrackingStartedListener(TrackingStartedListener trackingStartedListener) {
+    @Override
+    public void setTrackingStartedListener(TrackingStartedListener trackingStartedListener) {
         mTrackingStartedListener = trackingStartedListener;
     }
 
@@ -3378,11 +3380,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ViewGroupFadeHelper.reset(mView);
     }
 
-    void addOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
+    @Override
+    public void addOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().addOnGlobalLayoutListener(listener);
     }
 
-    void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
+    @Override
+    public void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
     }
 
@@ -3565,6 +3569,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
+        mShadeLog.logEndMotionEvent("endMotionEvent called", forceCancel, false);
         mTrackingPointer = -1;
         mAmbientState.setSwipingUp(false);
         if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
@@ -3586,15 +3591,19 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             } else if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
                 if (onKeyguard) {
                     expand = true;
+                    mShadeLog.logEndMotionEvent("endMotionEvent: cancel while on keyguard",
+                            forceCancel, expand);
                 } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
                     expand = false;
                 } else {
                     // If we get a cancel, put the shade back to the state it was in when the
                     // gesture started
                     expand = !mPanelClosedOnDown;
+                    mShadeLog.logEndMotionEvent("endMotionEvent: cancel", forceCancel, expand);
                 }
             } else {
                 expand = flingExpands(vel, vectorVel, x, y);
+                mShadeLog.logEndMotionEvent("endMotionEvent: flingExpands", forceCancel, expand);
             }
 
             mDozeLog.traceFling(
@@ -3847,8 +3856,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return !isFullyCollapsed() && !mTracking && !mClosing;
     }
 
-    /** Collapses the shade instantly without animation. */
-    void instantCollapse() {
+    @Override
+    public void instantCollapse() {
         abortAnimations();
         setExpandedFraction(0f);
         if (mExpanding) {
@@ -4021,8 +4030,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mFixedDuration = NO_FIXED_DURATION;
     }
 
-    /** */
-    boolean postToView(Runnable action) {
+    @Override
+    public boolean postToView(Runnable action) {
         return mView.post(action);
     }
 
@@ -4731,6 +4740,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mTouchSlopExceeded = mTouchSlopExceededBeforeDown;
                     mMotionAborted = false;
                     mPanelClosedOnDown = isFullyCollapsed();
+                    mShadeLog.logPanelClosedOnDown("intercept down touch", mPanelClosedOnDown,
+                            mExpandedFraction);
                     mCollapsedAndHeadsUpOnDown = false;
                     mHasLayoutedSinceDown = false;
                     mUpdateFlingOnLayout = false;
@@ -4948,6 +4959,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                     mMinExpandHeight = 0.0f;
                     mPanelClosedOnDown = isFullyCollapsed();
+                    mShadeLog.logPanelClosedOnDown("handle down touch", mPanelClosedOnDown,
+                            mExpandedFraction);
                     mHasLayoutedSinceDown = false;
                     mUpdateFlingOnLayout = false;
                     mMotionAborted = false;
@@ -5112,19 +5125,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             return super.performAccessibilityAction(host, action, args);
         }
-    }
-
-    /** Listens for when touch tracking begins. */
-    interface TrackingStartedListener {
-        void onTrackingStarted();
-    }
-
-    /** Listens for when shade begins opening of finishes closing. */
-    interface OpenCloseListener {
-        /** Called when the shade finishes closing. */
-        void onClosingFinished();
-        /** Called when the shade starts opening. */
-        void onOpenStarted();
     }
 }
 

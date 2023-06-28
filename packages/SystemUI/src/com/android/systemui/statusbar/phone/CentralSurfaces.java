@@ -203,8 +203,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     int getStatusBarHeight();
 
-    boolean isShadeDisabled();
-
     boolean isLaunchingActivityOverLockscreen();
 
     void onKeyguardViewManagerStatesUpdated();
@@ -379,14 +377,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void resendMessage(int msg);
 
     void resendMessage(Object msg);
-
-    int getDisabled1();
-
-    void setDisabled1(int disabled);
-
-    int getDisabled2();
-
-    void setDisabled2(int disabled);
 
     void setLastCameraLaunchSource(int source);
 

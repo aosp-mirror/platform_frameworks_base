@@ -182,7 +182,6 @@ import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.CameraLauncher;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
@@ -363,26 +362,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public int getDisabled1() {
-        return mDisabled1;
-    }
-
-    @Override
-    public void setDisabled1(int disabled) {
-        mDisabled1 = disabled;
-    }
-
-    @Override
-    public int getDisabled2() {
-        return mDisabled2;
-    }
-
-    @Override
-    public void setDisabled2(int disabled) {
-        mDisabled2 = disabled;
-    }
-
-    @Override
     public void setLastCameraLaunchSource(int source) {
         mLastCameraLaunchSource = source;
     }
@@ -497,14 +476,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Lazy<LightRevealScrimViewModel> mLightRevealScrimViewModelLazy;
 
     /** Controller for the Shade. */
-    @VisibleForTesting
-    ShadeSurface mShadeSurface;
+    private final ShadeSurface mShadeSurface;
     private final ShadeLogger mShadeLogger;
 
     // settings
     private QSPanelController mQSPanelController;
-    @VisibleForTesting
-    QuickSettingsController mQsController;
+    private final QuickSettingsController mQsController;
 
     KeyguardIndicationController mKeyguardIndicationController;
 
@@ -529,11 +506,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ActivityStarter mActivityStarter;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
-
-    // Flags for disabling the status bar
-    // Two variables because the first one evidently ran out of room for new flags.
-    private int mDisabled1 = 0;
-    private int mDisabled2 = 0;
 
     /**
      * This keeps track of whether we have (or haven't) registered the predictive back callback.
@@ -729,9 +701,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             MetricsLogger metricsLogger,
             ShadeLogger shadeLogger,
             @UiBackground Executor uiBgExecutor,
+            ShadeSurface shadeSurface,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
+            QuickSettingsController quickSettingsController,
             UserSwitcherController userSwitcherController,
             BatteryController batteryController,
             SysuiColorExtractor colorExtractor,
@@ -830,9 +804,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mMetricsLogger = metricsLogger;
         mShadeLogger = shadeLogger;
         mUiBgExecutor = uiBgExecutor;
+        mShadeSurface = shadeSurface;
         mMediaManager = notificationMediaManager;
         mLockscreenUserManager = lockScreenUserManager;
         mRemoteInputManager = remoteInputManager;
+        mQsController = quickSettingsController;
         mUserSwitcherController = userSwitcherController;
         mBatteryController = batteryController;
         mColorExtractor = colorExtractor;
@@ -1636,13 +1612,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         //  (Right now, there's a circular dependency.)
         mNotificationShadeWindowController.setWindowRootView(windowRootView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
-        NotificationPanelViewController npvc =
-                mCentralSurfacesComponent.getNotificationPanelViewController();
-        mShadeSurface = npvc;
-        mShadeController.setNotificationPanelViewController(npvc);
+        mShadeController.setShadeViewController(mShadeSurface);
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
-        mQsController = mCentralSurfacesComponent.getQuickSettingsController();
         mBackActionInteractor.setup(mQsController, mShadeSurface);
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
@@ -1722,11 +1694,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public int getStatusBarHeight() {
         return mStatusBarWindowController.getStatusBarHeight();
-    }
-
-    @Override
-    public boolean isShadeDisabled() {
-        return (mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0;
     }
 
     private void updateReportRejectedTouchVisibility() {
@@ -1843,7 +1810,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     @Override
     public void onStatusBarTrackpadEvent(MotionEvent event) {
-        mCentralSurfacesComponent.getNotificationPanelViewController().handleExternalTouch(event);
+        mShadeSurface.handleExternalTouch(event);
     }
 
     private void onExpandedInvisible() {
@@ -2213,7 +2180,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mLockscreenWallpaper != null && !mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
             mLockscreenWallpaper.setCurrentUser(newUserId);
         }
-        mScrimController.setCurrentUser(newUserId);
         if (mWallpaperSupported) {
             mWallpaperChangedReceiver.onReceive(mContext, null);
         }

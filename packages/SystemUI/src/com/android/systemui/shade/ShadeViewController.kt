@@ -17,6 +17,7 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -77,6 +78,9 @@ interface ShadeViewController {
     /** Collapses the shade with an animation duration in milliseconds. */
     fun collapseWithDuration(animationDuration: Int)
 
+    /** Collapses the shade instantly without animation. */
+    fun instantCollapse()
+
     /**
      * Animate QS collapse by flinging it. If QS is expanded, it will collapse into QQS and stop. If
      * in split shade, it will collapse the whole shade.
@@ -100,6 +104,9 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     val isViewEnabled: Boolean
 
+    /** Sets a listener to be notified when the shade starts opening or finishes closing. */
+    fun setOpenCloseListener(openCloseListener: OpenCloseListener)
+
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
 
@@ -108,6 +115,9 @@ interface ShadeViewController {
      * necessary to avoid shade expansion while/after the bouncer is dismissed.
      */
     fun blockExpansionForCurrentTouch()
+
+    /** Sets a listener to be notified when touch tracking begins. */
+    fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener)
 
     /**
      * Disables the shade header.
@@ -177,6 +187,15 @@ interface ShadeViewController {
 
     /** Ensures that the touchable region is updated. */
     fun updateTouchableRegion()
+
+    /** Adds a global layout listener. */
+    fun addOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
+
+    /** Removes a global layout listener. */
+    fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
+
+    /** Posts the given runnable to the view. */
+    fun postToView(action: Runnable): Boolean
 
     // ******* Begin Keyguard Section *********
     /** Animate to expanded shade after a delay in ms. Used for lockscreen to shade transition. */
@@ -336,4 +355,18 @@ interface ShadeViewStateProvider {
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
     val lockscreenShadeDragProgress: Float
+}
+
+/** Listens for when touch tracking begins. */
+interface TrackingStartedListener {
+    fun onTrackingStarted()
+}
+
+/** Listens for when shade begins opening or finishes closing. */
+interface OpenCloseListener {
+    /** Called when the shade finishes closing. */
+    fun onClosingFinished()
+
+    /** Called when the shade starts opening. */
+    fun onOpenStarted()
 }

@@ -24,11 +24,11 @@ import android.provider.Settings
 import android.util.Log
 import androidx.annotation.OpenForTesting
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogMessage
 import com.android.systemui.log.LogMessageImpl
-import com.android.systemui.log.MessageInitializer
-import com.android.systemui.log.MessagePrinter
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
