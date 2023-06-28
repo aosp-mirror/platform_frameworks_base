@@ -1101,6 +1101,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final Task task = ar.getTask();
                 if (task == null) continue;
                 boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(ar);
+                // visibleAtTransitionEnd is used to guard against pre-maturely committing
+                // invisible on a window which is actually hidden by a later transition and not this
+                // one. However, for a transient launch, we can't use this mechanism because the
+                // visibility is determined at finish. Instead, use a different heuristic: don't
+                // commit invisible if the window is already in a later transition. That later
+                // transition will then handle the commit.
+                if (isTransientLaunch(ar) && !ar.isVisibleRequested()
+                        && mController.inCollectingTransition(ar)) {
+                    visibleAtTransitionEnd = true;
+                }
                 // We need both the expected visibility AND current requested-visibility to be
                 // false. If it is expected-visible but not currently visible, it means that
                 // another animation is queued-up to animate this to invisibility, so we can't
