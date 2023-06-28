@@ -2210,7 +2210,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mLockscreenWallpaper != null && !mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
             mLockscreenWallpaper.setCurrentUser(newUserId);
         }
-        mScrimController.setCurrentUser(newUserId);
         if (mWallpaperSupported) {
             mWallpaperChangedReceiver.onReceive(mContext, null);
         }
