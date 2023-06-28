@@ -32,6 +32,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -76,6 +77,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     dumpManager: DumpManager,
     qsTransitionControllerFactory: LockscreenShadeQsTransitionController.Factory,
     private val shadeRepository: ShadeRepository,
+    private val shadeInteractor: ShadeInteractor,
     private val powerInteractor: PowerInteractor,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
@@ -558,7 +560,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         animationHandler: ((Long) -> Unit)? = null,
         cancelAction: Runnable? = null
     ) {
-        if (centralSurfaces.isShadeDisabled) {
+        if (!shadeInteractor.isShadeEnabled.value) {
             cancelAction?.run()
             logger.logShadeDisabledOnGoToLockedShade()
             return

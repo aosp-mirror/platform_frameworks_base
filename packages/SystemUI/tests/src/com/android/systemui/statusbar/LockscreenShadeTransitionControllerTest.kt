@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar
 
+import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
@@ -11,6 +12,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -19,6 +21,9 @@ import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -28,8 +33,13 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.util.mockito.mock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -60,7 +70,10 @@ private fun <T> anyObject(): T {
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
+
+    private val testScope = TestScope(StandardTestDispatcher())
 
     lateinit var transitionController: LockscreenShadeTransitionController
     lateinit var row: ExpandableNotificationRow
@@ -87,6 +100,15 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
+    private val disableFlagsRepository = FakeDisableFlagsRepository()
+    private val shadeInteractor = ShadeInteractor(
+        testScope.backgroundScope,
+        disableFlagsRepository,
+        keyguardRepository = FakeKeyguardRepository(),
+        userSetupRepository = FakeUserSetupRepository(),
+        deviceProvisionedController = mock(),
+        userInteractor = mock(),
+    )
     private val powerInteractor = PowerInteractor(
         FakePowerRepository(),
         FalsingCollectorFake(),
@@ -99,6 +121,10 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        // By default, have the shade enabled
+        disableFlagsRepository.disableFlags.value = DisableFlagsModel()
+        testScope.runCurrent()
+
         val helper = NotificationTestHelper(
                 mContext,
                 mDependency,
@@ -139,6 +165,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 qsTransitionControllerFactory = { qsTransitionController },
                 activityStarter = activityStarter,
                 shadeRepository = FakeShadeRepository(),
+                shadeInteractor = shadeInteractor,
                 powerInteractor = powerInteractor,
             )
         transitionController.addCallback(transitionControllerCallback)
@@ -214,7 +241,10 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
     @Test
     fun testDontGoWhenShadeDisabled() {
-        whenever(mCentralSurfaces.isShadeDisabled).thenReturn(true)
+        disableFlagsRepository.disableFlags.value = DisableFlagsModel(
+            disable2 = DISABLE2_NOTIFICATION_SHADE,
+        )
+        testScope.runCurrent()
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
     }

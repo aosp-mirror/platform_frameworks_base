@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -144,23 +145,32 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Test
     public void testDisableNotificationShade() {
-        when(mCentralSurfaces.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
-        when(mCentralSurfaces.getDisabled2()).thenReturn(StatusBarManager.DISABLE_NONE);
+        // Start with nothing disabled
+        mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NONE, false);
+
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
+        // WHEN the new disable flags have the shade disabled
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
 
+        // THEN the shade is collapsed
         verify(mShadeController).animateCollapseShade();
     }
 
     @Test
     public void testEnableNotificationShade() {
-        when(mCentralSurfaces.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
-        when(mCentralSurfaces.getDisabled2())
-                .thenReturn(StatusBarManager.DISABLE2_NOTIFICATION_SHADE);
+        // Start with the shade disabled
+        mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
+                StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
+        reset(mShadeController);
+
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        // WHEN the new disable flags have the shade enabled
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
+
+        // THEN the shade is not collapsed
         verify(mShadeController, never()).animateCollapseShade();
     }
 
