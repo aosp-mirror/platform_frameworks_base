@@ -241,7 +241,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             public void onAnimationEnd(Animator animation) {
                 mDesktopModeWindowDecoration.hideResizeVeil();
                 mTransitions.getMainExecutor().execute(
-                        () -> finishCallback.onTransitionFinished(null, null));
+                        () -> finishCallback.onTransitionFinished(null));
             }
         });
         animator.start();
@@ -272,7 +272,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         startT.apply();
 
         mTransitions.getMainExecutor().execute(
-                () -> finishCallback.onTransitionFinished(null, null));
+                () -> finishCallback.onTransitionFinished(null));
 
         return true;
     }
@@ -324,7 +324,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                     mOnAnimationFinishedCallback.accept(finishT);
                 }
                 mTransitions.getMainExecutor().execute(
-                        () -> finishCallback.onTransitionFinished(null, null));
+                        () -> finishCallback.onTransitionFinished(null));
             }
         });
 
@@ -378,7 +378,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                     mOnAnimationFinishedCallback.accept(finishT);
                 }
                 mTransitions.getMainExecutor().execute(
-                        () -> finishCallback.onTransitionFinished(null, null));
+                        () -> finishCallback.onTransitionFinished(null));
             }
         });
         animator.start();
