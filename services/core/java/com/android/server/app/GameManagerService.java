@@ -2166,7 +2166,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             synchronized (mUidObserverLock) {
-                if (ActivityManager.isProcStateBackground(procState)) {
+                if (procState != ActivityManager.PROCESS_STATE_TOP) {
                     disableGameMode(uid);
                     return;
                 }

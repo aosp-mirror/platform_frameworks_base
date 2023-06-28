@@ -52,6 +52,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -376,6 +377,116 @@ public final class DisplayDeviceConfigTest {
         assertEquals(90, testMap.get(Temperature.THROTTLING_EMERGENCY).max, SMALL_DELTA);
     }
 
+    @Test
+    public void testValidLuxThrottling() throws Exception {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
+                mDisplayDeviceConfig.getLuxThrottlingData();
+        assertEquals(2, luxThrottlingData.size());
+
+        Map<Float, Float> adaptiveOnBrightnessPoints = luxThrottlingData.get(
+                DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
+        assertEquals(2, adaptiveOnBrightnessPoints.size());
+        assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
+        assertEquals(0.5f, adaptiveOnBrightnessPoints.get(5000f), SMALL_DELTA);
+
+        Map<Float, Float> adaptiveOffBrightnessPoints = luxThrottlingData.get(
+                DisplayDeviceConfig.BrightnessLimitMapType.DEFAULT);
+        assertEquals(2, adaptiveOffBrightnessPoints.size());
+        assertEquals(0.35f, adaptiveOffBrightnessPoints.get(1500f), SMALL_DELTA);
+        assertEquals(0.55f, adaptiveOffBrightnessPoints.get(5500f), SMALL_DELTA);
+    }
+
+    @Test
+    public void testInvalidLuxThrottling() throws Exception {
+        setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getInvalidLuxThrottling()));
+
+        Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
+                mDisplayDeviceConfig.getLuxThrottlingData();
+        assertEquals(1, luxThrottlingData.size());
+
+        Map<Float, Float> adaptiveOnBrightnessPoints = luxThrottlingData.get(
+                DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
+        assertEquals(1, adaptiveOnBrightnessPoints.size());
+        assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
+    }
+
+    private String getValidLuxThrottling() {
+        return "<luxThrottling>\n"
+                + "    <brightnessLimitMap>\n"
+                + "        <type>adaptive</type>\n"
+                + "        <map>\n"
+                + "            <point>"
+                + "                <first>1000</first>\n"
+                + "                <second>0.3</second>\n"
+                + "            </point>"
+                + "            <point>"
+                + "                <first>5000</first>\n"
+                + "                <second>0.5</second>\n"
+                + "            </point>"
+                + "        </map>\n"
+                + "    </brightnessLimitMap>\n"
+                + "    <brightnessLimitMap>\n"
+                + "        <type>default</type>\n"
+                + "        <map>\n"
+                + "            <point>"
+                + "                <first>1500</first>\n"
+                + "                <second>0.35</second>\n"
+                + "            </point>"
+                + "            <point>"
+                + "                <first>5500</first>\n"
+                + "                <second>0.55</second>\n"
+                + "            </point>"
+                + "        </map>\n"
+                + "    </brightnessLimitMap>\n"
+                + "</luxThrottling>";
+    }
+
+    private String getInvalidLuxThrottling() {
+        return "<luxThrottling>\n"
+                + "    <brightnessLimitMap>\n"
+                + "        <type>adaptive</type>\n"
+                + "        <map>\n"
+                + "            <point>"
+                + "                <first>1000</first>\n"
+                + "                <second>0.3</second>\n"
+                + "            </point>"
+                + "            <point>" // second > hbm.transitionPoint, skipped
+                + "                <first>1500</first>\n"
+                + "                <second>0.9</second>\n"
+                + "            </point>"
+                + "            <point>" // same lux value, skipped
+                + "                <first>1000</first>\n"
+                + "                <second>0.5</second>\n"
+                + "            </point>"
+                + "        </map>\n"
+                + "    </brightnessLimitMap>\n"
+                + "    <brightnessLimitMap>\n" // Same type, skipped
+                + "        <type>adaptive</type>\n"
+                + "        <map>\n"
+                + "            <point>"
+                + "                <first>2000</first>\n"
+                + "                <second>0.35</second>\n"
+                + "            </point>"
+                + "            <point>"
+                + "                <first>6000</first>\n"
+                + "                <second>0.55</second>\n"
+                + "            </point>"
+                + "        </map>\n"
+                + "    </brightnessLimitMap>\n"
+                + "    <brightnessLimitMap>\n" // Invalid points only, skipped
+                + "        <type>default</type>\n"
+                + "        <map>\n"
+                + "            <point>"
+                + "                <first>2500</first>\n"
+                + "                <second>0.99</second>\n"
+                + "            </point>"
+                + "        </map>\n"
+                + "    </brightnessLimitMap>\n"
+                + "</luxThrottling>";
+    }
+
     private String getRefreshThermalThrottlingMaps() {
         return "<refreshRateThrottlingMap>\n"
                + "    <refreshRateThrottlingPoint>\n"
@@ -405,6 +516,10 @@ public final class DisplayDeviceConfigTest {
     }
 
     private String getContent() {
+        return getContent(getValidLuxThrottling());
+    }
+
+    private String getContent(String brightnessCapConfig) {
         return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<displayConfiguration>\n"
                 +   "<name>Example Display</name>"
@@ -462,6 +577,7 @@ public final class DisplayDeviceConfigTest {
                 +            "</point>\n"
                 +       "</sdrHdrRatioMap>\n"
                 +   "</highBrightnessMode>\n"
+                + brightnessCapConfig
                 +   "<screenOffBrightnessSensor>\n"
                 +       "<type>sensor_12345</type>\n"
                 +       "<name>Sensor 12345</name>\n"
@@ -731,8 +847,12 @@ public final class DisplayDeviceConfigTest {
     }
 
     private void setupDisplayDeviceConfigFromDisplayConfigFile() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile(getContent());
+    }
+
+    private void setupDisplayDeviceConfigFromDisplayConfigFile(String content) throws IOException {
         Path tempFile = Files.createTempFile("display_config", ".tmp");
-        Files.write(tempFile, getContent().getBytes(StandardCharsets.UTF_8));
+        Files.write(tempFile, content.getBytes(StandardCharsets.UTF_8));
         mDisplayDeviceConfig = new DisplayDeviceConfig(mContext);
         mDisplayDeviceConfig.initFromFile(tempFile.toFile());
     }
