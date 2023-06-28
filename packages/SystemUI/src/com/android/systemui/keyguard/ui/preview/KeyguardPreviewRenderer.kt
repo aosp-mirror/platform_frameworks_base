@@ -346,6 +346,10 @@ constructor(
                         ?.largeClock
                         ?.events
                         ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
+                    clockController.clock
+                        ?.smallClock
+                        ?.events
+                        ?.onTargetRegionChanged(KeyguardClockSwitch.getSmallClockRegion(parentView))
                 }
             }
         parentView.addOnLayoutChangeListener(layoutChangeListener)
