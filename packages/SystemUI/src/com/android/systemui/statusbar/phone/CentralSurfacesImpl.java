@@ -182,6 +182,7 @@ import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.CameraLauncher;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
@@ -496,12 +497,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Lazy<LightRevealScrimViewModel> mLightRevealScrimViewModelLazy;
 
     /** Controller for the Shade. */
-    private final ShadeSurface mShadeSurface;
+    @VisibleForTesting
+    ShadeSurface mShadeSurface;
     private final ShadeLogger mShadeLogger;
 
     // settings
     private QSPanelController mQSPanelController;
-    private final QuickSettingsController mQsController;
+    @VisibleForTesting
+    QuickSettingsController mQsController;
 
     KeyguardIndicationController mKeyguardIndicationController;
 
@@ -726,11 +729,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             MetricsLogger metricsLogger,
             ShadeLogger shadeLogger,
             @UiBackground Executor uiBgExecutor,
-            ShadeSurface shadeSurface,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
-            QuickSettingsController quickSettingsController,
             UserSwitcherController userSwitcherController,
             BatteryController batteryController,
             SysuiColorExtractor colorExtractor,
@@ -829,11 +830,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mMetricsLogger = metricsLogger;
         mShadeLogger = shadeLogger;
         mUiBgExecutor = uiBgExecutor;
-        mShadeSurface = shadeSurface;
         mMediaManager = notificationMediaManager;
         mLockscreenUserManager = lockScreenUserManager;
         mRemoteInputManager = remoteInputManager;
-        mQsController = quickSettingsController;
         mUserSwitcherController = userSwitcherController;
         mBatteryController = batteryController;
         mColorExtractor = colorExtractor;
@@ -1637,9 +1636,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         //  (Right now, there's a circular dependency.)
         mNotificationShadeWindowController.setWindowRootView(windowRootView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
-        mShadeController.setShadeViewController(mShadeSurface);
+        NotificationPanelViewController npvc =
+                mCentralSurfacesComponent.getNotificationPanelViewController();
+        mShadeSurface = npvc;
+        mShadeController.setNotificationPanelViewController(npvc);
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
+        mQsController = mCentralSurfacesComponent.getQuickSettingsController();
         mBackActionInteractor.setup(mQsController, mShadeSurface);
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
@@ -1840,7 +1843,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     @Override
     public void onStatusBarTrackpadEvent(MotionEvent event) {
-        mShadeSurface.handleExternalTouch(event);
+        mCentralSurfacesComponent.getNotificationPanelViewController().handleExternalTouch(event);
     }
 
     private void onExpandedInvisible() {
