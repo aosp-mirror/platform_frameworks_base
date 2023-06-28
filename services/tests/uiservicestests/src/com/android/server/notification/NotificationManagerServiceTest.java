@@ -4148,6 +4148,30 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetListenerAccessForUser_grantWithNameTooLong_throws() {
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
+        ComponentName c = new ComponentName("com.example.package",
+                com.google.common.base.Strings.repeat("Blah", 150));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mBinderService.setNotificationListenerAccessGrantedForUser(
+                        c, user.getIdentifier(), /* enabled= */ true, true));
+    }
+
+    @Test
+    public void testSetListenerAccessForUser_revokeWithNameTooLong_okay() throws Exception {
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
+        ComponentName c = new ComponentName("com.example.package",
+                com.google.common.base.Strings.repeat("Blah", 150));
+
+        mBinderService.setNotificationListenerAccessGrantedForUser(
+                c, user.getIdentifier(), /* enabled= */ false, true);
+
+        verify(mListeners).setPackageOrComponentEnabled(
+                c.flattenToString(), user.getIdentifier(), true, /* enabled= */ false, true);
+    }
+
+    @Test
     public void testSetAssistantAccessForUser() throws Exception {
         UserInfo ui = new UserInfo();
         ui.id = mContext.getUserId() + 10;
