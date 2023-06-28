@@ -6938,9 +6938,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *                                  parameters used to create the PrecomputedText mismatches
      *                                  with this TextView.
      */
-    @android.view.RemotableViewMethod
+    @android.view.RemotableViewMethod(asyncImpl = "setTextAsync")
     public final void setText(CharSequence text) {
         setText(text, mBufferType);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setText(CharSequence)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     * @param text text to be displayed
+     * @return Runnable that sets text; must be called on the main thread by the caller of this
+     * method to complete the operation
+     * @hide
+     */
+    @NonNull
+    public Runnable setTextAsync(@Nullable CharSequence text) {
+        return () -> setText(text);
     }
 
     /**
