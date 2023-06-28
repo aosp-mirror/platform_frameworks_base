@@ -26,6 +26,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.app.PendingIntentStats;
@@ -126,6 +127,18 @@ public class PendingIntentController {
                 }
             }
             Bundle.setDefusable(bOptions, true);
+            ActivityOptions opts = ActivityOptions.fromBundle(bOptions);
+            if (opts != null && opts.getPendingIntentBackgroundActivityStartMode()
+                    != ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                Slog.wtf(TAG, "Resetting option setPendingIntentBackgroundActivityStartMode("
+                        + opts.getPendingIntentBackgroundActivityStartMode()
+                        + ") to SYSTEM_DEFINED from the options provided by the pending "
+                        + "intent creator ("
+                        + packageName
+                        + ") because this option is meant for the pending intent sender");
+                opts.setPendingIntentBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
+            }
 
             final boolean noCreate = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
             final boolean cancelCurrent = (flags & PendingIntent.FLAG_CANCEL_CURRENT) != 0;
@@ -135,7 +148,7 @@ public class PendingIntentController {
 
             PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, featureId,
                     token, resultWho, requestCode, intents, resolvedTypes, flags,
-                    SafeActivityOptions.fromBundle(bOptions), userId);
+                    new SafeActivityOptions(opts), userId);
             WeakReference<PendingIntentRecord> ref;
             ref = mIntentSenderRecords.get(key);
             PendingIntentRecord rec = ref != null ? ref.get() : null;
