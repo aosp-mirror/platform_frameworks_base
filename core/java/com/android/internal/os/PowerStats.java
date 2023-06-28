@@ -16,8 +16,13 @@
 
 package com.android.internal.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.BatteryConsumer;
+import android.os.Bundle;
+import android.os.Parcel;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.Arrays;
@@ -27,10 +32,138 @@ import java.util.Arrays;
  * details.
  */
 public final class PowerStats {
+    private static final String TAG = "PowerStats";
+
+    private static final BatteryStatsHistory.VarintParceler VARINT_PARCELER =
+            new BatteryStatsHistory.VarintParceler();
+    private static final byte PARCEL_FORMAT_VERSION = 1;
+
+    private static final int PARCEL_FORMAT_VERSION_MASK = 0x000000FF;
+    private static final int PARCEL_FORMAT_VERSION_SHIFT =
+            Integer.numberOfTrailingZeros(PARCEL_FORMAT_VERSION_MASK);
+    private static final int STATS_ARRAY_LENGTH_MASK = 0x0000FF00;
+    private static final int STATS_ARRAY_LENGTH_SHIFT =
+            Integer.numberOfTrailingZeros(STATS_ARRAY_LENGTH_MASK);
+    public static final int MAX_STATS_ARRAY_LENGTH =
+            2 ^ Integer.bitCount(STATS_ARRAY_LENGTH_MASK) - 1;
+    private static final int UID_STATS_ARRAY_LENGTH_MASK = 0x00FF0000;
+    private static final int UID_STATS_ARRAY_LENGTH_SHIFT =
+            Integer.numberOfTrailingZeros(UID_STATS_ARRAY_LENGTH_MASK);
+    public static final int MAX_UID_STATS_ARRAY_LENGTH =
+            (2 ^ Integer.bitCount(UID_STATS_ARRAY_LENGTH_MASK)) - 1;
+
     /**
-     * Power component (e.g. CPU, WIFI etc) that this snapshot relates to.
+     * Descriptor of the stats collected for a given power component (e.g. CPU, WiFi etc).
+     * This descriptor is used for storing PowerStats and can also be used by power models
+     * to adjust the algorithm in accordance with the stats available on the device.
      */
-    public @BatteryConsumer.PowerComponent int powerComponentId;
+    public static class Descriptor {
+        /**
+         * {@link BatteryConsumer.PowerComponent} (e.g. CPU, WIFI etc) that this snapshot relates
+         * to; or a custom power component ID (if the value
+         * is &gt;= {@link BatteryConsumer#FIRST_CUSTOM_POWER_COMPONENT_ID}).
+         */
+        public final int powerComponentId;
+        public final String name;
+
+        public final int statsArrayLength;
+        public final int uidStatsArrayLength;
+
+        /**
+         * Extra parameters specific to the power component, e.g. the availability of power
+         * monitors.
+         */
+        public final Bundle extras;
+
+        public Descriptor(@BatteryConsumer.PowerComponent int powerComponentId,
+                int statsArrayLength, int uidStatsArrayLength, @NonNull Bundle extras) {
+            this(powerComponentId, BatteryConsumer.powerComponentIdToString(powerComponentId),
+                    statsArrayLength, uidStatsArrayLength, extras);
+        }
+
+        public Descriptor(int customPowerComponentId, String name, int statsArrayLength,
+                int uidStatsArrayLength, Bundle extras) {
+            if (statsArrayLength > MAX_STATS_ARRAY_LENGTH) {
+                throw new IllegalArgumentException(
+                        "statsArrayLength is too high. Max = " + MAX_STATS_ARRAY_LENGTH);
+            }
+            if (uidStatsArrayLength > MAX_UID_STATS_ARRAY_LENGTH) {
+                throw new IllegalArgumentException(
+                        "uidStatsArrayLength is too high. Max = " + MAX_UID_STATS_ARRAY_LENGTH);
+            }
+            this.powerComponentId = customPowerComponentId;
+            this.name = name;
+            this.statsArrayLength = statsArrayLength;
+            this.uidStatsArrayLength = uidStatsArrayLength;
+            this.extras = extras;
+        }
+
+        /**
+         * Writes the Descriptor into the parcel.
+         */
+        public void writeSummaryToParcel(Parcel parcel) {
+            int firstWord = ((PARCEL_FORMAT_VERSION << PARCEL_FORMAT_VERSION_SHIFT)
+                    & PARCEL_FORMAT_VERSION_MASK)
+                    | ((statsArrayLength << STATS_ARRAY_LENGTH_SHIFT)
+                    & STATS_ARRAY_LENGTH_MASK)
+                    | ((uidStatsArrayLength << UID_STATS_ARRAY_LENGTH_SHIFT)
+                    & UID_STATS_ARRAY_LENGTH_MASK);
+            parcel.writeInt(firstWord);
+            parcel.writeInt(powerComponentId);
+            parcel.writeString(name);
+            extras.writeToParcel(parcel, 0);
+        }
+
+        /**
+         * Reads a Descriptor from the parcel.  If the parcel has an incompatible format,
+         * returns null.
+         */
+        @Nullable
+        public static Descriptor readSummaryFromParcel(Parcel parcel) {
+            int firstWord = parcel.readInt();
+            int version = (firstWord & PARCEL_FORMAT_VERSION_MASK) >>> PARCEL_FORMAT_VERSION_SHIFT;
+            if (version != PARCEL_FORMAT_VERSION) {
+                Log.w(TAG, "Cannot read PowerStats from Parcel - the parcel format version has "
+                        + "changed from " + version + " to " + PARCEL_FORMAT_VERSION);
+                return null;
+            }
+            int statsArrayLength =
+                    (firstWord & STATS_ARRAY_LENGTH_MASK) >>> STATS_ARRAY_LENGTH_SHIFT;
+            int uidStatsArrayLength =
+                    (firstWord & UID_STATS_ARRAY_LENGTH_MASK) >>> UID_STATS_ARRAY_LENGTH_SHIFT;
+            int powerComponentId = parcel.readInt();
+            String name = parcel.readString();
+            Bundle extras = parcel.readBundle(PowerStats.class.getClassLoader());
+            return new Descriptor(powerComponentId, name, statsArrayLength, uidStatsArrayLength,
+                    extras);
+        }
+    }
+
+    /**
+     * A registry for all supported power component types (e.g. CPU, WiFi).
+     */
+    public static class DescriptorRegistry {
+        private final SparseArray<Descriptor> mDescriptors = new SparseArray<>();
+
+        /**
+         * Adds the specified descriptor to the registry. If the registry already
+         * contained a descriptor for the same power component, then the new one replaces
+         * the old one.
+         */
+        public void register(Descriptor descriptor) {
+            mDescriptors.put(descriptor.powerComponentId, descriptor);
+        }
+
+        /**
+         * @param powerComponentId either a BatteryConsumer.PowerComponent or a custom power
+         *                         component ID
+         */
+        public Descriptor get(int powerComponentId) {
+            return mDescriptors.get(powerComponentId);
+        }
+    }
+
+    public final Descriptor descriptor;
 
     /**
      * Duration, in milliseconds, covered by this snapshot.
@@ -47,12 +180,81 @@ public final class PowerStats {
      */
     public final SparseArray<long[]> uidStats = new SparseArray<>();
 
+    public PowerStats(Descriptor descriptor) {
+        this.descriptor = descriptor;
+        stats = new long[descriptor.statsArrayLength];
+    }
+
+    /**
+     * Writes the object into the parcel.
+     */
+    public void writeToParcel(Parcel parcel) {
+        int lengthPos = parcel.dataPosition();
+        parcel.writeInt(0);     // Placeholder for length
+
+        int startPos = parcel.dataPosition();
+        parcel.writeInt(descriptor.powerComponentId);
+        parcel.writeLong(durationMs);
+        VARINT_PARCELER.writeLongArray(parcel, stats);
+        parcel.writeInt(uidStats.size());
+        for (int i = 0; i < uidStats.size(); i++) {
+            parcel.writeInt(uidStats.keyAt(i));
+            VARINT_PARCELER.writeLongArray(parcel, uidStats.valueAt(i));
+        }
+
+        int endPos = parcel.dataPosition();
+        parcel.setDataPosition(lengthPos);
+        parcel.writeInt(endPos - startPos);
+        parcel.setDataPosition(endPos);
+    }
+
+    /**
+     * Reads a PowerStats object from the supplied Parcel. If the parcel has an incompatible
+     * format, returns null.
+     */
+    @Nullable
+    public static PowerStats readFromParcel(Parcel parcel, DescriptorRegistry registry) {
+        int length = parcel.readInt();
+        int startPos = parcel.dataPosition();
+        int endPos = startPos + length;
+
+        try {
+            int powerComponentId = parcel.readInt();
+
+            Descriptor descriptor = registry.get(powerComponentId);
+            if (descriptor == null) {
+                Log.e(TAG, "Unsupported PowerStats for power component ID: " + powerComponentId);
+                return null;
+            }
+            PowerStats stats = new PowerStats(descriptor);
+            stats.durationMs = parcel.readLong();
+            stats.stats = new long[descriptor.statsArrayLength];
+            VARINT_PARCELER.readLongArray(parcel, stats.stats);
+            int uidCount = parcel.readInt();
+            for (int i = 0; i < uidCount; i++) {
+                int uid = parcel.readInt();
+                long[] uidStats = new long[descriptor.uidStatsArrayLength];
+                VARINT_PARCELER.readLongArray(parcel, uidStats);
+                stats.uidStats.put(uid, uidStats);
+            }
+            if (parcel.dataPosition() != endPos) {
+                Log.e(TAG, "Corrupted PowerStats parcel. Expected length: " + length
+                        + ", actual length: " + (parcel.dataPosition() - startPos));
+                return null;
+            }
+            return stats;
+        } finally {
+            // Unconditionally skip to the end of the written data, even if the actual parcel
+            // format is incompatible
+            parcel.setDataPosition(endPos);
+        }
+    }
+
     /**
      * Prints the contents of the stats snapshot.
      */
     public void dump(IndentingPrintWriter pw) {
-        pw.print("PowerStats: ");
-        pw.println(BatteryConsumer.powerComponentIdToString(powerComponentId));
+        pw.println("PowerStats: " + descriptor.name + " (" + descriptor.powerComponentId + ')');
         pw.increaseIndent();
         pw.print("duration", durationMs).println();
         for (int i = 0; i < uidStats.size(); i++) {

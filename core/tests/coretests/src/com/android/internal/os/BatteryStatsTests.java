@@ -35,6 +35,7 @@ import org.junit.runners.Suite;
         LongArrayMultiStateCounterTest.class,
         LongMultiStateCounterTest.class,
         PowerProfileTest.class,
+        PowerStatsTest.class,
 
         EnergyConsumerStatsTest.class
     })
