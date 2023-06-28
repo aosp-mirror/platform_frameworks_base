@@ -56,6 +56,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -273,7 +275,9 @@ constructor(
     }
 
     override fun addTile(spec: TileSpec, position: Int) {
-        scope.launch {
+        scope.launch(backgroundDispatcher) {
+            // Block until the list is not empty
+            currentTiles.filter { it.isNotEmpty() }.first()
             tileSpecRepository.addTile(userRepository.getSelectedUserInfo().id, spec, position)
         }
     }

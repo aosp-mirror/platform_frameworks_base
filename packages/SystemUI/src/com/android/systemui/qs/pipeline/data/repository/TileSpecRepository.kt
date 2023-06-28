@@ -20,6 +20,7 @@ import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.database.ContentObserver
 import android.provider.Settings
+import android.util.SparseArray
 import com.android.systemui.R
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -107,6 +108,7 @@ constructor(
 ) : TileSpecRepository {
 
     private val mutex = Mutex()
+    private val tileSpecsPerUser = SparseArray<List<TileSpec>>()
 
     private val retailModeTiles by lazy {
         resources
@@ -142,10 +144,12 @@ constructor(
                 awaitClose { secureSettings.unregisterContentObserver(observer) }
             }
             .onStart { emit(Unit) }
-            .map { secureSettings.getStringForUser(SETTING, userId) ?: "" }
-            .distinctUntilChanged()
+            .map { loadTiles(userId) }
             .onEach { logger.logTilesChangedInSettings(it, userId) }
-            .map { parseTileSpecs(it, userId) }
+            .distinctUntilChanged()
+            .map { parseTileSpecs(it, userId).also { storeTiles(userId, it) } }
+            .distinctUntilChanged()
+            .onEach { mutex.withLock { tileSpecsPerUser.put(userId, it) } }
             .flowOn(backgroundDispatcher)
     }
 
@@ -154,7 +158,7 @@ constructor(
             if (tile == TileSpec.Invalid) {
                 return
             }
-            val tilesList = loadTiles(userId).toMutableList()
+            val tilesList = tileSpecsPerUser.get(userId, emptyList()).toMutableList()
             if (tile !in tilesList) {
                 if (position < 0 || position >= tilesList.size) {
                     tilesList.add(tile)
@@ -162,6 +166,7 @@ constructor(
                     tilesList.add(position, tile)
                 }
                 storeTiles(userId, tilesList)
+                tileSpecsPerUser.put(userId, tilesList)
             }
         }
 
@@ -170,9 +175,10 @@ constructor(
             if (tiles.all { it == TileSpec.Invalid }) {
                 return
             }
-            val tilesList = loadTiles(userId).toMutableList()
+            val tilesList = tileSpecsPerUser.get(userId, emptyList()).toMutableList()
             if (tilesList.removeAll(tiles)) {
                 storeTiles(userId, tilesList.toList())
+                tileSpecsPerUser.put(userId, tilesList)
             }
         }
 
@@ -181,17 +187,9 @@ constructor(
             val filtered = tiles.filter { it != TileSpec.Invalid }
             if (filtered.isNotEmpty()) {
                 storeTiles(userId, filtered)
+                tileSpecsPerUser.put(userId, tiles)
             }
         }
-
-    private suspend fun loadTiles(@UserIdInt forUser: Int): List<TileSpec> {
-        return withContext(backgroundDispatcher) {
-            (secureSettings.getStringForUser(SETTING, forUser) ?: "")
-                .split(DELIMITER)
-                .map(TileSpec::create)
-                .filter { it !is TileSpec.Invalid }
-        }
-    }
 
     private suspend fun storeTiles(@UserIdInt forUser: Int, tiles: List<TileSpec>) {
         if (retailModeRepository.inRetailMode) {
@@ -211,6 +209,12 @@ constructor(
                 forUser,
                 true,
             )
+        }
+    }
+
+    private suspend fun loadTiles(userId: Int): String {
+        return withContext(backgroundDispatcher) {
+            secureSettings.getStringForUser(SETTING, userId) ?: ""
         }
     }
 
