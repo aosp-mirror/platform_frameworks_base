@@ -920,6 +920,17 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "requestCreateSessionWithRouter2 | router: %s(id: %d), old session id: %s,"
+                            + " new session's route id: %s, request id: %d",
+                        routerRecord.mPackageName,
+                        routerRecord.mRouterId,
+                        oldSession.getId(),
+                        route.getId(),
+                        requestId));
+
         if (managerRequestId != MediaRoute2ProviderService.REQUEST_ID_NONE) {
             ManagerRecord manager = routerRecord.mUserRecord.mHandler.findManagerWithId(
                     toRequesterId(managerRequestId));
