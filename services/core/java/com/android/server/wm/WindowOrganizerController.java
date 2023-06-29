@@ -321,9 +321,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
                     return transition.getToken();
                 }
-                transition.start();
                 transition.mLogger.mStartWCT = wct;
-                applyTransaction(wct, -1 /*syncId*/, transition, caller);
+                if (transition.shouldApplyOnDisplayThread()) {
+                    mService.mH.post(() -> {
+                        synchronized (mService.mGlobalLock) {
+                            transition.start();
+                            applyTransaction(wct, -1 /* syncId */, transition, caller);
+                        }
+                    });
+                } else {
+                    transition.start();
+                    applyTransaction(wct, -1 /* syncId */, transition, caller);
+                }
                 // Since the transition is already provided, it means WMCore is determining the
                 // "readiness lifecycle" outside the provided transaction, so don't set ready here.
                 return transition.getToken();
