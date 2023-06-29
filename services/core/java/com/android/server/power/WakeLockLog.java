@@ -16,20 +16,26 @@
 
 package com.android.server.power;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Simple Log for wake lock events. Optimized to reduce memory usage.
@@ -117,7 +123,7 @@ final class WakeLockLog {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
     /**
-     * Lock protects WakeLockLock.dump (binder thread) from conflicting with changes to the log
+     * Lock protects WakeLockLog.dump (binder thread) from conflicting with changes to the log
      * happening on the background thread.
      */
     private final Object mLock = new Object();
@@ -126,18 +132,20 @@ final class WakeLockLog {
     private final TheLog mLog;
     private final TagDatabase mTagDatabase;
     private final SimpleDateFormat mDumpsysDateFormat;
+    private final Context mContext;
 
-    WakeLockLog() {
-        this(new Injector());
+    WakeLockLog(Context context) {
+        this(new Injector(), context);
     }
 
     @VisibleForTesting
-    WakeLockLog(Injector injector) {
+    WakeLockLog(Injector injector, Context context) {
         mInjector = injector;
         mTagDatabase = new TagDatabase(injector);
         EntryByteTranslator translator = new EntryByteTranslator(mTagDatabase);
         mLog = new TheLog(injector, translator, mTagDatabase);
         mDumpsysDateFormat = injector.getDateFormat();
+        mContext = context;
     }
 
     /**
@@ -176,10 +184,24 @@ final class WakeLockLog {
         try {
             synchronized (mLock) {
                 pw.println("Wake Lock Log");
-                LogEntry tempEntry = new LogEntry();  // Temporary entry for the iterator to reuse.
-                final Iterator<LogEntry> iterator = mLog.getAllItems(tempEntry);
                 int numEvents = 0;
                 int numResets = 0;
+                SparseArray<String[]> uidToPackagesCache = new SparseArray();
+
+                for (int i = 0; i < mLog.mSavedAcquisitions.size(); i++) {
+                    numEvents++;
+                    LogEntry entry = mLog.mSavedAcquisitions.get(i);
+
+                    entry.updatePackageName(uidToPackagesCache, mContext.getPackageManager());
+
+                    if (DEBUG) {
+                        pw.print("Saved acquisition no. " + i);
+                    }
+                    entry.dump(pw, mDumpsysDateFormat);
+                }
+
+                LogEntry tempEntry = new LogEntry();  // Temporary entry for the iterator to reuse.
+                final Iterator<LogEntry> iterator = mLog.getAllItems(tempEntry);
                 while (iterator.hasNext()) {
                     String address = null;
                     if (DEBUG) {
@@ -192,6 +214,8 @@ final class WakeLockLog {
                             numResets++;
                         } else {
                             numEvents++;
+                            entry.updatePackageName(uidToPackagesCache,
+                                    mContext.getPackageManager());
                             if (DEBUG) {
                                 pw.print(address);
                             }
@@ -381,6 +405,11 @@ final class WakeLockLog {
          */
         public int flags;
 
+        /**
+         * The name of the package that acquired the wake lock
+         */
+        public String packageName;
+
         LogEntry() {}
 
         LogEntry(long time, int type, TagData tag, int flags) {
@@ -438,8 +467,13 @@ final class WakeLockLog {
             }
             sb.append(dateFormat.format(new Date(time)))
                     .append(" - ")
-                    .append(tag == null ? "---" : tag.ownerUid)
-                    .append(" - ")
+                    .append(tag == null ? "---" : tag.ownerUid);
+            if (packageName != null) {
+                sb.append(" (");
+                sb.append(packageName);
+                sb.append(")");
+            }
+            sb.append(" - ")
                     .append(type == TYPE_ACQUIRE ? "ACQ" : "REL")
                     .append(" ")
                     .append(tag == null ? "UNKNOWN" : tag.tag);
@@ -461,6 +495,36 @@ final class WakeLockLog {
             }
             if ((flags & FLAG_SYSTEM_WAKELOCK) == FLAG_SYSTEM_WAKELOCK) {
                 sb.append(",system-wakelock");
+            }
+        }
+
+        /**
+         * Update the package name using the cache if available or the package manager.
+         * @param uidToPackagesCache The cache of package names
+         * @param packageManager The package manager
+         */
+        public void updatePackageName(SparseArray<String[]> uidToPackagesCache,
+                PackageManager packageManager) {
+            if (tag == null) {
+                return;
+            }
+
+            String[] packages;
+            if (uidToPackagesCache.contains(tag.ownerUid)) {
+                packages = uidToPackagesCache.get(tag.ownerUid);
+            } else {
+                packages = packageManager.getPackagesForUid(tag.ownerUid);
+                uidToPackagesCache.put(tag.ownerUid, packages);
+            }
+
+            if (packages != null && packages.length > 0) {
+                packageName = packages[0];
+                if (packages.length > 1) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(packageName)
+                            .append(",...");
+                    packageName = sb.toString();
+                }
             }
         }
     }
@@ -744,6 +808,12 @@ final class WakeLockLog {
 
         private final TagDatabase mTagDatabase;
 
+        /**
+         * Wake lock acquisition events should continue to be printed until their corresponding
+         * release event is removed from the log.
+         */
+        private final List<LogEntry> mSavedAcquisitions;
+
         TheLog(Injector injector, EntryByteTranslator translator, TagDatabase tagDatabase) {
             final int logSize = Math.max(injector.getLogSize(), LOG_SIZE_MIN);
             mBuffer = new byte[logSize];
@@ -758,6 +828,8 @@ final class WakeLockLog {
                     removeTagIndex(index);
                 }
             });
+
+            mSavedAcquisitions = new ArrayList();
         }
 
         /**
@@ -976,6 +1048,19 @@ final class WakeLockLog {
 
             // Copy the contents of the start of the buffer to our temporary buffer.
             LogEntry entry = readEntryAt(mStart, mStartTime, null);
+            if (entry.type == TYPE_ACQUIRE) {
+                // We'll continue to print the event until the corresponding release event is also
+                // removed from the log.
+                mSavedAcquisitions.add(entry);
+            } else if (entry.type == TYPE_RELEASE) {
+                // We no longer need to print the corresponding acquire event.
+                for (int i = 0; i < mSavedAcquisitions.size(); i++) {
+                    if (Objects.equals(mSavedAcquisitions.get(i).tag, entry.tag)) {
+                        mSavedAcquisitions.remove(i);
+                        break;
+                    }
+                }
+            }
             if (DEBUG) {
                 Slog.d(TAG, "Removing oldest item at @ " + mStart + ", found: " + entry);
             }

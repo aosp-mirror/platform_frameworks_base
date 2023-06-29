@@ -18,11 +18,18 @@ package com.android.server.power;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.PowerManager;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,12 +41,27 @@ import java.util.TimeZone;
  */
 public class WakeLockLogTest {
 
+    @Mock
+    private Context mContext;
+
+    @Mock
+    private PackageManager mPackageManager;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+
+        when(mPackageManager.getPackagesForUid(101)).thenReturn(new String[]{ "some.package1" });
+        when(mPackageManager.getPackagesForUid(102)).thenReturn(new String[]{ "some.package2" });
+    }
+
     @Test
     public void testAddTwoItems() {
         final int tagDatabaseSize = 128;
         final int logSize = 20;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("TagPartial", 101,
@@ -50,8 +72,10 @@ public class WakeLockLogTest {
                 PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
 
         assertEquals("Wake Lock Log\n"
-                + "  01-01 00:00:01.000 - 101 - ACQ TagPartial (partial,on-after-release)\n"
-                + "  01-01 00:00:01.150 - 102 - ACQ TagFull (full,acq-causes-wake)\n"
+                + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ TagPartial "
+                        + "(partial,on-after-release)\n"
+                + "  01-01 00:00:01.150 - 102 (some.package2) - ACQ TagFull "
+                        + "(full,acq-causes-wake)\n"
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 6\n",
@@ -63,7 +87,7 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 128;
         final int logSize = 20;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("TagPartial", 101, PowerManager.PARTIAL_WAKE_LOCK);
@@ -72,8 +96,8 @@ public class WakeLockLogTest {
         log.onWakeLockAcquired("TagFull", 102, PowerManager.FULL_WAKE_LOCK);
 
         assertEquals("Wake Lock Log\n"
-                + "  01-01 00:00:01.000 - 101 - ACQ TagPartial (partial)\n"
-                + "  01-01 00:00:01.350 - 102 - ACQ TagFull (full)\n"
+                + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ TagPartial (partial)\n"
+                + "  01-01 00:00:01.350 - 102 (some.package2) - ACQ TagFull (full)\n"
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 1\n"
                 + "  Buffer, Bytes used: 15\n",
@@ -85,7 +109,7 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 2;
         final int logSize = 20;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("TagPartial", 101, PowerManager.PARTIAL_WAKE_LOCK);
@@ -95,7 +119,7 @@ public class WakeLockLogTest {
 
         assertEquals("Wake Lock Log\n"
                 + "  01-01 00:00:01.000 - --- - ACQ UNKNOWN (partial)\n"
-                + "  01-01 00:00:01.150 - 102 - ACQ TagFull (full)\n"
+                + "  01-01 00:00:01.150 - 102 (some.package2) - ACQ TagFull (full)\n"
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 6\n",
@@ -107,26 +131,55 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 6;
         final int logSize = 10;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
-        // This first item will get deleted when ring buffer loops around
+        // Wake lock 1 acquired - log size = 3
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("TagPartial", 101, PowerManager.PARTIAL_WAKE_LOCK);
 
+        // Wake lock 2 acquired - log size = 3 + 3 = 6
         when(injectorSpy.currentTimeMillis()).thenReturn(1150L);
         log.onWakeLockAcquired("TagFull", 102, PowerManager.FULL_WAKE_LOCK);
+
+        // Wake lock 3 acquired - log size = 6 + 3 = 9
         when(injectorSpy.currentTimeMillis()).thenReturn(1151L);
         log.onWakeLockAcquired("TagThree", 101, PowerManager.PARTIAL_WAKE_LOCK);
+
+        // We need more space - wake lock 1 acquisition is removed from the log and saved in the
+        // list. Log size = 9 - 3 + 2 = 8
         when(injectorSpy.currentTimeMillis()).thenReturn(1152L);
+        log.onWakeLockReleased("TagThree", 101);
+
+        // We need more space - wake lock 2 acquisition is removed from the log and saved in the
+        // list. Log size = 8 - 3 + 2 = 7
+        when(injectorSpy.currentTimeMillis()).thenReturn(1153L);
+        log.onWakeLockReleased("TagPartial", 101);
+
+        // We need more space - wake lock 3 acquisition is removed from the log and saved in the
+        // list. Log size = 7 - 3 + 3 = 7
+        when(injectorSpy.currentTimeMillis()).thenReturn(1154L);
         log.onWakeLockAcquired("TagFour", 101, PowerManager.PARTIAL_WAKE_LOCK);
 
+        // We need more space - wake lock 3 release is removed from the log and wake lock 3
+        // acquisition is removed from the list. Log size = 7 - 2 + 3 = 8
+        when(injectorSpy.currentTimeMillis()).thenReturn(1155L);
+        log.onWakeLockAcquired("TagFive", 101, PowerManager.PARTIAL_WAKE_LOCK);
+
+        // We need more space - wake lock 1 release is removed from the log and wake lock 1
+        // acquisition is removed from the list. Log size = 8 - 2 + 2 = 8
+        when(injectorSpy.currentTimeMillis()).thenReturn(1156L);
+        log.onWakeLockReleased("TagFull", 102);
+
+        // Wake lock 2 acquisition is still printed because its release have not rolled off the log
+        // yet.
         assertEquals("Wake Lock Log\n"
-                + "  01-01 00:00:01.150 - 102 - ACQ TagFull (full)\n"
-                + "  01-01 00:00:01.151 - 101 - ACQ TagThree (partial)\n"
-                + "  01-01 00:00:01.152 - 101 - ACQ TagFour (partial)\n"
+                + "  01-01 00:00:01.150 - 102 (some.package2) - ACQ TagFull (full)\n"
+                + "  01-01 00:00:01.154 - 101 (some.package1) - ACQ TagFour (partial)\n"
+                + "  01-01 00:00:01.155 - 101 (some.package1) - ACQ TagFive (partial)\n"
+                + "  01-01 00:00:01.156 - 102 (some.package2) - REL TagFull\n"
                 + "  -\n"
-                + "  Events: 3, Time-Resets: 0\n"
-                + "  Buffer, Bytes used: 9\n",
+                + "  Events: 4, Time-Resets: 0\n"
+                + "  Buffer, Bytes used: 8\n",
                 dumpLog(log, false));
     }
 
@@ -135,7 +188,7 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 6;
         final int logSize = 10;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         // Bad tag means it wont get written
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
@@ -153,14 +206,15 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 6;
         final int logSize = 10;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("*job*/com.one.two.3hree/.one..Last", 101,
                 PowerManager.PARTIAL_WAKE_LOCK);
 
         assertEquals("Wake Lock Log\n"
-                + "  01-01 00:00:01.000 - 101 - ACQ *job*/c.o.t.3/.o..Last (partial)\n"
+                + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ "
+                        + "*job*/c.o.t.3/.o..Last (partial)\n"
                 + "  -\n"
                 + "  Events: 1, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 3\n",
@@ -172,7 +226,7 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 6;
         final int logSize = 10;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("HowdyTag", 101, PowerManager.PARTIAL_WAKE_LOCK);
@@ -180,8 +234,8 @@ public class WakeLockLogTest {
         log.onWakeLockReleased("HowdyTag", 101);
 
         assertEquals("Wake Lock Log\n"
-                + "  01-01 00:00:01.000 - 101 - ACQ HowdyTag (partial)\n"
-                + "  01-01 00:00:01.001 - 101 - REL HowdyTag\n"
+                + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ HowdyTag (partial)\n"
+                + "  01-01 00:00:01.001 - 101 (some.package1) - REL HowdyTag\n"
                 + "  -\n"
                 + "  Events: 2, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 5\n"
@@ -194,7 +248,7 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 6;
         final int logSize = 10;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1100L);
         log.onWakeLockAcquired("HowdyTag", 101, PowerManager.PARTIAL_WAKE_LOCK);
@@ -204,7 +258,7 @@ public class WakeLockLogTest {
         log.onWakeLockReleased("HowdyTag", 101);
 
         assertEquals("Wake Lock Log\n"
-                + "  01-01 00:00:01.100 - 101 - ACQ HowdyTag (partial)\n"
+                + "  01-01 00:00:01.100 - 101 (some.package1) - ACQ HowdyTag (partial)\n"
                 + "  -\n"
                 + "  Events: 1, Time-Resets: 0\n"
                 + "  Buffer, Bytes used: 3\n",
@@ -216,18 +270,151 @@ public class WakeLockLogTest {
         final int tagDatabaseSize = 6;
         final int logSize = 10;
         TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
-        WakeLockLog log = new WakeLockLog(injectorSpy);
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
 
         when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
         log.onWakeLockAcquired("TagPartial", 101,
                 PowerManager.PARTIAL_WAKE_LOCK | PowerManager.SYSTEM_WAKELOCK);
 
         assertEquals("Wake Lock Log\n"
-                        + "  01-01 00:00:01.000 - 101 - ACQ TagPartial (partial,system-wakelock)\n"
+                        + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ TagPartial "
+                                + "(partial,system-wakelock)\n"
                         + "  -\n"
                         + "  Events: 1, Time-Resets: 0\n"
                         + "  Buffer, Bytes used: 3\n",
                 dumpLog(log, false));
+    }
+
+    @Test
+    public void testAddItemWithNoPackageName() {
+        final int tagDatabaseSize = 128;
+        final int logSize = 20;
+        TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
+
+        when(mPackageManager.getPackagesForUid(101)).thenReturn(null);
+        when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
+        log.onWakeLockAcquired("TagPartial", 101,
+                PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE);
+
+        assertEquals("Wake Lock Log\n"
+                        + "  01-01 00:00:01.000 - 101 - ACQ TagPartial "
+                                + "(partial,on-after-release)\n"
+                        + "  -\n"
+                        + "  Events: 1, Time-Resets: 0\n"
+                        + "  Buffer, Bytes used: 3\n",
+                dumpLog(log, false));
+    }
+
+    @Test
+    public void testAddItemWithMultiplePackageNames() {
+        final int tagDatabaseSize = 128;
+        final int logSize = 20;
+        TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
+
+        when(mPackageManager.getPackagesForUid(101)).thenReturn(
+                new String[]{ "some.package1", "some.package2", "some.package3" });
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
+        log.onWakeLockAcquired("TagPartial", 101,
+                PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE);
+
+        assertEquals("Wake Lock Log\n"
+                        + "  01-01 00:00:01.000 - 101 (some.package1,...) - ACQ TagPartial "
+                                + "(partial,on-after-release)\n"
+                        + "  -\n"
+                        + "  Events: 1, Time-Resets: 0\n"
+                        + "  Buffer, Bytes used: 3\n",
+                dumpLog(log, false));
+    }
+
+    @Test
+    public void testAddItemsWithRepeatOwnerUid_UsesCache() {
+        final int tagDatabaseSize = 128;
+        final int logSize = 20;
+        TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
+        log.onWakeLockAcquired("TagPartial", 101,
+                PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1150L);
+        log.onWakeLockAcquired("TagFull", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1151L);
+        log.onWakeLockAcquired("TagFull2", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        assertEquals("Wake Lock Log\n"
+                        + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ TagPartial "
+                        + "(partial,on-after-release)\n"
+                        + "  01-01 00:00:01.150 - 101 (some.package1) - ACQ TagFull "
+                        + "(full,acq-causes-wake)\n"
+                        + "  01-01 00:00:01.151 - 101 (some.package1) - ACQ TagFull2 "
+                        + "(full,acq-causes-wake)\n"
+                        + "  -\n"
+                        + "  Events: 3, Time-Resets: 0\n"
+                        + "  Buffer, Bytes used: 9\n",
+                dumpLog(log, false));
+
+        verify(mPackageManager, times(1)).getPackagesForUid(101);
+    }
+
+    @Test
+    public void testAddItemsWithRepeatOwnerUid_SavedAcquisitions_UsesCache() {
+        final int tagDatabaseSize = 128;
+        final int logSize = 10;
+        TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
+        WakeLockLog log = new WakeLockLog(injectorSpy, mContext);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
+        log.onWakeLockAcquired("TagPartial", 101,
+                PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1150L);
+        log.onWakeLockAcquired("TagFull", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1151L);
+        log.onWakeLockAcquired("TagFull2", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1152L);
+        log.onWakeLockAcquired("TagFull3", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1153L);
+        log.onWakeLockAcquired("TagFull4", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1154L);
+        log.onWakeLockAcquired("TagFull5", 101,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP);
+
+        // The first 3 events have been removed from the log and they exist in the saved
+        // acquisitions list. They should also use the cache when fetching the package names.
+        assertEquals("Wake Lock Log\n"
+                        + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ TagPartial "
+                        + "(partial,on-after-release)\n"
+                        + "  01-01 00:00:01.150 - 101 (some.package1) - ACQ TagFull "
+                        + "(full,acq-causes-wake)\n"
+                        + "  01-01 00:00:01.151 - 101 (some.package1) - ACQ TagFull2 "
+                        + "(full,acq-causes-wake)\n"
+                        + "  01-01 00:00:01.152 - 101 (some.package1) - ACQ TagFull3 "
+                        + "(full,acq-causes-wake)\n"
+                        + "  01-01 00:00:01.153 - 101 (some.package1) - ACQ TagFull4 "
+                        + "(full,acq-causes-wake)\n"
+                        + "  01-01 00:00:01.154 - 101 (some.package1) - ACQ TagFull5 "
+                        + "(full,acq-causes-wake)\n"
+                        + "  -\n"
+                        + "  Events: 6, Time-Resets: 0\n"
+                        + "  Buffer, Bytes used: 9\n",
+                dumpLog(log, false));
+
+        verify(mPackageManager, times(1)).getPackagesForUid(101);
     }
 
     private String dumpLog(WakeLockLog log, boolean includeTagDb) {

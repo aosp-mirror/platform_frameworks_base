@@ -222,7 +222,7 @@ public class Notifier {
         mShowWirelessChargingAnimationConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showBuiltinWirelessChargingAnim);
 
-        mWakeLockLog = new WakeLockLog();
+        mWakeLockLog = new WakeLockLog(context);
 
         // Initialize interactive state for battery stats.
         try {
