@@ -1015,6 +1015,13 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void setName_setDeviceNameIsEmpty() {
+        mCachedDevice.setName("");
+
+        verify(mDevice, never()).setAlias(any());
+    }
+
+    @Test
     public void getProfileConnectionState_nullProfile_returnDisconnected() {
         assertThat(mCachedDevice.getProfileConnectionState(null)).isEqualTo(
                 BluetoothProfile.STATE_DISCONNECTED);
