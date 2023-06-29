@@ -19500,8 +19500,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isCurrentInputMethodSetByOwner() {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                || isProfileOwner(caller) || isSystemUid(caller),
-                "Only profile owner, device owner and system may call this method.");
+                || isProfileOwner(caller) || canQueryAdminPolicy(caller) || isSystemUid(caller),
+                "Only profile owner, device owner, a caller with QUERY_ADMIN_POLICY "
+                        + "permission or system may call this method.");
         return getUserData(caller.getUserId()).mCurrentInputMethodSet;
     }
 
