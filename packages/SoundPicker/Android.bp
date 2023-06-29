@@ -34,4 +34,13 @@ android_app {
     platform_apis: true,
     certificate: "media",
     privileged: true,
+
+    optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
+        obfuscate: false,
+        proguard_compatibility: false,
+    },
 }

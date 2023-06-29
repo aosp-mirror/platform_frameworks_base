@@ -16,14 +16,37 @@
 
 package com.android.soundpicker;
 
-import androidx.fragment.app.Fragment;
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.lifecycle.ViewModelProvider;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
- * A fragment that will display a picker used to select vibration.
+ * A fragment that displays a picker used to select vibration or silent (no vibration).
  */
-public class VibrationPickerFragment extends Fragment {
+public class VibrationPickerFragment extends BasePickerFragment {
 
-    public VibrationPickerFragment() {
-        super(R.layout.fragment_vibration_picker);
+    @Override
+    public void onViewCreated(@NotNull View view, Bundle savedInstanceState) {
+        mRingtonePickerViewModel = new ViewModelProvider(requireActivity()).get(
+                RingtonePickerViewModel.class);
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    protected RingtoneListHandler getRingtoneListHandler() {
+        return mRingtonePickerViewModel.getVibrationListHandler();
+    }
+
+    @Override
+    protected void addRingtoneAsync() {
+        // no-op
+    }
+
+    @Override
+    protected void addNewRingtoneItem() {
+        // no-op
     }
 }
