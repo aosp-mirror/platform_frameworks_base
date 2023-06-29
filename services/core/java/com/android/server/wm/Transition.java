@@ -77,6 +77,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -2694,6 +2695,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.mContainer.scheduleAnimation();
             }
         });
+    }
+
+    /**
+     * Returns {@code true} if the transition and the corresponding transaction should be applied
+     * on display thread. Currently, this only checks for display rotation change because the order
+     * of dispatching the new display info will be after requesting the windows to sync drawing.
+     * That avoids potential flickering of screen overlays (e.g. cutout, rounded corner). Also,
+     * because the display thread has a higher priority, it is faster to perform the configuration
+     * changes and window hierarchy traversal.
+     */
+    boolean shouldApplyOnDisplayThread() {
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final DisplayContent dc = mParticipants.valueAt(i).asDisplayContent();
+            if (dc == null) continue;
+            final ChangeInfo changeInfo = mChanges.get(dc);
+            if (changeInfo != null && changeInfo.mRotation != dc.getRotation()) {
+                return Looper.myLooper() != mController.mAtm.mWindowManager.mH.getLooper();
+            }
+        }
+        return false;
     }
 
     /** Applies the new configuration for the changed displays. */
