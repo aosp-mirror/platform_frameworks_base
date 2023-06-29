@@ -1245,11 +1245,13 @@ public class SettingsProvider extends ContentProvider {
             Setting settingLocked = mSettingsRegistry.getSettingLocked(
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
                     Global.DEVICE_CONFIG_SYNC_DISABLED);
-            if (settingLocked == null) {
-                return SYNC_DISABLED_MODE_NONE;
+            String settingValue = settingLocked == null ? null : settingLocked.getValue();
+            if (settingValue == null) {
+                // Disable sync by default in test harness mode.
+                return ActivityManager.isRunningInUserTestHarness()
+                        ? SYNC_DISABLED_MODE_PERSISTENT : SYNC_DISABLED_MODE_NONE;
             }
-            String settingValue = settingLocked.getValue();
-            boolean isSyncDisabledPersistent = settingValue != null && !"0".equals(settingValue);
+            boolean isSyncDisabledPersistent = !"0".equals(settingValue);
             return isSyncDisabledPersistent
                     ? SYNC_DISABLED_MODE_PERSISTENT : SYNC_DISABLED_MODE_NONE;
         } finally {
