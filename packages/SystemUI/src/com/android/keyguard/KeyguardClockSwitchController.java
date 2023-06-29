@@ -352,6 +352,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
+     * Set if the split shade is enabled
+     */
+    public void setSplitShadeEnabled(boolean splitShadeEnabled) {
+        mSmartspaceController.setSplitShadeEnabled(splitShadeEnabled);
+    }
+
+    /**
      * Set which clock should be displayed on the keyguard. The other one will be automatically
      * hidden.
      */
