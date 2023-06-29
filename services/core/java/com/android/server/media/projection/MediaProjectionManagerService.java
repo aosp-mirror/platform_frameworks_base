@@ -147,7 +147,7 @@ public final class MediaProjectionManagerService extends SystemService
         mInjector = injector;
         mClock = injector.createClock();
         mDeathEaters = new ArrayMap<IBinder, IBinder.DeathRecipient>();
-        mCallbackDelegate = new CallbackDelegate();
+        mCallbackDelegate = new CallbackDelegate(injector.createCallbackLooper());
         mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
@@ -181,6 +181,11 @@ public final class MediaProjectionManagerService extends SystemService
 
         Clock createClock() {
             return SystemClock::uptimeMillis;
+        }
+
+        /** Creates the {@link Looper} to be used when notifying callbacks. */
+        Looper createCallbackLooper() {
+            return Looper.getMainLooper();
         }
     }
 
@@ -268,7 +273,8 @@ public final class MediaProjectionManagerService extends SystemService
         dispatchStop(projection);
     }
 
-    private void addCallback(final IMediaProjectionWatcherCallback callback) {
+    @VisibleForTesting
+    void addCallback(final IMediaProjectionWatcherCallback callback) {
         IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
@@ -315,6 +321,12 @@ public final class MediaProjectionManagerService extends SystemService
         mCallbackDelegate.dispatchStop(projection);
     }
 
+    private void dispatchSessionSet(
+            @NonNull MediaProjectionInfo projectionInfo,
+            @Nullable ContentRecordingSession session) {
+        mCallbackDelegate.dispatchSession(projectionInfo, session);
+    }
+
     /**
      * Returns {@code true} when updating the current mirroring session on WM succeeded, and
      * {@code false} otherwise.
@@ -335,6 +347,7 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant != null) {
                 // Cache the session details.
                 mProjectionGrant.mSession = incomingSession;
+                dispatchSessionSet(mProjectionGrant.getProjectionInfo(), incomingSession);
             }
             return true;
         }
@@ -1122,8 +1135,8 @@ public final class MediaProjectionManagerService extends SystemService
         private Handler mHandler;
         private final Object mLock = new Object();
 
-        public CallbackDelegate() {
-            mHandler = new Handler(Looper.getMainLooper(), null, true /*async*/);
+        CallbackDelegate(Looper callbackLooper) {
+            mHandler = new Handler(callbackLooper, null, true /*async*/);
             mClientCallbacks = new ArrayMap<IBinder, IMediaProjectionCallback>();
             mWatcherCallbacks = new ArrayMap<IBinder, IMediaProjectionWatcherCallback>();
         }
@@ -1182,6 +1195,16 @@ public final class MediaProjectionManagerService extends SystemService
                 for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks.values()) {
                     MediaProjectionInfo info = projection.getProjectionInfo();
                     mHandler.post(new WatcherStopCallback(info, callback));
+                }
+            }
+        }
+
+        public void dispatchSession(
+                @NonNull MediaProjectionInfo projectionInfo,
+                @Nullable ContentRecordingSession session) {
+            synchronized (mLock) {
+                for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks.values()) {
+                    mHandler.post(new WatcherSessionCallback(callback, projectionInfo, session));
                 }
             }
         }
@@ -1302,6 +1325,29 @@ public final class MediaProjectionManagerService extends SystemService
         }
     }
 
+    private static final class WatcherSessionCallback implements Runnable {
+        private final IMediaProjectionWatcherCallback mCallback;
+        private final MediaProjectionInfo mProjectionInfo;
+        private final ContentRecordingSession mSession;
+
+        WatcherSessionCallback(
+                @NonNull IMediaProjectionWatcherCallback callback,
+                @NonNull MediaProjectionInfo projectionInfo,
+                @Nullable ContentRecordingSession session) {
+            mCallback = callback;
+            mProjectionInfo = projectionInfo;
+            mSession = session;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mCallback.onRecordingSessionSet(mProjectionInfo, mSession);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to notify content recording session changed", e);
+            }
+        }
+    }
 
     private static String typeToString(int type) {
         switch (type) {

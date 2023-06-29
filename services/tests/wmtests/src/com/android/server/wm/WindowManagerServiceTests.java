@@ -82,6 +82,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
+import android.view.ContentRecordingSession;
 import android.view.IWindow;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
@@ -102,6 +103,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 import com.android.internal.os.IResultReceiver;
+import com.android.server.LocalServices;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -766,6 +768,63 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(
                 new Binder("some other cookie"));
         assertThat(wct).isNull();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionNull_returnsTrue() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+
+        boolean result = wmInternal.setContentRecordingSession(/* incomingSession= */ null);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionContentDisplay_returnsTrue() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                DEFAULT_DISPLAY);
+
+        boolean result = wmInternal.setContentRecordingSession(session);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionContentTask_noMatchingTask_returnsFalse() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        IBinder launchCookie = new Binder();
+        ContentRecordingSession session = ContentRecordingSession.createTaskSession(launchCookie);
+
+        boolean result = wmInternal.setContentRecordingSession(session);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionContentTask_matchingTask_returnsTrue() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        ActivityRecord activityRecord = createActivityRecord(createTask(mDefaultDisplay));
+        ContentRecordingSession session = ContentRecordingSession.createTaskSession(
+                activityRecord.mLaunchCookie);
+
+        boolean result = wmInternal.setContentRecordingSession(session);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void setContentRecordingSession_matchingTask_mutatesSessionWithWindowContainerToken() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        Task task = createTask(mDefaultDisplay);
+        ActivityRecord activityRecord = createActivityRecord(task);
+        ContentRecordingSession session = ContentRecordingSession.createTaskSession(
+                activityRecord.mLaunchCookie);
+
+        wmInternal.setContentRecordingSession(session);
+
+        assertThat(session.getTokenToRecord()).isEqualTo(
+                task.mRemoteToken.toWindowContainerToken().asBinder());
     }
 
     @Test
