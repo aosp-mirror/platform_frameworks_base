@@ -418,13 +418,17 @@ class KeyguardController {
             return;
         }
 
-        final boolean waitAppTransition = isKeyguardLocked(displayId);
-        mWindowManager.mPolicy.onKeyguardOccludedChangedLw(isDisplayOccluded(DEFAULT_DISPLAY),
-                waitAppTransition);
-        if (waitAppTransition) {
-            mService.deferWindowLayout();
-            try {
-                if (isDisplayOccluded(DEFAULT_DISPLAY)) {
+        final TransitionController tc = mRootWindowContainer.mTransitionController;
+
+        final boolean occluded = isDisplayOccluded(displayId);
+        final boolean performTransition = isKeyguardLocked(displayId);
+        final boolean executeTransition = performTransition && !tc.isCollecting();
+
+        mWindowManager.mPolicy.onKeyguardOccludedChangedLw(occluded);
+        mService.deferWindowLayout();
+        try {
+            if (isKeyguardLocked(displayId)) {
+                if (occluded) {
                     mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
                             TRANSIT_KEYGUARD_OCCLUDE,
                             TRANSIT_FLAG_KEYGUARD_OCCLUDING,
@@ -434,11 +438,19 @@ class KeyguardController {
                             TRANSIT_KEYGUARD_UNOCCLUDE,
                             TRANSIT_FLAG_KEYGUARD_UNOCCLUDING);
                 }
-                updateKeyguardSleepToken(DEFAULT_DISPLAY);
-                mWindowManager.executeAppTransition();
-            } finally {
-                mService.continueWindowLayout();
+            } else {
+                if (tc.inTransition()) {
+                    tc.mStateValidators.add(mWindowManager.mPolicy::applyKeyguardOcclusionChange);
+                } else {
+                    mWindowManager.mPolicy.applyKeyguardOcclusionChange();
+                }
             }
+            updateKeyguardSleepToken(displayId);
+            if (performTransition && executeTransition) {
+                mWindowManager.executeAppTransition();
+            }
+        } finally {
+            mService.continueWindowLayout();
         }
     }
 
@@ -485,6 +497,9 @@ class KeyguardController {
         }
     }
 
+    /**
+     * @return true if Keyguard is occluded or the device is dreaming.
+     */
     boolean isDisplayOccluded(int displayId) {
         return getDisplayState(displayId).mOccluded;
     }
