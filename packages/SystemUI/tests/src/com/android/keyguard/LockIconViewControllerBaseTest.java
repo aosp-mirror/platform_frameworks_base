@@ -41,6 +41,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -92,6 +93,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected @Mock KeyguardTransitionRepository mTransitionRepository;
     protected FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
     protected FakeFeatureFlags mFeatureFlags;
+    protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
     protected LockIconViewController mUnderTest;
 
@@ -161,7 +163,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 new KeyguardTransitionInteractor(mTransitionRepository,
                         TestScopeProvider.getTestScope().getBackgroundScope()),
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
-                mFeatureFlags
+                mFeatureFlags,
+                mPrimaryBouncerInteractor
         );
     }
 
