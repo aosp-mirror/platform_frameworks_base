@@ -2987,14 +2987,14 @@ public class UserManagerService extends IUserManager.Stub {
             Preconditions.checkState(mCachedEffectiveUserRestrictions.getRestrictions(userId)
                     != newBaseRestrictions);
 
-            if (mBaseUserRestrictions.updateRestrictions(userId, newBaseRestrictions)) {
+            if (mBaseUserRestrictions.updateRestrictions(userId, new Bundle(newBaseRestrictions))) {
                 scheduleWriteUser(userId);
             }
         }
 
         final Bundle effective = computeEffectiveUserRestrictionsLR(userId);
 
-        mCachedEffectiveUserRestrictions.updateRestrictions(userId, effective);
+        mCachedEffectiveUserRestrictions.updateRestrictions(userId, new Bundle(effective));
 
         // Apply the new restrictions.
         if (DBG) {
