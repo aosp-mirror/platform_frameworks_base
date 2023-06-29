@@ -702,8 +702,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     finishKeyguardDrawn();
                     break;
                 case MSG_WINDOW_MANAGER_DRAWN_COMPLETE:
-                    if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mWindowManagerDrawComplete");
-                    finishWindowsDrawn(msg.arg1);
+                    final int displayId = msg.arg1;
+                    if (DEBUG_WAKEUP) Slog.w(TAG, "All windows drawn on display " + displayId);
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER,
+                            TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, displayId /* cookie */);
+                    finishWindowsDrawn(displayId);
                     break;
                 case MSG_HIDE_BOOT_MESSAGE:
                     handleHideBootMessage();
@@ -4996,15 +4999,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // ... eventually calls finishWindowsDrawn which will finalize our screen turn on
         // as well as enabling the orientation change logic/sensor.
         Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER,
-                TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, /* cookie= */ 0);
-        mWindowManagerInternal.waitForAllWindowsDrawn(() -> {
-            if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for every display");
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE,
-                    INVALID_DISPLAY, 0));
-
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER,
-                    TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, /* cookie= */ 0);
-            }, WAITING_FOR_DRAWN_TIMEOUT, INVALID_DISPLAY);
+                TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, INVALID_DISPLAY /* cookie */);
+        mWindowManagerInternal.waitForAllWindowsDrawn(mHandler.obtainMessage(
+                MSG_WINDOW_MANAGER_DRAWN_COMPLETE, INVALID_DISPLAY, 0),
+                WAITING_FOR_DRAWN_TIMEOUT, INVALID_DISPLAY);
     }
 
     // Called on the DisplayManager's DisplayPowerController thread.
@@ -5084,15 +5082,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenOnListeners.put(displayId, screenOnListener);
 
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER,
-                    TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, /* cookie= */ 0);
-            mWindowManagerInternal.waitForAllWindowsDrawn(() -> {
-                if (DEBUG_WAKEUP) Slog.i(TAG, "All windows ready for display: " + displayId);
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_WINDOW_MANAGER_DRAWN_COMPLETE,
-                        displayId, 0));
-
-                Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER,
-                        TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, /* cookie= */ 0);
-            }, WAITING_FOR_DRAWN_TIMEOUT, displayId);
+                    TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD, displayId /* cookie */);
+            mWindowManagerInternal.waitForAllWindowsDrawn(mHandler.obtainMessage(
+                    MSG_WINDOW_MANAGER_DRAWN_COMPLETE, displayId, 0),
+                    WAITING_FOR_DRAWN_TIMEOUT, displayId);
         }
     }
 
