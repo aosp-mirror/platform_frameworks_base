@@ -568,8 +568,10 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_HDMI:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
-                mediaDevice =
-                        new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName);
+                mediaDevice = mPreferenceItemMap.containsKey(route.getId()) ? new PhoneMediaDevice(
+                        mContext, mRouterManager, route, mPackageName,
+                        mPreferenceItemMap.get(route.getId())) : new PhoneMediaDevice(mContext,
+                        mRouterManager, route, mPackageName);
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
@@ -579,8 +581,11 @@ public class InfoMediaManager extends MediaManager {
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
                 if (cachedDevice != null) {
-                    mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
-                            route, mPackageName);
+                    mediaDevice = mPreferenceItemMap.containsKey(route.getId())
+                            ? new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
+                            route, mPackageName, mPreferenceItemMap.get(route.getId()))
+                            : new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
+                                    route, mPackageName);
                 }
                 break;
             case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:

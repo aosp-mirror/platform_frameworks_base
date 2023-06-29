@@ -19,6 +19,9 @@ import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_GO_TO_APP;
+
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,6 +35,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.NearbyDevice;
+import android.media.RouteListingPreference;
 import android.os.Parcel;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
@@ -109,6 +113,8 @@ public class MediaDeviceTest {
     private BluetoothDevice mDevice;
     @Mock
     private MediaRouter2Manager mMediaRouter2Manager;
+
+    private RouteListingPreference.Item mItem;
 
     private BluetoothMediaDevice mBluetoothMediaDevice1;
     private BluetoothMediaDevice mBluetoothMediaDevice2;
@@ -496,5 +502,22 @@ public class MediaDeviceTest {
                 mMediaRouter2Manager, null /* MediaRoute2Info */, TEST_PACKAGE_NAME);
 
         assertThat(mBluetoothMediaDevice1.getFeatures().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void getSelectionBehavior_setItemWithSelectionBehaviorOnSystemRoute_returnTransfer() {
+        mItem = new RouteListingPreference.Item.Builder(DEVICE_ADDRESS_1)
+                .setSelectionBehavior(SELECTION_BEHAVIOR_GO_TO_APP)
+                .build();
+        mBluetoothMediaDevice1 = new BluetoothMediaDevice(mContext, mCachedDevice1,
+                mMediaRouter2Manager, null /* MediaRoute2Info */, TEST_PACKAGE_NAME, mItem);
+        mPhoneMediaDevice =
+                new PhoneMediaDevice(mContext, mMediaRouter2Manager, mPhoneRouteInfo,
+                        TEST_PACKAGE_NAME, mItem);
+
+        assertThat(mBluetoothMediaDevice1.getSelectionBehavior()).isEqualTo(
+                SELECTION_BEHAVIOR_TRANSFER);
+        assertThat(mPhoneMediaDevice.getSelectionBehavior()).isEqualTo(
+                SELECTION_BEHAVIOR_TRANSFER);
     }
 }
