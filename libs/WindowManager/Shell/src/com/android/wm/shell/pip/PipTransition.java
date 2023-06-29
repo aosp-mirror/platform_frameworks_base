@@ -567,7 +567,16 @@ public class PipTransition extends PipTransitionController {
                 mPipBoundsState.getDisplayBounds());
         mFinishCallback = (wct, wctCB) -> {
             mPipOrganizer.onExitPipFinished(taskInfo);
-            if (!Transitions.SHELL_TRANSITIONS_ROTATION && toFullscreen) {
+
+            // TODO(b/286346098): remove the OPEN app flicker completely
+            // not checking if we go to fullscreen helps avoid getting pip into an inconsistent
+            // state after the flicker occurs. This is a temp solution until flicker is removed.
+            if (!Transitions.SHELL_TRANSITIONS_ROTATION) {
+                // will help to debug the case when we are not exiting to fullscreen
+                if (!toFullscreen) {
+                    ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "%s: startExitAnimation() not exiting to fullscreen", TAG);
+                }
                 wct = wct != null ? wct : new WindowContainerTransaction();
                 wct.setBounds(pipTaskToken, null);
                 mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);

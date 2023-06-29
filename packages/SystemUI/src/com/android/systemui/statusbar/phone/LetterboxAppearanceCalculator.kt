@@ -209,7 +209,7 @@ constructor(
         if (this.contains(other) || other.contains(this)) {
             return false
         }
-        return this.intersect(other)
+        return this.intersects(other.left, other.top, other.right, other.bottom)
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
