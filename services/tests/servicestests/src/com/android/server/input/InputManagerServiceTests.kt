@@ -133,8 +133,7 @@ class InputManagerServiceTests {
         verify(native).setMotionClassifierEnabled(anyBoolean())
         verify(native).setMaximumObscuringOpacityForTouch(anyFloat())
         verify(native).setStylusPointerIconEnabled(anyBoolean())
-        // TODO(b/286078544): There is no need to call this more than once.
-        verify(native, times(3)).setKeyRepeatConfiguration(anyInt(), anyInt())
+        verify(native).setKeyRepeatConfiguration(anyInt(), anyInt())
     }
 
     @Test
