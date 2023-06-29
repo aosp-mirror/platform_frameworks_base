@@ -27,6 +27,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -2659,7 +2660,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     private void validateKeyguardOcclusion() {
-        if ((mFlags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
+        if ((mFlags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
             mController.mStateValidators.add(
                 mController.mAtm.mWindowManager.mPolicy::applyKeyguardOcclusionChange);
         }

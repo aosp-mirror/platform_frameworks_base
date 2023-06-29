@@ -3570,19 +3570,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition) {
-        if (mKeyguardDelegate != null && waitAppTransition) {
+    public void onKeyguardOccludedChangedLw(boolean occluded) {
+        if (mKeyguardDelegate != null) {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
-        } else {
-            setKeyguardOccludedLw(occluded);
         }
     }
 
     @Override
     public int applyKeyguardOcclusionChange() {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded commit occluded="
-                + mPendingKeyguardOccluded);
+                + mPendingKeyguardOccluded + " changed=" + mKeyguardOccludedChanged);
 
         // TODO(b/276433230): Explicitly save before/after for occlude state in each
         // Transition so we don't need to update SysUI every time.
