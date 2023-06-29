@@ -16226,6 +16226,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         @Override
+        public ComponentName getDeviceOwnerComponent(boolean callingUserOnly) {
+            return DevicePolicyManagerService.this.getDeviceOwnerComponent(callingUserOnly);
+        }
+
+        @Override
         public int getDeviceOwnerUserId() {
             return DevicePolicyManagerService.this.getDeviceOwnerUserId();
         }
