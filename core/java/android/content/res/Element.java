@@ -20,6 +20,7 @@ import static android.os.SystemProperties.PROP_VALUE_MAX;
 
 import android.annotation.NonNull;
 import android.util.Pools.SimplePool;
+import android.util.Slog;
 
 import androidx.annotation.StyleableRes;
 
@@ -41,6 +42,7 @@ public class Element {
     public static final int MAX_ATTR_LEN_PATH = 4000;
     public static final int MAX_ATTR_LEN_DATA_VALUE = 4000;
 
+    private static final String TAG = "PackageParsing";
     protected static final String TAG_ACTION = "action";
     protected static final String TAG_ACTIVITY = "activity";
     protected static final String TAG_ADOPT_PERMISSIONS = "adopt-permissions";
@@ -715,8 +717,104 @@ public class Element {
         mChildTagMask |= 1 << idx;
     }
 
+    private boolean isComponentNameAttr(String name) {
+        switch (mTag) {
+            case TAG_ACTIVITY:
+                switch (name) {
+                    case TAG_ATTR_NAME:
+                    case TAG_ATTR_PARENT_ACTIVITY_NAME:
+                        return true;
+                    default:
+                        return false;
+                }
+            case TAG_ACTIVITY_ALIAS:
+                switch (name) {
+                    case TAG_ATTR_TARGET_ACTIVITY:
+                        return true;
+                    default:
+                        return false;
+                }
+            case TAG_APPLICATION:
+                switch (name) {
+                    case TAG_ATTR_BACKUP_AGENT:
+                    case TAG_ATTR_NAME:
+                        return true;
+                    default:
+                        return false;
+                }
+            case TAG_INSTRUMENTATION:
+            case TAG_PROVIDER:
+            case TAG_RECEIVER:
+            case TAG_SERVICE:
+            case TAG_USES_LIBRARY:
+                switch (name) {
+                    case TAG_ATTR_NAME:
+                        return true;
+                    default:
+                        return false;
+                }
+            default:
+                return false;
+        }
+    }
+
+    private boolean isComponentNameAttr(@StyleableRes int index) {
+        switch (mTag) {
+            case TAG_ACTIVITY:
+                return index == R.styleable.AndroidManifestActivity_name
+                        || index == R.styleable.AndroidManifestActivity_parentActivityName;
+            case TAG_ACTIVITY_ALIAS:
+                return index == R.styleable.AndroidManifestActivityAlias_targetActivity;
+            case TAG_APPLICATION:
+                return index == R.styleable.AndroidManifestApplication_backupAgent
+                        || index == R.styleable.AndroidManifestApplication_name;
+            case TAG_INSTRUMENTATION:
+                return index ==  R.styleable.AndroidManifestInstrumentation_name;
+            case TAG_PROVIDER:
+                return index ==  R.styleable.AndroidManifestProvider_name;
+            case TAG_RECEIVER:
+                return index ==  R.styleable.AndroidManifestReceiver_name;
+            case TAG_SERVICE:
+                return index ==  R.styleable.AndroidManifestService_name;
+            case TAG_USES_LIBRARY:
+                return index ==  R.styleable.AndroidManifestUsesLibrary_name;
+            default:
+                return false;
+        }
+    }
+
     boolean hasChild(String tag) {
         return (mChildTagMask & (1 << getCounterIdx(tag))) != 0;
+    }
+
+    void validateComponentName(CharSequence name) {
+        int i = 0;
+        if (name.charAt(0) == '.') {
+            i = 1;
+        }
+        boolean isStart = true;
+        for (; i < name.length(); i++) {
+            if (name.charAt(i) == '.') {
+                if (isStart) {
+                    break;
+                }
+                isStart = true;
+            } else {
+                if (isStart) {
+                    if (Character.isJavaIdentifierStart(name.charAt(i))) {
+                        isStart = false;
+                    } else {
+                        break;
+                    }
+                } else if (!Character.isJavaIdentifierPart(name.charAt(i))) {
+                    break;
+                }
+            }
+        }
+        if ((i < name.length()) || (name.charAt(name.length() - 1) == '.')) {
+            Slog.e(TAG, name + " is not a valid Java class name");
+            throw new SecurityException(name + " is not a valid Java class name");
+        }
     }
 
     void validateStrAttr(String attrName, String attrValue) {
@@ -724,13 +822,20 @@ public class Element {
             throw new SecurityException("String length limit exceeded for attribute " + attrName
                     + " in " + mTag);
         }
+        if (isComponentNameAttr(attrName)) {
+            validateComponentName(attrValue);
+        }
     }
 
     void validateResStrAttr(@StyleableRes int index, CharSequence stringValue) {
         if (stringValue != null && stringValue.length() > getResStrMaxLen(index)) {
             throw new SecurityException("String length limit exceeded for attribute in " + mTag);
         }
+        if (isComponentNameAttr(index)) {
+            validateComponentName(stringValue);
+        }
     }
+
 
     void seen(@NonNull Element element) {
         TagCounter counter = mTagCounters[getCounterIdx(element.mTag)];

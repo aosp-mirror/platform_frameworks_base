@@ -52,7 +52,6 @@ class AndroidPackageParsingValidationTest {
             factory.isNamespaceAware = true
             factory.newPullParser()
         }
-        private val ns = "xmlns:android=\"http://schemas.android.com/apk/res/android\""
     }
 
     @Test
@@ -102,9 +101,13 @@ class AndroidPackageParsingValidationTest {
         val tag = "application"
         validateTagAttr(tag, "backupAgent",
             R.styleable.AndroidManifestApplication_backupAgent, 1024)
+        validateTagAttrComponentName(tag, "backupAgent",
+            R.styleable.AndroidManifestApplication_backupAgent)
         validateTagAttr(tag, "manageSpaceActivity",
             R.styleable.AndroidManifestApplication_manageSpaceActivity, 1024)
         validateTagAttr(tag, "name", R.styleable.AndroidManifestApplication_name, 1024)
+        validateTagAttrComponentName(tag, "name",
+            R.styleable.AndroidManifestApplication_name)
         validateTagAttr(tag, "permission", R.styleable.AndroidManifestApplication_permission, 1024)
         validateTagAttr(tag, "process", R.styleable.AndroidManifestApplication_process, 1024)
         validateTagAttr(tag, "requiredAccountType",
@@ -134,6 +137,7 @@ class AndroidPackageParsingValidationTest {
     fun parseReceiverTag() {
         val tag = "receiver"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestReceiver_name, 1024)
+        validateTagAttrComponentName(tag, "name", R.styleable.AndroidManifestReceiver_name)
         validateTagAttr(tag, "permission", R.styleable.AndroidManifestReceiver_permission, 1024)
         validateTagAttr(tag, "process", R.styleable.AndroidManifestReceiver_process, 1024)
         validateTagCount("meta-data", 1000, tag)
@@ -144,6 +148,7 @@ class AndroidPackageParsingValidationTest {
     fun parseServiceTag() {
         val tag = "service"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestService_name, 1024)
+        validateTagAttrComponentName(tag, "name", R.styleable.AndroidManifestService_name)
         validateTagAttr(tag, "permission", R.styleable.AndroidManifestService_permission, 1024)
         validateTagAttr(tag, "process", R.styleable.AndroidManifestService_process, 1024)
         validateTagCount("meta-data", 1000, tag)
@@ -158,6 +163,8 @@ class AndroidPackageParsingValidationTest {
             R.styleable.AndroidManifestActivityAlias_permission, 1024)
         validateTagAttr(tag, "targetActivity",
             R.styleable.AndroidManifestActivityAlias_targetActivity, 1024)
+        validateTagAttrComponentName(tag, "targetActivity",
+            R.styleable.AndroidManifestActivityAlias_targetActivity)
         validateTagCount("meta-data", 1000, tag)
         validateTagCount("intent-filter", 20000, tag)
     }
@@ -166,14 +173,18 @@ class AndroidPackageParsingValidationTest {
     fun parseUsesLibraryTag() {
         val tag = "uses-library"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesLibrary_name, 1024)
+        validateTagAttrComponentName(tag, "name", R.styleable.AndroidManifestUsesLibrary_name)
     }
 
     @Test
     fun parseActivityTag() {
         val tag = "activity"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestActivity_name, 1024)
+        validateTagAttrComponentName(tag, "name", R.styleable.AndroidManifestActivity_name)
         validateTagAttr(tag, "parentActivityName",
             R.styleable.AndroidManifestActivity_parentActivityName, 1024)
+        validateTagAttrComponentName(tag, "parentActivityName",
+            R.styleable.AndroidManifestActivity_parentActivityName)
         validateTagAttr(tag, "permission", R.styleable.AndroidManifestActivity_permission, 1024)
         validateTagAttr(tag, "process", R.styleable.AndroidManifestActivity_process, 1024)
         validateTagAttr(tag, "taskAffinity", R.styleable.AndroidManifestActivity_taskAffinity, 1024)
@@ -200,6 +211,8 @@ class AndroidPackageParsingValidationTest {
     fun parseInstrumentationTag() {
         val tag = "instrumentation"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestInstrumentation_name, 1024)
+        validateTagAttrComponentName(tag, "name",
+            R.styleable.AndroidManifestInstrumentation_name)
         validateTagAttr(tag, "targetPackage",
             R.styleable.AndroidManifestInstrumentation_targetPackage, 256)
         validateTagAttr(tag, "targetProcesses",
@@ -262,6 +275,7 @@ class AndroidPackageParsingValidationTest {
     fun parseProviderTag() {
         val tag = "provider"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestProvider_name, 1024)
+        validateTagAttrComponentName(tag, "name", R.styleable.AndroidManifestProvider_name)
         validateTagAttr(tag, "permission", R.styleable.AndroidManifestProvider_permission, 1024)
         validateTagAttr(tag, "process", R.styleable.AndroidManifestProvider_process, 1024)
         validateTagAttr(tag, "readPermission",
@@ -359,6 +373,48 @@ class AndroidPackageParsingValidationTest {
     fun parseUsesPermissionTag() {
         val tag = "uses-permission"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesPermission_name, 1024)
+    }
+
+    private fun validateTagAttrComponentName(tag: String, attr: String, index: Int) {
+        val passNames = arrayOf("com.android.TestClass", "TestClass", "_", "$", ".TestClass", "上")
+        for (name in passNames) {
+            val xml = "<$tag $attr=\"$name\" />"
+            pullParser.setInput(ByteArrayInputStream(xml.toByteArray()), null)
+            val validator = Validator()
+            pullParser.nextTag()
+            validator.validate(pullParser)
+            try {
+                validator.validateStrAttr(pullParser, attr, name)
+            } catch (e: SecurityException) {
+                fail("Failed to parse attribute $attr in <$tag> as valid Java class name:" +
+                        " ${e.message}")
+            }
+            try {
+                validator.validateResStrAttr(pullParser, index, name)
+            } catch (e: SecurityException) {
+                fail("Failed to parse attribute $attr in <$tag> as valid Java class name:" +
+                        " ${e.message}")
+            }
+        }
+
+        val failNames = arrayOf("com.android.TestClass:", "-TestClass", "TestClass.", ".", "..")
+        for (name in failNames) {
+            val xml = "<$tag $attr=\"$name\" />"
+            pullParser.setInput(ByteArrayInputStream(xml.toByteArray()), null)
+            val validator = Validator()
+            pullParser.nextTag()
+            validator.validate(pullParser)
+            val e1 = assertThrows("$name is not valid Java class name",
+                SecurityException::class.java) {
+                validator.validateStrAttr(pullParser, attr, name)
+            }
+            assertEquals(expectedAttrComponentNameErrorMsg(name), e1.message)
+            val e2 = assertThrows("$name is not valid Java class name",
+                SecurityException::class.java) {
+                validator.validateResStrAttr(pullParser, index, name)
+            }
+            assertEquals(expectedAttrComponentNameErrorMsg(name), e2.message)
+        }
     }
 
     private fun validateTagAttr(tag: String, name: String, index: Int?, maxLen: Int) {
@@ -468,4 +524,6 @@ class AndroidPackageParsingValidationTest {
 
     fun expectedResAttrLengthErrorMsg(tag: String) =
             "String length limit exceeded for attribute in $tag"
+
+    fun expectedAttrComponentNameErrorMsg(name: String) = "$name is not a valid Java class name"
 }
