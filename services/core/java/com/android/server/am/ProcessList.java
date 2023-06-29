@@ -97,6 +97,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OomKillRecord;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -411,6 +412,8 @@ public final class ProcessList {
     private boolean mHaveDisplaySize;
 
     private static LmkdConnection sLmkdConnection = null;
+
+    private static OomConnection sOomConnection = null;
 
     private boolean mOomLevelsSet = false;
 
@@ -855,6 +858,21 @@ public final class ProcessList {
                     THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
             sKillThread.start();
             sKillHandler = new KillHandler(sKillThread.getLooper());
+            sOomConnection = new OomConnection(new OomConnection.OomConnectionListener() {
+                @Override
+                public void handleOomEvent(OomKillRecord[] oomKills) {
+                    for (OomKillRecord oomKill: oomKills) {
+                        synchronized (mProcLock) {
+                            noteAppKill(
+                                oomKill.getPid(),
+                                oomKill.getUid(),
+                                ApplicationExitInfo.REASON_LOW_MEMORY,
+                                ApplicationExitInfo.SUBREASON_OOM_KILL,
+                                "oom");
+                        }
+                    }
+                }
+            });
             sLmkdConnection = new LmkdConnection(sKillThread.getLooper().getQueue(),
                     new LmkdConnection.LmkdConnectionListener() {
                         @Override
