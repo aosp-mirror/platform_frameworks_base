@@ -1280,44 +1280,52 @@ final class AccessibilityController {
                 }
 
                 void drawIfNeeded(SurfaceControl.Transaction t) {
+                    // Drawing variables (alpha, dirty rect, and bounds) access is synchronized
+                    // using WindowManagerGlobalLock. Grab copies of these values before
+                    // drawing on the canvas so that drawing can be performed outside of the lock.
+                    int alpha;
+                    Rect drawingRect = null;
+                    Region drawingBounds = null;
                     synchronized (mService.mGlobalLock) {
                         if (!mInvalidated) {
                             return;
                         }
                         mInvalidated = false;
-                        if (mAlpha > 0) {
-                            Canvas canvas = null;
-                            try {
-                                // Empty dirty rectangle means unspecified.
-                                if (mDirtyRect.isEmpty()) {
-                                    mBounds.getBounds(mDirtyRect);
-                                }
-                                mDirtyRect.inset(-mHalfBorderWidth, -mHalfBorderWidth);
-                                canvas = mSurface.lockCanvas(mDirtyRect);
-                                if (DEBUG_VIEWPORT_WINDOW) {
-                                    Slog.i(LOG_TAG, "Dirty rect: " + mDirtyRect);
-                                }
-                            } catch (IllegalArgumentException iae) {
-                                /* ignore */
-                            } catch (Surface.OutOfResourcesException oore) {
-                                /* ignore */
-                            }
-                            if (canvas == null) {
-                                return;
-                            }
-                            if (DEBUG_VIEWPORT_WINDOW) {
-                                Slog.i(LOG_TAG, "Bounds: " + mBounds);
-                            }
-                            canvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
-                            mPaint.setAlpha(mAlpha);
-                            Path path = mBounds.getBoundaryPath();
-                            canvas.drawPath(path, mPaint);
 
-                            mSurface.unlockCanvasAndPost(canvas);
-                            t.show(mSurfaceControl);
-                        } else {
-                            t.hide(mSurfaceControl);
+                        alpha = mAlpha;
+                        if (alpha > 0) {
+                            drawingBounds = new Region(mBounds);
+                            // Empty dirty rectangle means unspecified.
+                            if (mDirtyRect.isEmpty()) {
+                                mBounds.getBounds(mDirtyRect);
+                            }
+                            mDirtyRect.inset(-mHalfBorderWidth, -mHalfBorderWidth);
+                            drawingRect = new Rect(mDirtyRect);
+                            if (DEBUG_VIEWPORT_WINDOW) {
+                                Slog.i(LOG_TAG, "ViewportWindow bounds: " + mBounds);
+                                Slog.i(LOG_TAG, "ViewportWindow dirty rect: " + mDirtyRect);
+                            }
                         }
+                    }
+
+                    // Draw without holding WindowManagerGlobalLock.
+                    if (alpha > 0) {
+                        Canvas canvas = null;
+                        try {
+                            canvas = mSurface.lockCanvas(drawingRect);
+                        } catch (IllegalArgumentException | OutOfResourcesException e) {
+                            /* ignore */
+                        }
+                        if (canvas == null) {
+                            return;
+                        }
+                        canvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
+                        mPaint.setAlpha(alpha);
+                        canvas.drawPath(drawingBounds.getBoundaryPath(), mPaint);
+                        mSurface.unlockCanvasAndPost(canvas);
+                        t.show(mSurfaceControl);
+                    } else {
+                        t.hide(mSurfaceControl);
                     }
                 }
 

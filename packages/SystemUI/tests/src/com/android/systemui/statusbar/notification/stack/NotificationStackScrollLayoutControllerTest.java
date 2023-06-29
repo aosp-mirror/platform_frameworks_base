@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
+import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -412,6 +413,36 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
         verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_REVEAL_GEAR,
                 MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    @Test
+    public void callSwipeCallbacksDuringClearAll() {
+        initController(/* viewIsAttached= */ true);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        NotificationCallback notificationCallback = mController.mNotificationCallback;
+
+        when(mNotificationStackScrollLayout.getClearAllInProgress()).thenReturn(true);
+
+        notificationCallback.onBeginDrag(row);
+        verify(mNotificationStackScrollLayout).onSwipeBegin(row);
+
+        notificationCallback.handleChildViewDismissed(row);
+        verify(mNotificationStackScrollLayout).onSwipeEnd();
+    }
+
+    @Test
+    public void callSwipeCallbacksDuringClearNotification() {
+        initController(/* viewIsAttached= */ true);
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        NotificationCallback notificationCallback = mController.mNotificationCallback;
+
+        when(mNotificationStackScrollLayout.getClearAllInProgress()).thenReturn(false);
+
+        notificationCallback.onBeginDrag(row);
+        verify(mNotificationStackScrollLayout).onSwipeBegin(row);
+
+        notificationCallback.handleChildViewDismissed(row);
+        verify(mNotificationStackScrollLayout).onSwipeEnd();
     }
 
     @Test

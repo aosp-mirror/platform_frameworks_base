@@ -40,6 +40,7 @@ import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
+import android.view.InsetsSource.Flags;
 import android.view.InsetsSourceControl;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -81,6 +82,8 @@ class InsetsSourceProvider {
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
     private @NonNull Insets mInsetsHint = Insets.NONE;
+    private @Flags int mFlagsFromFrameProvider;
+    private @Flags int mFlagsFromServer;
 
     private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
         if (mControl != null) {
@@ -189,6 +192,16 @@ class InsetsSourceProvider {
         }
     }
 
+    boolean setFlags(@Flags int flags, @Flags int mask) {
+        mFlagsFromServer = (mFlagsFromServer & ~mask) | (flags & mask);
+        final @Flags int mergedFlags = mFlagsFromFrameProvider | mFlagsFromServer;
+        if (mSource.getFlags() != mergedFlags) {
+            mSource.setFlags(mergedFlags);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * The source frame can affect the layout of other windows, so this should be called once the
      * window container gets laid out.
@@ -217,11 +230,11 @@ class InsetsSourceProvider {
 
         mSourceFrame.set(frame);
         if (mFrameProvider != null) {
-            final int flags = mFrameProvider.apply(
+            mFlagsFromFrameProvider = mFrameProvider.apply(
                     mWindowContainer.getDisplayContent().mDisplayFrames,
                     mWindowContainer,
                     mSourceFrame);
-            mSource.setFlags(flags);
+            mSource.setFlags(mFlagsFromFrameProvider | mFlagsFromServer);
         }
         updateSourceFrameForServerVisibility();
 

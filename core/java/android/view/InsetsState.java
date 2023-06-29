@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
@@ -144,12 +145,18 @@ public class InsetsState implements Parcelable {
         boolean[] typeVisibilityMap = new boolean[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
+        @InsetsType int forceConsumingTypes = 0;
         @InsetsType int suppressScrimTypes = 0;
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
+            final @InsetsType int type = source.getType();
+
+            if ((source.getFlags() & InsetsSource.FLAG_FORCE_CONSUMING) != 0) {
+                forceConsumingTypes |= type;
+            }
 
             if ((source.getFlags() & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
-                suppressScrimTypes |= source.getType();
+                suppressScrimTypes |= type;
             }
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
@@ -157,7 +164,7 @@ public class InsetsState implements Parcelable {
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
-            if (source.getType() != WindowInsets.Type.ime()) {
+            if (type != WindowInsets.Type.ime()) {
                 InsetsSource ignoringVisibilitySource = ignoringVisibilityState != null
                         ? ignoringVisibilityState.peekSource(source.getId())
                         : source;
@@ -178,13 +185,13 @@ public class InsetsState implements Parcelable {
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
         }
-        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)
-                && !alwaysConsumeSystemBars) {
-            compatInsetsTypes = 0;
+        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
+            // Clear all types but forceConsumingTypes.
+            compatInsetsTypes &= forceConsumingTypes;
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, suppressScrimTypes, calculateRelativeCutout(frame),
+                forceConsumingTypes, suppressScrimTypes, calculateRelativeCutout(frame),
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),
@@ -290,9 +297,8 @@ public class InsetsState implements Parcelable {
 
     public Insets calculateVisibleInsets(Rect frame, int windowType, int windowingMode,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
-        if (clearsCompatInsets(windowType, windowFlags, windowingMode)) {
-            return Insets.NONE;
-        }
+        final boolean clearsCompatInsets = clearsCompatInsets(
+                windowType, windowFlags, windowingMode);
         final int softInputAdjustMode = softInputMode & SOFT_INPUT_MASK_ADJUST;
         final int visibleInsetsTypes = softInputAdjustMode != SOFT_INPUT_ADJUST_NOTHING
                 ? systemBars() | ime()
@@ -301,6 +307,9 @@ public class InsetsState implements Parcelable {
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             if ((source.getType() & visibleInsetsTypes) == 0) {
+                continue;
+            }
+            if (clearsCompatInsets && !source.hasFlags(FLAG_FORCE_CONSUMING)) {
                 continue;
             }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);

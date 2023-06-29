@@ -26,7 +26,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.app.Activity;
-import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1268,9 +1267,7 @@ public class DreamService extends Service implements Window.Callback {
                     fetchDreamLabel(this, serviceInfo, isPreviewMode));
 
             try {
-                if (!ActivityTaskManager.getService().startDreamActivity(i)) {
-                    detach();
-                }
+                mDreamManager.startDreamActivity(i);
             } catch (SecurityException e) {
                 Log.w(mTag,
                         "Received SecurityException trying to start DreamActivity. "

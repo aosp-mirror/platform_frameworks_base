@@ -2046,6 +2046,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Once transition starts, rotation is applied and transition shows DC rotating.
         testPlayer.startTransition();
+        waitUntilHandlersIdle();
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
         assertTrue(testPlayer.mController.isPlaying());

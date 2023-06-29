@@ -69,9 +69,9 @@ import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.DebugRoundedCornerDelegate;
+import com.android.systemui.decor.DebugRoundedCornerModel;
 import com.android.systemui.decor.DecorProvider;
 import com.android.systemui.decor.DecorProviderFactory;
 import com.android.systemui.decor.DecorProviderKt;
@@ -80,10 +80,12 @@ import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegateImpl;
+import com.android.systemui.decor.ScreenDecorCommand;
 import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
@@ -95,7 +97,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -130,7 +131,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     @VisibleForTesting
     protected boolean mIsRegistered;
     private final Context mContext;
-    private final Executor mMainExecutor;
+    private final CommandRegistry mCommandRegistry;
     private final SecureSettings mSecureSettings;
     @VisibleForTesting
     DisplayTracker.Callback mDisplayListener;
@@ -313,8 +314,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
     @Inject
     public ScreenDecorations(Context context,
-            @Main Executor mainExecutor,
             SecureSettings secureSettings,
+            CommandRegistry commandRegistry,
             UserTracker userTracker,
             DisplayTracker displayTracker,
             PrivacyDotViewController dotViewController,
@@ -324,8 +325,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             ScreenDecorationsLogger logger,
             AuthController authController) {
         mContext = context;
-        mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
+        mCommandRegistry = commandRegistry;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mDotViewController = dotViewController;
@@ -350,6 +351,45 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         }
     };
 
+    private final ScreenDecorCommand.Callback mScreenDecorCommandCallback = (cmd, pw) -> {
+        // If we are exiting debug mode, we can set it (false) and bail, otherwise we will
+        // ensure that debug mode is set
+        if (cmd.getDebug() != null && !cmd.getDebug()) {
+            setDebug(false);
+            return;
+        } else {
+            // setDebug is idempotent
+            setDebug(true);
+        }
+
+        if (cmd.getColor() != null) {
+            mDebugColor = cmd.getColor();
+            mExecutor.execute(() -> {
+                if (mScreenDecorHwcLayer != null) {
+                    mScreenDecorHwcLayer.setDebugColor(cmd.getColor());
+                }
+                updateColorInversionDefault();
+            });
+        }
+
+        DebugRoundedCornerModel roundedTop = null;
+        DebugRoundedCornerModel roundedBottom = null;
+        if (cmd.getRoundedTop() != null) {
+            roundedTop = cmd.getRoundedTop().toRoundedCornerDebugModel();
+        }
+        if (cmd.getRoundedBottom() != null) {
+            roundedBottom = cmd.getRoundedBottom().toRoundedCornerDebugModel();
+        }
+        if (roundedTop != null || roundedBottom != null) {
+            mDebugRoundedCornerDelegate.applyNewDebugCorners(roundedTop, roundedBottom);
+            mExecutor.execute(() -> {
+                removeAllOverlays();
+                removeHwcOverlay();
+                setupDecorations();
+            });
+        }
+    };
+
     @Override
     public void start() {
         if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
@@ -361,6 +401,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);
         mAuthController.addCallback(mAuthControllerCallback);
+        mCommandRegistry.registerCommand(ScreenDecorCommand.SCREEN_DECOR_CMD_NAME,
+                () -> new ScreenDecorCommand(mScreenDecorCommandCallback));
     }
 
     /**
@@ -1228,7 +1270,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             bottomDrawable = mDebugRoundedCornerDelegate.getBottomRoundedDrawable();
         }
 
-        if (topDrawable == null || bottomDrawable == null) {
+        if (topDrawable == null && bottomDrawable == null) {
             return;
         }
         mScreenDecorHwcLayer.updateRoundedCornerDrawable(topDrawable, bottomDrawable);

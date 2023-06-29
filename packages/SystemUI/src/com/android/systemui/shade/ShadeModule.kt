@@ -72,12 +72,6 @@ abstract class ShadeModule {
     @ClassKey(AuthRippleController::class)
     abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
 
-    @Binds
-    @SysUISingleton
-    abstract fun bindsShadeViewController(
-        notificationPanelViewController: NotificationPanelViewController
-    ): ShadeViewController
-
     companion object {
         const val SHADE_HEADER = "large_screen_shade_header"
 
@@ -215,9 +209,15 @@ abstract class ShadeModule {
         @Provides
         @SysUISingleton
         fun providesLockIconView(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            keyguardRootView: KeyguardRootView,
+            notificationPanelView: NotificationPanelView,
+            featureFlags: FeatureFlags
         ): LockIconView {
-            return notificationShadeWindowView.findViewById(R.id.lock_icon_view)
+            if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+                return keyguardRootView.findViewById(R.id.lock_icon_view)
+            } else {
+                return notificationPanelView.findViewById(R.id.lock_icon_view)
+            }
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.

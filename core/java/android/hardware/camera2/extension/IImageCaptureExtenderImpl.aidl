@@ -24,11 +24,13 @@ import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.Size;
 import android.hardware.camera2.extension.SizeList;
 
+import android.os.IBinder;
+
 /** @hide */
 interface IImageCaptureExtenderImpl
 {
-    void onInit(in String cameraId, in CameraMetadataNative cameraCharacteristics);
-    void onDeInit();
+    void onInit(in IBinder token, in String cameraId, in CameraMetadataNative cameraCharacteristics);
+    void onDeInit(in IBinder token);
     @nullable CaptureStageImpl onPresetSession();
     @nullable CaptureStageImpl onEnableSession();
     @nullable CaptureStageImpl onDisableSession();
