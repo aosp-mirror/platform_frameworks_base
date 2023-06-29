@@ -588,15 +588,6 @@ class TransitionController {
     /** Sets the sync method for the display change. */
     private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
             @NonNull Transition displayTransition, @NonNull DisplayContent displayContent) {
-        final int startRotation = displayChange.getStartRotation();
-        final int endRotation = displayChange.getEndRotation();
-        if (startRotation != endRotation && (startRotation + endRotation) % 2 == 0) {
-            // 180 degrees rotation change may not change screen size. So the clients may draw
-            // some frames before and after the display projection transaction is applied by the
-            // remote player. That may cause some buffers to show in different rotation. So use
-            // sync method to pause clients drawing until the projection transaction is applied.
-            mSyncEngine.setSyncMethod(displayTransition.getSyncId(), BLASTSyncEngine.METHOD_BLAST);
-        }
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
         if (startBounds == null || endBounds == null) return;
