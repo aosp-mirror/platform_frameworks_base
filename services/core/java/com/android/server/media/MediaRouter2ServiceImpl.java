@@ -482,20 +482,20 @@ class MediaRouter2ServiceImpl {
     }
 
     public void registerManager(@NonNull IMediaRouter2Manager manager,
-            @NonNull String packageName) {
+            @NonNull String callerPackageName) {
         Objects.requireNonNull(manager, "manager must not be null");
-        if (TextUtils.isEmpty(packageName)) {
-            throw new IllegalArgumentException("packageName must not be empty");
+        if (TextUtils.isEmpty(callerPackageName)) {
+            throw new IllegalArgumentException("callerPackageName must not be empty");
         }
 
-        final int uid = Binder.getCallingUid();
-        final int pid = Binder.getCallingPid();
-        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        final int callerUid = Binder.getCallingUid();
+        final int callerPid = Binder.getCallingPid();
+        final int userId = UserHandle.getUserHandleForUid(callerUid).getIdentifier();
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerManagerLocked(manager, uid, pid, packageName, userId);
+                registerManagerLocked(manager, callerUid, callerPid, callerPackageName, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1130,25 +1130,26 @@ class MediaRouter2ServiceImpl {
 
     @GuardedBy("mLock")
     private void registerManagerLocked(@NonNull IMediaRouter2Manager manager,
-            int uid, int pid, @NonNull String packageName, int userId) {
+            int callerUid, int callerPid, @NonNull String callerPackageName, int userId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord != null) {
-            Slog.w(TAG, "registerManagerLocked: Same manager already exists. packageName="
-                    + packageName);
+            Slog.w(TAG, "registerManagerLocked: Same manager already exists. callerPackageName="
+                    + callerPackageName);
             return;
         }
 
         Slog.i(TAG, TextUtils.formatSimple(
-                "registerManager | uid: %d, pid: %d, package: %s, user: %d",
-                uid, pid, packageName, userId));
+                "registerManager | callerUid: %d, callerPid: %d, package: %s, user: %d",
+                callerUid, callerPid, callerPackageName, userId));
 
-        mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
+        mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid,
                 "Must hold MEDIA_CONTENT_CONTROL permission.");
 
         UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-        managerRecord = new ManagerRecord(userRecord, manager, uid, pid, packageName);
+        managerRecord = new ManagerRecord(
+                userRecord, manager, callerUid, callerPid, callerPackageName);
         try {
             binder.linkToDeath(managerRecord, 0);
         } catch (RemoteException ex) {
@@ -1195,7 +1196,7 @@ class MediaRouter2ServiceImpl {
 
         Slog.i(TAG, TextUtils.formatSimple(
                 "unregisterManager | package: %s, user: %d, manager: %d",
-                managerRecord.mPackageName,
+                managerRecord.mOwnerPackageName,
                 userRecord.mUserId,
                 managerRecord.mManagerId));
 
@@ -1713,20 +1714,20 @@ class MediaRouter2ServiceImpl {
     final class ManagerRecord implements IBinder.DeathRecipient {
         public final UserRecord mUserRecord;
         public final IMediaRouter2Manager mManager;
-        public final int mUid;
-        public final int mPid;
-        public final String mPackageName;
+        public final int mOwnerUid;
+        public final int mOwnerPid;
+        public final String mOwnerPackageName;
         public final int mManagerId;
         public SessionCreationRequest mLastSessionCreationRequest;
         public boolean mIsScanning;
 
         ManagerRecord(UserRecord userRecord, IMediaRouter2Manager manager,
-                int uid, int pid, String packageName) {
+                int ownerUid, int ownerPid, String ownerPackageName) {
             mUserRecord = userRecord;
             mManager = manager;
-            mUid = uid;
-            mPid = pid;
-            mPackageName = packageName;
+            mOwnerUid = ownerUid;
+            mOwnerPid = ownerPid;
+            mOwnerPackageName = ownerPackageName;
             mManagerId = mNextRouterOrManagerId.getAndIncrement();
         }
 
@@ -1744,10 +1745,10 @@ class MediaRouter2ServiceImpl {
 
             String indent = prefix + "  ";
 
-            pw.println(indent + "mPackageName=" + mPackageName);
+            pw.println(indent + "mOwnerPackageName=" + mOwnerPackageName);
             pw.println(indent + "mManagerId=" + mManagerId);
-            pw.println(indent + "mUid=" + mUid);
-            pw.println(indent + "mPid=" + mPid);
+            pw.println(indent + "mOwnerUid=" + mOwnerUid);
+            pw.println(indent + "mOwnerPid=" + mOwnerPid);
             pw.println(indent + "mIsScanning=" + mIsScanning);
 
             if (mLastSessionCreationRequest != null) {
@@ -1775,7 +1776,7 @@ class MediaRouter2ServiceImpl {
 
         @Override
         public String toString() {
-            return "Manager " + mPackageName + " (pid " + mPid + ")";
+            return "Manager " + mOwnerPackageName + " (pid " + mOwnerPid + ")";
         }
     }
 
@@ -1933,7 +1934,7 @@ class MediaRouter2ServiceImpl {
                 isUidRelevant =
                         mUserRecord.mRouterRecords.stream().anyMatch(router -> router.mUid == uid)
                                 | mUserRecord.mManagerRecords.stream()
-                                        .anyMatch(manager -> manager.mUid == uid);
+                                        .anyMatch(manager -> manager.mOwnerUid == uid);
             }
             if (isUidRelevant) {
                 sendMessage(PooledLambda.obtainMessage(
@@ -2746,7 +2747,7 @@ class MediaRouter2ServiceImpl {
             if (service.mPowerManager.isInteractive()) {
                 isManagerScanning = managerRecords.stream().anyMatch(manager ->
                         manager.mIsScanning && service.mActivityManager
-                                .getPackageImportance(manager.mPackageName)
+                                .getPackageImportance(manager.mOwnerPackageName)
                                 <= sPackageImportanceForScanning);
 
                 if (isManagerScanning) {
