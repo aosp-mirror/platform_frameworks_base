@@ -1204,7 +1204,21 @@ public abstract class AccessibilityService extends Service {
      * property in its meta-data. For more information, see
      * {@link #SERVICE_META_DATA}.
      * </p>
+     * <p>Since many apps do not appropriately support {@link AccessibilityAction#ACTION_CLICK},
+     * if this action fails on an element that should be clickable, a service that is not a screen
+     * reader may send a tap directly to the element as a fallback. The example below
+     * demonstrates this fallback using the gesture dispatch APIs:
      *
+     * <pre class="prettyprint"><code>
+     *     private void tap(PointF point) {
+     *         StrokeDescription tap =  new StrokeDescription(path(point), 0,
+     *         ViewConfiguration.getTapTimeout());
+     *         GestureDescription.Builder builder = new GestureDescription.Builder();
+     *         builder.addStroke(tap);
+     *         dispatchGesture(builder.build(), null, null);
+     *     }
+     *</code>
+     * </pre>
      * @param gesture The gesture to dispatch
      * @param callback The object to call back when the status of the gesture is known. If
      * {@code null}, no status is reported.

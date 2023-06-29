@@ -8075,6 +8075,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param rectangle The rectangle in the View's content coordinate space
      * @return Whether any parent scrolled.
+     * @see AccessibilityAction#ACTION_SHOW_ON_SCREEN
      */
     public boolean requestRectangleOnScreen(Rect rectangle) {
         return requestRectangleOnScreen(rectangle, false);
@@ -11185,6 +11186,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param stateDescription The state description.
      * @see #getStateDescription()
+     * @see #setContentDescription(CharSequence) for the difference between content and
+     * state descriptions.
      */
     @RemotableViewMethod
     public void setStateDescription(@Nullable CharSequence stateDescription) {
