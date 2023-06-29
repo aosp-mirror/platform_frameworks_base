@@ -64,6 +64,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.DisplayThread;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
+import java.io.PrintWriter;
+
 /**
  * Policy that implements who gets control over the windows generating insets.
  */
@@ -114,6 +116,7 @@ class InsetsPolicy {
     private final BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
     private final BarWindow mNavBar = new BarWindow(StatusBarManager.WINDOW_NAVIGATION_BAR);
     private @InsetsType int mShowingTransientTypes;
+    private @InsetsType int mForcedShowingTypes;
     private boolean mAnimatingShown;
 
     private final boolean mHideNavBarForKeyboard;
@@ -126,7 +129,6 @@ class InsetsPolicy {
         final Resources r = mPolicy.getContext().getResources();
         mHideNavBarForKeyboard = r.getBoolean(R.bool.config_hideNavBarForKeyboard);
     }
-
 
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
@@ -514,7 +516,7 @@ class InsetsPolicy {
                     component, focusedWin.getRequestedVisibleTypes());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
-        if (mPolicy.areSystemBarsForcedShownLw()) {
+        if (areTypesForciblyShowing(Type.statusBars())) {
             // Status bar is forcibly shown. We don't want the client to control the status bar, and
             // we will dispatch the real visibility of status bar to the client.
             return null;
@@ -567,13 +569,6 @@ class InsetsPolicy {
                 return focusedWin;
             }
         }
-        if (forcesShowingNavigationBars(focusedWin)) {
-            // When "force show navigation bar" is enabled, it means both force visible is true, and
-            // we are in 3-button navigation. In this mode, the navigation bar is forcibly shown
-            // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
-            // still control the navigation bar in this mode.
-            return null;
-        }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             ComponentName component = focusedWin.mActivityRecord != null
                     ? focusedWin.mActivityRecord.mActivityComponent : null;
@@ -581,7 +576,7 @@ class InsetsPolicy {
                     component, focusedWin.getRequestedVisibleTypes());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
-        if (mPolicy.areSystemBarsForcedShownLw()) {
+        if (areTypesForciblyShowing(Type.navigationBars())) {
             // Navigation bar is forcibly shown. We don't want the client to control the navigation
             // bar, and we will dispatch the real visibility of navigation bar to the client.
             return null;
@@ -603,7 +598,32 @@ class InsetsPolicy {
         return focusedWin;
     }
 
-    boolean forcesShowingNavigationBars(WindowState win) {
+    boolean areTypesForciblyShowing(@InsetsType int types) {
+        return (mForcedShowingTypes & types) == types;
+    }
+
+    void updateSystemBars(WindowState win, boolean inSplitScreenMode, boolean inFreeformMode) {
+        mForcedShowingTypes = (inSplitScreenMode || inFreeformMode)
+                ? (Type.statusBars() | Type.navigationBars())
+                : forceShowingNavigationBars(win)
+                        ? Type.navigationBars()
+                        : 0;
+
+        // The client app won't be able to control these types of system bars. Here makes the client
+        // forcibly consume these types to prevent the app content from getting obscured.
+        mStateController.setForcedConsumingTypes(
+                mForcedShowingTypes | (remoteInsetsControllerControlsSystemBars(win)
+                        ? (Type.statusBars() | Type.navigationBars())
+                        : 0));
+
+        updateBarControlTarget(win);
+    }
+
+    private boolean forceShowingNavigationBars(WindowState win) {
+        // When "force show navigation bar" is enabled, it means both force visible is true, and
+        // we are in 3-button navigation. In this mode, the navigation bar is forcibly shown
+        // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
+        // still control the navigation bar in this mode.
         return mPolicy.isForceShowNavigationBarEnabled() && win != null
                 && win.getActivityType() == ACTIVITY_TYPE_STANDARD;
     }
@@ -694,6 +714,21 @@ class InsetsPolicy {
                         taskId,
                         areVisible,
                         wereRevealedFromSwipeOnSystemBar);
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + "InsetsPolicy");
+        prefix = prefix + "  ";
+        pw.println(prefix + "status: " + StatusBarManager.windowStateToString(mStatusBar.mState));
+        pw.println(prefix + "nav: " + StatusBarManager.windowStateToString(mNavBar.mState));
+        if (mShowingTransientTypes != 0) {
+            pw.println(prefix + "mShowingTransientTypes="
+                    + WindowInsets.Type.toString(mShowingTransientTypes));
+        }
+        if (mForcedShowingTypes != 0) {
+            pw.println(prefix + "mForcedShowingTypes="
+                    + WindowInsets.Type.toString(mForcedShowingTypes));
+        }
     }
 
     private class BarWindow {
