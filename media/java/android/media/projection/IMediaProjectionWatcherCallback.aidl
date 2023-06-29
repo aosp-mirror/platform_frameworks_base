@@ -17,9 +17,22 @@
 package android.media.projection;
 
 import android.media.projection.MediaProjectionInfo;
+import android.view.ContentRecordingSession;
 
 /** {@hide} */
 oneway interface IMediaProjectionWatcherCallback {
     void onStart(in MediaProjectionInfo info);
     void onStop(in MediaProjectionInfo info);
+    /**
+     * Called when the {@link ContentRecordingSession} was set for the current media
+     * projection.
+     *
+     * @param info    always present and contains information about the media projection host.
+     * @param session the recording session for the current media projection. Can be
+     *                {@code null} when the recording will stop.
+     */
+    void onRecordingSessionSet(
+        in MediaProjectionInfo info,
+        in @nullable ContentRecordingSession session
+    );
 }
