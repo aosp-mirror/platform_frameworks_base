@@ -301,7 +301,9 @@ public class MeasuredText {
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
             int lbStyle = LineBreakConfig.getResolvedLineBreakStyle(lineBreakConfig);
             int lbWordStyle = LineBreakConfig.getResolvedLineBreakWordStyle(lineBreakConfig);
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
+            boolean hyphenation = LineBreakConfig.getResolvedHyphenation(lineBreakConfig)
+                    == LineBreakConfig.HYPHENATION_ENABLED;
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle, hyphenation,
                     mCurrentOffset, end, isRtl);
             mCurrentOffset = end;
 
@@ -510,6 +512,7 @@ public class MeasuredText {
                                                 /* Non Zero */ long paintPtr,
                                                 int lineBreakStyle,
                                                 int lineBreakWordStyle,
+                                                boolean hyphenation,
                                                 @IntRange(from = 0) int start,
                                                 @IntRange(from = 0) int end,
                                                 boolean isRtl);
