@@ -65,6 +65,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -2574,6 +2575,13 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public static final String EXTRA_MOVE_ID = "android.content.pm.extra.MOVE_ID";
+
+    /**
+     * Extra field name for notifying package change event. Currently, it is used by PackageMonitor.
+     * @hide
+     */
+    public static final String EXTRA_PACKAGE_MONITOR_CALLBACK_RESULT =
+            "android.content.pm.extra.EXTRA_PACKAGE_MONITOR_CALLBACK_RESULT";
 
     /**
      * Usable by the required verifier as the {@code verificationCode} argument
@@ -11038,5 +11046,29 @@ public abstract class PackageManager {
     public void relinquishUpdateOwnership(@NonNull String targetPackage) {
         throw new UnsupportedOperationException(
                 "relinquishUpdateOwnership not implemented in subclass");
+    }
+
+    /**
+     * Register for notifications of package changes such as install, removal and other events.
+     *
+     * @param callback the callback to register for receiving the change events
+     * @param userId The id of registered user
+     * @hide
+     */
+    public void registerPackageMonitorCallback(@NonNull IRemoteCallback callback, int userId) {
+        throw new UnsupportedOperationException(
+                "registerPackageMonitorCallback not implemented in subclass");
+    }
+
+    /**
+     * Unregister for notifications of package changes such as install, removal and other events.
+     *
+     * @param callback the callback to unregister for receiving the change events
+     * @see #registerPackageMonitorCallback(IRemoteCallback, int)
+     * @hide
+     */
+    public void unregisterPackageMonitorCallback(@NonNull IRemoteCallback callback) {
+        throw new UnsupportedOperationException(
+                "unregisterPackageMonitorCallback not implemented in subclass");
     }
 }

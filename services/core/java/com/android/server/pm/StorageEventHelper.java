@@ -306,6 +306,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
         mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer, mediaStatus,
                 replacing, packageNames, packageUids);
+        mPm.notifyResourcesChanged(mediaStatus, replacing, packageNames, packageUids);
     }
 
     /**

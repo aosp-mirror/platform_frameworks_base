@@ -128,6 +128,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -709,6 +710,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     @NonNull
     private final PackageObserverHelper mPackageObserverHelper = new PackageObserverHelper();
+
+    @NonNull
+    private final PackageMonitorCallbackHelper mPackageMonitorCallbackHelper =
+            new PackageMonitorCallbackHelper();
 
     private final ModuleInfoProvider mModuleInfoProvider;
 
@@ -2975,6 +2980,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mHandler.post(() -> mBroadcastHelper.sendPackageBroadcast(action, pkg, extras, flags,
                 targetPkg, finishedReceiver, userIds, instantUserIds, broadcastAllowList,
                 null /* filterExtrasForReceiver */, bOptions));
+        if (targetPkg == null) {
+            // For some broadcast action, e.g. ACTION_PACKAGE_ADDED, this method will be called
+            // many times to different targets, e.g. installer app, permission controller, other
+            // registered apps. We should filter it to avoid calling back many times for the same
+            // action. When the targetPkg is set, it sends the broadcast to specific app, e.g.
+            // installer app or null for registered apps. The callback only need to send back to the
+            // registered apps so we check the null condition here.
+            notifyPackageMonitor(action, pkg, extras, userIds);
+        }
+    }
+
+    void notifyPackageMonitor(String action, String pkg, Bundle extras, int[] userIds) {
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(action, pkg, extras, userIds);
+    }
+
+    void notifyResourcesChanged(boolean mediaStatus, boolean replacing,
+            @NonNull String[] pkgNames, @NonNull int[] uids) {
+        mPackageMonitorCallbackHelper.notifyResourcesChanged(mediaStatus, replacing, pkgNames,
+                uids);
     }
 
     @Override
@@ -3023,6 +3047,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 userIds, snapshot.getPackageStates());
         mHandler.post(() -> mBroadcastHelper.sendPackageAddedForNewUsers(
                 packageName, appId, userIds, instantUserIds, dataLoaderType, broadcastAllowList));
+        mPackageMonitorCallbackHelper.notifyPackageAddedForNewUsers(packageName, appId, userIds,
+                instantUserIds, dataLoaderType);
         if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
             mHandler.post(() -> {
                         for (int userId : userIds) {
@@ -4015,6 +4041,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mHandler.post(() -> mBroadcastHelper.sendPackageChangedBroadcast(
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
                 instantUserIds, broadcastAllowList));
+        mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
+                packageUid, reason, userIds);
     }
 
     /**
@@ -6139,6 +6167,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 msg.obj = response;
                 mHandler.sendMessage(msg);
             });
+        }
+
+        @Override
+        public void registerPackageMonitorCallback(@NonNull IRemoteCallback callback, int userId) {
+            mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, userId);
+        }
+
+        @Override
+        public void unregisterPackageMonitorCallback(@NonNull IRemoteCallback callback) {
+            mPackageMonitorCallbackHelper.unregisterPackageMonitorCallback(callback);
         }
 
         @Override

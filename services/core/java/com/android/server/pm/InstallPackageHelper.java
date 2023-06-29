@@ -2790,6 +2790,8 @@ final class InstallPackageHelper {
                     final String[] pkgNames = new String[]{
                             request.getRemovedInfo().mRemovedPackage};
                     final int[] uids = new int[]{request.getRemovedInfo().mUid};
+                    mPm.notifyResourcesChanged(false /* mediaStatus */,
+                            true /* replacing */, pkgNames, uids);
                     mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer,
                             false /* mediaStatus */, true /* replacing */, pkgNames, uids);
                 }
@@ -2995,6 +2997,8 @@ final class InstallPackageHelper {
                     final int[] uids = new int[]{request.getPkg().getUid()};
                     mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer,
                             true /* mediaStatus */, true /* replacing */, pkgNames, uids);
+                    mPm.notifyResourcesChanged(true /* mediaStatus */, true /* replacing */,
+                            pkgNames, uids);
                 }
             } else if (!ArrayUtils.isEmpty(request.getLibraryConsumers())) { // if static shared lib
                 // No need to kill consumers if it's installation of new version static shared lib.
