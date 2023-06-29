@@ -16,11 +16,11 @@
 
 package com.android.server.dreams;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 
 import android.app.ActivityTaskManager;
 import android.app.BroadcastOptions;
+import android.app.IAppTask;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -214,6 +214,27 @@ final class DreamController {
     }
 
     /**
+     * Provides an appTask for the dream with token {@code dreamToken}, so that the dream controller
+     * can stop the dream task when necessary.
+     */
+    void setDreamAppTask(Binder dreamToken, IAppTask appTask) {
+        if (mCurrentDream == null || mCurrentDream.mToken != dreamToken
+                || mCurrentDream.mAppTask != null) {
+            Slog.e(TAG, "Illegal dream activity start. mCurrentDream.mToken = "
+                    + mCurrentDream.mToken + ", illegal dreamToken = " + dreamToken
+                    + ". Ending this dream activity.");
+            try {
+                appTask.finishAndRemoveTask();
+            } catch (RemoteException | RuntimeException e) {
+                Slog.e(TAG, "Unable to stop illegal dream activity.");
+            }
+            return;
+        }
+
+        mCurrentDream.mAppTask = appTask;
+    }
+
+    /**
      * Stops dreaming.
      *
      * The current dream, if any, and any unstopped previous dreams are stopped. The device stops
@@ -303,8 +324,14 @@ final class DreamController {
                     mSentStartBroadcast = false;
                 }
 
-                mActivityTaskManager.removeRootTasksWithActivityTypes(
-                        new int[] {ACTIVITY_TYPE_DREAM});
+                if (mCurrentDream != null && mCurrentDream.mAppTask != null) {
+                    // Finish the dream task in case it hasn't finished by itself already.
+                    try {
+                        mCurrentDream.mAppTask.finishAndRemoveTask();
+                    } catch (RemoteException | RuntimeException e) {
+                        Slog.e(TAG, "Unable to stop dream activity.");
+                    }
+                }
 
                 mListener.onDreamStopped(dream.mToken);
             }
@@ -364,6 +391,7 @@ final class DreamController {
         public final boolean mIsPreviewMode;
         public final boolean mCanDoze;
         public final int mUserId;
+        public IAppTask mAppTask;
 
         public PowerManager.WakeLock mWakeLock;
         public boolean mBound;

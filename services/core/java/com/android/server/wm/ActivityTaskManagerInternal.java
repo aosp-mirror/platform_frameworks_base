@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.BackgroundStartPrivileges;
 import android.app.IActivityManager;
+import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
@@ -306,6 +307,12 @@ public abstract class ActivityTaskManagerInternal {
      * @param activeDreamComponent The currently active dream. If null, the device is not dreaming.
      */
     public abstract void notifyActiveDreamChanged(@Nullable ComponentName activeDreamComponent);
+
+    /**
+     * Starts a dream activity in the DreamService's process.
+     */
+    public abstract IAppTask startDreamActivity(@NonNull Intent intent, int callingUid,
+            int callingPid);
 
     /**
      * Set a uid that is allowed to bypass stopped app switches, launching an app
