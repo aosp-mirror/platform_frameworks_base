@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.os.VibratorInfo;
 import android.util.AtomicFile;
 import android.util.SparseArray;
@@ -73,12 +72,10 @@ public class HapticFeedbackCustomizationTest {
             VibrationEffect.createWaveform(new long[] {123}, new int[] {254}, -1);
 
     @Mock private Resources mResourcesMock;
-    @Mock private Vibrator mVibratorMock;
     @Mock private VibratorInfo mVibratorInfoMock;
 
     @Before
     public void setUp() {
-        when(mVibratorMock.getInfo()).thenReturn(mVibratorInfoMock);
         when(mVibratorInfoMock.areVibrationFeaturesSupported(any())).thenReturn(true);
     }
 
@@ -220,17 +217,17 @@ public class HapticFeedbackCustomizationTest {
     public void testParseCustomizations_noCustomizationFile_returnsNull() throws Exception {
         setCustomizationFilePath("");
 
-        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock))
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorInfoMock))
                 .isNull();
 
         setCustomizationFilePath(null);
 
-        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock))
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorInfoMock))
                 .isNull();
 
         setCustomizationFilePath("non_existent_file.xml");
 
-        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock))
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorInfoMock))
                 .isNull();
     }
 
@@ -387,7 +384,7 @@ public class HapticFeedbackCustomizationTest {
             String xml, SparseArray<VibrationEffect> expectedCustomizations) throws Exception {
         setupCustomizationFile(xml);
         assertThat(expectedCustomizations.contentEquals(
-                HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock)))
+                HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorInfoMock)))
                         .isTrue();
     }
 
@@ -395,13 +392,15 @@ public class HapticFeedbackCustomizationTest {
         setupCustomizationFile(xml);
         assertThrows("Expected haptic feedback customization to fail for " + xml,
                 CustomizationParserException.class,
-                () ->  HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock));
+                () ->  HapticFeedbackCustomization.loadVibrations(
+                        mResourcesMock, mVibratorInfoMock));
     }
 
     private void assertParseCustomizationsFails() throws Exception {
         assertThrows("Expected haptic feedback customization to fail",
                 CustomizationParserException.class,
-                () ->  HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock));
+                () ->  HapticFeedbackCustomization.loadVibrations(
+                        mResourcesMock, mVibratorInfoMock));
     }
 
     private void setupCustomizationFile(String xml) throws Exception {

@@ -19,7 +19,7 @@ package com.android.server.vibrator;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.os.vibrator.persistence.ParsedVibration;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
@@ -107,10 +107,10 @@ final class HapticFeedbackCustomization {
      * @hide
      */
     @Nullable
-    static SparseArray<VibrationEffect> loadVibrations(Resources res, Vibrator vibrator)
+    static SparseArray<VibrationEffect> loadVibrations(Resources res, VibratorInfo vibratorInfo)
             throws CustomizationParserException, IOException {
         try {
-            return loadVibrationsInternal(res, vibrator);
+            return loadVibrationsInternal(res, vibratorInfo);
         } catch (VibrationXmlParser.VibrationXmlParserException
                 | XmlParserException
                 | XmlPullParserException e) {
@@ -121,7 +121,7 @@ final class HapticFeedbackCustomization {
 
     @Nullable
     private static SparseArray<VibrationEffect> loadVibrationsInternal(
-            Resources res, Vibrator vibrator) throws
+            Resources res, VibratorInfo vibratorInfo) throws
                     CustomizationParserException,
                     IOException,
                     VibrationXmlParser.VibrationXmlParserException,
@@ -175,7 +175,7 @@ final class HapticFeedbackCustomization {
                 throw new CustomizationParserException(
                         "Unable to parse vibration element for effect " + effectId);
             }
-            VibrationEffect effect = parsedVibration.resolve(vibrator);
+            VibrationEffect effect = parsedVibration.resolve(vibratorInfo);
             if (effect != null) {
                 if (effect.getDuration() == Long.MAX_VALUE) {
                     throw new CustomizationParserException(String.format(
