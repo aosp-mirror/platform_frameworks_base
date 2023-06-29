@@ -28,6 +28,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
@@ -1293,20 +1294,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final boolean mainStageVisible = mMainStage.mRootTaskInfo.isVisible;
         final boolean oneStageVisible =
                 mMainStage.mRootTaskInfo.isVisible != mSideStage.mRootTaskInfo.isVisible;
-        if (oneStageVisible) {
+        if (oneStageVisible && !ENABLE_SHELL_TRANSITIONS) {
             // Dismiss split because there's show-when-locked activity showing on top of keyguard.
             // Also make sure the task contains show-when-locked activity remains on top after split
             // dismissed.
-            if (!ENABLE_SHELL_TRANSITIONS) {
-                final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
-                exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
-            } else {
-                final int dismissTop = mainStageVisible ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                prepareExitSplitScreen(dismissTop, wct);
-                mSplitTransitions.startDismissTransition(wct, this, dismissTop,
-                        EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
-            }
+            final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
+            exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
         }
     }
 
@@ -2376,6 +2369,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     // so appends operations to exit split.
                     prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
                 }
+            } else if (type == TRANSIT_KEYGUARD_OCCLUDE && triggerTask.topActivity != null
+                    && isSplitScreenVisible()) {
+                // Split include show when lock activity case, check the top activity under which
+                // stage and move it to the top.
+                int top = triggerTask.topActivity.equals(mMainStage.mRootTaskInfo.topActivity)
+                        ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
+                prepareExitSplitScreen(top, out);
+                mSplitTransitions.setDismissTransition(transition, top,
+                        EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
             }
 
             // When split in the background, it should be only opening/dismissing transition and
