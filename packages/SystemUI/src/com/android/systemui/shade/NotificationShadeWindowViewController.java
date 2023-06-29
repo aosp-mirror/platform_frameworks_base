@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade;
 
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -102,9 +103,12 @@ public class NotificationShadeWindowViewController {
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final AmbientState mAmbientState;
     private final PulsingGestureListener mPulsingGestureListener;
+    private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
     private final boolean mIsTrackpadCommonEnabled;
+    private final FeatureFlags mFeatureFlags;
     private GestureDetector mPulsingWakeupGestureHandler;
+    private GestureDetector mDreamingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
@@ -156,6 +160,7 @@ public class NotificationShadeWindowViewController {
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
             PulsingGestureListener pulsingGestureListener,
+            LockscreenHostedDreamGestureListener lockscreenHostedDreamGestureListener,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
@@ -187,8 +192,10 @@ public class NotificationShadeWindowViewController {
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
         mPulsingGestureListener = pulsingGestureListener;
+        mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mIsTrackpadCommonEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_COMMON);
+        mFeatureFlags = featureFlags;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -237,7 +244,10 @@ public class NotificationShadeWindowViewController {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
         mPulsingWakeupGestureHandler = new GestureDetector(mView.getContext(),
                 mPulsingGestureListener);
-
+        if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            mDreamingWakeupGestureHandler = new GestureDetector(mView.getContext(),
+                    mLockscreenHostedDreamGestureListener);
+        }
         mView.setLayoutInsetsController(mNotificationInsetsController);
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
@@ -291,6 +301,10 @@ public class NotificationShadeWindowViewController {
 
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
+                if (mDreamingWakeupGestureHandler != null
+                        && mDreamingWakeupGestureHandler.onTouchEvent(ev)) {
+                    return true;
+                }
                 if (mStatusBarKeyguardViewManager.dispatchTouchEvent(ev)) {
                     return true;
                 }
