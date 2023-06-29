@@ -16,6 +16,9 @@
 
 package android.media.audiopolicy;
 
+import static android.media.AudioSystem.getDeviceName;
+import static android.media.AudioSystem.isRemoteSubmixDevice;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -445,36 +448,36 @@ public class AudioMix {
                     // CHANNEL_IN_FRONT_BACK is hidden, should not appear.
                 }
             }
-            if ((mDeviceSystemType != AudioSystem.DEVICE_NONE)
-                    && (mDeviceSystemType != AudioSystem.DEVICE_OUT_REMOTE_SUBMIX)
-                    && (mDeviceSystemType != AudioSystem.DEVICE_IN_REMOTE_SUBMIX)) {
-                if ((mRouteFlags & ROUTE_FLAG_RENDER) == 0) {
-                    throw new IllegalArgumentException(
-                            "Can't have audio device without flag ROUTE_FLAG_RENDER");
+
+            if ((mRouteFlags & ROUTE_FLAG_LOOP_BACK) == ROUTE_FLAG_LOOP_BACK) {
+                if (mDeviceSystemType == AudioSystem.DEVICE_NONE) {
+                    // If there was no device type explicitly set, configure it based on mix type.
+                    mDeviceSystemType = getLoopbackDeviceSystemTypeForAudioMixingRule(mRule);
+                } else if (!isRemoteSubmixDevice(mDeviceSystemType)) {
+                    // Loopback mode only supports remote submix devices.
+                    throw new IllegalArgumentException("Device " + getDeviceName(mDeviceSystemType)
+                            + "is not supported for loopback mix.");
                 }
-                if (mRule.getTargetMixType() != AudioMix.MIX_TYPE_PLAYERS) {
-                    throw new IllegalArgumentException("Unsupported device on non-playback mix");
-                }
-            } else if (mDeviceSystemType == AudioSystem.DEVICE_OUT_REMOTE_SUBMIX) {
-                if (mRule.getTargetMixType() != AudioMix.MIX_TYPE_PLAYERS) {
-                    throw new IllegalArgumentException(
-                            "DEVICE_OUT_REMOTE_SUBMIX device is not supported on non-playback mix");
-                }
-            } else {
-                if ((mRouteFlags & ROUTE_FLAG_SUPPORTED) == ROUTE_FLAG_RENDER) {
+            }
+
+            if ((mRouteFlags & ROUTE_FLAG_RENDER) == ROUTE_FLAG_RENDER) {
+                if (mDeviceSystemType == AudioSystem.DEVICE_NONE) {
                     throw new IllegalArgumentException(
                             "Can't have flag ROUTE_FLAG_RENDER without an audio device");
                 }
-                if ((mRouteFlags & ROUTE_FLAG_LOOP_BACK) == ROUTE_FLAG_LOOP_BACK) {
-                    if (mRule.getTargetMixType() == MIX_TYPE_PLAYERS) {
-                        mDeviceSystemType = AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
-                    } else if (mRule.getTargetMixType() == MIX_TYPE_RECORDERS) {
-                        mDeviceSystemType = AudioSystem.DEVICE_IN_REMOTE_SUBMIX;
-                    } else {
-                        throw new IllegalArgumentException("Unknown mixing rule type");
-                    }
+
+                if (AudioSystem.DEVICE_IN_ALL_SET.contains(mDeviceSystemType)) {
+                    throw new IllegalArgumentException(
+                            "Input device is not supported with ROUTE_FLAG_RENDER");
+                }
+
+                if (mRule.getTargetMixType() == MIX_TYPE_RECORDERS) {
+                    throw new IllegalArgumentException(
+                            "ROUTE_FLAG_RENDER/ROUTE_FLAG_LOOP_BACK_RENDER is not supported for "
+                                    + "non-playback mix rule");
                 }
             }
+
             if (mRule.allowPrivilegedMediaPlaybackCapture()) {
                 String error = AudioMix.canBeUsedForPrivilegedMediaCapture(mFormat);
                 if (error != null) {
@@ -483,6 +486,19 @@ public class AudioMix {
             }
             return new AudioMix(mRule, mFormat, mRouteFlags, mCallbackFlags, mDeviceSystemType,
                     mDeviceAddress);
+        }
+
+        private int getLoopbackDeviceSystemTypeForAudioMixingRule(AudioMixingRule rule) {
+            switch (mRule.getTargetMixType()) {
+                case MIX_TYPE_PLAYERS:
+                    return AudioSystem.DEVICE_OUT_REMOTE_SUBMIX;
+                case MIX_TYPE_RECORDERS:
+                    return AudioSystem.DEVICE_IN_REMOTE_SUBMIX;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown mixing rule type - 0x" + Integer.toHexString(
+                                    rule.getTargetMixType()));
+            }
         }
     }
 }
