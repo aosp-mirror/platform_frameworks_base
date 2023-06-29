@@ -834,12 +834,6 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             }
 
             updateEntireShouldFilterCacheInner(snapshot, settings, usersRef[0], USER_ALL);
-            synchronized (mImplicitlyQueryableLock) {
-                if (mNeedToUpdateCacheForImplicitAccess) {
-                    updateShouldFilterCacheForImplicitAccess();
-                    mNeedToUpdateCacheForImplicitAccess = false;
-                }
-            }
             logCacheRebuilt(reason, SystemClock.currentTimeMicro() - currentTimeUs,
                     users.length, settings.size());
 
@@ -850,7 +844,14 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 return;
             }
 
-            mCacheReady = true;
+            synchronized (mImplicitlyQueryableLock) {
+                if (mNeedToUpdateCacheForImplicitAccess) {
+                    updateShouldFilterCacheForImplicitAccess();
+                    mNeedToUpdateCacheForImplicitAccess = false;
+                }
+                mCacheReady = true;
+            }
+
             onChanged();
         }, delayMs);
     }
