@@ -12613,6 +12613,26 @@ public final class Settings {
         public static final String MOBILE_DATA_ALWAYS_ON = "mobile_data_always_on";
 
         /**
+         * The duration in milliseconds of each action, separated by commas. Ex:
+         *
+         * "18000,18000,18000,18000,0"
+         *
+         * See com.android.internal.telephony.data.DataStallRecoveryManager for more info
+         * @hide
+         */
+        public static final String DSRM_DURATION_MILLIS = "dsrm_duration_millis";
+
+        /**
+         * The list of DSRM enabled actions, separated by commas. Ex:
+         *
+         * "true,true,false,true,true"
+         *
+         * See com.android.internal.telephony.data.DataStallRecoveryManager for more info
+         * @hide
+         */
+        public static final String DSRM_ENABLED_ACTIONS = "dsrm_enabled_actions";
+
+        /**
          * Whether the wifi data connection should remain active even when higher
          * priority networks like Ethernet are active, to keep both networks.
          * In the case where higher priority networks are connected, wifi will be

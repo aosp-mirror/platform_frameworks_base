@@ -68,10 +68,16 @@ public class InsetsSource implements Parcelable {
      */
     public static final int FLAG_INSETS_ROUNDED_CORNER = 1 << 1;
 
+    /**
+     * Controls whether the insets provided by this source should be forcibly consumed.
+     */
+    public static final int FLAG_FORCE_CONSUMING = 1 << 2;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = "FLAG_", value = {
             FLAG_SUPPRESS_SCRIM,
             FLAG_INSETS_ROUNDED_CORNER,
+            FLAG_FORCE_CONSUMING,
     })
     public @interface Flags {}
 
@@ -327,6 +333,9 @@ public class InsetsSource implements Parcelable {
         }
         if ((flags & FLAG_INSETS_ROUNDED_CORNER) != 0) {
             joiner.add("INSETS_ROUNDED_CORNER");
+        }
+        if ((flags & FLAG_FORCE_CONSUMING) != 0) {
+            joiner.add("FORCE_CONSUMING");
         }
         return joiner.toString();
     }
