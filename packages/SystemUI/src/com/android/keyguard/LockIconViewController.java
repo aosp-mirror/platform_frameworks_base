@@ -62,6 +62,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -112,6 +113,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final VibratorHelper mVibrator;
     @Nullable private final AuthRippleController mAuthRippleController;
     @NonNull private final FeatureFlags mFeatureFlags;
+    @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @NonNull private final KeyguardTransitionInteractor mTransitionInteractor;
     @NonNull private final KeyguardInteractor mKeyguardInteractor;
 
@@ -180,7 +182,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull @Main Resources resources,
             @NonNull KeyguardTransitionInteractor transitionInteractor,
             @NonNull KeyguardInteractor keyguardInteractor,
-            @NonNull FeatureFlags featureFlags
+            @NonNull FeatureFlags featureFlags,
+            PrimaryBouncerInteractor primaryBouncerInteractor
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -197,6 +200,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mTransitionInteractor = transitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
         mFeatureFlags = featureFlags;
+        mPrimaryBouncerInteractor = primaryBouncerInteractor;
 
         mMaxBurnInOffsetX = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
@@ -325,8 +329,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setContentDescription(null);
         }
 
+        boolean accessibilityEnabled =
+                !mPrimaryBouncerInteractor.isAnimatingAway() && mView.isVisibleToUser();
+        mView.setImportantForAccessibility(
+                accessibilityEnabled ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                        : View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+
         if (!Objects.equals(prevContentDescription, mView.getContentDescription())
-                && mView.getContentDescription() != null && mView.isVisibleToUser()) {
+                && mView.getContentDescription() != null && accessibilityEnabled) {
             mView.announceForAccessibility(mView.getContentDescription());
         }
     }
