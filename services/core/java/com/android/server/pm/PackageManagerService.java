@@ -2493,13 +2493,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     @NonNull
     private String getRequiredServicesExtensionPackageLPr(@NonNull Computer computer) {
-        String servicesExtensionPackage =
-                ensureSystemPackageName(computer,
-                        mContext.getString(R.string.config_servicesExtensionPackage));
+        String configServicesExtensionPackage = mContext.getString(
+                R.string.config_servicesExtensionPackage);
+        if (TextUtils.isEmpty(configServicesExtensionPackage)) {
+            throw new RuntimeException(
+                    "Required services extension package failed due to "
+                            + "config_servicesExtensionPackage is empty.");
+        }
+        String servicesExtensionPackage = ensureSystemPackageName(computer,
+                configServicesExtensionPackage);
         if (TextUtils.isEmpty(servicesExtensionPackage)) {
             throw new RuntimeException(
-                    "Required services extension package is missing, check "
-                            + "config_servicesExtensionPackage.");
+                    "Required services extension package is missing, "
+                            + "config_servicesExtensionPackage had defined with "
+                            + configServicesExtensionPackage
+                            + ", but can not find the package info on the system image, check if "
+                            + "the package has a problem.");
         }
         return servicesExtensionPackage;
     }
