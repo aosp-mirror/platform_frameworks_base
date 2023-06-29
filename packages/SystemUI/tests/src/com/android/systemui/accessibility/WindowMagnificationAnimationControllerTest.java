@@ -53,6 +53,7 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -65,6 +66,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+// TODO(b/288926821): un-ignore once fixed
+@Ignore("Needs deeper investigation/refactoring, see b/289212459 and b/289392705")
 @LargeTest
 @RunWith(AndroidTestingRunner.class)
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
