@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -178,22 +179,20 @@ public final class CameraManager {
             boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
 
             mFoldedDeviceState = folded;
-            ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
-            for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
-                DeviceStateListener callback = listener.get();
+            Iterator<WeakReference<DeviceStateListener>> it = mDeviceStateListeners.iterator();
+            while(it.hasNext()) {
+                DeviceStateListener callback = it.next().get();
                 if (callback != null) {
                     callback.onDeviceStateChanged(folded);
                 } else {
-                    invalidListeners.add(listener);
+                    it.remove();
                 }
-            }
-            if (!invalidListeners.isEmpty()) {
-                mDeviceStateListeners.removeAll(invalidListeners);
             }
         }
 
         public synchronized void addDeviceStateListener(DeviceStateListener listener) {
             listener.onDeviceStateChanged(mFoldedDeviceState);
+            mDeviceStateListeners.removeIf(l -> l.get() == null);
             mDeviceStateListeners.add(new WeakReference<>(listener));
         }
 

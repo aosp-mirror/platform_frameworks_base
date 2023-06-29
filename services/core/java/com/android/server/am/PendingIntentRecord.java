@@ -457,6 +457,20 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             // can specify a consistent launch mode even if the PendingIntent is immutable
             final ActivityOptions opts = ActivityOptions.fromBundle(options);
             if (opts != null) {
+                if (opts.getPendingIntentCreatorBackgroundActivityStartMode()
+                        != ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                    Slog.wtf(TAG,
+                            "Resetting option "
+                                    + "setPendingIntentCreatorBackgroundActivityStartMode("
+                                    + opts.getPendingIntentCreatorBackgroundActivityStartMode()
+                                    + ") to SYSTEM_DEFINED from the options provided by the "
+                                    + "pending intent sender ("
+                                    + key.packageName
+                                    + ") because this option is meant for the pending intent "
+                                    + "creator");
+                    opts.setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
+                }
                 finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
             }
 

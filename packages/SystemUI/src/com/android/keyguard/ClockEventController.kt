@@ -42,7 +42,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.KeyguardLargeClockLog
 import com.android.systemui.log.dagger.KeyguardSmallClockLog
 import com.android.systemui.plugins.ClockController

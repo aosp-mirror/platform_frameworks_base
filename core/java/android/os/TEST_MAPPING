@@ -52,8 +52,20 @@
       ],
       "name": "FrameworksServicesTests",
       "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
+      ]
+    },
+    {
+      "file_patterns": [
+        "BatteryStats[^/]*\\.java",
+        "BatteryUsageStats[^/]*\\.java",
+        "PowerComponents\\.java",
+        "[^/]*BatteryConsumer[^/]*\\.java"
+      ],
+      "name": "FrameworksServicesTests",
+      "options": [
+        { "include-filter": "com.android.server.power.stats" },
+        { "exclude-filter": "com.android.server.power.stats.BatteryStatsTests" }
       ]
     },
     {

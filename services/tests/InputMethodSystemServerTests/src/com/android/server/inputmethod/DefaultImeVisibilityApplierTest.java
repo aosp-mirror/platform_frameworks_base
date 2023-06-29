@@ -20,6 +20,7 @@ import static android.inputmethodservice.InputMethodService.IME_ACTIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 
 import static com.android.internal.inputmethod.SoftInputShowHideReason.HIDE_SOFT_INPUT;
+import static com.android.internal.inputmethod.SoftInputShowHideReason.HIDE_SWITCH_USER;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.SHOW_SOFT_INPUT;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_EXPLICIT;
@@ -43,6 +44,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -163,6 +165,29 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         }
 
         verify(mMockImeTargetVisibilityPolicy).removeImeScreenshot(eq(Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void testApplyImeVisibility_hideImeWhenUnbinding() {
+        mInputMethodManagerService.setAttachedClientForTesting(null);
+        startInputOrWindowGainedFocus(mWindowToken, SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        ExtendedMockito.spyOn(mVisibilityApplier);
+
+        synchronized (ImfLock.class) {
+            // Simulate the system hides the IME when switching IME services in different users.
+            // (e.g. unbinding the IME from the current user to the profile user)
+            final int displayIdToShowIme = mInputMethodManagerService.getDisplayIdToShowImeLocked();
+            mInputMethodManagerService.hideCurrentInputLocked(mWindowToken, null, 0, null,
+                    HIDE_SWITCH_USER);
+            mInputMethodManagerService.onUnbindCurrentMethodByReset();
+
+            // Expects applyImeVisibility() -> hideIme() will be called to notify WM for syncing
+            // the IME hidden state.
+            verify(mVisibilityApplier).applyImeVisibility(eq(mWindowToken), any(),
+                    eq(STATE_HIDE_IME));
+            verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(
+                    eq(mWindowToken), eq(displayIdToShowIme), eq(null));
+        }
     }
 
     private InputBindResult startInputOrWindowGainedFocus(IBinder windowToken, int softInputMode) {

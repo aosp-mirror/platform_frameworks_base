@@ -3002,6 +3002,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSimStateChanged_HandleSimStateNotReady() {
+        KeyguardUpdateMonitorCallback keyguardUpdateMonitorCallback = spy(
+                KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback);
+        mKeyguardUpdateMonitor.handleSimStateChange(-1, 0, TelephonyManager.SIM_STATE_NOT_READY);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(-1, 0,
+                TelephonyManager.SIM_STATE_NOT_READY);
+    }
+
+    @Test
     public void onAuthEnrollmentChangesCallbacksAreNotified() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         ArgumentCaptor<AuthController.Callback> authCallback = ArgumentCaptor.forClass(

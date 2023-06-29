@@ -1476,10 +1476,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
-    public void setCurrentUser(int currentUser) {
-        // Don't care in the base class.
-    }
-
     private void updateThemeColors() {
         if (mScrimBehind == null) return;
         int background = Utils.getColorAttr(mScrimBehind.getContext(),
