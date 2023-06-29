@@ -346,6 +346,8 @@ public class SettingsBackupTest {
                     Settings.Global.MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS,
                     Settings.Global.MOBILE_DATA, // Candidate for backup?
                     Settings.Global.MOBILE_DATA_ALWAYS_ON,
+                    Settings.Global.DSRM_DURATION_MILLIS,
+                    Settings.Global.DSRM_ENABLED_ACTIONS,
                     Settings.Global.MODE_RINGER,
                     Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
                     Settings.Global.MULTI_SIM_SMS_PROMPT,
