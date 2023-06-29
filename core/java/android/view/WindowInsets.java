@@ -84,13 +84,7 @@ public final class WindowInsets {
     @Nullable private final PrivacyIndicatorBounds mPrivacyIndicatorBounds;
     @Nullable private final DisplayShape mDisplayShape;
 
-    /**
-     * In multi-window we force show the navigation bar. Because we don't want that the surface size
-     * changes in this mode, we instead have a flag whether the navigation bar size should always
-     * be consumed, so the app is treated like there is no virtual navigation bar at all.
-     */
-    private final boolean mAlwaysConsumeSystemBars;
-
+    private final @InsetsType int mForceConsumingTypes;
     private final @InsetsType int mSuppressScrimTypes;
     private final boolean mSystemWindowInsetsConsumed;
     private final boolean mStableInsetsConsumed;
@@ -117,7 +111,7 @@ public final class WindowInsets {
 
     static {
         CONSUMED = new WindowInsets(createCompatTypeMap(null), createCompatTypeMap(null),
-                createCompatVisibilityMap(createCompatTypeMap(null)), false, false, 0, null,
+                createCompatVisibilityMap(createCompatTypeMap(null)), false, 0, 0, null,
                 null, null, null, systemBars(), false);
     }
 
@@ -137,7 +131,8 @@ public final class WindowInsets {
             @Nullable Insets[] typeMaxInsetsMap,
             boolean[] typeVisibilityMap,
             boolean isRound,
-            boolean alwaysConsumeSystemBars, @InsetsType int suppressScrimTypes,
+            @InsetsType int forceConsumingTypes,
+            @InsetsType int suppressScrimTypes,
             DisplayCutout displayCutout,
             RoundedCorners roundedCorners,
             PrivacyIndicatorBounds privacyIndicatorBounds,
@@ -155,7 +150,7 @@ public final class WindowInsets {
 
         mTypeVisibilityMap = typeVisibilityMap;
         mIsRound = isRound;
-        mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
+        mForceConsumingTypes = forceConsumingTypes;
         mSuppressScrimTypes = suppressScrimTypes;
         mCompatInsetsTypes = compatInsetsTypes;
         mCompatIgnoreVisibility = compatIgnoreVisibility;
@@ -178,7 +173,7 @@ public final class WindowInsets {
         this(src.mSystemWindowInsetsConsumed ? null : src.mTypeInsetsMap,
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
-                src.mAlwaysConsumeSystemBars, src.mSuppressScrimTypes,
+                src.mForceConsumingTypes, src.mSuppressScrimTypes,
                 displayCutoutCopyConstructorArgument(src),
                 src.mRoundedCorners,
                 src.mPrivacyIndicatorBounds,
@@ -235,7 +230,7 @@ public final class WindowInsets {
     /** @hide */
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
-        this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, false, 0,
+        this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, 0, 0,
                 null, null, null, null, systemBars(), false /* compatIgnoreVisibility */);
     }
 
@@ -556,7 +551,7 @@ public final class WindowInsets {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mTypeInsetsMap,
                 mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
-                mIsRound, mAlwaysConsumeSystemBars, mSuppressScrimTypes,
+                mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
                 null /* displayCutout */, mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape,
                 mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
@@ -607,7 +602,7 @@ public final class WindowInsets {
     public WindowInsets consumeSystemWindowInsets() {
         return new WindowInsets(null, null,
                 mTypeVisibilityMap,
-                mIsRound, mAlwaysConsumeSystemBars, mSuppressScrimTypes,
+                mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
                 // If the system window insets types contain displayCutout, we should also consume
                 // it.
                 (mCompatInsetsTypes & displayCutout()) != 0
@@ -895,8 +890,8 @@ public final class WindowInsets {
     /**
      * @hide
      */
-    public boolean shouldAlwaysConsumeSystemBars() {
-        return mAlwaysConsumeSystemBars;
+    public @InsetsType int getForceConsumingTypes() {
+        return mForceConsumingTypes;
     }
 
     /**
@@ -929,6 +924,8 @@ public final class WindowInsets {
                 + mPrivacyIndicatorBounds : "");
         result.append("\n    ");
         result.append(mDisplayShape != null ? "displayShape=" + mDisplayShape : "");
+        result.append("\n    ");
+        result.append("forceConsumingTypes=" + Type.toString(mForceConsumingTypes));
         result.append("\n    ");
         result.append("suppressScrimTypes=" + Type.toString(mSuppressScrimTypes));
         result.append("\n    ");
@@ -1027,7 +1024,7 @@ public final class WindowInsets {
                         ? null
                         : insetInsets(mTypeMaxInsetsMap, left, top, right, bottom),
                 mTypeVisibilityMap,
-                mIsRound, mAlwaysConsumeSystemBars, mSuppressScrimTypes,
+                mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
                 mDisplayCutoutConsumed
                         ? null
                         : mDisplayCutout == null
@@ -1050,7 +1047,7 @@ public final class WindowInsets {
         WindowInsets that = (WindowInsets) o;
 
         return mIsRound == that.mIsRound
-                && mAlwaysConsumeSystemBars == that.mAlwaysConsumeSystemBars
+                && mForceConsumingTypes == that.mForceConsumingTypes
                 && mSuppressScrimTypes == that.mSuppressScrimTypes
                 && mSystemWindowInsetsConsumed == that.mSystemWindowInsetsConsumed
                 && mStableInsetsConsumed == that.mStableInsetsConsumed
@@ -1068,7 +1065,7 @@ public final class WindowInsets {
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(mTypeInsetsMap), Arrays.hashCode(mTypeMaxInsetsMap),
                 Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout, mRoundedCorners,
-                mAlwaysConsumeSystemBars, mSuppressScrimTypes, mSystemWindowInsetsConsumed,
+                mForceConsumingTypes, mSuppressScrimTypes, mSystemWindowInsetsConsumed,
                 mStableInsetsConsumed, mDisplayCutoutConsumed, mPrivacyIndicatorBounds,
                 mDisplayShape);
     }
@@ -1134,7 +1131,7 @@ public final class WindowInsets {
         private DisplayShape mDisplayShape = DisplayShape.NONE;
 
         private boolean mIsRound;
-        private boolean mAlwaysConsumeSystemBars;
+        private @InsetsType int mForceConsumingTypes;
         private @InsetsType int mSuppressScrimTypes;
 
         private PrivacyIndicatorBounds mPrivacyIndicatorBounds = new PrivacyIndicatorBounds();
@@ -1162,7 +1159,7 @@ public final class WindowInsets {
             mDisplayCutout = displayCutoutCopyConstructorArgument(insets);
             mRoundedCorners = insets.mRoundedCorners;
             mIsRound = insets.mIsRound;
-            mAlwaysConsumeSystemBars = insets.mAlwaysConsumeSystemBars;
+            mForceConsumingTypes = insets.mForceConsumingTypes;
             mSuppressScrimTypes = insets.mSuppressScrimTypes;
             mPrivacyIndicatorBounds = insets.mPrivacyIndicatorBounds;
             mDisplayShape = insets.mDisplayShape;
@@ -1433,7 +1430,15 @@ public final class WindowInsets {
         /** @hide */
         @NonNull
         public Builder setAlwaysConsumeSystemBars(boolean alwaysConsumeSystemBars) {
-            mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
+            // TODO (b/277891341): Remove this and related usages. This has been replaced by
+            //                     #setForceConsumingTypes.
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        public Builder setForceConsumingTypes(@InsetsType int forceConsumingTypes) {
+            mForceConsumingTypes = forceConsumingTypes;
             return this;
         }
 
@@ -1453,7 +1458,7 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
-                    mIsRound, mAlwaysConsumeSystemBars, mSuppressScrimTypes, mDisplayCutout,
+                    mIsRound, mForceConsumingTypes, mSuppressScrimTypes, mDisplayCutout,
                     mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape, systemBars(),
                     false /* compatIgnoreVisibility */);
         }

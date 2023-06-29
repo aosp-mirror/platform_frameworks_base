@@ -797,7 +797,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
 
             WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
-                    mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
+                    mLastInsets.isRound(), false /* alwaysConsumeSystemBars */,
                     mLastLegacySoftInputMode, mLastLegacyWindowFlags, mLastLegacySystemUiFlags,
                     mWindowType, mLastWindowingMode, null /* idSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets,
