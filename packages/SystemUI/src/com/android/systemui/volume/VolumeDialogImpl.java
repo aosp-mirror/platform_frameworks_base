@@ -476,7 +476,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND
                 | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
-        mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
