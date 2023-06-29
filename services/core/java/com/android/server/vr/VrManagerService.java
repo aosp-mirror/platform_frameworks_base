@@ -1045,7 +1045,11 @@ public class VrManagerService extends SystemService
 
         for (ComponentName c : possibleServices) {
             if (Objects.equals(c.getPackageName(), pkg)) {
-                nm.setNotificationListenerAccessGrantedForUser(c, userId, true);
+                try {
+                    nm.setNotificationListenerAccessGrantedForUser(c, userId, true);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Could not grant NLS access to package " + pkg, e);
+                }
             }
         }
     }
