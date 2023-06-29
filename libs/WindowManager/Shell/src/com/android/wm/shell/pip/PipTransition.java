@@ -1059,7 +1059,7 @@ public class PipTransition extends PipTransitionController {
         // When the PIP window is visible and being a part of the transition, such as display
         // rotation, we need to update its bounds and rounded corner.
         final SurfaceControl leash = pipChange.getLeash();
-        final Rect destBounds = mPipBoundsState.getBounds();
+        final Rect destBounds = mPipOrganizer.getCurrentOrAnimatingBounds();
         final boolean isInPip = mPipTransitionState.isInPip();
         mSurfaceTransactionHelper
                 .crop(startTransaction, leash, destBounds)
