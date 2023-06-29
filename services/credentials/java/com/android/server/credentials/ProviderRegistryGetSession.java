@@ -126,6 +126,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
                 .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+        mStatus = Status.PENDING;
     }
 
     protected ProviderRegistryGetSession(@NonNull Context context,
@@ -143,6 +144,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
                 .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+        mStatus = Status.PENDING;
     }
 
     private List<Entry> prepareUiCredentialEntries(
