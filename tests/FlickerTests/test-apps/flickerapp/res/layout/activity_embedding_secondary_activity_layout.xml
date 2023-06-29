@@ -27,4 +27,12 @@
       android:layout_height="48dp"
       android:text="Finish" />
 
+  <Button
+      android:id="@+id/launch_third_activity_button"
+      android:layout_width="wrap_content"
+      android:layout_height="48dp"
+      android:layout_centerHorizontal="true"
+      android:onClick="launchThirdActivity"
+      android:text="Launch a third activity" />
+
 </LinearLayout>

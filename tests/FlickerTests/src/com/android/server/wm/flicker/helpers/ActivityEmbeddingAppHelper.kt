@@ -59,6 +59,23 @@ constructor(
             .waitForAndVerify()
     }
 
+    /** Clicks the button to launch a third activity over a secondary activity. */
+    fun launchThirdActivity(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+                uiDevice.wait(
+                        Until.findObject(By.res(getPackage(), "launch_third_activity_button")),
+                        FIND_TIMEOUT
+                )
+        require(launchButton != null) { "Can't find launch third activity button on screen." }
+        launchButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_STOPPED)
+                .withActivityState(THIRD_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .waitForAndVerify()
+    }
+
     /**
      * Clicks the button to finishes the secondary activity launched through
      * [launchSecondaryActivity], waits for the main activity to resume.
@@ -165,6 +182,9 @@ constructor(
 
         val SECONDARY_ACTIVITY_COMPONENT =
             ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT.toFlickerComponent()
+
+        val THIRD_ACTIVITY_COMPONENT =
+            ActivityOptions.ActivityEmbedding.ThirdActivity.COMPONENT.toFlickerComponent()
 
         val ALWAYS_EXPAND_ACTIVITY_COMPONENT =
             ActivityOptions.ActivityEmbedding.AlwaysExpandActivity.COMPONENT.toFlickerComponent()
