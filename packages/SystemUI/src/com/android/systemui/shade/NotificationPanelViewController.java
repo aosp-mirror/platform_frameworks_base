@@ -1175,6 +1175,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
+        mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
         updateClockAppearance();
 
         if (mKeyguardUserSwitcherController != null) {
@@ -1227,6 +1228,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void onSplitShadeEnabledChanged() {
         mShadeLog.logSplitShadeChanged(mSplitShadeEnabled);
+        mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
         // Reset any left over overscroll state. It is a rare corner case but can happen.
         mQsController.setOverScrollAmount(0);
         mScrimController.setNotificationsOverScrollAmount(0);

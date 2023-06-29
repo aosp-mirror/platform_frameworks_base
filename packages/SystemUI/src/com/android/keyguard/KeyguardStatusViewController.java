@@ -323,6 +323,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Set if the split shade is enabled
+     */
+    public void setSplitShadeEnabled(boolean enabled) {
+        mKeyguardClockSwitchController.setSplitShadeEnabled(enabled);
+    }
+
+    /**
      * Updates the alignment of the KeyguardStatusView and animates the transition if requested.
      */
     public void updateAlignment(
@@ -350,6 +357,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         mInteractionJankMonitor.begin(mView, CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+        /* This transition blocks any layout changes while running. For that reason
+        * special logic with setting visibility was added to {@link BcSmartspaceView#setDozing}
+        * for split shade to avoid jump of the media object. */
         ChangeBounds transition = new ChangeBounds();
         if (splitShadeEnabled) {
             // Excluding media from the transition on split-shade, as it doesn't transition
