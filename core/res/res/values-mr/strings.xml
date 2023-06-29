@@ -597,8 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"तुमच्या बोटाची स्थिती प्रत्येक वेळी थोडीशी बदला"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखले नाही"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखली नाही"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
@@ -1008,7 +1008,7 @@
     <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
-    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज हे म्हणते:"</string>
+    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज पुढील गोष्टी दर्शवते:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पेज सोडा"</string>
@@ -1069,7 +1069,7 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"स्पेस"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"एंटर"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"हटवा"</string>
-    <string name="search_go" msgid="2141477624421347086">"शोध"</string>
+    <string name="search_go" msgid="2141477624421347086">"शोधा"</string>
     <string name="search_hint" msgid="455364685740251925">"शोधा…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"शोधा"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"शोध क्वेरी"</string>
@@ -1215,7 +1215,7 @@
     <string name="force_close" msgid="9035203496368973803">"ठीक"</string>
     <string name="report" msgid="2149194372340349521">"अहवाल द्या"</string>
     <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करा"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद देत नाही.\n\nतुम्ही ते बंद करू इच्छिता का?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"अ‍ॅप पुनर्निर्देशित केला"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता चालत आहे."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>
@@ -1606,7 +1606,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"टॅबलेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टीव्ही"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"स्पीकर डॉक करा"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डॉक स्पीकर"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफोन"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

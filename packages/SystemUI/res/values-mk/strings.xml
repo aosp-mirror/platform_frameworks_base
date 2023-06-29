@@ -181,7 +181,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панел за известување"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брзи поставки."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучи екран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучен екран."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Работен заклучен екран"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затвори"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"целосна тишина"</string>
@@ -760,7 +760,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Премести долу лево"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Премести долу десно"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и сокриј"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и скриј"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Премести над работ и прикажи"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"вклучување/исклучување"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Контроли за уредите"</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Отворете <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Пуштете <xliff:g id="SONG_NAME">%1$s</xliff:g> од <xliff:g id="ARTIST_NAME">%2$s</xliff:g> на <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Пуштете <xliff:g id="SONG_NAME">%1$s</xliff:g> на <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> работи"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Врати"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Приближете се за да пуштите на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Приближете се до <xliff:g id="DEVICENAME">%1$s</xliff:g> за да пуштите тука"</string>
@@ -829,7 +830,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е најдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е достапна"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Не може да се пристапи до <xliff:g id="DEVICE">%1$s</xliff:g>. Проверете ја апликацијата <xliff:g id="APPLICATION">%2$s</xliff:g> за да се уверите дека контролата е сѐ уште достапна и дека поставките за апликацијата не се сменети."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Отвори апликација"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отворете ја апликацијата"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Не може да се вчита статусот"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка, обидете се повторно"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додајте контроли"</string>
@@ -912,7 +913,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Нема други достапни мрежи"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нема достапни мрежи"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Допрете на мрежа за да се поврзете"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Допрете мрежа за да се поврзете"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Отклучете за да се прикажат мрежите"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Се пребаруваат мрежи…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не успеа да се поврзе на мрежата"</string>

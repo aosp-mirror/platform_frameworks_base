@@ -16,12 +16,19 @@
 
 package com.android.server.media;
 
+import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ResolveInfo;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -52,10 +59,14 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
+
+import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -72,6 +83,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
 public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
     private static final String TAG = "MediaSessionRecord";
+    private static final String[] ART_URIS = new String[] {
+            MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+            MediaMetadata.METADATA_KEY_ART_URI,
+            MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI};
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
@@ -125,6 +140,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private final SessionStub mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService mService;
+    private final UriGrantsManagerInternal mUgmInternal;
     private final Context mContext;
     private final boolean mVolumeAdjustmentForRemoteGroupSessions;
 
@@ -186,6 +202,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioAttrs = DEFAULT_ATTRIBUTES;
         mPolicies = policies;
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
 
@@ -884,6 +901,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
     };
 
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    private static boolean componentNameExists(
+            @NonNull ComponentName componentName, @NonNull Context context, int userId) {
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mediaButtonIntent.setComponent(componentName);
+
+        UserHandle userHandle = UserHandle.of(userId);
+        PackageManager pm = context.getPackageManager();
+
+        List<ResolveInfo> resolveInfos =
+                pm.queryBroadcastReceiversAsUser(
+                        mediaButtonIntent, /* flags */ 0, userHandle);
+        return !resolveInfos.isEmpty();
+    }
+
     private final class SessionStub extends ISession.Stub {
         @Override
         public void destroySession() throws RemoteException {
@@ -954,6 +987,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
+        @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
         public void setMediaButtonBroadcastReceiver(ComponentName receiver) throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
@@ -969,6 +1003,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         != 0) {
                     return;
                 }
+
+                if (!componentNameExists(receiver, mContext, mUserId)) {
+                    Log.w(
+                            TAG,
+                            "setMediaButtonBroadcastReceiver(): "
+                                    + "Ignoring invalid component name="
+                                    + receiver);
+                    return;
+                }
+
                 mMediaButtonReceiverHolder = MediaButtonReceiverHolder.create(mUserId, receiver);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
@@ -985,19 +1029,43 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void setMetadata(MediaMetadata metadata, long duration, String metadataDescription)
                 throws RemoteException {
             synchronized (mLock) {
-                MediaMetadata temp = metadata == null ? null : new MediaMetadata.Builder(metadata)
-                        .build();
-                // This is to guarantee that the underlying bundle is unparceled
-                // before we set it to prevent concurrent reads from throwing an
-                // exception
-                if (temp != null) {
-                    temp.size();
-                }
-                mMetadata = temp;
                 mDuration = duration;
                 mMetadataDescription = metadataDescription;
+                mMetadata = sanitizeMediaMetadata(metadata);
             }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
+        }
+
+        private MediaMetadata sanitizeMediaMetadata(MediaMetadata metadata) {
+            if (metadata == null) {
+                return null;
+            }
+            MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder(metadata);
+            for (String key: ART_URIS) {
+                String uriString = metadata.getString(key);
+                if (TextUtils.isEmpty(uriString)) {
+                    continue;
+                }
+                Uri uri = Uri.parse(uriString);
+                if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+                    continue;
+                }
+                try {
+                    mUgmInternal.checkGrantUriPermission(getUid(),
+                            getPackageName(),
+                            ContentProvider.getUriWithoutUserId(uri),
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            ContentProvider.getUserIdFromUri(uri, getUserId()));
+                } catch (SecurityException e) {
+                    metadataBuilder.putString(key, null);
+                }
+            }
+            MediaMetadata sanitizedMetadata = metadataBuilder.build();
+            // sanitizedMetadata.size() guarantees that the underlying bundle is unparceled
+            // before we set it to prevent concurrent reads from throwing an
+            // exception
+            sanitizedMetadata.size();
+            return sanitizedMetadata;
         }
 
         @Override

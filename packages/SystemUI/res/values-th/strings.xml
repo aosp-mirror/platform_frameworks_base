@@ -778,8 +778,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"ย้ายไปที่ตำแหน่ง <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"เลือกตัวควบคุมที่ต้องการให้เข้าถึงได้จากการตั้งค่าด่วน"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะตัวควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำตัวควบคุมทั้งหมดออกแล้ว"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะระบบควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำระบบควบคุมทั้งหมดออกแล้ว"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ยังไม่ได้บันทึกการเปลี่ยนแปลง"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"ดูแอปอื่นๆ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"โหลดตัวควบคุมไม่ได้ ตรวจสอบแอป <xliff:g id="APP">%s</xliff:g> ให้แน่ใจว่าการตั้งค่าของแอปไม่เปลี่ยนแปลง"</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"เปิด <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> ของ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> จาก <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> จาก <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงาน"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"เลิกทำ"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"ขยับไปใกล้มากขึ้นเพื่อเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ขยับไปใกล้ <xliff:g id="DEVICENAME">%1$s</xliff:g> มากขึ้นเพื่อเล่นที่นี่"</string>
@@ -833,7 +834,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"โหลดสถานะไม่ได้"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"พบข้อผิดพลาด โปรดลองอีกครั้ง"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"เพิ่มตัวควบคุม"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขตัวควบคุม"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขระบบควบคุม"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"เพิ่มเอาต์พุต"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"กลุ่ม"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"เลือกอุปกรณ์ไว้ 1 รายการ"</string>

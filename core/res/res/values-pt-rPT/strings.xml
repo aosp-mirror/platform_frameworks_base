@@ -310,7 +310,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"aceder aos ficheiros no seu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e áudio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"aceder a música e áudio no seu dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"aceder a fotos e vídeos no seu dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar áudio"</string>
@@ -653,7 +653,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Rode a cabeça um pouco menos."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Incline a cabeça um pouco menos."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Rode a cabeça um pouco menos."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo o que esteja a ocultar o seu rosto."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo o que esteja a ocultar o seu rosto"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior do ecrã, incluindo a barra preta."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1607,7 +1607,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telemóvel"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altif. estação ancoragem"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altif. estação carregamento"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Auscultadores"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

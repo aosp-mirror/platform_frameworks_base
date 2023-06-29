@@ -53,7 +53,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dopusti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika."</string>
-    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Želite li promijeniti jezik sustava u <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Želite li jezik sustava promijeniti na <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Drugi uređaj zatražio je promjenu jezika sustava"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Promijeni jezik"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Zadrži trenutačni jezik"</string>
@@ -137,7 +137,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrđeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Dodirnite Potvrdi za dovršetak"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Otključano pomoću lica. Pritisnite ikonu otključavanja da biste nastavili."</string>
-    <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentičnost provjerena"</string>
+    <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikacija izvršena"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristite PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Koristite uzorak"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Koristite zaporku"</string>
@@ -182,7 +182,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Zaslon obavijesti."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Brze postavke."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključavanje zaslona."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključan zaslon radnog profila"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključani zaslon radnog profila"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvaranje"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
@@ -667,7 +667,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Uređivanje redoslijeda postavki."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Izbornik tipke za uključivanje/isključivanje"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključan zaslon"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani zaslon"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog vrućine"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon sad radi normalno.\nDodirnite za više informacija"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon se pregrijao, stoga se isključio kako bi se ohladio Telefon sada radi normalno.\n\nTelefon se može pregrijati ako:\n	• upotrebljavate zahtjevne aplikacije (kao što su igre, aplikacije za videozapise ili navigaciju)\n	• preuzimate ili prenosite velike datoteke\n	• upotrebljavate telefon na visokim temperaturama."</string>
@@ -796,7 +796,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Preporuka s kanala <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Uređaj je zaključan"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Prikazati uređaje i omogućiti upravljanje njima na zaključanom zaslonu?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na zaključan zaslon možete dodati kontrole za svoje vanjske uređaje.\n\nAplikacija vašeg uređaja može vam dopustiti upravljanje nekim uređajima bez otključavanja telefona ili tableta.\n\nPromjene uvijek možete unijeti u Postavkama."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na zaključani zaslon možete dodati kontrole za svoje vanjske uređaje.\n\nAplikacija vašeg uređaja može vam dopustiti upravljanje nekim uređajima bez otključavanja telefona ili tableta.\n\nPromjene uvijek možete unijeti u Postavkama."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Upravljati uređajima na zaključanom zaslonu?"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Nekim uređajima možete upravljati bez otključavanja telefona ili tableta.\n\nAplikacija vašeg uređaja odlučuje kojim se uređajima može upravljati na taj način."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, hvala"</string>
@@ -826,6 +826,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvori <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g>, <xliff:g id="ARTIST_NAME">%2$s</xliff:g> putem aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> putem aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je pokrenuta"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Poništi"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Približite se radi reprodukcije na uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približite se uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g> da biste na njemu reproducirali"</string>
@@ -913,7 +914,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilni podaci"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilna veza neće se automatski uspostaviti"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilni podaci neće se automatski prenositi"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Niste povezani"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nije dostupna nijedna druga mreža"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nema dostupnih mreža"</string>

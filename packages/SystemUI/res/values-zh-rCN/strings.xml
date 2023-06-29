@@ -220,7 +220,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"输入"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"助听器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"正在开启…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动旋转屏幕"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动屏幕旋转"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"自动旋转屏幕"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"摄像头使用权限"</string>
@@ -624,7 +624,7 @@
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列功能块"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="5583565172803472437">"编辑"</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"打开<xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"通过<xliff:g id="APP_LABEL">%3$s</xliff:g>播放<xliff:g id="ARTIST_NAME">%2$s</xliff:g>的《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"通过<xliff:g id="APP_LABEL">%2$s</xliff:g>播放《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正在运行"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"撤消"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"若要在“<xliff:g id="DEVICENAME">%1$s</xliff:g>”上播放，请靠近这台设备"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"若要在此设备上播放，请靠近“<xliff:g id="DEVICENAME">%1$s</xliff:g>”"</string>

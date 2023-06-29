@@ -192,7 +192,7 @@
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Idioma"</string>
     <string name="tts_lang_use_system" msgid="6312945299804012406">"Utilitza l\'idioma del sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"No has seleccionat cap idioma"</string>
-    <string name="tts_default_lang_summary" msgid="9042620014800063470">"Defineix la llengua utilitzada per a la síntesi de veu"</string>
+    <string name="tts_default_lang_summary" msgid="9042620014800063470">"Defineix la llengua utilitzada per al text enunciat"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Vull escoltar un exemple"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"Reprodueix una breu demostració de síntesi de veu"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instal·la dades de veu"</string>

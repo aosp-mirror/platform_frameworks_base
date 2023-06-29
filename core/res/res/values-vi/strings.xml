@@ -1606,7 +1606,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Máy tính bảng"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Điện thoại"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Loa đế"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Loa kiêm đế sạc"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Tai nghe"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2106,7 +2106,7 @@
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Không có gợi ý nào về người mà bạn có thể chia sẻ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Danh sách ứng dụng"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
-    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Màn hình chính"</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Nhà"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Quay lại"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Ứng dụng gần đây"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Thông báo"</string>

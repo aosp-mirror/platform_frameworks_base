@@ -162,7 +162,7 @@
     <string name="httpErrorLookup" msgid="3099834738227549349">"URL nije moguće pronaći."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Shema autentifikacije web-lokacije nije podržana."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"Autentifikacija nije moguća."</string>
-    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Provjera autentičnosti preko proxy poslužitelja nije bila uspješna."</string>
+    <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Autentifikacija preko proxy poslužitelja nije bila uspješna."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"Povezivanje s poslužiteljem nije moguće."</string>
     <string name="httpErrorIO" msgid="3860318696166314490">"Komunikacija s poslužiteljem nije moguća. Pokušajte ponovno kasnije."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Veza s poslužiteljem privremeno je zaustavljena."</string>
@@ -945,7 +945,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Otključavanje SIM kartice…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g> zamolit ćemo vas da otključate tabletno računalo putem prijave na Google.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g> zamolit ćemo vas da otključate Android TV uređaj putem prijave na Google.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g> morat ćete otključati telefon putem prijave na Google.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
@@ -1354,11 +1354,11 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Uključeno je modemsko povezivanje putem USB-a"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Uključen je MIDI putem USB-a"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Priključen je USB dodatak"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za više opcija."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za više opcija"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Povezani se uređaj puni. Dodirnite za više opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Otkriven je analogni audiododatak"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Priključeni uređaj nije kompatibilan s ovim telefonom. Dodirnite da biste saznali više."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Priključen je alat za otklanjanje pogrešaka putem USB-a"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Uključeno je otklanjanje pogrešaka USB-om"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Dodirnite da isključite otkl. pogrešaka putem USB-a"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Odaberite da biste onemogućili rješavanje programske pogreške na USB-u."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bežično otklanjanje pogrešaka povezano"</string>
@@ -1607,7 +1607,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletno računalo"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvučnici postolja"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvučnici priključne stanice"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Slušalice"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1655,7 +1655,7 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Nevažeće korisničko ime ili zaporka."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Zaboravili ste korisničko ime ili zaporku?\nPosjetite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Provjera računa..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Netočno ste pokušali otključati tabletno računalo <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ono će se vratiti na tvorničke postavke i svi korisnički podaci bit će izgubljeni nakon još ovoliko neuspjelih pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

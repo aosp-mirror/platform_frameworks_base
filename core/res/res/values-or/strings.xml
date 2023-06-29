@@ -260,7 +260,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ସାଇଲେଣ୍ଟ ମୋଡ୍"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ସାଉଣ୍ଡ ଅଫ୍ ଅଛି"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ସାଉଣ୍ଡ ଚାଲୁ ଅଛି"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ଏରୋପ୍ଲେନ ମୋଡ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ଏୟାରପ୍ଲେନ ମୋଡ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ଏୟାରପ୍ଲେନ୍ ମୋଡ୍ ଚାଲୁ ଅଛି"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅଫ୍ ଅଛି"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"ସେଟିଂସ୍"</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ଆଡଜଷ୍ଟ କରି ଦେଖନ୍ତୁ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ପ୍ରତି ଥର ଆପଣଙ୍କ ଆଙ୍ଗୁଠିର ସ୍ଥାନ ସାମାନ୍ୟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ପ୍ରତି ଥର ଆପଣଙ୍କ ଆଙ୍ଗୁଠିର ଅବସ୍ଥିତି ସାମାନ୍ୟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା ନାହିଁ"</string>
@@ -626,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ଫେସ ଅନଲକ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ଫେସ୍ ଅନଲକ୍ ସହ ସମସ୍ୟା"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ଆପଣଙ୍କ ଫେସ୍ ମଡେଲକୁ ଡିଲିଟ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ, ତା\'ପରେ ପୁଣି ଆପଣଙ୍କ ଫେସ୍ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ ଅନଲକ ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ଫେସ ଅନଲକ ବ୍ୟବହାର କରିବା ପାଇଁ, ସେଟିଂସ ଏବଂ ଗୋପନୀୟତାରେ "<b>"କ୍ୟାମେରା ଆକ୍ସେସ"</b>"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
@@ -931,7 +931,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ଆପଣଙ୍କ SIM କାର୍ଡକୁ ସ୍ଥାୟୀ ରୂପେ ଅକ୍ଷମ କରିଦିଆଯାଇଛି।\n ଅନ୍ୟ SIM କାର୍ଡ ପାଇଁ ଆପଣଙ୍କ ୱାୟରଲେସ ସେବା ପ୍ରଦାନକାରୀଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ପୂର୍ବବର୍ତ୍ତୀ ଟ୍ରାକ୍‌"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"ପରବର୍ତ୍ତୀ ଟ୍ରାକ୍‌"</string>
-    <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ପଜ୍‍ କରନ୍ତୁ"</string>
+    <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ବିରତ କରନ୍ତୁ"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"ପ୍ଲେ କରନ୍ତୁ"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ପଛକୁ ନିଅନ୍ତୁ"</string>
@@ -1014,7 +1014,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ଏହି ପୃଷ୍ଠାରୁ ବାହାରିଯାଆନ୍ତୁ"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ଏହି ପୃଷ୍ଠାରେ ରୁହନ୍ତୁ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nଆପଣ କ’ଣ ପ୍ରକୃତରେ ଏହି ପୃଷ୍ଠାରୁ ଦୂରକୁ ନେଭିଗେଟ୍‍ କରିବାକୁ ଚାହୁଁଛନ୍ତି?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ଧ୍ୟାନଦିଅନ୍ତୁ: ଜୁମ୍‌ ଇନ୍‍ ଓ ଆଉଟ୍‍ କରିବା ପାଇଁ ଡବଲ୍‍-ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ସ୍ୱତଃପୂରଣ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ଅଟୋଫିଲ୍ ସେଟ୍ କରନ୍ତୁ"</string>
@@ -1068,7 +1068,7 @@
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"ସ୍ପେସ୍‍"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"ଏଣ୍ଟର୍"</string>
-    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="search_go" msgid="2141477624421347086">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="search_hint" msgid="455364685740251925">"ସର୍ଚ୍ଚ କରନ୍ତୁ…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
@@ -1134,7 +1134,7 @@
     <string name="paste" msgid="461843306215520225">"ପେଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"ସାଦା ଟେକ୍ସଟ୍‍ ଭାବରେ ପେଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="replace" msgid="7842675434546657444">"ବଦଳାନ୍ତୁ…"</string>
-    <string name="delete" msgid="1514113991712129054">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
+    <string name="delete" msgid="1514113991712129054">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL କପି କରନ୍ତୁ"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"ଟେକ୍ସଟ୍‍ ଚୟନ କରନ୍ତୁ"</string>
     <string name="undo" msgid="3175318090002654673">"ପୂର୍ବ ପରି କରନ୍ତୁ"</string>
@@ -1142,7 +1142,7 @@
     <string name="autofill" msgid="511224882647795296">"ଅଟୋଫିଲ୍‌"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"ଟେକ୍ସଟ୍‍ ଚୟନ"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"ଶବ୍ଦକୋଷରେ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="deleteText" msgid="4200807474529938112">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
+    <string name="deleteText" msgid="4200807474529938112">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ଟେକ୍ସଟ୍‌ କାର୍ଯ୍ୟ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ପଛକୁ ଫେରନ୍ତୁ"</string>
@@ -1353,12 +1353,12 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB ଟିଥରିଙ୍ଗ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ମାଧ୍ୟମରେ MIDIକୁ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ଆକ୍ସେସୋରୀ ଯୋଡ଼ାଗଲା"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି। ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ଆନାଲଗ୍‍ ଅଡିଓ ଆକ୍ସେସରୀ ଚିହ୍ନଟ ହେଲା"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ଏହି ଫୋନ୍‌ରେ କନେକ୍ଟ ଥିବା ଡିଭାଇସ୍‍ କମ୍ପାଟିବଲ୍‍ ନୁହେଁ। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଂ କନେକ୍ଟ କରାଯାଇଛି"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଂ କନେକ୍ଟ ହୋଇଛି"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ଡିବଗିଙ୍ଗକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ୱାୟାରଲେସ୍ ଡିବଗିଂ ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ୱାୟାରଲେସ୍ ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
@@ -1383,7 +1383,7 @@
     <string name="show_ime" msgid="6406112007347443383">"ଫିଜିକାଲ୍‌ କୀବୋର୍ଡ ସକ୍ରିୟ ଥିବାବେଳେ ଏହାକୁ ସ୍କ୍ରିନ୍‌ ଉପରେ ରଖନ୍ତୁ"</string>
     <string name="hardware" msgid="1800597768237606953">"ଭର୍ଚୁଆଲ୍ କୀ’ବୋର୍ଡ ଦେଖାନ୍ତୁ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ଫିଜିକଲ୍ କୀ\'ବୋର୍ଡ କନଫିଗର୍‍ କରନ୍ତୁ"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ଭାଷା ଓ ଲେଆଉଟ୍‍ ଚୟନ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ଭାଷା ଓ ଲେଆଉଟ ଚୟନ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ଅନ୍ୟ ଆପ୍‌ଗୁଡ଼ିକ ଉପରେ ଦେଖାନ୍ତୁ"</string>
@@ -1417,7 +1417,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2832724384636625852">"କିଛି କାର୍ଯ୍ୟକ୍ଷମତା ଠିକ୍ ଭାବେ କାମ ନକରିପାରେ। ନୂଆ ଷ୍ଟୋରେଜ୍ ଭର୍ତ୍ତି କରନ୍ତୁ।"</string>
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g>କୁ ଇଜେକ୍ଟ କରାଯାଉଛି"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"କାଢ଼ନ୍ତୁ ନାହିଁ"</string>
-    <string name="ext_media_init_action" msgid="2312974060585056709">"ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <string name="ext_media_init_action" msgid="2312974060585056709">"ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"ଖୋଜନ୍ତୁ"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"ଆଉଟ୍‌ପୁଟ୍ ସ୍ୱିଚ୍‌ କରନ୍ତୁ"</string>
@@ -1477,7 +1477,7 @@
     <string name="input_method_binding_label" msgid="1166731601721983656">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ସିଙ୍କ୍"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"ଆକ୍ସେସିବିଲିଟୀ"</string>
-    <string name="wallpaper_binding_label" msgid="1197440498000786738">"ୱାଲପେପର୍"</string>
+    <string name="wallpaper_binding_label" msgid="1197440498000786738">"ୱାଲପେପର"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"ୱାଲପେପର୍‍ ପରିବର୍ତ୍ତନ କରନ୍ତୁ।"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"ବିଜ୍ଞପ୍ତି ଶ୍ରୋତା"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ଲିସନର୍"</string>
@@ -1500,7 +1500,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ଡ୍ରାଇଭିଙ୍ଗ ଆପ୍‌ରୁ ବାହାରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="back_button_label" msgid="4078224038025043387">"ଫେରନ୍ତୁ"</string>
     <string name="next_button_label" msgid="6040209156399907780">"ପରବର୍ତ୍ତୀ"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"ଛାଡ଼ିଦିଅନ୍ତୁ"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"ବାଦ ଦିଅନ୍ତୁ"</string>
     <string name="no_matches" msgid="6472699895759164599">"କୌଣସି ମେଳକ ନାହିଁ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ପୃଷ୍ଠାରେ ଖୋଜନ୍ତୁ"</string>
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{#ଟି ମେଳ}other{{total}ଟିରୁ #ଟି ମେଳ}}"</string>
@@ -1544,7 +1544,7 @@
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"ପରବର୍ତ୍ତୀ ମାସ"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"ALT"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
+    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"ହୋଇଗଲା"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"ମୋଡ୍‍ ପରିବର୍ତ୍ତନ"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"ଶିଫ୍ଟ"</string>
@@ -1594,7 +1594,7 @@
     <string name="fingerprints" msgid="148690767172613723">"ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 ଟିପଚିହ୍ନ:"</string>
-    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"ସମସ୍ତ ଦେଖନ୍ତୁ"</string>
+    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"ଗତିବିଧି ଚୟନ କରନ୍ତୁ"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"ଏହାଙ୍କ ସହ ସେୟାର୍‍ କରନ୍ତୁ"</string>
     <string name="sending" msgid="206925243621664438">"ପଠାଯାଉଛି…"</string>
@@ -1606,7 +1606,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ଟାବଲେଟ୍‌"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ଫୋନ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ଡକ୍‌ ସ୍ପିକର୍‌"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ଡକ ସ୍ପିକର"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1650,7 +1650,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"ଅନଲକ୍‌ କରିବା ପାଇଁ, ଆପଣଙ୍କ Google ଆକାଉଣ୍ଟ ସହ ସାଇନ୍-ଇନ୍ କରନ୍ତୁ।"</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"ୟୁଜରନେମ୍‍ (ଇମେଲ୍)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"ପାସୱାର୍ଡ"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"ସାଇନ୍-ଇନ୍"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"ସାଇନ ଇନ କରନ୍ତୁ"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"ଅମାନ୍ୟ ୟୁଜରନେମ୍‍ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ।"</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"ଆପଣଙ୍କର ୟୁଜରନେମ୍‍ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ ଭୁଲି ଯାଇଛନ୍ତି କି?\n"<b>"google.com/accounts/recovery"</b>" ଭିଜିଟ୍‍ କରନ୍ତୁ।"</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"ଆକାଉଣ୍ଟ ଯାଞ୍ଚ କରାଯାଉଛି…"</string>

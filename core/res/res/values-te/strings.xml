@@ -640,7 +640,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ఫోన్‌ను కాస్త దూరంగా పట్టుకోండి."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"ఫోన్‌ను పైకి పట్టుకోండి."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ఫోన్‌ను కిందికి దించండి."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"ఫోన్‌ను కిందికి జరపండి."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
@@ -914,7 +914,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"అన్‌లాక్ చేయడానికి లేదా అత్యవసర కాల్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"అన్‌లాక్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"అన్‌లాక్ చేయడానికి నమూనాను గీయండి"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"అత్యవసరం"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ఎమర్జెన్సీ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"కాల్‌కు తిరిగి వెళ్లు"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ట్రై చేయండి"</string>
@@ -1184,7 +1184,7 @@
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$sని ఉపయోగించి పంపండి"</string>
-    <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపు"</string>
+    <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపండి"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"హోమ్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$sని హోమ్‌గా ఉపయోగించండి"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
@@ -1319,7 +1319,7 @@
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ఒక మెసేజ్‌ను &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;కి పంపాలనుకుంటోంది."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"దీని వలన మీ మొబైల్ ఖాతాకు "<b>"ఛార్జీలు విధించబడవచ్చు"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"దీని వలన మీ మొబైల్ ఖాతాకు ఛార్జీలు విధించబడవచ్చు."</b></string>
-    <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపు"</string>
+    <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపండి"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"రద్దు చేయండి"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"నా ఎంపికను గుర్తుంచుకో"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"మీరు దీన్ని తర్వాత సెట్టింగ్‌లు &gt; అనువర్తనాలులో మార్చవచ్చు"</string>
@@ -1353,7 +1353,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB టెథెరింగ్ ఆన్ చేయబడింది"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ద్వారా MIDI ఆన్ చేయబడింది"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ఉపకరణం కనెక్ట్ చేయబడింది"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఆప్షన్ల కోసం ట్యాప్ చేయండి."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"కనెక్ట్ చేయబడిన పరికరాన్ని ఛార్జ్ చేస్తోంది. మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"అనలాగ్ ఆడియో ఉపకరణం కనుగొనబడింది"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"జోడించిన పరికరం ఈ ఫోన్‌కు అనుకూలంగా లేదు. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
@@ -1383,7 +1383,7 @@
     <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
     <string name="hardware" msgid="1800597768237606953">"వర్చువల్ కీబోర్డ్‌ను చూపు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"భౌతిక కీబోర్డుని కాన్ఫిగర్ చేయండి"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాషను, లేఅవుట్‌ను ఎంచుకోవడానికి ట్యాప్ చేయండి"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ఇతర యాప్‌ల ఎగువన ప్రదర్శన"</string>
@@ -1457,7 +1457,7 @@
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"వెళ్లు"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"సెర్చ్"</string>
-    <string name="ime_action_send" msgid="8456843745664334138">"పంపు"</string>
+    <string name="ime_action_send" msgid="8456843745664334138">"పంపండి"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"తర్వాత"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"పూర్తయింది"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"మునుపటి"</string>
@@ -1681,13 +1681,13 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ఆన్"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ఆఫ్"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి కంట్రోల్‌ను ఇవ్వాలనుకుంటున్నారా?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెసిబిలిటీ కోసం యాప్‌లకు పూర్తి కంట్రోల్ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"యాక్సెసిబిలిటీ అవసరాలు ఉన్నప్పుడు మీకు సహాయం చేయడానికి యాప్‌లకు ఫుల్‌ కంట్రోల్‌ ఇవ్వడం సమంజసమే. అయితే అన్ని యాప్‌లకు అలా కంట్రోల్ ఇవ్వడం సరికాదు."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, కంట్రోల్ చేయగలగడం"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది. అంతే కాక, ఇతర యాప్‌లపై కంటెంట్‌ను డిస్‌ప్లే చేస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయగలగడం"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించండి"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"వద్దు"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
@@ -2132,7 +2132,7 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"గ్రూప్ సంభాషణ"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"వ్యక్తిగతం"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"ఆఫీస్"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"వర్క్ ప్లేస్"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"వ్యక్తిగత వీక్షణ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"పని వీక్షణ"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"మీ IT అడ్మిన్ ద్వారా బ్లాక్ చేయబడింది"</string>

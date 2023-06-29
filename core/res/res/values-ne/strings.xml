@@ -91,8 +91,8 @@
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कल फर्वार्ड गर्ने सेवा"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"आपत्‌कालीन कलब्याक मोड"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"मोबाइल डेटाको स्थिति"</string>
-    <string name="notification_channel_sms" msgid="1243384981025535724">"SMS सन्देशहरू"</string>
-    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"भ्वाइस मेल सन्देशहरू"</string>
+    <string name="notification_channel_sms" msgid="1243384981025535724">"SMS म्यासेजहरू"</string>
+    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"भ्वाइस मेल म्यासेजहरू"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi कल"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को स्थिति"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"उच्च प्राथमिकता रहेको SIM को स्थिति"</string>
@@ -124,7 +124,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"सेवाको खोजी गर्दै…"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Wi-Fi कलिङ सेटअप गर्न सकिएन"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"Wi-Fi मार्फत कलहरू गर्न र सन्देशहरू पठाउन सबभन्दा पहिला आफ्नो सेवा प्रदायकलाई यो सेवा सेट गर्न भन्नुहोस्। त्यसपछि सेटिङहरूबाट Wi-Fi कलिङलाई सक्रिय पार्नुहोस्। (त्रुटिसम्बन्धी कोड: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"Wi-Fi मार्फत कलहरू गर्न र म्यासेजहरू पठाउन सबभन्दा पहिला आफ्नो सेवा प्रदायकलाई यो सेवा सेट गर्न भन्नुहोस्। त्यसपछि सेटिङहरूबाट Wi-Fi कलिङलाई सक्रिय पार्नुहोस्। (त्रुटिसम्बन्धी कोड: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"तपाईंको सेवा प्रदायकमार्फत Wi-Fi कलिङ सुविधा दर्ता गर्ने क्रममा देखिएको समस्या: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -180,7 +180,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android टिभी डिभाइसको भण्डारण भरिएको छ। ठाउँ खाली गर्न केही फाइलहरू मेट्नुहोस्।"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकाय इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायहरू इन्स्टल गरियो}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकायको प्रमाणपत्र इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायका प्रमाणपत्रहरू इन्स्टल गरिए}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"अज्ञात तेस्रो पक्ष द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"तपाईंको कार्य प्रोफाइलका प्रशासकद्वारा"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारा"</string>
@@ -207,7 +207,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"आफ्नो कार्य प्रोफाइल अन गर्नुहोस्"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"तपाईंले आफ्नो कार्य प्रोफाइल सक्रिय नगरुन्जेल तपाईंका व्यक्तिगत एपहरूलाई रोक लगाइन्छ"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"मिति <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> बजे व्यक्तिगत एपहरूलाई रोक लगाइने छ। तपाईंका IT एडमिन तपाईंलाई आफ्नो कार्य प्रोफाइल <xliff:g id="NUMBER">%3$d</xliff:g> भन्दा धेरै दिन निष्क्रिय राख्ने अनुमति दिनुहुन्न।"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"मिति <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> बजे व्यक्तिगत एपहरूलाई रोक लगाइने छ। तपाईंका IT एड्मिन तपाईंलाई आफ्नो कार्य प्रोफाइल <xliff:g id="NUMBER">%3$d</xliff:g> भन्दा धेरै दिन निष्क्रिय राख्ने अनुमति दिनुहुन्न।"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"अन गर्नुहोस्"</string>
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
@@ -274,8 +274,8 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाताको स्थिति"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"विकासकर्ताका सन्देशहरू"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"विकासकर्तासम्बन्धी महत्त्वपूर्ण सन्देशहरू"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"विकासकर्ताका म्यासेजहरू"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"विकासकर्तासम्बन्धी महत्त्वपूर्ण म्यासेजहरू"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"अद्यावधिकहरू"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"नेटवर्कको स्थिति"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"नेटवर्कका अलर्टहरू"</string>
@@ -297,14 +297,14 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android सिस्टम"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"व्यक्तिगत प्रोफाइलमा बदल्नुहोस्"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"कार्य प्रोफाइलमा बदल्नुहोस्"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"सम्पर्कहरू"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"कन्ट्याक्टहरू"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"तपाईँको सम्पर्कमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"लोकेसन"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"यस डिभाइसको स्थानमाथि पहुँच"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"पात्रो"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS म्यासेजहरू पठाउनुहोस् र हेर्नुहोस्"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"फाइलहरू"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"आफ्नो डिभाइसमा रहेका फाइलहरू हेर्नुहोस् र प्रयोग गर्नुहोस्"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"सङ्गीत तथा अडियो"</string>
@@ -358,25 +358,25 @@
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"फोन कलहरूको जवाफ दिनुहोस्"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"एपलाई आगमन फोन कलको जवाफ दिन अनुमति दिन्छ।"</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"टेक्स्ट म्यासेजहरू (SMS) प्राप्त गर्नुहोस्"</string>
-    <string name="permdesc_receiveSms" msgid="1797345626687832285">"एपलाई SMS सन्देशहरू प्राप्त गर्न र प्रक्रिया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
+    <string name="permdesc_receiveSms" msgid="1797345626687832285">"एपलाई SMS म्यासेजहरू प्राप्त गर्न र प्रक्रिया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको म्यासेजहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"टेक्स्ट म्यासेज (MMS) प्राप्त गर्नुहोस्"</string>
-    <string name="permdesc_receiveMms" msgid="958102423732219710">"एपलाई MMS सन्देशहरू प्राप्त गर्न र प्रकृया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको सन्देशहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
-    <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"मोबाइल प्रसारणसम्बन्धी सन्देशहरू फर्वार्ड गर्नुहोस्"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"मोबाइल प्रसारणसम्बन्धी सन्देशहरू प्राप्त हुनासाथै तिनीहरूलाई फर्वार्ड गर्नका लागि यसले एपलाई मोबाइल प्रसारण मोड्युलमा जोडिने अनुमति दिन्छ। तपाईंलाई कतिपय स्थानमा आपत्‌कालीन अवस्थाका बारेमा जानकारी दिनका लागि मोबाइल प्रसारणसम्बन्धी अलर्टहरू पठाइन्छ। हानिकारक एपहरूले आपत्‌कालीन मोबाइल प्रसारण प्राप्त हुँदा तपाईंको यन्त्रलाई कार्य सम्पादन गर्ने वा सञ्चालित हुने क्रममा हस्तक्षेप गर्न सक्छन्।"</string>
+    <string name="permdesc_receiveMms" msgid="958102423732219710">"एपलाई MMS म्यासेजहरू प्राप्त गर्न र प्रकृया गर्न अनुमति दिन्छ। यसको मतलब अनुप्रयोगले तपाईंको उपकरणमा पठाइएको म्यासेजहरू तपाईंलाई नदेखाईनै मोनिटर गर्न वा मेटाउन सक्दछ।"</string>
+    <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"मोबाइल प्रसारणसम्बन्धी म्यासेजहरू फर्वार्ड गर्नुहोस्"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"मोबाइल प्रसारणसम्बन्धी म्यासेजहरू प्राप्त हुनासाथै तिनीहरूलाई फर्वार्ड गर्नका लागि यसले एपलाई मोबाइल प्रसारण मोड्युलमा जोडिने अनुमति दिन्छ। तपाईंलाई कतिपय स्थानमा आपत्‌कालीन अवस्थाका बारेमा जानकारी दिनका लागि मोबाइल प्रसारणसम्बन्धी अलर्टहरू पठाइन्छ। हानिकारक एपहरूले आपत्‌कालीन मोबाइल प्रसारण प्राप्त हुँदा तपाईंको यन्त्रलाई कार्य सम्पादन गर्ने वा सञ्चालित हुने क्रममा हस्तक्षेप गर्न सक्छन्।"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"जारी रहेका कलहरू व्यवस्थापन गर्न"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"तपाईं यो एपलाई अनुमति दिनुभयो यस एपले तपाईंको डिभाइसमा जारी रहेका कलसम्बन्धी विवरण हेर्न र ती कलहरू नियन्त्रण गर्न सक्छ।"</string>
-    <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"सेल प्रसारित सन्देशहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"तपाईंको उपकरणद्वारा प्राप्त सेल प्रसारण सन्देशहरू एपलाई पढ्न अनुमति दिन्छ। सेल प्रसारण चेतावनीहरू केही स्थानहरूमा तपाईंलाई आपत्‌कालीन गतिविधिहरूको बारेमा सचेत गराउन गरिएका छन्। खराब एपहरूले एउटा आपत्‌कालीन सेल प्रसारण प्राप्त गर्दछ जब तपाईंको उपकरणको प्रदर्शन वा अपरेशनको साथ हस्तक्षेप गर्न सक्दछन्।"</string>
+    <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"सेल प्रसारित म्यासेजहरू पढ्नुहोस्"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"तपाईंको उपकरणद्वारा प्राप्त सेल प्रसारण म्यासेजहरू एपलाई पढ्न अनुमति दिन्छ। सेल प्रसारण चेतावनीहरू केही स्थानहरूमा तपाईंलाई आपत्‌कालीन गतिविधिहरूको बारेमा सचेत गराउन गरिएका छन्। खराब एपहरूले एउटा आपत्‌कालीन सेल प्रसारण प्राप्त गर्दछ जब तपाईंको उपकरणको प्रदर्शन वा अपरेशनको साथ हस्तक्षेप गर्न सक्दछन्।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"सदस्य बनाइका फिडहरू पढ्नुहोस्"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"एपलाई अहिलेको समीकरण गरिएका सूचकहरू बारे विवरणहरू लिने अनुमति दिन्छ।"</string>
-    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <string name="permdesc_sendSms" msgid="6757089798435130769">"एपलाई SMS सन्देशहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब एपहरूले तपाईंको पुष्टि बिना सन्देशहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
+    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS म्यासेजहरू पठाउनुहोस् र हेर्नुहोस्"</string>
+    <string name="permdesc_sendSms" msgid="6757089798435130769">"एपलाई SMS म्यासेजहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब एपहरूले तपाईंको पुष्टि बिना म्यासेजहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"तपाईंका टेक्स्ट म्यासेजहरू (SMS वा MMS) पढ्नुहोस्"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
-    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सबै SMS.(पाठ) सन्देशहरू पढ्न सक्छ।"</string>
-    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"यस एपले तपाईंको फोनमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका सबै SMS (पाठ) म्यासेजहरू पढ्न सक्छ।"</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सबै SMS.(पाठ) म्यासेजहरू पढ्न सक्छ।"</string>
+    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"यस एपले तपाईंको फोनमा भण्डारण गरिएका सबै SMS (पाठ) म्यासेजहरू पढ्न सक्छ।"</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"टेक्स्ट म्यासेजहरू (WAP) प्राप्त गर्नुहोस्"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न एपलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका म्यासेजहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP म्यासेजहरू प्राप्त गर्न र प्रशोधन गर्न एपलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका म्यासेजहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"चलिरहेका एपहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न एपलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन एपलाई अनुमति दिन सक्छ।"</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"प्रोफाइल र यन्त्र मालिकहरूको व्यवस्थापन गराउनुहोस्"</string>
@@ -434,9 +434,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"यस एपले तपाईंको फोनमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"पात्रो घटनाहरू थप्नुहोस् वा परिमार्जन गर्नुहोस् र मालिकको ज्ञान बिना नै पाहुनाहरूलाई इमेल पठाउनुहोस्"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"यस एपले तपाईंको ट्याब्लेटमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"यस एपले तपाईंको Android टिभी डिभाइसमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरूले पठाएको जस्तै देखिने सन्देशहरू पठाउन वा कार्यक्रमका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"यस एपले तपाईंको फोनमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"यस एपले तपाईंको ट्याब्लेटमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने म्यासेजहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"यस एपले तपाईंको Android टिभी डिभाइसमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरूले पठाएको जस्तै देखिने म्यासेजहरू पठाउन वा कार्यक्रमका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"यस एपले तपाईंको फोनमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने म्यासेजहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"एपलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो एपलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"अग्रभूमिमा मात्र सटीक स्थानमाथि पहुँच राख्नुहोस्"</string>
@@ -621,7 +621,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"जारी राख्न आफ्नो फिंगरप्रिन्ट वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"कुनै समस्या आयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिन्ट आइकन"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलक"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फेस अनलक सुविधामा अनुहार दर्ता गर्ने क्रममा त्रुटि भयो"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"आफ्नो टाउको अलि थोरै घुमाउनुहोस्।"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"आफ्नो टाउको केही कम झुकाउनुहोस्।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"आफ्नो टाउको अलि थोरै घुमाउनुहोस्।"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"तपाईंको अनुहार लुकाउने सबै कुरा हटाउनुहोस्।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"आफ्नो अनुहार छोप्ने सबै कुरा हटाउनुहोस्।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"कालो रङको पट्टीलगायत आफ्नो स्क्रिनको माथिल्लो भाग सफा गर्नुहोस्"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -675,7 +675,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी राख्न आफ्नो फेस वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"कुनै समस्या आयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"अनुहारको आइकन"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"एपलाई खाताको लागि सिंक सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको एप खातासँग सिंक भएको नभएको निर्धारण गर्न सक्दछ।"</string>
@@ -944,7 +944,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM कार्ड अनलक गरिँदै..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तपाईंले गलत तरिकाले आफ्नो पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नुभयो। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत PIN टाइप गर्नुभएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल कोसिसहरू, तपाईँको Google साइन इन प्रयोग गरी तपाईँको ट्याब्लेट अनलक गर्न भनिने छ।\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो Google खाता मार्फत साइन इन गरेर आफ्नो Android टिभी डिभाइस अनलक गर्न अनुरोध गरिने छ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले तपाईँको अनलक ढाँचालाई कोर्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, तपाईँलाई तपाईँको फोन Google साइन इन प्रयोग गरेर अनलक गर्नको लागि सोधिने छ। \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</string>
@@ -1130,7 +1130,7 @@
     <string name="selectAll" msgid="1532369154488982046">"सबैलाई चयन गर्नुहोस्"</string>
     <string name="cut" msgid="2561199725874745819">"काट्नुहोस्"</string>
     <string name="copy" msgid="5472512047143665218">"कपी गर्नुहोस्"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्डमा प्रतिलिपि गर्न सकिएन"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्डमा कपी गर्न सकिएन"</string>
     <string name="paste" msgid="461843306215520225">"टाँस्नुहोस्"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"सामान्य पाठको रूपमा टाँस्नुहोस्"</string>
     <string name="replace" msgid="7842675434546657444">"विस्थापन गर्नुहोस्…"</string>
@@ -1312,8 +1312,8 @@
     <string name="accept" msgid="5447154347815825107">"स्वीकार्नुहोस्"</string>
     <string name="decline" msgid="6490507610282145874">"अस्वीकार गर्नुहोस्"</string>
     <string name="select_character" msgid="3352797107930786979">"अक्षरहरू प्रवेश गराउनुहोस्"</string>
-    <string name="sms_control_title" msgid="4748684259903148341">"SMS सन्देशहरू पठाइँदै"</string>
-    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ले धरै संख्यामा SMS सन्देशहरू पठाउँदैछ। के तपाईं यस एपलाई सन्देशहरू पठाउन सुचारु गर्न अनुमति दिन चाहनु हुन्छ?"</string>
+    <string name="sms_control_title" msgid="4748684259903148341">"SMS म्यासेजहरू पठाइँदै"</string>
+    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ले धरै संख्यामा SMS म्यासेजहरू पठाउँदैछ। के तपाईं यस एपलाई म्यासेजहरू पठाउन सुचारु गर्न अनुमति दिन चाहनु हुन्छ?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"अनुमति दिनुहोस्"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"अस्वीकार गर्नुहोस्"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; के तपाईं सन्देश पठाउन चाहुनु हुन्छ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1500,7 +1500,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ड्राइभिङ अनुप्रयोगबाट बाहिर निस्कन ट्याप गर्नुहोस्।"</string>
     <string name="back_button_label" msgid="4078224038025043387">"पछाडि"</string>
     <string name="next_button_label" msgid="6040209156399907780">"अर्को"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"छोड्नुहोस्"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"स्किप गर्नुहोस्"</string>
     <string name="no_matches" msgid="6472699895759164599">"कुनै मिलेन"</string>
     <string name="find_on_page" msgid="5400537367077438198">"पृष्ठमा फेला पार्नुहोस्"</string>
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# वटा मिल्दोजुल्दो परिणाम}other{{total} मध्ये # वटा मिल्दाजुल्दा परिणाम}}"</string>
@@ -1620,7 +1620,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"स्क्यान गर्दै ..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"जडान हुँदै..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"कनेक्ट गरिँदै छ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"उपलब्ध"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"उपलब्ध छैन"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"प्रयोगमा छ"</string>
@@ -1637,8 +1637,8 @@
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN हाल्नुहोस्"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN हाल्नुहोस्"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"पासवर्ड प्रविष्टि गर्नुहोस्"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्।  विवरणको लागि वाहकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित PIN कोड प्रविष्टि गर्नुहोस्"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड हाल्नुहोस्।  विवरणको लागि वाहकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित PIN कोड हाल्नुहोस्"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"मनपर्दो PIN कोड निश्चित गर्नुहोस्"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM कार्ड अनलक गर्दै…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"गलत PIN कोड।"</string>
@@ -1654,7 +1654,7 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"अमान्य प्रयोगकर्तानाम वा पासवर्ड।"</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"के तपाईँले उपयोगकर्ता नाम वा पासवर्ड बिर्सनुभयो?\n"<b>"google.com/accounts/recovery"</b>" मा जानुहोस्।"</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"खाता जाँच हुँदै…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत PIN टाइप गर्नुभएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"तपाईँले तपाईँक पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत टाइप गर्नुभएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"तपाईँले ट्याब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल प्रयासहरू, ट्याब्लेट डिफल्ट कार्यशालामा रिसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
@@ -1681,7 +1681,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"सक्रिय"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"निष्क्रिय"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> लाई तपाईंको यन्त्र पूर्ण रूपमा नियन्त्रण गर्न दिने हो?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"एक्सेसिबिलिटीसम्बन्धी आवश्यकतामा सहयोग गर्ने एपको पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश एपका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"एक्सेसिबिलिटीसम्बन्धी आवश्यकतामा सहयोग गर्ने एपको पूर्ण नियन्त्रण गर्न दिनु उपयुक्त हुन्छ तर अधिकांश एपका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य एपहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>
@@ -2106,7 +2106,7 @@
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"कुनै पनि व्यक्तिसँग सेयर गर्ने सिफारिस गरिएको छैन"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"अनुप्रयोगहरूको सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"यो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले यो USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
-    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"गृहपृष्ठ"</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"होम"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"पछाडि फर्कनुहोस्"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"हालसालैका एपहरू"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"सूचनाहरू"</string>

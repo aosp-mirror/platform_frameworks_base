@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ဖုန်းဝန်ဆောင်မှု မရှိပါ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"ဖုန်းခေါ်ဆိုခြင်း ဝန်ဆောင်မှု သို့မဟုတ် အရေးပေါ်ခေါ်ဆိုခြင်း မရနိုင်ပါ"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားသည်"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
@@ -200,7 +200,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"အာရုံခံကိရိယာ အကြောင်းကြားချက် ဝန်ဆောင်မှု"</string>
     <string name="twilight_service" msgid="8964898045693187224">"နေဝင်ဆည်းဆာ ဝန်ဆောင်မှု"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS အချိန်အပ်ဒိတ် ဝန်ဆောင်မှု"</string>
-    <string name="device_policy_manager_service" msgid="5085762851388850332">"ကိရိယာဆိုင်ရာ မူဝါဒ မန်နေဂျာဝန်ဆောင်မှု"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"ကိရိယာ မူဝါဒ မန်နေဂျာဝန်ဆောင်မှု"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"တေးဂီတကို သိရှိမှတ်မိခြင်း စီမံခန့်ခွဲမှုစနစ် ဝန်ဆောင်မှု"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"စက်စီမံအက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်\n\nမေးစရာများရှိပါက သင့်အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"အခြားလက်ဗွေဖြင့် စမ်းကြည့်ပါ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"အလွန် လင်းသည်"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ပြင်ဆင်ကြည့်ပါ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း လက်ချောင်းအနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"လက်ချောင်းအနေအထား နည်းနည်းစီ ပြောင်းပါ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"လက်ဗွေကို မသိရှိပါ"</string>
@@ -639,8 +639,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"အလွန်မှောင်သည်။ ပိုလင်းအောင် လုပ်ကြည့်ပါ။"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ဖုန်းကို အဝေးသို့ခွာပါ။"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ဖုန်းကို အနားသို့ ပိုတိုးပါ။"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ။"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ဖုန်းကို အောက်ပိုနှိမ့်ပါ။"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"ဖုန်းကို မြှင့်လိုက်ပါ။"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"ဖုန်းကို နှိမ့်လိုက်ပါ။"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
@@ -697,8 +697,8 @@
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
-    <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
-    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"အက်ပ်အား တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
+    <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"တယ်လီကွမ် ဆင်းမ်ကတ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
+    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"အက်ပ်အား တယ်လီကွမ် ဆင်းမ်ကတ် ချိတ်ဆက်မှုကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"တယ်လီကွမ် တယ်လီကွမ် ချိတ်ဆက်မှု အသစ်များကို မှတ်ပုံတင်ပါ"</string>
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"အက်ပ်အား တယ်လီကွမ် ချိတ်ဆက်မှု အသစ်များကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံရန်"</string>
@@ -1357,7 +1357,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်။ နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ဆက်ထားသည်"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB အမှားရှာပြင်ခြင်းကို ပိတ်ရန် တို့ပါ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ချိတ်ဆက်ပြီးပြီ"</string>
@@ -1697,7 +1697,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ဖြတ်လမ်းလင့်ခ်ကို သုံးရန်"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင်ပြောင်းပြန်ပြုလုပ်ခြင်း"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ဆင်ခြင်း"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ခြင်း"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ပိုမှိန်ခြင်း"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
@@ -2021,14 +2021,14 @@
     <string name="etws_primary_default_message_test" msgid="4583367373909549421">"အရေးပေါ် မက်ဆေ့ဂျ် စမ်းသပ်မှု"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"စာပြန်ရန်"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
-    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"စကားသံအတွက် ဆင်းမ်ကို ထောက်ပံ့မထားပါ"</string>
-    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ထောက်ပံ့မထားပါ"</string>
+    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ခွင့်မပြုပါ"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"စကားသံအတွက် ဖုန်းကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"အက်ပ်ဗားရှင်းကို အဆင့်နှိမ့်ထားသည် သို့မဟုတ် ဤဖြတ်လမ်းလင့်ခ်နှင့် သဟဇာတမဖြစ်ပါ"</string>

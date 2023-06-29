@@ -64,7 +64,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM कार्ड अनलॉक हो रहा है…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK कोड 8 या ज़्यादा संख्या वाला होना चाहिए."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"आप अपना पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"<xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत पिन डाला जा चुका है. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"गलत SIM पिन कोड, अपने डिवाइस को अनलॉक करने के लिए अब आपको अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा."</string>

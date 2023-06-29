@@ -121,7 +121,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"用于共享联系人"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"短信"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡存取权限"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡访问权限"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 音频：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 音频"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"助听器"</string>
@@ -302,11 +302,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"蓝牙音频 LDAC 编解码器：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"触发蓝牙音频 LDAC\n编解码器选择：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"私人 DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"专用 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"选择私人 DNS 模式"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"已关闭"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"自动"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"私人 DNS 提供商主机名"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"专用 DNS 提供商主机名"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"输入 DNS 提供商的主机名"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"无法连接"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
@@ -461,7 +461,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"根据您的使用情况，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"直到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"可以用到 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"电池电量可能在<xliff:g id="TIME">%1$s</xliff:g> 前耗尽"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

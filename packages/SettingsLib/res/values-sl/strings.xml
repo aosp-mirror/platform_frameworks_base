@@ -224,7 +224,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Izbira profila"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osebno"</string>
-    <string name="category_work" msgid="4014193632325996115">"Služba"</string>
+    <string name="category_work" msgid="4014193632325996115">"Delo"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Možnosti za razvijalce"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Omogočanje možnosti za razvijalce"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Nastavi možnosti za razvoj aplikacij"</string>
@@ -520,7 +520,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ni registrirana"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Ni na voljo"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Naslov MAC je naključno izbran"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih}=1{1 naprava je povezana}one{# naprava je povezana}two{# napravi sta povezani}few{# naprave so povezane}other{# naprav je povezanih}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih.}=1{1 naprava je povezana.}one{# naprava je povezana.}two{# napravi sta povezani.}few{# naprave so povezane.}other{# naprav je povezanih.}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daljši čas."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Krajši čas."</string>
     <string name="cancel" msgid="5665114069455378395">"Prekliči"</string>
@@ -583,7 +583,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podatki za profil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Preden lahko ustvarite profil z omejitvami, morate nastaviti zaklepanje zaslona, da zaščitite aplikacije in osebne podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Nastavi zaklepanje"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na račun <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na uporabnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Ustvarjanje novega uporabnika …"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Ustvarjanje novega gosta …"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Ustvarjanje novega uporabnika ni uspelo."</string>

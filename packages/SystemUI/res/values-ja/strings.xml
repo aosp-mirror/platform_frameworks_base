@@ -353,7 +353,7 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ユーザーを削除しますか？"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"削除"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面上で表示または再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> を開く"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）を <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> を <xliff:g id="APP_LABEL">%2$s</xliff:g> で再生"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> を実行しています"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"元に戻す"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>で再生するにはもっと近づけてください"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ここで再生するには<xliff:g id="DEVICENAME">%1$s</xliff:g>に近づいてください"</string>
@@ -926,8 +927,8 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"タイルを追加しない"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ユーザーを選択"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個のアプリが実行中です</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個のアプリが実行中です</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 個のアプリが実行中</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 個のアプリが実行中</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"最新情報"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"実行中のアプリ"</string>

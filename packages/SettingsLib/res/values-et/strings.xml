@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Tühista"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Sidumine annab ühenduse ajal juurdepääsu kontaktidele ja kõneajaloole."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või parooli tõttu."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või pääsuvõtme tõttu."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ei saa sidet luua."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> hülgas sidumise."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Arvuti"</string>

@@ -264,7 +264,7 @@
       <item quantity="other">‏%d جهاز</item>
       <item quantity="one">‏جهاز واحد (%d)</item>
     </plurals>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"الفلاش"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ضوء الفلاش"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"الكاميرا قيد الاستخدام"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"بيانات الجوّال"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"استخدام البيانات"</string>
@@ -749,8 +749,8 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(العمل)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"المكالمات الهاتفية"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(من خلال <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -844,6 +844,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"فتح <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"\"<xliff:g id="APP_NAME">%1$s</xliff:g>\" قيد التشغيل"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"تراجع"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"عليك الاقتراب لتشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"يُرجى الاقتراب من <xliff:g id="DEVICENAME">%1$s</xliff:g> لتشغيل الوسائط هنا."</string>
