@@ -3335,6 +3335,15 @@ package android.text {
     field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.NamedFamilyList> CREATOR;
   }
 
+  public class MeasuredParagraph {
+    method @NonNull public static android.text.MeasuredParagraph buildForStaticLayoutTest(@NonNull android.text.TextPaint, @Nullable android.graphics.text.LineBreakConfig, @NonNull CharSequence, @IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.text.TextDirectionHeuristic, int, boolean, @Nullable android.text.MeasuredParagraph.StyleRunCallback);
+  }
+
+  public static interface MeasuredParagraph.StyleRunCallback {
+    method public void onAppendReplacementRun(@NonNull android.graphics.Paint, @IntRange(from=0) int, @FloatRange(from=0) @Px float);
+    method public void onAppendStyleRun(@NonNull android.graphics.Paint, @Nullable android.graphics.text.LineBreakConfig, @IntRange(from=0) int, boolean);
+  }
+
   public static final class Selection.MemoryTextWatcher implements android.text.TextWatcher {
     ctor public Selection.MemoryTextWatcher();
     method public void afterTextChanged(android.text.Editable);

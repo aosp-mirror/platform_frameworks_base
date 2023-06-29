@@ -18,6 +18,7 @@ package android.graphics.text;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,6 +32,32 @@ import java.util.Objects;
  * line-break property</a> for more information.
  */
 public final class LineBreakConfig {
+
+    /**
+     * No line break style is specified.
+     *
+     * This is a special value of line break style indicating no style value is specified.
+     * When overriding a {@link LineBreakConfig} with another {@link LineBreakConfig} with
+     * {@link Builder#merge(LineBreakConfig)} function, the line break style of overridden config
+     * will be kept if the line break style of overriding config is
+     * {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
+     *
+     * <pre>
+     *     val override = LineBreakConfig.Builder()
+     *          .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+     *          .build();  // UNSPECIFIED if no setLineBreakStyle is called.
+     *     val config = LineBreakConfig.Builder()
+     *          .setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_STRICT)
+     *          .merge(override)
+     *          .build()
+     *     // Here, config has LINE_BREAK_STYLE_STRICT for line break config and
+     *     // LINE_BREAK_WORD_STYLE_PHRASE for line break word style.
+     * </pre>
+     *
+     * This value is resolved to {@link #LINE_BREAK_STYLE_NONE} if this value is used for text
+     * layout/rendering.
+     */
+    public static final int LINE_BREAK_STYLE_UNSPECIFIED = -1;
 
     /**
      * No line-break rules are used for line breaking.
@@ -56,10 +83,36 @@ public final class LineBreakConfig {
     /** @hide */
     @IntDef(prefix = { "LINE_BREAK_STYLE_" }, value = {
             LINE_BREAK_STYLE_NONE, LINE_BREAK_STYLE_LOOSE, LINE_BREAK_STYLE_NORMAL,
-            LINE_BREAK_STYLE_STRICT
+            LINE_BREAK_STYLE_STRICT, LINE_BREAK_STYLE_UNSPECIFIED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakStyle {}
+
+    /**
+     * No line break word style is specified.
+     *
+     * This is a special value of line break word style indicating no style value is specified.
+     * When overriding a {@link LineBreakConfig} with another {@link LineBreakConfig} with
+     * {@link Builder#merge(LineBreakConfig)} function, the line break word style of overridden
+     * config will be kept if the line break word style of overriding config is
+     * {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}.
+     *
+     * <pre>
+     *     val override = LineBreakConfig.Builder()
+     *          .setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_STRICT)
+     *          .build();  // UNSPECIFIED if no setLineBreakWordStyle is called.
+     *     val config = LineBreakConfig.Builder()
+     *          .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+     *          .merge(override)
+     *          .build()
+     *     // Here, config has LINE_BREAK_STYLE_STRICT for line break config and
+     *     // LINE_BREAK_WORD_STYLE_PHRASE for line break word style.
+     * </pre>
+     *
+     * This value is resolved to {@link #LINE_BREAK_WORD_STYLE_NONE} if this value is used for
+     * text layout/rendering.
+     */
+    public static final int LINE_BREAK_WORD_STYLE_UNSPECIFIED = -1;
 
     /**
      * No line-break word style is used for line breaking.
@@ -78,7 +131,7 @@ public final class LineBreakConfig {
 
     /** @hide */
     @IntDef(prefix = { "LINE_BREAK_WORD_STYLE_" }, value = {
-        LINE_BREAK_WORD_STYLE_NONE, LINE_BREAK_WORD_STYLE_PHRASE
+        LINE_BREAK_WORD_STYLE_NONE, LINE_BREAK_WORD_STYLE_PHRASE, LINE_BREAK_WORD_STYLE_UNSPECIFIED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakWordStyle {}
@@ -88,11 +141,11 @@ public final class LineBreakConfig {
      */
     public static final class Builder {
         // The line break style for the LineBreakConfig.
-        private @LineBreakStyle int mLineBreakStyle = LineBreakConfig.LINE_BREAK_STYLE_NONE;
+        private @LineBreakStyle int mLineBreakStyle = LineBreakConfig.LINE_BREAK_STYLE_UNSPECIFIED;
 
         // The line break word style for the LineBreakConfig.
         private @LineBreakWordStyle int mLineBreakWordStyle =
-                LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+                LineBreakConfig.LINE_BREAK_WORD_STYLE_UNSPECIFIED;
 
         // Whether or not enabling phrase breaking automatically.
         // TODO(b/226012260): Remove this and add LINE_BREAK_WORD_STYLE_PHRASE_AUTO after
@@ -103,10 +156,69 @@ public final class LineBreakConfig {
          * Builder constructor.
          */
         public Builder() {
+            reset(null);
+        }
+
+        /**
+         * Merges line break config with other config
+         *
+         * Update the internal configurations with passed {@code config}. If the config values of
+         * passed {@code config} are unspecified, the original config values are kept. For example,
+         * the following code passes {@code config} that has {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
+         * This code generates {@link LineBreakConfig} that has line break config
+         * {@link #LINE_BREAK_STYLE_STRICT}.
+         *
+         * <pre>
+         *     val override = LineBreakConfig.Builder()
+         *          .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+         *          .build();  // UNSPECIFIED if no setLineBreakStyle is called.
+         *     val config = LineBreakConfig.Builder()
+         *          .setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_STRICT)
+         *          .merge(override)
+         *          .build()
+         *     // Here, config has LINE_BREAK_STYLE_STRICT of line break config and
+         *     // LINE_BREAK_WORD_STYLE_PHRASE of line break word style.
+         * </pre>
+         *
+         * @see #LINE_BREAK_STYLE_UNSPECIFIED
+         * @see #LINE_BREAK_WORD_STYLE_UNSPECIFIED
+         *
+         * @param config an override line break config
+         * @return This {@code Builder}.
+         */
+        public @NonNull Builder merge(@NonNull LineBreakConfig config) {
+            if (config.mLineBreakStyle != LINE_BREAK_STYLE_UNSPECIFIED) {
+                mLineBreakStyle = config.mLineBreakStyle;
+            }
+            if (config.mLineBreakWordStyle != LINE_BREAK_WORD_STYLE_UNSPECIFIED) {
+                mLineBreakWordStyle = config.mLineBreakWordStyle;
+            }
+            return this;
+        }
+
+        /**
+         * Resets this builder to the given config state.
+         *
+         * @return This {@code Builder}.
+         * @hide
+         */
+        public @NonNull Builder reset(@Nullable LineBreakConfig config) {
+            if (config == null) {
+                mLineBreakStyle = LINE_BREAK_STYLE_UNSPECIFIED;
+                mLineBreakWordStyle = LINE_BREAK_WORD_STYLE_UNSPECIFIED;
+            } else {
+                mLineBreakStyle = config.mLineBreakStyle;
+                mLineBreakWordStyle = config.mLineBreakWordStyle;
+            }
+            return this;
         }
 
         /**
          * Sets the line-break style.
+         *
+         * Note: different from {@link #merge(LineBreakConfig)} if this function is called with
+         * {@link #LINE_BREAK_STYLE_UNSPECIFIED}, the line break style is reset to
+         * {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
          *
          * @param lineBreakStyle The new line-break style.
          * @return This {@code Builder}.
@@ -119,6 +231,10 @@ public final class LineBreakConfig {
         /**
          * Sets the line-break word style.
          *
+         * Note: different from {@link #merge(LineBreakConfig)} method, if this function is called
+         * with {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}, the line break style is reset to
+         * {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}.
+         *
          * @param lineBreakWordStyle The new line-break word style.
          * @return This {@code Builder}.
          */
@@ -128,7 +244,7 @@ public final class LineBreakConfig {
         }
 
         /**
-         * Enables or disables the automation of {@link LINE_BREAK_WORD_STYLE_PHRASE}.
+         * Enables or disables the automation of {@link #LINE_BREAK_WORD_STYLE_PHRASE}.
          *
          * @hide
          */
@@ -139,6 +255,9 @@ public final class LineBreakConfig {
 
         /**
          * Builds a {@link LineBreakConfig} instance.
+         *
+         * This method can be called multiple times for generating multiple {@link LineBreakConfig}
+         * instances.
          *
          * @return The {@code LineBreakConfig} instance.
          */
@@ -213,6 +332,22 @@ public final class LineBreakConfig {
     }
 
     /**
+     * Gets the resolved line break style.
+     *
+     * This method never returns {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
+     *
+     * @return The line break style.
+     * @hide
+     */
+    public static @LineBreakStyle int getResolvedLineBreakStyle(@Nullable LineBreakConfig config) {
+        if (config == null) {
+            return LINE_BREAK_STYLE_NONE;
+        }
+        return config.mLineBreakStyle == LINE_BREAK_STYLE_UNSPECIFIED
+                ? LINE_BREAK_STYLE_NONE : config.mLineBreakStyle;
+    }
+
+    /**
      * Gets the current line-break word style.
      *
      * @return The line-break word style to be used for text wrapping.
@@ -222,10 +357,59 @@ public final class LineBreakConfig {
     }
 
     /**
-     * Used to identify if the automation of {@link LINE_BREAK_WORD_STYLE_PHRASE} is enabled.
+     * Gets the resolved line break style.
+     *
+     * This method never returns {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}.
+     *
+     * @return The line break word style.
+     * @hide
+     */
+    public static @LineBreakWordStyle int getResolvedLineBreakWordStyle(
+            @Nullable LineBreakConfig config) {
+        if (config == null) {
+            return LINE_BREAK_WORD_STYLE_NONE;
+        }
+        return config.mLineBreakWordStyle == LINE_BREAK_WORD_STYLE_UNSPECIFIED
+                ? LINE_BREAK_WORD_STYLE_NONE : config.mLineBreakWordStyle;
+    }
+
+    /**
+     * Generates a new {@link LineBreakConfig} instance merged with given {@code config}.
+     *
+     * If values of passing {@code config} are unspecified, the original values are kept. For
+     * example, the following code shows how line break config is merged.
+     *
+     * <pre>
+     *     val override = LineBreakConfig.Builder()
+     *          .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+     *          .build();  // UNSPECIFIED if no setLineBreakStyle is called.
+     *     val config = LineBreakConfig.Builder()
+     *          .setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_STRICT)
+     *          .build();
+     *
+     *     val newConfig = config.merge(override)
+     *     // newConfig has LINE_BREAK_STYLE_STRICT of line break style and
+     *     LINE_BREAK_WORD_STYLE_PHRASE of line break word style.
+     * </pre>
+     *
+     * @param config an overriding config.
+     * @return newly created instance that is current style merged with passed config.
+     */
+    public @NonNull LineBreakConfig merge(@NonNull LineBreakConfig config) {
+        return new LineBreakConfig(
+                config.mLineBreakStyle == LINE_BREAK_STYLE_UNSPECIFIED
+                        ? mLineBreakStyle : config.mLineBreakStyle,
+                config.mLineBreakWordStyle == LINE_BREAK_WORD_STYLE_UNSPECIFIED
+                        ? mLineBreakWordStyle : config.mLineBreakWordStyle,
+                config.mAutoPhraseBreaking
+        );
+    }
+
+    /**
+     * Used to identify if the automation of {@link #LINE_BREAK_WORD_STYLE_PHRASE} is enabled.
      *
      * @return The result that records whether or not the automation of
-     * {@link LINE_BREAK_WORD_STYLE_PHRASE} is enabled.
+     * {@link #LINE_BREAK_WORD_STYLE_PHRASE} is enabled.
      * @hide
      */
     public boolean getAutoPhraseBreaking() {
@@ -246,5 +430,13 @@ public final class LineBreakConfig {
     @Override
     public int hashCode() {
         return Objects.hash(mLineBreakStyle, mLineBreakWordStyle);
+    }
+
+    @Override
+    public String toString() {
+        return "LineBreakConfig{"
+                + "mLineBreakStyle=" + mLineBreakStyle
+                + ", mLineBreakWordStyle=" + mLineBreakWordStyle
+                + '}';
     }
 }
