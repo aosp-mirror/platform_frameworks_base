@@ -48,7 +48,7 @@ constructor(
         )
 
     val transitionEnded =
-        keyguardTransitionInteractor.dreamingToLockscreenTransition.filter { step ->
+        keyguardTransitionInteractor.fromDreamingTransition.filter { step ->
             step.transitionState == TransitionState.FINISHED ||
                 step.transitionState == TransitionState.CANCELED
         }
