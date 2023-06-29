@@ -840,7 +840,7 @@ public class PipTransition extends PipTransitionController {
         }
 
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
-        final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
+        final Rect currentBounds = pipChange.getStartAbsBounds();
         int rotationDelta = deltaRotation(startRotation, endRotation);
         Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
                 taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
