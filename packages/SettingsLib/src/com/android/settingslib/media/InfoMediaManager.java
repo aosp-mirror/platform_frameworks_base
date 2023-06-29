@@ -50,7 +50,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
@@ -180,6 +179,27 @@ public abstract class InfoMediaManager extends MediaManager {
     @NonNull
     protected abstract BluetoothMediaDevice createBluetoothMediaDevice(
             MediaRoute2Info route, CachedBluetoothDevice cachedDevice);
+
+    protected final void rebuildDeviceList() {
+        mMediaDevices.clear();
+        mCurrentConnectedDevice = null;
+        if (TextUtils.isEmpty(mPackageName)) {
+            buildAllRoutes();
+        } else {
+            buildAvailableRoutes();
+        }
+    }
+
+    protected final void notifyCurrentConnectedDeviceChanged() {
+        final String id = mCurrentConnectedDevice != null ? mCurrentConnectedDevice.getId() : null;
+        dispatchConnectedDeviceChanged(id);
+    }
+
+    @RequiresApi(34)
+    protected final void notifyRouteListingPreferenceUpdated(
+            RouteListingPreference routeListingPreference) {
+        Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference, mPreferenceItemMap);
+    }
 
     /**
      * Get current device that played media.
@@ -475,14 +495,8 @@ public abstract class InfoMediaManager extends MediaManager {
                 || sessionInfo.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
     }
 
-    private synchronized void refreshDevices() {
-        mMediaDevices.clear();
-        mCurrentConnectedDevice = null;
-        if (TextUtils.isEmpty(mPackageName)) {
-            buildAllRoutes();
-        } else {
-            buildAvailableRoutes();
-        }
+    protected final synchronized void refreshDevices() {
+        rebuildDeviceList();
         dispatchDeviceListAdded();
     }
 
@@ -610,75 +624,6 @@ public abstract class InfoMediaManager extends MediaManager {
         }
         if (mediaDevice != null) {
             mMediaDevices.add(mediaDevice);
-        }
-    }
-
-    class RouterManagerCallback implements MediaRouter2Manager.Callback {
-
-        @Override
-        public void onRoutesUpdated() {
-            refreshDevices();
-        }
-
-        @Override
-        public void onPreferredFeaturesChanged(String packageName, List<String> preferredFeatures) {
-            if (TextUtils.equals(mPackageName, packageName)) {
-                refreshDevices();
-            }
-        }
-
-        @Override
-        public void onTransferred(RoutingSessionInfo oldSession, RoutingSessionInfo newSession) {
-            if (DEBUG) {
-                Log.d(TAG, "onTransferred() oldSession : " + oldSession.getName()
-                        + ", newSession : " + newSession.getName());
-            }
-            mMediaDevices.clear();
-            mCurrentConnectedDevice = null;
-            if (TextUtils.isEmpty(mPackageName)) {
-                buildAllRoutes();
-            } else {
-                buildAvailableRoutes();
-            }
-
-            final String id = mCurrentConnectedDevice != null
-                    ? mCurrentConnectedDevice.getId()
-                    : null;
-            dispatchConnectedDeviceChanged(id);
-        }
-
-        /**
-         * Ignore callback here since we'll also receive{@link
-         * MediaRouter2Manager.Callback#onRequestFailed onRequestFailed} with reason code.
-         */
-        @Override
-        public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
-        }
-
-        @Override
-        public void onRequestFailed(int reason) {
-            dispatchOnRequestFailed(reason);
-        }
-
-        @Override
-        public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
-            refreshDevices();
-        }
-
-        @Override
-        public void onSessionReleased(@NonNull RoutingSessionInfo session) {
-            refreshDevices();
-        }
-
-        @Override
-        public void onRouteListingPreferenceUpdated(
-                String packageName,
-                RouteListingPreference routeListingPreference) {
-            if (TextUtils.equals(mPackageName, packageName)) {
-                Api34Impl.onRouteListingPreferenceUpdated(
-                        routeListingPreference, mPreferenceItemMap);
-                refreshDevices();
-            }
         }
     }
 

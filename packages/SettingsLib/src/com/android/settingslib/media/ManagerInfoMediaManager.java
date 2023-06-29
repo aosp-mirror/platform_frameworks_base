@@ -24,6 +24,8 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -38,6 +40,9 @@ import java.util.concurrent.Executors;
  * Template implementation of {@link InfoMediaManager} using {@link MediaRouter2Manager}.
  */
 public class ManagerInfoMediaManager extends InfoMediaManager {
+
+    private static final String TAG = "ManagerInfoMediaManager";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     @VisibleForTesting
     /* package */ final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
@@ -190,5 +195,67 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
             MediaRoute2Info route, CachedBluetoothDevice cachedDevice) {
         return new BluetoothMediaDevice(
                 mContext, cachedDevice, mRouterManager, route, mPackageName);
+    }
+
+    @VisibleForTesting
+    /* package */ final class RouterManagerCallback implements MediaRouter2Manager.Callback {
+
+        @Override
+        public void onRoutesUpdated() {
+            refreshDevices();
+        }
+
+        @Override
+        public void onPreferredFeaturesChanged(String packageName, List<String> preferredFeatures) {
+            if (TextUtils.equals(mPackageName, packageName)) {
+                refreshDevices();
+            }
+        }
+
+        @Override
+        public void onTransferred(RoutingSessionInfo oldSession, RoutingSessionInfo newSession) {
+            if (DEBUG) {
+                Log.d(
+                        TAG,
+                        "onTransferred() oldSession : "
+                                + oldSession.getName()
+                                + ", newSession : "
+                                + newSession.getName());
+            }
+            rebuildDeviceList();
+            notifyCurrentConnectedDeviceChanged();
+        }
+
+        /**
+         * Ignore callback here since we'll also receive{@link
+         * MediaRouter2Manager.Callback#onRequestFailed onRequestFailed} with reason code.
+         */
+        @Override
+        public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {}
+
+        @Override
+        public void onRequestFailed(int reason) {
+            dispatchOnRequestFailed(reason);
+        }
+
+        @Override
+        public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onSessionReleased(@NonNull RoutingSessionInfo session) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onRouteListingPreferenceUpdated(
+                String packageName, RouteListingPreference routeListingPreference) {
+            if (!TextUtils.equals(mPackageName, packageName)) {
+                return;
+            }
+            notifyRouteListingPreferenceUpdated(routeListingPreference);
+            refreshDevices();
+        }
     }
 }
