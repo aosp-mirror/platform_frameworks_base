@@ -17,33 +17,18 @@
 package com.android.server.wm.flicker.testapp;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 
 /**
- * Activity to be used as the secondary activity to split with
+ * Activity to be used also as a secondary activity to split with
  * {@link ActivityEmbeddingMainActivity}.
  */
-public class ActivityEmbeddingSecondaryActivity extends Activity {
-
+public class ActivityEmbeddingThirdActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_embedding_secondary_activity_layout);
-        findViewById(R.id.secondary_activity_layout).setBackgroundColor(Color.YELLOW);
-        findViewById(R.id.finish_secondary_activity_button).setOnClickListener(
-              new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        finish();
-                    }
-            });
-    }
-
-    public void launchThirdActivity(View view) {
-        startActivity(new Intent().setComponent(
-                ActivityOptions.ActivityEmbedding.ThirdActivity.COMPONENT));
+        setContentView(R.layout.activity_embedding_base_layout);
+        findViewById(R.id.root_activity_layout).setBackgroundColor(Color.RED);
     }
 }
