@@ -47,6 +47,9 @@ class InputSettingsObserver extends ContentObserver {
     private final NativeInputManagerService mNative;
     private final Map<Uri, Consumer<String /* reason*/>> mObservers;
 
+    // Cache prevent notifying same KeyRepeatInfo data to native code multiple times.
+    private KeyRepeatInfo mLastKeyRepeatInfoSettingsUpdate;
+
     InputSettingsObserver(Context context, Handler handler, InputManagerService service,
             NativeInputManagerService nativeIms) {
         super(handler);
@@ -195,7 +198,11 @@ class InputSettingsObserver extends ContentObserver {
         final int delayMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
                 UserHandle.USER_CURRENT);
-        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
+        if (mLastKeyRepeatInfoSettingsUpdate == null || !mLastKeyRepeatInfoSettingsUpdate.isEqualTo(
+                timeoutMs, delayMs)) {
+            mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
+            mLastKeyRepeatInfoSettingsUpdate = new KeyRepeatInfo(timeoutMs, delayMs);
+        }
     }
 
     // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
@@ -213,5 +220,20 @@ class InputSettingsObserver extends ContentObserver {
             return;
         }
         mNative.setMaximumObscuringOpacityForTouch(opacity);
+    }
+
+    private static class KeyRepeatInfo {
+        private final int mKeyRepeatTimeoutMs;
+        private final int mKeyRepeatDelayMs;
+
+        private KeyRepeatInfo(int keyRepeatTimeoutMs, int keyRepeatDelayMs) {
+            this.mKeyRepeatTimeoutMs = keyRepeatTimeoutMs;
+            this.mKeyRepeatDelayMs = keyRepeatDelayMs;
+        }
+
+        public boolean isEqualTo(int keyRepeatTimeoutMs, int keyRepeatDelayMs) {
+            return mKeyRepeatTimeoutMs == keyRepeatTimeoutMs
+                    && mKeyRepeatDelayMs == keyRepeatDelayMs;
+        }
     }
 }
