@@ -1220,14 +1220,15 @@ public class QuickSettingsController implements Dumpable {
         if (mIsFullWidth) {
             clipStatusView = qsVisible;
             float screenCornerRadius =
-                    !mSplitShadeEnabled || mRecordingController.isRecording()
-                            || mCastController.hasConnectedCastDevice()
+                    mRecordingController.isRecording() || mCastController.hasConnectedCastDevice()
                             ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
 
-            float bottomRadius = mExpanded ? screenCornerRadius :
-                    calculateBottomCornerRadius(screenCornerRadius);
+            float bottomRadius = mSplitShadeEnabled ? screenCornerRadius : 0;
+            if (!mExpanded) {
+                bottomRadius = calculateBottomCornerRadius(bottomRadius);
+            }
             mScrimController.setNotificationBottomRadius(bottomRadius);
         }
         if (isQsFragmentCreated()) {
