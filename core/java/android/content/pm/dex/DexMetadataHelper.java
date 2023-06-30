@@ -23,6 +23,9 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
+import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.JsonReader;
@@ -33,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +48,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Helper class used to compute and validate the location of dex metadata files.
@@ -61,6 +66,11 @@ public class DexMetadataHelper {
     private static final String PROPERTY_DM_FSVERITY_REQUIRED = "pm.dexopt.dm.require_fsverity";
 
     private static final String DEX_METADATA_FILE_EXTENSION = ".dm";
+
+    private static final String PROFILE_FILE_NAME = "primary.prof";
+    private static final String PROFILE_METADATA_FILE_NAME = "primary.profm";
+    private static final String BASELINE_PROFILE_SOURCE_RELATIVE_PATH = "dexopt/baseline.prof";
+    private static final String BASELINE_PROFILE_METADATA_RELATIVE_PATH = "dexopt/baseline.profm";
 
     private DexMetadataHelper() {}
 
@@ -313,4 +323,76 @@ public class DexMetadataHelper {
         }
     }
 
+    /**
+     * Extract the baseline profiles from the assets directory in the apk. Then create a
+     * ZIP archive with the (.dm) file extension (e.g. foo.dm from foo.apk) to include the
+     * baseline profiles and put the DexMetadata file in the same directory with the apk.
+     *
+     * @param assetManager The {@link AssetManager} to use.
+     * @param apkPath The path of the apk
+     * @return {@code true} if the extraction is successful. Otherwise, return {@code false}.
+     *
+     * @see #buildDexMetadataPathForApk(String)
+     */
+    public static boolean extractBaselineProfilesToDexMetadataFileFromApk(AssetManager assetManager,
+            String apkPath) {
+        if (!ApkLiteParseUtils.isApkPath(apkPath)) {
+            if (DEBUG) {
+                Log.d(TAG, "It is not an apk file: " + apkPath);
+            }
+            return false;
+        }
+
+        // get the name of the DexMetadata file from the path of the apk
+        final File dmFile = new File(buildDexMetadataPathForApk(apkPath));
+        boolean success = false;
+
+        // load profile and profile metadata from assets directory in the apk
+        try (InputStream profileIs = openStreamFromAssets(assetManager,
+                BASELINE_PROFILE_SOURCE_RELATIVE_PATH);
+             InputStream profileMetadataIs = openStreamFromAssets(assetManager,
+                     BASELINE_PROFILE_METADATA_RELATIVE_PATH)) {
+            // Create the zip archive file and write the baseline profiles into it.
+            try (FileOutputStream fos = new FileOutputStream(dmFile)) {
+                try (ZipOutputStream zipOs = new ZipOutputStream(fos)) {
+                    zipOs.putNextEntry(new ZipEntry(PROFILE_FILE_NAME));
+                    zipOs.write(profileIs.readAllBytes());
+                    zipOs.closeEntry();
+
+                    zipOs.putNextEntry(new ZipEntry(PROFILE_METADATA_FILE_NAME));
+                    zipOs.write(profileMetadataIs.readAllBytes());
+                    zipOs.closeEntry();
+                    success = true;
+                }
+            }
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.e(TAG, "Extract baseline profiles from apk failed: " + e.getMessage());
+            }
+        } finally {
+            if (!success) {
+                if (dmFile.exists()) {
+                    dmFile.delete();
+                }
+            }
+        }
+        return success;
+    }
+
+    /**
+     * Loads an {@link AutoCloseInputStream} from assets with the path.
+     *
+     * @param assetManager The {@link AssetManager} to use.
+     * @param path The source file's relative path.
+     * @return An AutoCloseInputStream in case the file was successfully read.
+     * @throws IOException If anything goes wrong while opening or reading the file.
+     */
+    private static AutoCloseInputStream openStreamFromAssets(AssetManager assetManager, String path)
+            throws IOException {
+        AssetFileDescriptor descriptor = assetManager.openFd(path);
+        // Based on the java doc of AssetFileDescriptor#createInputStream, it will always return
+        // an AutoCloseInputStream. It should be fine we cast it from FileInputStream to
+        // AutoCloseInputStream here.
+        return (AutoCloseInputStream) descriptor.createInputStream();
+    }
 }

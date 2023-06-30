@@ -50,6 +50,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
+import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.PackageLite;
@@ -73,6 +74,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.ext.SdkExtensions;
+import android.os.incremental.IncrementalManager;
 import android.permission.PermissionManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -240,6 +242,11 @@ public class ParsingPackageUtils {
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_APK_IN_APEX = 1 << 9;
 
+    /**
+     * This flag is to determine whether to extract the baseline profiles from the apk or not.
+     */
+    public static final int PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK = 1 << 10;
+
     public static final int PARSE_CHATTY = 1 << 31;
 
     /** The total maximum number of activities, services, providers and activity-aliases */
@@ -251,14 +258,16 @@ public class ParsingPackageUtils {
     private static final int MAX_PERMISSION_NAME_LENGTH = 512;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
+            PARSE_APK_IN_APEX,
             PARSE_CHATTY,
             PARSE_COLLECT_CERTIFICATES,
             PARSE_ENFORCE_CODE,
             PARSE_EXTERNAL_STORAGE,
+            PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK,
+            PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
             PARSE_IGNORE_PROCESSES,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
-            PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
@@ -557,6 +566,26 @@ public class ParsingPackageUtils {
                 pkg.setSigningDetails(ret.getResult());
             } else {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
+            }
+
+            // 1. The apkFile is an apk file
+            // 2. The flags include PARSE_EXTRACT_PROFILE_FROM_APK
+            // 3. The apk patch is NOT an incremental path
+            // 4. If the .dm file exists in the current apk directory, it means the caller
+            // prepares the .dm file. Don't extract the profiles from the apk again.
+            if (ApkLiteParseUtils.isApkFile(apkFile)
+                    && (flags & PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK) != 0
+                    && !IncrementalManager.isIncrementalPath(apkPath)
+                    && DexMetadataHelper.findDexMetadataForFile(apkFile) == null) {
+                // Extract the baseline profiles from the apk if the profiles exist in the assets
+                // directory in the apk.
+                boolean extractedResult =
+                        DexMetadataHelper.extractBaselineProfilesToDexMetadataFileFromApk(assets,
+                                apkPath);
+
+                if (DEBUG_JAR) {
+                    Slog.d(TAG, "Extract profiles " + (extractedResult ? "success" : "fail"));
+                }
             }
 
             return input.success(pkg);

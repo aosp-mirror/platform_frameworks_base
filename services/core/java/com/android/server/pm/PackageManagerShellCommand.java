@@ -3436,6 +3436,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |=
                             PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
                     break;
+                case "--no-profile":
+                    sessionParams.installFlags |=
+                            PackageManager.INSTALL_DONT_EXTRACT_BASELINE_PROFILES;
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -4324,7 +4328,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
-        pw.println("       [--enable-rollback]");
+        pw.println("       [--enable-rollback] [--no-profile]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("       [--apex] [--force-non-staged] [--staged-ready-timeout TIMEOUT]");
         pw.println("       [PATH [SPLIT...]|-]");
@@ -4357,6 +4361,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --apex: install an .apex file, not an .apk");
         pw.println("      --force-non-staged: force the installation to run under a non-staged");
         pw.println("          session, which may complete without requiring a reboot");
+        pw.println("      --no-profile: don't extract the profiles from the apk");
         pw.println("      --staged-ready-timeout: By default, staged sessions wait "
                 + DEFAULT_STAGED_READY_TIMEOUT_MS);
         pw.println("          milliseconds for pre-reboot verification to complete when");
@@ -4378,7 +4383,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [--apex] [-S BYTES]");
-        pw.println("       [--multi-package] [--staged] [--update-ownership]");
+        pw.println("       [--multi-package] [--staged] [--no-profile] [--update-ownership]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");
         pw.println("    to push data into the session, and \"install-commit\" to finish.");
         pw.println("");

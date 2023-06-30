@@ -1432,6 +1432,7 @@ public abstract class PackageManager {
             INSTALL_ALLOW_DOWNGRADE,
             INSTALL_STAGED,
             INSTALL_REQUEST_UPDATE_OWNERSHIP,
+            INSTALL_DONT_EXTRACT_BASELINE_PROFILES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1645,6 +1646,13 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
+
+    /**
+     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that do not extract
+     * the baseline profiles when parsing the apk
+     * @hide
+     */
+    public static final int INSTALL_DONT_EXTRACT_BASELINE_PROFILES = 1 << 27;
 
     /** @hide */
     @IntDef(flag = true, value = {
