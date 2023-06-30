@@ -3030,15 +3030,15 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
-        <!-- Sets the id of a view before which this one is visited in accessibility traversal.
-             A screen-reader must visit the content of this view before the content of the one
-             it precedes.
+        <!-- Sets the id of a view that screen readers are requested to visit after this view.
+             Requests that a screen-reader visits the content of this view before the content of the
+             one it precedes. This does nothing if either view is not important for accessibility.
              {@see android.view.View#setAccessibilityTraversalBefore(int)} -->
         <attr name="accessibilityTraversalBefore" format="integer" />
 
-        <!-- Sets the id of a view after which this one is visited in accessibility traversal.
-             A screen-reader must visit the content of the other view before the content of
-             this one.
+        <!-- Sets the id of a view that screen readers are requested to visit before this view.
+             Requests that a screen-reader visits the content of the other view before the content
+             of this one. This does nothing if either view is not important for accessibility.
              {@see android.view.View#setAccessibilityTraversalAfter(int)} -->
         <attr name="accessibilityTraversalAfter" format="integer" />
 
