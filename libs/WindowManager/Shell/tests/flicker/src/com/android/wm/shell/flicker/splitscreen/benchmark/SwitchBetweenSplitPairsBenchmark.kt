@@ -64,8 +64,7 @@ open class SwitchBetweenSplitPairsBenchmark(override val flicker: LegacyFlickerT
             thisTransition(this)
         }
 
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit @Test open fun cujCompleted() {}
+    @PlatinumTest(focusArea = "sysui") @Presubmit @Test open fun cujCompleted() {}
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
