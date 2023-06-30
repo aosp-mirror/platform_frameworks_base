@@ -60,6 +60,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -387,15 +388,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private void updateLockIconLocation() {
         final float scaleFactor = mAuthController.getScaleFactor();
         final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
-        if (mUdfpsSupported) {
-            mView.setCenterLocation(mAuthController.getUdfpsLocation(),
-                    mAuthController.getUdfpsRadius(), scaledPadding);
-        } else {
-            mView.setCenterLocation(
-                    new Point((int) mWidthPixels / 2,
-                            (int) (mHeightPixels
-                                    - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor))),
+        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+            if (mUdfpsSupported) {
+                mView.setCenterLocation(mAuthController.getUdfpsLocation(),
+                        mAuthController.getUdfpsRadius(), scaledPadding);
+            } else {
+                mView.setCenterLocation(
+                        new Point((int) mWidthPixels / 2,
+                                (int) (mHeightPixels
+                                        - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor))),
                         sLockIconRadiusPx * scaleFactor, scaledPadding);
+            }
         }
     }
 
