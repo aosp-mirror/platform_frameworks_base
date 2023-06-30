@@ -167,9 +167,10 @@ constructor(
                                         from = KeyguardState.PRIMARY_BOUNCER,
                                         to = KeyguardState.LOCKSCREEN,
                                         animator =
-                                            getDefaultAnimatorForTransitionsToState(KeyguardState.LOCKSCREEN).apply {
-                                                duration = 0
-                                            }
+                                            getDefaultAnimatorForTransitionsToState(
+                                                    KeyguardState.LOCKSCREEN
+                                                )
+                                                .apply { duration = 0 }
                                     )
                                 )
                             }

@@ -21,21 +21,22 @@ import android.view.View
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
-import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceConfig
+import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockTickRate
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -64,7 +65,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import java.util.TimeZone
 import java.util.concurrent.Executor
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
@@ -122,7 +122,9 @@ class ClockEventControllerTest : SysuiTestCase() {
                 bouncerRepository = bouncerRepository,
                 configurationRepository = FakeConfigurationRepository(),
             ),
-            KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
+            KeyguardTransitionInteractorFactory.create(
+                    scope = TestScope().backgroundScope,
+            ).keyguardTransitionInteractor,
             broadcastDispatcher,
             batteryController,
             keyguardUpdateMonitor,
