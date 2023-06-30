@@ -379,7 +379,6 @@ cc_library_shared {
                 "libbinary_parse",
                 "libdng_sdk",
                 "libft2",
-                "libhostgraphics",
                 "libhwui",
                 "libimage_type_recognition",
                 "libjpeg",
