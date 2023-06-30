@@ -59,6 +59,10 @@ class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlicker
         get() = {
             super.transition(this)
 
+            transitions {
+                wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
+            }
+
             setup {
                 device.wakeUpAndGoToHomeScreen()
 
