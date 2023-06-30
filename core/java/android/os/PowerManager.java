@@ -1866,6 +1866,21 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if the platform has auto power save modes (eg. Doze & app standby) enabled.
+     * This doesn't necessarily mean that the individual features are enabled. For example, if this
+     * returns true, Doze might be enabled while app standby buckets remain disabled.
+     * @hide
+     */
+    @TestApi
+    public boolean areAutoPowerSaveModesEnabled() {
+        try {
+            return mService.areAutoPowerSaveModesEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns true if the device is currently in power save mode.  When in this mode,
      * applications should reduce their functionality in order to conserve battery as
      * much as possible.  You can monitor for changes to this state with
