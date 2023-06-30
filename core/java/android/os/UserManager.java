@@ -159,6 +159,13 @@ public class UserManager {
     @SystemApi
     public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
 
+
+    /**
+     * User type representing a private profile.
+     * @hide
+     */
+    public static final String USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE";
+
     /**
      * User type representing a generic profile for testing purposes. Only on debuggable builds.
      * @hide
@@ -2858,6 +2865,16 @@ public class UserManager {
     }
 
     /**
+     * Returns whether the user type is a
+     * {@link UserManager#USER_TYPE_PROFILE_PRIVATE private profile}.
+     *
+     * @hide
+     */
+    public static boolean isUserTypePrivateProfile(@Nullable String userType) {
+        return USER_TYPE_PROFILE_PRIVATE.equals(userType);
+    }
+
+    /**
      * @hide
      * @deprecated Use {@link #isRestrictedProfile()}
      */
@@ -3143,6 +3160,24 @@ public class UserManager {
     @SuppressAutoDoc
     public boolean isCloneProfile() {
         return isUserTypeCloneProfile(getProfileType());
+    }
+
+    /**
+     * Checks if the context user is a private profile.
+     *
+     * @return whether the context user is a private profile.
+     *
+     * @see android.os.UserManager#USER_TYPE_PROFILE_PRIVATE
+     * @hide
+     */
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @SuppressAutoDoc
+    public boolean isPrivateProfile() {
+        return isUserTypePrivateProfile(getProfileType());
     }
 
     /**

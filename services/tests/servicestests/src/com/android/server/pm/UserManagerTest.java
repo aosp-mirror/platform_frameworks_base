@@ -265,6 +265,52 @@ public final class UserManagerTest {
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
     }
 
+    @Test
+    public void testPrivateProfile() throws Exception {
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeTrue("Main user is null", mainUser != null);
+        // Get the default properties for private profile user type.
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_PRIVATE);
+        assertWithMessage("No %s type on device", UserManager.USER_TYPE_PROFILE_PRIVATE)
+                .that(userTypeDetails).isNotNull();
+        final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
+
+        // Test that only one private profile  can be created
+        final int mainUserId = mainUser.getIdentifier();
+        UserInfo userInfo = createProfileForUser("Private profile1",
+                UserManager.USER_TYPE_PROFILE_PRIVATE,
+                mainUserId);
+        assertThat(userInfo).isNotNull();
+        UserInfo userInfo2 = createProfileForUser("Private profile2",
+                UserManager.USER_TYPE_PROFILE_PRIVATE,
+                mainUserId);
+        assertThat(userInfo2).isNull();
+
+        // Check that the new private profile has the expected properties (relative to the defaults)
+        // provided that the test caller has the necessary permissions.
+        UserProperties privateProfileUserProperties =
+                mUserManager.getUserProperties(UserHandle.of(userInfo.id));
+        assertThat(typeProps.getShowInLauncher())
+                .isEqualTo(privateProfileUserProperties.getShowInLauncher());
+        assertThrows(SecurityException.class, privateProfileUserProperties::getStartWithParent);
+        assertThrows(SecurityException.class,
+                privateProfileUserProperties::getCrossProfileIntentFilterAccessControl);
+        assertThat(typeProps.isMediaSharedWithParent())
+                .isEqualTo(privateProfileUserProperties.isMediaSharedWithParent());
+        assertThat(typeProps.isCredentialShareableWithParent())
+                .isEqualTo(privateProfileUserProperties.isCredentialShareableWithParent());
+        assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
+
+        // Verify private profile parent
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        assertThat(parentProfileInfo).isNotNull();
+        assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
+        removeUser(userInfo.id);
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+    }
+
     @MediumTest
     @Test
     public void testAdd2Users() throws Exception {

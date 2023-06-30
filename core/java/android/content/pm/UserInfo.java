@@ -390,6 +390,10 @@ public class UserInfo implements Parcelable {
         return UserManager.isUserTypeCommunalProfile(userType);
     }
 
+    public boolean isPrivateProfile() {
+        return UserManager.isUserTypePrivateProfile(userType);
+    }
+
     @UnsupportedAppUsage
     public boolean isEnabled() {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;
