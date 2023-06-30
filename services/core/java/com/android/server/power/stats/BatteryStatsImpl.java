@@ -14613,17 +14613,13 @@ public class BatteryStatsImpl extends BatteryStats {
 
     // Inform StatsLog of setBatteryState changes.
     private void reportChangesToStatsLog(final int status, final int plugType, final int level) {
-        if (!mHaveBatteryLevel) {
-            return;
-        }
-
-        if (mBatteryStatus != status) {
+        if (!mHaveBatteryLevel || mBatteryStatus != status) {
             FrameworkStatsLog.write(FrameworkStatsLog.CHARGING_STATE_CHANGED, status);
         }
-        if (mBatteryPlugType != plugType) {
+        if (!mHaveBatteryLevel || mBatteryPlugType != plugType) {
             FrameworkStatsLog.write(FrameworkStatsLog.PLUGGED_STATE_CHANGED, plugType);
         }
-        if (mBatteryLevel != level) {
+        if (!mHaveBatteryLevel || mBatteryLevel != level) {
             FrameworkStatsLog.write(FrameworkStatsLog.BATTERY_LEVEL_CHANGED, level);
         }
     }
