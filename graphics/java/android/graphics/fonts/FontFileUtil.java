@@ -19,11 +19,14 @@ package android.graphics.fonts;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.ArraySet;
 
 import dalvik.annotation.optimization.FastNative;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Provides a utility for font file operations.
@@ -62,6 +65,7 @@ public class FontFileUtil {
     private static final int SFNT_VERSION_OTTO = 0x4F54544F;
     private static final int TTC_TAG = 0x74746366;
     private static final int OS2_TABLE_TAG = 0x4F532F32;
+    private static final int FVAR_TABLE_TAG = 0x66766172;
 
     private static final int ANALYZE_ERROR = 0xFFFFFFFF;
 
@@ -197,6 +201,73 @@ public class FontFileUtil {
             return 0;
         } else {
             return -1;
+        }
+    }
+
+    private static int getUInt16(ByteBuffer buffer, int offset) {
+        return ((int) buffer.getShort(offset)) & 0xFFFF;
+    }
+
+    /**
+     * Returns supported axes of font
+     *
+     * @param buffer A buffer of the entire font file.
+     * @param index A font index in case of font collection. Must be 0 otherwise.
+     * @return set of supported axes tag. Returns empty set on error.
+     */
+    public static Set<Integer> getSupportedAxes(@NonNull ByteBuffer buffer, int index) {
+        ByteOrder originalOrder = buffer.order();
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        try {
+            int fontFileOffset = 0;
+            int magicNumber = buffer.getInt(0);
+            if (magicNumber == TTC_TAG) {
+                // TTC file.
+                if (index >= buffer.getInt(8 /* offset to number of fonts in TTC */)) {
+                    return Collections.EMPTY_SET;
+                }
+                fontFileOffset = buffer.getInt(
+                        12 /* offset to array of offsets of font files */ + 4 * index);
+            }
+            int sfntVersion = buffer.getInt(fontFileOffset);
+
+            if (sfntVersion != SFNT_VERSION_1 && sfntVersion != SFNT_VERSION_OTTO) {
+                return Collections.EMPTY_SET;
+            }
+
+            int numTables = buffer.getShort(fontFileOffset + 4 /* offset to number of tables */);
+            int fvarTableOffset = -1;
+            for (int i = 0; i < numTables; ++i) {
+                int tableOffset = fontFileOffset + 12 /* size of offset table */
+                        + i * 16 /* size of table record */;
+                if (buffer.getInt(tableOffset) == FVAR_TABLE_TAG) {
+                    fvarTableOffset = buffer.getInt(tableOffset + 8 /* offset to the table */);
+                    break;
+                }
+            }
+
+            if (fvarTableOffset == -1) {
+                // Couldn't find OS/2 table. use regular style
+                return Collections.EMPTY_SET;
+            }
+
+            if (buffer.getShort(fvarTableOffset) != 1
+                    || buffer.getShort(fvarTableOffset + 2) != 0) {
+                return Collections.EMPTY_SET;
+            }
+
+            int axesArrayOffset = getUInt16(buffer, fvarTableOffset + 4);
+            int axisCount = getUInt16(buffer, fvarTableOffset + 8);
+            int axisSize = getUInt16(buffer, fvarTableOffset + 10);
+
+            ArraySet<Integer> axes = new ArraySet<>();
+            for (int i = 0; i < axisCount; ++i) {
+                axes.add(buffer.getInt(fvarTableOffset + axesArrayOffset + axisSize * i));
+            }
+
+            return axes;
+        } finally {
+            buffer.order(originalOrder);
         }
     }
 

@@ -60,7 +60,7 @@ static void FontFamily_Builder_addFont(CRITICAL_JNI_PARAMS_COMMA jlong builderPt
 // Regular JNI
 static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr,
                                       jstring langTags, jint variant, jboolean isCustomFallback,
-                                      jboolean isDefaultFallback) {
+                                      jboolean isDefaultFallback, jint variationFamilyType) {
     std::unique_ptr<NativeFamilyBuilder> builder(toBuilder(builderPtr));
     uint32_t localeId;
     if (langTags == nullptr) {
@@ -71,7 +71,8 @@ static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderP
     }
     std::shared_ptr<minikin::FontFamily> family = minikin::FontFamily::create(
             localeId, static_cast<minikin::FamilyVariant>(variant), std::move(builder->fonts),
-            isCustomFallback, isDefaultFallback);
+            isCustomFallback, isDefaultFallback,
+            static_cast<minikin::VariationFamilyType>(variationFamilyType));
     if (family->getCoverage().length() == 0) {
         // No coverage means minikin rejected given font for some reasons.
         jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -121,7 +122,7 @@ static jlong FontFamily_getFont(CRITICAL_JNI_PARAMS_COMMA jlong familyPtr, jint 
 static const JNINativeMethod gFontFamilyBuilderMethods[] = {
         {"nInitBuilder", "()J", (void*)FontFamily_Builder_initBuilder},
         {"nAddFont", "(JJ)V", (void*)FontFamily_Builder_addFont},
-        {"nBuild", "(JLjava/lang/String;IZZ)J", (void*)FontFamily_Builder_build},
+        {"nBuild", "(JLjava/lang/String;IZZI)J", (void*)FontFamily_Builder_build},
         {"nGetReleaseNativeFamily", "()J", (void*)FontFamily_Builder_GetReleaseFunc},
 };
 

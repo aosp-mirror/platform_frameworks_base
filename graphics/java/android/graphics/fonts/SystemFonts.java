@@ -194,7 +194,7 @@ public final class SystemFonts {
             }
         }
         return b == null ? null : b.build(languageTags, variant, false /* isCustomFallback */,
-                isDefaultFallback);
+                isDefaultFallback, FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
     }
 
     private static void appendNamedFamilyList(@NonNull FontConfig.NamedFamilyList namedFamilyList,
