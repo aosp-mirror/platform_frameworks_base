@@ -222,6 +222,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayPolicy.finishWindowsDrawn();
         displayPolicy.finishScreenTurningOn();
 
+        final InsetsPolicy insetsPolicy = mDefaultDisplay.getInsetsPolicy();
+        suppressInsetsAnimation(insetsPolicy.getTransientControlTarget());
+        suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
+
         mTransaction = mSystemServicesTestRule.mTransaction;
         mMockSession = mock(Session.class);
 
@@ -276,6 +280,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 .setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(false);
 
         checkDeviceSpecificOverridesNotApplied();
+    }
+
+    /**
+     * The test doesn't create real SurfaceControls, but mocked ones. This prevents the target from
+     * controlling them, or it will cause {@link NullPointerException}.
+     */
+    static void suppressInsetsAnimation(InsetsControlTarget target) {
+        spyOn(target);
+        Mockito.doNothing().when(target).notifyInsetsControlChanged();
     }
 
     @After
