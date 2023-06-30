@@ -156,7 +156,12 @@ constructor(
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
-            interpolator = Interpolators.LINEAR
+            interpolator =
+                when (toState) {
+                    KeyguardState.ALTERNATE_BOUNCER -> Interpolators.FAST_OUT_SLOW_IN
+                    else -> Interpolators.LINEAR
+                }
+
             duration =
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION

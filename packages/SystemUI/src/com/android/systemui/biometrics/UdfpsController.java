@@ -85,6 +85,8 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter;
+import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -153,6 +155,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    @NonNull private final Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
     @NonNull private final VibratorHelper mVibrator;
     @NonNull private final FeatureFlags mFeatureFlags;
     @NonNull private final FalsingManager mFalsingManager;
@@ -272,7 +275,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
                             mPrimaryBouncerInteractor, mAlternateBouncerInteractor, mUdfpsUtils,
-                            mUdfpsKeyguardAccessibilityDelegate)));
+                            mUdfpsKeyguardAccessibilityDelegate,
+                            mUdfpsKeyguardViewModels)));
         }
 
         @Override
@@ -784,7 +788,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private boolean shouldTryToDismissKeyguard() {
         return mOverlay != null
                 && mOverlay.getAnimationViewController()
-                instanceof UdfpsKeyguardViewControllerLegacy
+                instanceof UdfpsKeyguardViewControllerAdapter
                 && mKeyguardStateController.canDismissLockScreen()
                 && !mAttemptedToDismissKeyguard;
     }
@@ -829,7 +833,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull InputManager inputManager,
             @NonNull UdfpsUtils udfpsUtils,
             @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
-            @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate) {
+            @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
+            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -895,6 +900,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     return Unit.INSTANCE;
                 });
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mUdfpsKeyguardViewModels = udfpsKeyguardViewModelsProvider;
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);

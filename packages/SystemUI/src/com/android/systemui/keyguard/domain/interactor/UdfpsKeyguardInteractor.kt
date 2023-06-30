@@ -1,0 +1,65 @@
+/*
+ *  Copyright (C) 2023 The Android Open Source Project
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+package com.android.systemui.keyguard.domain.interactor
+
+import android.animation.FloatEvaluator
+import android.animation.IntEvaluator
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+
+/** Encapsulates business logic for transitions between UDFPS states on the keyguard. */
+@ExperimentalCoroutinesApi
+@SysUISingleton
+class UdfpsKeyguardInteractor
+@Inject
+constructor(
+    configRepo: ConfigurationRepository,
+    burnInInteractor: BurnInInteractor,
+    keyguardInteractor: KeyguardInteractor,
+) {
+    private val intEvaluator = IntEvaluator()
+    private val floatEvaluator = FloatEvaluator()
+
+    val dozeAmount = keyguardInteractor.dozeAmount
+    val scaleForResolution = configRepo.scaleForResolution
+
+    /** Burn-in offsets for the UDFPS view to mitigate burn-in on AOD. */
+    val burnInOffsets: Flow<BurnInOffsets> =
+        combine(
+            keyguardInteractor.dozeAmount,
+            burnInInteractor.udfpsBurnInXOffset,
+            burnInInteractor.udfpsBurnInYOffset,
+            burnInInteractor.udfpsBurnInProgress
+        ) { dozeAmount, fullyDozingBurnInX, fullyDozingBurnInY, fullyDozingBurnInProgress ->
+            BurnInOffsets(
+                intEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInX),
+                intEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInY),
+                floatEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInProgress),
+            )
+        }
+}
+
+data class BurnInOffsets(
+    val burnInXOffset: Int, // current x burn in offset based on the aodTransitionAmount
+    val burnInYOffset: Int, // current y burn in offset based on the aodTransitionAmount
+    val burnInProgress: Float, // current progress based on the aodTransitionAmount
+)
