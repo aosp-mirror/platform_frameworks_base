@@ -34,6 +34,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener
@@ -80,7 +81,8 @@ constructor(
         shadeExpansionStateManager,
         systemUIDialogManager,
         dumpManager,
-    ) {
+    ),
+    UdfpsKeyguardViewControllerAdapter {
     private val useExpandedOverlay: Boolean =
         featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
     private var showingUdfpsBouncer = false

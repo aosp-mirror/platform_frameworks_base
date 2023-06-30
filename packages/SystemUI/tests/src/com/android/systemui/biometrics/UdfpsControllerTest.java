@@ -83,13 +83,14 @@ import com.android.systemui.biometrics.udfps.InteractionEvent;
 import com.android.systemui.biometrics.udfps.NormalizedTouchData;
 import com.android.systemui.biometrics.udfps.SinglePointerTouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessorResult;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -219,6 +220,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
+    @Mock
+    private Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -318,7 +321,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
                 mAlternateBouncerInteractor, mSecureSettings, mInputManager, mUdfpsUtils,
                 mock(KeyguardFaceAuthInteractor.class),
-                mUdfpsKeyguardAccessibilityDelegate);
+                mUdfpsKeyguardAccessibilityDelegate, mUdfpsKeyguardViewModels);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
