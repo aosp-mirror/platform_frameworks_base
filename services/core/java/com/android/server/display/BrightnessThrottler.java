@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessInfo;
-import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IThermalEventListener;
@@ -38,6 +37,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.feature.DeviceConfigParameterProvider;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ class BrightnessThrottler {
     private final Runnable mThrottlingChangeCallback;
     private final SkinThermalStatusObserver mSkinThermalStatusObserver;
     private final DeviceConfigListener mDeviceConfigListener;
-    private final DeviceConfigInterface mDeviceConfig;
+    private final DeviceConfigParameterProvider mConfigParameterProvider;
 
     private int mThrottlingStatus;
 
@@ -118,7 +118,7 @@ class BrightnessThrottler {
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(mInjector, mHandler);
 
         mUniqueDisplayId = uniqueDisplayId;
-        mDeviceConfig = injector.getDeviceConfig();
+        mConfigParameterProvider = new DeviceConfigParameterProvider(injector.getDeviceConfig());
         mDeviceConfigListener = new DeviceConfigListener();
         mThermalBrightnessThrottlingDataId = throttlingDataId;
         mDdcThermalThrottlingDataMap = thermalBrightnessThrottlingDataMap;
@@ -145,7 +145,7 @@ class BrightnessThrottler {
 
     void stop() {
         mSkinThermalStatusObserver.stopObserving();
-        mDeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListener);
+        mConfigParameterProvider.removeOnPropertiesChangedListener(mDeviceConfigListener);
         // We're asked to stop throttling, so reset brightness restrictions.
         mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
         mBrightnessMaxReason = BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
@@ -248,12 +248,6 @@ class BrightnessThrottler {
         mSkinThermalStatusObserver.dump(pw);
     }
 
-    private String getThermalBrightnessThrottlingDataString() {
-        return mDeviceConfig.getString(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                DisplayManager.DeviceConfig.KEY_BRIGHTNESS_THROTTLING_DATA,
-                /* defaultValue= */ null);
-    }
-
     // The brightness throttling data id may or may not be specified in the string that is passed
     // in, if there is none specified, we assume it is for the default case. Each string passed in
     // here must be for one display and one throttling id.
@@ -318,7 +312,8 @@ class BrightnessThrottler {
     private void loadThermalBrightnessThrottlingDataFromDeviceConfig() {
         HashMap<String, HashMap<String, ThermalBrightnessThrottlingData>> tempThrottlingData =
                 new HashMap<>(1);
-        mThermalBrightnessThrottlingDataString = getThermalBrightnessThrottlingDataString();
+        mThermalBrightnessThrottlingDataString =
+                mConfigParameterProvider.getBrightnessThrottlingData();
         boolean validConfig = true;
         mThermalBrightnessThrottlingDataOverride.clear();
         if (mThermalBrightnessThrottlingDataString != null) {
@@ -390,8 +385,7 @@ class BrightnessThrottler {
         public Executor mExecutor = new HandlerExecutor(mDeviceConfigHandler);
 
         public void startListening() {
-            mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                    mExecutor, this);
+            mConfigParameterProvider.addOnPropertiesChangedListener(mExecutor, this);
         }
 
         @Override
