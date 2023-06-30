@@ -51,7 +51,11 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
         super.onCreate(savedInstanceState);
 
         // Verify intent is valid
-        mUri = getIntent().getParcelableExtra(SliceProvider.EXTRA_BIND_URI);
+        try {
+            mUri = getIntent().getParcelableExtra(SliceProvider.EXTRA_BIND_URI);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to getParcelableExtra", e);
+        }
         mCallingPkg = getIntent().getStringExtra(SliceProvider.EXTRA_PKG);
         if (mUri == null
                 || !SliceProvider.SLICE_TYPE.equals(getContentResolver().getType(mUri))
