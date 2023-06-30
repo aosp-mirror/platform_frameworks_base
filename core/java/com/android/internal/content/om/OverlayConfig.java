@@ -34,8 +34,15 @@ import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.TriConsumer;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +52,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Responsible for reading overlay configuration files and handling queries of overlay mutability,
@@ -60,6 +71,8 @@ public class OverlayConfig {
     // priority have a higher precedence than configured overlays.
     @VisibleForTesting
     public static final int DEFAULT_PRIORITY = Integer.MAX_VALUE;
+
+    public static final String PARTITION_ORDER_FILE_PATH = "/product/overlay/partition_order.xml";
 
     @VisibleForTesting
     public static final class Configuration {
@@ -119,6 +132,10 @@ public class OverlayConfig {
     // Singleton instance only assigned in system server
     private static OverlayConfig sInstance;
 
+    private final String mPartitionOrder;
+
+    private final boolean mIsDefaultPartitionOrder;
+
     @VisibleForTesting
     public OverlayConfig(@Nullable File rootDirectory,
             @Nullable Supplier<OverlayScanner> scannerFactory,
@@ -137,6 +154,8 @@ public class OverlayConfig {
                             new File(rootDirectory, p.getNonConicalFolder().getPath()),
                             p)));
         }
+        mIsDefaultPartitionOrder = !sortPartitions(PARTITION_ORDER_FILE_PATH, partitions);
+        mPartitionOrder = generatePartitionOrderString(partitions);
 
         ArrayMap<Integer, List<String>> activeApexesPerPartition = getActiveApexes(partitions);
 
@@ -196,6 +215,96 @@ public class OverlayConfig {
             final ParsedConfiguration config = overlays.get(i);
             mConfigurations.put(config.packageName, new Configuration(config, i));
         }
+    }
+
+    private static String generatePartitionOrderString(List<OverlayPartition> partitions) {
+        if (partitions == null || partitions.size() == 0) {
+            return "";
+        }
+        StringBuilder partitionOrder = new StringBuilder();
+        partitionOrder.append(partitions.get(0).getName());
+        for (int i = 1; i < partitions.size(); i++) {
+            partitionOrder.append(", ").append(partitions.get(i).getName());
+        }
+        return partitionOrder.toString();
+    }
+
+    private static boolean parseAndValidatePartitionsOrderXml(String partitionOrderFilePath,
+            Map<String, Integer> orderMap, List<OverlayPartition> partitions) {
+        try {
+            File file = new File(partitionOrderFilePath);
+            if (!file.exists()) {
+                Log.w(TAG, "partition_order.xml does not exist.");
+                return false;
+            }
+            var dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            Element root = doc.getDocumentElement();
+            if (!root.getNodeName().equals("partition-order")) {
+                Log.w(TAG, "Invalid partition_order.xml, "
+                        + "xml root element is not partition-order");
+                return false;
+            }
+
+            NodeList partitionList = doc.getElementsByTagName("partition");
+            for (int order = 0; order < partitionList.getLength(); order++) {
+                Node partitionNode = partitionList.item(order);
+                if (partitionNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element partitionElement = (Element) partitionNode;
+                    String partitionName = partitionElement.getAttribute("name");
+                    if (orderMap.containsKey(partitionName)) {
+                        Log.w(TAG, "Invalid partition_order.xml, "
+                                + "it has duplicate partition: " + partitionName);
+                        return false;
+                    }
+                    orderMap.put(partitionName, order);
+                }
+            }
+
+            if (orderMap.keySet().size() != partitions.size()) {
+                Log.w(TAG, "Invalid partition_order.xml, partition_order.xml has "
+                        + orderMap.keySet().size() + " partitions, "
+                        + "which is different from SYSTEM_PARTITIONS");
+                return false;
+            }
+            for (int i = 0; i < partitions.size(); i++) {
+                if (!orderMap.keySet().contains(partitions.get(i).getName())) {
+                    Log.w(TAG, "Invalid Parsing partition_order.xml, "
+                            + "partition_order.xml does not have partition: "
+                            + partitions.get(i).getName());
+                    return false;
+                }
+            }
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            Log.w(TAG, "Parsing or validating partition_order.xml failed, "
+                    + "exception thrown: " + e.getMessage());
+            return false;
+        }
+        Log.i(TAG, "Sorting partitions in the specified order from partitions_order.xml");
+        return true;
+    }
+
+    /**
+     * Sort partitions by order in partition_order.xml if the file exists.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static boolean sortPartitions(String partitionOrderFilePath,
+            List<OverlayPartition> partitions) {
+        Map<String, Integer> orderMap = new HashMap<>();
+        if (!parseAndValidatePartitionsOrderXml(partitionOrderFilePath, orderMap, partitions)) {
+            return false;
+        }
+
+        Comparator<OverlayPartition> partitionComparator = Comparator.comparingInt(
+                o -> orderMap.get(o.getName()));
+        Collections.sort(partitions, partitionComparator);
+
+        return true;
     }
 
     /**
@@ -476,4 +585,19 @@ public class OverlayConfig {
      */
     private static native String[] createIdmap(@NonNull String targetPath,
             @NonNull String[] overlayPath, @NonNull String[] policies, boolean enforceOverlayable);
+
+    /**
+     * @hide
+     */
+    public boolean isDefaultPartitionOrder() {
+        return mIsDefaultPartitionOrder;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPartitionOrder() {
+        return mPartitionOrder;
+    }
+
 }
