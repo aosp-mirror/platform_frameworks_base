@@ -26,6 +26,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -221,6 +223,40 @@ class UserRepositoryImplTest : SysuiTestCase() {
         )
         tracker.onProfileChanged()
         assertThat(selectedUserInfo?.id).isEqualTo(1)
+    }
+
+    @Test
+    fun userTrackerCallback_updatesSelectionStatus() = runSelfCancelingTest {
+        underTest = create(this)
+        var selectedUser: SelectedUserModel? = null
+        underTest.selectedUser.onEach { selectedUser = it }.launchIn(this)
+        setUpUsers(count = 2, selectedIndex = 1)
+
+        // WHEN the user is changing
+        tracker.onUserChanging(userId = 1)
+
+        // THEN the selection status is IN_PROGRESS
+        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+
+        // WHEN the user has finished changing
+        tracker.onUserChanged(userId = 1)
+
+        // THEN the selection status is COMPLETE
+        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_COMPLETE)
+
+        tracker.onProfileChanged()
+        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_COMPLETE)
+
+        setUpUsers(count = 2, selectedIndex = 0)
+
+        tracker.onUserChanging(userId = 0)
+        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+
+        // WHEN a profile change occurs while a user is changing
+        tracker.onProfileChanged()
+
+        // THEN the selection status remains as IN_PROGRESS
+        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
     }
 
     @Test
