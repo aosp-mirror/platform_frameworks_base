@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
+import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.flags.FakeFeatureFlags
@@ -92,76 +93,97 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        testScope = TestScope()
+        testScope = TestScopeProvider.getTestScope()
 
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         shadeRepository = FakeShadeRepository()
         transitionRepository = spy(FakeKeyguardTransitionRepository())
-        transitionInteractor = KeyguardTransitionInteractor(
-                transitionRepository, testScope.backgroundScope)
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
         featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
 
-        fromLockscreenTransitionInteractor = FromLockscreenTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-                shadeRepository = shadeRepository,
-        ).apply { start() }
+        transitionInteractor =
+            KeyguardTransitionInteractorFactory.create(
+                    scope = testScope,
+                    repository = transitionRepository,
+                )
+                .keyguardTransitionInteractor
 
-        fromPrimaryBouncerTransitionInteractor = FromPrimaryBouncerTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-                keyguardSecurityModel = keyguardSecurityModel,
-        ).apply { start() }
+        fromLockscreenTransitionInteractor =
+            FromLockscreenTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                    shadeRepository = shadeRepository,
+                )
+                .apply { start() }
 
-        fromDreamingTransitionInteractor = FromDreamingTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-        ).apply { start() }
+        fromPrimaryBouncerTransitionInteractor =
+            FromPrimaryBouncerTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                    keyguardSecurityModel = keyguardSecurityModel,
+                )
+                .apply { start() }
 
-        fromAodTransitionInteractor = FromAodTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-        ).apply { start() }
+        fromDreamingTransitionInteractor =
+            FromDreamingTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
 
-        fromGoneTransitionInteractor = FromGoneTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-        ).apply { start() }
+        fromAodTransitionInteractor =
+            FromAodTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
 
-        fromDozingTransitionInteractor = FromDozingTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-        ).apply { start() }
+        fromGoneTransitionInteractor =
+            FromGoneTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
 
-        fromOccludedTransitionInteractor = FromOccludedTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-        ).apply { start() }
+        fromDozingTransitionInteractor =
+            FromDozingTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
 
-        fromAlternateBouncerTransitionInteractor = FromAlternateBouncerTransitionInteractor(
-                scope = testScope,
-                keyguardInteractor = createKeyguardInteractor(),
-                transitionRepository = transitionRepository,
-                transitionInteractor = transitionInteractor,
-        ).apply { start() }
+        fromOccludedTransitionInteractor =
+            FromOccludedTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
+
+        fromAlternateBouncerTransitionInteractor =
+            FromAlternateBouncerTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
     }
 
     @Test
