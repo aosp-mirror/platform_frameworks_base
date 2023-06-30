@@ -53,6 +53,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.keyboard.KeyboardModule;
+import com.android.systemui.keyguard.ui.view.layout.LockscreenLayoutModule;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
@@ -177,6 +178,7 @@ import javax.inject.Named;
             GarbageMonitorModule.class,
             KeyboardModule.class,
             LetterboxModule.class,
+            LockscreenLayoutModule.class,
             LogModule.class,
             MediaProjectionModule.class,
             MotionToolModule.class,
