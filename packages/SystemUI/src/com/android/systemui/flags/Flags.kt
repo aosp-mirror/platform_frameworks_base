@@ -780,6 +780,11 @@ object Flags {
     val ENABLE_NEW_PRIVACY_DIALOG =
             unreleasedFlag(283740863, "enable_new_privacy_dialog", teamfood = false)
 
+    // TODO(b/289573946): Tracking Bug
+    @JvmField
+    val PRECOMPUTED_TEXT =
+        unreleasedFlag(289573946, "precomputed_text")
+
     // 2900 - CentralSurfaces-related flags
 
     // TODO(b/285174336): Tracking Bug
