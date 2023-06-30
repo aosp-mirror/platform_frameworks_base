@@ -139,6 +139,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -538,6 +539,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private CentralSurfaces mCentralSurfaces;
 
+    private IRemoteAnimationFinishedCallback mUnoccludeFromDreamFinishedCallback;
+
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
             @Override
@@ -642,6 +645,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             switch (simState) {
                 case TelephonyManager.SIM_STATE_NOT_READY:
                 case TelephonyManager.SIM_STATE_ABSENT:
+                case TelephonyManager.SIM_STATE_UNKNOWN:
+                    mPendingPinLock = false;
                     // only force lock screen in case of missing sim if user hasn't
                     // gone through setup wizard
                     synchronized (KeyguardViewMediator.this) {
@@ -705,9 +710,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             resetStateLocked();
                         }
                     }
-                    break;
-                case TelephonyManager.SIM_STATE_UNKNOWN:
-                    mPendingPinLock = false;
                     break;
                 default:
                     if (DEBUG_SIM_STATES) Log.v(TAG, "Unspecific state: " + simState);
@@ -1165,6 +1167,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             getRemoteSurfaceAlphaApplier().accept(0.0f);
                             mDreamingToLockscreenTransitionViewModel.get()
                                     .startTransition();
+                            mUnoccludeFromDreamFinishedCallback = finishedCallback;
                             return;
                         }
 
@@ -1241,6 +1244,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             .Builder(mRemoteAnimationTarget.leash)
                             .withAlpha(alpha).build();
             applier.scheduleApply(params);
+        };
+    }
+
+    private Consumer<TransitionStep> getFinishedCallbackConsumer() {
+        return (TransitionStep step) -> {
+            if (mUnoccludeFromDreamFinishedCallback == null) return;
+            try {
+                mUnoccludeFromDreamFinishedCallback.onAnimationFinished();
+                mUnoccludeFromDreamFinishedCallback = null;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Wasn't able to callback", e);
+            }
+            mInteractionJankMonitor.end(CUJ_LOCKSCREEN_OCCLUSION);
         };
     }
 
@@ -1503,6 +1519,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 collectFlow(viewRootImpl.getView(),
                         mDreamingToLockscreenTransitionViewModel.get().getDreamOverlayAlpha(),
                         getRemoteSurfaceAlphaApplier(), mMainDispatcher);
+                collectFlow(viewRootImpl.getView(),
+                        mDreamingToLockscreenTransitionViewModel.get().getTransitionEnded(),
+                        getFinishedCallbackConsumer(), mMainDispatcher);
             }
         }
         // Most services aren't available until the system reaches the ready state, so we
