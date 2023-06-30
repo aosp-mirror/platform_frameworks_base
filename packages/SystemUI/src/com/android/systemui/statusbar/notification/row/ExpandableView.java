@@ -367,7 +367,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      *                             such that the  child appears to be going away to the top. 1
      *                             Should mean the opposite.
      * @param isHeadsUpAnimation Is this a headsUp animation.
-     * @param endLocation The location where the horizonal heads up disappear animation should end.
      * @param onFinishedRunnable A runnable which should be run when the animation is finished.
      * @param animationListener An animation listener to add to the animation.
      *
@@ -375,7 +374,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      * animation starts.
      */
     public abstract long performRemoveAnimation(long duration,
-            long delay, float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            long delay, float translationDirection, boolean isHeadsUpAnimation,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener);
 
