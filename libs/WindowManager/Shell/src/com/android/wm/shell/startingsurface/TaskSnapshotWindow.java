@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.graphics.Color.WHITE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -77,6 +78,13 @@ public class TaskSnapshotWindow {
             @NonNull Runnable clearWindowHandler) {
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
         final int taskId = runningTaskInfo.taskId;
+
+        // if we're in PIP we don't want to create the snapshot
+        if (runningTaskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                    "did not create taskSnapshot due to being in PIP");
+            return null;
+        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                 "create taskSnapshot surface for task: %d", taskId);
 
