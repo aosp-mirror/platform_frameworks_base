@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.close
 
 import android.platform.test.annotations.FlakyTest
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.common.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
