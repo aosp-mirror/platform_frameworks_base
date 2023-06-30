@@ -1037,7 +1037,7 @@ public class UserManagerService extends IUserManager.Stub {
                 final UserData userData = mUsers.valueAt(i);
                 final int userId = userData.info.id;
                 if (userId != currentUser && userData.info.isFull() && !userData.info.partial
-                        && !mRemovingUserIds.get(userId)) {
+                        && userData.info.isEnabled() && !mRemovingUserIds.get(userId)) {
                     final long userEnteredTime = userData.mLastEnteredForegroundTimeMillis;
                     if (userEnteredTime > latestEnteredTime) {
                         latestEnteredTime = userEnteredTime;
@@ -5636,8 +5636,14 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    @GuardedBy("mUsersLock")
     @VisibleForTesting
+    void addRemovingUserId(@UserIdInt int userId) {
+        synchronized (mUsersLock) {
+            addRemovingUserIdLocked(userId);
+        }
+    }
+
+    @GuardedBy("mUsersLock")
     void addRemovingUserIdLocked(@UserIdInt int userId) {
         // We remember deleted user IDs to prevent them from being
         // reused during the current boot; they can still be reused
