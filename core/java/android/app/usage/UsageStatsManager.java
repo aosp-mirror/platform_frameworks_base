@@ -642,6 +642,19 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Returns whether the app standby bucket feature is enabled.
+     * @hide
+     */
+    @TestApi
+    public boolean isAppStandbyEnabled() {
+        try {
+            return mService.isAppStandbyEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether the specified app is currently considered inactive. This will be true if the
      * app hasn't been used directly or indirectly for a period of time defined by the system. This
      * could be of the order of several hours or days. Apps are not considered inactive when the
