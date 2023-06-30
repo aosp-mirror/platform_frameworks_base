@@ -69,11 +69,14 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
         canvas.clipPath(clipPath)
     }
 
-
-    override fun performRemoveAnimation(duration: Long, delay: Long, translationDirection: Float,
-                                        isHeadsUpAnimation: Boolean, endLocation: Float,
-                                        onFinishedRunnable: Runnable?,
-                                        animationListener: AnimatorListenerAdapter?): Long {
+    override fun performRemoveAnimation(
+            duration: Long,
+            delay: Long,
+            translationDirection: Float,
+            isHeadsUpAnimation: Boolean,
+            onFinishedRunnable: Runnable?,
+            animationListener: AnimatorListenerAdapter?
+    ): Long {
         return 0
     }
 
