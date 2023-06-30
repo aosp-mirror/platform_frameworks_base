@@ -27,6 +27,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -44,6 +45,12 @@ class PackageMonitorCallbackHelper {
     @NonNull
     private final Object mLock = new Object();
     final IActivityManager mActivityManager = ActivityManager.getService();
+
+    final Handler mHandler;
+
+    PackageMonitorCallbackHelper(PackageManagerServiceInjector injector) {
+        mHandler = injector.getHandler();
+    }
 
     @NonNull
     @GuardedBy("mLock")
@@ -149,13 +156,14 @@ class PackageMonitorCallbackHelper {
                 intent.putExtra(Intent.EXTRA_UID, uid);
             }
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            callbacks.broadcast((callback, user) -> {
+
+            mHandler.post(() -> callbacks.broadcast((callback, user) -> {
                 int registerUserId = (int) user;
                 if ((registerUserId != UserHandle.USER_ALL) && (registerUserId != userId)) {
                     return;
                 }
                 invokeCallback(callback, intent);
-            });
+            }));
         }
     }
 

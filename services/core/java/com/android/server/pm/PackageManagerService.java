@@ -712,8 +712,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final PackageObserverHelper mPackageObserverHelper = new PackageObserverHelper();
 
     @NonNull
-    private final PackageMonitorCallbackHelper mPackageMonitorCallbackHelper =
-            new PackageMonitorCallbackHelper();
+    private final PackageMonitorCallbackHelper mPackageMonitorCallbackHelper;
 
     private final ModuleInfoProvider mModuleInfoProvider;
 
@@ -1837,6 +1836,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
         mStorageEventHelper = testParams.storageEventHelper;
+        mPackageMonitorCallbackHelper = testParams.packageMonitorCallbackHelper;
 
         registerObservers(false);
         invalidatePackageInfoCache();
@@ -1977,6 +1977,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDomainVerificationManager.setConnection(mDomainVerificationConnection);
 
         mBroadcastHelper = new BroadcastHelper(mInjector);
+        mPackageMonitorCallbackHelper = new PackageMonitorCallbackHelper(mInjector);
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
