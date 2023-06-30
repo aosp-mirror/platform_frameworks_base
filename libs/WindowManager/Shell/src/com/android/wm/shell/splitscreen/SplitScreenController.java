@@ -616,8 +616,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                         Toast.LENGTH_SHORT).show();
             }
         }
-        mStageCoordinator.startShortcutAndTask(shortcutInfo, options1, taskId, options2,
-                splitPosition, splitRatio, remoteTransition, instanceId);
+        mStageCoordinator.startShortcutAndTask(shortcutInfo, activityOptions.toBundle(), taskId,
+                options2, splitPosition, splitRatio, remoteTransition, instanceId);
     }
 
     /**
