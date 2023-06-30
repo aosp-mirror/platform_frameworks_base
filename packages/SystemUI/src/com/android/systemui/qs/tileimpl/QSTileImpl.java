@@ -330,7 +330,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         final int eventId = mClickEventId++;
         mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state,
                 eventId);
-        mHandler.obtainMessage(H.LONG_CLICK, eventId, 0, view).sendToTarget();
+        if (!mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
+            mHandler.obtainMessage(H.LONG_CLICK, eventId, 0, view).sendToTarget();
+        }
     }
 
     public LogMaker populate(LogMaker logMaker) {
