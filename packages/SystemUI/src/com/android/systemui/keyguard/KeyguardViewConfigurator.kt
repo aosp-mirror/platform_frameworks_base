@@ -59,7 +59,7 @@ constructor(
         // At startup, 2 views with the ID `R.id.keyguard_indication_area` will be available.
         // Disable one of them
         if (featureFlags.isEnabled(Flags.MIGRATE_INDICATION_AREA)) {
-            legacyParent.requireViewById<View>(R.id.keyguard_indication_area).let {
+            legacyParent.findViewById<View>(R.id.keyguard_indication_area)?.let {
                 legacyParent.removeView(it)
             }
         } else {

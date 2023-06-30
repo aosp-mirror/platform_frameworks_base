@@ -67,6 +67,12 @@ abstract class ShadeModule {
     @ClassKey(AuthRippleController::class)
     abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
 
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeViewController(
+        notificationPanelViewController: NotificationPanelViewController
+    ): ShadeViewController
+
     companion object {
         const val SHADE_HEADER = "large_screen_shade_header"
 
