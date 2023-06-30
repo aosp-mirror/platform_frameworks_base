@@ -1993,11 +1993,7 @@ class ActivityStarter {
             }
         }
 
-        boolean shouldBlockActivityStart = true;
-        // Used for logging/toasts. Would we block the start if target sdk was U and feature was
-        // enabled?
-        boolean wouldBlockActivityStartIgnoringFlags = true;
-
+        Pair<Boolean, Boolean> pair = null;
         if (mSourceRecord != null) {
             boolean passesAsmChecks = true;
             Task sourceTask = mSourceRecord.getTask();
@@ -2013,14 +2009,25 @@ class ActivityStarter {
 
             if (passesAsmChecks) {
                 Task taskToCheck = taskToFront ? sourceTask : targetTask;
-                // first == false means Should Block
-                // second == false means Would Block disregarding flags
-                Pair<Boolean, Boolean> pair = ActivityTaskSupervisor
+                pair = ActivityTaskSupervisor
                         .doesTopActivityMatchingUidExistForAsm(taskToCheck, mSourceRecord.getUid(),
                                 mSourceRecord);
-                shouldBlockActivityStart = !pair.first;
-                wouldBlockActivityStartIgnoringFlags = !pair.second;
             }
+        } else if (!taskToFront) {
+            // We don't have a sourceRecord, and we're launching into an existing task.
+            // Allow if callingUid is top of stack.
+            pair = ActivityTaskSupervisor
+                    .doesTopActivityMatchingUidExistForAsm(targetTask, mCallingUid,
+                            /*sourceRecord*/null);
+        }
+
+        boolean shouldBlockActivityStart = true;
+        if (pair != null) {
+            // We block if feature flag is enabled
+            shouldBlockActivityStart = !pair.first;
+            // Used for logging/toasts. Would we block if target sdk was U and feature was
+            // enabled? If so, we can't return here but we also might not block at the end
+            boolean wouldBlockActivityStartIgnoringFlags = !pair.second;
 
             if (!wouldBlockActivityStartIgnoringFlags) {
                 return true;
