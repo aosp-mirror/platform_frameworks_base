@@ -27,10 +27,11 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
-
-import javax.inject.Inject;
+import com.android.systemui.statusbar.KeyboardShortcuts;
 
 import dagger.Lazy;
+
+import javax.inject.Inject;
 
 /**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav.
@@ -77,5 +78,10 @@ public class TvStatusBar implements CoreStartable, CommandQueue.Callbacks {
         mContext.sendBroadcast(
                 new Intent(ACTION_SHOW_PIP_MENU).setPackage(mContext.getPackageName()),
                 SYSTEMUI_PERMISSION);
+    }
+
+    @Override
+    public void toggleKeyboardShortcutsMenu(int deviceId) {
+        KeyboardShortcuts.show(mContext, deviceId);
     }
 }

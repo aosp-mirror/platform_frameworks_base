@@ -440,10 +440,15 @@ public final class KeyboardShortcuts {
                 mContext.getString(R.string.keyboard_shortcut_group_system_back),
                 KeyEvent.KEYCODE_DEL,
                 KeyEvent.META_META_ON));
-        systemGroup.addItem(new KeyboardShortcutInfo(
-                mContext.getString(R.string.keyboard_shortcut_group_system_recents),
-                KeyEvent.KEYCODE_TAB,
-                KeyEvent.META_ALT_ON));
+
+        // Some devices (like TV) don't have recents
+        if (mContext.getResources().getBoolean(com.android.internal.R.bool.config_hasRecents)) {
+            systemGroup.addItem(new KeyboardShortcutInfo(
+                    mContext.getString(R.string.keyboard_shortcut_group_system_recents),
+                    KeyEvent.KEYCODE_TAB,
+                    KeyEvent.META_ALT_ON));
+        }
+
         systemGroup.addItem(new KeyboardShortcutInfo(
                 mContext.getString(
                         R.string.keyboard_shortcut_group_system_notifications),
@@ -683,8 +688,10 @@ public final class KeyboardShortcuts {
                 ViewGroup shortcutItemsContainer = (ViewGroup) shortcutView
                         .findViewById(R.id.keyboard_shortcuts_item_container);
                 final int shortcutKeysSize = shortcutKeys.size();
+                final List<String> humanReadableShortcuts = new ArrayList<>();
                 for (int k = 0; k < shortcutKeysSize; k++) {
                     StringDrawableContainer shortcutRepresentation = shortcutKeys.get(k);
+                    humanReadableShortcuts.add(shortcutRepresentation.mString);
                     if (shortcutRepresentation.mDrawable != null) {
                         ImageView shortcutKeyIconView = (ImageView) inflater.inflate(
                                 R.layout.keyboard_shortcuts_key_icon_view, shortcutItemsContainer,
@@ -714,6 +721,11 @@ public final class KeyboardShortcuts {
                         shortcutItemsContainer.addView(shortcutKeyTextView);
                     }
                 }
+                CharSequence contentDescription = info.getLabel();
+                if (!humanReadableShortcuts.isEmpty()) {
+                    contentDescription += ": " + String.join(", ", humanReadableShortcuts);
+                }
+                shortcutView.setContentDescription(contentDescription);
                 shortcutContainer.addView(shortcutView);
             }
             keyboardShortcutsLayout.addView(shortcutContainer);
