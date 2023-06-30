@@ -168,6 +168,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     /** Volume dialog slider animation. */
     private static final String TYPE_UPDATE = "update";
 
+    /**
+     *  TODO(b/290612381): remove lingering animations or tolerate them
+     *  When false, this will cause this class to not listen to animator events and not record jank
+     *  events. This should never be false in production code, and only is false for unit tests for
+     *  this class. This flag should be true in Scenario/Integration tests.
+     */
+    private final boolean mShouldListenForJank;
     private final int mDialogShowAnimationDurationMs;
     private final int mDialogHideAnimationDurationMs;
     private int mDialogWidth;
@@ -304,6 +311,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             VolumePanelFactory volumePanelFactory,
             ActivityStarter activityStarter,
             InteractionJankMonitor interactionJankMonitor,
+            boolean shouldListenForJank,
             CsdWarningDialog.Factory csdWarningDialogFactory,
             DevicePostureController devicePostureController,
             Looper looper,
@@ -311,6 +319,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
+
+        mShouldListenForJank = shouldListenForJank;
         mController = volumeDialogController;
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -1368,7 +1378,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private Animator.AnimatorListener getJankListener(View v, String type, long timeout) {
-        return new Animator.AnimatorListener() {
+        if (!mShouldListenForJank) {
+            // TODO(b/290612381): temporary fix to prevent null pointers on leftover JankMonitors
+            return null;
+        } else return new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
                 if (!v.isAttachedToWindow()) {
