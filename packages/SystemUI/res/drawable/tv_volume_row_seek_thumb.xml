@@ -14,6 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+<!-- TODO(b/289498394) move this to the TvSystemUI target -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
     <solid android:color="@color/tv_volume_dialog_accent" />
     <size android:width="@dimen/tv_volume_seek_bar_thumb_diameter"

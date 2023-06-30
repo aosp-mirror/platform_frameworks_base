@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 -->
+<!-- TODO(b/289498394) move this to the TvSystemUI target -->
 <resources>
     <color name="recents_tv_card_background_color">#FF263238</color>
     <color name="recents_tv_card_title_text_color">#CCEEEEEE</color>
@@ -32,8 +33,4 @@
     <color name="tv_volume_dialog_seek_bar_background">#A03C4043</color>
     <color name="tv_volume_dialog_seek_bar_fill">#FFF8F9FA</color>
     <color name="tv_volume_dialog_accent">#FFDADCE0</color>
-
-    <color name="tv_notification_default_background_color">#383838</color>
-    <color name="tv_notification_blur_background_color">#a0383838</color>
-    <color name="tv_notification_text_color">#FFFFFF</color>
 </resources>
