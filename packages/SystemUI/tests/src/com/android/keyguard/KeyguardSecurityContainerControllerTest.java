@@ -62,12 +62,12 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -395,6 +395,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         // WHEN a request is made from the SimPin screens to show the next security method
         when(mKeyguardSecurityModel.getSecurityMode(TARGET_USER_ID)).thenReturn(SecurityMode.None);
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true);
         mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
                 /* authenticated= */true,
                 TARGET_USER_ID,
@@ -421,6 +422,28 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         assertThat(keyguardDone).isEqualTo(false);
         verify(mKeyguardUpdateMonitor, never()).getUserHasTrust(anyInt());
     }
+
+    @Test
+    public void showNextSecurityScreenOrFinish_SimPin_Swipe() {
+        // GIVEN the current security method is SimPin
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID)).thenReturn(false);
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.SimPin);
+
+        // WHEN a request is made from the SimPin screens to show the next security method
+        when(mKeyguardSecurityModel.getSecurityMode(TARGET_USER_ID)).thenReturn(SecurityMode.None);
+        // WHEN security method is SWIPE
+        when(mLockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false);
+        mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
+                /* authenticated= */true,
+                TARGET_USER_ID,
+                /* bypassSecondaryLockScreen= */true,
+                SecurityMode.SimPin);
+
+        // THEN the next security method of None will dismiss keyguard.
+        verify(mViewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt());
+    }
+
 
     @Test
     public void onSwipeUp_whenFaceDetectionIsNotRunning_initiatesFaceAuth() {

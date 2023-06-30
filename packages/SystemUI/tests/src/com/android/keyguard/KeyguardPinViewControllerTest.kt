@@ -97,7 +97,21 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(keyguardPinView.findViewById<NumPadButton>(R.id.delete_button))
             .thenReturn(deleteButton)
         `when`(keyguardPinView.findViewById<View>(R.id.key_enter)).thenReturn(enterButton)
-        constructViewController()
+        pinViewController =
+            KeyguardPinViewController(
+                keyguardPinView,
+                keyguardUpdateMonitor,
+                securityMode,
+                lockPatternUtils,
+                mKeyguardSecurityCallback,
+                keyguardMessageAreaControllerFactory,
+                mLatencyTracker,
+                liftToActivateListener,
+                mEmergencyButtonController,
+                falsingCollector,
+                postureController,
+                featureFlags
+            )
     }
 
     @Test
@@ -121,10 +135,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(3)
         `when`(passwordTextView.text).thenReturn("")
-        constructViewController()
 
         pinViewController.startAppearAnimation()
-
         verify(deleteButton).visibility = View.INVISIBLE
         verify(enterButton).visibility = View.INVISIBLE
         verify(passwordTextView).setUsePinShapes(true)
@@ -138,10 +150,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(6)
         `when`(passwordTextView.text).thenReturn("")
-        constructViewController()
 
         pinViewController.startAppearAnimation()
-
         verify(deleteButton).visibility = View.VISIBLE
         verify(enterButton).visibility = View.VISIBLE
         verify(passwordTextView).setUsePinShapes(true)
@@ -152,23 +162,5 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     fun handleLockout_readsNumberOfErrorAttempts() {
         pinViewController.handleAttemptLockout(0)
         verify(lockPatternUtils).getCurrentFailedPasswordAttempts(anyInt())
-    }
-
-    fun constructViewController() {
-        pinViewController =
-            KeyguardPinViewController(
-                keyguardPinView,
-                keyguardUpdateMonitor,
-                securityMode,
-                lockPatternUtils,
-                mKeyguardSecurityCallback,
-                keyguardMessageAreaControllerFactory,
-                mLatencyTracker,
-                liftToActivateListener,
-                mEmergencyButtonController,
-                falsingCollector,
-                postureController,
-                featureFlags
-            )
     }
 }
