@@ -41,13 +41,12 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
@@ -210,10 +209,10 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor =
-                    KeyguardTransitionInteractor(
-                        repository = FakeKeyguardTransitionRepository(),
-                        scope = testScope.backgroundScope
-                    ),
+                    KeyguardTransitionInteractorFactory.create(
+                            scope = TestScope().backgroundScope,
+                        )
+                        .keyguardTransitionInteractor,
                 repository = repository,
                 logger = UiEventLoggerFake(),
                 featureFlags = featureFlags,
