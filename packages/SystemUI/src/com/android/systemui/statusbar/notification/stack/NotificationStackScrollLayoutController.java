@@ -411,7 +411,8 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
-    private final NotificationSwipeHelper.NotificationCallback mNotificationCallback =
+    @VisibleForTesting
+    final NotificationSwipeHelper.NotificationCallback mNotificationCallback =
             new NotificationSwipeHelper.NotificationCallback() {
 
                 @Override
@@ -470,10 +471,11 @@ public class NotificationStackScrollLayoutController {
                  */
 
                 public void handleChildViewDismissed(View view) {
+                    // The View needs to clean up the Swipe states, e.g. roundness.
+                    mView.onSwipeEnd();
                     if (mView.getClearAllInProgress()) {
                         return;
                     }
-                    mView.onSwipeEnd();
                     if (view instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                         if (row.isHeadsUp()) {
