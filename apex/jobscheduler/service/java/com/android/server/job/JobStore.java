@@ -1118,6 +1118,7 @@ public final class JobStore {
             }
             boolean needFileMigration = false;
             long nowElapsed = sElapsedRealtimeClock.millis();
+            int numDuplicates = 0;
             synchronized (mLock) {
                 for (File file : files) {
                     final AtomicFile aFile = createJobFile(file);
@@ -1126,6 +1127,16 @@ public final class JobStore {
                         if (jobs != null) {
                             for (int i = 0; i < jobs.size(); i++) {
                                 JobStatus js = jobs.get(i);
+                                final JobStatus existingJob = this.jobSet.get(
+                                        js.getUid(), js.getNamespace(), js.getJobId());
+                                if (existingJob != null) {
+                                    numDuplicates++;
+                                    // Jobs are meant to have unique uid-namespace-jobId
+                                    // combinations, but we've somehow read multiple jobs with the
+                                    // combination. Drop the latter one since keeping both will
+                                    // result in other issues.
+                                    continue;
+                                }
                                 js.prepareLocked();
                                 js.enqueueTime = nowElapsed;
                                 this.jobSet.add(js);
@@ -1172,6 +1183,10 @@ public final class JobStore {
             Slog.i(TAG, "Read " + numJobs + " jobs");
             if (needFileMigration) {
                 migrateJobFilesAsync();
+            }
+
+            if (numDuplicates > 0) {
+                Slog.wtf(TAG, "Encountered " + numDuplicates + " duplicate persisted jobs");
             }
 
             // Log the count immediately after loading from boot.
