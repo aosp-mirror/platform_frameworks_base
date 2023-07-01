@@ -1525,6 +1525,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         // Handle animation package
         if (part.animation != nullptr) {
@@ -1601,8 +1602,10 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 if (r > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
-                    glGenTextures(1, &frame.tid);
-                    glBindTexture(GL_TEXTURE_2D, frame.tid);
+                    if (part.count != 1) {
+                        glGenTextures(1, &frame.tid);
+                        glBindTexture(GL_TEXTURE_2D, frame.tid);
+                    }
                     int w, h;
                     // Set decoding option to alpha unpremultiplied so that the R, G, B channels
                     // of transparent pixels are preserved.
