@@ -173,9 +173,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    void const* mapbase = MAP_FAILED;
-    ssize_t mapsize = -1;
-
     void* base = NULL;
 
     // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
@@ -255,9 +252,6 @@ int main(int argc, char** argv)
         }
     }
     close(fd);
-    if (mapbase != MAP_FAILED) {
-        munmap((void *)mapbase, mapsize);
-    }
 
     return 0;
 }
