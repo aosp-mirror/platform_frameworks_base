@@ -30,6 +30,7 @@ import android.content.res.Resources.Theme;
 import android.content.res.XmlResourceParser;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.InflateException;
 
@@ -153,6 +154,18 @@ public class AnimationUtils {
     public static long getExpectedPresentationTimeNanos() {
         AnimationState state = sAnimationState.get();
         return state.mExpectedPresentationTimeNanos;
+    }
+
+    /**
+     * The expected presentation time of a frame in the {@link SystemClock#uptimeMillis()}.
+     * Developers should prefer using this method over {@link #currentAnimationTimeMillis()}
+     * because it offers a more accurate time for the calculating animation progress.
+     *
+     * @return the expected presentation time of a frame in the
+     *         {@link SystemClock#uptimeMillis()} time base.
+     */
+    public static long getExpectedPresentationTimeMillis() {
+        return getExpectedPresentationTimeNanos() / TimeUtils.NANOS_PER_MS;
     }
 
     /**
