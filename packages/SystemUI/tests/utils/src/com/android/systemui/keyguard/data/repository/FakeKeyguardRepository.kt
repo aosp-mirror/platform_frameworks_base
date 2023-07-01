@@ -187,6 +187,10 @@ class FakeKeyguardRepository : KeyguardRepository {
         _statusBarState.value = state
     }
 
+    fun setKeyguardUnlocked(isUnlocked: Boolean) {
+        _isKeyguardUnlocked.value = isUnlocked
+    }
+
     override fun isUdfpsSupported(): Boolean {
         return _isUdfpsSupported.value
     }

@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
@@ -43,7 +44,9 @@ constructor(
 
     /** Sets the scene in the container with the given name. */
     fun setCurrentScene(containerName: String, scene: SceneModel) {
+        val currentSceneKey = repository.currentScene(containerName).value.key
         repository.setCurrentScene(containerName, scene)
+        repository.setSceneTransition(containerName, from = currentSceneKey, to = scene.key)
     }
 
     /** The current scene in the container with the given name. */
@@ -69,5 +72,14 @@ constructor(
     /** Progress of the transition into the current scene in the container with the given name. */
     fun sceneTransitionProgress(containerName: String): StateFlow<Float> {
         return repository.sceneTransitionProgress(containerName)
+    }
+
+    /**
+     * Scene transitions as pairs of keys. A new value is emitted exactly once, each time a scene
+     * transition occurs. The flow begins with a `null` value at first, because the initial scene is
+     * not something that we transition to from another scene.
+     */
+    fun sceneTransitions(containerName: String): StateFlow<SceneTransitionModel?> {
+        return repository.sceneTransitions(containerName)
     }
 }

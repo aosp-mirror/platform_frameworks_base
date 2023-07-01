@@ -16,7 +16,6 @@
 
 package com.android.systemui.bouncer.data.repository
 
-import com.android.systemui.bouncer.shared.model.AuthenticationThrottledModel
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,15 +29,7 @@ class BouncerRepository @Inject constructor() {
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<String?> = _message.asStateFlow()
 
-    private val _throttling = MutableStateFlow<AuthenticationThrottledModel?>(null)
-    /** The current authentication throttling state. If `null`, there's no throttling. */
-    val throttling: StateFlow<AuthenticationThrottledModel?> = _throttling.asStateFlow()
-
     fun setMessage(message: String?) {
         _message.value = message
-    }
-
-    fun setThrottling(throttling: AuthenticationThrottledModel?) {
-        _throttling.value = throttling
     }
 }

@@ -20,11 +20,16 @@ import android.app.admin.DevicePolicyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -47,22 +52,54 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun getAuthenticationMethod() =
         testScope.runTest {
-            assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.Pin(1234))
+            assertThat(underTest.getAuthenticationMethod()).isEqualTo(AuthenticationMethodModel.Pin)
 
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password("password")
+                AuthenticationMethodModel.Password
             )
+
             assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.Password("password"))
+                .isEqualTo(AuthenticationMethodModel.Password)
         }
 
     @Test
-    fun isUnlocked_whenAuthMethodIsNone_isTrue() =
+    fun getAuthenticationMethod_noneTreatedAsSwipe_whenLockscreenEnabled() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setLockscreenEnabled(true)
+
+            assertThat(underTest.getAuthenticationMethod())
+                .isEqualTo(AuthenticationMethodModel.Swipe)
+        }
+
+    @Test
+    fun getAuthenticationMethod_none_whenLockscreenDisabled() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setLockscreenEnabled(false)
+
+            assertThat(underTest.getAuthenticationMethod())
+                .isEqualTo(AuthenticationMethodModel.None)
+        }
+
+    @Test
+    fun isUnlocked_whenAuthMethodIsNoneAndLockscreenDisabled_isTrue() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setLockscreenEnabled(false)
+
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             assertThat(isUnlocked).isTrue()
+        }
+
+    @Test
+    fun isUnlocked_whenAuthMethodIsNoneAndLockscreenEnabled_isFalse() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setLockscreenEnabled(true)
+
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            assertThat(isUnlocked).isFalse()
         }
 
     @Test
@@ -84,7 +121,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password("password")
+                AuthenticationMethodModel.Password
             )
 
             assertThat(underTest.isAuthenticationRequired()).isTrue()
@@ -106,7 +143,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password("password")
+                AuthenticationMethodModel.Password
             )
 
             assertThat(underTest.isAuthenticationRequired()).isFalse()
@@ -125,49 +162,33 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPin_returnsTrue() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
-
+            val isThrottled by collectLastValue(underTest.isThrottled)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            assertThat(isThrottled).isFalse()
         }
 
     @Test
     fun authenticate_withIncorrectPin_returnsFalse() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
-
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
         }
 
-    @Test
-    fun authenticate_withEmptyPin_returnsFalse() =
+    @Test(expected = IllegalArgumentException::class)
+    fun authenticate_withEmptyPin_throwsException() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
-
-            assertThat(underTest.authenticate(listOf())).isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            underTest.authenticate(listOf())
         }
 
     @Test
     fun authenticate_withCorrectMaxLengthPin_returnsTrue() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(9999999999999999)
-            )
-
-            assertThat(underTest.authenticate(List(16) { 9 })).isTrue()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            val pin = List(16) { 9 }
+            utils.authenticationRepository.overrideCredential(pin)
+            assertThat(underTest.authenticate(pin)).isTrue()
         }
 
     @Test
@@ -179,105 +200,47 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // If the policy changes, there is work to do in SysUI.
             assertThat(DevicePolicyManager.MAX_PASSWORD_LENGTH).isLessThan(17)
 
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(99999999999999999)
-            )
-
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(underTest.authenticate(List(17) { 9 })).isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
     fun authenticate_withCorrectPassword_returnsTrue() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
+            val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password("password")
+                AuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("password".toList())).isTrue()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            assertThat(isThrottled).isFalse()
         }
 
     @Test
     fun authenticate_withIncorrectPassword_returnsFalse() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password("password")
+                AuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("alohomora".toList())).isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
         }
 
     @Test
     fun authenticate_withCorrectPattern_returnsTrue() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern(
-                    listOf(
-                        AuthenticationMethodModel.Pattern.PatternCoordinate(
-                            x = 0,
-                            y = 0,
-                        ),
-                        AuthenticationMethodModel.Pattern.PatternCoordinate(
-                            x = 0,
-                            y = 1,
-                        ),
-                        AuthenticationMethodModel.Pattern.PatternCoordinate(
-                            x = 0,
-                            y = 2,
-                        ),
-                    )
-                )
+                AuthenticationMethodModel.Pattern
             )
 
-            assertThat(
-                    underTest.authenticate(
-                        listOf(
-                            AuthenticationMethodModel.Pattern.PatternCoordinate(
-                                x = 0,
-                                y = 0,
-                            ),
-                            AuthenticationMethodModel.Pattern.PatternCoordinate(
-                                x = 0,
-                                y = 1,
-                            ),
-                            AuthenticationMethodModel.Pattern.PatternCoordinate(
-                                x = 0,
-                                y = 2,
-                            ),
-                        )
-                    )
-                )
-                .isTrue()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN)).isTrue()
         }
 
     @Test
     fun authenticate_withIncorrectPattern_returnsFalse() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern(
-                    listOf(
-                        AuthenticationMethodModel.Pattern.PatternCoordinate(
-                            x = 0,
-                            y = 0,
-                        ),
-                        AuthenticationMethodModel.Pattern.PatternCoordinate(
-                            x = 0,
-                            y = 1,
-                        ),
-                        AuthenticationMethodModel.Pattern.PatternCoordinate(
-                            x = 0,
-                            y = 2,
-                        ),
-                    )
-                )
+                AuthenticationMethodModel.Pattern
             )
 
             assertThat(
@@ -299,91 +262,159 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
-        }
-
-    @Test
-    fun tryAutoConfirm_withAutoConfirmPinAndEmptyInput_returnsNull() =
-        testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234, autoConfirm = true)
-            )
-
-            assertThat(underTest.authenticate(listOf(), tryAutoConfirm = true)).isNull()
-            assertThat(failedAttemptCount).isEqualTo(0)
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNullAndHasNoEffect() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234, autoConfirm = true)
-            )
-
+            val isThrottled by collectLastValue(underTest.isThrottled)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(underTest.authenticate(listOf(1, 2, 3), tryAutoConfirm = true)).isNull()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            assertThat(isThrottled).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234, autoConfirm = true)
-            )
-
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(underTest.authenticate(listOf(1, 2, 4, 4), tryAutoConfirm = true)).isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
+            assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234, autoConfirm = true)
-            )
-
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4, 5), tryAutoConfirm = true))
                 .isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
+            assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234, autoConfirm = true)
-            )
-
-            assertThat(underTest.authenticate(listOf(1, 2, 4, 4), tryAutoConfirm = true)).isFalse()
-            assertThat(failedAttemptCount).isEqualTo(1)
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isTrue()
+            assertThat(isUnlocked).isTrue()
         }
 
     @Test
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNullAndHasNoEffects() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234, autoConfirm = false)
-            )
-
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(false)
             assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isNull()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            assertThat(isUnlocked).isFalse()
         }
 
     @Test
     fun tryAutoConfirm_withoutCorrectPassword_returnsNullAndHasNoEffects() =
         testScope.runTest {
-            val failedAttemptCount by collectLastValue(underTest.failedAuthenticationAttempts)
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password("password")
+                AuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true)).isNull()
-            assertThat(failedAttemptCount).isEqualTo(0)
+            assertThat(isUnlocked).isFalse()
+        }
+
+    @Test
+    fun throttling() =
+        testScope.runTest {
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            val throttling by collectLastValue(underTest.throttling)
+            val isThrottled by collectLastValue(underTest.isThrottled)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            underTest.authenticate(listOf(1, 2, 3, 4))
+            assertThat(isUnlocked).isTrue()
+            assertThat(isThrottled).isFalse()
+            assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
+
+            utils.authenticationRepository.setUnlocked(false)
+            assertThat(isUnlocked).isFalse()
+            assertThat(isThrottled).isFalse()
+            assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
+
+            // Make many wrong attempts, but just shy of what's needed to get throttled:
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1) {
+                underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
+                assertThat(isUnlocked).isFalse()
+                assertThat(isThrottled).isFalse()
+                assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
+            }
+
+            // Make one more wrong attempt, leading to throttling:
+            underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
+            assertThat(isUnlocked).isFalse()
+            assertThat(isThrottled).isTrue()
+            assertThat(throttling)
+                .isEqualTo(
+                    AuthenticationThrottlingModel(
+                        failedAttemptCount =
+                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
+                        remainingMs = FakeAuthenticationRepository.THROTTLE_DURATION_MS,
+                    )
+                )
+
+            // Correct PIN, but throttled, so doesn't attempt it:
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isNull()
+            assertThat(isUnlocked).isFalse()
+            assertThat(isThrottled).isTrue()
+            assertThat(throttling)
+                .isEqualTo(
+                    AuthenticationThrottlingModel(
+                        failedAttemptCount =
+                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
+                        remainingMs = FakeAuthenticationRepository.THROTTLE_DURATION_MS,
+                    )
+                )
+
+            // Move the clock forward to ALMOST skip the throttling, leaving one second to go:
+            val throttleTimeoutSec =
+                FakeAuthenticationRepository.THROTTLE_DURATION_MS.milliseconds.inWholeSeconds
+                    .toInt()
+            repeat(throttleTimeoutSec - 1) { time ->
+                advanceTimeBy(1000)
+                assertThat(isThrottled).isTrue()
+                assertThat(throttling)
+                    .isEqualTo(
+                        AuthenticationThrottlingModel(
+                            failedAttemptCount =
+                                FakeAuthenticationRepository
+                                    .MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
+                            remainingMs =
+                                ((throttleTimeoutSec - (time + 1)).seconds.inWholeMilliseconds)
+                                    .toInt(),
+                        )
+                    )
+            }
+
+            // Move the clock forward one more second, to completely finish the throttling period:
+            advanceTimeBy(1000)
+            assertThat(isUnlocked).isFalse()
+            assertThat(isThrottled).isFalse()
+            assertThat(throttling)
+                .isEqualTo(
+                    AuthenticationThrottlingModel(
+                        failedAttemptCount =
+                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
+                        remainingMs = 0,
+                    )
+                )
+
+            // Correct PIN and no longer throttled so unlocks successfully:
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
+            assertThat(isUnlocked).isTrue()
+            assertThat(isThrottled).isFalse()
+            assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
         }
 }
