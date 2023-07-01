@@ -49,6 +49,7 @@ import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
+import com.android.systemui.statusbar.phone.LockscreenWallpaper
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
@@ -301,4 +302,9 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardViewConfigurator::class)
     abstract fun bindKeyguardViewConfigurator(impl: KeyguardViewConfigurator): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(LockscreenWallpaper::class)
+    abstract fun bindLockscreenWallpaper(impl: LockscreenWallpaper): CoreStartable
 }

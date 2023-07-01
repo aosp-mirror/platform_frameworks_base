@@ -10,7 +10,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
@@ -67,10 +67,11 @@ class ResourceTrimmerTest : SysuiTestCase() {
         resourceTrimmer =
             ResourceTrimmer(
                 keyguardInteractor,
-                KeyguardTransitionInteractor(
-                    keyguardTransitionRepository,
-                    testScope.backgroundScope
-                ),
+                KeyguardTransitionInteractorFactory.create(
+                        scope = TestScope().backgroundScope,
+                        repository = keyguardTransitionRepository,
+                    )
+                    .keyguardTransitionInteractor,
                 globalWindowManager,
                 testScope.backgroundScope,
                 testDispatcher,

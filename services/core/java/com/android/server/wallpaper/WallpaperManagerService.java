@@ -1993,7 +1993,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData data = null;
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
-                clearWallpaperLocked(callingPackage, false, which, userId);
+                clearWallpaperLocked(callingPackage, false, which, userId, null);
             } else {
                 clearWallpaperLocked(false, which, userId, null);
             }
@@ -2014,7 +2014,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private void clearWallpaperLocked(String callingPackage, boolean defaultFailed,
-            int which, int userId) {
+            int which, int userId, IRemoteCallback reply) {
 
         // Might need to bring it in the first time to establish our rewrite
         if (!mWallpaperMap.contains(userId)) {
@@ -2068,9 +2068,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         withCleanCallingIdentity(() -> clearWallpaperComponentLocked(wallpaper));
     }
 
-    // TODO(b/266818039) remove this version of the method
     private void clearWallpaperLocked(boolean defaultFailed, int which, int userId,
             IRemoteCallback reply) {
+
+        if (mIsLockscreenLiveWallpaperEnabled) {
+            String callingPackage = mPackageManagerInternal.getNameForUid(getCallingUid());
+            clearWallpaperLocked(callingPackage, defaultFailed, which, userId, reply);
+            return;
+        }
+
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
@@ -3113,7 +3119,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (which == FLAG_SYSTEM && systemIsStatic && systemIsBoth) {
                 Slog.i(TAG, "Migrating current wallpaper to be lock-only before"
                         + " updating system wallpaper");
-                migrateStaticSystemToLockWallpaperLocked(userId);
+                if (!migrateStaticSystemToLockWallpaperLocked(userId)
+                        && !isLockscreenLiveWallpaperEnabled()) {
+                    which |= FLAG_LOCK;
+                }
             }
 
             wallpaper = getWallpaperSafeLocked(userId, which);
@@ -3141,13 +3150,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void migrateStaticSystemToLockWallpaperLocked(int userId) {
+    private boolean migrateStaticSystemToLockWallpaperLocked(int userId) {
         WallpaperData sysWP = mWallpaperMap.get(userId);
         if (sysWP == null) {
             if (DEBUG) {
                 Slog.i(TAG, "No system wallpaper?  Not tracking for lock-only");
             }
-            return;
+            return true;
         }
 
         // We know a-priori that there is no lock-only wallpaper currently
@@ -3174,9 +3183,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 SELinux.restorecon(lockWP.getWallpaperFile());
                 mLastLockWallpaper = lockWP;
             }
+            return true;
         } catch (ErrnoException e) {
-            Slog.e(TAG, "Can't migrate system wallpaper: " + e.getMessage());
+            // can happen when migrating default wallpaper (which is not stored in wallpaperFile)
+            Slog.w(TAG, "Couldn't migrate system wallpaper: " + e.getMessage());
             clearWallpaperBitmaps(lockWP);
+            return false;
         }
     }
 
@@ -3234,15 +3246,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     boolean setWallpaperComponent(ComponentName name, String callingPackage,
             @SetWallpaperFlags int which, int userId) {
         if (mIsLockscreenLiveWallpaperEnabled) {
-            return setWallpaperComponentInternal(name, callingPackage, which, userId);
+            return setWallpaperComponentInternal(name, callingPackage, which, userId, null);
         } else {
             setWallpaperComponentInternalLegacy(name, callingPackage, which, userId);
             return true;
         }
     }
 
+    private boolean setWallpaperComponent(ComponentName name, @SetWallpaperFlags int which,
+            int userId) {
+        String callingPackage = mPackageManagerInternal.getNameForUid(getCallingUid());
+        return setWallpaperComponentInternal(name, callingPackage, which, userId, null);
+    }
+
     private boolean setWallpaperComponentInternal(ComponentName name, String callingPackage,
-            @SetWallpaperFlags int which, int userIdIn) {
+            @SetWallpaperFlags int which, int userIdIn, IRemoteCallback reply) {
         if (DEBUG) {
             Slog.v(TAG, "Setting new live wallpaper: which=" + which + ", component: " + name);
         }
@@ -3291,6 +3309,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             Slog.d(TAG, "publish system wallpaper changed!");
                         }
                         liveSync.complete();
+                        if (reply != null) reply.sendResult(null);
                     }
                 };
 
@@ -3388,7 +3407,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // therefore it's a shared system+lock image that we need to migrate.
                     Slog.i(TAG, "Migrating current wallpaper to be lock-only before"
                             + "updating system wallpaper");
-                    migrateStaticSystemToLockWallpaperLocked(userId);
+                    if (!migrateStaticSystemToLockWallpaperLocked(userId)) {
+                        which |= FLAG_LOCK;
+                    }
                 }
             }
 

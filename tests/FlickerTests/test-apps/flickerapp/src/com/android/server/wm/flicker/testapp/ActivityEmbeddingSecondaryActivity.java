@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.testapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -39,5 +40,10 @@ public class ActivityEmbeddingSecondaryActivity extends Activity {
                         finish();
                     }
             });
+    }
+
+    public void launchThirdActivity(View view) {
+        startActivity(new Intent().setComponent(
+                ActivityOptions.ActivityEmbedding.ThirdActivity.COMPONENT));
     }
 }

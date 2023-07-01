@@ -32,7 +32,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
@@ -126,7 +125,6 @@ public class LockIconView extends FrameLayout implements Dumpable {
     /**
      * Set the location of the lock icon.
      */
-    @VisibleForTesting
     public void setCenterLocation(@NonNull Point center, float radius, int drawablePadding) {
         mLockIconCenter = center;
         mRadius = radius;

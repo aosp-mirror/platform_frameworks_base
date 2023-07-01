@@ -43,11 +43,12 @@ import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -58,6 +59,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,6 +72,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
 
 private const val REQUEST_ID = 2L
@@ -80,6 +83,7 @@ private const val DISPLAY_HEIGHT = 1920
 private const val SENSOR_WIDTH = 30
 private const val SENSOR_HEIGHT = 60
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RoboPilotTest
 @RunWith(AndroidJUnit4::class)
@@ -116,6 +120,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var udfpsUtils: UdfpsUtils
     @Mock private lateinit var udfpsKeyguardAccessibilityDelegate:
             UdfpsKeyguardAccessibilityDelegate
+    @Mock private lateinit var udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>
     @Captor private lateinit var layoutParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
@@ -148,6 +153,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             controllerCallback, onTouch, activityLaunchAnimator, featureFlags,
             primaryBouncerInteractor, alternateBouncerInteractor, isDebuggable, udfpsUtils,
             udfpsKeyguardAccessibilityDelegate,
+            udfpsKeyguardViewModels,
         )
         block()
     }

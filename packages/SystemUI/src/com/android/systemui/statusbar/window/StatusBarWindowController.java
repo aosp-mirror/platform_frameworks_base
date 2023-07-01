@@ -240,8 +240,10 @@ public class StatusBarWindowController {
                     Insets.of(0, safeTouchRegionHeight, 0, 0));
         }
         lp.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(mInsetsSourceOwner, 0, statusBars()),
-                new InsetsFrameProvider(mInsetsSourceOwner, 0, tappableElement()),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, statusBars())
+                        .setInsetsSize(Insets.of(0, height, 0, 0)),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, tappableElement())
+                        .setInsetsSize(Insets.of(0, height, 0, 0)),
                 gestureInsetsProvider
         };
         return lp;

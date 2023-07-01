@@ -359,9 +359,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public long performRemoveAnimation(long duration, long delay,
-            float translationDirection, boolean isHeadsUpAnimation, float endLocation,
-            Runnable onFinishedRunnable, AnimatorListenerAdapter animationListener) {
+    public long performRemoveAnimation(long duration, long delay, float translationDirection,
+            boolean isHeadsUpAnimation, Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAnimation;
         if (mDrawingAppearAnimation) {

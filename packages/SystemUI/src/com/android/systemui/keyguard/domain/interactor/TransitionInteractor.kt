@@ -44,9 +44,9 @@ sealed class TransitionInteractor(
     abstract fun start()
 
     fun startTransitionTo(
-            toState: KeyguardState,
-            animator: ValueAnimator? = getDefaultAnimatorForTransitionsToState(toState),
-            resetIfCancelled: Boolean = false
+        toState: KeyguardState,
+        animator: ValueAnimator? = getDefaultAnimatorForTransitionsToState(toState),
+        resetIfCancelled: Boolean = false
     ): UUID? {
         if (
             fromState != transitionInteractor.startedKeyguardState.value &&

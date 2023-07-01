@@ -49,7 +49,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.AuthenticationStatus
 import com.android.systemui.keyguard.shared.model.DetectionStatus
 import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
@@ -216,7 +216,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             )
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         val keyguardTransitionInteractor =
-            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
+            KeyguardTransitionInteractorFactory.create(
+                    scope = TestScope().backgroundScope,
+                    repository = keyguardTransitionRepository,
+                )
+                .keyguardTransitionInteractor
         return DeviceEntryFaceAuthRepositoryImpl(
             mContext,
             fmOverride,

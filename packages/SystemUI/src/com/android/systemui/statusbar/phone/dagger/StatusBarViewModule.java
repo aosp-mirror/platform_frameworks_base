@@ -21,18 +21,15 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
-import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
@@ -44,10 +41,8 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoSet;
 
 import java.util.concurrent.Executor;
 
@@ -64,17 +59,6 @@ import javax.inject.Named;
 public abstract class StatusBarViewModule {
 
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
-
-    /** */
-    @Binds
-    @CentralSurfacesComponent.CentralSurfacesScope
-    abstract ShadeViewController bindsShadeViewController(
-            NotificationPanelViewController notificationPanelViewController);
-
-    @Binds
-    @IntoSet
-    abstract StatusBarBoundsProvider.BoundsChangeListener sysBarAttrsListenerAsBoundsListener(
-            SystemBarAttributesListener systemBarAttributesListener);
 
     /**
      * Creates a new {@link CollapsedStatusBarFragment}.

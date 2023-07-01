@@ -205,6 +205,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
         when(mDreamingToLockscreenTransitionViewModel.getDreamOverlayAlpha())
                 .thenReturn(mock(Flow.class));
+        when(mDreamingToLockscreenTransitionViewModel.getTransitionEnded())
+                .thenReturn(mock(Flow.class));
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mViewMediator, mKeyguardBypassController,

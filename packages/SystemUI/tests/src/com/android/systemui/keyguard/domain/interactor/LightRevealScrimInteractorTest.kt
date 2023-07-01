@@ -46,7 +46,11 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
 
     private val keyguardTransitionInteractor =
-        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository, TestScope().backgroundScope)
+        KeyguardTransitionInteractorFactory.create(
+                scope = TestScope().backgroundScope,
+                repository = fakeKeyguardTransitionRepository,
+            )
+            .keyguardTransitionInteractor
 
     private lateinit var underTest: LightRevealScrimInteractor
 
