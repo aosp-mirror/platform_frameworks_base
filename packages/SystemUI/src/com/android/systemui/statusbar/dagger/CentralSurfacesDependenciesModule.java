@@ -41,6 +41,8 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
@@ -272,6 +274,21 @@ public interface CentralSurfacesDependenciesModule {
         ongoingCallController.init();
         return ongoingCallController;
     }
+
+    /**
+     * {@link NotificationPanelViewController} implements two interfaces:
+     *  - {@link com.android.systemui.shade.ShadeViewController}, which can be used by any class
+     *    needing access to the shade.
+     *  - {@link ShadeSurface}, which should *only* be used by {@link CentralSurfacesImpl}.
+     *
+     * Since {@link ShadeSurface} should only be accessible by {@link CentralSurfacesImpl}, it's
+     * *only* bound in this CentralSurfaces dependencies module.
+     * The {@link com.android.systemui.shade.ShadeViewController} interface is bound in
+     * {@link com.android.systemui.shade.ShadeModule} so others can access it.
+     */
+    @Binds
+    @SysUISingleton
+    ShadeSurface provideShadeSurface(NotificationPanelViewController impl);
 
     /** */
     @Binds

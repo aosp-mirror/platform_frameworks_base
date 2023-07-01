@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -61,12 +62,35 @@ constructor(
     val fromDreamingTransition: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.from == DREAMING }
 
+    /** (any)->Lockscreen transition information */
+    val anyStateToLockscreenTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == LOCKSCREEN }
+
+    /** (any)->Occluded transition information */
+    val anyStateToOccludedTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == OCCLUDED }
+
+    /** (any)->PrimaryBouncer transition information */
+    val anyStateToPrimaryBouncerTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == PRIMARY_BOUNCER }
+
+    /** (any)->Dreaming transition information */
+    val anyStateToDreamingTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == DREAMING }
+
+    /** (any)->AlternateBouncer transition information */
+    val anyStateToAlternateBouncerTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == ALTERNATE_BOUNCER }
+
     /** AOD->LOCKSCREEN transition information. */
     val aodToLockscreenTransition: Flow<TransitionStep> = repository.transition(AOD, LOCKSCREEN)
 
     /** DREAMING->LOCKSCREEN transition information. */
     val dreamingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DREAMING, LOCKSCREEN)
+
+    /** GONE->AOD transition information. */
+    val goneToAodTransition: Flow<TransitionStep> = repository.transition(GONE, AOD)
 
     /** GONE->DREAMING transition information. */
     val goneToDreamingTransition: Flow<TransitionStep> = repository.transition(GONE, DREAMING)

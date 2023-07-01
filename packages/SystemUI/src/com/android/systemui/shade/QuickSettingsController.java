@@ -68,6 +68,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -98,7 +99,6 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.LargeScreenUtils;
@@ -113,7 +113,7 @@ import javax.inject.Inject;
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class QuickSettingsController implements Dumpable {
     public static final String TAG = "QuickSettingsController";
 
@@ -1220,14 +1220,15 @@ public class QuickSettingsController implements Dumpable {
         if (mIsFullWidth) {
             clipStatusView = qsVisible;
             float screenCornerRadius =
-                    !mSplitShadeEnabled || mRecordingController.isRecording()
-                            || mCastController.hasConnectedCastDevice()
+                    mRecordingController.isRecording() || mCastController.hasConnectedCastDevice()
                             ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
 
-            float bottomRadius = mExpanded ? screenCornerRadius :
-                    calculateBottomCornerRadius(screenCornerRadius);
+            float bottomRadius = mSplitShadeEnabled ? screenCornerRadius : 0;
+            if (!mExpanded) {
+                bottomRadius = calculateBottomCornerRadius(bottomRadius);
+            }
             mScrimController.setNotificationBottomRadius(bottomRadius);
         }
         if (isQsFragmentCreated()) {

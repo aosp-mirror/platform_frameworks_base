@@ -40,8 +40,8 @@ import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
@@ -211,10 +211,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                         multiShadeInteractor = multiShadeInteractor,
                         featureFlags = featureFlags,
                         keyguardTransitionInteractor =
-                            KeyguardTransitionInteractor(
-                                repository = FakeKeyguardTransitionRepository(),
-                                scope = testScope.backgroundScope
-                            ),
+                            KeyguardTransitionInteractorFactory.create(
+                                    scope = TestScope().backgroundScope,
+                                )
+                                .keyguardTransitionInteractor,
                         falsingManager = FalsingManagerFake(),
                         shadeController = shadeController,
                     )

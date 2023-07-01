@@ -114,13 +114,12 @@ internal object SplitScreenUtils {
     }
 
     fun enterSplitViaIntent(
-            wmHelper: WindowManagerStateHelper,
-            primaryApp: StandardAppHelper,
-            secondaryApp: StandardAppHelper
+        wmHelper: WindowManagerStateHelper,
+        primaryApp: StandardAppHelper,
+        secondaryApp: StandardAppHelper
     ) {
         val stringExtras = mapOf(Primary.EXTRA_LAUNCH_ADJACENT to "true")
-        primaryApp.launchViaIntent(wmHelper, null, null,
-                stringExtras)
+        primaryApp.launchViaIntent(wmHelper, null, null, stringExtras)
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 

@@ -25,7 +25,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -97,10 +97,11 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                 multiShadeInteractor = interactor,
                 featureFlags = featureFlags,
                 keyguardTransitionInteractor =
-                    KeyguardTransitionInteractor(
-                        repository = keyguardTransitionRepository,
-                        scope = testScope.backgroundScope
-                    ),
+                    KeyguardTransitionInteractorFactory.create(
+                            scope = TestScope().backgroundScope,
+                            repository = keyguardTransitionRepository,
+                        )
+                        .keyguardTransitionInteractor,
                 falsingManager = falsingManager,
                 shadeController = shadeController,
             )
