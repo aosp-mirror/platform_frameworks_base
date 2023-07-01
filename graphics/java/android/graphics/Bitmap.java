@@ -782,10 +782,13 @@ public final class Bitmap implements Parcelable {
     @Nullable
     public static Bitmap wrapHardwareBuffer(@NonNull HardwareBuffer hardwareBuffer,
             @Nullable ColorSpace colorSpace) {
-        if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
+        final long usage = hardwareBuffer.getUsage();
+        if ((usage & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
             throw new IllegalArgumentException("usage flags must contain USAGE_GPU_SAMPLED_IMAGE.");
         }
-        int format = hardwareBuffer.getFormat();
+        if ((usage & HardwareBuffer.USAGE_PROTECTED_CONTENT) != 0) {
+            throw new IllegalArgumentException("Bitmap is not compatible with protected buffers");
+        }
         if (colorSpace == null) {
             colorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
         }
