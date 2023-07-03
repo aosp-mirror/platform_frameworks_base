@@ -2185,7 +2185,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     @Override
     public void setBrightness(float brightnessValue, int userSerial) {
-        mDisplayBrightnessController.setBrightness(brightnessValue, userSerial);
+        mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightnessValue),
+                userSerial);
     }
 
     @Override

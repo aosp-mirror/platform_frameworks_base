@@ -1086,6 +1086,16 @@ public final class DisplayPowerController2Test {
                 .getThermalBrightnessThrottlingDataMapByThrottlingId();
     }
 
+    @Test
+    public void testSetBrightness_BrightnessShouldBeClamped() {
+        float clampedBrightness = 0.6f;
+        when(mHolder.hbmController.getCurrentBrightnessMax()).thenReturn(clampedBrightness);
+
+        mHolder.dpc.setBrightness(PowerManager.BRIGHTNESS_MAX);
+
+        verify(mHolder.brightnessSetting).setBrightness(clampedBrightness);
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
