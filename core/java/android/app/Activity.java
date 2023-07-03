@@ -3156,13 +3156,17 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called by the system when the device configuration changes while your
-     * activity is running.  Note that this will <em>only</em> be called if
-     * you have selected configurations you would like to handle with the
+     * activity is running.  Note that this will only be called if you have
+     * selected configurations you would like to handle with the
      * {@link android.R.attr#configChanges} attribute in your manifest.  If
      * any configuration change occurs that is not selected to be reported
      * by that attribute, then instead of reporting it the system will stop
      * and restart the activity (to have it launched with the new
-     * configuration).
+     * configuration). The only exception is if a size-based configuration
+     * is not large enough to be considered significant, in which case the
+     * system will not recreate the activity and will instead call this
+     * method. For details on this see the documentation on
+     * <a href="{@docRoot}guide/topics/resources/runtime-changes.html">size-based config change</a>.
      *
      * <p>At the time that this function has been called, your Resources
      * object will have been updated to return resource values matching the
