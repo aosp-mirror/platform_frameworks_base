@@ -121,7 +121,7 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     @FlakyTest(bugId = 265007895)
     @Test
     fun transitionHasColorBackground() {
-        val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
+        val backgroundColorLayer = ComponentNameMatcher("", "animation-background")
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
         flicker.assertLayers {
             this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
