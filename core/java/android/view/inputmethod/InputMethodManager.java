@@ -2018,7 +2018,7 @@ public final class InputMethodManager {
      *
      * @deprecated Use {@link #showSoftInput} without this flag instead. Using this flag can lead
      * to the soft input remaining visible even when the calling application is closed. The
-     * use of this flag can make the soft input remains visible globally. Starting in
+     * use of this flag can make the soft input remain visible globally. Starting in
      * {@link Build.VERSION_CODES#TIRAMISU Android T}, this flag only has an effect while the
      * caller is currently focused.
      */
