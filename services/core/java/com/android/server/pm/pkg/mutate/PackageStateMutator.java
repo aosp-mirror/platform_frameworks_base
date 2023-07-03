@@ -439,6 +439,16 @@ public class PackageStateMutator {
                 }
                 return null;
             }
+
+            @NonNull
+            @Override
+            public PackageUserStateWrite setMinAspectRatio(
+                    @PackageManager.UserMinAspectRatio int aspectRatio) {
+                if (mUserState != null) {
+                    mUserState.setMinAspectRatio(aspectRatio);
+                }
+                return this;
+            }
         }
     }
 }

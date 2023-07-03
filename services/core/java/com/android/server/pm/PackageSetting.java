@@ -875,7 +875,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
             int installReason, int uninstallReason,
             String harmfulAppWarning, String splashScreenTheme,
-            long firstInstallTime) {
+            long firstInstallTime, int aspectRatio) {
         modifyUserState(userId)
                 .setSuspendParams(suspendParams)
                 .setCeDataInode(ceDataInode)
@@ -894,7 +894,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 .setVirtualPreload(virtualPreload)
                 .setHarmfulAppWarning(harmfulAppWarning)
                 .setSplashScreenTheme(splashScreenTheme)
-                .setFirstInstallTimeMillis(firstInstallTime);
+                .setFirstInstallTimeMillis(firstInstallTime)
+                .setMinAspectRatio(aspectRatio);
         onChanged();
     }
 
@@ -912,7 +913,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                         ? null : otherState.getDisabledComponentsNoCopy().untrackedStorage(),
                 otherState.getInstallReason(), otherState.getUninstallReason(),
                 otherState.getHarmfulAppWarning(), otherState.getSplashScreenTheme(),
-                otherState.getFirstInstallTimeMillis());
+                otherState.getFirstInstallTimeMillis(), otherState.getMinAspectRatio());
     }
 
     WatchedArraySet<String> getEnabledComponents(int userId) {
