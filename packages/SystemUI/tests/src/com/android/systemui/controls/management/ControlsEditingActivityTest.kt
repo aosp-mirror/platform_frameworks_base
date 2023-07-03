@@ -11,9 +11,9 @@ import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.flags.FakeFeatureFlags
@@ -63,24 +63,19 @@ class ControlsEditingActivityTest : SysuiTestCase() {
     @JvmField
     var activityRule =
         ActivityTestRule(
-            object :
-                SingleActivityFactory<TestableControlsEditingActivity>(
-                    TestableControlsEditingActivity::class.java
-                ) {
-                override fun create(intent: Intent?): TestableControlsEditingActivity {
-                    return TestableControlsEditingActivity(
-                        featureFlags,
-                        uiExecutor,
-                        controller,
-                        userTracker,
-                        customIconCache,
-                        mockDispatcher,
-                        latch
-                    )
-                }
+            /* activityFactory= */ SingleActivityFactory {
+                TestableControlsEditingActivity(
+                    featureFlags,
+                    uiExecutor,
+                    controller,
+                    userTracker,
+                    customIconCache,
+                    mockDispatcher,
+                    latch
+                )
             },
-            false,
-            false
+            /* initialTouchMode= */ false,
+            /* launchActivity= */ false,
         )
 
     @Before
