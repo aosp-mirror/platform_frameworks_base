@@ -47,7 +47,7 @@ import java.util.Set;
 public final class SystemFonts {
     private static final String TAG = "SystemFonts";
 
-    private static final String FONTS_XML = "/system/etc/fonts.xml";
+    private static final String FONTS_XML = "/system/etc/font_fallback.xml";
     /** @hide */
     public static final String SYSTEM_FONT_DIR = "/system/fonts/";
     private static final String OEM_XML = "/product/etc/fonts_customization.xml";

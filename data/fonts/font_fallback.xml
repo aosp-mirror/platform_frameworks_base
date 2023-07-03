@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    DEPRECATED: This XML file is no longer a source of the font files installed
-    in the system.
-
-    For the device vendors: please add your font configurations to the
-    platform/frameworks/base/data/font_fallback.xml and also add it to this XML
-    file as much as possible for apps that reads this XML file.
-
-    For the application developers: please stop reading this XML file and use
-    android.graphics.fonts.SystemFonts#getAvailableFonts Java API or
-    ASystemFontIterator_open NDK API for getting list of system installed
-    font files.
-
-    WARNING: Parsing of this file by third-party apps is not supported. The
-    file, and the font files it refers to, will be renamed and/or moved out
-    from their respective location in the next Android release, and/or the
-    format or syntax of the file may change significantly. If you parse this
-    file for information about system fonts, do it at your own risk. Your
-    application will almost certainly break with the next major Android
-    release.
-
     In this file, all fonts without names are added to the default list.
     Fonts are chosen based on a match: full BCP-47 language tag including
     script, then just language, and finally order (the first font containing
@@ -1439,9 +1419,6 @@
         <font weight="400" style="normal" index="1" fallbackFor="serif"
               postScriptName="NotoSerifCJKjp-Regular">NotoSerifCJK-Regular.ttc
         </font>
-    </family>
-    <family lang="und-Zsye" ignore="true">
-        <font weight="400" style="normal">NotoColorEmojiLegacy.ttf</font>
     </family>
     <family lang="und-Zsye">
         <font weight="400" style="normal">NotoColorEmoji.ttf</font>
