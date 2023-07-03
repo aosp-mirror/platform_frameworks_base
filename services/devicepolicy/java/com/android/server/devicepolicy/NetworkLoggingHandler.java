@@ -134,7 +134,7 @@ final class NetworkLoggingHandler extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case LOG_NETWORK_EVENT_MSG: {
-                final NetworkEvent networkEvent = msg.getData().getParcelable(NETWORK_EVENT_KEY);
+                final NetworkEvent networkEvent = msg.getData().getParcelable(NETWORK_EVENT_KEY, android.app.admin.NetworkEvent.class);
                 if (networkEvent != null) {
                     Bundle notificationExtras = null;
                     synchronized (NetworkLoggingHandler.this) {

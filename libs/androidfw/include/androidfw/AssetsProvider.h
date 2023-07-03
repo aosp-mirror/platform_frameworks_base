@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "android-base/function_ref.h"
 #include "android-base/macros.h"
 #include "android-base/unique_fd.h"
 
@@ -46,7 +47,7 @@ struct AssetsProvider {
   // Iterate over all files and directories provided by the interface. The order of iteration is
   // stable.
   virtual bool ForEachFile(const std::string& path,
-                           const std::function<void(const StringPiece&, FileType)>& f) const = 0;
+                           base::function_ref<void(StringPiece, FileType)> f) const = 0;
 
   // Retrieves the path to the contents of the AssetsProvider on disk. The path could represent an
   // APk, a directory, or some other file type.
@@ -80,8 +81,8 @@ struct AssetsProvider {
 
 // Supplies assets from a zip archive.
 struct ZipAssetsProvider : public AssetsProvider {
-  static std::unique_ptr<ZipAssetsProvider> Create(std::string path,
-                                                   package_property_t flags);
+  static std::unique_ptr<ZipAssetsProvider> Create(std::string path, package_property_t flags,
+                                                   base::unique_fd fd = {});
 
   static std::unique_ptr<ZipAssetsProvider> Create(base::unique_fd fd,
                                                    std::string friendly_name,
@@ -90,7 +91,7 @@ struct ZipAssetsProvider : public AssetsProvider {
                                                    off64_t len = kUnknownLength);
 
   bool ForEachFile(const std::string& root_path,
-                   const std::function<void(const StringPiece&, FileType)>& f) const override;
+                   base::function_ref<void(StringPiece, FileType)> f) const override;
 
   WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
@@ -108,7 +109,12 @@ struct ZipAssetsProvider : public AssetsProvider {
                     time_t last_mod_time);
 
   struct PathOrDebugName {
-    PathOrDebugName(std::string&& value, bool is_path);
+    static PathOrDebugName Path(std::string value) {
+      return {std::move(value), true};
+    }
+    static PathOrDebugName DebugName(std::string value) {
+      return {std::move(value), false};
+    }
 
     // Retrieves the path or null if this class represents a debug name.
     WARN_UNUSED const std::string* GetPath() const;
@@ -117,11 +123,16 @@ struct ZipAssetsProvider : public AssetsProvider {
     WARN_UNUSED const std::string& GetDebugName() const;
 
    private:
+    PathOrDebugName(std::string value, bool is_path) : value_(std::move(value)), is_path_(is_path) {
+    }
     std::string value_;
     bool is_path_;
   };
 
-  std::unique_ptr<ZipArchive, void (*)(ZipArchive*)> zip_handle_;
+  struct ZipCloser {
+    void operator()(ZipArchive* a) const;
+  };
+  std::unique_ptr<ZipArchive, ZipCloser> zip_handle_;
   PathOrDebugName name_;
   package_property_t flags_;
   time_t last_mod_time_;
@@ -132,7 +143,7 @@ struct DirectoryAssetsProvider : public AssetsProvider {
   static std::unique_ptr<DirectoryAssetsProvider> Create(std::string root_dir);
 
   bool ForEachFile(const std::string& path,
-                   const std::function<void(const StringPiece&, FileType)>& f) const override;
+                   base::function_ref<void(StringPiece, FileType)> f) const override;
 
   WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
@@ -157,7 +168,7 @@ struct MultiAssetsProvider : public AssetsProvider {
                                                 std::unique_ptr<AssetsProvider>&& secondary);
 
   bool ForEachFile(const std::string& root_path,
-                   const std::function<void(const StringPiece&, FileType)>& f) const override;
+                   base::function_ref<void(StringPiece, FileType)> f) const override;
 
   WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;
@@ -181,10 +192,10 @@ struct MultiAssetsProvider : public AssetsProvider {
 // Does not provide any assets.
 struct EmptyAssetsProvider : public AssetsProvider {
   static std::unique_ptr<AssetsProvider> Create();
-  static std::unique_ptr<AssetsProvider> Create(const std::string& path);
+  static std::unique_ptr<AssetsProvider> Create(std::string path);
 
   bool ForEachFile(const std::string& path,
-                  const std::function<void(const StringPiece&, FileType)>& f) const override;
+                   base::function_ref<void(StringPiece, FileType)> f) const override;
 
   WARN_UNUSED std::optional<std::string_view> GetPath() const override;
   WARN_UNUSED const std::string& GetDebugName() const override;

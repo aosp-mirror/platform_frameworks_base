@@ -17,11 +17,14 @@
 package android.hardware.camera2.params;
 
 import android.annotation.LongDef;
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
@@ -67,10 +70,17 @@ public final class DeviceStateSensorOrientationMap {
              FOLDED })
     public @interface DeviceState {};
 
-    private final HashMap<Long, Integer> mDeviceStateOrientationMap = new HashMap<>();
+    private final HashMap<Long, Integer> mDeviceStateOrientationMap;
 
     /**
      * Create a new immutable DeviceStateOrientationMap instance.
+     *
+     * <p>The array is a list of pairs of elements (deviceState, angle):</p>
+     *
+     * <code>[state0, angle0, state1, angle1,..., stateN, angleN]</code>
+     *
+     * <p>Each pair describes the camera sensor orientation when the device is in the
+     * matching deviceState. The angle is in degrees, and must be a multiple of 90.</p>
      *
      * <p>This constructor takes over the array; do not write to the array afterwards.</p>
      *
@@ -85,8 +95,9 @@ public final class DeviceStateSensorOrientationMap {
      *
      * @hide
      */
-    public DeviceStateSensorOrientationMap(final long[] elements) {
+    public DeviceStateSensorOrientationMap(@NonNull final long[] elements) {
         mElements = Objects.requireNonNull(elements, "elements must not be null");
+        mDeviceStateOrientationMap = new HashMap<>();
         if ((elements.length % 2) != 0) {
             throw new IllegalArgumentException("Device state sensor orientation map length " +
                     elements.length + " is not even!");
@@ -100,6 +111,20 @@ public final class DeviceStateSensorOrientationMap {
 
             mDeviceStateOrientationMap.put(elements[i], Math.toIntExact(elements[i + 1]));
         }
+    }
+
+    /**
+     * Used by the Builder only.
+     *
+     * @hide
+     */
+    private DeviceStateSensorOrientationMap(@NonNull final ArrayList<Long> elements,
+            @NonNull final HashMap<Long, Integer> deviceStateOrientationMap) {
+        mElements = new long[elements.size()];
+        for (int i = 0; i < elements.size(); i++) {
+            mElements[i] = elements.get(i);
+        }
+        mDeviceStateOrientationMap = deviceStateOrientationMap;
     }
 
     /**
@@ -153,4 +178,58 @@ public final class DeviceStateSensorOrientationMap {
     }
 
     private final long[] mElements;
+
+    /**
+     * Builds a DeviceStateSensorOrientationMap object.
+     *
+     * <p>This builder is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
+     */
+    public static final class Builder {
+        public Builder() {
+            // Empty
+        }
+
+        /**
+         * Add a sensor orientation for a given device state.
+         *
+         * <p>Each pair of deviceState and angle describes the camera sensor orientation when the
+         * device is in the matching deviceState. The angle is in degrees, and must be a multiple
+         * of 90.</p>
+         *
+         * @param deviceState The deviceState.
+         * @param angle The orientation angle in degrees.
+         * @return This builder.
+         *
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder addOrientationForState(@DeviceState long deviceState, long angle) {
+            if (angle % 90 != 0) {
+                throw new IllegalArgumentException("Sensor orientation not divisible by 90: "
+                        + angle);
+            }
+            mDeviceStateOrientationMap.put(deviceState, Math.toIntExact(angle));
+            mElements.add(deviceState);
+            mElements.add(angle);
+            return this;
+        }
+
+        /**
+         * Returns an instance of <code>DeviceStateSensorOrientationMap</code> created from the
+         * fields set on this builder.
+         *
+         * @return A DeviceStateSensorOrientationMap.
+         */
+        public @NonNull DeviceStateSensorOrientationMap build() {
+            if (mElements.size() == 0) {
+                throw new IllegalStateException("Cannot build a DeviceStateSensorOrientationMap"
+                        + " with zero elements.");
+            }
+            return new DeviceStateSensorOrientationMap(mElements, mDeviceStateOrientationMap);
+        }
+
+        private final ArrayList<Long> mElements = new ArrayList<>();
+        private final HashMap<Long, Integer> mDeviceStateOrientationMap = new HashMap<>();
+    }
 }

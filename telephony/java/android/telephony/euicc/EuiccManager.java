@@ -48,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +81,47 @@ public class EuiccManager {
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
+
+
+    /**
+     * Intent action to transfer an embedded subscriptions.
+     *
+     * <p> Action sent by apps (such as the Settings app) to the Telephony framework to transfer an
+     * embedded subscription.
+     *
+     * <p> Requires that the calling app has the
+     * {@code android.Manifest.permission#MODIFY_PHONE_STATE} permission.
+     *
+     * <p>The activity will immediately finish with {@link android.app.Activity#RESULT_CANCELED} if
+     * {@link #isEnabled} is false.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public static final String ACTION_TRANSFER_EMBEDDED_SUBSCRIPTIONS =
+            "android.telephony.euicc.action.TRANSFER_EMBEDDED_SUBSCRIPTIONS";
+
+    /**
+     * Intent action to convert the physical subscription to an embedded subscription.
+     *
+     * <p> Action sent by apps (such as the Settings app) to the Telephony framework to convert
+     * physical sim to embedded sim.
+     *
+     * <p> Requires that the calling app has the
+     * {@code android.Manifest.permission#MODIFY_PHONE_STATE} permission.
+     *
+     * <p>The activity will immediately finish with {@link android.app.Activity#RESULT_CANCELED} if
+     * {@link #isEnabled} is false.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public static final String ACTION_CONVERT_TO_EMBEDDED_SUBSCRIPTION =
+            "android.telephony.euicc.action.CONVERT_TO_EMBEDDED_SUBSCRIPTION";
 
     /**
      * Broadcast Action: The eUICC OTA status is changed.
@@ -840,6 +882,16 @@ public class EuiccManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long SHOULD_RESOLVE_PORT_INDEX_FOR_APPS = 224562872L;
 
+    /**
+     * Starting with Android U, a port is available if it is active without an enabled profile
+     * on it or calling app can activate a new profile on the selected port without any user
+     * interaction.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long INACTIVE_PORT_AVAILABILITY_CHECK = 240273417L;
+
     private final Context mContext;
     private int mCardId;
 
@@ -1001,7 +1053,7 @@ public class EuiccManager {
     public void startResolutionActivity(Activity activity, int requestCode, Intent resultIntent,
             PendingIntent callbackIntent) throws IntentSender.SendIntentException {
         PendingIntent resolutionIntent =
-                resultIntent.getParcelableExtra(EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT);
+                resultIntent.getParcelableExtra(EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT, android.app.PendingIntent.class);
         if (resolutionIntent == null) {
             throw new IllegalArgumentException("Invalid result intent");
         }
@@ -1032,7 +1084,7 @@ public class EuiccManager {
         if (!isEnabled()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
-                            EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
+                            EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT, android.app.PendingIntent.class);
             if (callbackIntent != null) {
                 sendUnavailableError(callbackIntent);
             }
@@ -1524,7 +1576,7 @@ public class EuiccManager {
             return false;
         }
         try {
-            return getIEuiccController().isSupportedCountry(countryIso.toUpperCase());
+            return getIEuiccController().isSupportedCountry(countryIso.toUpperCase(Locale.ROOT));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1571,6 +1623,10 @@ public class EuiccManager {
      * Returns whether the passing portIndex is available.
      * A port is available if it is active without enabled profile on it or
      * calling app has carrier privilege over the profile installed on the selected port.
+     *
+     * <p> From Android U, a port is available if it is active without an enabled profile on it or
+     * calling app can activate a new profile on the selected port without any user interaction.
+     *
      * Always returns false if the cardId is a physical card.
      *
      * @param portIndex is an enumeration of the ports available on the UICC.

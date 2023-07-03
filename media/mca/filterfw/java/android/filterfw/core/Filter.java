@@ -90,9 +90,7 @@ public abstract class Filter {
             return false;
         }
         // Then make sure it's a subclass of Filter.
-        try {
-            filterClass.asSubclass(Filter.class);
-        } catch (ClassCastException e) {
+        if (!Filter.class.isAssignableFrom(filterClass)) {
             return false;
         }
         return true;

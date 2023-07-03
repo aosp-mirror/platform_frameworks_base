@@ -93,7 +93,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.people.PeopleService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import com.google.common.collect.Iterables;
 
@@ -291,7 +291,8 @@ public final class DataManagerTest {
                 mShortcutChangeCallbackCaptor.capture());
         mShortcutChangeCallback = mShortcutChangeCallbackCaptor.getValue();
 
-        verify(mContext, times(2)).registerReceiver(any(), any());
+        verify(mContext, times(1)).registerReceiver(any(), any());
+        verify(mContext, times(1)).registerReceiver(any(), any(), anyInt());
     }
 
     @After
@@ -499,6 +500,7 @@ public final class DataManagerTest {
         // The cached conversations are above the limit because every conversation has active
         // notifications. To uncache one of them, the notifications for that conversation need to
         // be dismissed.
+        String notificationKey = "";
         for (int i = 0; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
             String shortcutId = TEST_SHORTCUT_ID + i;
             ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
@@ -506,11 +508,13 @@ public final class DataManagerTest {
             shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
             mDataManager.addOrUpdateConversationInfo(shortcut);
             when(mNotification.getShortcutId()).thenReturn(shortcutId);
-            sendGenericNotification();
+            notificationKey = String.format("notification-key-%d", i);
+            sendGenericNotificationWithKey(notificationKey);
         }
 
         // Post another notification for the last conversation.
-        sendGenericNotification();
+        String otherNotificationKey = "other-notification-key";
+        sendGenericNotificationWithKey(otherNotificationKey);
 
         // Removing one of the two notifications does not un-cache the shortcut.
         listenerService.onNotificationRemoved(mGenericSbn, null,
@@ -519,6 +523,7 @@ public final class DataManagerTest {
                 anyInt(), any(), anyString(), any(), anyInt(), anyInt());
 
         // Removing the second notification un-caches the shortcut.
+        when(mGenericSbn.getKey()).thenReturn(notificationKey);
         listenerService.onNotificationRemoved(mGenericSbn, null,
                 NotificationListenerService.REASON_CANCEL_ALL);
         verify(mShortcutServiceInternal).uncacheShortcuts(
@@ -683,6 +688,63 @@ public final class DataManagerTest {
         assertTrue(result.hasActiveNotifications());
         assertFalse(result.hasBirthdayToday());
         assertThat(result.getStatuses()).containsExactly(cs);
+    }
+
+    @Test
+    public void testGetConversation_trackActiveConversations() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNull();
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_PINNED);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNotNull();
+
+        sendGenericNotification();
+        sendGenericNotification();
+        ConversationChannel result = mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID);
+        assertTrue(result.hasActiveNotifications());
+
+        // Both generic notifications have the same notification key, so a single dismiss will
+        // remove both of them.
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationRemoved(mGenericSbn, null,
+                NotificationListenerService.REASON_CANCEL);
+        ConversationChannel resultTwo = mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID);
+        assertFalse(resultTwo.hasActiveNotifications());
+    }
+
+    @Test
+    public void testGetConversation_unsyncedShortcut() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_PINNED);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNotNull();
+        assertThat(mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID)).isNotNull();
+
+        when(mShortcutServiceInternal.getShortcuts(
+                anyInt(), anyString(), anyLong(), anyString(), anyList(), any(), any(),
+                anyInt(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(Collections.emptyList());
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNull();
+
+        // Conversation is removed from store as there is no matching shortcut in ShortcutManager
+        assertThat(mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID)).isNull();
+        verify(mNotificationManagerInternal)
+                .onConversationRemoved(TEST_PKG_NAME, TEST_PKG_UID, Set.of(TEST_SHORTCUT_ID));
     }
 
     @Test
@@ -1163,6 +1225,76 @@ public final class DataManagerTest {
     }
 
     @Test
+    public void testUncacheOldestCachedShortcut_missingNotificationEvents() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        for (int i = 0; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            String shortcutId = TEST_SHORTCUT_ID + i;
+            ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
+                    buildPerson());
+            shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            mShortcutChangeCallback.onShortcutsAddedOrUpdated(
+                    TEST_PKG_NAME,
+                    Collections.singletonList(shortcut),
+                    UserHandle.of(USER_ID_PRIMARY));
+            mLooper.dispatchAll();
+        }
+
+        // Only the shortcut #0 is uncached, all the others are not.
+        verify(mShortcutServiceInternal).uncacheShortcuts(
+                anyInt(), any(), eq(TEST_PKG_NAME),
+                eq(Collections.singletonList(TEST_SHORTCUT_ID + 0)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        for (int i = 1; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            verify(mShortcutServiceInternal, never()).uncacheShortcuts(
+                    anyInt(), anyString(), anyString(),
+                    eq(Collections.singletonList(TEST_SHORTCUT_ID + i)), anyInt(),
+                    eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        }
+    }
+
+    @Test
+    public void testUncacheOldestCachedShortcut_legacyConversation() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        // Add an extra conversation with a legacy type (no creationTime)
+        ConversationStore conversationStore = mDataManager
+                .getUserDataForTesting(USER_ID_PRIMARY)
+                .getOrCreatePackageData(TEST_PKG_NAME)
+                .getConversationStore();
+        ConversationInfo.Builder builder = new ConversationInfo.Builder();
+        builder.setShortcutId(TEST_SHORTCUT_ID + 0);
+        builder.setShortcutFlags(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+        mDataManager.updateConversationStoreThenNotifyListeners(
+                conversationStore,
+                builder.build(),
+                TEST_PKG_NAME, USER_ID_PRIMARY);
+        for (int i = 1; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            String shortcutId = TEST_SHORTCUT_ID + i;
+            ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
+                    buildPerson());
+            shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            mShortcutChangeCallback.onShortcutsAddedOrUpdated(
+                    TEST_PKG_NAME,
+                    Collections.singletonList(shortcut),
+                    UserHandle.of(USER_ID_PRIMARY));
+            mLooper.dispatchAll();
+        }
+
+        // Only the shortcut #0 is uncached, all the others are not.
+        verify(mShortcutServiceInternal).uncacheShortcuts(
+                anyInt(), any(), eq(TEST_PKG_NAME),
+                eq(Collections.singletonList(TEST_SHORTCUT_ID + 0)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        for (int i = 1; i < DataManager.MAX_CACHED_RECENT_SHORTCUTS + 1; i++) {
+            verify(mShortcutServiceInternal, never()).uncacheShortcuts(
+                    anyInt(), anyString(), anyString(),
+                    eq(Collections.singletonList(TEST_SHORTCUT_ID + i)), anyInt(),
+                    eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
+        }
+    }
+
+    @Test
     public void testBackupAndRestoration()
             throws IntentFilter.MalformedMimeTypeException {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
@@ -1223,7 +1355,7 @@ public final class DataManagerTest {
 
         sendGenericNotification();
 
-       mDataManager.getRecentConversations(USER_ID_PRIMARY);
+        mDataManager.getRecentConversations(USER_ID_PRIMARY);
 
         verify(mShortcutServiceInternal).getShortcuts(
                 anyInt(), anyString(), anyLong(), anyString(), anyList(), any(), any(),
@@ -1594,22 +1726,46 @@ public final class DataManagerTest {
     // "Sends" a notification to a non-customized notification channel - the notification channel
     // is something generic like "messages" and the notification has a  shortcut id
     private void sendGenericNotification() {
+        sendGenericNotificationWithKey(GENERIC_KEY);
+    }
+
+    // "Sends" a notification to a non-customized notification channel with the specified key.
+    private void sendGenericNotificationWithKey(String key) {
+        when(mGenericSbn.getKey()).thenReturn(key);
         when(mNotification.getChannelId()).thenReturn(PARENT_NOTIFICATION_CHANNEL_ID);
         doAnswer(invocationOnMock -> {
             NotificationListenerService.Ranking ranking = (NotificationListenerService.Ranking)
                     invocationOnMock.getArguments()[1];
             ranking.populate(
-                    (String) invocationOnMock.getArguments()[0],
-                    0,
-                    false,
-                    0,
-                    0,
+                    /* key= */ (String) invocationOnMock.getArguments()[0],
+                    /* rank= */ 0,
+                    /* matchesInterruptionFilter= */ false,
+                    /* visibilityOverride= */ 0,
+                    /* suppressedVisualEffects= */ 0,
                     mParentNotificationChannel.getImportance(),
-                    null, null,
-                    mParentNotificationChannel, null, null, true, 0, false, -1, false, null, null,
-                    false, false, false, null, 0, false);
+                    /* explanation= */ null,
+                    /* overrideGroupKey= */ null,
+                    mParentNotificationChannel,
+                    /* overridePeople= */ null,
+                    /* snoozeCriteria= */ null,
+                    /* showBadge= */ true,
+                    /* userSentiment= */ 0,
+                    /* hidden= */ false,
+                    /* lastAudiblyAlertedMs= */ -1,
+                    /* noisy= */ false,
+                    /* smartActions= */ null,
+                    /* smartReplies= */ null,
+                    /* canBubble= */ false,
+                    /* isTextChanged= */ false,
+                    /* isConversation= */ false,
+                    /* shortcutInfo= */ null,
+                    /* rankingAdjustment= */ 0,
+                    /* isBubble= */ false,
+                    /* proposedImportance= */ 0,
+                    /* sensitiveContent= */ false
+            );
             return true;
-        }).when(mRankingMap).getRanking(eq(GENERIC_KEY),
+        }).when(mRankingMap).getRanking(eq(key),
                 any(NotificationListenerService.Ranking.class));
         NotificationListenerService listenerService =
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
@@ -1625,15 +1781,33 @@ public final class DataManagerTest {
             NotificationListenerService.Ranking ranking = (NotificationListenerService.Ranking)
                     invocationOnMock.getArguments()[1];
             ranking.populate(
-                    (String) invocationOnMock.getArguments()[0],
-                    0,
-                    false,
-                    0,
-                    0,
-                    mNotificationChannel.getImportance(),
-                    null, null,
-                    mNotificationChannel, null, null, true, 0, false, -1, false, null, null, false,
-                    false, false, null, 0, false);
+                    /* key= */ (String) invocationOnMock.getArguments()[0],
+                    /* rank= */ 0,
+                    /* matchesInterruptionFilter= */ false,
+                    /* visibilityOverride= */ 0,
+                    /* suppressedVisualEffects= */ 0,
+                    mParentNotificationChannel.getImportance(),
+                    /* explanation= */ null,
+                    /* overrideGroupKey= */ null,
+                    mParentNotificationChannel,
+                    /* overridePeople= */ null,
+                    /* snoozeCriteria= */ null,
+                    /* showBadge= */ true,
+                    /* userSentiment= */ 0,
+                    /* hidden= */ false,
+                    /* lastAudiblyAlertedMs= */ -1,
+                    /* noisy= */ false,
+                    /* smartActions= */ null,
+                    /* smartReplies= */ null,
+                    /* canBubble= */ false,
+                    /* isTextChanged= */ false,
+                    /* isConversation= */ false,
+                    /* shortcutInfo= */ null,
+                    /* rankingAdjustment= */ 0,
+                    /* isBubble= */ false,
+                    /* proposedImportance= */ 0,
+                    /* sensitiveContent= */ false
+            );
             return true;
         }).when(mRankingMap).getRanking(eq(CUSTOM_KEY),
                 any(NotificationListenerService.Ranking.class));

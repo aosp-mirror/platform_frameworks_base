@@ -246,7 +246,7 @@ class ExplicitHealthCheckController {
             try {
                 mRemoteService.getSupportedPackages(new RemoteCallback(result -> {
                     List<PackageConfig> packages =
-                            result.getParcelableArrayList(EXTRA_SUPPORTED_PACKAGES);
+                            result.getParcelableArrayList(EXTRA_SUPPORTED_PACKAGES, android.service.watchdog.ExplicitHealthCheckService.PackageConfig.class);
                     Slog.i(TAG, "Explicit health check supported packages " + packages);
                     consumer.accept(packages);
                 }));

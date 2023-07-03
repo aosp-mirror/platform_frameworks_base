@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -25,7 +24,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * expanded/collapsed state of a single notification which is tracked within each
  * ExpandableNotificationRow.
  */
-public interface GroupExpansionManager extends Dumpable {
+public interface GroupExpansionManager {
 
     /**
      * Register a listener for group expansion changes

@@ -36,5 +36,9 @@ interface ISearchUiManager {
 
     void notifyEvent(in SearchSessionId sessionId, in Query input, in SearchTargetEvent event);
 
+    void registerEmptyQueryResultUpdateCallback(in SearchSessionId sessionId, in ISearchCallback callback);
+
+    void unregisterEmptyQueryResultUpdateCallback(in SearchSessionId sessionId, in ISearchCallback callback);
+
     void destroySearchSession(in SearchSessionId sessionId);
 }

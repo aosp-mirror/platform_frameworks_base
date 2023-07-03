@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ExceptionUtils;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 
@@ -46,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * Base class for a remotable object, the core part of a lightweight
@@ -144,9 +144,6 @@ public class Binder implements IBinder {
      */
     private static volatile boolean sStackTrackingEnabled = false;
 
-    private static final Object sTracingUidsWriteLock = new Object();
-    private static volatile IntArray sTracingUidsImmutable = new IntArray();
-
     /**
      * Enable Binder IPC stack tracking. If enabled, every binder transaction will be logged to
      * {@link TransactionTracker}.
@@ -167,30 +164,12 @@ public class Binder implements IBinder {
     }
 
     /**
-     * @hide
-     */
-    public static void enableTracingForUid(int uid) {
-        synchronized (sTracingUidsWriteLock) {
-            final IntArray copy = sTracingUidsImmutable.clone();
-            copy.add(uid);
-            sTracingUidsImmutable = copy;
-        }
-    }
-
-    /**
      * Check if binder transaction stack tracking is enabled.
      *
      * @hide
      */
     public static boolean isStackTrackingEnabled() {
         return sStackTrackingEnabled;
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isTracingEnabled(int callingUid) {
-        return sTracingUidsImmutable.indexOf(callingUid) != -1;
     }
 
     /**
@@ -313,7 +292,7 @@ public class Binder implements IBinder {
     private IInterface mOwner;
     @Nullable
     private String mDescriptor;
-    private volatile String[] mTransactionTraceNames = null;
+    private volatile AtomicReferenceArray<String> mTransactionTraceNames = null;
     private volatile String mSimpleDescriptor = null;
     private static final int TRANSACTION_TRACE_NAME_ID_LIMIT = 1024;
 
@@ -349,16 +328,48 @@ public class Binder implements IBinder {
     public static final native boolean isDirectlyHandlingTransaction();
 
     /**
+    * Returns {@code true} if the current thread has had its identity
+    * set explicitly via {@link #clearCallingIdentity()}
+    *
+    * @hide
+    */
+    @CriticalNative
+    private static native boolean hasExplicitIdentity();
+
+    /**
      * Return the Linux UID assigned to the process that sent the transaction
      * currently being processed.
      *
      * @throws IllegalStateException if the current thread is not currently
-     * executing an incoming transaction.
+     * executing an incoming transaction and the calling identity has not been
+     * explicitly set with {@link #clearCallingIdentity()}
      */
     public static final int getCallingUidOrThrow() {
-        if (!isDirectlyHandlingTransaction()) {
+        if (!isDirectlyHandlingTransaction() && !hasExplicitIdentity()) {
             throw new IllegalStateException(
-                  "Thread is not in a binder transcation");
+                  "Thread is not in a binder transaction, "
+                  + "and the calling identity has not been "
+                  + "explicitly set with clearCallingIdentity");
+        }
+        return getCallingUid();
+    }
+
+    /**
+     * Return the Linux UID assigned to the process that sent the transaction
+     * currently being processed.
+     *
+     * Slog.wtf if the current thread is not currently
+     * executing an incoming transaction and the calling identity has not been
+     * explicitly set with {@link #clearCallingIdentity()}
+     *
+     * @hide
+     */
+    public static final int getCallingUidOrWtf(String message) {
+        if (!isDirectlyHandlingTransaction() && !hasExplicitIdentity()) {
+            Slog.wtf(TAG,
+                    message + ": Thread is not in a binder transaction, "
+                            + "and the calling identity has not been "
+                            + "explicitly set with clearCallingIdentity");
         }
         return getCallingUid();
     }
@@ -583,7 +594,7 @@ public class Binder implements IBinder {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     public final native void markVintfStability();
 
     /**
@@ -917,28 +928,36 @@ public class Binder implements IBinder {
     @VisibleForTesting
     public final @NonNull String getTransactionTraceName(int transactionCode) {
         if (mTransactionTraceNames == null) {
-            final String descriptor = getSimpleDescriptor();
             final int highestId = Math.min(getMaxTransactionId(), TRANSACTION_TRACE_NAME_ID_LIMIT);
-            final String[] transactionNames = new String[highestId + 1];
-            final StringBuffer buf = new StringBuffer();
-            for (int i = 0; i <= highestId; i++) {
-                String transactionName = getTransactionName(i + FIRST_CALL_TRANSACTION);
-                if (transactionName != null) {
-                    buf.append(descriptor).append(':').append(transactionName);
-                } else {
-                    buf.append(descriptor).append('#').append(i + FIRST_CALL_TRANSACTION);
-                }
-                transactionNames[i] = buf.toString();
-                buf.setLength(0);
-            }
-            mSimpleDescriptor = descriptor;
-            mTransactionTraceNames = transactionNames;
+            mSimpleDescriptor = getSimpleDescriptor();
+            mTransactionTraceNames = new AtomicReferenceArray(highestId + 1);
         }
+
         final int index = transactionCode - FIRST_CALL_TRANSACTION;
-        if (index < 0 || index >= mTransactionTraceNames.length) {
+        if (index < 0 || index >= mTransactionTraceNames.length()) {
             return mSimpleDescriptor + "#" + transactionCode;
         }
-        return mTransactionTraceNames[index];
+
+        String transactionTraceName = mTransactionTraceNames.getAcquire(index);
+        if (transactionTraceName == null) {
+            final String transactionName = getTransactionName(transactionCode);
+            final StringBuffer buf = new StringBuffer();
+
+            // Keep trace name consistent with cpp trace name in:
+            // system/tools/aidl/generate_cpp.cpp
+            buf.append("AIDL::java::");
+            if (transactionName != null) {
+                buf.append(mSimpleDescriptor).append("::").append(transactionName);
+            } else {
+                buf.append(mSimpleDescriptor).append("::#").append(transactionCode);
+            }
+            buf.append("::server");
+
+            transactionTraceName = buf.toString();
+            mTransactionTraceNames.setRelease(index, transactionTraceName);
+        }
+
+        return transactionTraceName;
     }
 
     private @NonNull String getSimpleDescriptor() {
@@ -1236,25 +1255,40 @@ public class Binder implements IBinder {
     @UnsupportedAppUsage
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
+
+        Parcel data = Parcel.obtain(dataObj);
+        Parcel reply = Parcel.obtain(replyObj);
+
         // At that point, the parcel request headers haven't been parsed so we do not know what
         // {@link WorkSource} the caller has set. Use calling UID as the default.
-        final int callingUid = Binder.getCallingUid();
-        final long origWorkSource = ThreadLocalWorkSource.setUid(callingUid);
+        //
+        // TODO: this is wrong - we should attribute along the entire call route
+        // also this attribution logic should move to native code - it only works
+        // for Java now
+        //
+        // This attribution support is not generic and therefore not support in RPC mode
+        final int callingUid = data.isForRpc() ? -1 : Binder.getCallingUid();
+        final long origWorkSource = callingUid == -1
+                ? -1 : ThreadLocalWorkSource.setUid(callingUid);
+
         try {
-            return execTransactInternal(code, dataObj, replyObj, flags, callingUid);
+            return execTransactInternal(code, data, reply, flags, callingUid);
         } finally {
-            ThreadLocalWorkSource.restore(origWorkSource);
+            reply.recycle();
+            data.recycle();
+
+            if (callingUid != -1) {
+                ThreadLocalWorkSource.restore(origWorkSource);
+            }
         }
     }
 
-    private boolean execTransactInternal(int code, long dataObj, long replyObj, int flags,
+    private boolean execTransactInternal(int code, Parcel data, Parcel reply, int flags,
             int callingUid) {
         // Make sure the observer won't change while processing a transaction.
         final BinderInternal.Observer observer = sObserver;
         final CallSession callSession =
                 observer != null ? observer.callStarted(this, code, UNSET_WORKSOURCE) : null;
-        Parcel data = Parcel.obtain(dataObj);
-        Parcel reply = Parcel.obtain(replyObj);
         // Theoretically, we should call transact, which will call onTransact,
         // but all that does is rewind it, and we just got these from an IPC,
         // so we'll just call it directly.
@@ -1262,19 +1296,44 @@ public class Binder implements IBinder {
         // Log any exceptions as warnings, don't silently suppress them.
         // If the call was {@link IBinder#FLAG_ONEWAY} then these exceptions
         // disappear into the ether.
-        final boolean tracingEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_AIDL) &&
-                (Binder.isStackTrackingEnabled() || Binder.isTracingEnabled(callingUid));
+        final boolean tagEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_AIDL);
+        final boolean hasFullyQualifiedName = getMaxTransactionId() > 0;
+        final String transactionTraceName;
+
+        if (tagEnabled && hasFullyQualifiedName) {
+            // If tracing enabled and we have a fully qualified name, fetch the name
+            transactionTraceName = getTransactionTraceName(code);
+        } else if (tagEnabled && isStackTrackingEnabled()) {
+            // If tracing is enabled and we *don't* have a fully qualified name, fetch the
+            // 'best effort' name only for stack tracking. This works around noticeable perf impact
+            // on low latency binder calls (<100us). The tracing call itself is between (1-10us) and
+            // the perf impact can be quite noticeable while benchmarking such binder calls.
+            // The primary culprits are ContentProviders and Cursors which convenienty don't
+            // autogenerate their AIDL and hence will not have a fully qualified name.
+            //
+            // TODO(b/253426478): Relax this constraint after a more robust fix
+            transactionTraceName = getTransactionTraceName(code);
+        } else {
+            transactionTraceName = null;
+        }
+
+        final boolean tracingEnabled = tagEnabled && transactionTraceName != null;
         try {
+            // TODO - this logic should not be in Java - it should be in native
+            // code in libbinder so that it works for all binder users.
             final BinderCallHeavyHitterWatcher heavyHitterWatcher = sHeavyHitterWatcher;
-            if (heavyHitterWatcher != null) {
+            if (heavyHitterWatcher != null && callingUid != -1) {
                 // Notify the heavy hitter watcher, if it's enabled.
                 heavyHitterWatcher.onTransaction(callingUid, getClass(), code);
             }
             if (tracingEnabled) {
-                Trace.traceBegin(Trace.TRACE_TAG_AIDL, getTransactionTraceName(code));
+                Trace.traceBegin(Trace.TRACE_TAG_AIDL, transactionTraceName);
             }
 
-            if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0) {
+            // TODO - this logic should not be in Java - it should be in native
+            // code in libbinder so that it works for all binder users. Further,
+            // this should not re-use flags.
+            if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0 && callingUid != -1) {
                 AppOpsManager.startNotedAppOpsCollection(callingUid);
                 try {
                     res = onTransact(code, data, reply, flags);
@@ -1317,8 +1376,6 @@ public class Binder implements IBinder {
             }
 
             checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
-            reply.recycle();
-            data.recycle();
         }
 
         // Just in case -- we are done with the IPC, so there should be no more strict

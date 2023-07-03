@@ -16,6 +16,8 @@
 
 #include "TestSceneBase.h"
 
+#include <SkBlendMode.h>
+
 class ClippingAnimation;
 
 static TestScene::Registrar _RectGrid(TestScene::Info{

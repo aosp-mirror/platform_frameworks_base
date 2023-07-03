@@ -18,13 +18,15 @@
 #define AAPT_SPLIT_UTIL_H
 
 #include <regex>
-
-#include "androidfw/StringPiece.h"
+#include <set>
+#include <unordered_set>
 
 #include "AppInfo.h"
-#include "Diagnostics.h"
 #include "SdkConstants.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/StringPiece.h"
 #include "filter/ConfigFilter.h"
+#include "process/IResourceTableConsumer.h"
 #include "split/TableSplitter.h"
 #include "xml/XmlDom.h"
 
@@ -32,19 +34,19 @@ namespace aapt {
 
 // Parses a configuration density (ex. hdpi, xxhdpi, 234dpi, anydpi, etc).
 // Returns Nothing and logs a human friendly error message if the string was not legal.
-std::optional<uint16_t> ParseTargetDensityParameter(const android::StringPiece& arg,
-                                                    IDiagnostics* diag);
+std::optional<uint16_t> ParseTargetDensityParameter(android::StringPiece arg,
+                                                    android::IDiagnostics* diag);
 
 // Parses a string of the form 'path/to/output.apk:<config>[,<config>...]' and fills in
 // `out_path` with the path and `out_split` with the set of ConfigDescriptions.
 // Returns false and logs a human friendly error message if the string was not legal.
-bool ParseSplitParameter(const android::StringPiece& arg, IDiagnostics* diag, std::string* out_path,
-                         SplitConstraints* out_split);
+bool ParseSplitParameter(android::StringPiece arg, android::IDiagnostics* diag,
+                         std::string* out_path, SplitConstraints* out_split);
 
 // Parses a set of config filter strings of the form 'en,fr-rFR' and returns an IConfigFilter.
 // Returns nullptr and logs a human friendly error message if the string was not legal.
 std::unique_ptr<IConfigFilter> ParseConfigFilterParameters(const std::vector<std::string>& args,
-                                                           IDiagnostics* diag);
+                                                           android::IDiagnostics* diag);
 
 // Adjust the SplitConstraints so that their SDK version is stripped if it
 // is less than or equal to the min_sdk. Otherwise the resources that have had
@@ -60,7 +62,7 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
 
 // Extracts relevant info from the AndroidManifest.xml.
 std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
-                                                        IDiagnostics* diag);
+                                                        android::IDiagnostics* diag);
 
 // Returns a copy of 'name' which conforms to the regex '[a-zA-Z]+[a-zA-Z0-9_]*' by
 // replacing nonconforming characters with underscores.
@@ -76,6 +78,11 @@ void SetLongVersionCode(xml::Element* manifest, uint64_t version_code);
 
 // Returns a case insensitive regular expression based on the input.
 std::regex GetRegularExpression(const std::string &input);
+
+bool ParseResourceConfig(const std::string& content, IAaptContext* context,
+                         std::unordered_set<ResourceName>& out_resource_exclude_list,
+                         std::set<ResourceName>& out_name_collapse_exemptions,
+                         std::set<ResourceName>& out_path_shorten_exemptions);
 
 }  // namespace aapt
 

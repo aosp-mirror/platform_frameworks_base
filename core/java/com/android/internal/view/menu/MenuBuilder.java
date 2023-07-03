@@ -1286,8 +1286,13 @@ public class MenuBuilder implements Menu {
         mCurrentMenuInfo = menuInfo;
     }
 
+    /**
+     * Sets the optional icon visible.
+     * @param visible true for visible, false for hidden.
+     */
     @UnsupportedAppUsage
-    void setOptionalIconsVisible(boolean visible) {
+    @Override
+    public void setOptionalIconsVisible(boolean visible) {
         mOptionalIconsVisible = visible;
     }
     

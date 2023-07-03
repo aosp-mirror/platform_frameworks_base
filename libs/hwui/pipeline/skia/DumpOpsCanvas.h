@@ -19,6 +19,8 @@
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
 
+class SkRRect;
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {

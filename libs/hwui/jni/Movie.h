@@ -13,6 +13,7 @@
 #include "SkBitmap.h"
 #include "SkCanvas.h"
 #include "SkRefCnt.h"
+#include "SkTypes.h"
 
 class SkStreamRewindable;
 

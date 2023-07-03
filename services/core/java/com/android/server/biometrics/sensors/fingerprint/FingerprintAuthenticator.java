@@ -23,6 +23,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IFingerprintService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -63,8 +64,13 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, long requestId, int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
-        mFingerprintService.prepareForAuthentication(mSensorId, token, operationId, userId,
-                sensorReceiver, opPackageName, requestId, cookie, allowBackgroundAuthentication);
+        mFingerprintService.prepareForAuthentication(token, operationId, sensorReceiver,
+                new FingerprintAuthenticateOptions.Builder()
+                        .setSensorId(mSensorId)
+                        .setUserId(userId)
+                        .setOpPackageName(opPackageName)
+                        .build(),
+                requestId, cookie, allowBackgroundAuthentication);
     }
 
     @Override

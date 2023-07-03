@@ -21,14 +21,16 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
-import android.app.Activity;
+import android.app.WindowConfiguration;
+import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.annotation.UiContext;
 
 /**
  * Util class for both Sidecar and Extensions.
@@ -86,26 +88,31 @@ public final class ExtensionHelper {
     }
 
     /** Transforms rectangle from absolute coordinate space to the window coordinate space. */
-    public static void transformToWindowSpaceRect(Activity activity, Rect inOutRect) {
-        Rect windowRect = getWindowBounds(activity);
-        if (windowRect == null) {
+    public static void transformToWindowSpaceRect(@NonNull @UiContext Context context,
+            Rect inOutRect) {
+        transformToWindowSpaceRect(getWindowBounds(context), inOutRect);
+    }
+
+    /** @see ExtensionHelper#transformToWindowSpaceRect(Context, Rect) */
+    public static void transformToWindowSpaceRect(@NonNull WindowConfiguration windowConfiguration,
+            Rect inOutRect) {
+        transformToWindowSpaceRect(windowConfiguration.getBounds(), inOutRect);
+    }
+
+    private static void transformToWindowSpaceRect(@NonNull Rect bounds, @NonNull Rect inOutRect) {
+        if (!inOutRect.intersect(bounds)) {
             inOutRect.setEmpty();
             return;
         }
-        if (!Rect.intersects(inOutRect, windowRect)) {
-            inOutRect.setEmpty();
-            return;
-        }
-        inOutRect.intersect(windowRect);
-        inOutRect.offset(-windowRect.left, -windowRect.top);
+        inOutRect.offset(-bounds.left, -bounds.top);
     }
 
     /**
      * Gets the current window bounds in absolute coordinates.
      */
-    @Nullable
-    private static Rect getWindowBounds(@NonNull Activity activity) {
-        return activity.getWindowManager().getCurrentWindowMetrics().getBounds();
+    @NonNull
+    private static Rect getWindowBounds(@NonNull @UiContext Context context) {
+        return context.getSystemService(WindowManager.class).getCurrentWindowMetrics().getBounds();
     }
 
     /**

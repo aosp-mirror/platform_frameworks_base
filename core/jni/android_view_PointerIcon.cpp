@@ -16,15 +16,14 @@
 
 #define LOG_TAG "PointerIcon-JNI"
 
-#include <nativehelper/JNIHelp.h>
-
 #include "android_view_PointerIcon.h"
 
+#include <android/graphics/bitmap.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-#include <utils/Log.h>
-#include <android/graphics/bitmap.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
+#include <utils/Log.h>
 
 #include "core_jni_helpers.h"
 
@@ -45,7 +44,8 @@ static struct {
 
 // --- Global Functions ---
 
-jobject android_view_PointerIcon_getSystemIcon(JNIEnv* env, jobject contextObj, int32_t style) {
+jobject android_view_PointerIcon_getSystemIcon(JNIEnv* env, jobject contextObj,
+                                               PointerIconStyle style) {
     jobject pointerIconObj = env->CallStaticObjectMethod(gPointerIconClassInfo.clazz,
             gPointerIconClassInfo.getSystemIcon, contextObj, style);
     if (env->ExceptionCheck()) {
@@ -81,7 +81,8 @@ status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIcon
     if (!pointerIconObj) {
         return BAD_VALUE;
     }
-    outPointerIcon->style = env->GetIntField(pointerIconObj, gPointerIconClassInfo.mType);
+    outPointerIcon->style = static_cast<PointerIconStyle>(
+            env->GetIntField(pointerIconObj, gPointerIconClassInfo.mType));
     outPointerIcon->hotSpotX = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotX);
     outPointerIcon->hotSpotY = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotY);
 
@@ -108,7 +109,8 @@ status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIcon
 }
 
 status_t android_view_PointerIcon_loadSystemIcon(JNIEnv* env, jobject contextObj,
-        int32_t style, PointerIcon* outPointerIcon) {
+                                                 PointerIconStyle style,
+                                                 PointerIcon* outPointerIcon) {
     jobject pointerIconObj = android_view_PointerIcon_getSystemIcon(env, contextObj, style);
     if (!pointerIconObj) {
         outPointerIcon->reset();
@@ -120,7 +122,6 @@ status_t android_view_PointerIcon_loadSystemIcon(JNIEnv* env, jobject contextObj
     env->DeleteLocalRef(pointerIconObj);
     return status;
 }
-
 
 // --- JNI Registration ---
 

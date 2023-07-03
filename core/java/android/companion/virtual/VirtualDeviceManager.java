@@ -16,66 +16,91 @@
 
 package android.companion.virtual;
 
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
-import android.hardware.display.DisplayManagerGlobal;
-import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
+import android.hardware.input.VirtualDpad;
+import android.hardware.input.VirtualDpadConfig;
 import android.hardware.input.VirtualKeyboard;
+import android.hardware.input.VirtualKeyboardConfig;
 import android.hardware.input.VirtualMouse;
+import android.hardware.input.VirtualMouseConfig;
+import android.hardware.input.VirtualNavigationTouchpad;
+import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchscreen;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
+import android.hardware.input.VirtualTouchscreenConfig;
+import android.media.AudioManager;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
-import android.util.ArrayMap;
+import android.util.Log;
 import android.view.Surface;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
 /**
- * System level service for managing virtual devices.
+ * System level service for creation and management of virtual devices.
  *
- * @hide
+ * <p>VirtualDeviceManager enables interactive sharing of capabilities between the host Android
+ * device and a remote device.
+ *
+ * <p class="note">Not to be confused with the Android Studio's Virtual Device Manager, which allows
+ * for device emulation.
  */
-@SystemApi
 @SystemService(Context.VIRTUAL_DEVICE_SERVICE)
 public final class VirtualDeviceManager {
 
-    private static final boolean DEBUG = false;
     private static final String TAG = "VirtualDeviceManager";
 
-    private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+    /**
+     * Broadcast Action: A Virtual Device was removed.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_VIRTUAL_DEVICE_REMOVED =
+            "android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED";
+
+    /**
+     * Int intent extra to be used with {@link #ACTION_VIRTUAL_DEVICE_REMOVED}.
+     * Contains the identifier of the virtual device, which was removed.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VIRTUAL_DEVICE_ID =
+            "android.companion.virtual.extra.VIRTUAL_DEVICE_ID";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -91,19 +116,28 @@ public final class VirtualDeviceManager {
     /**
      * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch was
      * successful.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int LAUNCH_SUCCESS = 0;
 
     /**
      * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
      * because the pending intent was canceled.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1;
 
     /**
      * Status for {@link VirtualDevice#launchPendingIntent}, indicating that the launch failed
      * because no activity starts were detected as a result of calling the pending intent.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2;
 
     private final IVirtualDeviceManager mService;
@@ -129,12 +163,16 @@ public final class VirtualDeviceManager {
      * @param params The parameters for creating virtual devices. See {@link VirtualDeviceParams}
      *   for the available options.
      * @return The created virtual device.
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     public VirtualDevice createVirtualDevice(
             int associationId,
             @NonNull VirtualDeviceParams params) {
+        Objects.requireNonNull(params, "params must not be null");
         try {
             return new VirtualDevice(mService, mContext, associationId, params);
         } catch (RemoteException e) {
@@ -143,63 +181,211 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * A virtual device has its own virtual display, audio output, microphone, and camera etc. The
-     * creator of a virtual device can take the output from the virtual display and stream it over
-     * to another device, and inject input events that are received from the remote device.
+     * Returns the details of all available virtual devices.
      *
-     * TODO(b/204081582): Consider using a builder pattern for the input APIs.
+     * <p>The returned objects are read-only representations that expose the properties of all
+     * existing virtual devices.
      */
+    @NonNull
+    public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return new ArrayList<>();
+        }
+        try {
+            return mService.getVirtualDevices();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the device policy for the given virtual device and policy type.
+     *
+     * <p>In case the virtual device identifier is not valid, or there's no explicitly specified
+     * policy for that device and policy type, then
+     * {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT} is returned.
+     *
+     * @hide
+     */
+    public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
+            int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve device policy; no virtual device manager service.");
+            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+        }
+        try {
+            return mService.getDevicePolicy(deviceId, policyType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the ID of the device which owns the display with the given ID.
+     *
+     * @hide
+     */
+    public int getDeviceIdForDisplayId(int displayId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return Context.DEVICE_ID_DEFAULT;
+        }
+        try {
+            return mService.getDeviceIdForDisplayId(displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
+     * {@link Context#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
+     * created by {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
+     *
+     * @hide
+     */
+    public boolean isValidVirtualDeviceId(int deviceId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return false;
+        }
+        try {
+            return mService.isValidVirtualDeviceId(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns device-specific audio session id for audio playback.
+     *
+     * @param deviceId - id of the virtual audio device
+     * @return Device specific session id to be used for audio playback (see
+     *   {@link AudioManager#generateAudioSessionId}) if virtual device has
+     *   {@link VirtualDeviceParams#POLICY_TYPE_AUDIO} set to
+     *   {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM} and Virtual Audio Device
+     *   is configured in context-aware mode. Otherwise
+     *   {@link AudioManager#AUDIO_SESSION_ID_GENERATE} constant is returned.
+     *
+     * @hide
+     */
+    public int getAudioPlaybackSessionId(int deviceId) {
+        if (mService == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+        try {
+            return mService.getAudioPlaybackSessionId(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns device-specific audio session id for audio recording.
+     *
+     * @param deviceId - id of the virtual audio device
+     * @return Device specific session id to be used for audio recording (see
+     *   {@link AudioManager#generateAudioSessionId}) if virtual device has
+     *   {@link VirtualDeviceParams#POLICY_TYPE_AUDIO} set to
+     *   {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM} and Virtual Audio Device
+     *   is configured in context-aware mode. Otherwise
+     *   {@link AudioManager#AUDIO_SESSION_ID_GENERATE} constant is returned.
+     *
+     * @hide
+     */
+    public int getAudioRecordingSessionId(int deviceId) {
+        if (mService == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+        try {
+            return mService.getAudioRecordingSessionId(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests sound effect to be played on virtual device.
+     *
+     * @see AudioManager#playSoundEffect(int)
+     *
+     * @param deviceId - id of the virtual audio device
+     * @param effectType the type of sound effect
+     *
+     * @hide
+     */
+    public void playSoundEffect(int deviceId, @AudioManager.SystemSoundEffect int effectType) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to dispatch sound effect; no virtual device manager service.");
+            return;
+        }
+        try {
+            mService.playSoundEffect(deviceId, effectType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * A representation of a virtual device.
+     *
+     * <p>A virtual device can have its own virtual displays, audio input/output, sensors, etc.
+     * The creator of a virtual device can take the output from the virtual display and stream it
+     * over to another device, and inject input and sensor events that are received from the remote
+     * device.
+     *
+     * <p>This object is only used by the virtual device creator and allows them to manage the
+     * device's behavior, peripherals, and the user interaction with that device.
+     *
+     * <p class="note">Not to be confused with {@link android.companion.virtual.VirtualDevice},
+     * which is a read-only representation exposing the properties of an existing virtual device.
+     *
+     * @hide
+     */
+    @SystemApi
     public static class VirtualDevice implements AutoCloseable {
 
-        private final Context mContext;
-        private final IVirtualDeviceManager mService;
-        private final IVirtualDevice mVirtualDevice;
-        private final ArrayMap<ActivityListener, ActivityListenerDelegate> mActivityListeners =
-                new ArrayMap<>();
-        private final IVirtualDeviceActivityListener mActivityListenerBinder =
-                new IVirtualDeviceActivityListener.Stub() {
+        private final VirtualDeviceInternal mVirtualDeviceInternal;
 
-                    @Override
-                    public void onTopActivityChanged(int displayId, ComponentName topActivity) {
-                        final long token = Binder.clearCallingIdentity();
-                        try {
-                            for (int i = 0; i < mActivityListeners.size(); i++) {
-                                mActivityListeners.valueAt(i)
-                                        .onTopActivityChanged(displayId, topActivity);
-                            }
-                        } finally {
-                            Binder.restoreCallingIdentity(token);
-                        }
-                    }
-
-                    @Override
-                    public void onDisplayEmpty(int displayId) {
-                        final long token = Binder.clearCallingIdentity();
-                        try {
-                            for (int i = 0; i < mActivityListeners.size(); i++) {
-                                mActivityListeners.valueAt(i).onDisplayEmpty(displayId);
-                            }
-                        } finally {
-                            Binder.restoreCallingIdentity(token);
-                        }
-                    }
-                };
-        @Nullable
-        private VirtualAudioDevice mVirtualAudioDevice;
-
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         private VirtualDevice(
                 IVirtualDeviceManager service,
                 Context context,
                 int associationId,
                 VirtualDeviceParams params) throws RemoteException {
-            mService = service;
-            mContext = context.getApplicationContext();
-            mVirtualDevice = service.createVirtualDevice(
-                    new Binder(),
-                    mContext.getPackageName(),
-                    associationId,
-                    params,
-                    mActivityListenerBinder);
+            mVirtualDeviceInternal =
+                    new VirtualDeviceInternal(service, context, associationId, params);
+        }
+
+        /**
+         * Returns the unique ID of this virtual device.
+         */
+        public int getDeviceId() {
+            return mVirtualDeviceInternal.getDeviceId();
+        }
+
+        /**
+         * Returns a new context bound to this device.
+         *
+         * <p>This is a convenience method equivalent to calling
+         * {@link Context#createDeviceContext(int)} with the id of this device.
+         */
+        public @NonNull Context createContext() {
+            return mVirtualDeviceInternal.createContext();
+        }
+
+        /**
+         * Returns this device's sensors.
+         *
+         * @see VirtualDeviceParams.Builder#addVirtualSensorConfig
+         *
+         * @return A list of all sensors for this device, or an empty list if no sensors exist.
+         */
+        @NonNull
+        public List<VirtualSensor> getVirtualSensorList() {
+            return mVirtualDeviceInternal.getVirtualSensorList();
         }
 
         /**
@@ -225,20 +411,11 @@ public final class VirtualDeviceManager {
                 @NonNull PendingIntent pendingIntent,
                 @NonNull Executor executor,
                 @NonNull IntConsumer listener) {
-            try {
-                mVirtualDevice.launchPendingIntent(
-                        displayId,
-                        pendingIntent,
-                        new ResultReceiver(new Handler(Looper.getMainLooper())) {
-                            @Override
-                            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                                super.onReceiveResult(resultCode, resultData);
-                                executor.execute(() -> listener.accept(resultCode));
-                            }
-                        });
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
+            Objects.requireNonNull(pendingIntent, "pendingIntent must not be null");
+            Objects.requireNonNull(executor, "executor must not be null");
+            Objects.requireNonNull(listener, "listener must not be null");
+            mVirtualDeviceInternal.launchPendingIntent(
+                    displayId, pendingIntent, executor, listener);
         }
 
         /**
@@ -249,23 +426,26 @@ public final class VirtualDeviceManager {
          * @param height The height of the virtual display in pixels, must be greater than 0.
          * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
          * @param surface The surface to which the content of the virtual display should
-         * be rendered, or null if there is none initially. The surface can also be set later using
-         * {@link VirtualDisplay#setSurface(Surface)}.
+         *   be rendered, or null if there is none initially. The surface can also be set later
+         *   using {@link VirtualDisplay#setSurface(Surface)}.
          * @param flags A combination of virtual display flags accepted by
-         * {@link DisplayManager#createVirtualDisplay}. In addition, the following flags are
-         * automatically set for all virtual devices:
-         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC VIRTUAL_DISPLAY_FLAG_PUBLIC} and
-         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-         * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
+         *   {@link DisplayManager#createVirtualDisplay}. In addition, the following flags are
+         *   automatically set for all virtual devices:
+         *   {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC} and
+         *   {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
          * @param executor The executor on which {@code callback} will be invoked. This is ignored
-         * if {@code callback} is {@code null}. If {@code callback} is specified, this executor must
-         * not be null.
+         *   if {@code callback} is {@code null}. If {@code callback} is specified, this executor
+         *   must not be null.
          * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
          * @return The newly created virtual display, or {@code null} if the application could
-         * not create the virtual display.
+         *   not create the virtual display.
          *
          * @see DisplayManager#createVirtualDisplay
+         *
+         * @deprecated use {@link #createVirtualDisplay(VirtualDisplayConfig, Executor,
+         * VirtualDisplay.Callback)}
          */
+        @Deprecated
         @Nullable
         public VirtualDisplay createVirtualDisplay(
                 @IntRange(from = 1) int width,
@@ -275,26 +455,41 @@ public final class VirtualDeviceManager {
                 @VirtualDisplayFlag int flags,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
-            // TODO(b/205343547): Handle display groups properly instead of creating a new display
-            //  group for every new virtual display created using this API.
-            // belongs to the same display group.
-            VirtualDisplayConfig config = new VirtualDisplayConfig.Builder(
-                    getVirtualDisplayName(), width, height, densityDpi)
-                    .setSurface(surface)
-                    .setFlags(getVirtualDisplayFlags(flags))
-                    .build();
-            IVirtualDisplayCallback callbackWrapper =
-                    new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
-            final int displayId;
-            try {
-                displayId = mService.createVirtualDisplay(config, callbackWrapper, mVirtualDevice,
-                        mContext.getPackageName());
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
+            // Currently this just uses the device ID, which means all of the virtual displays
+            // created using the same virtual device will have the same name if they use this
+            // deprecated API. The name should only be used for informational purposes, and not for
+            // identifying the display in code.
+            String virtualDisplayName =  "VirtualDevice_" + getDeviceId();
+            VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                    virtualDisplayName, width, height, densityDpi)
+                    .setFlags(flags);
+            if (surface != null) {
+                builder.setSurface(surface);
             }
-            DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-            return displayManager.createVirtualDisplayWrapper(config, mContext, callbackWrapper,
-                    displayId);
+            return mVirtualDeviceInternal.createVirtualDisplay(builder.build(), executor, callback);
+        }
+
+        /**
+         * Creates a virtual display for this virtual device. All displays created on the same
+         * device belongs to the same display group.
+         *
+         * @param config The configuration of the display.
+         * @param executor The executor on which {@code callback} will be invoked. This is ignored
+         *   if {@code callback} is {@code null}. If {@code callback} is specified, this executor
+         *   must not be null.
+         * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
+         * @return The newly created virtual display, or {@code null} if the application could
+         *   not create the virtual display.
+         *
+         * @see DisplayManager#createVirtualDisplay
+         */
+        @Nullable
+        public VirtualDisplay createVirtualDisplay(
+                @NonNull VirtualDisplayConfig config,
+                @Nullable @CallbackExecutor Executor executor,
+                @Nullable VirtualDisplay.Callback callback) {
+            Objects.requireNonNull(config, "config must not be null");
+            return mVirtualDeviceInternal.createVirtualDisplay(config, executor, callback);
         }
 
         /**
@@ -303,95 +498,152 @@ public final class VirtualDeviceManager {
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void close() {
-            try {
-                mVirtualDevice.close();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            if (mVirtualAudioDevice != null) {
-                mVirtualAudioDevice.close();
-                mVirtualAudioDevice = null;
-            }
+            mVirtualDeviceInternal.close();
+        }
+
+        /**
+         * Creates a virtual dpad.
+         *
+         * @param config the configurations of the virtual dpad.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
+            return mVirtualDeviceInternal.createVirtualDpad(config);
         }
 
         /**
          * Creates a virtual keyboard.
          *
-         * @param display the display that the events inputted through this device should target
-         * @param inputDeviceName the name to call this input device
-         * @param vendorId the PCI vendor id
-         * @param productId the product id, as defined by the vendor
+         * @param config the configurations of the virtual keyboard.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
-        public VirtualKeyboard createVirtualKeyboard(
-                @NonNull VirtualDisplay display,
-                @NonNull String inputDeviceName,
-                int vendorId,
-                int productId) {
-            try {
-                final IBinder token = new Binder(
-                        "android.hardware.input.VirtualKeyboard:" + inputDeviceName);
-                mVirtualDevice.createVirtualKeyboard(display.getDisplay().getDisplayId(),
-                        inputDeviceName, vendorId, productId, token);
-                return new VirtualKeyboard(mVirtualDevice, token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        public VirtualKeyboard createVirtualKeyboard(@NonNull VirtualKeyboardConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
+            return mVirtualDeviceInternal.createVirtualKeyboard(config);
+        }
+
+        /**
+         * Creates a virtual keyboard.
+         *
+         * @param display the display that the events inputted through this device should target.
+         * @param inputDeviceName the name of this keyboard device.
+         * @param vendorId the PCI vendor id.
+         * @param productId the product id, as defined by the vendor.
+         * @see #createVirtualKeyboard(VirtualKeyboardConfig config)
+         * @deprecated Use {@link #createVirtualKeyboard(VirtualKeyboardConfig config)} instead
+         */
+        @Deprecated
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualKeyboard createVirtualKeyboard(@NonNull VirtualDisplay display,
+                @NonNull String inputDeviceName, int vendorId, int productId) {
+            VirtualKeyboardConfig keyboardConfig =
+                    new VirtualKeyboardConfig.Builder()
+                            .setVendorId(vendorId)
+                            .setProductId(productId)
+                            .setInputDeviceName(inputDeviceName)
+                            .setAssociatedDisplayId(display.getDisplay().getDisplayId())
+                            .build();
+            return mVirtualDeviceInternal.createVirtualKeyboard(keyboardConfig);
         }
 
         /**
          * Creates a virtual mouse.
          *
-         * @param display the display that the events inputted through this device should target
-         * @param inputDeviceName the name to call this input device
-         * @param vendorId the PCI vendor id
-         * @param productId the product id, as defined by the vendor
+         * @param config the configurations of the virtual mouse.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
-        public VirtualMouse createVirtualMouse(
-                @NonNull VirtualDisplay display,
-                @NonNull String inputDeviceName,
-                int vendorId,
-                int productId) {
-            try {
-                final IBinder token = new Binder(
-                        "android.hardware.input.VirtualMouse:" + inputDeviceName);
-                mVirtualDevice.createVirtualMouse(display.getDisplay().getDisplayId(),
-                        inputDeviceName, vendorId, productId, token);
-                return new VirtualMouse(mVirtualDevice, token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        public VirtualMouse createVirtualMouse(@NonNull VirtualMouseConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
+            return mVirtualDeviceInternal.createVirtualMouse(config);
+        }
+
+        /**
+         * Creates a virtual mouse.
+         *
+         * @param display the display that the events inputted through this device should target.
+         * @param inputDeviceName the name of this mouse.
+         * @param vendorId the PCI vendor id.
+         * @param productId the product id, as defined by the vendor.
+         * @see #createVirtualMouse(VirtualMouseConfig config)
+         * @deprecated Use {@link #createVirtualMouse(VirtualMouseConfig config)} instead
+         */
+        @Deprecated
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualMouse createVirtualMouse(@NonNull VirtualDisplay display,
+                @NonNull String inputDeviceName, int vendorId, int productId) {
+            VirtualMouseConfig mouseConfig =
+                    new VirtualMouseConfig.Builder()
+                            .setVendorId(vendorId)
+                            .setProductId(productId)
+                            .setInputDeviceName(inputDeviceName)
+                            .setAssociatedDisplayId(display.getDisplay().getDisplayId())
+                            .build();
+            return mVirtualDeviceInternal.createVirtualMouse(mouseConfig);
         }
 
         /**
          * Creates a virtual touchscreen.
          *
-         * @param display the display that the events inputted through this device should target
-         * @param inputDeviceName the name to call this input device
-         * @param vendorId the PCI vendor id
-         * @param productId the product id, as defined by the vendor
+         * @param config the configurations of the virtual touchscreen.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualTouchscreen createVirtualTouchscreen(
-                @NonNull VirtualDisplay display,
-                @NonNull String inputDeviceName,
-                int vendorId,
-                int productId) {
-            try {
-                final IBinder token = new Binder(
-                        "android.hardware.input.VirtualTouchscreen:" + inputDeviceName);
-                final Point size = new Point();
-                display.getDisplay().getSize(size);
-                mVirtualDevice.createVirtualTouchscreen(display.getDisplay().getDisplayId(),
-                        inputDeviceName, vendorId, productId, token, size);
-                return new VirtualTouchscreen(mVirtualDevice, token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+                @NonNull VirtualTouchscreenConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
+            return mVirtualDeviceInternal.createVirtualTouchscreen(config);
+        }
+
+        /**
+         * Creates a virtual touchscreen.
+         *
+         * @param display the display that the events inputted through this device should target.
+         * @param inputDeviceName the name of this touchscreen device.
+         * @param vendorId the PCI vendor id.
+         * @param productId the product id, as defined by the vendor.
+         * @see #createVirtualTouchscreen(VirtualTouchscreenConfig config)
+         * @deprecated Use {@link #createVirtualTouchscreen(VirtualTouchscreenConfig config)}
+         * instead
+         */
+        @Deprecated
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualTouchscreen createVirtualTouchscreen(@NonNull VirtualDisplay display,
+                @NonNull String inputDeviceName, int vendorId, int productId) {
+            final Point size = new Point();
+            display.getDisplay().getSize(size);
+            VirtualTouchscreenConfig touchscreenConfig =
+                    new VirtualTouchscreenConfig.Builder(size.x, size.y)
+                            .setVendorId(vendorId)
+                            .setProductId(productId)
+                            .setInputDeviceName(inputDeviceName)
+                            .setAssociatedDisplayId(display.getDisplay().getDisplayId())
+                            .build();
+            return mVirtualDeviceInternal.createVirtualTouchscreen(touchscreenConfig);
+        }
+
+        /**
+         * Creates a virtual touchpad in navigation mode.
+         *
+         * <p>A touchpad in navigation mode means that its events are interpreted as navigation
+         * events (up, down, etc) instead of using them to update a cursor's absolute position. If
+         * the events are not consumed they are converted to DPAD events and delivered to the target
+         * again.
+         *
+         * @param config the configurations of the virtual navigation touchpad.
+         * @see android.view.InputDevice#SOURCE_TOUCH_NAVIGATION
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualNavigationTouchpad createVirtualNavigationTouchpad(
+                @NonNull VirtualNavigationTouchpadConfig config) {
+            return mVirtualDeviceInternal.createVirtualNavigationTouchpad(config);
         }
 
         /**
@@ -405,10 +657,10 @@ public final class VirtualDeviceManager {
          *
          * @param display The target virtual display to capture from and inject into.
          * @param executor The {@link Executor} object for the thread on which to execute
-         *                the callback. If <code>null</code>, the {@link Executor} associated with
-         *                the main {@link Looper} will be used.
+         *   the callback. If <code>null</code>, the {@link Executor} associated with the main
+         *   {@link Looper} will be used.
          * @param callback Interface to be notified when playback or recording configuration of
-         *                applications running on virtual display is changed.
+         *   applications running on virtual display is changed.
          * @return A {@link VirtualAudioDevice} instance.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
@@ -417,49 +669,20 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplay display,
                 @Nullable Executor executor,
                 @Nullable AudioConfigurationChangeCallback callback) {
-            if (mVirtualAudioDevice == null) {
-                mVirtualAudioDevice = new VirtualAudioDevice(
-                        mContext, mVirtualDevice, display, executor, callback);
-            }
-            return mVirtualAudioDevice;
+            Objects.requireNonNull(display, "display must not be null");
+            return mVirtualDeviceInternal.createVirtualAudioDevice(display, executor, callback);
         }
 
         /**
          * Sets the visibility of the pointer icon for this VirtualDevice's associated displays.
          *
          * @param showPointerIcon True if the pointer should be shown; false otherwise. The default
-         *                        visibility is true.
+         *   visibility is true.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public void setShowPointerIcon(boolean showPointerIcon) {
-            try {
-                mVirtualDevice.setShowPointerIcon(showPointerIcon);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
-         * Returns the display flags that should be added to a particular virtual display.
-         * Additional device-level flags from {@link
-         * com.android.server.companion.virtual.VirtualDeviceImpl#getBaseVirtualDisplayFlags()} will
-         * be added by DisplayManagerService.
-         */
-        private int getVirtualDisplayFlags(int flags) {
-            return DEFAULT_VIRTUAL_DISPLAY_FLAGS | flags;
-        }
-
-        private String getVirtualDisplayName() {
-            try {
-                // Currently this just use the association ID, which means all of the virtual
-                // displays created using the same virtual device will have the same name. The name
-                // should only be used for informational purposes, and not for identifying the
-                // display in code.
-                return "VirtualDevice_" + mVirtualDevice.getAssociationId();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            mVirtualDeviceInternal.setShowPointerIcon(showPointerIcon);
         }
 
         /**
@@ -472,24 +695,78 @@ public final class VirtualDeviceManager {
          */
         public void addActivityListener(
                 @CallbackExecutor @NonNull Executor executor, @NonNull ActivityListener listener) {
-            mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
+            mVirtualDeviceInternal.addActivityListener(executor, listener);
         }
 
         /**
-         * Removes an activity listener previously added with
-         * {@link #addActivityListener}.
+         * Removes an activity listener previously added with {@link #addActivityListener}.
          *
          * @param listener The listener to remove.
          * @see #addActivityListener(Executor, ActivityListener)
          */
         public void removeActivityListener(@NonNull ActivityListener listener) {
-            mActivityListeners.remove(listener);
+            mVirtualDeviceInternal.removeActivityListener(listener);
+        }
+
+        /**
+         * Adds a sound effect listener.
+         *
+         * @param executor The executor where the listener is executed on.
+         * @param soundEffectListener The listener to add.
+         * @see #removeActivityListener(ActivityListener)
+         */
+        public void addSoundEffectListener(@CallbackExecutor @NonNull Executor executor,
+                @NonNull SoundEffectListener soundEffectListener) {
+            mVirtualDeviceInternal.addSoundEffectListener(executor, soundEffectListener);
+        }
+
+        /**
+         * Removes a sound effect listener previously added with {@link #addSoundEffectListener}.
+         *
+         * @param soundEffectListener The listener to remove.
+         * @see #addSoundEffectListener(Executor, SoundEffectListener)
+         */
+        public void removeSoundEffectListener(@NonNull SoundEffectListener soundEffectListener) {
+            mVirtualDeviceInternal.removeSoundEffectListener(soundEffectListener);
+        }
+
+        /**
+         * Registers an intent interceptor that will intercept an intent attempting to launch
+         * when matching the provided IntentFilter and calls the callback with the intercepted
+         * intent.
+         *
+         * @param interceptorFilter The filter to match intents intended for interception.
+         * @param executor The executor where the interceptor is executed on.
+         * @param interceptorCallback The callback called when an intent matching interceptorFilter
+         * is intercepted.
+         * @see #unregisterIntentInterceptor(IntentInterceptorCallback)
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void registerIntentInterceptor(
+                @NonNull IntentFilter interceptorFilter,
+                @CallbackExecutor @NonNull Executor executor,
+                @NonNull IntentInterceptorCallback interceptorCallback) {
+            mVirtualDeviceInternal.registerIntentInterceptor(
+                    interceptorFilter, executor, interceptorCallback);
+        }
+
+        /**
+         * Unregisters the intent interceptor previously registered with
+         * {@link #registerIntentInterceptor}.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void unregisterIntentInterceptor(
+                    @NonNull IntentInterceptorCallback interceptorCallback) {
+            mVirtualDeviceInternal.unregisterIntentInterceptor(interceptorCallback);
         }
     }
 
     /**
      * Listener for activity changes in this virtual device.
+     *
+     * @hide
      */
+    @SystemApi
     public interface ActivityListener {
 
         /**
@@ -501,8 +778,23 @@ public final class VirtualDeviceManager {
          *
          * @param displayId The display ID on which the activity change happened.
          * @param topActivity The component name of the top activity.
+         * @deprecated Use {@link #onTopActivityChanged(int, ComponentName, int)} instead
          */
         void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity);
+
+        /**
+         * Called when the top activity is changed.
+         *
+         * <p>Note: When there are no activities running on the virtual display, the
+         * {@link #onDisplayEmpty(int)} will be called. If the value topActivity is cached, it
+         * should be cleared when {@link #onDisplayEmpty(int)} is called.
+         *
+         * @param displayId The display ID on which the activity change happened.
+         * @param topActivity The component name of the top activity.
+         * @param userId The user ID associated with the top activity.
+         */
+        default void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity,
+                @UserIdInt int userId) {}
 
         /**
          * Called when the display becomes empty (e.g. if the user hits back on the last
@@ -514,23 +806,40 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * A wrapper for {@link ActivityListener} that executes callbacks on the given executor.
+     * Interceptor interface to be called when an intent matches the IntentFilter passed into {@link
+     * VirtualDevice#registerIntentInterceptor}. When the interceptor is called after matching the
+     * IntentFilter, the intended activity launch will be aborted and alternatively replaced by
+     * the interceptor's receiver.
+     *
+     * @hide
      */
-    private static class ActivityListenerDelegate {
-        @NonNull private final ActivityListener mActivityListener;
-        @NonNull private final Executor mExecutor;
+    @SystemApi
+    public interface IntentInterceptorCallback {
 
-        ActivityListenerDelegate(@NonNull ActivityListener listener, @NonNull Executor executor) {
-            mActivityListener = listener;
-            mExecutor = executor;
-        }
+        /**
+         * Called when an intent that matches the IntentFilter registered in {@link
+         * VirtualDevice#registerIntentInterceptor} is intercepted for the virtual device to
+         * handle.
+         *
+         * @param intent The intent that has been intercepted by the interceptor.
+         */
+        void onIntentIntercepted(@NonNull Intent intent);
+    }
 
-        public void onTopActivityChanged(int displayId, ComponentName topActivity) {
-            mExecutor.execute(() -> mActivityListener.onTopActivityChanged(displayId, topActivity));
-        }
+    /**
+     * Listener for system sound effect playback on virtual device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface SoundEffectListener {
 
-        public void onDisplayEmpty(int displayId) {
-            mExecutor.execute(() -> mActivityListener.onDisplayEmpty(displayId));
-        }
+        /**
+         * Called when there's a system sound effect to be played on virtual device.
+         *
+         * @param effectType - system sound effect type
+         * @see android.media.AudioManager.SystemSoundEffect
+         */
+        void onPlaySoundEffect(@AudioManager.SystemSoundEffect int effectType);
     }
 }

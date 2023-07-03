@@ -16,7 +16,6 @@
 
 package com.android.settingslib.media;
 
-import static android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -29,10 +28,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.media.AudioDeviceAttributes;
+import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
@@ -71,6 +72,7 @@ public class LocalMediaManagerTest {
     private static final String TEST_CURRENT_DEVICE_ID = "currentDevice_id";
     private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
     private static final String TEST_SESSION_ID = "session_id";
+    private static final String TEST_ADDRESS = "00:01:02:03:04:05";
 
     @Mock
     private InfoMediaManager mInfoMediaManager;
@@ -90,6 +92,8 @@ public class LocalMediaManagerTest {
     private MediaRoute2Info mRouteInfo1;
     @Mock
     private MediaRoute2Info mRouteInfo2;
+    @Mock
+    private AudioManager mAudioManager;
 
     private Context mContext;
     private LocalMediaManager mLocalMediaManager;
@@ -118,6 +122,7 @@ public class LocalMediaManagerTest {
                 TEST_PACKAGE_NAME);
         mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
                 mInfoMediaManager, "com.test.packagename");
+        mLocalMediaManager.mAudioManager = mAudioManager;
     }
 
     @Test
@@ -201,8 +206,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
-        final MediaDevice device = mLocalMediaManager
-                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_DEVICE_ID_2);
+        MediaDevice device = mLocalMediaManager.getMediaDeviceById(TEST_DEVICE_ID_2);
 
         assertThat(device.getId()).isEqualTo(TEST_DEVICE_ID_2);
     }
@@ -217,8 +221,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
 
-        final MediaDevice device = mLocalMediaManager
-                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_CURRENT_DEVICE_ID);
+        MediaDevice device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
 
         assertThat(device).isNull();
     }
@@ -233,57 +236,9 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(null);
         when(device2.getId()).thenReturn(null);
 
-        MediaDevice device = mLocalMediaManager
-                .getMediaDeviceById(mLocalMediaManager.mMediaDevices, TEST_CURRENT_DEVICE_ID);
+        MediaDevice device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
 
         assertThat(device).isNull();
-
-        device = mLocalMediaManager.getMediaDeviceById(TEST_CURRENT_DEVICE_ID);
-
-        assertThat(device).isNull();
-    }
-
-    @Test
-    public void onDeviceAdded_addDevice() {
-        final MediaDevice device = mock(MediaDevice.class);
-
-        assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceAdded_mediaDeviceNotExistAndPhoneDeviceExistInList_addMediaDevice() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device2);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceAdded_mediaDeviceAndPhoneDeviceExistInList_doNothing() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device1);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        verify(mCallback, never()).onDeviceListUpdate(any());
     }
 
     @Test
@@ -311,18 +266,15 @@ public class LocalMediaManagerTest {
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
         final MediaDevice device3 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
         devices.add(device1);
         devices.add(device2);
         mLocalMediaManager.mMediaDevices.add(device3);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
         when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
-        when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
@@ -331,66 +283,16 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceRemoved_removeDevice() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device1);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceRemoved_phoneDeviceNotLastDeviceAfterRemoveMediaDevice_removeMediaDevice() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device2);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceRemoved_removeMediaDeviceNotInList_doNothing() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device1);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        verify(mCallback, never()).onDeviceListUpdate(any());
-    }
-
-    @Test
     public void onDeviceListRemoved_removeAll() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
         devices.add(device1);
         devices.add(device2);
         mLocalMediaManager.mMediaDevices.add(device1);
         mLocalMediaManager.mMediaDevices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback
                 .onDeviceListRemoved(mLocalMediaManager.mMediaDevices);
@@ -405,19 +307,17 @@ public class LocalMediaManagerTest {
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
         final MediaDevice device3 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
         devices.add(device1);
         devices.add(device3);
         mLocalMediaManager.mMediaDevices.add(device1);
         mLocalMediaManager.mMediaDevices.add(device2);
         mLocalMediaManager.mMediaDevices.add(device3);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(4);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListRemoved(devices);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
         verify(mCallback).onDeviceListUpdate(any());
     }
 
@@ -478,15 +378,6 @@ public class LocalMediaManagerTest {
     public void onConnectedDeviceChanged_nullConnectedDevice_noException() {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
-    }
-
-    @Test
-    public void onDeviceAttributesChanged_shouldDispatchDeviceListUpdate() {
-        mLocalMediaManager.registerCallback(mCallback);
-
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
-
-        verify(mCallback).onDeviceAttributesChanged();
     }
 
     @Test
@@ -551,16 +442,10 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceListAdded_haveDisconnectedDevice_addDisconnectedDevice() {
+    public void onDeviceListAdded_haveMutingExpectedDevice_addMutingExpectedDevice() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        final MediaDevice device3 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
         devices.add(device1);
-        devices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(device3);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
         final List<LocalBluetoothProfile> profiles = new ArrayList<>();
         final A2dpProfile a2dpProfile = mock(A2dpProfile.class);
@@ -573,26 +458,28 @@ public class LocalMediaManagerTest {
         bluetoothDevices.add(bluetoothDevice);
         mShadowBluetoothAdapter.setMostRecentlyConnectedDevices(bluetoothDevices);
 
+        AudioDeviceAttributes audioDeviceAttributes = new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, TEST_ADDRESS);
+
+        when(mAudioManager.getMutingExpectedDevice()).thenReturn(audioDeviceAttributes);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(cachedManager);
         when(cachedManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(cachedDevice.isConnected()).thenReturn(false);
         when(cachedDevice.getConnectableProfiles()).thenReturn(profiles);
         when(cachedDevice.getDevice()).thenReturn(bluetoothDevice);
+        when(cachedDevice.getAddress()).thenReturn(TEST_ADDRESS);
         when(mA2dpProfile.getActiveDevice()).thenReturn(bluetoothDevice);
         when(mHapProfile.getActiveDevices()).thenReturn(new ArrayList<>());
 
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
-        when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
-        when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
         when(device1.getDeviceType()).thenReturn(MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
-        when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(0);
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
         verify(mCallback).onDeviceListUpdate(any());
     }
 
@@ -634,84 +521,18 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceListAdded_haveDisconnectedDevice_list5DisconnectedDevice() {
-        final List<MediaDevice> devices = new ArrayList<>();
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        final MediaDevice device3 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        devices.add(device1);
-        devices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(device3);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        final List<LocalBluetoothProfile> profiles = new ArrayList<>();
-        final A2dpProfile a2dpProfile = mock(A2dpProfile.class);
-        profiles.add(a2dpProfile);
-
-        final List<BluetoothDevice> bluetoothDevices = new ArrayList<>();
-        final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
-        final BluetoothDevice bluetoothDevice2 = mock(BluetoothDevice.class);
-        final BluetoothDevice bluetoothDevice3 = mock(BluetoothDevice.class);
-        final BluetoothDevice bluetoothDevice4 = mock(BluetoothDevice.class);
-        final BluetoothDevice bluetoothDevice5 = mock(BluetoothDevice.class);
-        final BluetoothDevice bluetoothDevice6 = mock(BluetoothDevice.class);
-        final BluetoothClass bluetoothClass = mock(BluetoothClass.class);
-        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
-        final CachedBluetoothDeviceManager cachedManager = mock(CachedBluetoothDeviceManager.class);
-        bluetoothDevices.add(bluetoothDevice);
-        bluetoothDevices.add(bluetoothDevice2);
-        bluetoothDevices.add(bluetoothDevice3);
-        bluetoothDevices.add(bluetoothDevice4);
-        bluetoothDevices.add(bluetoothDevice5);
-        bluetoothDevices.add(bluetoothDevice6);
-        mShadowBluetoothAdapter.setMostRecentlyConnectedDevices(bluetoothDevices);
-
-        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(cachedManager);
-        when(cachedManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
-        when(cachedManager.findDevice(bluetoothDevice2)).thenReturn(cachedDevice);
-        when(cachedManager.findDevice(bluetoothDevice3)).thenReturn(cachedDevice);
-        when(cachedManager.findDevice(bluetoothDevice4)).thenReturn(cachedDevice);
-        when(cachedManager.findDevice(bluetoothDevice5)).thenReturn(cachedDevice);
-        when(cachedManager.findDevice(bluetoothDevice6)).thenReturn(cachedDevice);
-        when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        when(cachedDevice.isConnected()).thenReturn(false);
-        when(cachedDevice.getDevice()).thenReturn(bluetoothDevice);
-        when(cachedDevice.getConnectableProfiles()).thenReturn(profiles);
-        when(bluetoothDevice.getBluetoothClass()).thenReturn(bluetoothClass);
-        when(bluetoothClass.getDeviceClass()).thenReturn(AUDIO_VIDEO_HEADPHONES);
-
-        when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
-        when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
-        when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
-        when(device1.getDeviceType()).thenReturn(MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
-        when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(7);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
     public void onDeviceListAdded_bluetoothAdapterIsNull_noDisconnectedDeviceAdded() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
         final MediaDevice device3 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
         devices.add(device1);
         devices.add(device2);
         mLocalMediaManager.mMediaDevices.add(device3);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
         mShadowBluetoothAdapter = null;
 
-        when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 

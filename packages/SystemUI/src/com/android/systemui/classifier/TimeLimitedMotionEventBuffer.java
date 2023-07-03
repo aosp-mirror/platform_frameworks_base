@@ -18,9 +18,9 @@ package com.android.systemui.classifier;
 
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -33,13 +33,13 @@ import java.util.ListIterator;
  */
 public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
 
-    private final LinkedList<MotionEvent> mMotionEvents;
+    private final List<MotionEvent> mMotionEvents;
     private final long mMaxAgeMs;
 
     public TimeLimitedMotionEventBuffer(long maxAgeMs) {
         super();
         mMaxAgeMs = maxAgeMs;
-        mMotionEvents = new LinkedList<>();
+        mMotionEvents = new ArrayList<>();
     }
 
     private void ejectOldEvents() {
@@ -47,7 +47,7 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
             return;
         }
         Iterator<MotionEvent> iter = listIterator();
-        long mostRecentMs = mMotionEvents.getLast().getEventTime();
+        long mostRecentMs = mMotionEvents.get(mMotionEvents.size() - 1).getEventTime();
         while (iter.hasNext()) {
             MotionEvent ev = iter.next();
             if (mostRecentMs - ev.getEventTime() > mMaxAgeMs) {
@@ -183,7 +183,7 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
 
     @Override
     public List<MotionEvent> subList(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException();
+        return mMotionEvents.subList(fromIndex, toIndex);
     }
 
     class Iter implements ListIterator<MotionEvent> {

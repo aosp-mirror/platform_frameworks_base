@@ -28,6 +28,7 @@
 
 #include "idmap2/ResourceContainer.h"
 #include "idmap2/Result.h"
+#include <binder/ParcelFileDescriptor.h>
 
 namespace android::idmap2 {
 
@@ -39,7 +40,20 @@ struct FabricatedOverlay {
     Builder& SetOverlayable(const std::string& name);
 
     Builder& SetResourceValue(const std::string& resource_name, uint8_t data_type,
-                              uint32_t data_value);
+                              uint32_t data_value, const std::string& configuration);
+
+    Builder& SetResourceValue(const std::string& resource_name, uint8_t data_type,
+                              const std::string& data_string_value,
+                              const std::string& configuration);
+
+    Builder& SetResourceValue(const std::string& resource_name,
+                              std::optional<android::base::borrowed_fd>&& binary_value,
+                              const std::string& configuration);
+
+    inline Builder& setFrroPath(std::string frro_path) {
+      frro_path_ = std::move(frro_path);
+      return *this;
+    }
 
     WARN_UNUSED Result<FabricatedOverlay> Build();
 
@@ -48,12 +62,16 @@ struct FabricatedOverlay {
       std::string resource_name;
       DataType data_type;
       DataValue data_value;
+      std::string data_string_value;
+      std::optional<android::base::borrowed_fd> data_binary_value;
+      std::string configuration;
     };
 
     std::string package_name_;
     std::string name_;
     std::string target_package_name_;
     std::string target_overlayable_;
+    std::string frro_path_;
     std::vector<Entry> entries_;
   };
 
@@ -62,18 +80,25 @@ struct FabricatedOverlay {
 
  private:
   struct SerializedData {
-    std::unique_ptr<uint8_t[]> data;
-    size_t data_size;
-    uint32_t crc;
-  };
+    std::unique_ptr<uint8_t[]> pb_data;
+    size_t pb_data_size;
+    uint32_t pb_crc;
+    std::string sp_data;
+   };
 
   Result<SerializedData*> InitializeData() const;
   Result<uint32_t> GetCrc() const;
 
   explicit FabricatedOverlay(pb::FabricatedOverlay&& overlay,
+                             std::string&& string_pool_data_,
+                             std::vector<android::base::borrowed_fd> binary_files_,
+                             off_t total_binary_bytes_,
                              std::optional<uint32_t> crc_from_disk = {});
 
   pb::FabricatedOverlay overlay_pb_;
+  std::string string_pool_data_;
+  std::vector<android::base::borrowed_fd> binary_files_;
+  uint32_t total_binary_bytes_;
   std::optional<uint32_t> crc_from_disk_;
   mutable std::optional<SerializedData> data_;
 

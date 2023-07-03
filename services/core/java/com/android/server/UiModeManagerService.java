@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.UiModeManager.ContrastUtils.CONTRAST_DEFAULT_VALUE;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
@@ -27,7 +28,11 @@ import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserHandle.getCallingUserId;
+import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.util.TimeUtils.isTimeBetween;
+
+import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -38,6 +43,7 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
+import android.app.IUiModeManagerCallback;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -71,6 +77,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
@@ -152,6 +159,8 @@ final class UiModeManagerService extends SystemService {
 
     // flag set by resource, whether to start dream immediately upon docking even if unlocked.
     private boolean mStartDreamImmediatelyOnDock = true;
+    // flag set by resource, whether to disable dreams when ambient mode suppression is enabled.
+    private boolean mDreamsDisabledByAmbientModeSuppression = false;
     // flag set by resource, whether to enable Car dock launch when starting car mode.
     private boolean mEnableCarDockLaunch = true;
     // flag set by resource, whether to lock UI mode to the default one or not.
@@ -191,11 +200,18 @@ final class UiModeManagerService extends SystemService {
     private PowerManagerInternal mLocalPowerManager;
 
     @GuardedBy("mLock")
+    private final SparseArray<RemoteCallbackList<IUiModeManagerCallback>> mUiModeManagerCallbacks =
+            new SparseArray<>();
+
+    @GuardedBy("mLock")
     @Nullable
     private SparseArray<List<ProjectionHolder>> mProjectionHolders;
     @GuardedBy("mLock")
     @Nullable
     private SparseArray<RemoteCallbackList<IOnProjectionStateChangedListener>> mProjectionListeners;
+
+    @GuardedBy("mLock")
+    private final SparseArray<Float> mContrasts = new SparseArray<>();
 
     public UiModeManagerService(Context context) {
         this(context, /* setupWizardComplete= */ false, /* tm= */ null, new Injector());
@@ -350,6 +366,20 @@ final class UiModeManagerService extends SystemService {
         }
     };
 
+    private final ContentObserver mContrastObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            synchronized (mLock) {
+                if (updateContrastLocked()) {
+                    float contrast = getContrastLocked();
+                    mUiModeManagerCallbacks.get(mCurrentUser, new RemoteCallbackList<>())
+                            .broadcast(ignoreRemoteException(
+                                    callback -> callback.notifyContrastChanged(contrast)));
+                }
+            }
+        }
+    };
+
     private void updateSystemProperties() {
         int mode = Secure.getIntForUser(getContext().getContentResolver(), Secure.UI_NIGHT_MODE,
                 mNightMode, 0);
@@ -357,6 +387,16 @@ final class UiModeManagerService extends SystemService {
             mode = MODE_NIGHT_YES;
         }
         SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
+    }
+
+    @VisibleForTesting
+    void setStartDreamImmediatelyOnDock(boolean startDreamImmediatelyOnDock) {
+        mStartDreamImmediatelyOnDock = startDreamImmediatelyOnDock;
+    }
+
+    @VisibleForTesting
+    void setDreamsDisabledByAmbientModeSuppression(boolean disabledByAmbientModeSuppression) {
+        mDreamsDisabledByAmbientModeSuppression = disabledByAmbientModeSuppression;
     }
 
     @Override
@@ -395,6 +435,9 @@ final class UiModeManagerService extends SystemService {
                 context.getContentResolver()
                         .registerContentObserver(Secure.getUriFor(Secure.UI_NIGHT_MODE),
                                 false, mDarkThemeObserver, 0);
+                context.getContentResolver().registerContentObserver(
+                        Secure.getUriFor(Secure.CONTRAST_LEVEL), false,
+                        mContrastObserver, UserHandle.USER_ALL);
                 context.registerReceiver(mDockModeReceiver,
                         new IntentFilter(Intent.ACTION_DOCK_EVENT));
                 IntentFilter batteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -419,6 +462,8 @@ final class UiModeManagerService extends SystemService {
         final Resources res = context.getResources();
         mStartDreamImmediatelyOnDock = res.getBoolean(
                 com.android.internal.R.bool.config_startDreamImmediatelyOnDock);
+        mDreamsDisabledByAmbientModeSuppression = res.getBoolean(
+                com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
         mNightMode = res.getInteger(
                 com.android.internal.R.integer.config_defaultNightMode);
         mDefaultUiModeType = res.getInteger(
@@ -619,6 +664,17 @@ final class UiModeManagerService extends SystemService {
     }
 
     private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
+        @Override
+        public void addCallback(IUiModeManagerCallback callback) {
+            int userId = getCallingUserId();
+            synchronized (mLock) {
+                if (!mUiModeManagerCallbacks.contains(userId)) {
+                    mUiModeManagerCallbacks.put(userId, new RemoteCallbackList<>());
+                }
+                mUiModeManagerCallbacks.get(userId).register(callback);
+            }
+        }
+
         @Override
         public void enableCarMode(@UiModeManager.EnableCarMode int flags,
                 @IntRange(from = 0) int priority, String callingPackage) {
@@ -1118,6 +1174,13 @@ final class UiModeManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public float getContrast() {
+            synchronized (mLock) {
+                return getContrastLocked();
+            }
+        }
     };
 
     private void enforceProjectionTypePermissions(@UiModeManager.ProjectionType int p) {
@@ -1198,6 +1261,30 @@ final class UiModeManagerService extends SystemService {
             }
             return removed;
         }
+    }
+
+    /**
+     * Return the contrast for the current user. If not cached, fetch it from the settings.
+     */
+    @GuardedBy("mLock")
+    private float getContrastLocked() {
+        if (!mContrasts.contains(mCurrentUser)) updateContrastLocked();
+        return mContrasts.get(mCurrentUser);
+    }
+
+    /**
+     * Read the contrast setting for the current user and update {@link #mContrasts}
+     * if the contrast changed. Returns true if {@link #mContrasts} was updated.
+     */
+    @GuardedBy("mLock")
+    private boolean updateContrastLocked() {
+        float contrast = Settings.Secure.getFloatForUser(getContext().getContentResolver(),
+                CONTRAST_LEVEL, CONTRAST_DEFAULT_VALUE, mCurrentUser);
+        if (Math.abs(mContrasts.get(mCurrentUser, Float.MAX_VALUE) - contrast) >= 1e-10) {
+            mContrasts.put(mCurrentUser, contrast);
+            return true;
+        }
+        return false;
     }
 
     private static class ProjectionHolder implements IBinder.DeathRecipient {
@@ -1822,10 +1909,15 @@ final class UiModeManagerService extends SystemService {
         // Send the new configuration.
         applyConfigurationExternallyLocked();
 
+        final boolean dreamsSuppressed = mDreamsDisabledByAmbientModeSuppression
+                && mLocalPowerManager.isAmbientDisplaySuppressed();
+
         // If we did not start a dock app, then start dreaming if appropriate.
-        if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
-                || mKeyguardManager.isKeyguardLocked())) {
-            Sandman.startDreamWhenDockedIfAppropriate(getContext());
+        if (category != null && !dockAppStarted && !dreamsSuppressed && (
+                mStartDreamImmediatelyOnDock
+                        || mWindowManager.isKeyguardShowingAndNotOccluded()
+                        || !mPowerManager.isInteractive())) {
+            mInjector.startDreamWhenDockedIfAppropriate(getContext());
         }
     }
 
@@ -1897,7 +1989,10 @@ final class UiModeManagerService extends SystemService {
             mComputedNightMode = false;
             return;
         }
-        resetNightModeOverrideLocked();
+        if (mNightMode != MODE_NIGHT_AUTO || (mTwilightManager != null
+                && mTwilightManager.getLastTwilightState() != null)) {
+            resetNightModeOverrideLocked();
+        }
     }
 
     private boolean resetNightModeOverrideLocked() {
@@ -2138,6 +2233,10 @@ final class UiModeManagerService extends SystemService {
     public static class Injector {
         public int getCallingUid() {
             return Binder.getCallingUid();
+        }
+
+        public void startDreamWhenDockedIfAppropriate(Context context) {
+            Sandman.startDreamWhenDockedIfAppropriate(context);
         }
     }
 }

@@ -76,6 +76,7 @@ public final class HdmiCecConfigTest {
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                     HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
+                    HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
@@ -105,7 +106,8 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
-                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                    HdmiControlManager.SETTING_NAME_EARC_ENABLED);
     }
 
     @Test
@@ -115,6 +117,7 @@ public final class HdmiCecConfigTest {
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                     HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
+                    HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
@@ -144,7 +147,8 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
-                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                    HdmiControlManager.SETTING_NAME_EARC_ENABLED);
     }
 
     @Test
@@ -155,6 +159,7 @@ public final class HdmiCecConfigTest {
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
+                    HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
@@ -183,7 +188,8 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
-                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                    HdmiControlManager.SETTING_NAME_EARC_ENABLED);
     }
 
     @Test

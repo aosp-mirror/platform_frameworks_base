@@ -153,4 +153,4 @@ public interface OperationStorage {
      * @return a set of operation tokens for operations in that state.
      */
     Set<Integer> operationTokensForOpState(@OpState int state);
-};
+}

@@ -24,11 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSFooterView;
@@ -38,7 +35,6 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.phone.StatusIconContainer;
 
 import javax.inject.Named;
 
@@ -51,8 +47,6 @@ import dagger.Provides;
  */
 @Module
 public interface QSFragmentModule {
-    String QS_FGS_MANAGER_FOOTER_VIEW = "qs_fgs_manager_footer";
-    String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
     String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
     String QS_USING_COLLAPSED_LANDSCAPE_MEDIA = "qs_using_collapsed_landscape_media";
 
@@ -109,24 +103,8 @@ public interface QSFragmentModule {
 
     /** */
     @Provides
-    static BatteryMeterView providesBatteryMeterView(QuickStatusBarHeader quickStatusBarHeader) {
-        return quickStatusBarHeader.findViewById(R.id.batteryRemainingIcon);
-    }
-
-    /** */
-    @Provides
     static QSFooterView providesQSFooterView(@RootView View view) {
         return view.findViewById(R.id.qs_footer);
-    }
-
-    /**
-     * Provides a {@link FooterActionsView}.
-     *
-     * This will replace a ViewStub either in {@link QSFooterView} or in {@link QSContainerImpl}.
-     */
-    @Provides
-    static FooterActionsView providesQSFooterActionsView(@RootView View view) {
-        return view.findViewById(R.id.qs_footer_actions);
     }
 
     /** */
@@ -146,18 +124,6 @@ public interface QSFragmentModule {
 
     /** */
     @Provides
-    @QSScope
-    @Named(QS_SECURITY_FOOTER_VIEW)
-    static View providesQSSecurityFooterView(
-            @QSThemedContext LayoutInflater layoutInflater,
-            FooterActionsView footerActionsView
-    ) {
-        return layoutInflater.inflate(R.layout.quick_settings_security_footer, footerActionsView,
-                false);
-    }
-
-    /** */
-    @Provides
     @Named(QS_USING_MEDIA_PLAYER)
     static boolean providesQSUsingMediaPlayer(Context context) {
         return useQsMediaPlayer(context);
@@ -168,30 +134,5 @@ public interface QSFragmentModule {
     @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
     static boolean providesQSUsingCollapsedLandscapeMedia(Context context) {
         return useCollapsedMediaInLandscape(context.getResources());
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    static OngoingPrivacyChip providesPrivacyChip(QuickStatusBarHeader qsHeader) {
-        return qsHeader.findViewById(R.id.privacy_chip);
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    static StatusIconContainer providesStatusIconContainer(QuickStatusBarHeader qsHeader) {
-        return qsHeader.findViewById(R.id.statusIcons);
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    @Named(QS_FGS_MANAGER_FOOTER_VIEW)
-    static View providesQSFgsManagerFooterView(
-            @QSThemedContext LayoutInflater layoutInflater,
-            FooterActionsView footerActionsView
-    ) {
-        return layoutInflater.inflate(R.layout.fgs_footer, footerActionsView, false);
     }
 }

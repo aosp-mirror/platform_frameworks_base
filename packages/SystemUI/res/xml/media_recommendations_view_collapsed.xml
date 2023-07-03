@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<ConstraintSet
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <Constraint
+        android:id="@+id/sizing_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_collapsed"
+        />
+
+    <Constraint
+        android:id="@+id/media_rec_title"
+        style="@style/MediaPlayer.Recommendation.Header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <Constraint
+        android:id="@+id/media_cover1_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer.Updated"
+        android:layout_height="@dimen/qs_media_rec_album_height_collapsed"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginStart="@dimen/qs_media_padding"
+        app:layout_constraintTop_toBottomOf="@+id/media_rec_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/media_cover2_container"/>
+
+
+    <Constraint
+        android:id="@+id/media_cover2_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer.Updated"
+        android:layout_height="@dimen/qs_media_rec_album_height_collapsed"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        app:layout_constraintTop_toBottomOf="@+id/media_rec_title"
+        app:layout_constraintStart_toEndOf="@id/media_cover1_container"
+        app:layout_constraintEnd_toStartOf="@id/media_cover3_container"/>
+
+    <Constraint
+        android:id="@+id/media_cover3_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer.Updated"
+        android:layout_height="@dimen/qs_media_rec_album_height_collapsed"
+        android:layout_marginEnd="@dimen/qs_media_padding"
+        app:layout_constraintTop_toBottomOf="@+id/media_rec_title"
+        app:layout_constraintStart_toEndOf="@id/media_cover2_container"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+</ConstraintSet>

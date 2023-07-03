@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.LocusId;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -94,6 +95,7 @@ public class BubbleDataTest extends ShellTestCase {
     private Bubble mBubbleInterruptive;
     private Bubble mBubbleDismissed;
     private Bubble mBubbleLocusId;
+    private Bubble mAppBubble;
 
     private BubbleData mBubbleData;
     private TestableBubblePositioner mPositioner;
@@ -178,6 +180,15 @@ public class BubbleDataTest extends ShellTestCase {
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
                 mMainExecutor);
+
+        Intent appBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
+        appBubbleIntent.setPackage(mContext.getPackageName());
+        mAppBubble = Bubble.createAppBubble(
+                appBubbleIntent,
+                new UserHandle(1),
+                mock(Icon.class),
+                mMainExecutor);
+
         mPositioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));
         mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner,
@@ -1087,6 +1098,19 @@ public class BubbleDataTest extends ShellTestCase {
         // Verify no A bubbles in active or overflow.
         assertBubbleListContains(mBubbleC1, mBubbleB3);
         assertOverflowChangedTo(ImmutableList.of());
+    }
+
+    @Test
+    public void test_removeAppBubble_skipsOverflow() {
+        String appBubbleKey = mAppBubble.getKey();
+        mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
+                false /* showInShade */);
+        assertThat(mBubbleData.getBubbleInStackWithKey(appBubbleKey)).isEqualTo(mAppBubble);
+
+        mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+        assertThat(mBubbleData.getBubbleInStackWithKey(appBubbleKey)).isNull();
     }
 
     private void verifyUpdateReceived() {

@@ -104,7 +104,7 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
     }
 
     @Override
-    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
+    protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setColorLayer()
                 .setBufferSize(mDisplayBounds.width(), mDisplayBounds.height())
@@ -113,7 +113,7 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
                 .setName(TAG)
                 .setCallsite("BackgroundWindowManager#attachToParentSurface");
         mLeash = builder.build();
-        b.setParent(mLeash);
+        return mLeash;
     }
 
     /** Inflates background view on to the root surface. */
@@ -122,7 +122,8 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
             return false;
         }
 
-        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this,
+                "BackgroundWindowManager");
         mBackgroundView = (View) LayoutInflater.from(mContext)
                 .inflate(R.layout.background_panel, null /* root */);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(

@@ -51,6 +51,7 @@ public class SystemUIAuxiliaryDumpService extends Service {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         // Simulate the NORMAL priority arg being passed to us
         mDumpHandler.dump(
+                fd,
                 pw,
                 new String[] { DumpHandler.PRIORITY_ARG, DumpHandler.PRIORITY_ARG_NORMAL });
     }

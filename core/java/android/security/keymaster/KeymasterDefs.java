@@ -65,9 +65,12 @@ public final class KeymasterDefs {
     public static final int KM_TAG_PADDING = Tag.PADDING; // KM_ENUM_REP | 6;
     public static final int KM_TAG_CALLER_NONCE = Tag.CALLER_NONCE; // KM_BOOL | 7;
     public static final int KM_TAG_MIN_MAC_LENGTH = Tag.MIN_MAC_LENGTH; // KM_UINT | 8;
+    public static final int KM_TAG_EC_CURVE = Tag.EC_CURVE; // KM_ENUM | 10;
 
     public static final int KM_TAG_RSA_PUBLIC_EXPONENT = Tag.RSA_PUBLIC_EXPONENT; // KM_ULONG | 200;
     public static final int KM_TAG_INCLUDE_UNIQUE_ID = Tag.INCLUDE_UNIQUE_ID; // KM_BOOL | 202;
+    public static final int KM_TAG_RSA_OAEP_MGF_DIGEST = Tag.RSA_OAEP_MGF_DIGEST;
+            // KM_ENUM_REP | 203;
 
     public static final int KM_TAG_ACTIVE_DATETIME = Tag.ACTIVE_DATETIME; // KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME =
@@ -123,6 +126,8 @@ public final class KeymasterDefs {
             Tag.BOOT_PATCHLEVEL; // KM_UINT | 719;
     public static final int KM_TAG_DEVICE_UNIQUE_ATTESTATION =
             Tag.DEVICE_UNIQUE_ATTESTATION; // KM_BOOL | 720;
+    public static final int KM_TAG_ATTESTATION_ID_SECOND_IMEI =
+            Tag.ATTESTATION_ID_SECOND_IMEI; // KM_BYTES | 723;
 
     public static final int KM_TAG_NONCE = Tag.NONCE; // KM_BYTES | 1001;
     public static final int KM_TAG_MAC_LENGTH = Tag.MAC_LENGTH; // KM_UINT | 1003;

@@ -540,16 +540,16 @@ public class NotificationShellCmd extends ShellCommand {
                     if ("broadcast".equals(intentKind)) {
                         pi = PendingIntent.getBroadcastAsUser(
                                 context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-                                        | PendingIntent.FLAG_MUTABLE_UNAUDITED,
+                                        | PendingIntent.FLAG_IMMUTABLE,
                                 UserHandle.CURRENT);
                     } else if ("service".equals(intentKind)) {
                         pi = PendingIntent.getService(
                                 context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-                                        | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                                        | PendingIntent.FLAG_IMMUTABLE);
                     } else {
                         pi = PendingIntent.getActivityAsUser(
                                 context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-                                        | PendingIntent.FLAG_MUTABLE_UNAUDITED, null,
+                                        | PendingIntent.FLAG_IMMUTABLE, null,
                                 UserHandle.CURRENT);
                     }
                     builder.setContentIntent(pi);

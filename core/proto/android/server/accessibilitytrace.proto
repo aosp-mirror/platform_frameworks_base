@@ -39,6 +39,10 @@ message AccessibilityTraceFileProto {
 
     optional fixed64 magic_number = 1;  /* Must be the first field, set to value in MagicNumber */
     repeated AccessibilityTraceProto entry = 2;
+
+    /* offset between real-time clock and elapsed time clock in nanoseconds.
+       Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
+    optional fixed64 real_to_elapsed_time_offset_nanos = 3;
 }
 
 /* one accessibility trace entry. */

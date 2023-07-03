@@ -216,11 +216,14 @@ static std::span<const uint8_t> toSpan(const ::std::optional<::std::vector<uint8
     if (!content) {
         return {};
     }
-    return {content->data(), (int)content->size()};
+    // TODO(b/175635923): Replace with {content->data(), content->size()} after libc++ is upgraded.
+    // The type of the second std::span ctor param changed from ptrdiff_t to size_t between the old
+    // libc++ and the finalized C++20.
+    return std::span<const uint8_t>(content->data(), content->size());
 }
 
 binder::Status BinderIncrementalService::makeFile(
-        int32_t storageId, const std::string& path,
+        int32_t storageId, const std::string& path, int32_t mode,
         const ::android::os::incremental::IncrementalNewFileParams& params,
         const ::std::optional<::std::vector<uint8_t>>& content, int32_t* _aidl_return) {
     auto [err, fileId, nfp] = toMakeFileParams(params);
@@ -229,7 +232,7 @@ binder::Status BinderIncrementalService::makeFile(
         return ok();
     }
 
-    *_aidl_return = mImpl.makeFile(storageId, path, 0777, fileId, nfp, toSpan(content));
+    *_aidl_return = mImpl.makeFile(storageId, path, mode, fileId, nfp, toSpan(content));
     return ok();
 }
 binder::Status BinderIncrementalService::makeFileFromRange(int32_t storageId,

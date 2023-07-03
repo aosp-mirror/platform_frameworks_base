@@ -20,4 +20,9 @@ android_library {
 
     sdk_version: "system_current",
     min_sdk_version: "28",
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+    ],
 }

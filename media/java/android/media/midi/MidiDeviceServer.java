@@ -36,6 +36,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Internal class used for providing an implementation for a MIDI device.
@@ -78,6 +79,9 @@ public final class MidiDeviceServer implements Closeable {
     private final HashMap<IBinder, PortClient> mPortClients = new HashMap<IBinder, PortClient>();
     private final HashMap<MidiInputPort, PortClient> mInputPortClients =
             new HashMap<MidiInputPort, PortClient>();
+
+    private AtomicInteger mTotalInputBytes = new AtomicInteger();
+    private AtomicInteger mTotalOutputBytes = new AtomicInteger();
 
     public interface Callback {
         /**
@@ -133,6 +137,8 @@ public final class MidiDeviceServer implements Closeable {
                 int portNumber = mOutputPort.getPortNumber();
                 mInputPortOutputPorts[portNumber] = null;
                 mInputPortOpen[portNumber] = false;
+                mTotalOutputBytes.addAndGet(mOutputPort.pullTotalBytesCount());
+                updateTotalBytes();
                 updateDeviceStatus();
             }
             IoUtils.closeQuietly(mOutputPort);
@@ -156,6 +162,8 @@ public final class MidiDeviceServer implements Closeable {
                 dispatcher.getSender().disconnect(mInputPort);
                 int openCount = dispatcher.getReceiverCount();
                 mOutputPortOpenCount[portNumber] = openCount;
+                mTotalInputBytes.addAndGet(mInputPort.pullTotalBytesCount());
+                updateTotalBytes();
                 updateDeviceStatus();
            }
 
@@ -405,18 +413,20 @@ public final class MidiDeviceServer implements Closeable {
         synchronized (mGuard) {
             if (mIsClosed) return;
             mGuard.close();
-
             for (int i = 0; i < mInputPortCount; i++) {
                 MidiOutputPort outputPort = mInputPortOutputPorts[i];
                 if (outputPort != null) {
+                    mTotalOutputBytes.addAndGet(outputPort.pullTotalBytesCount());
                     IoUtils.closeQuietly(outputPort);
                     mInputPortOutputPorts[i] = null;
                 }
             }
             for (MidiInputPort inputPort : mInputPorts) {
+                mTotalInputBytes.addAndGet(inputPort.pullTotalBytesCount());
                 IoUtils.closeQuietly(inputPort);
             }
             mInputPorts.clear();
+            updateTotalBytes();
             try {
                 mMidiManager.unregisterDeviceServer(mServer);
             } catch (RemoteException e) {
@@ -448,5 +458,13 @@ public final class MidiDeviceServer implements Closeable {
         MidiReceiver[] receivers = new MidiReceiver[mOutputPortCount];
         System.arraycopy(mOutputPortDispatchers, 0, receivers, 0, mOutputPortCount);
         return receivers;
+    }
+
+    private void updateTotalBytes() {
+        try {
+            mMidiManager.updateTotalBytes(mServer, mTotalInputBytes.get(), mTotalOutputBytes.get());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in updateTotalBytes");
+        }
     }
 }

@@ -16,218 +16,62 @@
 
 package com.prefabulated.touchlatency;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Paint.Align;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.util.AttributeSet;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Trace;
 import android.view.Display;
 import android.view.Display.Mode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.os.Trace;
 import android.view.Window;
 import android.view.WindowManager;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
-class TouchLatencyView extends View implements View.OnTouchListener {
-    private static final String LOG_TAG = "TouchLatency";
-    private static final int BACKGROUND_COLOR = 0xFF400080;
-    private static final int INNER_RADIUS = 70;
-    private static final int BALL_DIAMETER = 200;
-    private static final int SEC_TO_NANOS = 1000000000;
-    private static final float FPS_UPDATE_THRESHOLD = 20;
-    private static final long BALL_VELOCITY = 420;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
-    public TouchLatencyView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        Trace.beginSection("TouchLatencyView constructor");
-        setOnTouchListener(this);
-        setWillNotDraw(false);
-        mBluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBluePaint.setColor(0xFF0000FF);
-        mBluePaint.setStyle(Paint.Style.FILL);
-        mGreenPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mGreenPaint.setColor(0xFF00FF00);
-        mGreenPaint.setStyle(Paint.Style.FILL);
-        mYellowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mYellowPaint.setColor(0xFFFFFF00);
-        mYellowPaint.setStyle(Paint.Style.FILL);
-        mRedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mRedPaint.setColor(0xFFFF0000);
-        mRedPaint.setStyle(Paint.Style.FILL);
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setColor(0xFFFFFFFF);
-        mTextPaint.setTextSize(100);
-        mTextPaint.setTextAlign(Align.RIGHT);
+import com.google.android.material.slider.RangeSlider;
+import com.google.android.material.slider.RangeSlider.OnChangeListener;
 
-        mTouching = false;
+public class TouchLatencyActivity extends AppCompatActivity {
+    private static final int REFRESH_RATE_SLIDER_MIN = 20;
+    private static final int REFRESH_RATE_SLIDER_STEP = 1;
 
-        mLastDrawNano = 0;
-        mFps = 0;
-        mLastFpsUpdate = 0;
-        mFrameCount = 0;
-
-        mDf = new DecimalFormat("fps: #.##");
-        mDf.setRoundingMode(RoundingMode.HALF_UP);
-
-        Trace.endSection();
-    }
-
-    @Override
-    public boolean onTouch(View view, MotionEvent event) {
-        Trace.beginSection("TouchLatencyView onTouch");
-        int action = event.getActionMasked();
-        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
-            mTouching = true;
-            invalidate();
-
-            mTouchX = event.getX();
-            mTouchY = event.getY();
-        } else if (action == MotionEvent.ACTION_UP) {
-            mTouching = false;
-            invalidate();
-        }
-        Trace.endSection();
-        return true;
-    }
-
-    private void drawTouch(Canvas canvas) {
-        Trace.beginSection("TouchLatencyView drawTouch");
-
-        try {
-            if (!mTouching) {
-                Log.d(LOG_TAG, "Filling background");
-                canvas.drawColor(BACKGROUND_COLOR);
-                return;
-            }
-
-            float deltaX = (mTouchX - mLastDrawnX);
-            float deltaY = (mTouchY - mLastDrawnY);
-            float scaleFactor = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 1.5f;
-
-            mLastDrawnX = mTouchX;
-            mLastDrawnY = mTouchY;
-
-            canvas.drawColor(BACKGROUND_COLOR);
-            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + 3 * scaleFactor, mRedPaint);
-            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + 2 * scaleFactor, mYellowPaint);
-            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + scaleFactor, mGreenPaint);
-            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS, mBluePaint);
-        } finally {
-            Trace.endSection();
-        }
-    }
-
-    private Paint getBallColor() {
-        if (mFps > 75)
-            return mGreenPaint;
-        else if (mFps > 45)
-            return mYellowPaint;
-        else
-            return mRedPaint;
-    }
-
-    private void drawBall(Canvas canvas) {
-        Trace.beginSection("TouchLatencyView drawBall");
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
-        float fps = 0f;
-
-        long t = System.nanoTime();
-        long tDiff = t - mLastDrawNano;
-        mLastDrawNano = t;
-        mFrameCount++;
-
-        if (tDiff < SEC_TO_NANOS) {
-            fps = 1f * SEC_TO_NANOS / tDiff;
-        }
-
-        long fDiff = t - mLastFpsUpdate;
-        if (Math.abs(mFps - fps) > FPS_UPDATE_THRESHOLD) {
-            mFps = fps;
-            mLastFpsUpdate = t;
-            mFrameCount = 0;
-        } else if (fDiff > SEC_TO_NANOS) {
-            mFps = 1f * mFrameCount * SEC_TO_NANOS / fDiff;
-            mLastFpsUpdate = t;
-            mFrameCount = 0;
-        }
-
-        final long pos = t * BALL_VELOCITY / SEC_TO_NANOS;
-        final long xMax = width - BALL_DIAMETER;
-        final long yMax = height - BALL_DIAMETER;
-        long xOffset = pos % xMax;
-        long yOffset = pos % yMax;
-
-        float left, right, top, bottom;
-
-        if (((pos / xMax) & 1) == 0) {
-            left = xMax - xOffset;
-        } else {
-            left = xOffset;
-        }
-        right = left + BALL_DIAMETER;
-
-        if (((pos / yMax) & 1) == 0) {
-            top = yMax - yOffset;
-        } else {
-            top = yOffset;
-        }
-        bottom = top + BALL_DIAMETER;
-
-        // Draw the ball
-        canvas.drawColor(BACKGROUND_COLOR);
-        canvas.drawOval(left, top, right, bottom, getBallColor());
-        canvas.drawText(mDf.format(mFps), width, 100, mTextPaint);
-
-        invalidate();
-        Trace.endSection();
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        Trace.beginSection("TouchLatencyView onDraw");
-        if (mMode == 0) {
-            drawTouch(canvas);
-        } else {
-            drawBall(canvas);
-        }
-        Trace.endSection();
-    }
-
-    public void changeMode(MenuItem item) {
-        Trace.beginSection("TouchLatencyView changeMode");
-        final int NUM_MODES = 2;
-        final String modes[] = {"Touch", "Ball"};
-        mMode = (mMode + 1) % NUM_MODES;
-        invalidate();
-        item.setTitle(modes[mMode]);
-        Trace.endSection();
-    }
-
-    private final Paint mBluePaint, mGreenPaint, mYellowPaint, mRedPaint, mTextPaint;
-    private int mMode;
-
-    private boolean mTouching;
-    private float mTouchX, mTouchY;
-    private float mLastDrawnX, mLastDrawnY;
-
-    private long mLastDrawNano, mLastFpsUpdate, mFrameCount;
-    private float mFps;
-    private DecimalFormat mDf;
-}
-
-public class TouchLatencyActivity extends Activity {
-    private Mode mDisplayModes[];
+    private Menu mMenu;
+    private Mode[] mDisplayModes;
     private int mCurrentModeIndex;
+    private float mSliderPreferredRefreshRate;
+    private DisplayManager mDisplayManager;
+
+    private final DisplayManager.DisplayListener mDisplayListener =
+            new DisplayManager.DisplayListener() {
+        @Override
+        public void onDisplayAdded(int i) {
+            updateOptionsMenu();
+        }
+
+        @Override
+        public void onDisplayRemoved(int i) {
+            updateOptionsMenu();
+        }
+
+        @Override
+        public void onDisplayChanged(int i) {
+            updateOptionsMenu();
+        }
+    };
+
+    private final RangeSlider.OnChangeListener mRefreshRateSliderListener = new OnChangeListener() {
+        @Override
+        public void onValueChange(@NonNull RangeSlider slider, float value, boolean fromUser) {
+            if (value == mSliderPreferredRefreshRate) return;
+
+            mSliderPreferredRefreshRate = value;
+            WindowManager.LayoutParams w = getWindow().getAttributes();
+            w.preferredRefreshRate = mSliderPreferredRefreshRate;
+            getWindow().setAttributes(w);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,9 +79,9 @@ public class TouchLatencyActivity extends Activity {
 
         Trace.beginSection("TouchLatencyActivity onCreate");
         setContentView(R.layout.activity_touch_latency);
-
         mTouchView = findViewById(R.id.canvasView);
 
+        configureDisplayListener();
         WindowManager wm = getWindowManager();
         Display display = wm.getDefaultDisplay();
         mDisplayModes = display.getSupportedModes();
@@ -249,25 +93,28 @@ public class TouchLatencyActivity extends Activity {
                 break;
             }
         }
-
         Trace.endSection();
     }
 
+    public void updateOptionsMenu() {
+        if (mDisplayModes.length > 1) {
+            MenuItem menuItem = mMenu.findItem(R.id.display_mode);
+            Mode currentMode = getWindowManager().getDefaultDisplay().getMode();
+            updateDisplayMode(menuItem, currentMode);
+        }
+        updateRefreshRateMenu(mMenu.findItem(R.id.frame_rate));
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Trace.beginSection("TouchLatencyActivity onCreateOptionsMenu");
+        mMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_touch_latency, menu);
-        if (mDisplayModes.length > 1) {
-            MenuItem menuItem = menu.findItem(R.id.display_mode);
-            Mode currentMode = getWindowManager().getDefaultDisplay().getMode();
-            updateDisplayMode(menuItem, currentMode);
-        }
+        getMenuInflater().inflate(R.menu.menu_touch_latency, mMenu);
+        updateOptionsMenu();
         Trace.endSection();
         return true;
     }
-
 
     private void updateDisplayMode(MenuItem menuItem, Mode displayMode) {
         int fps = (int) displayMode.getRefreshRate();
@@ -275,18 +122,66 @@ public class TouchLatencyActivity extends Activity {
         menuItem.setVisible(true);
     }
 
+    private float getHighestRefreshRate() {
+        float maxRefreshRate = 0;
+        for (Display.Mode mode : getDisplay().getSupportedModes()) {
+            if (sameSizeMode(mode) && mode.getRefreshRate() > maxRefreshRate) {
+                maxRefreshRate = mode.getRefreshRate();
+            }
+        }
+        return maxRefreshRate;
+    }
+
+    private void updateRefreshRateMenu(MenuItem item) {
+        item.setActionView(R.layout.refresh_rate_layout);
+        RangeSlider slider = item.getActionView().findViewById(R.id.slider_from_layout);
+        slider.addOnChangeListener(mRefreshRateSliderListener);
+
+        float highestRefreshRate = getHighestRefreshRate();
+        slider.setValueFrom(REFRESH_RATE_SLIDER_MIN);
+        slider.setValueTo(highestRefreshRate);
+        slider.setStepSize(REFRESH_RATE_SLIDER_STEP);
+        if (mSliderPreferredRefreshRate < REFRESH_RATE_SLIDER_MIN
+                || mSliderPreferredRefreshRate > highestRefreshRate) {
+            mSliderPreferredRefreshRate = highestRefreshRate;
+        }
+        slider.setValues(mSliderPreferredRefreshRate);
+    }
+
+    private void updateMultiDisplayMenu(MenuItem item) {
+        item.setVisible(mDisplayManager.getDisplays().length > 1);
+    }
+
+    private void configureDisplayListener() {
+        mDisplayManager = getSystemService(DisplayManager.class);
+        mDisplayManager.registerDisplayListener(mDisplayListener, new Handler());
+    }
+
+    private boolean sameSizeMode(Display.Mode mode) {
+        Mode currentMode = mDisplayModes[mCurrentModeIndex];
+        return currentMode.getPhysicalHeight() == mode.getPhysicalHeight()
+            && currentMode.getPhysicalWidth() == mode.getPhysicalWidth();
+    }
+
     public void changeDisplayMode(MenuItem item) {
         Window w = getWindow();
         WindowManager.LayoutParams params = w.getAttributes();
 
         int modeIndex = (mCurrentModeIndex + 1) % mDisplayModes.length;
+        while (modeIndex != mCurrentModeIndex) {
+            // skip modes with different resolutions
+            if (sameSizeMode(mDisplayModes[modeIndex])) {
+                break;
+            }
+            modeIndex = (modeIndex + 1) % mDisplayModes.length;
+        }
+
         params.preferredDisplayModeId = mDisplayModes[modeIndex].getModeId();
         w.setAttributes(params);
 
         updateDisplayMode(item, mDisplayModes[modeIndex]);
         mCurrentModeIndex = modeIndex;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -297,14 +192,27 @@ public class TouchLatencyActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            mTouchView.changeMode(item);
-        } else if (id == R.id.display_mode) {
-            changeDisplayMode(item);
+        switch (id) {
+            case R.id.action_settings: {
+                mTouchView.changeMode(item);
+                break;
+            }
+            case R.id.display_mode: {
+                changeDisplayMode(item);
+                break;
+            }
         }
 
         Trace.endSection();
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mDisplayManager != null) {
+            mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        }
     }
 
     private TouchLatencyView mTouchView;

@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -153,6 +154,22 @@ interface IBackupManager {
      * @param userId User id for which backup service should be enabled/disabled.
      */
     void setBackupEnabledForUser(int userId, boolean isEnabled);
+
+
+    /**
+     * Enable/disable the framework backup scheduling entirely. When disabled, no Key/Value or Full
+     * backup jobs will be scheduled by the Android framework.
+     *
+     * <p>Note: This does not disable backups: only their scheduling is affected and backups can
+     * still be triggered manually.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method. If
+     * {@code userId} is different from the calling user id, then the caller must additionally hold
+     * the android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId The user for which backup scheduling should be enabled/disabled.
+     */
+    void setFrameworkSchedulingEnabledForUser(int userId, boolean isEnabled);
 
     /**
      * {@link android.app.backup.IBackupManager.setBackupEnabledForUser} for the calling user id.
@@ -722,4 +739,6 @@ interface IBackupManager {
      * that have been excluded will be passed to the agent to make it aware of the exclusions.
      */
     void excludeKeysFromRestore(String packageName, in List<String> keys);
+
+    void reportDelayedRestoreResult(in String packageName, in List<DataTypeResult> results);
 }

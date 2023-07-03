@@ -16,42 +16,102 @@
 package com.android.server.timezonedetector;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneDetectorStatus;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
 
-class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
+import java.util.ArrayList;
+import java.util.Objects;
 
-    // Call tracking.
-    private GeolocationTimeZoneSuggestion mLastGeolocationSuggestion;
-    private ManualTimeZoneSuggestion mLastManualSuggestion;
-    private TelephonyTimeZoneSuggestion mLastTelephonySuggestion;
-    private boolean mDumpCalled;
+public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
+
+    private final FakeServiceConfigAccessor mFakeServiceConfigAccessor =
+            new FakeServiceConfigAccessor();
+    private final ArrayList<StateChangeListener> mListeners = new ArrayList<>();
+    private TimeZoneState mTimeZoneState;
+    private TimeZoneDetectorStatus mStatus;
+
+    public FakeTimeZoneDetectorStrategy() {
+        mFakeServiceConfigAccessor.addConfigurationInternalChangeListener(
+                this::notifyChangeListeners);
+    }
+
+    public void initializeConfigurationAndStatus(
+            ConfigurationInternal configuration, TimeZoneDetectorStatus status) {
+        mFakeServiceConfigAccessor.initializeCurrentUserConfiguration(configuration);
+        mStatus = Objects.requireNonNull(status);
+    }
 
     @Override
-    public void suggestGeolocationTimeZone(GeolocationTimeZoneSuggestion timeZoneSuggestion) {
-        mLastGeolocationSuggestion = timeZoneSuggestion;
+    public boolean confirmTimeZone(String timeZoneId) {
+        return false;
+    }
+
+    @Override
+    public TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfig(int userId,
+            boolean bypassUserPolicyChecks) {
+        ConfigurationInternal configurationInternal =
+                mFakeServiceConfigAccessor.getCurrentUserConfigurationInternal();
+        assertEquals("Multi-user testing not supported",
+                configurationInternal.getUserId(), userId);
+        return new TimeZoneCapabilitiesAndConfig(
+                mStatus,
+                configurationInternal.asCapabilities(bypassUserPolicyChecks),
+                configurationInternal.asConfiguration());
+    }
+
+    @Override
+    public boolean updateConfiguration(int userId, TimeZoneConfiguration requestedChanges,
+            boolean bypassUserPolicyChecks) {
+        return mFakeServiceConfigAccessor.updateConfiguration(
+                userId, requestedChanges, bypassUserPolicyChecks);
+    }
+
+    @Override
+    public void addChangeListener(StateChangeListener listener) {
+        mListeners.add(listener);
+    }
+
+    private void notifyChangeListeners() {
+        for (StateChangeListener listener : mListeners) {
+            listener.onChange();
+        }
+    }
+
+    @Override
+    public TimeZoneState getTimeZoneState() {
+        return mTimeZoneState;
+    }
+
+    @Override
+    public void setTimeZoneState(TimeZoneState timeZoneState) {
+        mTimeZoneState = timeZoneState;
+    }
+
+    @Override
+    public void handleLocationAlgorithmEvent(LocationAlgorithmEvent locationAlgorithmEvent) {
     }
 
     @Override
     public boolean suggestManualTimeZone(
-            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
-        mLastManualSuggestion = timeZoneSuggestion;
+            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion timeZoneSuggestion,
+            boolean bypassUserPolicyChecks) {
         return true;
     }
 
     @Override
-    public void suggestTelephonyTimeZone(
-            @NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion) {
-        mLastTelephonySuggestion = timeZoneSuggestion;
+    public void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion) {
     }
 
     @Override
-    public void enableTelephonyTimeZoneFallback() {
+    public void enableTelephonyTimeZoneFallback(String reason) {
         throw new UnsupportedOperationException();
     }
 
@@ -72,30 +132,5 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
     @Override
     public void dump(IndentingPrintWriter pw, String[] args) {
-        mDumpCalled = true;
-    }
-
-    void resetCallTracking() {
-        mLastGeolocationSuggestion = null;
-        mLastManualSuggestion = null;
-        mLastTelephonySuggestion = null;
-        mDumpCalled = false;
-    }
-
-    void verifySuggestGeolocationTimeZoneCalled(
-            GeolocationTimeZoneSuggestion expectedSuggestion) {
-        assertEquals(expectedSuggestion, mLastGeolocationSuggestion);
-    }
-
-    void verifySuggestManualTimeZoneCalled(ManualTimeZoneSuggestion expectedSuggestion) {
-        assertEquals(expectedSuggestion, mLastManualSuggestion);
-    }
-
-    void verifySuggestTelephonyTimeZoneCalled(TelephonyTimeZoneSuggestion expectedSuggestion) {
-        assertEquals(expectedSuggestion, mLastTelephonySuggestion);
-    }
-
-    void verifyDumpCalled() {
-        assertTrue(mDumpCalled);
     }
 }

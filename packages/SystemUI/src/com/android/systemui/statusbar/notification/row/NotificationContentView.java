@@ -26,7 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.RemoteException;
-import android.provider.Settings;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -74,7 +74,7 @@ import java.util.List;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
- * expanded and heads up layout. This class is responsible for clipping the content and and
+ * expanded and heads up layout. This class is responsible for clipping the content and
  * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
 public class NotificationContentView extends FrameLayout implements NotificationFadeAware {
@@ -188,6 +188,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private boolean mIsContentExpandable;
     private boolean mRemoteInputVisible;
     private int mUnrestrictedContentHeight;
+
+    private boolean mContentAnimating;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -634,6 +636,13 @@ public class NotificationContentView extends FrameLayout implements Notification
         int hint;
         if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = getViewHeight(VISIBLE_TYPE_HEADSUP);
+            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()
+                    && mHeadsUpRemoteInputController.isFocusAnimationFlagActive()) {
+                // While the RemoteInputView is animating its appearance, it should be allowed
+                // to overlap the hint, therefore no space is reserved for the hint during the
+                // appearance animation of the RemoteInputView
+                hint = 0;
+            }
         } else if (mExpandedChild != null) {
             hint = getViewHeight(VISIBLE_TYPE_EXPANDED);
         } else if (mContractedChild != null) {
@@ -1049,7 +1058,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     }
 
     /**
-     * @return one of the static enum types in this view, calculated form the current state
+     * @return one of the static enum types in this view, calculated from the current state
      */
     public int calculateVisibleType() {
         if (mUserExpanding) {
@@ -1185,6 +1194,7 @@ public class NotificationContentView extends FrameLayout implements Notification
 
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
+            Trace.beginSection("NotifContentView#updateSingleLineView");
             boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
                     mSingleLineView, mContractedChild, mNotificationEntry.getSbn(), this);
@@ -1192,6 +1202,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                 updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
                         mSingleLineView, mSingleLineView);
             }
+            Trace.endSection();
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
             mSingleLineView = null;
@@ -1376,16 +1387,13 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
         ImageView bubbleButton = layout.findViewById(com.android.internal.R.id.bubble_button);
         View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
+        LinearLayout actionListMarginTarget = layout.findViewById(
+                com.android.internal.R.id.notification_action_list_margin_target);
         if (bubbleButton == null || actionContainer == null) {
             return;
         }
-        boolean isPersonWithShortcut =
-                mPeopleIdentifier.getPeopleNotificationType(entry)
-                        >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
-        boolean showButton = BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
-                && isPersonWithShortcut
-                && entry.getBubbleMetadata() != null;
-        if (showButton) {
+
+        if (shouldShowBubbleButton(entry)) {
             // explicitly resolve drawable resource using SystemUI's theme
             Drawable d = mContext.getDrawable(entry.isBubble()
                     ? R.drawable.bubble_ic_stop_bubble
@@ -1400,9 +1408,29 @@ public class NotificationContentView extends FrameLayout implements Notification
             bubbleButton.setOnClickListener(mContainingNotification.getBubbleClickListener());
             bubbleButton.setVisibility(VISIBLE);
             actionContainer.setVisibility(VISIBLE);
+            // Set notification_action_list_margin_target's bottom margin to 0 when showing bubble
+            if (actionListMarginTarget != null) {
+                ViewGroup.LayoutParams lp = actionListMarginTarget.getLayoutParams();
+                if (lp instanceof ViewGroup.MarginLayoutParams) {
+                    final ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) lp;
+                    if (mlp.bottomMargin > 0) {
+                        mlp.setMargins(mlp.leftMargin, mlp.topMargin, mlp.rightMargin, 0);
+                    }
+                }
+            }
         } else  {
             bubbleButton.setVisibility(GONE);
         }
+    }
+
+    @VisibleForTesting
+    boolean shouldShowBubbleButton(NotificationEntry entry) {
+        boolean isPersonWithShortcut =
+                mPeopleIdentifier.getPeopleNotificationType(entry)
+                        >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
+        return BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
+                && isPersonWithShortcut
+                && entry.getBubbleMetadata() != null;
     }
 
     private void applySnoozeAction(View layout) {
@@ -1414,11 +1442,9 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (snoozeButton == null || actionContainer == null) {
             return;
         }
-        final boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1;
         // Notification.Builder can 'disable' the snooze button to prevent it from being shown here
         boolean snoozeDisabled = !snoozeButton.isEnabled();
-        if (!showSnooze || snoozeDisabled) {
+        if (!mContainingNotification.getShowSnooze() || snoozeDisabled) {
             snoozeButton.setVisibility(GONE);
             return;
         }
@@ -1981,6 +2007,25 @@ public class NotificationContentView extends FrameLayout implements Notification
     public void setRemoteInputVisible(boolean remoteInputVisible) {
         mRemoteInputVisible = remoteInputVisible;
         setClipChildren(!remoteInputVisible);
+        setActionsImportanceForAccessibility(
+                remoteInputVisible ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                        : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+    }
+
+    private void setActionsImportanceForAccessibility(int mode) {
+        if (mExpandedChild != null) {
+            setActionsImportanceForAccessibility(mode, mExpandedChild);
+        }
+        if (mHeadsUpChild != null) {
+            setActionsImportanceForAccessibility(mode, mHeadsUpChild);
+        }
+    }
+
+    private void setActionsImportanceForAccessibility(int mode, View child) {
+        View actionsCandidate = child.findViewById(com.android.internal.R.id.actions);
+        if (actionsCandidate != null) {
+            actionsCandidate.setImportantForAccessibility(mode);
+        }
     }
 
     @Override
@@ -2017,6 +2062,23 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
+
+        pw.print("RemoteInputViews { ");
+        pw.print(" visibleType: " + mVisibleType);
+        if (mHeadsUpRemoteInputController != null) {
+            pw.print(", headsUpRemoteInputController.isActive: "
+                    + mHeadsUpRemoteInputController.isActive());
+        } else {
+            pw.print(", headsUpRemoteInputController: null");
+        }
+
+        if (mExpandedRemoteInputController != null) {
+            pw.print(", expandedRemoteInputController.isActive: "
+                    + mExpandedRemoteInputController.isActive());
+        } else {
+            pw.print(", expandedRemoteInputController: null");
+        }
+        pw.println(" }");
     }
 
     /** Add any existing SmartReplyView to the dump */
@@ -2088,6 +2150,34 @@ public class NotificationContentView extends FrameLayout implements Notification
             return true;
         }
         if (mExpandedRemoteInput != null && mExpandedRemoteInput.isActive()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Starts and stops animations in the underlying views.
+     * Avoids restarting the animations by checking whether they're already running first.
+     * Return value is used for testing.
+     *
+     * @param running whether to start animations running, or stop them.
+     * @return true if the state of animations changed.
+     */
+    public boolean setContentAnimationRunning(boolean running) {
+        boolean stateChangeRequired = (running != mContentAnimating);
+        if (stateChangeRequired) {
+            // Starts or stops the animations in the potential views.
+            if (mContractedWrapper != null) {
+                mContractedWrapper.setAnimationsRunning(running);
+            }
+            if (mExpandedWrapper != null) {
+                mExpandedWrapper.setAnimationsRunning(running);
+            }
+            if (mHeadsUpWrapper != null) {
+                mHeadsUpWrapper.setAnimationsRunning(running);
+            }
+            // Updates the state tracker.
+            mContentAnimating = running;
             return true;
         }
         return false;

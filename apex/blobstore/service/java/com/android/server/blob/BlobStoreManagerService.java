@@ -80,6 +80,7 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -619,7 +620,7 @@ public class BlobStoreManagerService extends SystemService {
         return blobInfos;
     }
 
-    private void deleteBlobInternal(long blobId, int callingUid) {
+    private void deleteBlobInternal(long blobId) {
         synchronized (mBlobsLock) {
             mBlobsMap.entrySet().removeIf(entry -> {
                 final BlobMetadata blobMetadata = entry.getValue();
@@ -1612,10 +1613,7 @@ public class BlobStoreManagerService extends SystemService {
         @Override
         @NonNull
         public List<BlobInfo> queryBlobsForUser(@UserIdInt int userId) {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                throw new SecurityException("Only system uid is allowed to call "
-                        + "queryBlobsForUser()");
-            }
+            verifyCallerIsSystemUid("queryBlobsForUser");
 
             final int resolvedUserId = userId == USER_CURRENT
                     ? ActivityManager.getCurrentUser() : userId;
@@ -1629,13 +1627,9 @@ public class BlobStoreManagerService extends SystemService {
 
         @Override
         public void deleteBlob(long blobId) {
-            final int callingUid = Binder.getCallingUid();
-            if (callingUid != Process.SYSTEM_UID) {
-                throw new SecurityException("Only system uid is allowed to call "
-                        + "deleteBlob()");
-            }
+            verifyCallerIsSystemUid("deleteBlob");
 
-            deleteBlobInternal(blobId, callingUid);
+            deleteBlobInternal(blobId);
         }
 
         @Override
@@ -1715,6 +1709,18 @@ public class BlobStoreManagerService extends SystemService {
                 @NonNull String[] args) {
             return new BlobStoreManagerShellCommand(BlobStoreManagerService.this).exec(this,
                     in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
+        }
+
+        /**
+         * Verify if the caller is an admin user's app with system uid
+         */
+        private void verifyCallerIsSystemUid(final String operation) {
+            if (UserHandle.getCallingAppId() != Process.SYSTEM_UID
+                    || !mContext.getSystemService(UserManager.class)
+                    .isUserAdmin(UserHandle.getCallingUserId())) {
+                throw new SecurityException("Only admin user's app with system uid"
+                        + "are allowed to call #" + operation);
+            }
         }
     }
 

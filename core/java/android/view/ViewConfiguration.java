@@ -27,6 +27,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -178,6 +180,9 @@ public class ViewConfiguration {
      */
     private static final int TOUCH_SLOP = 8;
 
+    /** Distance a stylus touch can wander before we think the user is handwriting in dips. */
+    private static final int HANDWRITING_SLOP = 4;
+
     /**
      * Defines the minimum size of the touch target for a scrollbar in dips
      */
@@ -215,6 +220,11 @@ public class ViewConfiguration {
     private static final int WINDOW_TOUCH_SLOP = 16;
 
     /**
+     * Margin in dips around text line bounds where stylus handwriting gestures should be supported.
+     */
+    private static final int HANDWRITING_GESTURE_LINE_MARGIN = 16;
+
+    /**
      * Minimum velocity to initiate a fling, as measured in dips per second
      */
     private static final int MINIMUM_FLING_VELOCITY = 50;
@@ -223,6 +233,12 @@ public class ViewConfiguration {
      * Maximum velocity to initiate a fling, as measured in dips per second
      */
     private static final int MAXIMUM_FLING_VELOCITY = 8000;
+
+    /** Value used as a minimum fling velocity, when fling is not supported. */
+    private static final int NO_FLING_MIN_VELOCITY = Integer.MAX_VALUE;
+
+    /** Value used as a maximum fling velocity, when fling is not supported. */
+    private static final int NO_FLING_MAX_VELOCITY = Integer.MIN_VALUE;
 
     /**
      * Delay before dispatching a recurring accessibility event in milliseconds.
@@ -325,8 +341,11 @@ public class ViewConfiguration {
     private final int mFadingEdgeLength;
     private final int mMinimumFlingVelocity;
     private final int mMaximumFlingVelocity;
+    private final int mMinimumRotaryEncoderFlingVelocity;
+    private final int mMaximumRotaryEncoderFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mHandwritingSlop;
     private final int mMinScalingSpan;
     private final int mHoverSlop;
     private final int mMinScrollbarTouchTarget;
@@ -334,6 +353,7 @@ public class ViewConfiguration {
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
     private final int mWindowTouchSlop;
+    private final int mHandwritingGestureLineMargin;
     private final float mAmbiguousGestureMultiplier;
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
@@ -368,14 +388,18 @@ public class ViewConfiguration {
         mFadingEdgeLength = FADING_EDGE_LENGTH;
         mMinimumFlingVelocity = MINIMUM_FLING_VELOCITY;
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
+        mMinimumRotaryEncoderFlingVelocity = MINIMUM_FLING_VELOCITY;
+        mMaximumRotaryEncoderFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mHandwritingSlop = HANDWRITING_SLOP;
         mHoverSlop = TOUCH_SLOP / 2;
         mMinScrollbarTouchTarget = MIN_SCROLLBAR_TOUCH_TARGET;
         mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
+        mHandwritingGestureLineMargin = HANDWRITING_GESTURE_LINE_MARGIN;
         mAmbiguousGestureMultiplier = AMBIGUOUS_GESTURE_MULTIPLIER;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
@@ -475,6 +499,8 @@ public class ViewConfiguration {
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
         mTouchSlop = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewConfigurationTouchSlop);
+        mHandwritingSlop = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewConfigurationHandwritingSlop);
         mHoverSlop = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewConfigurationHoverSlop);
         mMinScrollbarTouchTarget = res.getDimensionPixelSize(
@@ -483,10 +509,26 @@ public class ViewConfiguration {
 
         mDoubleTapTouchSlop = mTouchSlop;
 
+        mHandwritingGestureLineMargin = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewConfigurationHandwritingGestureLineMargin);
+
         mMinimumFlingVelocity = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewMinFlingVelocity);
         mMaximumFlingVelocity = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewMaxFlingVelocity);
+
+        int configMinRotaryEncoderFlingVelocity = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewMinRotaryEncoderFlingVelocity);
+        int configMaxRotaryEncoderFlingVelocity = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewMaxRotaryEncoderFlingVelocity);
+        if (configMinRotaryEncoderFlingVelocity < 0 || configMaxRotaryEncoderFlingVelocity < 0) {
+            mMinimumRotaryEncoderFlingVelocity = NO_FLING_MIN_VELOCITY;
+            mMaximumRotaryEncoderFlingVelocity = NO_FLING_MAX_VELOCITY;
+        } else {
+            mMinimumRotaryEncoderFlingVelocity = configMinRotaryEncoderFlingVelocity;
+            mMaximumRotaryEncoderFlingVelocity = configMaxRotaryEncoderFlingVelocity;
+        }
+
         mGlobalActionsKeyTimeout = res.getInteger(
                 com.android.internal.R.integer.config_globalActionsKeyTimeout);
 
@@ -734,6 +776,14 @@ public class ViewConfiguration {
     }
 
     /**
+     * @return Distance in pixels a stylus touch can wander before we think the user is
+     * handwriting.
+     */
+    public int getScaledHandwritingSlop() {
+        return mHandwritingSlop;
+    }
+
+    /**
      * @return Distance in pixels a hover can wander while it is still considered "stationary".
      *
      */
@@ -778,6 +828,14 @@ public class ViewConfiguration {
      */
     public int getScaledDoubleTapSlop() {
         return mDoubleTapSlop;
+    }
+
+    /**
+     * @return margin in pixels around text line bounds where stylus handwriting gestures should be
+     *     supported.
+     */
+    public int getScaledHandwritingGestureLineMargin() {
+        return mHandwritingGestureLineMargin;
     }
 
     /**
@@ -1041,6 +1099,98 @@ public class ViewConfiguration {
      */
     public boolean hasPermanentMenuKey() {
         return sHasPermanentMenuKey;
+    }
+
+    /**
+     * Minimum absolute value of velocity to initiate a fling for a motion generated by an
+     * {@link InputDevice} with an id of {@code inputDeviceId}, from an input {@code source} and on
+     * a given motion event {@code axis}.
+     *
+     * <p>Before utilizing this method to get a minimum fling velocity for a motion generated by the
+     * input device, scale the velocity of the motion events generated by the input device to pixels
+     * per second.
+     *
+     * <p>For instance, if you tracked {@link MotionEvent#AXIS_SCROLL} vertical velocities generated
+     * from a {@link InputDevice#SOURCE_ROTARY_ENCODER}, the velocity returned from
+     * {@link VelocityTracker} will be in the units with which the axis values were reported in the
+     * motion event. Before comparing that velocity against the minimum fling velocity specified
+     * here, make sure that the {@link MotionEvent#AXIS_SCROLL} velocity from the tracker is
+     * calculated in "units per second" (see {@link VelocityTracker#computeCurrentVelocity(int)},
+     * {@link VelocityTracker#computeCurrentVelocity(int, float)} to adjust your velocity
+     * computations to "per second"), and use {@link #getScaledVerticalScrollFactor} to change this
+     * velocity value to "pixels/second".
+     *
+     * <p>If the provided {@code inputDeviceId} is not valid, or if the input device whose ID is
+     * provided does not support the given motion event source and/or axis, this method will return
+     * {@code Integer.MAX_VALUE}.
+     *
+     * <h3>Obtaining the correct arguments for this method call</h3>
+     * <p><b>inputDeviceId</b>: if calling this method in response to a {@link MotionEvent}, use
+     * the device ID that is reported by the event, which can be obtained using
+     * {@link MotionEvent#getDeviceId()}. Otherwise, use a valid ID that is obtained from
+     * {@link InputDevice#getId()}, or from an {@link InputManager} instance
+     * ({@link InputManager#getInputDeviceIds()} gives all the valid input device IDs).
+     *
+     * <p><b>axis</b>: a {@link MotionEvent} may report data for multiple axes, and each axis may
+     * have multiple data points for different pointers. Use the axis for which you obtained the
+     * velocity for ({@link VelocityTracker} lets you calculate velocities for a specific axis. Use
+     * the axis for which you calculated velocity). You can use
+     * {@link InputDevice#getMotionRanges()} to get all the {@link InputDevice.MotionRange}s for the
+     * {@link InputDevice}, from which you can derive all the valid axes for the device.
+     *
+     * <p><b>source</b>: use {@link MotionEvent#getSource()} if calling this method in response to a
+     * {@link MotionEvent}. Otherwise, use a valid source for the {@link InputDevice}. You can use
+     * {@link InputDevice#getMotionRanges()} to get all the {@link InputDevice.MotionRange}s for the
+     * {@link InputDevice}, from which you can derive all the valid sources for the device.
+     *
+     *
+     * <p>This method optimizes calls over multiple input device IDs, so caching the return value of
+     * the method is not necessary if you are handling multiple input devices.
+     *
+     * @param inputDeviceId the ID of the {@link InputDevice} that generated the motion triggering
+     *          fling.
+     * @param axis the axis on which the motion triggering the fling happened. This axis should be
+     *          a valid axis that can be reported by the provided input device from the provided
+     *          input device source.
+     * @param source the input source of the motion causing fling. This source should be a valid
+     *          source for the {@link InputDevice} whose ID is {@code inputDeviceId}.
+     *
+     * @return the minimum velocity, in pixels/second, to trigger fling.
+     *
+     * @see InputDevice#getMotionRange(int, int)
+     * @see InputDevice#getMotionRanges()
+     * @see VelocityTracker#getAxisVelocity(int, int)
+     * @see VelocityTracker#getAxisVelocity(int)
+     */
+    public int getScaledMinimumFlingVelocity(int inputDeviceId, int axis, int source) {
+        if (!isInputDeviceInfoValid(inputDeviceId, axis, source)) return NO_FLING_MIN_VELOCITY;
+
+        if (source == InputDevice.SOURCE_ROTARY_ENCODER) return mMinimumRotaryEncoderFlingVelocity;
+
+        return mMinimumFlingVelocity;
+    }
+
+    /**
+     * Maximum absolute value of velocity to initiate a fling for a motion generated by an
+     * {@link InputDevice} with an id of {@code inputDeviceId}, from an input {@code source} and on
+     * a given motion event {@code axis}.
+     *
+     * <p>Similar to {@link #getScaledMinimumFlingVelocity(int, int, int)}, but for maximum fling
+     * velocity, instead of minimum. Also, unlike that method which returns
+     * {@code Integer.MAX_VALUE} for bad input device ID, source and/or motion event axis inputs,
+     * this method returns {@code Integer.MIN_VALUE} for such bad inputs.
+     */
+    public int getScaledMaximumFlingVelocity(int inputDeviceId, int axis, int source) {
+        if (!isInputDeviceInfoValid(inputDeviceId, axis, source)) return NO_FLING_MAX_VELOCITY;
+
+        if (source == InputDevice.SOURCE_ROTARY_ENCODER) return mMaximumRotaryEncoderFlingVelocity;
+
+        return mMaximumFlingVelocity;
+    }
+
+    private static boolean isInputDeviceInfoValid(int id, int axis, int source) {
+        InputDevice device = InputManagerGlobal.getInstance().getInputDevice(id);
+        return device != null && device.getMotionRange(axis, source) != null;
     }
 
     /**

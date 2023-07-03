@@ -61,12 +61,13 @@ import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
-import com.android.server.testing.shadows.ShadowBackupEligibilityRules;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
+import com.android.server.testing.shadows.ShadowBackupEligibilityRules;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
 import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
+import com.android.server.testing.shadows.ShadowUserManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -101,7 +102,8 @@ import java.util.List;
         shadows = {
             ShadowBackupEligibilityRules.class,
             ShadowApplicationPackageManager.class,
-            ShadowSystemServiceRegistry.class
+            ShadowSystemServiceRegistry.class,
+            ShadowUserManager.class
         })
 @Presubmit
 public class UserBackupManagerServiceTest {
@@ -358,6 +360,26 @@ public class UserBackupManagerServiceTest {
         assertThat(oldTransport).isEqualTo(mOldTransport.transportName);
         verify(mTransportManager)
                 .disposeOfTransportClient(eq(mNewTransportMock.mTransportConnection), any());
+    }
+
+    /**
+     * Test verifying that {@link UserBackupManagerService#selectBackupTransport(String)} does not
+     * switch the current transport to the inputted transport, when the inputted transport is not
+     * registered.
+     */
+    @Test
+    public void testSelectBackupTransport_nonRegisteredTransport() throws Exception {
+        setUpForSelectTransport();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        when(mTransportManager.isTransportRegistered(eq(mNewTransport.transportName)))
+                .thenReturn(false);
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
+
+        String oldTransport = backupManagerService.selectBackupTransport(
+                mNewTransport.transportName);
+
+        assertThat(getSettingsTransport()).isNotEqualTo(mNewTransport.transportName);
+        assertThat(oldTransport).isEqualTo(null);
     }
 
     /**
@@ -1359,8 +1381,8 @@ public class UserBackupManagerServiceTest {
          * BackupManagerConstants)} that throws an {@link IllegalArgumentException}.
          */
         public static void schedule(int userId, Context ctx, long delay,
-                BackupManagerConstants constants) {
-            ShadowKeyValueBackupJob.schedule(userId, ctx, delay, constants);
+                UserBackupManagerService userBackupManagerService) {
+            ShadowKeyValueBackupJob.schedule(userId, ctx, delay, userBackupManagerService);
             throw new IllegalArgumentException();
         }
     }

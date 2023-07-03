@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.service;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -27,12 +29,15 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -42,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Objects;
 
 @SmallTest
@@ -91,15 +97,22 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
 
     FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
+    private FakeUserTracker mUserTracker;
+
+    private static final int MAIN_USER_ID = 10;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mUserTracker = new FakeUserTracker();
+        // Set the main user as the current user.
+        mUserTracker.set(List.of(new UserInfo(MAIN_USER_ID, "main", UserInfo.FLAG_MAIN)), 0);
     }
 
     @Test
     public void testConnect() {
         ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
-                mIntent, mExecutor, mTransformer);
+                mIntent, mUserTracker, mExecutor, mTransformer);
         // Register twice to ensure only one callback occurs.
         connection.addCallback(mCallback);
         connection.addCallback(mCallback);
@@ -119,15 +132,16 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
     @Test
     public void testDisconnect() {
         ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
-                mIntent, mExecutor, mTransformer);
+                mIntent, mUserTracker, mExecutor, mTransformer);
         connection.addCallback(mCallback);
         connection.onServiceDisconnected(mComponentName);
+        mExecutor.runAllReady();
 
         // Disconnects before binds should be ignored.
         verify(mCallback, never()).onDisconnected(eq(connection), anyInt());
 
-        when(mContext.bindService(eq(mIntent), anyInt(), eq(mExecutor), eq(connection)))
-                .thenReturn(true);
+        when(mContext.bindServiceAsUser(eq(mIntent), eq(connection), anyInt(),
+                eq(UserHandle.of(MAIN_USER_ID)))).thenReturn(true);
         connection.bind();
         connection.onServiceDisconnected(mComponentName);
 
@@ -144,5 +158,46 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
         // Ensure unbind after disconnect has no effect on the connection
         connection.unbind();
         verify(mContext, never()).unbindService(eq(connection));
+    }
+
+    @Test
+    public void testUnbind() {
+        ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
+                mIntent, mUserTracker, mExecutor, mTransformer);
+        connection.addCallback(mCallback);
+        connection.onServiceDisconnected(mComponentName);
+        mExecutor.runAllReady();
+
+        // Disconnects before binds should be ignored.
+        verify(mCallback, never()).onDisconnected(eq(connection), anyInt());
+
+        when(mContext.bindServiceAsUser(eq(mIntent), eq(connection), anyInt(),
+                eq(UserHandle.of(MAIN_USER_ID)))).thenReturn(true);
+        connection.bind();
+
+        mExecutor.runAllReady();
+
+        connection.unbind();
+
+        mExecutor.runAllReady();
+
+        verify(mCallback).onDisconnected(eq(connection),
+                eq(ObservableServiceConnection.DISCONNECT_REASON_UNBIND));
+    }
+
+    @Test
+    public void testBindServiceThrowsError() {
+        ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
+                mIntent, mUserTracker, mExecutor, mTransformer);
+        connection.addCallback(mCallback);
+
+        when(mContext.bindServiceAsUser(eq(mIntent), eq(connection), anyInt(),
+                eq(UserHandle.of(MAIN_USER_ID))))
+                .thenThrow(new SecurityException());
+
+        // Verify that the exception was caught and that bind returns false, and we properly
+        // unbind.
+        assertThat(connection.bind()).isFalse();
+        verify(mContext).unbindService(connection);
     }
 }

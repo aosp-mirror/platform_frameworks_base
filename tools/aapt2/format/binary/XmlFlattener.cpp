@@ -64,11 +64,11 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
  public:
   using xml::ConstVisitor::Visit;
 
-  StringPool pool;
-  std::map<uint8_t, StringPool> package_pools;
+  android::StringPool pool;
+  std::map<uint8_t, android::StringPool> package_pools;
 
   struct StringFlattenDest {
-    StringPool::Ref ref;
+    android::StringPool::Ref ref;
     ResStringPool_ref* dest;
   };
 
@@ -79,7 +79,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
   }
 
   void Visit(const xml::Text* node) override {
-    std::string text = util::TrimWhitespace(node->text).to_string();
+    std::string text(util::TrimWhitespace(node->text));
 
     // Skip whitespace only text nodes.
     if (text.empty()) {
@@ -88,16 +88,16 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
 
     // Compact leading and trailing whitespace into a single space
     if (isspace(node->text[0])) {
-      text = ' ' + text;
+      text.insert(text.begin(), ' ');
     }
-    if (isspace(node->text[node->text.length() - 1])) {
-      text = text + ' ';
+    if (isspace(node->text.back())) {
+      text += ' ';
     }
 
     ChunkWriter writer(buffer_);
     ResXMLTree_node* flat_node = writer.StartChunk<ResXMLTree_node>(RES_XML_CDATA_TYPE);
-    flat_node->lineNumber = util::HostToDevice32(node->line_number);
-    flat_node->comment.index = util::HostToDevice32(-1);
+    flat_node->lineNumber = android::util::HostToDevice32(node->line_number);
+    flat_node->comment.index = android::util::HostToDevice32(-1);
 
     ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
     AddString(text, kLowPriority, &flat_text->data);
@@ -116,8 +116,8 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
       ChunkWriter start_writer(buffer_);
       ResXMLTree_node* flat_node =
           start_writer.StartChunk<ResXMLTree_node>(RES_XML_START_ELEMENT_TYPE);
-      flat_node->lineNumber = util::HostToDevice32(node->line_number);
-      flat_node->comment.index = util::HostToDevice32(-1);
+      flat_node->lineNumber = android::util::HostToDevice32(node->line_number);
+      flat_node->comment.index = android::util::HostToDevice32(-1);
 
       ResXMLTree_attrExt* flat_elem = start_writer.NextBlock<ResXMLTree_attrExt>();
 
@@ -126,8 +126,8 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
                 true /* treat_empty_string_as_null */);
       AddString(node->name, kLowPriority, &flat_elem->name, true /* treat_empty_string_as_null */);
 
-      flat_elem->attributeStart = util::HostToDevice16(sizeof(*flat_elem));
-      flat_elem->attributeSize = util::HostToDevice16(sizeof(ResXMLTree_attribute));
+      flat_elem->attributeStart = android::util::HostToDevice16(sizeof(*flat_elem));
+      flat_elem->attributeSize = android::util::HostToDevice16(sizeof(ResXMLTree_attribute));
 
       WriteAttributes(node, flat_elem, &start_writer);
 
@@ -140,8 +140,8 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
       ChunkWriter end_writer(buffer_);
       ResXMLTree_node* flat_end_node =
           end_writer.StartChunk<ResXMLTree_node>(RES_XML_END_ELEMENT_TYPE);
-      flat_end_node->lineNumber = util::HostToDevice32(node->line_number);
-      flat_end_node->comment.index = util::HostToDevice32(-1);
+      flat_end_node->lineNumber = android::util::HostToDevice32(node->line_number);
+      flat_end_node->comment.index = android::util::HostToDevice32(-1);
 
       ResXMLTree_endElementExt* flat_end_elem = end_writer.NextBlock<ResXMLTree_endElementExt>();
       AddString(node->namespace_uri, kLowPriority, &flat_end_elem->ns,
@@ -165,21 +165,21 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
   // We are adding strings to a StringPool whose strings will be sorted and merged with other
   // string pools. That means we can't encode the ID of a string directly. Instead, we defer the
   // writing of the ID here, until after the StringPool is merged and sorted.
-  void AddString(const StringPiece& str, uint32_t priority, android::ResStringPool_ref* dest,
+  void AddString(StringPiece str, uint32_t priority, android::ResStringPool_ref* dest,
                  bool treat_empty_string_as_null = false) {
     if (str.empty() && treat_empty_string_as_null) {
       // Some parts of the runtime treat null differently than empty string.
-      dest->index = util::DeviceToHost32(-1);
+      dest->index = android::util::DeviceToHost32(-1);
     } else {
       string_refs.push_back(
-          StringFlattenDest{pool.MakeRef(str, StringPool::Context(priority)), dest});
+          StringFlattenDest{pool.MakeRef(str, android::StringPool::Context(priority)), dest});
     }
   }
 
   // We are adding strings to a StringPool whose strings will be sorted and merged with other
   // string pools. That means we can't encode the ID of a string directly. Instead, we defer the
   // writing of the ID here, until after the StringPool is merged and sorted.
-  void AddString(const StringPool::Ref& ref, android::ResStringPool_ref* dest) {
+  void AddString(const android::StringPool::Ref& ref, android::ResStringPool_ref* dest) {
     string_refs.push_back(StringFlattenDest{ref, dest});
   }
 
@@ -187,8 +187,8 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
     ChunkWriter writer(buffer_);
 
     ResXMLTree_node* flatNode = writer.StartChunk<ResXMLTree_node>(type);
-    flatNode->lineNumber = util::HostToDevice32(decl.line_number);
-    flatNode->comment.index = util::HostToDevice32(-1);
+    flatNode->lineNumber = android::util::HostToDevice32(decl.line_number);
+    flatNode->comment.index = android::util::HostToDevice32(-1);
 
     ResXMLTree_namespaceExt* flat_ns = writer.NextBlock<ResXMLTree_namespaceExt>();
     AddString(decl.prefix, kLowPriority, &flat_ns->prefix);
@@ -217,7 +217,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
 
     std::sort(filtered_attrs_.begin(), filtered_attrs_.end(), cmp_xml_attribute_by_id);
 
-    flat_elem->attributeCount = util::HostToDevice16(filtered_attrs_.size());
+    flat_elem->attributeCount = android::util::HostToDevice16(filtered_attrs_.size());
 
     ResXMLTree_attribute* flat_attr =
         writer->NextBlock<ResXMLTree_attribute>(filtered_attrs_.size());
@@ -226,12 +226,12 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
       // Assign the indices for specific attributes.
       if (xml_attr->compiled_attribute && xml_attr->compiled_attribute.value().id &&
           xml_attr->compiled_attribute.value().id.value() == kIdAttr) {
-        flat_elem->idIndex = util::HostToDevice16(attribute_index);
+        flat_elem->idIndex = android::util::HostToDevice16(attribute_index);
       } else if (xml_attr->namespace_uri.empty()) {
         if (xml_attr->name == "class") {
-          flat_elem->classIndex = util::HostToDevice16(attribute_index);
+          flat_elem->classIndex = android::util::HostToDevice16(attribute_index);
         } else if (xml_attr->name == "style") {
-          flat_elem->styleIndex = util::HostToDevice16(attribute_index);
+          flat_elem->styleIndex = android::util::HostToDevice16(attribute_index);
         }
       }
       attribute_index++;
@@ -241,7 +241,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
       AddString(xml_attr->namespace_uri, kLowPriority, &flat_attr->ns,
                 true /* treat_empty_string_as_null */);
 
-      flat_attr->rawValue.index = util::HostToDevice32(-1);
+      flat_attr->rawValue.index = android::util::HostToDevice32(-1);
 
       if (!xml_attr->compiled_attribute || !xml_attr->compiled_attribute.value().id) {
         // The attribute has no associated ResourceID, so the string order doesn't matter.
@@ -256,8 +256,9 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
         // Lookup the StringPool for this package and make the reference there.
         const xml::AaptAttribute& aapt_attr = xml_attr->compiled_attribute.value();
 
-        StringPool::Ref name_ref = package_pools[aapt_attr.id.value().package_id()].MakeRef(
-            xml_attr->name, StringPool::Context(aapt_attr.id.value().id));
+        android::StringPool::Ref name_ref =
+            package_pools[aapt_attr.id.value().package_id()].MakeRef(
+                xml_attr->name, android::StringPool::Context(aapt_attr.id.value().id));
 
         // Add it to the list of strings to flatten.
         AddString(name_ref, &flat_attr->name);
@@ -298,7 +299,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
         AddString(xml_attr->value, kLowPriority, &flat_attr->rawValue);
       }
 
-      flat_attr->typedValue.size = util::HostToDevice16(sizeof(flat_attr->typedValue));
+      flat_attr->typedValue.size = android::util::HostToDevice16(sizeof(flat_attr->typedValue));
       flat_attr++;
     }
   }
@@ -313,7 +314,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
 }  // namespace
 
 bool XmlFlattener::Flatten(IAaptContext* context, const xml::Node* node) {
-  BigBuffer node_buffer(1024);
+  android::BigBuffer node_buffer(1024);
   XmlFlattenerVisitor visitor(&node_buffer, options_);
   node->Accept(&visitor);
 
@@ -323,13 +324,14 @@ bool XmlFlattener::Flatten(IAaptContext* context, const xml::Node* node) {
   }
 
   // Sort the string pool so that attribute resource IDs show up first.
-  visitor.pool.Sort([](const StringPool::Context& a, const StringPool::Context& b) -> int {
-    return util::compare(a.priority, b.priority);
-  });
+  visitor.pool.Sort(
+      [](const android::StringPool::Context& a, const android::StringPool::Context& b) -> int {
+        return util::compare(a.priority, b.priority);
+      });
 
   // Now we flatten the string pool references into the correct places.
   for (const auto& ref_entry : visitor.string_refs) {
-    ref_entry.dest->index = util::HostToDevice32(ref_entry.ref.index());
+    ref_entry.dest->index = android::util::HostToDevice32(ref_entry.ref.index());
   }
 
   // Write the XML header.
@@ -338,9 +340,9 @@ bool XmlFlattener::Flatten(IAaptContext* context, const xml::Node* node) {
 
   // Flatten the StringPool.
   if (options_.use_utf16) {
-    StringPool::FlattenUtf16(buffer_, visitor.pool, context->GetDiagnostics());
+    android::StringPool::FlattenUtf16(buffer_, visitor.pool, context->GetDiagnostics());
   } else {
-    StringPool::FlattenUtf8(buffer_, visitor.pool, context->GetDiagnostics());
+    android::StringPool::FlattenUtf8(buffer_, visitor.pool, context->GetDiagnostics());
   }
 
   {
@@ -353,7 +355,7 @@ bool XmlFlattener::Flatten(IAaptContext* context, const xml::Node* node) {
         // When we see the first non-resource ID, we're done.
         break;
       }
-      *res_id_map_writer.NextBlock<uint32_t>() = util::HostToDevice32(id.id);
+      *res_id_map_writer.NextBlock<uint32_t>() = android::util::HostToDevice32(id.id);
     }
     res_id_map_writer.Finish();
   }

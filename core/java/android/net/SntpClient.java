@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.sntp.Duration64;
 import android.net.sntp.Timestamp64;
@@ -29,6 +30,7 @@ import com.android.internal.util.TrafficStatsConstants;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -39,9 +41,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 /**
- * {@hide}
- *
- * Simple SNTP client class for retrieving network time.
+ * Simple, single-use SNTP client class for retrieving network time.
  *
  * Sample usage:
  * <pre>SntpClient client = new SntpClient();
@@ -49,6 +49,10 @@ import java.util.function.Supplier;
  *     long now = client.getNtpTime() + SystemClock.elapsedRealtime() - client.getNtpTimeReference();
  * }
  * </pre>
+ *
+ * <p>This class is not thread-safe.
+ *
+ * @hide
  */
 public class SntpClient {
     private static final String TAG = "SntpClient";
@@ -86,6 +90,9 @@ public class SntpClient {
 
     // The round trip (network) time in milliseconds
     private long mRoundTripTime;
+
+    // Details of the NTP server used to obtain the time last.
+    @Nullable private InetSocketAddress mServerSocketAddress;
 
     private static class InvalidServerReplyException extends Exception {
         public InvalidServerReplyException(String message) {
@@ -202,6 +209,7 @@ public class SntpClient {
             mNtpTime = responseTime.plus(clockOffsetDuration).toEpochMilli();
             mNtpTimeReference = responseTicks;
             mRoundTripTime = roundTripTimeMillis;
+            mServerSocketAddress = new InetSocketAddress(address, port);
         } catch (Exception e) {
             EventLogTags.writeNtpFailure(address.toString(), e.toString());
             if (DBG) Log.d(TAG, "request time failed: " + e);
@@ -282,6 +290,14 @@ public class SntpClient {
     @UnsupportedAppUsage
     public long getRoundTripTime() {
         return mRoundTripTime;
+    }
+
+    /**
+     * Returns the address of the NTP server used in the NTP transaction
+     */
+    @Nullable
+    public InetSocketAddress getServerSocketAddress() {
+        return mServerSocketAddress;
     }
 
     private static void checkValidServerReply(

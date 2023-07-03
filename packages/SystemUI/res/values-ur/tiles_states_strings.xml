@@ -171,4 +171,14 @@
     <item msgid="146088982397753810">"آف"</item>
     <item msgid="460891964396502657">"آن"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"غیر دستیاب"</item>
+    <item msgid="8014986104355098744">"آف"</item>
+    <item msgid="5966994759929723339">"آن"</item>
+  </string-array>
+  <string-array name="tile_states_font_scaling">
+    <item msgid="3173069902082305985">"دستیاب نہیں ہیں"</item>
+    <item msgid="2478289035899842865">"آف ہے"</item>
+    <item msgid="5137565285664080143">"آن ہے"</item>
+  </string-array>
 </resources>

@@ -22,7 +22,7 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
  * An audio class-specific Mixer Interface.
  * see audio10.pdf section 4.3.2.3
  */
-public final class Usb10ACMixerUnit extends UsbACMixerUnit {
+public final class Usb10ACMixerUnit extends UsbACMixerUnit implements UsbAudioChannelCluster {
     private static final String TAG = "Usb10ACMixerUnit";
 
     private int mChannelConfig; // Spatial location of output channels
@@ -34,11 +34,18 @@ public final class Usb10ACMixerUnit extends UsbACMixerUnit {
         super(length, type, subtype, subClass);
     }
 
+    @Override
+    public byte getChannelCount() {
+        return mNumOutputs;
+    }
+
+    @Override
     public int getChannelConfig() {
         return mChannelConfig;
     }
 
-    public byte getChanNameID() {
+    @Override
+    public byte getChannelNames() {
         return mChanNameID;
     }
 

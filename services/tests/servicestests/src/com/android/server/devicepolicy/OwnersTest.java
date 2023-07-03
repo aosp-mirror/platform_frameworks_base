@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.SystemUpdatePolicy.TYPE_INSTALL_WINDOWED;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.content.ComponentName;
 import android.os.IpcDataCache;
@@ -43,7 +44,9 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class OwnersTest extends DpmTestBase {
 
+    private static final int TEST_PO_USER = 10;
     private static final String TESTDPC_PACKAGE = "com.afwsamples.testdpc";
+    private final DeviceStateCacheImpl mDeviceStateCache = new DeviceStateCacheImpl();
 
     @Before
     public void setUp() throws Exception {
@@ -54,11 +57,11 @@ public class OwnersTest extends DpmTestBase {
 
     @Test
     public void loadProfileOwner() throws Exception {
-        getServices().addUsers(10);
+        getServices().addUsers(TEST_PO_USER);
 
         final Owners owners = makeOwners();
 
-        DpmTestUtils.writeToFile(owners.getProfileOwnerFile(10),
+        DpmTestUtils.writeToFile(owners.getProfileOwnerFile(TEST_PO_USER),
                 DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/profile_owner_1.xml"));
 
         owners.load();
@@ -70,6 +73,9 @@ public class OwnersTest extends DpmTestBase {
         assertThat(owners.getProfileOwnerComponent(10))
                 .isEqualTo(new ComponentName(TESTDPC_PACKAGE,
                         "com.afwsamples.testdpc.DeviceAdminReceiver"));
+
+        assertWithMessage("Profile owner data in DeviceStateCache wasn't populated")
+                .that(mDeviceStateCache.isUserOrganizationManaged(TEST_PO_USER)).isTrue();
     }
 
     @Test
@@ -89,6 +95,10 @@ public class OwnersTest extends DpmTestBase {
                         "com.afwsamples.testdpc.DeviceAdminReceiver"));
 
         assertThat(owners.getSystemUpdatePolicy().getPolicyType()).isEqualTo(TYPE_INSTALL_WINDOWED);
+
+        assertWithMessage("Device owner data in DeviceStateCache wasn't populated")
+                .that(mDeviceStateCache.isUserOrganizationManaged(owners.getDeviceOwnerUserId()))
+                .isTrue();
     }
 
     @Test
@@ -120,6 +130,6 @@ public class OwnersTest extends DpmTestBase {
         final MockSystemServices services = getServices();
         return new Owners(services.userManager, services.userManagerInternal,
                 services.packageManagerInternal, services.activityTaskManagerInternal,
-                services.activityManagerInternal, services.pathProvider);
+                services.activityManagerInternal, mDeviceStateCache, services.pathProvider);
     }
 }

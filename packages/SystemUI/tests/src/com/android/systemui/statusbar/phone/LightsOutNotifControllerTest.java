@@ -30,6 +30,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.lifecycle.Observer;
@@ -107,8 +108,9 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
-                null /* packageName */);
+                WindowInsets.Type.defaultVisible(),
+                null /* packageName */,
+                null /* letterboxDetails */);
         assertTrue(mLightsOutNotifController.areLightsOut());
     }
 
@@ -120,8 +122,9 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
-                null /* packageName */);
+                WindowInsets.Type.defaultVisible(),
+                null /* packageName */,
+                null /* letterboxDetails */);
         assertFalse(mLightsOutNotifController.areLightsOut());
     }
 
@@ -151,8 +154,9 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
-                null /* packageName */);
+                WindowInsets.Type.defaultVisible(),
+                null /* packageName */,
+                null /* letterboxDetails */);
 
         // THEN we should show dot
         assertTrue(mLightsOutNotifController.shouldShowDot());
@@ -171,8 +175,9 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
-                null /* packageName */);
+                WindowInsets.Type.defaultVisible(),
+                null /* packageName */,
+                null /* letterboxDetails */);
 
         // THEN we shouldn't show the dot
         assertFalse(mLightsOutNotifController.shouldShowDot());
@@ -191,8 +196,9 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 null /* appearanceRegions */,
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
-                null /* requestedVisibilities */,
-                null /* packageName */);
+                WindowInsets.Type.defaultVisible(),
+                null /* packageName */,
+                null /* letterboxDetails */);
 
         // THEN we shouldn't show the dot
         assertFalse(mLightsOutNotifController.shouldShowDot());

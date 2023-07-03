@@ -16,23 +16,32 @@
 
 #pragma once
 
+#include <SkCanvas.h>
+#include <SkCanvasVirtualEnforcer.h>
+#include <SkDrawable.h>
+#include <SkGainmapInfo.h>
+#include <SkNoDrawCanvas.h>
+#include <SkPaint.h>
+#include <SkPath.h>
+#include <SkRect.h>
+#include <SkRuntimeEffect.h>
+#include <log/log.h>
+
+#include <cstdlib>
+#include <utility>
+#include <vector>
+
 #include "CanvasTransform.h"
+#include "Gainmap.h"
 #include "hwui/Bitmap.h"
+#include "pipeline/skia/AnimatedDrawables.h"
+#include "utils/AutoMalloc.h"
 #include "utils/Macros.h"
 #include "utils/TypeLogic.h"
 
-#include "SkCanvas.h"
-#include "SkCanvasVirtualEnforcer.h"
-#include "SkDrawable.h"
-#include "SkNoDrawCanvas.h"
-#include "SkPaint.h"
-#include "SkPath.h"
-#include "SkRect.h"
-
-#include "pipeline/skia/AnimatedDrawables.h"
-
-#include <SkRuntimeEffect.h>
-#include <vector>
+enum class SkBlendMode;
+class SkRRect;
+class Mesh;
 
 namespace android {
 namespace uirenderer {
@@ -58,6 +67,44 @@ struct DisplayListOp {
 };
 
 static_assert(sizeof(DisplayListOp) == 4);
+
+class DrawMeshPayload {
+public:
+    explicit DrawMeshPayload(const SkMesh* mesh) : mesh(mesh) {}
+    explicit DrawMeshPayload(const Mesh* meshWrapper) : meshWrapper(meshWrapper) {}
+
+    [[nodiscard]] const SkMesh& getSkMesh() const;
+
+private:
+    const SkMesh* mesh = nullptr;
+    const Mesh* meshWrapper = nullptr;
+};
+
+struct DrawImagePayload {
+    explicit DrawImagePayload(Bitmap& bitmap)
+            : image(bitmap.makeImage()), palette(bitmap.palette()) {
+        if (bitmap.hasGainmap()) {
+            auto gainmap = bitmap.gainmap();
+            gainmapInfo = gainmap->info;
+            gainmapImage = gainmap->bitmap->makeImage();
+        }
+    }
+
+    explicit DrawImagePayload(const SkImage* image)
+            : image(sk_ref_sp(image)), palette(BitmapPalette::Unknown) {}
+
+    DrawImagePayload(const DrawImagePayload&) = default;
+    DrawImagePayload(DrawImagePayload&&) = default;
+    DrawImagePayload& operator=(const DrawImagePayload&) = default;
+    DrawImagePayload& operator=(DrawImagePayload&&) = default;
+    ~DrawImagePayload() = default;
+
+    sk_sp<SkImage> image;
+    BitmapPalette palette;
+
+    sk_sp<SkImage> gainmapImage;
+    SkGainmapInfo gainmapInfo;
+};
 
 class RecordingCanvas;
 
@@ -109,19 +156,21 @@ private:
     void drawRRect(const SkRRect&, const SkPaint&);
     void drawDRRect(const SkRRect&, const SkRRect&, const SkPaint&);
 
+    void drawMesh(const SkMesh&, const sk_sp<SkBlender>&, const SkPaint&);
+    void drawMesh(const Mesh&, const sk_sp<SkBlender>&, const SkPaint&);
+
     void drawAnnotation(const SkRect&, const char*, SkData*);
     void drawDrawable(SkDrawable*, const SkMatrix*);
     void drawPicture(const SkPicture*, const SkMatrix*, const SkPaint*);
 
     void drawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&);
 
-    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkSamplingOptions&,
-                   const SkPaint*, BitmapPalette palette);
-    void drawImageNine(sk_sp<const SkImage>, const SkIRect&, const SkRect&, const SkPaint*);
-    void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkSamplingOptions&,
-                       const SkPaint*, SkCanvas::SrcRectConstraint, BitmapPalette palette);
-    void drawImageLattice(sk_sp<const SkImage>, const SkCanvas::Lattice&, const SkRect&,
-                          SkFilterMode, const SkPaint*, BitmapPalette);
+    void drawImage(DrawImagePayload&&, SkScalar, SkScalar, const SkSamplingOptions&,
+                   const SkPaint*);
+    void drawImageRect(DrawImagePayload&&, const SkRect*, const SkRect&, const SkSamplingOptions&,
+                       const SkPaint*, SkCanvas::SrcRectConstraint);
+    void drawImageLattice(DrawImagePayload&&, const SkCanvas::Lattice&, const SkRect&, SkFilterMode,
+                          const SkPaint*);
 
     void drawPatch(const SkPoint[12], const SkColor[4], const SkPoint[4], SkBlendMode,
                    const SkPaint&);
@@ -140,7 +189,7 @@ private:
     template <typename Fn, typename... Args>
     void map(const Fn[], Args...) const;
 
-    SkAutoTMalloc<uint8_t> fBytes;
+    AutoTMalloc<uint8_t> fBytes;
     size_t fUsed = 0;
     size_t fReserved = 0;
 
@@ -188,14 +237,14 @@ public:
 
     void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override;
 
-    void drawImage(const sk_sp<SkImage>&, SkScalar left, SkScalar top, const SkSamplingOptions&,
-                   const SkPaint* paint, BitmapPalette pallete);
     void drawRippleDrawable(const skiapipeline::RippleDrawableParams& params);
 
-    void drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
-                       const SkSamplingOptions&, const SkPaint*, SrcRectConstraint, BitmapPalette);
-    void drawImageLattice(const sk_sp<SkImage>& image, const Lattice& lattice, const SkRect& dst,
-                          SkFilterMode, const SkPaint* paint, BitmapPalette palette);
+    void drawImage(DrawImagePayload&&, SkScalar, SkScalar, const SkSamplingOptions&,
+                   const SkPaint*);
+    void drawImageRect(DrawImagePayload&&, const SkRect&, const SkRect&, const SkSamplingOptions&,
+                       const SkPaint*, SrcRectConstraint);
+    void drawImageLattice(DrawImagePayload&&, const Lattice& lattice, const SkRect&, SkFilterMode,
+                          const SkPaint*);
 
     void onDrawImage2(const SkImage*, SkScalar, SkScalar, const SkSamplingOptions&,
                       const SkPaint*) override;
@@ -208,10 +257,12 @@ public:
                      const SkPaint&) override;
     void onDrawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override;
     void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
+    void onDrawMesh(const SkMesh&, sk_sp<SkBlender>, const SkPaint&) override;
     void onDrawAtlas2(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
                      SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
+    void drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint);
     void drawVectorDrawable(VectorDrawableRoot* tree);
     void drawWebView(skiapipeline::FunctorDrawable*);
 

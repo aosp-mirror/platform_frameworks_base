@@ -185,4 +185,12 @@ public class StyleSpan extends MetricAffectingSpan implements ParcelableSpan {
 
         paint.setTypeface(tf);
     }
+
+    @Override
+    public String toString() {
+        return "StyleSpan{"
+                + "style=" + getStyle()
+                + ", fontWeightAdjustment=" + getFontWeightAdjustment()
+                + '}';
+    }
 }

@@ -17,48 +17,25 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
-
-import java.lang.ref.WeakReference;
 
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
-public class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
-    /** Handler token posted with accessibility announcement runnables. */
-    private static final Object ANNOUNCE_TOKEN = new Object();
+public abstract class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
 
-    /**
-     * Delay before speaking an accessibility announcement. Used to prevent
-     * lift-to-type from interrupting itself.
-     */
-    private static final long ANNOUNCEMENT_DELAY = 250;
-    private static final int DEFAULT_COLOR = -1;
-
-    private final Handler mHandler;
-
-    private ColorStateList mDefaultColorState;
     private CharSequence mMessage;
-    private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
-    private boolean mBouncerShowing;
-    private boolean mAltBouncerShowing;
+    private boolean mIsVisible;
     /**
      * Container that wraps the KeyguardMessageArea - may be null if current view hierarchy doesn't
      * contain {@link R.id.keyguard_message_area_container}.
@@ -66,12 +43,19 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     @Nullable
     private ViewGroup mContainer;
     private int mTopMargin;
+    protected boolean mAnimate;
+    private final int mStyleResId;
+    private boolean mIsDisabled = false;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
-
-        mHandler = new Handler(Looper.myLooper());
+        if (attrs != null) {
+            mStyleResId = attrs.getStyleAttribute();
+        } else {
+            // Set to default reference style if the component is used without setting "style" attr
+            mStyleResId = R.style.Keyguard_TextView;
+        }
         onThemeChanged();
     }
 
@@ -96,36 +80,28 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         mContainer.setLayoutParams(lp);
     }
 
-    @Override
-    public void setNextMessageColor(ColorStateList colorState) {
-        mNextMessageColorState = colorState;
-    }
-
-    void onThemeChanged() {
-        TypedArray array = mContext.obtainStyledAttributes(new int[] {
-                android.R.attr.textColorPrimary
-        });
-        ColorStateList newTextColors = ColorStateList.valueOf(array.getColor(0, Color.RED));
-        array.recycle();
-        mDefaultColorState = newTextColors;
+    protected void onThemeChanged() {
         update();
     }
 
-    void reloadColor() {
-        mDefaultColorState = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary);
+    protected void reloadColor() {
         update();
     }
 
     void onDensityOrFontScaleChanged() {
-        TypedArray array = mContext.obtainStyledAttributes(R.style.Keyguard_TextView, new int[] {
+        TypedArray array = mContext.obtainStyledAttributes(getStyleResId(), new int[] {
                 android.R.attr.textSize
         });
         setTextSize(TypedValue.COMPLEX_UNIT_PX, array.getDimensionPixelSize(0, 0));
         array.recycle();
     }
 
+    protected int getStyleResId() {
+        return mStyleResId;
+    }
+
     @Override
-    public void setMessage(CharSequence msg) {
+    public void setMessage(CharSequence msg, boolean animate) {
         if (!TextUtils.isEmpty(msg)) {
             securityMessageChanged(msg);
         } else {
@@ -134,40 +110,17 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     }
 
     @Override
-    public void setMessage(int resId) {
-        CharSequence message = null;
-        if (resId != 0) {
-            message = getContext().getResources().getText(resId);
-        }
-        setMessage(message);
-    }
-
-    @Override
     public void formatMessage(int resId, Object... formatArgs) {
         CharSequence message = null;
         if (resId != 0) {
             message = getContext().getString(resId, formatArgs);
         }
-        setMessage(message);
-    }
-
-    public static KeyguardMessageArea findSecurityMessageDisplay(View v) {
-        KeyguardMessageArea messageArea = v.findViewById(R.id.keyguard_message_area);
-        if (messageArea == null) {
-            messageArea = v.getRootView().findViewById(R.id.keyguard_message_area);
-        }
-        if (messageArea == null) {
-            throw new RuntimeException("Can't find keyguard_message_area in " + v.getClass());
-        }
-        return messageArea;
+        setMessage(message, true);
     }
 
     private void securityMessageChanged(CharSequence message) {
         mMessage = message;
         update();
-        mHandler.removeCallbacksAndMessages(ANNOUNCE_TOKEN);
-        mHandler.postAtTime(new AnnounceRunnable(this, getText()), ANNOUNCE_TOKEN,
-                (SystemClock.uptimeMillis() + ANNOUNCEMENT_DELAY));
     }
 
     private void clearMessage() {
@@ -176,60 +129,39 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     }
 
     void update() {
+        if (mIsDisabled) {
+            setVisibility(GONE);
+            return;
+        }
         CharSequence status = mMessage;
-        setVisibility(TextUtils.isEmpty(status) || (!mBouncerShowing && !mAltBouncerShowing)
-                ? INVISIBLE : VISIBLE);
+        setVisibility(TextUtils.isEmpty(status) || (!mIsVisible) ? INVISIBLE : VISIBLE);
         setText(status);
-        ColorStateList colorState = mDefaultColorState;
-        if (mNextMessageColorState.getDefaultColor() != DEFAULT_COLOR) {
-            colorState = mNextMessageColorState;
-            mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
-        }
-        if (mAltBouncerShowing) {
-            // alt bouncer has a black scrim, so always show the text in white
-            colorState = ColorStateList.valueOf(Color.WHITE);
-        }
-        setTextColor(colorState);
+        updateTextColor();
     }
 
     /**
      * Set whether the bouncer is fully showing
      */
-    public void setBouncerShowing(boolean bouncerShowing) {
-        if (mBouncerShowing != bouncerShowing) {
-            mBouncerShowing = bouncerShowing;
+    public void setIsVisible(boolean isVisible) {
+        if (mIsVisible != isVisible) {
+            mIsVisible = isVisible;
             update();
         }
     }
 
+    /** Set the text color */
+    protected abstract void updateTextColor();
+
     /**
-     * Set whether the alt bouncer is showing
+     * Mark this view with {@link android.view.View#GONE} visibility to remove this from the layout
+     * of the view. Any calls to {@link #setIsVisible(boolean)} after this will be a no-op.
      */
-    void setAltBouncerShowing(boolean showing) {
-        if (mAltBouncerShowing != showing) {
-            mAltBouncerShowing = showing;
-            update();
-        }
+    public void disable() {
+        mIsDisabled = true;
+        update();
     }
 
-    /**
-     * Runnable used to delay accessibility announcements.
-     */
-    private static class AnnounceRunnable implements Runnable {
-        private final WeakReference<View> mHost;
-        private final CharSequence mTextToAnnounce;
-
-        AnnounceRunnable(View host, CharSequence textToAnnounce) {
-            mHost = new WeakReference<View>(host);
-            mTextToAnnounce = textToAnnounce;
-        }
-
-        @Override
-        public void run() {
-            final View host = mHost.get();
-            if (host != null) {
-                host.announceForAccessibility(mTextToAnnounce);
-            }
-        }
+    public boolean isDisabled() {
+        return mIsDisabled;
     }
 }

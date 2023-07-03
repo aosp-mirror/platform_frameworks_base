@@ -28,13 +28,15 @@ final class AppBindRecord {
     final ServiceRecord service;    // The running service.
     final IntentBindRecord intent;  // The intent we are bound to.
     final ProcessRecord client;     // Who has started/bound the service.
-
+    final ProcessRecord attributedClient; // The binding was done by the system on behalf
+                                          // of 'attributedClient'
     final ArraySet<ConnectionRecord> connections = new ArraySet<>();
                                     // All ConnectionRecord for this client.
 
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "service=" + service);
         pw.println(prefix + "client=" + client);
+        pw.println(prefix + "attributedClient=" + attributedClient);
         dumpInIntentBind(pw, prefix);
     }
 
@@ -50,10 +52,11 @@ final class AppBindRecord {
     }
 
     AppBindRecord(ServiceRecord _service, IntentBindRecord _intent,
-            ProcessRecord _client) {
+            ProcessRecord _client, ProcessRecord _attributedClient) {
         service = _service;
         intent = _intent;
         client = _client;
+        attributedClient = _attributedClient;
     }
 
     public String toString() {

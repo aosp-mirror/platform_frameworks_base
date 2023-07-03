@@ -42,7 +42,7 @@ public class FakeGateKeeperService implements IGateKeeperService {
             ByteBuffer buffer = ByteBuffer.allocate(handle.length);
             buffer.put(handle, 0, handle.length);
             buffer.flip();
-            int version = buffer.get();
+            buffer.get(); // version
             sid = buffer.getLong();
             password = new byte[buffer.remaining()];
             buffer.get(password);
@@ -50,7 +50,7 @@ public class FakeGateKeeperService implements IGateKeeperService {
 
         public byte[] toBytes() {
             ByteBuffer buffer = ByteBuffer.allocate(1 + Long.BYTES + password.length);
-            buffer.put((byte)0);
+            buffer.put((byte)0); // version
             buffer.putLong(sid);
             buffer.put(password);
             return buffer.array();
@@ -70,14 +70,14 @@ public class FakeGateKeeperService implements IGateKeeperService {
             ByteBuffer buffer = ByteBuffer.allocate(handle.length);
             buffer.put(handle, 0, handle.length);
             buffer.flip();
-            int version = buffer.get();
+            buffer.get(); // version
             challenge = buffer.getLong();
             sid = buffer.getLong();
         }
 
         public byte[] toBytes() {
             ByteBuffer buffer = ByteBuffer.allocate(1 + Long.BYTES + Long.BYTES);
-            buffer.put((byte)0);
+            buffer.put((byte)0); // version
             buffer.putLong(challenge);
             buffer.putLong(sid);
             return buffer.array();

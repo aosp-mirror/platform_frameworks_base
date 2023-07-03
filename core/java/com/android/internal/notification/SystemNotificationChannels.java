@@ -17,7 +17,6 @@ package com.android.internal.notification;
 import static android.app.admin.DevicePolicyResources.Strings.Core.NOTIFICATION_CHANNEL_DEVICE_ADMIN;
 
 import android.app.INotificationManager;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
@@ -25,7 +24,6 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.os.RemoteException;
-import android.provider.Settings;
 
 import com.android.internal.R;
 
@@ -35,7 +33,10 @@ import java.util.List;
 
 // Manages the NotificationChannels used by the frameworks itself.
 public class SystemNotificationChannels {
-    public static String VIRTUAL_KEYBOARD  = "VIRTUAL_KEYBOARD";
+    /**
+     * @deprecated Legacy system channel, which is no longer used,
+     */
+    @Deprecated public static String VIRTUAL_KEYBOARD  = "VIRTUAL_KEYBOARD";
     public static String PHYSICAL_KEYBOARD = "PHYSICAL_KEYBOARD";
     public static String SECURITY = "SECURITY";
     public static String CAR_MODE = "CAR_MODE";
@@ -72,19 +73,10 @@ public class SystemNotificationChannels {
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         List<NotificationChannel> channelsList = new ArrayList<NotificationChannel>();
-        final NotificationChannel keyboard = new NotificationChannel(
-                VIRTUAL_KEYBOARD,
-                context.getString(R.string.notification_channel_virtual_keyboard),
-                NotificationManager.IMPORTANCE_LOW);
-        keyboard.setBlockable(true);
-        channelsList.add(keyboard);
-
         final NotificationChannel physicalKeyboardChannel = new NotificationChannel(
                 PHYSICAL_KEYBOARD,
                 context.getString(R.string.notification_channel_physical_keyboard),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        physicalKeyboardChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
-                Notification.AUDIO_ATTRIBUTES_DEFAULT);
+                NotificationManager.IMPORTANCE_LOW);
         physicalKeyboardChannel.setBlockable(true);
         channelsList.add(physicalKeyboardChannel);
 
@@ -237,6 +229,7 @@ public class SystemNotificationChannels {
     /** Remove notification channels which are no longer used */
     public static void removeDeprecated(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
+        nm.deleteNotificationChannel(VIRTUAL_KEYBOARD);
         nm.deleteNotificationChannel(DEVICE_ADMIN_DEPRECATED);
         nm.deleteNotificationChannel(SYSTEM_CHANGES_DEPRECATED);
     }

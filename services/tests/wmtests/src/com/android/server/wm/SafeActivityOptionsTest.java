@@ -17,9 +17,12 @@
 package com.android.server.wm;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.MediumTest;
 
@@ -42,5 +45,32 @@ public class SafeActivityOptionsTest {
         final SafeActivityOptions options = new SafeActivityOptions(opts1);
         final ActivityOptions result = options.mergeActivityOptions(opts1, opts2);
         assertEquals(6, result.getLaunchDisplayId());
+    }
+
+    @Test
+    public void test_selectiveCloneDisplayOptions() {
+        final WindowContainerToken token = mock(WindowContainerToken.class);
+        final int launchDisplayId = 5;
+        final int callerDisplayId = 6;
+
+        final SafeActivityOptions clone = new SafeActivityOptions(ActivityOptions.makeBasic()
+                .setLaunchTaskDisplayArea(token)
+                .setLaunchDisplayId(launchDisplayId)
+                .setCallerDisplayId(callerDisplayId))
+                .selectiveCloneLaunchOptions();
+
+        assertSame(clone.getOriginalOptions().getLaunchTaskDisplayArea(), token);
+        assertEquals(clone.getOriginalOptions().getLaunchDisplayId(), launchDisplayId);
+        assertEquals(clone.getOriginalOptions().getCallerDisplayId(), callerDisplayId);
+    }
+
+    @Test
+    public void test_selectiveCloneLunchRootTask() {
+        final WindowContainerToken token = mock(WindowContainerToken.class);
+        final SafeActivityOptions clone = new SafeActivityOptions(ActivityOptions.makeBasic()
+                .setLaunchRootTask(token))
+                .selectiveCloneLaunchOptions();
+
+        assertSame(clone.getOriginalOptions().getLaunchRootTask(), token);
     }
 }

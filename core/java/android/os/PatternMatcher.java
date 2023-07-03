@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
@@ -149,6 +150,23 @@ public class PatternMatcher implements Parcelable {
         // PatternMatcherProto.PARSED_PATTERN is too much to dump, but the field is reserved to
         // match the current data structure.
         proto.end(token);
+    }
+
+    /**
+     * Perform a check on the matcher for the pattern type of {@link #PATTERN_ADVANCED_GLOB}.
+     * Return true if it passed.
+     * @hide
+     */
+    public boolean check() {
+        try {
+            if (mType == PATTERN_ADVANCED_GLOB) {
+                return Arrays.equals(mParsedPattern, parseAndVerifyAdvancedPattern(mPattern));
+            }
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Failed to verify advanced pattern: " + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     public int describeContents() {

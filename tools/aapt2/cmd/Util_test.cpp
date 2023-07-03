@@ -25,6 +25,7 @@
 #include "util/Files.h"
 
 using ::android::ConfigDescription;
+using testing::UnorderedElementsAre;
 
 namespace aapt {
 
@@ -102,7 +103,7 @@ TEST (UtilTest, LongVersionCodeUndefined) {
 
 
 TEST (UtilTest, ParseSplitParameters) {
-  IDiagnostics* diagnostics = test::ContextBuilder().Build().get()->GetDiagnostics();
+  android::IDiagnostics* diagnostics = test::ContextBuilder().Build().get()->GetDiagnostics();
   std::string path;
   SplitConstraints constraints;
   ConfigDescription expected_configuration;
@@ -356,7 +357,7 @@ TEST (UtilTest, ParseSplitParameters) {
 TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
 
-  IDiagnostics* diagnostics = context.get()->GetDiagnostics();
+  android::IDiagnostics* diagnostics = context.get()->GetDiagnostics();
   std::vector<SplitConstraints> test_constraints;
   std::string path;
 
@@ -409,6 +410,74 @@ TEST (UtilTest, RegularExpressionNonEnglish) {
   EXPECT_TRUE(std::regex_search("file.KOŃCÓWKA", expression));
   EXPECT_TRUE(std::regex_search("file.kOńcÓwkA", expression));
   EXPECT_FALSE(std::regex_search("file.koncowka", expression));
+}
+
+TEST(UtilTest, ParseConfigWithDirectives) {
+  const std::string& content = R"(
+bool/remove_me#remove
+bool/keep_name#no_collapse
+layout/keep_path#no_path_shorten
+string/foo#no_obfuscate
+dimen/bar#no_obfuscate
+layout/keep_name_and_path#no_collapse,no_path_shorten
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
+
+  EXPECT_TRUE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                  path_shorten_exemptions));
+
+  EXPECT_THAT(name_collapse_exemptions,
+              UnorderedElementsAre(ResourceName({}, ResourceType::kString, "foo"),
+                                   ResourceName({}, ResourceType::kDimen, "bar"),
+                                   ResourceName({}, ResourceType::kBool, "keep_name"),
+                                   ResourceName({}, ResourceType::kLayout, "keep_name_and_path")));
+  EXPECT_THAT(path_shorten_exemptions,
+              UnorderedElementsAre(ResourceName({}, ResourceType::kLayout, "keep_path"),
+                                   ResourceName({}, ResourceType::kLayout, "keep_name_and_path")));
+  EXPECT_THAT(resource_exclusion,
+              UnorderedElementsAre(ResourceName({}, ResourceType::kBool, "remove_me")));
+}
+
+TEST(UtilTest, ParseConfigResourceWithPackage) {
+  const std::string& content = R"(
+package:bool/remove_me#remove
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
+
+  EXPECT_FALSE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                   path_shorten_exemptions));
+}
+
+TEST(UtilTest, ParseConfigInvalidName) {
+  const std::string& content = R"(
+package:bool/1231#remove
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
+
+  EXPECT_FALSE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                   path_shorten_exemptions));
+}
+
+TEST(UtilTest, ParseConfigNoHash) {
+  const std::string& content = R"(
+package:bool/my_bool
+)";
+  aapt::test::Context context;
+  std::unordered_set<ResourceName> resource_exclusion;
+  std::set<ResourceName> name_collapse_exemptions;
+  std::set<ResourceName> path_shorten_exemptions;
+
+  EXPECT_FALSE(ParseResourceConfig(content, &context, resource_exclusion, name_collapse_exemptions,
+                                   path_shorten_exemptions));
 }
 
 }  // namespace aapt

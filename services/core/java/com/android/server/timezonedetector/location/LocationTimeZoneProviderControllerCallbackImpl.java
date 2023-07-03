@@ -19,7 +19,7 @@ package com.android.server.timezonedetector.location;
 import android.annotation.NonNull;
 
 import com.android.server.LocalServices;
-import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.LocationAlgorithmEvent;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
 /**
@@ -34,11 +34,11 @@ class LocationTimeZoneProviderControllerCallbackImpl
     }
 
     @Override
-    void suggest(@NonNull GeolocationTimeZoneSuggestion suggestion) {
+    void sendEvent(@NonNull LocationAlgorithmEvent event) {
         mThreadingDomain.assertCurrentThread();
 
         TimeZoneDetectorInternal timeZoneDetector =
                 LocalServices.getService(TimeZoneDetectorInternal.class);
-        timeZoneDetector.suggestGeolocationTimeZone(suggestion);
+        timeZoneDetector.handleLocationAlgorithmEvent(event);
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.text.TextUtils;
 
 /**
@@ -59,6 +60,13 @@ public class Position {
     @Override
     public String toString() {
         return mPercentageX + ", " + mPercentageY;
+    }
+
+    /**
+     * Updates the position with {@code percentagePosition}.
+     */
+    public void update(@NonNull Position percentagePosition) {
+        update(percentagePosition.getPercentageX(), percentagePosition.getPercentageY());
     }
 
     /**

@@ -30,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BackupUtils {
     private static final String TAG = "BackupUtils";
@@ -64,8 +65,9 @@ public class BackupUtils {
         }
 
         if (DEBUG) {
-            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigHashes
-                    + " device=" + signingInfo.getApkContentsSigners());
+            Slog.v(TAG, "signaturesMatch(): stored="
+                    + storedSigHashes.stream().map(Arrays::toString).collect(Collectors.toList())
+                    + " device=" + Arrays.toString(signingInfo.getApkContentsSigners()));
         }
 
         final int nStored = storedSigHashes.size();

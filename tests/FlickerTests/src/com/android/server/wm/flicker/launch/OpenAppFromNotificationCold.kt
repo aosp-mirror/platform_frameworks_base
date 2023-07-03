@@ -17,13 +17,16 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import android.platform.test.annotations.Presubmit
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -40,45 +43,71 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
 @Postsubmit
-open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter)
-    : OpenAppFromNotificationWarm(testSpec) {
+open class OpenAppFromNotificationCold(flicker: FlickerTest) :
+    OpenAppFromNotificationWarm(flicker) {
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
 
             setup {
-                eachRun {
-                    // Close the app that posted the notification to trigger a cold start next time
-                    // it is open - can't just kill it because that would remove the notification.
-                    taplInstrumentation.goHome()
-                    taplInstrumentation.workspace.switchToOverview()
-                    taplInstrumentation.overview.dismissAllTasks()
-                }
+                // Close the app that posted the notification to trigger a cold start next time
+                // it is open - can't just kill it because that would remove the notification.
+                tapl.setExpectedRotationCheckEnabled(false)
+                tapl.goHome()
+                tapl.workspace.switchToOverview()
+                tapl.overview.dismissAllTasks()
             }
         }
 
-    @Test
-    @Postsubmit
-    override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
+    @Presubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
+    @Presubmit @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
+
+    /** {@inheritDoc} */
     @Test
-    @Postsubmit
-    override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /**
+     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
+     * transition
+     */
+    @Presubmit @Test open fun statusBarLayerPositionAtEnd() = flicker.statusBarLayerPositionAtEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun navBarWindowIsAlwaysVisible() {}
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(repetitions = 3)
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

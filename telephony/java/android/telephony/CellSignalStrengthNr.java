@@ -49,7 +49,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     private static final String TAG = "CellSignalStrengthNr";
 
     // Lifted from Default carrier configs and max range of SSRSRP
-    // Boundaries: [-140 dB, -44 dB]
+    // Boundaries: [-156 dB, -31 dB]
     private int[] mSsRsrpThresholds = new int[] {
             -110, /* SIGNAL_STRENGTH_POOR */
             -90, /* SIGNAL_STRENGTH_MODERATE */
@@ -155,6 +155,16 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      */
     private int mParametersUseForLevel;
 
+    /**
+     * Timing advance value for a one way trip from cell to device in microseconds.
+     * Approximate distance is calculated using 300m/us * timingAdvance.
+     *
+     * Reference: 3GPP TS 36.213 section 4.2.3.
+     *
+     * Range: [0, 1282]
+     */
+    private int mTimingAdvance;
+
     /** @hide */
     public CellSignalStrengthNr() {
         setDefaultValues();
@@ -169,20 +179,22 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      * @param ssRsrp SS reference signal received power.
      * @param ssRsrq SS reference signal received quality.
      * @param ssSinr SS signal-to-noise and interference ratio.
+     * @param timingAdvance Timing advance.
      * @hide
      */
     public CellSignalStrengthNr(int csiRsrp, int csiRsrq, int csiSinr, int csiCqiTableIndex,
-            List<Byte> csiCqiReport, int ssRsrp, int ssRsrq, int ssSinr) {
-        mCsiRsrp = inRangeOrUnavailable(csiRsrp, -140, -44);
+            List<Byte> csiCqiReport, int ssRsrp, int ssRsrq, int ssSinr, int timingAdvance) {
+        mCsiRsrp = inRangeOrUnavailable(csiRsrp, -156, -31);
         mCsiRsrq = inRangeOrUnavailable(csiRsrq, -20, -3);
         mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
         mCsiCqiTableIndex = inRangeOrUnavailable(csiCqiTableIndex, 1, 3);
         mCsiCqiReport = csiCqiReport.stream()
-                .map(cqi -> new Integer(inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 0, 15)))
+                .map(cqi -> inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 0, 15))
                 .collect(Collectors.toList());
-        mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
+        mSsRsrp = inRangeOrUnavailable(ssRsrp, -156, -31);
         mSsRsrq = inRangeOrUnavailable(ssRsrq, -43, 20);
         mSsSinr = inRangeOrUnavailable(ssSinr, -23, 40);
+        mTimingAdvance = inRangeOrUnavailable(timingAdvance, 0, 1282);
         updateLevel(null, null);
     }
 
@@ -198,7 +210,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     public CellSignalStrengthNr(
             int csiRsrp, int csiRsrq, int csiSinr, int ssRsrp, int ssRsrq, int ssSinr) {
         this(csiRsrp, csiRsrq, csiSinr, CellInfo.UNAVAILABLE, Collections.emptyList(),
-                ssRsrp, ssRsrq, ssSinr);
+                ssRsrp, ssRsrq, ssSinr, CellInfo.UNAVAILABLE);
     }
 
     /**
@@ -212,8 +224,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * Reference: 3GPP TS 38.215.
-     * Range: -140 dBm to -44 dBm.
+     * Reference: 3GPP TS 38.133 10.1.6.1.
+     * Range: -156 dBm to -31 dBm.
      * @return SS reference signal received power, {@link CellInfo#UNAVAILABLE} means unreported
      * value.
      */
@@ -242,8 +254,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * Reference: 3GPP TS 38.215.
-     * Range: -140 dBm to -44 dBm.
+     * Reference: 3GPP TS 38.133 10.1.6.1.
+     * Range: -156 dBm to -31 dBm.
      * @return CSI reference signal received power, {@link CellInfo#UNAVAILABLE} means unreported
      * value.
      */
@@ -302,6 +314,22 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         return mCsiCqiReport;
     }
 
+    /**
+     * Get the timing advance value for a one way trip from cell to device for NR in microseconds.
+     * {@link android.telephony.CellInfo#UNAVAILABLE} is reported when there is no
+     * active RRC connection.
+     *
+     * Reference: 3GPP TS 36.213 section 4.2.3.
+     * Range: 0 us to 1282 us.
+     *
+     * @return the NR timing advance if available or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE} if unavailable.
+     */
+    @IntRange(from = 0, to = 1282)
+    public int getTimingAdvanceMicros() {
+        return mTimingAdvance;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -319,6 +347,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         dest.writeInt(mSsRsrq);
         dest.writeInt(mSsSinr);
         dest.writeInt(mLevel);
+        dest.writeInt(mTimingAdvance);
     }
 
     private CellSignalStrengthNr(Parcel in) {
@@ -331,6 +360,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsRsrq = in.readInt();
         mSsSinr = in.readInt();
         mLevel = in.readInt();
+        mTimingAdvance = in.readInt();
     }
 
     /** @hide */
@@ -346,6 +376,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsSinr = CellInfo.UNAVAILABLE;
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         mParametersUseForLevel = USE_SSRSRP;
+        mTimingAdvance = CellInfo.UNAVAILABLE;
     }
 
     /** {@inheritDoc} */
@@ -495,6 +526,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsSinr = s.mSsSinr;
         mLevel = s.mLevel;
         mParametersUseForLevel = s.mParametersUseForLevel;
+        mTimingAdvance = s.mTimingAdvance;
     }
 
     /** @hide */
@@ -506,7 +538,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     @Override
     public int hashCode() {
         return Objects.hash(mCsiRsrp, mCsiRsrq, mCsiSinr, mCsiCqiTableIndex,
-                mCsiCqiReport, mSsRsrp, mSsRsrq, mSsSinr, mLevel);
+                mCsiCqiReport, mSsRsrp, mSsRsrq, mSsSinr, mLevel, mTimingAdvance);
     }
 
     private static final CellSignalStrengthNr sInvalid = new CellSignalStrengthNr();
@@ -525,7 +557,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
                     && mCsiCqiTableIndex == o.mCsiCqiTableIndex
                     && mCsiCqiReport.equals(o.mCsiCqiReport)
                     && mSsRsrp == o.mSsRsrp && mSsRsrq == o.mSsRsrq && mSsSinr == o.mSsSinr
-                    && mLevel == o.mLevel;
+                    && mLevel == o.mLevel && mTimingAdvance == o.mTimingAdvance;
         }
         return false;
     }
@@ -543,6 +575,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
                 .append(" ssSinr = " + mSsSinr)
                 .append(" level = " + mLevel)
                 .append(" parametersUseForLevel = " + mParametersUseForLevel)
+                .append(" timingAdvance = " + mTimingAdvance)
                 .append(" }")
                 .toString();
     }

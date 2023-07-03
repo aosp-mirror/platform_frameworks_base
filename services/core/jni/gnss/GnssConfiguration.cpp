@@ -67,7 +67,7 @@ GnssConfiguration::GnssConfiguration(const sp<IGnssConfiguration>& iGnssConfigur
       : mIGnssConfiguration(iGnssConfiguration) {}
 
 jobject GnssConfiguration::getVersion(JNIEnv* env) {
-    return createHalInterfaceVersionJavaObject(env, 3, 0);
+    return createHalInterfaceVersionJavaObject(env, 3, mIGnssConfiguration->getInterfaceVersion());
 }
 
 jboolean GnssConfiguration::setEmergencySuplPdn(jint enable) {

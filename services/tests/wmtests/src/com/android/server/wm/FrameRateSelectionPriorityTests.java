@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,6 +36,8 @@ import android.view.Display.Mode;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import com.android.server.wm.RefreshRatePolicy.FrameRateVote;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,12 +53,18 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class FrameRateSelectionPriorityTests extends WindowTestsBase {
-    private static final float FLOAT_TOLERANCE = 0.01f;
     private static final int LOW_MODE_ID = 3;
 
     private DisplayPolicy mDisplayPolicy = mock(DisplayPolicy.class);
     private RefreshRatePolicy mRefreshRatePolicy;
     private HighRefreshRateDenylist mDenylist = mock(HighRefreshRateDenylist.class);
+    private FrameRateVote mTempFrameRateVote = new FrameRateVote();
+
+    private static final FrameRateVote FRAME_RATE_VOTE_NONE = new FrameRateVote();
+    private static final FrameRateVote FRAME_RATE_VOTE_60_EXACT =
+            new FrameRateVote(60, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+    private static final FrameRateVote FRAME_RATE_VOTE_60_PREFERRED =
+            new FrameRateVote(60, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
 
     WindowState createWindow(String name) {
         WindowState window = createWindow(null, TYPE_APPLICATION, name);
@@ -85,12 +94,12 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         assertNotNull("Window state is created", appWindow);
 
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority doesn't change.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Call the function a few times.
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
@@ -109,16 +118,15 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
         assertEquals(appWindow.getDisplayContent().getDisplayPolicy().getRefreshRatePolicy()
                 .getPreferredModeId(appWindow), 0);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
-        assertEquals(appWindow.getDisplayContent().getDisplayPolicy().getRefreshRatePolicy()
-                .getPreferredRefreshRate(appWindow), 0, FLOAT_TOLERANCE);
-
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
+        assertFalse(appWindow.getDisplayContent().getDisplayPolicy().getRefreshRatePolicy()
+                .updateFrameRateVote(appWindow));
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority stays MAX_VALUE.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
         verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionPriority(
                 appWindow.getSurfaceControl(), RefreshRatePolicy.LAYER_PRIORITY_UNSET);
 
@@ -127,7 +135,7 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority changes to 1.
         assertEquals(appWindow.mFrameRateSelectionPriority, 1);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
         verify(appWindow.getPendingTransaction()).setFrameRateSelectionPriority(
                 appWindow.getSurfaceControl(), 1);
         verify(appWindow.getPendingTransaction(), never()).setFrameRate(
@@ -138,27 +146,27 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     public void testApplicationInFocusWithModeId() {
         final WindowState appWindow = createWindow("appWindow");
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Application is in focus.
         appWindow.mToken.mDisplayContent.mCurrentFocus = appWindow;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority changes.
         assertEquals(appWindow.mFrameRateSelectionPriority, 1);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
         // Update the mode ID to a requested number.
         appWindow.mAttrs.preferredDisplayModeId = 1;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority changes.
         assertEquals(appWindow.mFrameRateSelectionPriority, 0);
-        assertEquals(appWindow.mAppPreferredFrameRate, 60, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_60_EXACT);
 
         // Remove the mode ID request.
         appWindow.mAttrs.preferredDisplayModeId = 0;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority changes.
         assertEquals(appWindow.mFrameRateSelectionPriority, 1);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Verify we called actions on Transactions correctly.
         verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionPriority(
@@ -174,23 +182,21 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     @Test
     public void testApplicationNotInFocusWithModeId() {
         final WindowState appWindow = createWindow("appWindow");
-        assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
-
-        final WindowState inFocusWindow = createWindow("inFocus");
-        appWindow.mToken.mDisplayContent.mCurrentFocus = inFocusWindow;
-
+        mDisplayContent.mCurrentFocus = appWindow;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
+        mDisplayContent.mCurrentFocus = null;
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+
         // The window is not in focus.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Update the mode ID to a requested number.
         appWindow.mAttrs.preferredDisplayModeId = 1;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority changes.
         assertEquals(appWindow.mFrameRateSelectionPriority, 2);
-        assertEquals(appWindow.mAppPreferredFrameRate, 60, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_60_EXACT);
 
         verify(appWindow.getPendingTransaction()).setFrameRateSelectionPriority(
                 appWindow.getSurfaceControl(), RefreshRatePolicy.LAYER_PRIORITY_UNSET);
@@ -203,23 +209,21 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     @Test
     public void testApplicationNotInFocusWithoutModeId() {
         final WindowState appWindow = createWindow("appWindow");
-        assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
-
-        final WindowState inFocusWindow = createWindow("inFocus");
-        appWindow.mToken.mDisplayContent.mCurrentFocus = inFocusWindow;
-
+        mDisplayContent.mCurrentFocus = appWindow;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
+        mDisplayContent.mCurrentFocus = null;
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+
         // The window is not in focus.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Make sure that the mode ID is not set.
         appWindow.mAttrs.preferredDisplayModeId = 0;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         // Priority doesn't change.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         verify(appWindow.getPendingTransaction()).setFrameRateSelectionPriority(
                 appWindow.getSurfaceControl(), RefreshRatePolicy.LAYER_PRIORITY_UNSET);
@@ -237,11 +241,10 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         when(mDenylist.isDenylisted("com.android.test")).thenReturn(true);
 
         assertEquals(0, mRefreshRatePolicy.getPreferredModeId(appWindow));
-        assertEquals(60, mRefreshRatePolicy.getPreferredRefreshRate(appWindow), FLOAT_TOLERANCE);
 
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         assertEquals(RefreshRatePolicy.LAYER_PRIORITY_UNSET, appWindow.mFrameRateSelectionPriority);
-        assertEquals(60, appWindow.mAppPreferredFrameRate, FLOAT_TOLERANCE);
+        assertEquals(FRAME_RATE_VOTE_60_EXACT, appWindow.mFrameRateVote);
 
         // Call the function a few times.
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
@@ -262,19 +265,19 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
                 .thenReturn(DisplayManager.SWITCHING_TYPE_NONE);
 
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Update the mode ID to a requested number.
         appWindow.mAttrs.preferredDisplayModeId = 1;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
 
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         // Remove the mode ID request.
         appWindow.mAttrs.preferredDisplayModeId = 0;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
 
-        assertEquals(appWindow.mAppPreferredFrameRate, 0, FLOAT_TOLERANCE);
+        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
 
         verify(appWindow.getPendingTransaction()).setFrameRateSelectionPriority(
                 appWindow.getSurfaceControl(), RefreshRatePolicy.LAYER_PRIORITY_UNSET);
@@ -292,11 +295,10 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         appWindow.mAttrs.preferredRefreshRate = 60;
 
         assertEquals(0, mRefreshRatePolicy.getPreferredModeId(appWindow));
-        assertEquals(60, mRefreshRatePolicy.getPreferredRefreshRate(appWindow), FLOAT_TOLERANCE);
 
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
         assertEquals(RefreshRatePolicy.LAYER_PRIORITY_UNSET, appWindow.mFrameRateSelectionPriority);
-        assertEquals(60, appWindow.mAppPreferredFrameRate, FLOAT_TOLERANCE);
+        assertEquals(FRAME_RATE_VOTE_60_PREFERRED, appWindow.mFrameRateVote);
 
         // Call the function a few times.
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
@@ -307,6 +309,6 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
                 any(SurfaceControl.class), anyInt());
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 appWindow.getSurfaceControl(), 60,
-                Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
+                Surface.FRAME_RATE_COMPATIBILITY_DEFAULT, Surface.CHANGE_FRAME_RATE_ALWAYS);
     }
 }

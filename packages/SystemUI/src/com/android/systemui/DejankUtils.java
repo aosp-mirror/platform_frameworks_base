@@ -29,13 +29,17 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.view.Choreographer;
+import android.view.View;
+import android.view.ViewRootImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Stack;
 import java.util.function.Supplier;
 
@@ -43,12 +47,14 @@ import java.util.function.Supplier;
  * Utility class for methods used to dejank the UI.
  */
 public class DejankUtils {
+    private static final String TRACK_NAME = "DejankUtils";
 
     public static final boolean STRICT_MODE_ENABLED = Build.IS_ENG
             || SystemProperties.getBoolean("persist.sysui.strictmode", false);
     private static final Choreographer sChoreographer = Choreographer.getInstance();
     private static final Handler sHandler = new Handler();
     private static final ArrayList<Runnable> sPendingRunnables = new ArrayList<>();
+    private static final Random sRandom = new Random();
     private static Stack<String> sBlockingIpcs = new Stack<>();
     private static boolean sTemporarilyIgnoreStrictMode;
     private static final HashSet<String> sWhitelistedFrameworkClasses = new HashSet<>();
@@ -253,5 +259,31 @@ public class DejankUtils {
     @VisibleForTesting
     public static void setImmediate(boolean immediate) {
         sImmediate = immediate;
+    }
+
+    /**
+     * Calls notifyRendererOfExpensiveFrame on the ViewRootImpl after performing null checks.
+     */
+    public static void notifyRendererOfExpensiveFrame(View view, String reason) {
+        if (view == null) return;
+        notifyRendererOfExpensiveFrame(view.getViewRootImpl(), reason);
+    }
+
+    /**
+     * Calls notifyRendererOfExpensiveFrame on the ViewRootImpl after performing null checks.
+     */
+    public static void notifyRendererOfExpensiveFrame(ViewRootImpl viewRoot, String reason) {
+        if (viewRoot == null) return;
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            int cookie = sRandom.nextInt();
+            Trace.asyncTraceForTrackBegin(
+                    Trace.TRACE_TAG_APP,
+                    TRACK_NAME,
+                    "notifyRendererOfExpensiveFrame (" + reason + ")",
+                    cookie);
+            DejankUtils.postAfterTraversal(
+                    () -> Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, cookie));
+        }
+        viewRoot.notifyRendererOfExpensiveFrame();
     }
 }

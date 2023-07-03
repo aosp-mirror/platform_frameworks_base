@@ -3,18 +3,10 @@
     {
       "name": "FrameworksServicesTests",
       "options": [
-        {
-          "include-filter": "com.android.server.display."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
+        {"include-filter": "com.android.server.display"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
       ]
     }
   ]

@@ -38,9 +38,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -102,8 +102,7 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
-        `when`(userSwitcherController.keyguardStateController).thenReturn(keyguardStateController)
-        `when`(userSwitcherController.keyguardStateController.isShowing).thenReturn(true)
+        `when`(userSwitcherController.isKeyguardShowing).thenReturn(true)
         `when`(keyguardStateController.isShowing).thenReturn(true)
         `when`(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
         keyguardQsUserSwitchController.init()

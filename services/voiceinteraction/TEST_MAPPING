@@ -1,7 +1,18 @@
 {
-  "presubmit-large": [
+  "presubmit": [
     {
       "name": "CtsVoiceInteractionTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceStressTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsAssistTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -9,7 +20,31 @@
       ]
     },
     {
-      "name": "CtsAssistTestCases",
+      "name": "CtsVoiceInteractionHostTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsLocalVoiceInteraction",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksVoiceInteractionTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsSoundTriggerTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"

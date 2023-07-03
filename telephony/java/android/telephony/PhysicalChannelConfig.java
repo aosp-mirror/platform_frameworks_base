@@ -37,15 +37,26 @@ public final class PhysicalChannelConfig implements Parcelable {
 
     /**
      * UE has connection to cell for signalling and possibly data (3GPP 36.331, 25.331).
+     *
+     * @deprecated Use {@link  CellInfo#CONNECTION_PRIMARY_SERVING} instead.
      */
+    @Deprecated
     public static final int CONNECTION_PRIMARY_SERVING = 1;
 
     /**
      * UE has connection to cell for data (3GPP 36.331, 25.331).
+     *
+     * @deprecated Use {@link  CellInfo#CONNECTION_SECONDARY_SERVING} instead.
      */
+    @Deprecated
     public static final int CONNECTION_SECONDARY_SERVING = 2;
 
-    /** Connection status is unknown. */
+    /**
+     * Connection status is unknown.
+     *
+     * @deprecated Use {@link  CellInfo#CONNECTION_UNKNOWN} instead.
+     */
+    @Deprecated
     public static final int CONNECTION_UNKNOWN = -1;
 
     /** Channel number is unknown. */
@@ -433,7 +444,8 @@ public final class PhysicalChannelConfig implements Parcelable {
         return Objects.hash(
                 mCellConnectionStatus, mCellBandwidthDownlinkKhz, mCellBandwidthUplinkKhz,
                 mNetworkType, mFrequencyRange, mDownlinkChannelNumber, mUplinkChannelNumber,
-                mContextIds, mPhysicalCellId, mBand, mDownlinkFrequency, mUplinkFrequency);
+                Arrays.hashCode(mContextIds), mPhysicalCellId, mBand, mDownlinkFrequency,
+                mUplinkFrequency);
     }
 
     public static final

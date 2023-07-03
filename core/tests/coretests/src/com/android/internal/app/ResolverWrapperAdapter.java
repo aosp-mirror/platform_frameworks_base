@@ -19,6 +19,7 @@ package com.android.internal.app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 
 import androidx.test.espresso.idling.CountingIdlingResource;
 
@@ -36,9 +37,10 @@ public class ResolverWrapperAdapter extends ResolverListAdapter {
             Intent[] initialIntents,
             List<ResolveInfo> rList, boolean filterLastUsed,
             ResolverListController resolverListController,
-            ResolverListCommunicator resolverListCommunicator) {
+            ResolverListCommunicator resolverListCommunicator,
+            UserHandle initialIntentsUserHandle) {
         super(context, payloadIntents, initialIntents, rList, filterLastUsed,
-                resolverListController, resolverListCommunicator, false);
+                resolverListController, resolverListCommunicator, false, initialIntentsUserHandle);
     }
 
     public CountingIdlingResource getLabelIdlingResource() {
@@ -46,14 +48,14 @@ public class ResolverWrapperAdapter extends ResolverListAdapter {
     }
 
     @Override
-    protected LoadLabelTask getLoadLabelTask(DisplayResolveInfo info, ViewHolder holder) {
-        return new LoadLabelWrapperTask(info, holder);
+    protected LoadLabelTask createLoadLabelTask(DisplayResolveInfo info) {
+        return new LoadLabelWrapperTask(info);
     }
 
     class LoadLabelWrapperTask extends LoadLabelTask {
 
-        protected LoadLabelWrapperTask(DisplayResolveInfo dri, ViewHolder holder) {
-            super(dri, holder);
+        protected LoadLabelWrapperTask(DisplayResolveInfo dri) {
+            super(dri);
         }
 
         @Override

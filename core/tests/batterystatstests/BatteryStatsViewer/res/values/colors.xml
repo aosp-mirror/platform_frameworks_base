@@ -17,5 +17,5 @@
 
 <resources>
     <color name="battery_consumer_bg_power_profile">#ffffff</color>
-    <color name="battery_consumer_bg_measured_energy">#fff5eb</color>
+    <color name="battery_consumer_bg_energy_consumption">#fff5eb</color>
 </resources>

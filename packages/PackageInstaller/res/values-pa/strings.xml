@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ਐਪ ਸਥਾਪਤ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ਕੀ ਇਸ ਐਪ ਨੂੰ <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ਤੋਂ ਅੱਪਡੇਟ ਕਰਨਾ ਹੈ?\n\nਇਸ ਐਪ ਨੂੰ ਆਮ ਤੌਰ \'ਤੇ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> ਤੋਂ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਹੁੰਦੀਆਂ ਹਨ। ਕਿਸੇ ਵੱਖਰੇ ਸਰੋਤ ਤੋਂ ਅੱਪਡੇਟ ਕਰ ਕੇ, ਤੁਸੀਂ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਕਿਸੇ ਵੀ ਸਰੋਤ ਤੋਂ ਭਵਿੱਖੀ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ। ਐਪ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="install_failed" msgid="5777824004474125469">"ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ਪੈਕੇਜ ਨੂੰ ਸਥਾਪਤ ਹੋਣ ਤੋਂ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ਪੈਕੇਜ ਦੇ ਇੱਕ ਮੌਜੂਦਾ ਪੈਕੇਜ ਨਾਲ ਵਿਵਾਦ ਹੋਣ ਕਰਕੇ ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ਇਹ ਵਰਤੋਂਕਾਰ ਅਗਿਆਤ ਐਪਾਂ ਨੂੰ ਸਥਾਪਤ ਨਹੀਂ ਕਰ ਸਕਦਾ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="ok" msgid="7871959885003339302">"ਠੀਕ ਹੈ"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"ਫਿਰ ਵੀ ਅੱਪਡੇਟ ਕਰੋ"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ਐਪਾਂ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ਜਗ੍ਹਾ ਖਾਲੀ ਨਹੀਂ"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੂੰ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਕੁਝ ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਫੈਕਟਰੀ ਵਰਜਨ ਨਾਲ ਬਦਲਣਾ ਹੈ? ਸਾਰਾ ਡਾਟਾ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਫੈਕਟਰੀ ਵਰਜਨ ਨਾਲ ਬਦਲਣਾ ਹੈ? ਸਾਰਾ ਡਾਟਾ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ। ਇਹ ਇਸ ਡੀਵਾਈਸ ਦੇ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰੇਗਾ, ਜਿਸ ਵਿੱਚ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਾਲੇ ਵਰਤੋਂਕਾਰ ਵੀ ਸ਼ਾਮਲ ਹਨ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ਐਪ ਡਾਟਾ ਰੱਖੋ।"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਵੀ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ਚੱਲ ਰਹੀਆਂ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ਅਸਫਲ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ਅਣਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"ਅਣਸਥਾਪਤ ਕਰਨਾ ਮੁਕੰਮਲ ਹੋਇਆ।"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਕਲੋਨ ਨੂੰ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ਅਣਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ।"</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਮਿਟਾਇਆ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ਕਿਰਿਆਸ਼ੀਲ ਡੀਵਾਈਸ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਕਿਰਿਆਸ਼ੀਲ ਡੀਵਾਈਸ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ਇਹ ਐਪ ਕੁਝ ਵਰਤੋਂਕਾਰਾਂ ਜਾਂ ਪ੍ਰੋਫਾਈਲਾਂ ਲਈ ਲੋੜੀਂਦੀ ਹੈ ਅਤੇ ਹੋਰਾਂ ਲਈ ਅਣਸਥਾਪਤ ਕੀਤੀ ਗਈ ਹੈ"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"ਅਗਿਆਤ"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਫ਼ਿਲਹਾਲ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਇਸ ਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਫ਼ਿਲਹਾਲ ਤੁਹਾਡੇ ਟੀਵੀ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਇਸ ਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਫ਼ਿਲਹਾਲ ਤੁਹਾਡੀ ਘੜੀ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਇਸ ਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਫ਼ਿਲਹਾਲ ਤੁਹਾਡੇ ਫ਼ੋਨ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਇਸ ਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹੋਣ ਵਾਲੇ ਹਮਲਿਆਂ ਕਰਕੇ ਤੁਹਾਡੇ ਫ਼ੋਨ ਅਤੇ ਨਿੱਜੀ ਡਾਟੇ ਨਾਲ ਛੇੜਛਾੜ ਹੋ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ਿੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੈਬਲੈੱਟ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ਤੁਹਾਡਾ ਟੀਵੀ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੀਵੀ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦਾ ਕਲੋਨ"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ਵੀਅਰ ਐਪਾਂ ਸਥਾਪਤ ਜਾਂ ਅਣਸਥਾਪਤ ਕਰਨਾ"</string>

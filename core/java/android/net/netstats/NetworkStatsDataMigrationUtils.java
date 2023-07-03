@@ -37,7 +37,7 @@ import android.os.Environment;
 import android.util.AtomicFile;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastDataInput;
+import com.android.internal.util.ArtFastDataInput;
 
 import libcore.io.IoUtils;
 
@@ -53,8 +53,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -89,12 +89,10 @@ public class NetworkStatsDataMigrationUtils {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Prefix {}
 
-    private static final HashMap<String, String> sPrefixLegacyFileNameMap =
-            new HashMap<String, String>() {{
-                put(PREFIX_XT, "netstats_xt.bin");
-                put(PREFIX_UID, "netstats_uid.bin");
-                put(PREFIX_UID_TAG, "netstats_uid.bin");
-            }};
+    private static final Map<String, String> sPrefixLegacyFileNameMap = Map.of(
+            PREFIX_XT, "netstats_xt.bin",
+            PREFIX_UID, "netstats_uid.bin",
+            PREFIX_UID_TAG, "netstats_uid.bin");
 
     // These version constants are copied from NetworkStatsCollection/History, which is okay for
     // OEMs to modify to adapt their own logic.
@@ -254,7 +252,7 @@ public class NetworkStatsDataMigrationUtils {
     private static void readPlatformCollection(@NonNull NetworkStatsCollection.Builder builder,
             @NonNull File file) throws IOException {
         final FileInputStream is = new FileInputStream(file);
-        final FastDataInput dataIn = new FastDataInput(is, BUFFER_SIZE);
+        final ArtFastDataInput dataIn = new ArtFastDataInput(is, BUFFER_SIZE);
         try {
             readPlatformCollection(builder, dataIn);
         } finally {

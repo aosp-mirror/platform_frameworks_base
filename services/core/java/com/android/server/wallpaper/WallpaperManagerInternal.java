@@ -27,4 +27,13 @@ public abstract class WallpaperManagerInternal {
      * Notifies the display is ready for adding wallpaper on it.
      */
     public abstract void onDisplayReady(int displayId);
+
+    /** Notifies when the screen finished turning on and is visible to the user. */
+    public abstract void onScreenTurnedOn(int displayId);
+
+    /** Notifies when the screen starts turning on and is not yet visible to the user. */
+    public abstract void onScreenTurningOn(int displayId);
+
+    /** Notifies when the keyguard is going away. Sent right after the bouncer is gone. */
+    public abstract void onKeyguardGoingAway();
 }

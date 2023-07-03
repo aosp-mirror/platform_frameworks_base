@@ -21,7 +21,7 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
  * Audio20.pdf - 4.9.2 Class-Specific AS Interface Descriptor
  * 16 bytes
  */
-public final class Usb20ASGeneral extends UsbACInterface {
+public final class Usb20ASGeneral extends UsbACInterface implements UsbAudioChannelCluster {
     private static final String TAG = "Usb20ASGeneral";
 
     // Audio20.pdf - Table 4-27
@@ -61,14 +61,17 @@ public final class Usb20ASGeneral extends UsbACInterface {
         return mFormats;
     }
 
-    public byte getNumChannels() {
+    @Override
+    public byte getChannelCount() {
         return mNumChannels;
     }
 
+    @Override
     public int getChannelConfig() {
         return mChannelConfig;
     }
 
+    @Override
     public byte getChannelNames() {
         return mChannelNames;
     }
@@ -96,7 +99,7 @@ public final class Usb20ASGeneral extends UsbACInterface {
         canvas.writeListItem("Controls: " + ReportCanvas.getHexString(getControls()));
         canvas.writeListItem("Format Type: " + ReportCanvas.getHexString(getFormatType()));
         canvas.writeListItem("Formats: " + ReportCanvas.getHexString(getFormats()));
-        canvas.writeListItem("Num Channels: " + getNumChannels());
+        canvas.writeListItem("Channel Count: " + getChannelCount());
         canvas.writeListItem("Channel Config: " + ReportCanvas.getHexString(getChannelConfig()));
         canvas.writeListItem("Channel Names String ID: " + getChannelNames());
         canvas.closeList();

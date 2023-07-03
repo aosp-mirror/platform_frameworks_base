@@ -16,29 +16,111 @@
 
 package com.android.systemui.dreams.dagger;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 
+import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.settingslib.dream.DreamBackend;
-import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
+import com.android.systemui.R;
+import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
+import com.android.systemui.dreams.DreamOverlayService;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
+import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
 
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
+
+import javax.inject.Named;
 
 /**
  * Dagger Module providing Dream-related functionality.
  */
 @Module(includes = {
             RegisteredComplicationsModule.class,
+            LowLightDreamModule.class,
+            ScrimModule.class
         },
         subcomponents = {
+            ComplicationComponent.class,
             DreamOverlayComponent.class,
         })
 public interface DreamModule {
+    String DREAM_ONLY_ENABLED_FOR_DOCK_USER = "dream_only_enabled_for_dock_user";
+    String DREAM_OVERLAY_SERVICE_COMPONENT = "dream_overlay_service_component";
+    String DREAM_OVERLAY_ENABLED = "dream_overlay_enabled";
+
+    String DREAM_SUPPORTED = "dream_supported";
+    String DREAM_OVERLAY_WINDOW_TITLE = "dream_overlay_window_title";
+
+    /**
+     * Provides the dream component
+     */
+    @Provides
+    @Named(DREAM_OVERLAY_SERVICE_COMPONENT)
+    static ComponentName providesDreamOverlayService(Context context) {
+        return new ComponentName(context, DreamOverlayService.class);
+    }
+
+    /**
+     * Provides whether dream overlay is enabled.
+     */
+    @Provides
+    @Named(DREAM_OVERLAY_ENABLED)
+    static Boolean providesDreamOverlayEnabled(PackageManager packageManager,
+            @Named(DREAM_OVERLAY_SERVICE_COMPONENT) ComponentName component) {
+        try {
+            return packageManager.getServiceInfo(component, PackageManager.GET_META_DATA).enabled;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
     /**
      * Provides an instance of the dream backend.
      */
     @Provides
     static DreamBackend providesDreamBackend(Context context) {
         return DreamBackend.getInstance(context);
+    }
+
+    /**
+     * Provides an instance of a {@link DreamOverlayNotificationCountProvider}.
+     */
+    @SysUISingleton
+    @Provides
+    static Optional<DreamOverlayNotificationCountProvider>
+            providesDreamOverlayNotificationCountProvider() {
+        // If we decide to bring this back, we should gate it on a config that can be changed in
+        // an overlay.
+        return Optional.empty();
+    }
+
+    /** */
+    @Provides
+    @Named(DREAM_ONLY_ENABLED_FOR_DOCK_USER)
+    static boolean providesDreamOnlyEnabledForDockUser(@Main Resources resources) {
+        return resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsOnlyEnabledForDockUser);
+    }
+
+    /** */
+    @Provides
+    @Named(DREAM_SUPPORTED)
+    static boolean providesDreamSupported(@Main Resources resources) {
+        return resources.getBoolean(com.android.internal.R.bool.config_dreamsSupported);
+    }
+
+    /** */
+    @Provides
+    @Named(DREAM_OVERLAY_WINDOW_TITLE)
+    static String providesDreamOverlayWindowTitle(@Main Resources resources) {
+        return resources.getString(R.string.app_label);
     }
 }

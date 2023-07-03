@@ -37,8 +37,6 @@ import com.android.settingslib.Utils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,12 +111,13 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
             // Check current list of CachedDevices to see if any are Hearing Aid devices.
             mDeviceManager.updateHearingAidsDevices();
-            mIsProfileReady=true;
+            mIsProfileReady = true;
             mProfileManager.callServiceConnectedListeners();
         }
 
         public void onServiceDisconnected(int profile) {
-            mIsProfileReady=false;
+            mIsProfileReady = false;
+            mProfileManager.callServiceDisconnectedListeners();
         }
     }
 
@@ -286,16 +285,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
             return defaultValue;
         }
 
-        try {
-            Method method = mService.getClass().getDeclaredMethod("getDeviceSideInternal",
-                    BluetoothDevice.class);
-            method.setAccessible(true);
-            return (int) method.invoke(mService, device);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            Log.e(TAG, "fail to get getDeviceSideInternal\n" + e.toString() + "\n"
-                    + Log.getStackTraceString(new Throwable()));
-            return defaultValue;
-        }
+        return mService.getDeviceSide(device);
     }
 
     /**
@@ -312,17 +302,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
             return defaultValue;
         }
 
-        try {
-            Method method = mService.getClass().getDeclaredMethod("getDeviceModeInternal",
-                    BluetoothDevice.class);
-            method.setAccessible(true);
-            return (int) method.invoke(mService, device);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            Log.e(TAG, "fail to get getDeviceModeInternal\n" + e.toString() + "\n"
-                    + Log.getStackTraceString(new Throwable()));
-
-            return defaultValue;
-        }
+        return mService.getDeviceMode(device);
     }
 
     public String toString() {

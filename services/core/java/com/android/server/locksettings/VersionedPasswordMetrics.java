@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  * A versioned and serializable wrapper around {@link PasswordMetrics},
  * for long-term persistence on disk.
  */
-public class VersionedPasswordMetrics {
+class VersionedPasswordMetrics {
     private static final int VERSION_1 = 1;
 
     private final PasswordMetrics mMetrics;

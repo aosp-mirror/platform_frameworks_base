@@ -20,11 +20,13 @@ import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.ST
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.android.keyguard.LockIconViewController;
-import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationShadeWindowView;
+import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.QuickSettingsController;
+import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelfController;
-import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -32,23 +34,18 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarterModule;
 import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
+import dagger.Subcomponent;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.util.Set;
 
 import javax.inject.Named;
 import javax.inject.Scope;
-
-import dagger.Subcomponent;
 
 /**
  * Dagger subcomponent for classes (semi-)related to the status bar. The component is created once
@@ -60,7 +57,6 @@ import dagger.Subcomponent;
  * outside the component. Should more items be moved *into* this component to avoid so many getters?
  */
 @Subcomponent(modules = {
-        CentralSurfacesStartableModule.class,
         NotificationStackScrollLayoutListContainerModule.class,
         StatusBarViewModule.class,
         StatusBarNotificationActivityStarterModule.class,
@@ -85,14 +81,6 @@ public interface CentralSurfacesComponent {
     @interface CentralSurfacesScope {}
 
     /**
-     * Performs initialization logic after {@link CentralSurfacesComponent} has been constructed.
-     */
-    interface Startable {
-        void start();
-        void stop();
-    }
-
-    /**
      * Creates a {@link NotificationShadeWindowView}.
      */
     NotificationShadeWindowView getNotificationShadeWindowView();
@@ -113,15 +101,8 @@ public interface CentralSurfacesComponent {
      */
     NotificationPanelViewController getNotificationPanelViewController();
 
-    /**
-     * Creates a LockIconViewController. Must be init after creation.
-     */
-    LockIconViewController getLockIconViewController();
-
-    /**
-     * Creates an AuthRippleViewController. Must be init after creation.
-     */
-    AuthRippleController getAuthRippleController();
+    /** Creates a QuickSettingsController. */
+    QuickSettingsController getQuickSettingsController();
 
     /**
      * Creates a StatusBarHeadsUpChangeListener.
@@ -134,9 +115,9 @@ public interface CentralSurfacesComponent {
     CentralSurfacesCommandQueueCallbacks getCentralSurfacesCommandQueueCallbacks();
 
     /**
-     * Creates a {@link LargeScreenShadeHeaderController}.
+     * Creates a {@link ShadeHeaderController}.
      */
-    LargeScreenShadeHeaderController getLargeScreenShadeHeaderController();
+    ShadeHeaderController getLargeScreenShadeHeaderController();
 
     /**
      * Creates a new {@link CollapsedStatusBarFragment} each time it's called. See
@@ -144,16 +125,6 @@ public interface CentralSurfacesComponent {
      */
     @Named(STATUS_BAR_FRAGMENT)
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
-
-    /**
-     * Creates a StatusBarInitializer
-     */
-    StatusBarInitializer getStatusBarInitializer();
-
-    /**
-     * Set of startables to be run after a CentralSurfacesComponent has been constructed.
-     */
-    Set<Startable> getStartables();
 
     NotificationActivityStarter getNotificationActivityStarter();
 

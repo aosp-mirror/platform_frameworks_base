@@ -25,6 +25,7 @@ import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
+import android.location.GnssSignalType;
 import android.location.GnssStatus;
 import android.location.Location;
 import android.os.Binder;
@@ -988,6 +989,14 @@ public class GnssNative {
         mGnssHal.injectPsdsData(data, length, psdsType);
     }
 
+    /**
+     * Injects NI SUPL message data into the GNSS HAL.
+     */
+    public void injectNiSuplMessageData(byte[] data, int length, int slotIndex) {
+        Preconditions.checkState(mRegistered);
+        mGnssHal.injectNiSuplMessageData(data, length, slotIndex);
+    }
+
     @NativeEntryPoint
     void reportGnssServiceDied() {
         // Not necessary to clear (and restore) binder identity since it runs on another thread.
@@ -1118,13 +1127,14 @@ public class GnssNative {
     }
 
     @NativeEntryPoint
-    void setTopHalCapabilities(@GnssCapabilities.TopHalCapabilityFlags int capabilities) {
+    void setTopHalCapabilities(@GnssCapabilities.TopHalCapabilityFlags int capabilities,
+            boolean isAdrCapabilityKnown) {
         // Here the bits specified by 'capabilities' are turned on. It is handled differently from
         // sub hal because top hal capabilities could be set by HIDL HAL and/or AIDL HAL. Each of
         // them possesses a different set of capabilities.
         mTopFlags |= capabilities;
         GnssCapabilities oldCapabilities = mCapabilities;
-        mCapabilities = oldCapabilities.withTopHalFlags(mTopFlags);
+        mCapabilities = oldCapabilities.withTopHalFlags(mTopFlags, isAdrCapabilityKnown);
         onCapabilitiesChanged(oldCapabilities, mCapabilities);
     }
 
@@ -1141,6 +1151,13 @@ public class GnssNative {
             @GnssCapabilities.SubHalPowerCapabilityFlags int capabilities) {
         GnssCapabilities oldCapabilities = mCapabilities;
         mCapabilities = oldCapabilities.withSubHalPowerFlags(capabilities);
+        onCapabilitiesChanged(oldCapabilities, mCapabilities);
+    }
+
+    @NativeEntryPoint
+    void setSignalTypeCapabilities(List<GnssSignalType> signalTypes) {
+        GnssCapabilities oldCapabilities = mCapabilities;
+        mCapabilities = oldCapabilities.withSignalTypes(signalTypes);
         onCapabilitiesChanged(oldCapabilities, mCapabilities);
     }
 
@@ -1270,7 +1287,7 @@ public class GnssNative {
     }
 
     @NativeEntryPoint
-    boolean isInEmergencySession() {
+    public boolean isInEmergencySession() {
         return Binder.withCleanCallingIdentity(
                 () -> mEmergencyHelper.isInEmergency(
                         TimeUnit.SECONDS.toMillis(mConfiguration.getEsExtensionSec())));
@@ -1499,6 +1516,10 @@ public class GnssNative {
         protected void injectPsdsData(byte[] data, int length, int psdsType) {
             native_inject_psds_data(data, length, psdsType);
         }
+
+        protected void injectNiSuplMessageData(byte[] data, int length, int slotIndex) {
+            native_inject_ni_supl_message_data(data, length, slotIndex);
+        }
     }
 
     // basic APIs
@@ -1641,6 +1662,9 @@ public class GnssNative {
 
     private static native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
             int lac, long cid, int tac, int pcid, int arfcn);
+
+    private static native void native_inject_ni_supl_message_data(byte[] data, int length,
+            int slotIndex);
 
     // PSDS APIs
 

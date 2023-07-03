@@ -202,6 +202,13 @@ public class DynamicSystemClient {
     public static final String ACTION_NOTIFY_IF_IN_USE =
             "android.os.image.action.NOTIFY_IF_IN_USE";
 
+    /**
+     * Intent action: hide notifications about the status of {@code DynamicSystem}.
+     * @hide
+     */
+    public static final String ACTION_HIDE_NOTIFICATION =
+            "android.os.image.action.HIDE_NOTIFICATION";
+
     /*
      * Intent Keys
      */
@@ -217,6 +224,28 @@ public class DynamicSystemClient {
      */
     public static final String KEY_USERDATA_SIZE = "KEY_USERDATA_SIZE";
 
+    /**
+     * Intent key: Whether to enable DynamicSystem immediately after installation is done.
+     *             Note this will reboot the device automatically.
+     * @hide
+     */
+    public static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
+
+    /**
+     * Intent key: Whether to leave DynamicSystem on device reboot.
+     *             False indicates a sticky mode where device stays in DynamicSystem across reboots.
+     * @hide
+     */
+    public static final String KEY_ONE_SHOT = "KEY_ONE_SHOT";
+
+    /**
+     * Intent key: Whether to use default strings when showing the dialog that prompts
+     *             user for device credentials.
+     *             False indicates using the custom strings provided by {@code DynamicSystem}.
+     * @hide
+     */
+    public static final String KEY_KEYGUARD_USE_DEFAULT_STRINGS =
+            "KEY_KEYGUARD_USE_DEFAULT_STRINGS";
 
     private static class IncomingHandler extends Handler {
         private final WeakReference<DynamicSystemClient> mWeakClient;
@@ -420,7 +449,7 @@ public class DynamicSystemClient {
                 Bundle bundle = (Bundle) msg.obj;
                 long progress = bundle.getLong(KEY_INSTALLED_SIZE);
                 ParcelableException t = (ParcelableException) bundle.getSerializable(
-                        KEY_EXCEPTION_DETAIL);
+                        KEY_EXCEPTION_DETAIL, android.os.ParcelableException.class);
 
                 Throwable detail = t == null ? null : t.getCause();
 

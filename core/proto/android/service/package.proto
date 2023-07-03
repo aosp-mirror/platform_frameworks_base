@@ -124,6 +124,9 @@ message PackageProto {
 
         // The package on behalf of which the initiiating package requested the install.
         optional string originating_package_name = 2;
+
+        // The package that is the update owner.
+        optional string update_owner_package_name = 3;
     }
 
     message StatesProto {

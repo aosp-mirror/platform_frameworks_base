@@ -28,8 +28,10 @@ import static org.mockito.Mockito.mock;
 import android.app.ActivityTaskManager;
 import android.graphics.Matrix;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
+import android.text.TextUtils;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.filters.SmallTest;
@@ -40,6 +42,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Class for testing {@link WindowInfo}.
@@ -47,6 +50,7 @@ import java.util.Arrays;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowInfoTest {
+    private static final LocaleList TEST_LOCALES = new LocaleList(Locale.ROOT);
 
     @SmallTest
     @Test
@@ -82,22 +86,7 @@ public class WindowInfoTest {
     public void testDefaultValues() {
         WindowInfo w = WindowInfo.obtain();
 
-        assertEquals(0, w.type);
-        assertEquals(0, w.layer);
-        assertEquals(AccessibilityNodeInfo.UNDEFINED_NODE_ID, w.accessibilityIdOfAnchor);
-        assertEquals(Display.INVALID_DISPLAY, w.displayId);
-        assertEquals(ActivityTaskManager.INVALID_TASK_ID, w.taskId);
-        assertNull(w.title);
-        assertNull(w.token);
-        assertNull(w.childTokens);
-        assertNull(w.parentToken);
-        assertNull(w.activityToken);
-        assertFalse(w.focused);
-        assertFalse(w.inPictureInPicture);
-        assertFalse(w.hasFlagWatchOutsideTouch);
-        assertTrue(w.regionInScreen.isEmpty());
-        assertEquals(w.mTransformMatrix.length, 9);
-        assertTrue(w.mMagnificationSpec.isNop());
+        assertDefaultValue(w);
     }
 
     @SmallTest
@@ -114,6 +103,38 @@ public class WindowInfoTest {
         }
     }
 
+    @SmallTest
+    @Test
+    public void testRecycle_fallbackToDefaultValues() {
+        WindowInfo w = WindowInfo.obtain();
+        initTestWindowInfo(w);
+        w.recycle();
+
+        assertDefaultValue(w);
+    }
+
+    private static void assertDefaultValue(WindowInfo windowinfo) {
+        assertEquals(0, windowinfo.type);
+        assertEquals(0, windowinfo.layer);
+        assertEquals(AccessibilityNodeInfo.UNDEFINED_NODE_ID, windowinfo.accessibilityIdOfAnchor);
+        assertEquals(Display.INVALID_DISPLAY, windowinfo.displayId);
+        assertEquals(ActivityTaskManager.INVALID_TASK_ID, windowinfo.taskId);
+        assertNull(windowinfo.title);
+        assertNull(windowinfo.token);
+        if (windowinfo.childTokens != null) {
+            assertTrue(windowinfo.childTokens.isEmpty());
+        }
+        assertNull(windowinfo.parentToken);
+        assertNull(windowinfo.activityToken);
+        assertFalse(windowinfo.focused);
+        assertFalse(windowinfo.inPictureInPicture);
+        assertFalse(windowinfo.hasFlagWatchOutsideTouch);
+        assertTrue(windowinfo.regionInScreen.isEmpty());
+        assertEquals(windowinfo.mTransformMatrix.length, 9);
+        assertTrue(windowinfo.mMagnificationSpec.isNop());
+        assertEquals(windowinfo.locales, LocaleList.getEmptyLocaleList());
+    }
+
     private boolean areWindowsEqual(WindowInfo w1, WindowInfo w2) {
         boolean equality = w1.toString().contentEquals(w2.toString());
         equality &= w1.token == w2.token;
@@ -123,6 +144,8 @@ public class WindowInfoTest {
         equality &= w1.regionInScreen.equals(w2.regionInScreen);
         equality &= w1.mMagnificationSpec.equals(w2.mMagnificationSpec);
         equality &= Arrays.equals(w1.mTransformMatrix, w2.mTransformMatrix);
+        equality &= TextUtils.equals(w1.title, w2.title);
+        equality &= w1.locales.equals(w2.locales);
         return equality;
     }
 
@@ -146,5 +169,6 @@ public class WindowInfoTest {
         windowInfo.mMagnificationSpec.offsetX = 100f;
         windowInfo.mMagnificationSpec.offsetY = 200f;
         Matrix.IDENTITY_MATRIX.getValues(windowInfo.mTransformMatrix);
+        windowInfo.locales = TEST_LOCALES;
     }
 }

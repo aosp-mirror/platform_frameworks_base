@@ -38,6 +38,9 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
         return UNDEFINED;
     }
 
+    boolean shouldHaveDefinedPreExecutionState() {
+        return true;
+    }
 
     // Parcelable
 

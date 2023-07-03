@@ -33,9 +33,14 @@ fun <T> wheneverStatic(mockedMethod: MockedMethod<T>) = object : CustomStaticStu
     override fun thenReturn(value: T) {
         ExtendedMockito.doReturn(value).wheneverStatic(mockedMethod)
     }
+
+    override fun thenDoNothing() {
+        ExtendedMockito.doNothing().wheneverStatic(mockedMethod)
+    }
 }
 
 interface CustomStaticStubber<T> {
     fun thenAnswer(answer: Answer<T>)
     fun thenReturn(value: T)
+    fun thenDoNothing()
 }

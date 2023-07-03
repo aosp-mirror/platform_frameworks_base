@@ -42,6 +42,7 @@ import androidx.test.filters.SmallTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -282,9 +283,10 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         setupPackageManager();
 
         byte[] wrongCert = Base64.decode("this is a wrong cert", Base64.DEFAULT);
-        List<byte[]> certList = Arrays.asList(wrongCert);
+        List<byte[]> certList = Collections.singletonList(wrongCert);
         FontRequest requestWrongCerts = new FontRequest(
-                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query", Arrays.asList(certList));
+                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query",
+                Collections.singletonList(certList));
 
         assertNull(FontsContract.getProvider(mPackageManager, requestWrongCerts));
     }
@@ -293,9 +295,10 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
             throws PackageManager.NameNotFoundException {
         ProviderInfo info = setupPackageManager();
 
-        List<byte[]> certList = Arrays.asList(BYTE_ARRAY);
+        List<byte[]> certList = Collections.singletonList(BYTE_ARRAY);
         FontRequest requestRightCerts = new FontRequest(
-                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query", Arrays.asList(certList));
+                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query",
+                Collections.singletonList(certList));
         ProviderInfo result = FontsContract.getProvider(
                 mPackageManager, requestRightCerts);
 
@@ -309,7 +312,8 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         byte[] wrongCert = Base64.decode("this is a wrong cert", Base64.DEFAULT);
         List<byte[]> certList = Arrays.asList(wrongCert, BYTE_ARRAY);
         FontRequest requestRightCerts = new FontRequest(
-                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query", Arrays.asList(certList));
+                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query",
+                Collections.singletonList(certList));
         assertNull(FontsContract.getProvider(mPackageManager, requestRightCerts));
     }
 
@@ -332,7 +336,8 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         // {BYTE_ARRAY_2, BYTE_ARRAY_COPY}.
         List<byte[]> certList = Arrays.asList(BYTE_ARRAY_2, BYTE_ARRAY_COPY);
         FontRequest requestRightCerts = new FontRequest(
-                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query", Arrays.asList(certList));
+                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query",
+                Collections.singletonList(certList));
         assertNull(FontsContract.getProvider(mPackageManager, requestRightCerts));
     }
 
@@ -341,9 +346,9 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         ProviderInfo info = setupPackageManager();
 
         List<List<byte[]>> certList = new ArrayList<>();
-        byte[] wrongCert = Base64.decode("this is a wrong cert", Base64.DEFAULT);
-        certList.add(Arrays.asList(wrongCert));
-        certList.add(Arrays.asList(BYTE_ARRAY));
+        certList.add(Collections.singletonList(
+                Base64.decode("this is a wrong cert", Base64.DEFAULT)));
+        certList.add(Collections.singletonList(BYTE_ARRAY));
         FontRequest requestRightCerts = new FontRequest(
                 TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query", certList);
         ProviderInfo result = FontsContract.getProvider(mPackageManager, requestRightCerts);
@@ -356,7 +361,7 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         setupPackageManager();
 
         List<List<byte[]>> certList = new ArrayList<>();
-        certList.add(Arrays.asList(BYTE_ARRAY));
+        certList.add(Collections.singletonList(BYTE_ARRAY));
         FontRequest requestRightCerts = new FontRequest(
                 TestFontsProvider.AUTHORITY, "com.wrong.package.name", "query", certList);
         try {

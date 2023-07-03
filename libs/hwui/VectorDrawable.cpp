@@ -21,9 +21,10 @@
 #include <utils/Log.h>
 
 #include "PathParser.h"
-#include "SkColorFilter.h"
+#include "SkImage.h"
 #include "SkImageInfo.h"
-#include "SkShader.h"
+#include "SkSamplingOptions.h"
+#include "SkScalar.h"
 #include "hwui/Paint.h"
 
 #ifdef __ANDROID__

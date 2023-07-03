@@ -25,11 +25,11 @@ import android.graphics.BLASTBufferQueue;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.Picture;
-import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.Trace;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
@@ -196,8 +196,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     public static boolean sRendererEnabled = true;
 
-    public static boolean sTrimForeground = false;
-
     /**
      * Controls whether or not the renderer should aggressively trim
      * memory. Note that this must not be set for any process that uses
@@ -205,8 +203,9 @@ public final class ThreadedRenderer extends HardwareRenderer {
      * that do not go into the background.
      */
     public static void enableForegroundTrimming() {
-        sTrimForeground = true;
+        // TODO: Remove
     }
+
 
     /**
      * Initialize HWUI for being in a system process like system_server
@@ -218,9 +217,8 @@ public final class ThreadedRenderer extends HardwareRenderer {
         // process.
         if (!ActivityManager.isHighEndGfx()) {
             sRendererEnabled = false;
-        } else {
-            enableForegroundTrimming();
         }
+        setIsSystemOrPersistent();
     }
 
     /**
@@ -574,19 +572,26 @@ public final class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl) {
-        super.setSurfaceControl(surfaceControl);
+    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl,
+            @Nullable BLASTBufferQueue blastBufferQueue) {
+        super.setSurfaceControl(surfaceControl, blastBufferQueue);
         mWebViewOverlayProvider.setSurfaceControl(surfaceControl);
+        mWebViewOverlayProvider.setBLASTBufferQueue(blastBufferQueue);
         updateWebViewOverlayCallbacks();
     }
 
-    /**
-     * Sets the BLASTBufferQueue being used for rendering. This is required to be specified
-     * for WebView overlay support
-     */
-    public void setBlastBufferQueue(@Nullable BLASTBufferQueue blastBufferQueue) {
-        mWebViewOverlayProvider.setBLASTBufferQueue(blastBufferQueue);
-        updateWebViewOverlayCallbacks();
+    @Override
+    public void notifyCallbackPending() {
+        if (isEnabled()) {
+            super.notifyCallbackPending();
+        }
+    }
+
+    @Override
+    public void notifyExpensiveFrame() {
+        if (isEnabled()) {
+            super.notifyExpensiveFrame();
+        }
     }
 
     /**
@@ -596,11 +601,18 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     void setLightCenter(AttachInfo attachInfo) {
         // Adjust light position for window offsets.
-        final Point displaySize = attachInfo.mPoint;
-        attachInfo.mDisplay.getRealSize(displaySize);
-        final float lightX = displaySize.x / 2f - attachInfo.mWindowLeft;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        attachInfo.mDisplay.getRealMetrics(displayMetrics);
+        final float lightX = displayMetrics.widthPixels / 2f - attachInfo.mWindowLeft;
         final float lightY = mLightY - attachInfo.mWindowTop;
-        setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
+        // To prevent shadow distortion on larger screens, scale the z position of the light source
+        // relative to the smallest screen dimension.
+        final float zRatio = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                / (450f * displayMetrics.density);
+        final float zWeightedAdjustment = (zRatio + 2) / 3f;
+        final float lightZ = mLightZ * zWeightedAdjustment;
+
+        setLightSourceGeometry(lightX, lightY, lightZ, mLightRadius);
     }
 
     /**
@@ -849,12 +861,18 @@ public final class ThreadedRenderer extends HardwareRenderer {
         public void setLightCenter(final Display display,
                 final int windowLeft, final int windowTop) {
             // Adjust light position for window offsets.
-            final Point displaySize = new Point();
-            display.getRealSize(displaySize);
-            final float lightX = displaySize.x / 2f - windowLeft;
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            display.getRealMetrics(displayMetrics);
+            final float lightX = displayMetrics.widthPixels / 2f - windowLeft;
             final float lightY = mLightY - windowTop;
+            // To prevent shadow distortion on larger screens, scale the z position of the light
+            // source relative to the smallest screen dimension.
+            final float zRatio = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                    / (450f * displayMetrics.density);
+            final float zWeightedAdjustment = (zRatio + 2) / 3f;
+            final float lightZ = mLightZ * zWeightedAdjustment;
 
-            setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
+            setLightSourceGeometry(lightX, lightY, lightZ, mLightRadius);
         }
 
         public RenderNode getRootNode() {

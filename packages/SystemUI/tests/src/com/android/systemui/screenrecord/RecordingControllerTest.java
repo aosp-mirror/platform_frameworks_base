@@ -16,13 +16,15 @@
 
 package com.android.systemui.screenrecord;
 
+import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Looper;
@@ -31,8 +33,17 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,13 +60,24 @@ import org.mockito.MockitoAnnotations;
  */
 public class RecordingControllerTest extends SysuiTestCase {
 
+    private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     @Mock
     private RecordingController.RecordingStateChangeCallback mCallback;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserContextProvider mUserContextProvider;
+    @Mock
+    private ScreenCaptureDevicePolicyResolver mDevicePolicyResolver;
+    @Mock
+    private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private ActivityStarter mActivityStarter;
+    @Mock
+    private UserTracker mUserTracker;
 
+    private FakeFeatureFlags mFeatureFlags;
     private RecordingController mController;
 
     private static final int USER_ID = 10;
@@ -63,7 +85,9 @@ public class RecordingControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mController = new RecordingController(mBroadcastDispatcher, mUserContextProvider);
+        mFeatureFlags = new FakeFeatureFlags();
+        mController = new RecordingController(mMainExecutor, mBroadcastDispatcher, mContext,
+                mFeatureFlags, mUserContextProvider, () -> mDevicePolicyResolver, mUserTracker);
         mController.addCallback(mCallback);
     }
 
@@ -99,7 +123,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         mController.startCountdown(0, 0, startIntent, null);
 
         verify(mCallback).onCountdownEnd();
-        verify(startIntent).send();
+        verify(startIntent).send(any());
     }
 
     // Test that when recording is stopped, the stop intent is sent and listeners are notified.
@@ -117,7 +141,7 @@ public class RecordingControllerTest extends SysuiTestCase {
 
         assertFalse(mController.isStarting());
         assertFalse(mController.isRecording());
-        verify(stopIntent).send();
+        verify(stopIntent).send(any());
         verify(mCallback).onRecordingEnd();
     }
 
@@ -176,12 +200,73 @@ public class RecordingControllerTest extends SysuiTestCase {
         mController.updateState(true);
 
         // and user is changed
-        Intent intent = new Intent(Intent.ACTION_USER_SWITCHED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, USER_ID);
-        mController.mUserChangeReceiver.onReceive(mContext, intent);
+        mController.mUserChangedCallback.onUserChanged(USER_ID, mContext);
 
         // Ensure that the recording was stopped
         verify(mCallback).onRecordingEnd();
         assertFalse(mController.isRecording());
+    }
+
+    @Test
+    public void testPoliciesFlagDisabled_screenCapturingNotAllowed_returnsNullDevicePolicyDialog() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
+        when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
+
+        Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
+                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+
+        assertThat(dialog).isInstanceOf(ScreenRecordPermissionDialog.class);
+    }
+
+    @Test
+    public void testPartialScreenSharingDisabled_returnsLegacyDialog() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, false);
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
+
+        Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
+                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+
+        assertThat(dialog).isInstanceOf(ScreenRecordDialog.class);
+    }
+
+    @Test
+    public void testPoliciesFlagEnabled_screenCapturingNotAllowed_returnsDevicePolicyDialog() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
+        when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
+
+        Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
+                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+
+        assertThat(dialog).isInstanceOf(ScreenCaptureDisabledDialog.class);
+    }
+
+    @Test
+    public void testPoliciesFlagEnabled_screenCapturingAllowed_returnsNullDevicePolicyDialog() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING, true);
+        mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, true);
+        when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
+
+        Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
+                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+
+        assertThat(dialog).isInstanceOf(ScreenRecordPermissionDialog.class);
     }
 }

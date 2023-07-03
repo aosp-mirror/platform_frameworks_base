@@ -26,7 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class representing an Address, i.e, a set of Strings describing a location.
+ * A class representing an Address, that is, a set of Strings describing a location.
  *
  * The address format is a simplified version of xAL (eXtensible Address Language)
  * http://www.oasis-open.org/committees/ciq/ciq.html#6

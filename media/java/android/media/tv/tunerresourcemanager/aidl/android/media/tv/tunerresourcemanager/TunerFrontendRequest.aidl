@@ -22,7 +22,11 @@ package android.media.tv.tunerresourcemanager;
  * @hide
  */
 parcelable TunerFrontendRequest {
+    const int DEFAULT_DESIRED_ID = 0xFFFFFFFF;
+
     int clientId;
 
     int frontendType;
+
+    int desiredId = DEFAULT_DESIRED_ID;
 }

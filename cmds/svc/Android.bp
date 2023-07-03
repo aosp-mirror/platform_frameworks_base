@@ -20,6 +20,6 @@ license {
 
 java_binary {
     name: "svc",
-    wrapper: "svc",
+    wrapper: "svc.sh",
     srcs: ["**/*.java"],
 }

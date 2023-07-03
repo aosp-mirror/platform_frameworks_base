@@ -69,4 +69,4 @@ public final class Fingerprint extends BiometricAuthenticator.Identifier {
             return new Fingerprint[size];
         }
     };
-};
+}

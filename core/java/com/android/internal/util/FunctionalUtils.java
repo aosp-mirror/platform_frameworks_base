@@ -248,6 +248,19 @@ public class FunctionalUtils {
     }
 
     /**
+     * A {@link Supplier} that allows the caller to specify a custom checked {@link Exception} that
+     * can be thrown by the implementer. This is usually used when proxying/wrapping calls between
+     * different classes.
+     *
+     * @param <Output> Method return type
+     * @param <ExceptionType> Checked exception type
+     */
+    @FunctionalInterface
+    public interface ThrowingCheckedSupplier<Output, ExceptionType extends Exception> {
+        Output get() throws ExceptionType;
+    }
+
+    /**
      * A {@link Consumer} that allows the caller to specify a custom checked {@link Exception} that
      * can be thrown by the implementer. This is usually used when proxying/wrapping calls between
      * different classes.

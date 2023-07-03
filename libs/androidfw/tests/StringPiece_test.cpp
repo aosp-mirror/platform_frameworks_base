@@ -60,36 +60,4 @@ TEST(StringPieceTest, PiecesHaveCorrectSortOrderUtf8) {
   EXPECT_TRUE(StringPiece(car) > banana);
 }
 
-TEST(StringPieceTest, ContainsOtherStringPiece) {
-  StringPiece text("I am a leaf on the wind.");
-  StringPiece start_needle("I am");
-  StringPiece end_needle("wind.");
-  StringPiece middle_needle("leaf");
-  StringPiece empty_needle("");
-  StringPiece missing_needle("soar");
-  StringPiece long_needle("This string is longer than the text.");
-
-  EXPECT_TRUE(text.contains(start_needle));
-  EXPECT_TRUE(text.contains(end_needle));
-  EXPECT_TRUE(text.contains(middle_needle));
-  EXPECT_TRUE(text.contains(empty_needle));
-  EXPECT_FALSE(text.contains(missing_needle));
-  EXPECT_FALSE(text.contains(long_needle));
-
-  StringPiece16 text16(u"I am a leaf on the wind.");
-  StringPiece16 start_needle16(u"I am");
-  StringPiece16 end_needle16(u"wind.");
-  StringPiece16 middle_needle16(u"leaf");
-  StringPiece16 empty_needle16(u"");
-  StringPiece16 missing_needle16(u"soar");
-  StringPiece16 long_needle16(u"This string is longer than the text.");
-
-  EXPECT_TRUE(text16.contains(start_needle16));
-  EXPECT_TRUE(text16.contains(end_needle16));
-  EXPECT_TRUE(text16.contains(middle_needle16));
-  EXPECT_TRUE(text16.contains(empty_needle16));
-  EXPECT_FALSE(text16.contains(missing_needle16));
-  EXPECT_FALSE(text16.contains(long_needle16));
-}
-
 }  // namespace android

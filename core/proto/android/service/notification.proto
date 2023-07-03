@@ -110,11 +110,20 @@ message ManagedServicesProto {
     // All of this type/caption enabled for current profiles.
     repeated android.content.ComponentNameProto enabled = 3;
 
-
     repeated ManagedServiceInfoProto live_services = 4;
 
+    // Was: repeated ComponentNameProto, when snoozed services were not per-user-id.
+    reserved 5;
+
+    message SnoozedServices {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 user_id = 1;
+        repeated android.content.ComponentNameProto snoozed = 2;
+    }
+
     // Snoozed for current profiles.
-    repeated android.content.ComponentNameProto snoozed = 5;
+    repeated SnoozedServices snoozed = 6;
 }
 
 message RankingHelperProto {
@@ -276,22 +285,24 @@ message NotificationRemoteViewsProto {
     repeated PackageRemoteViewInfoProto package_remote_view_info = 1;
 }
 
+// Enum used in DNDModeProto to specify the zen mode setting.
+enum LoggedZenMode {
+    ROOT_CONFIG = -1;  // Used to distinguish config (one per user) from the rules.
+    OFF = 0;
+    IMPORTANT_INTERRUPTIONS = 1;
+    NO_INTERRUPTIONS = 2;
+    ALARMS = 3;
+}
+
 /**
  * Atom that represents an item in the list of Do Not Disturb rules, pulled from
  * NotificationManagerService.java.
  */
 message DNDModeProto {
-    enum Mode {
-        ROOT_CONFIG = -1;  // Used to distinguish the config (one per user) from the rules.
-        ZEN_MODE_OFF = 0;
-        ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
-        ZEN_MODE_NO_INTERRUPTIONS = 2;
-        ZEN_MODE_ALARMS = 3;
-    }
     optional int32 user = 1;  // Android user ID (0, 1, 10, ...)
     optional bool enabled = 2;  // true for ROOT_CONFIG if a manualRule is enabled
     optional bool channels_bypassing = 3; // only valid for ROOT_CONFIG
-    optional Mode zen_mode = 4;
+    optional LoggedZenMode zen_mode = 4;
     // id is one of the system default rule IDs, or empty
     // May also be "MANUAL_RULE" to indicate app-activation of the manual rule.
     optional string id = 5;
@@ -299,15 +310,34 @@ message DNDModeProto {
     optional DNDPolicyProto policy = 7;
 }
 
+// Enum used in DNDPolicyProto for a particular policy parameter's state.
+enum State {
+    STATE_UNSET = 0;
+    STATE_ALLOW = 1;
+    STATE_DISALLOW = 2;
+}
+
+// Enum used in DNDPolicyProto for which people are allowed to break through.
+enum PeopleType {
+    PEOPLE_UNSET = 0;
+    PEOPLE_ANYONE = 1;
+    PEOPLE_CONTACTS = 2;
+    PEOPLE_STARRED = 3;
+    PEOPLE_NONE = 4;
+}
+
+// Enum used in DNDPolicyProto for conversation types allowed to break through.
+enum ConversationType {
+    CONV_UNSET = 0;
+    CONV_ANYONE = 1;
+    CONV_IMPORTANT = 2;
+    CONV_NONE = 3;
+}
+
 /**
- * Atom that represents a Do Not Disturb policy, an optional detail proto for DNDModeProto.
+ * Message that represents a Do Not Disturb policy, an optional detail proto for DNDModeProto.
  */
 message DNDPolicyProto {
-    enum State {
-        STATE_UNSET = 0;
-        STATE_ALLOW = 1;
-        STATE_DISALLOW = 2;
-    }
     optional State calls = 1;
     optional State repeat_callers = 2;
     optional State messages = 3;
@@ -325,23 +355,16 @@ message DNDPolicyProto {
     optional State ambient = 15;
     optional State notification_list = 16;
 
-    enum PeopleType {
-        PEOPLE_UNSET = 0;
-        PEOPLE_ANYONE = 1;
-        PEOPLE_CONTACTS = 2;
-        PEOPLE_STARRED = 3;
-        PEOPLE_NONE = 4;
-    }
-
     optional PeopleType allow_calls_from = 17;
     optional PeopleType allow_messages_from = 18;
 
-    enum ConversationType {
-        CONV_UNSET = 0;
-        CONV_ANYONE = 1;
-        CONV_IMPORTANT = 2;
-        CONV_NONE = 3;
-    }
-
     optional ConversationType allow_conversations_from = 19;
+}
+
+// Enum identifying the type of rule that changed; values set to match ones used in the
+// DNDStateChanged proto.
+enum RuleType {
+    RULE_TYPE_UNKNOWN = 0;
+    RULE_TYPE_MANUAL = 1;
+    RULE_TYPE_AUTOMATIC = 2;
 }

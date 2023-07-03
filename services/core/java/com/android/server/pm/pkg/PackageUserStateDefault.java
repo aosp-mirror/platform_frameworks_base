@@ -30,6 +30,7 @@ import com.android.server.utils.WatchedArraySet;
 import java.util.Collections;
 import java.util.Map;
 
+/** @hide */
 class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Override
@@ -135,7 +136,7 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
-    public long getFirstInstallTime() {
+    public long getFirstInstallTimeMillis() {
         return 0;
     }
 

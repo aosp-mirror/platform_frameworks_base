@@ -21,7 +21,7 @@
 
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
-
+#include "androidfw/Util.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -69,18 +69,19 @@ class ResChunkPullParser {
 
 template <typename T, size_t MinSize = sizeof(T)>
 inline static const T* ConvertTo(const android::ResChunk_header* chunk) {
-  if (util::DeviceToHost16(chunk->headerSize) < MinSize) {
+  if (android::util::DeviceToHost16(chunk->headerSize) < MinSize) {
     return nullptr;
   }
   return reinterpret_cast<const T*>(chunk);
 }
 
 inline static const uint8_t* GetChunkData(const android::ResChunk_header* chunk) {
-  return reinterpret_cast<const uint8_t*>(chunk) + util::DeviceToHost16(chunk->headerSize);
+  return reinterpret_cast<const uint8_t*>(chunk) + android::util::DeviceToHost16(chunk->headerSize);
 }
 
 inline static uint32_t GetChunkDataLen(const android::ResChunk_header* chunk) {
-  return util::DeviceToHost32(chunk->size) - util::DeviceToHost16(chunk->headerSize);
+  return android::util::DeviceToHost32(chunk->size) -
+         android::util::DeviceToHost16(chunk->headerSize);
 }
 
 //

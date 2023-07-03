@@ -51,6 +51,7 @@ public final class DumpState {
     public static final int OPTION_SHOW_FILTERS = 1 << 0;
     public static final int OPTION_DUMP_ALL_COMPONENTS = 1 << 1;
     public static final int OPTION_SKIP_PERMISSIONS = 1 << 2;
+    public static final int OPTION_INCLUDE_APEX = 1 << 3;
 
     private int mTypes;
 

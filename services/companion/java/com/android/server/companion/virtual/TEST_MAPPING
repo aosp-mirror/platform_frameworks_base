@@ -1,0 +1,24 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsVirtualDevicesTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsVirtualDevicesTestCases",
+      "options": [
+        {
+          "include-filter": "android.hardware.input.cts.tests"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ],
+      "file_patterns": ["Virtual[^/]*\\.java"]
+    }
+  ]
+}

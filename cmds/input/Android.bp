@@ -20,5 +20,5 @@ license {
 
 sh_binary {
     name: "input",
-    src: "input",
+    src: "input.sh",
 }

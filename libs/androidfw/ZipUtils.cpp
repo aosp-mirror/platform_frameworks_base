@@ -35,7 +35,7 @@
 using namespace android;
 
 // TODO: This can go away once the only remaining usage in aapt goes away.
-class FileReader : public zip_archive::Reader {
+class FileReader final : public zip_archive::Reader {
   public:
     explicit FileReader(FILE* fp) : Reader(), mFp(fp), mCurrentOffset(0) {
     }
@@ -66,7 +66,7 @@ class FileReader : public zip_archive::Reader {
     mutable off64_t mCurrentOffset;
 };
 
-class FdReader : public zip_archive::Reader {
+class FdReader final : public zip_archive::Reader {
   public:
     explicit FdReader(int fd) : mFd(fd) {
     }
@@ -79,7 +79,7 @@ class FdReader : public zip_archive::Reader {
     const int mFd;
 };
 
-class BufferReader : public zip_archive::Reader {
+class BufferReader final : public zip_archive::Reader {
   public:
     BufferReader(incfs::map_ptr<void> input, size_t inputSize) : Reader(),
         mInput(input.convert<uint8_t>()),
@@ -105,7 +105,7 @@ class BufferReader : public zip_archive::Reader {
     const size_t mInputSize;
 };
 
-class BufferWriter : public zip_archive::Writer {
+class BufferWriter final : public zip_archive::Writer {
   public:
     BufferWriter(void* output, size_t outputSize) : Writer(),
         mOutput(reinterpret_cast<uint8_t*>(output)), mOutputSize(outputSize), mBytesWritten(0) {

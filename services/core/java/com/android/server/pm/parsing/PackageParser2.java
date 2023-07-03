@@ -34,6 +34,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.PackageImpl;
@@ -65,8 +66,8 @@ public class PackageParser2 implements AutoCloseable {
     public static PackageParser2 forParsingFileWithDefaults() {
         IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        return new PackageParser2(null /* separateProcesses */, false /* onlyCoreApps */,
-                null /* displayMetrics */, null /* cacheDir */, new Callback() {
+        return new PackageParser2(null /* separateProcesses */, null /* displayMetrics */,
+                null /* cacheDir */, new Callback() {
             @Override
             public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
                 try {
@@ -108,13 +109,8 @@ public class PackageParser2 implements AutoCloseable {
 
     private ParsingPackageUtils parsingUtils;
 
-    /**
-     * @param onlyCoreApps Flag indicating this parser should only consider apps with
-     *                     {@code coreApp} manifest attribute to be valid apps. This is useful when
-     *                     creating a minimalist boot environment.
-     */
-    public PackageParser2(String[] separateProcesses, boolean onlyCoreApps,
-            DisplayMetrics displayMetrics, @Nullable File cacheDir, @NonNull Callback callback) {
+    public PackageParser2(String[] separateProcesses, DisplayMetrics displayMetrics,
+            @Nullable File cacheDir, @NonNull Callback callback) {
         if (displayMetrics == null) {
             displayMetrics = new DisplayMetrics();
             displayMetrics.setToDefaults();
@@ -127,8 +123,8 @@ public class PackageParser2 implements AutoCloseable {
 
         mCacher = cacheDir == null ? null : new PackageCacher(cacheDir);
 
-        parsingUtils = new ParsingPackageUtils(onlyCoreApps, separateProcesses, displayMetrics,
-                splitPermissions, callback);
+        parsingUtils = new ParsingPackageUtils(separateProcesses, displayMetrics, splitPermissions,
+                callback);
 
         ParseInput.Callback enforcementCallback = (changeId, packageName, targetSdkVersion) -> {
             ApplicationInfo appInfo = mSharedAppInfo.get();
@@ -147,15 +143,12 @@ public class PackageParser2 implements AutoCloseable {
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches)
             throws PackageManagerException {
-        return parsePackage(packageFile, flags, useCaches, /* frameworkSplits= */ null);
-    }
+        var files = packageFile.listFiles();
+        // Apk directory is directly nested under the current directory
+        if (ArrayUtils.size(files) == 1 && files[0].isDirectory()) {
+            packageFile = files[0];
+        }
 
-    /**
-     * TODO(b/135203078): Document new package parsing
-     */
-    @AnyThread
-    public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches,
-            List<File> frameworkSplits) throws PackageManagerException {
         if (useCaches && mCacher != null) {
             ParsedPackage parsed = mCacher.getCachedResult(packageFile, flags);
             if (parsed != null) {
@@ -165,8 +158,7 @@ public class PackageParser2 implements AutoCloseable {
 
         long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         ParseInput input = mSharedResult.get().reset();
-        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags,
-                frameworkSplits);
+        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags);
         if (result.isError()) {
             throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
                     result.getException());

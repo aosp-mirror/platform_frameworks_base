@@ -437,6 +437,10 @@ class GnssVisibilityControl {
         return locationPermissionEnabledProxyApps;
     }
 
+    public boolean hasLocationPermissionEnabledProxyApps() {
+        return getLocationPermissionEnabledProxyApps().length > 0;
+    }
+
     private void handleNfwNotification(NfwNotification nfwNotification) {
         if (DEBUG) Log.d(TAG, "Non-framework location access notification: " + nfwNotification);
 

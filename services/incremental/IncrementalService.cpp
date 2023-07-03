@@ -419,6 +419,17 @@ int64_t IncrementalService::elapsedUsSinceMonoTs(uint64_t monoTsUs) {
     return nowUs - monoTsUs;
 }
 
+static const char* loadingStateToString(incfs::LoadingState state) {
+    switch (state) {
+        case (incfs::LoadingState::Full):
+            return "Full";
+        case (incfs::LoadingState::MissingBlocks):
+            return "MissingBlocks";
+        default:
+            return "error obtaining loading state";
+    }
+}
+
 void IncrementalService::onDump(int fd) {
     dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
     dprintf(fd, "IncFs features: 0x%x\n", int(mIncFs->features()));
@@ -453,9 +464,13 @@ void IncrementalService::onDump(int fd) {
             }
             dprintf(fd, "    storages (%d): {\n", int(mnt.storages.size()));
             for (auto&& [storageId, storage] : mnt.storages) {
-                dprintf(fd, "      [%d] -> [%s] (%d %% loaded) \n", storageId, storage.name.c_str(),
+                auto&& ifs = getIfsLocked(storageId);
+                dprintf(fd, "      [%d] -> [%s] (%d %% loaded)(%s) \n", storageId,
+                        storage.name.c_str(),
                         (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()).getProgress() *
-                              100));
+                              100),
+                        ifs ? loadingStateToString(mIncFs->isEverythingFullyLoaded(ifs->control))
+                            : "error obtaining ifs");
             }
             dprintf(fd, "    }\n");
 
@@ -1166,11 +1181,11 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
     if (!ifs) {
         return -EINVAL;
     }
-    if (data.size() > params.size) {
+    if ((IncFsSize)data.size() > params.size) {
         LOG(ERROR) << "Bad data size - bigger than file size";
         return -EINVAL;
     }
-    if (!data.empty() && data.size() != params.size) {
+    if (!data.empty() && (IncFsSize)data.size() != params.size) {
         // Writing a page is an irreversible operation, and it can't be updated with additional
         // data later. Check that the last written page is complete, or we may break the file.
         if (!isPageAligned(data.size())) {
@@ -1287,8 +1302,8 @@ int IncrementalService::addBindMount(IncFsMount& ifs, StorageId storage,
         bp.set_allocated_dest_path(&target);
         bp.set_allocated_source_subdir(&source);
         const auto metadata = bp.SerializeAsString();
-        bp.release_dest_path();
-        bp.release_source_subdir();
+        static_cast<void>(bp.release_dest_path());
+        static_cast<void>(bp.release_source_subdir());
         mdFileName = makeBindMdName();
         metadataFullPath = path::join(ifs.root, constants().mount, mdFileName);
         auto node = mIncFs->makeFile(ifs.control, metadataFullPath, 0444, idFromMetadata(metadata),
@@ -2816,6 +2831,12 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
 
 binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mountId, int newStatus) {
     if (!isValid()) {
+        if (newStatus == IDataLoaderStatusListener::DATA_LOADER_BOUND) {
+            // Async "bound" came to already destroyed stub.
+            // Unbind immediately to avoid invalid stub sitting around in DataLoaderManagerService.
+            mService.mDataLoaderManager->unbindFromDataLoader(mountId);
+            return binder::Status::ok();
+        }
         return binder::Status::
                 fromServiceSpecificError(-EINVAL, "onStatusChange came to invalid DataLoaderStub");
     }
@@ -3188,7 +3209,7 @@ binder::Status IncrementalService::IncrementalServiceConnector::setStorageParams
 }
 
 FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
-    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), metadata.size()});
+    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), (IncFsSize)metadata.size()});
 }
 
 } // namespace android::incremental

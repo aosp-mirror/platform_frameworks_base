@@ -20,6 +20,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallSuper;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.search.ISearchCallback;
@@ -35,8 +36,10 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.service.search.ISearchUiService.Stub;
+import android.util.ArrayMap;
 import android.util.Slog;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -66,6 +69,9 @@ public abstract class SearchUiService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.search.SearchUiService";
 
+    private final ArrayMap<SearchSessionId, ArrayList<CallbackWrapper>>
+            mSessionEmptyQueryResultCallbacks = new ArrayMap<>();
+
     private Handler mHandler;
 
     private final android.service.search.ISearchUiService mInterface = new Stub() {
@@ -87,7 +93,7 @@ public abstract class SearchUiService extends Service {
             mHandler.sendMessage(
                     obtainMessage(SearchUiService::onQuery,
                             SearchUiService.this, sessionId, input,
-                            new CallbackWrapper(callback)));
+                            new CallbackWrapper(callback, null)));
         }
 
         @Override
@@ -95,6 +101,22 @@ public abstract class SearchUiService extends Service {
             mHandler.sendMessage(
                     obtainMessage(SearchUiService::onNotifyEvent,
                             SearchUiService.this, sessionId, query, event));
+        }
+
+        @Override
+        public void onRegisterEmptyQueryResultUpdateCallback(SearchSessionId sessionId,
+                ISearchCallback callback) {
+            mHandler.sendMessage(
+                    obtainMessage(SearchUiService::doRegisterEmptyQueryResultUpdateCallback,
+                            SearchUiService.this, sessionId, callback));
+        }
+
+        @Override
+        public void onUnregisterEmptyQueryResultUpdateCallback(SearchSessionId sessionId,
+                ISearchCallback callback) {
+            mHandler.sendMessage(
+                    obtainMessage(SearchUiService::doUnregisterEmptyQueryResultUpdateCallback,
+                            SearchUiService.this, sessionId, callback));
         }
 
         @Override
@@ -126,21 +148,23 @@ public abstract class SearchUiService extends Service {
     /**
      * Creates a new search session.
      *
+     * @removed
      * @deprecated this is method will be removed as soon as
      * {@link #onSearchSessionCreated(SearchContext, SearchSessionId)}
      * is adopted by the service.
-     *
-     * @removed
      */
     @Deprecated
     public void onCreateSearchSession(@NonNull SearchContext context,
-            @NonNull SearchSessionId sessionId) {}
+            @NonNull SearchSessionId sessionId) {
+    }
 
     /**
      * A new search session is created.
      */
     public void onSearchSessionCreated(@NonNull SearchContext context,
-            @NonNull SearchSessionId sessionId) {}
+            @NonNull SearchSessionId sessionId) {
+        mSessionEmptyQueryResultCallbacks.put(sessionId, new ArrayList<>());
+    }
 
     /**
      * Called by the client to request search results using a query string.
@@ -161,6 +185,80 @@ public abstract class SearchUiService extends Service {
             @NonNull Query query,
             @NonNull SearchTargetEvent event);
 
+    private void doRegisterEmptyQueryResultUpdateCallback(@NonNull SearchSessionId sessionId,
+            @NonNull ISearchCallback callback) {
+        final ArrayList<CallbackWrapper> callbacks = mSessionEmptyQueryResultCallbacks.get(
+                sessionId);
+        if (callbacks == null) {
+            Slog.e(TAG, "Failed to register for updates for unknown session: " + sessionId);
+            return;
+        }
+
+        final CallbackWrapper wrapper = findCallbackWrapper(callbacks, callback);
+        if (wrapper == null) {
+            callbacks.add(new CallbackWrapper(callback,
+                    callbackWrapper ->
+                            mHandler.post(() ->
+                                    removeCallbackWrapper(callbacks, callbackWrapper))));
+            if (callbacks.size() == 1) {
+                onStartUpdateEmptyQueryResult();
+            }
+        }
+    }
+
+    /**
+     * Called when the first empty query result callback is registered. Service provider may make
+     * their own decision whether to generate data if no callback is registered to optimize for
+     * system health.
+     */
+    @MainThread
+    public void onStartUpdateEmptyQueryResult() {}
+
+    private void doUnregisterEmptyQueryResultUpdateCallback(@NonNull SearchSessionId sessionId,
+            @NonNull ISearchCallback callback) {
+        final ArrayList<CallbackWrapper> callbacks = mSessionEmptyQueryResultCallbacks.get(
+                sessionId);
+        if (callbacks == null) {
+            Slog.e(TAG, "Failed to unregister for updates for unknown session: " + sessionId);
+            return;
+        }
+
+        final CallbackWrapper wrapper = findCallbackWrapper(callbacks, callback);
+        removeCallbackWrapper(callbacks, wrapper);
+    }
+
+    /**
+     * Finds the callback wrapper for the given callback.
+     */
+    private CallbackWrapper findCallbackWrapper(ArrayList<CallbackWrapper> callbacks,
+            ISearchCallback callback) {
+        for (int i = callbacks.size() - 1; i >= 0; i--) {
+            if (callbacks.get(i).isCallback(callback)) {
+                return callbacks.get(i);
+            }
+        }
+        return null;
+    }
+
+    private void removeCallbackWrapper(@Nullable ArrayList<CallbackWrapper> callbacks,
+            @Nullable CallbackWrapper wrapper) {
+        if (callbacks == null || wrapper == null) {
+            return;
+        }
+        callbacks.remove(wrapper);
+        wrapper.destroy();
+        if (callbacks.isEmpty()) {
+            onStopUpdateEmptyQueryResult();
+        }
+    }
+
+    /**
+     * Called when there are no longer any empty query result callbacks registered. Service
+     * provider can choose to stop generating data to optimize for system health.
+     */
+    @MainThread
+    public void onStopUpdateEmptyQueryResult() {}
+
     private void doDestroy(@NonNull SearchSessionId sessionId) {
         super.onDestroy();
         onDestroy(sessionId);
@@ -172,13 +270,48 @@ public abstract class SearchUiService extends Service {
     @MainThread
     public abstract void onDestroy(@NonNull SearchSessionId sessionId);
 
-    private static final class CallbackWrapper implements Consumer<List<SearchTarget>> {
+    /**
+     * Used by the service provider to send back results the client app. The can be called
+     * in response to {@link #onRequestEmptyQueryResultUpdate(SearchSessionId)} or proactively as
+     * a result of changes in zero state data.
+     */
+    public final void updateEmptyQueryResult(@NonNull SearchSessionId sessionId,
+            @NonNull List<SearchTarget> targets) {
+        List<CallbackWrapper> callbacks = mSessionEmptyQueryResultCallbacks.get(sessionId);
+        if (callbacks != null) {
+            for (CallbackWrapper callback : callbacks) {
+                callback.accept(targets);
+            }
+        }
+    }
+
+    private static final class CallbackWrapper implements Consumer<List<SearchTarget>>,
+            IBinder.DeathRecipient {
 
         private ISearchCallback mCallback;
+        private final Consumer<CallbackWrapper> mOnBinderDied;
 
-        CallbackWrapper(ISearchCallback callback) {
+        CallbackWrapper(ISearchCallback callback,
+                @Nullable Consumer<CallbackWrapper> onBinderDied) {
             mCallback = callback;
+            mOnBinderDied = onBinderDied;
+            if (mOnBinderDied != null) {
+                try {
+                    mCallback.asBinder().linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to link to death:" + e);
+                }
+            }
         }
+
+        public boolean isCallback(@NonNull ISearchCallback callback) {
+            if (mCallback == null) {
+                Slog.e(TAG, "Callback is null, likely the binder has died.");
+                return false;
+            }
+            return mCallback.asBinder().equals(callback.asBinder());
+        }
+
 
         @Override
         public void accept(List<SearchTarget> searchTargets) {
@@ -191,6 +324,21 @@ public abstract class SearchUiService extends Service {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending result:" + e);
+            }
+        }
+
+        public void destroy() {
+            if (mCallback != null && mOnBinderDied != null) {
+                mCallback.asBinder().unlinkToDeath(this, 0);
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            destroy();
+            mCallback = null;
+            if (mOnBinderDied != null) {
+                mOnBinderDied.accept(this);
             }
         }
     }

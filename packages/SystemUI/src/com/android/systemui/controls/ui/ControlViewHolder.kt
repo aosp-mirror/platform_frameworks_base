@@ -50,7 +50,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor

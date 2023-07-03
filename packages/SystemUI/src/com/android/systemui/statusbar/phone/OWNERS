@@ -1,0 +1,6 @@
+per-file *Notification* = set noparent
+per-file *Notification* = file:../notification/OWNERS
+
+per-file NotificationIcon* = ccassidy@google.com, evanlaird@google.com, pixel@google.com
+
+per-file NotificationShadeWindowControllerImpl.java = dupin@google.com, cinek@google.com, beverlyt@google.com, pixel@google.com, juliacr@google.com

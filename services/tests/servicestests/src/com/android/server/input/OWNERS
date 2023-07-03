@@ -1,1 +1,2 @@
-include /core/java/android/hardware/input/OWNERS
+include /services/core/java/com/android/server/input/OWNERS
+

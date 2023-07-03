@@ -20,8 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
@@ -33,6 +35,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -41,28 +44,28 @@ public class InputMethodSubtypeTest {
     public void verifyLocale(final String localeString) {
         // InputMethodSubtype#getLocale() returns exactly the same string that is passed to the
         // constructor.
-        assertEquals(localeString, createDummySubtype(localeString).getLocale());
+        assertEquals(localeString, createSubtype(localeString).getLocale());
 
         // InputMethodSubtype#getLocale() should be preserved via marshaling.
-        assertEquals(createDummySubtype(localeString).getLocale(),
-                cloneViaParcel(createDummySubtype(localeString)).getLocale());
+        assertEquals(createSubtype(localeString).getLocale(),
+                cloneViaParcel(createSubtype(localeString)).getLocale());
 
         // InputMethodSubtype#getLocale() should be preserved via marshaling.
-        assertEquals(createDummySubtype(localeString).getLocale(),
-                cloneViaParcel(cloneViaParcel(createDummySubtype(localeString))).getLocale());
+        assertEquals(createSubtype(localeString).getLocale(),
+                cloneViaParcel(cloneViaParcel(createSubtype(localeString))).getLocale());
 
         // Make sure InputMethodSubtype#hashCode() returns the same hash code.
-        assertEquals(createDummySubtype(localeString).hashCode(),
-                createDummySubtype(localeString).hashCode());
-        assertEquals(createDummySubtype(localeString).hashCode(),
-                cloneViaParcel(createDummySubtype(localeString)).hashCode());
-        assertEquals(createDummySubtype(localeString).hashCode(),
-                cloneViaParcel(cloneViaParcel(createDummySubtype(localeString))).hashCode());
+        assertEquals(createSubtype(localeString).hashCode(),
+                createSubtype(localeString).hashCode());
+        assertEquals(createSubtype(localeString).hashCode(),
+                cloneViaParcel(createSubtype(localeString)).hashCode());
+        assertEquals(createSubtype(localeString).hashCode(),
+                cloneViaParcel(cloneViaParcel(createSubtype(localeString))).hashCode());
     }
 
     @Test
     public void testLocaleObj_locale() {
-        final InputMethodSubtype usSubtype = createDummySubtype("en_US");
+        final InputMethodSubtype usSubtype = createSubtype("en_US");
         Locale localeObject = usSubtype.getLocaleObject();
         assertEquals("en", localeObject.getLanguage());
         assertEquals("US", localeObject.getCountry());
@@ -73,7 +76,7 @@ public class InputMethodSubtypeTest {
 
     @Test
     public void testLocaleObj_languageTag() {
-        final InputMethodSubtype usSubtype = createDummySubtypeUsingLanguageTag("en-US");
+        final InputMethodSubtype usSubtype = createSubtypeUsingLanguageTag("en-US");
         Locale localeObject = usSubtype.getLocaleObject();
         assertNotNull(localeObject);
         assertEquals("en", localeObject.getLanguage());
@@ -85,7 +88,7 @@ public class InputMethodSubtypeTest {
 
     @Test
     public void testLocaleObj_emptyLocale() {
-        final InputMethodSubtype emptyLocaleSubtype = createDummySubtype("");
+        final InputMethodSubtype emptyLocaleSubtype = createSubtype("");
         assertNull(emptyLocaleSubtype.getLocaleObject());
         // It should continue returning null when called multiple times.
         assertNull(emptyLocaleSubtype.getLocaleObject());
@@ -110,8 +113,8 @@ public class InputMethodSubtypeTest {
     @Test
     public void testDeprecatedLocaleString() throws Exception {
         // Make sure "iw" is not automatically replaced with "he".
-        final InputMethodSubtype subtypeIw = createDummySubtype("iw");
-        final InputMethodSubtype subtypeHe = createDummySubtype("he");
+        final InputMethodSubtype subtypeIw = createSubtype("iw");
+        final InputMethodSubtype subtypeHe = createSubtype("he");
         assertEquals("iw", subtypeIw.getLocale());
         assertEquals("he", subtypeHe.getLocale());
         assertFalse(Objects.equals(subtypeIw, subtypeHe));
@@ -123,6 +126,56 @@ public class InputMethodSubtypeTest {
         assertEquals(subtypeHe, clonedSubtypeHe);
         assertEquals("iw", clonedSubtypeIw.getLocale());
         assertEquals("he", clonedSubtypeHe.getLocale());
+    }
+
+    @Test
+    public void testCanonicalizedLanguageTagObjectCache() {
+        final InputMethodSubtype subtype = createSubtypeUsingLanguageTag("en-US");
+        // Verify that the returned object is cached and any subsequent call should return the same
+        // object, which is strictly guaranteed if the method gets called only on a single thread.
+        assertSame(subtype.getCanonicalizedLanguageTag(), subtype.getCanonicalizedLanguageTag());
+    }
+
+    @Test
+    public void testCanonicalizedLanguageTag() {
+        verifyCanonicalizedLanguageTag("en", "en");
+        verifyCanonicalizedLanguageTag("en-US", "en-US");
+        verifyCanonicalizedLanguageTag("en-Latn-US-t-k0-qwerty", "en-Latn-US-t-k0-qwerty");
+
+        verifyCanonicalizedLanguageTag("en-us", "en-US");
+        verifyCanonicalizedLanguageTag("EN-us", "en-US");
+
+        verifyCanonicalizedLanguageTag(null, "");
+        verifyCanonicalizedLanguageTag("", "");
+
+        verifyCanonicalizedLanguageTag("und", "und");
+        verifyCanonicalizedLanguageTag("apparently invalid language tag!!!", "und");
+    }
+
+    private void verifyCanonicalizedLanguageTag(
+            @Nullable String languageTag, @Nullable String expectedLanguageTag) {
+        final InputMethodSubtype subtype = createSubtypeUsingLanguageTag(languageTag);
+        assertEquals(subtype.getCanonicalizedLanguageTag(), expectedLanguageTag);
+    }
+
+    @Test
+    public void testIsSuitableForPhysicalKeyboardLayoutMapping() {
+        final Supplier<InputMethodSubtypeBuilder> getValidBuilder = () ->
+                new InputMethodSubtypeBuilder()
+                        .setLanguageTag("en-US")
+                        .setIsAuxiliary(false)
+                        .setSubtypeMode("keyboard")
+                        .setSubtypeId(1);
+
+        assertTrue(getValidBuilder.get().build().isSuitableForPhysicalKeyboardLayoutMapping());
+
+        // mode == "voice" is not suitable.
+        assertFalse(getValidBuilder.get().setSubtypeMode("voice").build()
+                .isSuitableForPhysicalKeyboardLayoutMapping());
+
+        // Auxiliary subtype not suitable.
+        assertFalse(getValidBuilder.get().setIsAuxiliary(true).build()
+                .isSuitableForPhysicalKeyboardLayoutMapping());
     }
 
     private static InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {
@@ -139,7 +192,7 @@ public class InputMethodSubtypeTest {
         }
     }
 
-    private static InputMethodSubtype createDummySubtype(final String locale) {
+    private static InputMethodSubtype createSubtype(final String locale) {
         final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder();
         return builder.setSubtypeNameResId(0)
                 .setSubtypeIconResId(0)
@@ -148,7 +201,7 @@ public class InputMethodSubtypeTest {
                 .build();
     }
 
-    private static InputMethodSubtype createDummySubtypeUsingLanguageTag(
+    private static InputMethodSubtype createSubtypeUsingLanguageTag(
             final String languageTag) {
         final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder();
         return builder.setSubtypeNameResId(0)

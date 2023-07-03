@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,13 +32,11 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
-import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.IBiometricContextListener;
@@ -46,39 +45,57 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.util.Log;
+import android.util.RotationUtils;
 import android.util.SparseBooleanArray;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.udfps.UdfpsOverlayParams;
+import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
+import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
+import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
+import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
+import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
+import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -86,6 +103,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import kotlin.Unit;
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -95,7 +113,7 @@ import kotlin.Unit;
  * {@link com.android.keyguard.KeyguardUpdateMonitor}
  */
 @SysUISingleton
-public class AuthController extends CoreStartable implements CommandQueue.Callbacks,
+public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         AuthDialogCallback, DozeReceiver {
 
     private static final String TAG = "AuthController";
@@ -103,19 +121,33 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     private static final int SENSOR_PRIVACY_DELAY = 500;
 
     private final Handler mHandler;
+    private final Context mContext;
+    private final FeatureFlags mFeatureFlags;
     private final Execution mExecution;
     private final CommandQueue mCommandQueue;
-    private final StatusBarStateController mStatusBarStateController;
     private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
-    private final Provider<SidefpsController> mSidefpsControllerFactory;
+    private final Provider<SideFpsController> mSidefpsControllerFactory;
+    private final CoroutineScope mApplicationCoroutineScope;
 
-    @NonNull private Point mStableDisplaySize = new Point();
+    // TODO: these should be migrated out once ready
+    @NonNull private final Provider<AuthBiometricFingerprintViewModel>
+            mAuthBiometricFingerprintViewModelProvider;
+    @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
+    @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
+    @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
+    @NonNull private final Provider<PromptViewModel> mPromptViewModelProvider;
+    @NonNull private final LogContextInteractor mLogContextInteractor;
 
-    @Nullable private final PointF mFaceAuthSensorLocation;
-    @Nullable private PointF mFingerprintLocation;
+    private final Display mDisplay;
+    private float mScaleFactor = 1f;
+    // sensor locations without any resolution scaling nor rotation adjustments:
+    @Nullable private final Point mFaceSensorLocationDefault;
+    // cached sensor locations:
+    @Nullable private Point mFaceSensorLocation;
+    @Nullable private Point mFingerprintSensorLocation;
     @Nullable private Rect mUdfpsBounds;
     private final Set<Callback> mCallbacks = new HashSet<>();
 
@@ -127,9 +159,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @NonNull private final WindowManager mWindowManager;
     @NonNull private final DisplayManager mDisplayManager;
     @Nullable private UdfpsController mUdfpsController;
-    @Nullable private IUdfpsHbmListener mUdfpsHbmListener;
-    @Nullable private SidefpsController mSidefpsController;
-    @Nullable private IBiometricContextListener mBiometricContextListener;
+    @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
+    @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
+    @Nullable private SideFpsController mSideFpsController;
+    @Nullable private UdfpsLogger mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
@@ -137,13 +170,32 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
+    @NonNull private final Map<Integer, Boolean> mFpEnrolledForUser = new HashMap<>();
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
+    @NonNull private final SparseBooleanArray mFaceEnrolledForUser;
+    @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final AuthDialogPanelInteractionDetector mPanelInteractionDetector;
     private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
+    @NonNull private final InteractionJankMonitor mInteractionJankMonitor;
+    @NonNull private final UdfpsUtils mUdfpsUtils;
     private final @Background DelayableExecutor mBackgroundExecutor;
+    private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
+
+    private final VibratorHelper mVibratorHelper;
+
+    private void vibrateSuccess(int modality) {
+        mVibratorHelper.vibrateAuthSuccess(
+                getClass().getSimpleName() + ", modality = " + modality + "BP::success");
+    }
+
+    private void vibrateError(int modality) {
+        mVibratorHelper.vibrateAuthError(
+                getClass().getSimpleName() + ", modality = " + modality + "BP::error");
+    }
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
@@ -153,52 +205,39 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
     };
 
-    private final IFingerprintAuthenticatorsRegisteredCallback
-            mFingerprintAuthenticatorsRegisteredCallback =
-            new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
-                @Override
-                public void onAllAuthenticatorsRegistered(
-                        List<FingerprintSensorPropertiesInternal> sensors) {
-                    mHandler.post(() -> handleAllFingerprintAuthenticatorsRegistered(sensors));
-                }
-            };
-
-    private final BiometricStateListener mBiometricStateListener =
-            new BiometricStateListener() {
-                @Override
-                public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
-                    mHandler.post(
-                            () -> handleEnrollmentsChanged(userId, sensorId, hasEnrollments));
-                }
-            };
-
     @VisibleForTesting
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mCurrentDialog != null
-                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                Log.w(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
-                mCurrentDialog.dismissWithoutCallback(true /* animate */);
-                mCurrentDialog = null;
-                mOrientationListener.disable();
-
-                for (Callback cb : mCallbacks) {
-                    cb.onBiometricPromptDismissed();
-                }
-
-                try {
-                    if (mReceiver != null) {
-                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
-                                null /* credentialAttestation */);
-                        mReceiver = null;
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Remote exception", e);
-                }
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                String reason = intent.getStringExtra("reason");
+                reason = (reason != null) ? reason : "unknown";
+                closeDioalog(reason);
             }
         }
     };
+
+    private void closeDioalog(String reason) {
+        if (isShowing()) {
+            Log.i(TAG, "Close BP, reason :" + reason);
+            mCurrentDialog.dismissWithoutCallback(true /* animate */);
+            mCurrentDialog = null;
+
+            for (Callback cb : mCallbacks) {
+                cb.onBiometricPromptDismissed();
+            }
+
+            try {
+                if (mReceiver != null) {
+                    mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                            null /* credentialAttestation */);
+                    mReceiver = null;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception", e);
+            }
+        }
+    }
 
     private void cancelIfOwnerIsNotInForeground() {
         mExecution.assertIsMainThread();
@@ -215,7 +254,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                         Log.e(TAG, "Evicting client due to: " + topPackage);
                         mCurrentDialog.dismissWithoutCallback(true /* animate */);
                         mCurrentDialog = null;
-                        mOrientationListener.disable();
 
                         for (Callback cb : mCallbacks) {
                             cb.onBiometricPromptDismissed();
@@ -246,8 +284,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             List<FingerprintSensorPropertiesInternal> sensors) {
         mExecution.assertIsMainThread();
         if (DEBUG) {
-            Log.d(TAG, "handleAllAuthenticatorsRegistered | sensors: " + Arrays.toString(
-                    sensors.toArray()));
+            Log.d(TAG, "handleAllFingerprintAuthenticatorsRegistered | sensors: "
+                    + Arrays.toString(sensors.toArray()));
         }
         mAllFingerprintAuthenticatorsRegistered = true;
         mFpProps = sensors;
@@ -279,39 +317,87 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 }
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
-            mUdfpsController.setHalControlsIllumination(mUdfpsProps.get(0).halControlsIllumination);
+            mUdfpsController.setUdfpsDisplayMode(new UdfpsDisplayMode(mContext, mExecution,
+                    this, mUdfpsLogger));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
-            updateUdfpsLocation();
         }
 
         mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
         if (mSidefpsProps != null) {
-            mSidefpsController = mSidefpsControllerFactory.get();
+            mSideFpsController = mSidefpsControllerFactory.get();
         }
 
-        mFingerprintManager.registerBiometricStateListener(mBiometricStateListener);
-        updateFingerprintLocation();
+        mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
+            @Override
+            public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+                mHandler.post(() -> handleEnrollmentsChanged(
+                        TYPE_FINGERPRINT, userId, sensorId, hasEnrollments));
+            }
+        });
+        updateSensorLocations();
 
         for (Callback cb : mCallbacks) {
-            cb.onAllAuthenticatorsRegistered();
+            cb.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT);
         }
     }
 
-    private void handleEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+    private void handleAllFaceAuthenticatorsRegistered(List<FaceSensorPropertiesInternal> sensors) {
+        mExecution.assertIsMainThread();
+        if (DEBUG) {
+            Log.d(TAG, "handleAllFaceAuthenticatorsRegistered | sensors: " + Arrays.toString(
+                    sensors.toArray()));
+        }
+
+        mFaceManager.registerBiometricStateListener(new BiometricStateListener() {
+            @Override
+            public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
+                mHandler.post(() -> handleEnrollmentsChanged(
+                        TYPE_FACE, userId, sensorId, hasEnrollments));
+            }
+        });
+
+        for (Callback cb : mCallbacks) {
+            cb.onAllAuthenticatorsRegistered(TYPE_FACE);
+        }
+    }
+
+    private void handleEnrollmentsChanged(@Modality int modality, int userId, int sensorId,
+            boolean hasEnrollments) {
         mExecution.assertIsMainThread();
         Log.d(TAG, "handleEnrollmentsChanged, userId: " + userId + ", sensorId: " + sensorId
                 + ", hasEnrollments: " + hasEnrollments);
-        if (mUdfpsProps == null) {
-            Log.d(TAG, "handleEnrollmentsChanged, mUdfpsProps is null");
-        } else {
-            for (FingerprintSensorPropertiesInternal prop : mUdfpsProps) {
+        BiometricType sensorBiometricType = BiometricType.UNKNOWN;
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal prop: mFpProps) {
                 if (prop.sensorId == sensorId) {
-                    mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                    mFpEnrolledForUser.put(userId, hasEnrollments);
+                    if (prop.isAnyUdfpsType()) {
+                        sensorBiometricType = BiometricType.UNDER_DISPLAY_FINGERPRINT;
+                        mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                    } else if (prop.isAnySidefpsType()) {
+                        sensorBiometricType = BiometricType.SIDE_FINGERPRINT;
+                        mSfpsEnrolledForUser.put(userId, hasEnrollments);
+                    } else if (prop.sensorType == TYPE_REAR) {
+                        sensorBiometricType = BiometricType.REAR_FINGERPRINT;
+                    }
+                    break;
+                }
+            }
+        }
+        if (mFaceProps == null) {
+            Log.d(TAG, "handleEnrollmentsChanged, mFaceProps is null");
+        } else {
+            for (FaceSensorPropertiesInternal prop : mFaceProps) {
+                if (prop.sensorId == sensorId) {
+                    mFaceEnrolledForUser.put(userId, hasEnrollments);
+                    sensorBiometricType = BiometricType.FACE;
+                    break;
                 }
             }
         }
         for (Callback cb : mCallbacks) {
-            cb.onEnrollmentsChanged();
+            cb.onEnrollmentsChanged(modality);
+            cb.onEnrollmentsChanged(sensorBiometricType, userId, hasEnrollments);
         }
     }
 
@@ -337,60 +423,116 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void onTryAgainPressed() {
-        if (mReceiver == null) {
-            Log.e(TAG, "onTryAgainPressed: Receiver is null");
+    public void onTryAgainPressed(long requestId) {
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onTryAgainPressed");
             return;
         }
+
         try {
-            mReceiver.onTryAgainPressed();
+            receiver.onTryAgainPressed();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when handling try again", e);
         }
     }
 
     @Override
-    public void onDeviceCredentialPressed() {
-        if (mReceiver == null) {
-            Log.e(TAG, "onDeviceCredentialPressed: Receiver is null");
+    public void onDeviceCredentialPressed(long requestId) {
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onDeviceCredentialPressed");
             return;
         }
+
         try {
-            mReceiver.onDeviceCredentialPressed();
+            receiver.onDeviceCredentialPressed();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when handling credential button", e);
         }
     }
 
     @Override
-    public void onSystemEvent(int event) {
-        if (mReceiver == null) {
-            Log.e(TAG, "onSystemEvent(" + event + "): Receiver is null");
+    public void onSystemEvent(int event, long requestId) {
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onSystemEvent");
             return;
         }
+
         try {
-            mReceiver.onSystemEvent(event);
+            receiver.onSystemEvent(event);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when sending system event", e);
         }
     }
 
     @Override
-    public void onDialogAnimatedIn() {
-        if (mReceiver == null) {
-            Log.e(TAG, "onDialogAnimatedIn: Receiver is null");
+    public void onDialogAnimatedIn(long requestId, boolean startFingerprintNow) {
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.w(TAG, "Skip onDialogAnimatedIn");
             return;
         }
 
         try {
-            mReceiver.onDialogAnimatedIn();
+            receiver.onDialogAnimatedIn(startFingerprintNow);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when sending onDialogAnimatedIn", e);
         }
     }
 
     @Override
-    public void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation) {
+    public void onStartFingerprintNow(long requestId) {
+        final IBiometricSysuiReceiver receiver = getCurrentReceiver(requestId);
+        if (receiver == null) {
+            Log.e(TAG, "onStartUdfpsNow: Receiver is null");
+            return;
+        }
+
+        try {
+            receiver.onStartFingerprintNow();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when sending onDialogAnimatedIn", e);
+        }
+    }
+
+    @Nullable
+    private IBiometricSysuiReceiver getCurrentReceiver(long requestId) {
+        if (!isRequestIdValid(requestId)) {
+            return null;
+        }
+
+        if (mReceiver == null) {
+            Log.w(TAG, "getCurrentReceiver: Receiver is null");
+        }
+
+        return mReceiver;
+    }
+
+    private boolean isRequestIdValid(long requestId) {
+        if (mCurrentDialog == null) {
+            Log.w(TAG, "shouldNotifyReceiver: dialog already gone");
+            return false;
+        }
+
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "shouldNotifyReceiver: requestId doesn't match");
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onDismissed(@DismissedReason int reason,
+                            @Nullable byte[] credentialAttestation, long requestId) {
+
+        if (mCurrentDialog != null && requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "requestId doesn't match, skip onDismissed");
+            return;
+        }
+
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
@@ -434,14 +576,19 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
     }
 
+    @Override
+    public void handleShowGlobalActionsMenu() {
+        closeDioalog("PowerMenu shown");
+    }
+
     /**
      * @return where the UDFPS exists on the screen in pixels in portrait mode.
      */
-    @Nullable public PointF getUdfpsLocation() {
+    @Nullable public Point getUdfpsLocation() {
         if (mUdfpsController == null || mUdfpsBounds == null) {
             return null;
         }
-        return new PointF(mUdfpsBounds.centerX(), mUdfpsBounds.centerY());
+        return new Point(mUdfpsBounds.centerX(), mUdfpsBounds.centerY());
     }
 
     /**
@@ -455,42 +602,121 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     /**
-     * @return the scale factor representing the user's current resolution / the stable
-     * (default) resolution
+     * Gets the cached scale factor representing the user's current resolution / the stable
+     * (default) resolution.
      */
     public float getScaleFactor() {
-        if (mUdfpsController == null || mUdfpsController.mOverlayParams == null) {
-            return 1f;
-        }
-        return mUdfpsController.mOverlayParams.getScaleFactor();
+        return mScaleFactor;
     }
 
     /**
-     * @return where the fingerprint sensor exists in pixels in portrait mode. devices without an
-     * overridden value will use the default value even if they don't have a fingerprint sensor
+     * Updates the current display info and cached scale factor & sensor locations.
+     * Getting the display info is a relatively expensive call, so avoid superfluous calls.
      */
-    @Nullable public PointF getFingerprintSensorLocation() {
+    private void updateSensorLocations() {
+        mDisplay.getDisplayInfo(mCachedDisplayInfo);
+        mScaleFactor = mUdfpsUtils.getScaleFactor(mCachedDisplayInfo);
+        updateUdfpsLocation();
+        updateFingerprintLocation();
+        updateFaceLocation();
+    }
+    /**
+     * @return where the fingerprint sensor exists in pixels in its natural orientation.
+     * Devices without location configs will use the default value even if they don't have a
+     * fingerprint sensor.
+     *
+     * May return null if the fingerprint sensor isn't available yet.
+     */
+    @Nullable private Point getFingerprintSensorLocationInNaturalOrientation() {
         if (getUdfpsLocation() != null) {
             return getUdfpsLocation();
+        } else {
+            int xFpLocation = mCachedDisplayInfo.getNaturalWidth() / 2;
+            try {
+                xFpLocation = mContext.getResources().getDimensionPixelSize(
+                        com.android.systemui.R.dimen
+                                .physical_fingerprint_sensor_center_screen_location_x);
+            } catch (Resources.NotFoundException e) {
+            }
+
+            return new Point(
+                    (int) (xFpLocation * mScaleFactor),
+                    (int) (mContext.getResources().getDimensionPixelSize(
+                            com.android.systemui.R.dimen
+                                    .physical_fingerprint_sensor_center_screen_location_y)
+                            * mScaleFactor)
+            );
         }
-        return mFingerprintLocation;
     }
 
     /**
-     * @return where the face authentication sensor exists relative to the screen in pixels in
-     * portrait mode.
+     * @return where the fingerprint sensor exists in pixels exists the current device orientation.
+     * Devices without location configs will use the default value even if they don't have a
+     * fingerprint sensor.
      */
-    @Nullable public PointF getFaceAuthSensorLocation() {
-        if (mFaceProps == null || mFaceAuthSensorLocation == null) {
-            return null;
+    @Nullable public Point getFingerprintSensorLocation() {
+        return mFingerprintSensorLocation;
+    }
+
+    private void updateFingerprintLocation() {
+        if (mFpProps == null) {
+            mFingerprintSensorLocation = null;
+        } else {
+            mFingerprintSensorLocation = rotateToCurrentOrientation(
+                    getFingerprintSensorLocationInNaturalOrientation(),
+                    mCachedDisplayInfo);
         }
-        DisplayInfo displayInfo = new DisplayInfo();
-        mContext.getDisplay().getDisplayInfo(displayInfo);
-        final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                mStableDisplaySize.x, mStableDisplaySize.y, displayInfo.getNaturalWidth(),
-                displayInfo.getNaturalHeight());
-        return new PointF(mFaceAuthSensorLocation.x * scaleFactor,
-                mFaceAuthSensorLocation.y * scaleFactor);
+
+        for (final Callback cb : mCallbacks) {
+            cb.onFingerprintLocationChanged();
+        }
+    }
+
+    /** Get FP sensor properties */
+    public @Nullable List<FingerprintSensorPropertiesInternal> getFingerprintProperties() {
+        return mFpProps;
+    }
+
+    /**
+     * @return where the face sensor exists in pixels in the current device orientation. Returns
+     * null if no face sensor exists.
+     */
+    @Nullable public Point getFaceSensorLocation() {
+        return mFaceSensorLocation;
+    }
+
+    private void updateFaceLocation() {
+        if (mFaceProps == null || mFaceSensorLocationDefault == null) {
+            mFaceSensorLocation = null;
+        } else {
+            mFaceSensorLocation = rotateToCurrentOrientation(
+                    new Point(
+                            (int) (mFaceSensorLocationDefault.x * mScaleFactor),
+                            (int) (mFaceSensorLocationDefault.y * mScaleFactor)),
+                    mCachedDisplayInfo
+            );
+        }
+
+        for (final Callback cb : mCallbacks) {
+            cb.onFaceSensorLocationChanged();
+        }
+    }
+
+    /**
+     * @param inOutPoint point on the display in pixels. Going in, represents the point
+     *                   in the device's natural orientation. Going out, represents
+     *                   the point in the display's current orientation.
+     * @param displayInfo currently display information to use to rotate the point
+     */
+    @VisibleForTesting
+    protected Point rotateToCurrentOrientation(Point inOutPoint, DisplayInfo displayInfo) {
+        RotationUtils.rotatePoint(
+                inOutPoint,
+                displayInfo.rotation,
+                displayInfo.getNaturalWidth(),
+                displayInfo.getNaturalHeight()
+        );
+        return inOutPoint;
     }
 
     /**
@@ -508,17 +734,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mUdfpsController.onAodInterrupt(screenX, screenY, major, minor);
     }
 
-    /**
-     * Cancel a fingerprint scan manually. This will get rid of the white circle on the udfps
-     * sensor area even if the user hasn't explicitly lifted their finger yet.
-     */
-    public void onCancelUdfps() {
-        if (mUdfpsController == null) {
-            return;
-        }
-        mUdfpsController.onCancelUdfps();
-    }
-
     private void sendResultAndCleanUp(@DismissedReason int reason,
             @Nullable byte[] credentialAttestation) {
         if (mReceiver == null) {
@@ -533,9 +748,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
         onDialogDismissed(reason);
     }
-
     @Inject
     public AuthController(Context context,
+            @NonNull FeatureFlags featureFlags,
+            @Application CoroutineScope applicationCoroutineScope,
             Execution execution,
             CommandQueue commandQueue,
             ActivityTaskManager activityTaskManager,
@@ -543,17 +759,28 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory,
-            Provider<SidefpsController> sidefpsControllerFactory,
+            Provider<SideFpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
+            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
-            @NonNull StatusBarStateController statusBarStateController,
+            @NonNull UdfpsLogger udfpsLogger,
+            @NonNull LogContextInteractor logContextInteractor,
+            @NonNull Provider<AuthBiometricFingerprintViewModel>
+                    authBiometricFingerprintViewModelProvider,
+            @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
+            @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
+            @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
+            @NonNull Provider<PromptViewModel> promptViewModelProvider,
+            @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
-            @Background DelayableExecutor bgExecutor) {
-        super(context);
+            @Background DelayableExecutor bgExecutor,
+            @NonNull VibratorHelper vibrator,
+            @NonNull UdfpsUtils udfpsUtils) {
+        mContext = context;
+        mFeatureFlags = featureFlags;
         mExecution = execution;
-        mWakefulnessLifecycle = wakefulnessLifecycle;
         mUserManager = userManager;
         mLockPatternUtils = lockPatternUtils;
         mHandler = handler;
@@ -564,9 +791,23 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
         mSidefpsControllerFactory = sidefpsControllerFactory;
+        mUdfpsLogger = udfpsLogger;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;
+        mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
+        mSfpsEnrolledForUser = new SparseBooleanArray();
+        mFaceEnrolledForUser = new SparseBooleanArray();
+        mVibratorHelper = vibrator;
+        mUdfpsUtils = udfpsUtils;
+        mApplicationCoroutineScope = applicationCoroutineScope;
+
+        mLogContextInteractor = logContextInteractor;
+        mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
+        mPromptSelectorInteractor = promptSelectorInteractorProvider;
+        mPromptCredentialInteractor = promptCredentialInteractorProvider;
+        mPromptViewModelProvider = promptViewModelProvider;
+        mCredentialViewModelProvider = credentialViewModelProvider;
 
         mOrientationListener = new BiometricDisplayListener(
                 context,
@@ -578,54 +819,28 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     return Unit.INSTANCE;
                 });
 
-        mStatusBarStateController = statusBarStateController;
-        mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
-            @Override
-            public void onDozingChanged(boolean isDozing) {
-                notifyDozeChanged(isDozing);
-            }
-        });
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mPanelInteractionDetector = panelInteractionDetector;
+
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
-
         int[] faceAuthLocation = context.getResources().getIntArray(
                 com.android.systemui.R.array.config_face_auth_props);
         if (faceAuthLocation == null || faceAuthLocation.length < 2) {
-            mFaceAuthSensorLocation = null;
+            mFaceSensorLocationDefault = null;
         } else {
-            mFaceAuthSensorLocation = new PointF(
-                    (float) faceAuthLocation[0],
-                    (float) faceAuthLocation[1]);
+            mFaceSensorLocationDefault = new Point(
+                    faceAuthLocation[0],
+                    faceAuthLocation[1]);
         }
 
-        updateFingerprintLocation();
+        mDisplay = mContext.getDisplay();
+        updateSensorLocations();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-
         context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
-    }
-
-    private int getDisplayWidth() {
-        DisplayInfo displayInfo = new DisplayInfo();
-        mContext.getDisplay().getDisplayInfo(displayInfo);
-        return displayInfo.getNaturalWidth();
-    }
-
-    private void updateFingerprintLocation() {
-        int xLocation = getDisplayWidth() / 2;
-        try {
-            xLocation = mContext.getResources().getDimensionPixelSize(
-                    com.android.systemui.R.dimen
-                            .physical_fingerprint_sensor_center_screen_location_x);
-        } catch (Resources.NotFoundException e) {
-        }
-        int yLocation = mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.R.dimen.physical_fingerprint_sensor_center_screen_location_y);
-        mFingerprintLocation = new PointF(
-                xLocation,
-                yLocation);
     }
 
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
@@ -634,22 +849,33 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     // updateFingerprintLocation in such a case are unclear.
     private void updateUdfpsLocation() {
         if (mUdfpsController != null) {
-            final DisplayInfo displayInfo = new DisplayInfo();
-            mContext.getDisplay().getDisplayInfo(displayInfo);
-            final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                    mStableDisplaySize.x, mStableDisplaySize.y, displayInfo.getNaturalWidth(),
-                    displayInfo.getNaturalHeight());
-
             final FingerprintSensorPropertiesInternal udfpsProp = mUdfpsProps.get(0);
+
             final Rect previousUdfpsBounds = mUdfpsBounds;
+            final UdfpsOverlayParams previousUdfpsOverlayParams = mUdfpsOverlayParams;
+
             mUdfpsBounds = udfpsProp.getLocation().getRect();
-            mUdfpsBounds.scale(scaleFactor);
-            mUdfpsController.updateOverlayParams(udfpsProp.sensorId,
-                    new UdfpsOverlayParams(mUdfpsBounds, displayInfo.getNaturalWidth(),
-                            displayInfo.getNaturalHeight(), scaleFactor, displayInfo.rotation));
-            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
+            mUdfpsBounds.scale(mScaleFactor);
+
+            final Rect overlayBounds = new Rect(
+                    0, /* left */
+                    mCachedDisplayInfo.getNaturalHeight() / 2, /* top */
+                    mCachedDisplayInfo.getNaturalWidth(), /* right */
+                    mCachedDisplayInfo.getNaturalHeight() /* bottom */);
+
+            mUdfpsOverlayParams = new UdfpsOverlayParams(
+                    mUdfpsBounds,
+                    overlayBounds,
+                    mCachedDisplayInfo.getNaturalWidth(),
+                    mCachedDisplayInfo.getNaturalHeight(),
+                    mScaleFactor,
+                    mCachedDisplayInfo.rotation);
+
+            mUdfpsController.updateOverlayParams(udfpsProp, mUdfpsOverlayParams);
+            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds) || !Objects.equals(
+                    previousUdfpsOverlayParams, mUdfpsOverlayParams)) {
                 for (Callback cb : mCallbacks) {
-                    cb.onUdfpsLocationChanged();
+                    cb.onUdfpsLocationChanged(mUdfpsOverlayParams);
                 }
             }
         }
@@ -662,52 +888,62 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
         if (mFingerprintManager != null) {
             mFingerprintManager.addAuthenticatorsRegisteredCallback(
-                    mFingerprintAuthenticatorsRegisteredCallback);
+                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FingerprintSensorPropertiesInternal> sensors) {
+                            mHandler.post(() ->
+                                    handleAllFingerprintAuthenticatorsRegistered(sensors));
+                        }
+                    });
+        }
+        if (mFaceManager != null) {
+            mFaceManager.addAuthenticatorsRegisteredCallback(
+                    new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FaceSensorPropertiesInternal> sensors) {
+                            mHandler.post(() ->
+                                    handleAllFaceAuthenticatorsRegistered(sensors));
+                        }
+                    }
+            );
         }
 
-        mStableDisplaySize = mDisplayManager.getStableDisplaySize();
         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+        mOrientationListener.enable();
+        updateSensorLocations();
     }
 
     @Override
-    public void setBiometicContextListener(IBiometricContextListener listener) {
-        mBiometricContextListener = listener;
-        notifyDozeChanged(mStatusBarStateController.isDozing());
-    }
-
-    private void notifyDozeChanged(boolean isDozing) {
-        if (mBiometricContextListener != null) {
-            try {
-                mBiometricContextListener.onDozeChanged(isDozing);
-            } catch (RemoteException e) {
-                Log.w(TAG, "failed to notify initial doze state");
-            }
-        }
+    public void setBiometricContextListener(IBiometricContextListener listener) {
+        mLogContextInteractor.addBiometricContextListener(listener);
     }
 
     /**
-     * Stores the listener received from {@link com.android.server.display.DisplayModeDirector}.
+     * Stores the callback received from
+     * {@link com.android.server.display.mode.DisplayModeDirector}.
      *
-     * DisplayModeDirector implements {@link IUdfpsHbmListener} and registers it with this class by
-     * calling {@link CommandQueue#setUdfpsHbmListener(IUdfpsHbmListener)}.
+     * DisplayModeDirector implements {@link IUdfpsRefreshRateRequestCallback}
+     * and registers it with this class by calling
+     * {@link CommandQueue#setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback)}.
      */
     @Override
-    public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
-        mUdfpsHbmListener = listener;
+    public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
+        mUdfpsRefreshRateRequestCallback = callback;
     }
 
     /**
-     * @return IUdfpsHbmListener that can be set by DisplayModeDirector.
+     * @return IUdfpsRefreshRateRequestCallback that can be set by DisplayModeDirector.
      */
-    @Nullable public IUdfpsHbmListener getUdfpsHbmListener() {
-        return mUdfpsHbmListener;
+    @Nullable public IUdfpsRefreshRateRequestCallback getUdfpsRefreshRateCallback() {
+        return mUdfpsRefreshRateRequestCallback;
     }
 
     @Override
     public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, long operationId, String opPackageName, long requestId,
-            @BiometricMultiSensorMode int multiSensorConfig) {
+            int userId, long operationId, String opPackageName, long requestId) {
         @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
 
         if (DEBUG) {
@@ -720,8 +956,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     + ", credentialAllowed: " + credentialAllowed
                     + ", requireConfirmation: " + requireConfirmation
                     + ", operationId: " + operationId
-                    + ", requestId: " + requestId
-                    + ", multiSensorConfig: " + multiSensorConfig);
+                    + ", requestId: " + requestId);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = promptInfo;
@@ -733,7 +968,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         args.arg6 = opPackageName;
         args.argl1 = operationId;
         args.argl2 = requestId;
-        args.argi2 = multiSensorConfig;
 
         boolean skipAnimation = false;
         if (mCurrentDialog != null) {
@@ -741,7 +975,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             skipAnimation = true;
         }
 
-        showDialog(args, skipAnimation, null /* savedState */);
+        showDialog(args, skipAnimation, null /* savedState */, mPromptViewModelProvider.get());
     }
 
     /**
@@ -752,6 +986,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Override
     public void onBiometricAuthenticated(@Modality int modality) {
         if (DEBUG) Log.d(TAG, "onBiometricAuthenticated: ");
+
+        vibrateSuccess(modality);
 
         if (mCurrentDialog != null) {
             mCurrentDialog.onAuthenticationSucceeded(modality);
@@ -776,6 +1012,43 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         return mUdfpsProps;
     }
 
+    @Nullable
+    public List<FingerprintSensorPropertiesInternal> getSfpsProps() {
+        return mSidefpsProps;
+    }
+
+    /**
+     * @return true if udfps HW is supported on this device. Can return true even if the user has
+     * not enrolled udfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isUdfpsSupported() {
+        return getUdfpsProps() != null && !getUdfpsProps().isEmpty();
+    }
+
+    /**
+     * @return true if sfps HW is supported on this device. Can return true even if the user has
+     * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isSfpsSupported() {
+        return getSfpsProps() != null && !getSfpsProps().isEmpty();
+    }
+
+    /**
+     * @return true if rear fps HW is supported on this device. Can return true even if the user has
+     * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isRearFpsSupported() {
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal prop: mFpProps) {
+                if (prop.sensorType == TYPE_REAR) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     private String getErrorString(@Modality int modality, int error, int vendorCode) {
         switch (modality) {
             case TYPE_FACE:
@@ -799,6 +1072,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         if (DEBUG) {
             Log.d(TAG, String.format("onBiometricError(%d, %d, %d)", modality, error, vendorCode));
         }
+
+        vibrateError(modality);
 
         final boolean isLockout = (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT)
                 || (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
@@ -842,8 +1117,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         } else {
             Log.w(TAG, "onBiometricError callback but dialog is gone");
         }
-
-        onCancelUdfps();
     }
 
     @Override
@@ -867,7 +1140,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         // BiometricService will have already sent the callback to the client in this case.
         // This avoids a round trip to SystemUI. So, just dismiss the dialog and we're done.
         mCurrentDialog = null;
-        mOrientationListener.disable();
     }
 
     /**
@@ -889,7 +1161,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             return false;
         }
 
-        return mFaceManager.hasEnrolledTemplates(userId);
+        return mFaceEnrolledForUser.get(userId);
     }
 
     /**
@@ -903,7 +1175,31 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         return mUdfpsEnrolledForUser.get(userId);
     }
 
-    private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
+    /**
+     * Whether the passed userId has enrolled SFPS.
+     */
+    public boolean isSfpsEnrolled(int userId) {
+        if (mSideFpsController == null) {
+            return false;
+        }
+
+        return mSfpsEnrolledForUser.get(userId);
+    }
+
+    /** If BiometricPrompt is currently being shown to the user. */
+    public boolean isShowing() {
+        return mCurrentDialog != null;
+    }
+
+    /**
+     * Whether the passed userId has enrolled at least one fingerprint.
+     */
+    public boolean isFingerprintEnrolled(int userId) {
+        return mFpEnrolledForUser.getOrDefault(userId, false);
+    }
+
+    private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState,
+            @Nullable PromptViewModel viewModel) {
         mCurrentDialogArgs = args;
 
         final PromptInfo promptInfo = (PromptInfo) args.arg1;
@@ -914,7 +1210,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         final String opPackageName = (String) args.arg6;
         final long operationId = args.argl1;
         final long requestId = args.argl2;
-        @BiometricMultiSensorMode final int multiSensorConfig = args.argi2;
 
         // Create a new dialog but do not replace the current one yet.
         final AuthDialog newDialog = buildDialog(
@@ -927,10 +1222,11 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 skipAnimation,
                 operationId,
                 requestId,
-                multiSensorConfig,
                 mWakefulnessLifecycle,
+                mPanelInteractionDetector,
                 mUserManager,
-                mLockPatternUtils);
+                mLockPatternUtils,
+                viewModel);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type configuration");
@@ -958,7 +1254,6 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
         mCurrentDialog = newDialog;
         mCurrentDialog.show(mWindowManager, savedState);
-        mOrientationListener.enable();
 
         if (!promptInfo.isAllowBackgroundAuthentication()) {
             mHandler.post(this::cancelIfOwnerIsNotInForeground);
@@ -977,22 +1272,19 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
         mReceiver = null;
         mCurrentDialog = null;
-        mOrientationListener.disable();
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateFingerprintLocation();
-        updateUdfpsLocation();
+    public void onConfigurationChanged(Configuration newConfig) {
+        updateSensorLocations();
 
         // Save the state of the current dialog (buttons showing, etc)
         if (mCurrentDialog != null) {
+            final PromptViewModel viewModel = mCurrentDialog.getViewModel();
             final Bundle savedState = new Bundle();
             mCurrentDialog.onSaveState(savedState);
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
             mCurrentDialog = null;
-            mOrientationListener.disable();
 
             // Only show the dialog if necessary. If it was animating out, the dialog is supposed
             // to send its pending callback immediately.
@@ -1007,14 +1299,13 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
                 }
 
-                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
+                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState, viewModel);
             }
         }
     }
 
     private void onOrientationChanged() {
-        updateFingerprintLocation();
-        updateUdfpsLocation();
+        updateSensorLocations();
         if (mCurrentDialog != null) {
             mCurrentDialog.onOrientationChanged();
         }
@@ -1023,22 +1314,57 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     protected AuthDialog buildDialog(@Background DelayableExecutor bgExecutor,
             PromptInfo promptInfo, boolean requireConfirmation, int userId, int[] sensorIds,
             String opPackageName, boolean skipIntro, long operationId, long requestId,
-            @BiometricMultiSensorMode int multiSensorConfig,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
+            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
-            @NonNull LockPatternUtils lockPatternUtils) {
-        return new AuthContainerView.Builder(mContext)
-                .setCallback(this)
-                .setPromptInfo(promptInfo)
-                .setRequireConfirmation(requireConfirmation)
-                .setUserId(userId)
-                .setOpPackageName(opPackageName)
-                .setSkipIntro(skipIntro)
-                .setOperationId(operationId)
-                .setRequestId(requestId)
-                .setMultiSensorConfig(multiSensorConfig)
-                .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
-                        userManager, lockPatternUtils);
+            @NonNull LockPatternUtils lockPatternUtils,
+            @NonNull PromptViewModel viewModel) {
+        final AuthContainerView.Config config = new AuthContainerView.Config();
+        config.mContext = mContext;
+        config.mCallback = this;
+        config.mPromptInfo = promptInfo;
+        config.mRequireConfirmation = requireConfirmation;
+        config.mUserId = userId;
+        config.mOpPackageName = opPackageName;
+        config.mSkipIntro = skipIntro;
+        config.mOperationId = operationId;
+        config.mRequestId = requestId;
+        config.mSensorIds = sensorIds;
+        config.mScaleProvider = this::getScaleFactor;
+        return new AuthContainerView(config, mFeatureFlags, mApplicationCoroutineScope, mFpProps, mFaceProps,
+                wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
+                mInteractionJankMonitor, mAuthBiometricFingerprintViewModelProvider,
+                mPromptCredentialInteractor, mPromptSelectorInteractor, viewModel,
+                mCredentialViewModelProvider, bgExecutor);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        final AuthDialog dialog = mCurrentDialog;
+        pw.println("  mCachedDisplayInfo=" + mCachedDisplayInfo);
+        pw.println("  mScaleFactor=" + mScaleFactor);
+        pw.println("  faceAuthSensorLocationDefault=" + mFaceSensorLocationDefault);
+        pw.println("  faceAuthSensorLocation=" + getFaceSensorLocation());
+        pw.println("  fingerprintSensorLocationInNaturalOrientation="
+                + getFingerprintSensorLocationInNaturalOrientation());
+        pw.println("  fingerprintSensorLocation=" + getFingerprintSensorLocation());
+        pw.println("  udfpsBounds=" + mUdfpsBounds);
+        pw.println("  allFingerprintAuthenticatorsRegistered="
+                + mAllFingerprintAuthenticatorsRegistered);
+        pw.println("  currentDialog=" + dialog);
+        if (dialog != null) {
+            dialog.dump(pw, args);
+        }
+    }
+
+    /**
+     * Provides a float that represents the resolution scale(if the controller is for UDFPS).
+     */
+    public interface ScaleFactorProvider {
+        /**
+         * Returns a float representing the scaled resolution(if the controller if for UDFPS).
+         */
+        float provide();
     }
 
     /**
@@ -1050,13 +1376,23 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
          * Called when authenticators are registered. If authenticators are already
          * registered before this call, this callback will never be triggered.
          */
-        default void onAllAuthenticatorsRegistered() {}
+        default void onAllAuthenticatorsRegistered(@Modality int modality) {}
 
         /**
-         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
+         * Called when enrollments have changed. This is called after boot and on changes to
          * enrollment.
          */
-        default void onEnrollmentsChanged() {}
+        default void onEnrollmentsChanged(@Modality int modality) {}
+
+        /**
+         * Called when enrollments have changed. This is called after boot and on changes to
+         * enrollment.
+         */
+        default void onEnrollmentsChanged(
+                @NonNull BiometricType biometricType,
+                int userId,
+                boolean hasEnrollments
+        ) {}
 
         /**
          * Called when the biometric prompt starts showing.
@@ -1069,8 +1405,24 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         default void onBiometricPromptDismissed() {}
 
         /**
-         * The location in pixels can change due to resolution changes.
+         * Called when the location of the fingerprint sensor changes. The location in pixels can
+         * change due to resolution changes.
          */
-        default void onUdfpsLocationChanged() {}
+        default void onFingerprintLocationChanged() {}
+
+        /**
+         * Called when the location of the under display fingerprint sensor changes. The location in
+         * pixels can change due to resolution changes.
+         *
+         * On devices with UDFPS, this is always called alongside
+         * {@link #onFingerprintLocationChanged}.
+         */
+        default void onUdfpsLocationChanged(UdfpsOverlayParams udfpsOverlayParams) {}
+
+        /**
+         * Called when the location of the face unlock sensor (typically the front facing camera)
+         * changes. The location in pixels can change due to resolution changes.
+         */
+        default void onFaceSensorLocationChanged() {}
     }
 }

@@ -1,0 +1,8 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "securebox",
+    srcs: ["src/**/*.java"],
+}

@@ -425,7 +425,8 @@ public class Instrument {
             if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
             return cn;
         } else {
-            List<InstrumentationInfo> infos = mPm.queryInstrumentation(null, 0).getList();
+            List<InstrumentationInfo> infos = mPm.queryInstrumentationAsUser(
+                    null, 0, userId).getList();
 
             final int numInfos = infos == null ? 0: infos.size();
             ArrayList<ComponentName> cns = new ArrayList<>();

@@ -55,13 +55,13 @@ jboolean AGnssRil::setRefLocation(jint type, jint mcc, jint mnc, jint lac, jlong
         case IAGnssRil::AGnssRefLocationType::UMTS_CELLID:
         case IAGnssRil::AGnssRefLocationType::LTE_CELLID:
         case IAGnssRil::AGnssRefLocationType::NR_CELLID:
-            location.cellID.mcc = mcc;
-            location.cellID.mnc = mnc;
-            location.cellID.lac = lac;
-            location.cellID.cid = cid;
-            location.cellID.tac = tac;
-            location.cellID.pcid = pcid;
-            location.cellID.arfcn = arfcn;
+            location.cellID.mcc = static_cast<int>(mcc);
+            location.cellID.mnc = static_cast<int>(mnc);
+            location.cellID.lac = static_cast<int>(lac);
+            location.cellID.cid = static_cast<long>(cid);
+            location.cellID.tac = static_cast<int>(tac);
+            location.cellID.pcid = static_cast<int>(pcid);
+            location.cellID.arfcn = static_cast<int>(arfcn);
             break;
         default:
             ALOGE("Unknown cellid (%s:%d).", __FUNCTION__, __LINE__);
@@ -84,8 +84,23 @@ jboolean AGnssRil::updateNetworkState(jboolean connected, jint type, jboolean ro
     networkAttributes.capabilities = static_cast<int32_t>(capabilities),
     networkAttributes.apn = jniApn.c_str();
 
-    auto result = mIAGnssRil->updateNetworkState(networkAttributes);
-    return checkAidlStatus(result, "IAGnssRilAidl updateNetworkState() failed.");
+    auto status = mIAGnssRil->updateNetworkState(networkAttributes);
+    return checkAidlStatus(status, "IAGnssRilAidl updateNetworkState() failed.");
+}
+
+jboolean AGnssRil::injectNiSuplMessageData(const jbyteArray& msgData, jint length, jint slotIndex) {
+    if (mIAGnssRil->getInterfaceVersion() <= 2) {
+        ALOGE("IAGnssRil does not support injectNiSuplMessageData().");
+        return JNI_FALSE;
+    }
+    JNIEnv* env = getJniEnv();
+    jbyte* bytes = reinterpret_cast<jbyte*>(env->GetPrimitiveArrayCritical(msgData, 0));
+    auto status = mIAGnssRil->injectNiSuplMessageData(std::vector<uint8_t>((const uint8_t*)bytes,
+                                                                           (const uint8_t*)bytes +
+                                                                                   length),
+                                                      static_cast<int>(slotIndex));
+    env->ReleasePrimitiveArrayCritical(msgData, bytes, JNI_ABORT);
+    return checkAidlStatus(status, "IAGnssRil injectNiSuplMessageData() failed.");
 }
 
 // Implementation of AGnssRil_V1_0
@@ -106,20 +121,24 @@ jboolean AGnssRil_V1_0::setSetId(jint type, const jstring& setid_string) {
     return checkHidlReturn(result, "IAGnssRil_V1_0 setSetId() failed.");
 }
 
-jboolean AGnssRil_V1_0::setRefLocation(jint type, jint mcc, jint mnc, jint lac, jlong cid, jint,
-                                       jint, jint) {
+jboolean AGnssRil_V1_0::setRefLocation(jint type, jint mcc, jint mnc, jint lac, jlong cid, jint tac,
+                                       jint pcid, jint) {
     IAGnssRil_V1_0::AGnssRefLocation location;
-    switch (static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type)) {
+    location.type = static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type);
+
+    switch (location.type) {
         case IAGnssRil_V1_0::AGnssRefLocationType::GSM_CELLID:
         case IAGnssRil_V1_0::AGnssRefLocationType::UMTS_CELLID:
-            location.type = static_cast<IAGnssRil_V1_0::AGnssRefLocationType>(type);
-            location.cellID.mcc = mcc;
-            location.cellID.mnc = mnc;
-            location.cellID.lac = lac;
-            location.cellID.cid = cid;
+        case IAGnssRil_V1_0::AGnssRefLocationType::LTE_CELLID:
+            location.cellID.mcc = static_cast<uint16_t>(mcc);
+            location.cellID.mnc = static_cast<uint16_t>(mnc);
+            location.cellID.lac = static_cast<uint16_t>(lac);
+            location.cellID.cid = static_cast<uint32_t>(cid);
+            location.cellID.tac = static_cast<uint16_t>(tac);
+            location.cellID.pcid = static_cast<uint16_t>(pcid);
             break;
         default:
-            ALOGE("Neither a GSM nor a UMTS cellid (%s:%d).", __FUNCTION__, __LINE__);
+            ALOGE("Unknown cellid (%s:%d).", __FUNCTION__, __LINE__);
             return JNI_FALSE;
             break;
     }
@@ -145,6 +164,11 @@ jboolean AGnssRil_V1_0::updateNetworkState(jboolean connected, jint type, jboole
                                                 static_cast<IAGnssRil_V1_0::NetworkType>(type),
                                                 roaming);
     return checkHidlReturn(result, "IAGnssRil_V1_0 updateNetworkState() failed.");
+}
+
+jboolean AGnssRil_V1_0::injectNiSuplMessageData(const jbyteArray&, jint, jint) {
+    ALOGI("IAGnssRil_V1_0 interface does not support injectNiSuplMessageData.");
+    return JNI_FALSE;
 }
 
 // Implementation of AGnssRil_V2_0

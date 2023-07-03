@@ -64,7 +64,7 @@ private class SensitiveContentCoordinatorImpl @Inject constructor(
         pipeline.addPreRenderInvalidator(this)
     }
 
-    override fun onDynamicPrivacyChanged(): Unit = invalidateList()
+    override fun onDynamicPrivacyChanged(): Unit = invalidateList("onDynamicPrivacyChanged")
 
     override fun onBeforeRenderList(entries: List<ListEntry>) {
         if (keyguardStateController.isKeyguardGoingAway() ||

@@ -19,6 +19,7 @@ package com.android.server.tv;
 import android.hardware.tv.input.V1_0.Constants;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvStreamConfig;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -26,9 +27,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Surface;
-
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * Provides access to the low-level TV input hardware abstraction layer.
@@ -48,12 +46,15 @@ final class TvInputHal implements Handler.Callback {
             Constants.EVENT_STREAM_CONFIGURATIONS_CHANGED;
     public static final int EVENT_FIRST_FRAME_CAPTURED = 4;
 
+    public static final int EVENT_TV_MESSAGE = 5;
+
     public interface Callback {
         void onDeviceAvailable(TvInputHardwareInfo info, TvStreamConfig[] configs);
         void onDeviceUnavailable(int deviceId);
         void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs,
                 int cableConnectionStatus);
         void onFirstFrameCaptured(int deviceId, int streamId);
+        void onTvMessage(int deviceId, int type, Bundle data);
     }
 
     private native long nativeOpen(MessageQueue queue);
@@ -64,6 +65,8 @@ final class TvInputHal implements Handler.Callback {
     private static native TvStreamConfig[] nativeGetStreamConfigs(long ptr, int deviceId,
             int generation);
     private static native void nativeClose(long ptr);
+    private static native int nativeSetTvMessageEnabled(long ptr, int deviceId, int streamId,
+            int type, boolean enabled);
 
     private final Object mLock = new Object();
     private long mPtr = 0;
@@ -93,6 +96,25 @@ final class TvInputHal implements Handler.Callback {
                 return ERROR_STALE_CONFIG;
             }
             if (nativeAddOrUpdateStream(mPtr, deviceId, streamConfig.getStreamId(), surface) == 0) {
+                return SUCCESS;
+            } else {
+                return ERROR_UNKNOWN;
+            }
+        }
+    }
+
+    public int setTvMessageEnabled(int deviceId, TvStreamConfig streamConfig, int type,
+            boolean enabled) {
+        synchronized (mLock) {
+            if (mPtr == 0) {
+                return ERROR_NO_INIT;
+            }
+            int generation = mStreamConfigGenerations.get(deviceId, 0);
+            if (generation != streamConfig.getGeneration()) {
+                return ERROR_STALE_CONFIG;
+            }
+            if (nativeSetTvMessageEnabled(mPtr, deviceId, streamConfig.getStreamId(), type,
+                    enabled) == 0) {
                 return SUCCESS;
             } else {
                 return ERROR_UNKNOWN;
@@ -153,9 +175,11 @@ final class TvInputHal implements Handler.Callback {
                 mHandler.obtainMessage(EVENT_STREAM_CONFIGURATION_CHANGED, deviceId, streamId));
     }
 
-    // Handler.Callback implementation
+    private void tvMessageReceivedFromNative(int deviceId, int type, Bundle data) {
+        mHandler.obtainMessage(EVENT_TV_MESSAGE, deviceId, type, data).sendToTarget();
+    }
 
-    private final Queue<Message> mPendingMessageQueue = new LinkedList<>();
+    // Handler.Callback implementation
 
     @Override
     public boolean handleMessage(Message msg) {
@@ -202,6 +226,14 @@ final class TvInputHal implements Handler.Callback {
                 int deviceId = msg.arg1;
                 int streamId = msg.arg2;
                 mCallback.onFirstFrameCaptured(deviceId, streamId);
+                break;
+            }
+
+            case EVENT_TV_MESSAGE: {
+                int deviceId = msg.arg1;
+                int type = msg.arg2;
+                Bundle data = (Bundle) msg.obj;
+                mCallback.onTvMessage(deviceId, type, data);
                 break;
             }
 

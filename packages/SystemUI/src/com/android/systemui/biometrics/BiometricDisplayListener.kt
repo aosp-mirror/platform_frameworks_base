@@ -20,7 +20,7 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Handler
-import android.view.Surface
+import android.view.DisplayInfo
 import com.android.systemui.biometrics.BiometricDisplayListener.SensorType.Generic
 
 /**
@@ -37,7 +37,7 @@ class BiometricDisplayListener(
     private val onChanged: () -> Unit
 ) : DisplayManager.DisplayListener {
 
-    private var lastRotation = Surface.ROTATION_0
+    private var cachedDisplayInfo = DisplayInfo()
 
     override fun onDisplayAdded(displayId: Int) {}
     override fun onDisplayRemoved(displayId: Int) {}
@@ -55,15 +55,14 @@ class BiometricDisplayListener(
     }
 
     private fun didRotationChange(): Boolean {
-        val rotation = context.display?.rotation ?: return false
-        val last = lastRotation
-        lastRotation = rotation
-        return last != rotation
+        val last = cachedDisplayInfo.rotation
+        context.display?.getDisplayInfo(cachedDisplayInfo)
+        return last != cachedDisplayInfo.rotation
     }
 
     /** Listen for changes. */
     fun enable() {
-        lastRotation = context.display?.rotation ?: Surface.ROTATION_0
+        context.display?.getDisplayInfo(cachedDisplayInfo)
         displayManager.registerDisplayListener(
             this,
             handler,

@@ -72,32 +72,34 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryBoundSuccessfully(eq("key"));
+        verify(mLogger).entryBoundSuccessfully(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryBoundSuccessfully(eq("key"));
+        verify(mLogger).entryBoundSuccessfully(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
+
+        when(mBindStage.tryGetStageParams(eq(mEntry))).thenReturn(new RowContentBindParams());
 
         mViewBinder.unbindHeadsUpView(mEntry);
-        verify(mLogger).entryContentViewMarkedFreeable(eq("key"));
+        verify(mLogger).entryContentViewMarkedFreeable(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryUnbound(eq("key"));
+        verify(mLogger).entryUnbound(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
     }
@@ -111,12 +113,12 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         mViewBinder.abortBindCallback(mEntry);
-        verify(mLogger).currentOngoingBindingAborted(eq("key"));
+        verify(mLogger).currentOngoingBindingAborted(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
@@ -135,18 +137,46 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
+        when(mBindStage.tryGetStageParams(eq(mEntry))).thenReturn(new RowContentBindParams());
+
         mViewBinder.unbindHeadsUpView(mEntry);
-        verify(mLogger).currentOngoingBindingAborted(eq("key"));
-        verify(mLogger).entryContentViewMarkedFreeable(eq("key"));
+        verify(mLogger).currentOngoingBindingAborted(eq(mEntry));
+        verify(mLogger).entryContentViewMarkedFreeable(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryUnbound(eq("key"));
+        verify(mLogger).entryUnbound(eq(mEntry));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+    }
+
+    @Test
+    public void testLoggingForLateUnbindFlow() {
+        AtomicReference<NotifBindPipeline.BindCallback> callback = new AtomicReference<>();
+        when(mBindStage.requestRebind(any(), any())).then(i -> {
+            callback.set(i.getArgument(1));
+            return new CancellationSignal();
+        });
+
+        mViewBinder.bindHeadsUpView(mEntry, null);
+        verify(mLogger).startBindingHun(eq(mEntry));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        callback.get().onBindFinished(mEntry);
+        verify(mLogger).entryBoundSuccessfully(eq(mEntry));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        when(mBindStage.tryGetStageParams(eq(mEntry))).thenReturn(null);
+
+        mViewBinder.unbindHeadsUpView(mEntry);
+        verify(mLogger).entryBindStageParamsNullOnUnbind(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
     }

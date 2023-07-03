@@ -23,10 +23,10 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.util.ArrayMap;
 import android.util.SparseIntArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.SettingsXml;
 
 import org.xmlpull.v1.XmlPullParserException;

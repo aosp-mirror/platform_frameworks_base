@@ -45,6 +45,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -60,6 +61,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Night display **/
 public class NightDisplayTile extends QSTileImpl<BooleanState> implements
         NightDisplayListener.Callback {
+
+    public static final String TILE_SPEC = "night";
 
     /**
      * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
@@ -78,6 +81,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     @Inject
     public NightDisplayTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -89,7 +93,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
             ColorDisplayManager colorDisplayManager,
             NightDisplayListenerModule.Builder nightDisplayListenerBuilder
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mLocationController = locationController;
         mManager = colorDisplayManager;
@@ -144,9 +148,10 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = mManager.isNightDisplayActivated();
         state.label = mContext.getString(R.string.quick_settings_night_display_label);
-        state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.icon = ResourceIcon.get(state.value ? R.drawable.qs_nightlight_icon_on
+                : R.drawable.qs_nightlight_icon_off);
         state.secondaryLabel = getSecondaryLabel(state.value);
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
                 ? state.label

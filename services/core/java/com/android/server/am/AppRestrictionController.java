@@ -72,6 +72,7 @@ import static android.os.PowerExemptionManager.REASON_PROFILE_OWNER;
 import static android.os.PowerExemptionManager.REASON_ROLE_DIALER;
 import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_EXEMPT_APP_OP;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.getExemptionReasonForStatsd;
@@ -100,12 +101,12 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -116,7 +117,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
-import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AppBackgroundRestrictionsInfo;
@@ -136,8 +136,8 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -146,8 +146,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
@@ -157,6 +155,8 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.TriConsumer;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
@@ -313,10 +313,18 @@ public final class AppRestrictionController {
     private final Object mCarrierPrivilegedLock = new Object();
 
     /**
-     * List of carrier-privileged apps that should be excluded from standby.
+     * List of carrier-privileged apps that should be excluded from standby,
+     * the key of this array here is the phone id.
      */
     @GuardedBy("mCarrierPrivilegedLock")
-    private List<String> mCarrierPrivilegedApps;
+    private final SparseArray<Set<String>> mCarrierPrivilegedApps = new SparseArray<>();
+
+    /**
+     * Holding the callbacks to the carrier privileged app changes.
+     *
+     * it's lock free.
+     */
+    private volatile ArrayList<PhoneCarrierPrivilegesCallback> mCarrierPrivilegesCallbacks;
 
     /**
      * Whether or not we've loaded the restriction settings from the persistent storage.
@@ -359,19 +367,6 @@ public final class AppRestrictionController {
                             onUidAdded(uid);
                         }
                     }
-                }
-                // fall through.
-                case Intent.ACTION_PACKAGE_CHANGED: {
-                    final String pkgName = intent.getData().getSchemeSpecificPart();
-                    final String[] cmpList = intent.getStringArrayExtra(
-                            Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-                    // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
-                    // enable/disable event (cmpList is just the package name itself), drop
-                    // our carrier privileged app & system-app caches and let them refresh
-                    if (cmpList == null
-                            || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
-                        clearCarrierPrivilegedApps();
-                    }
                 } break;
                 case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
                     final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
@@ -413,6 +408,10 @@ public final class AppRestrictionController {
                     if (userId >= 0) {
                         onUserRemoved(userId);
                     }
+                } break;
+                case TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED: {
+                    unregisterCarrierPrivilegesCallbacks();
+                    registerCarrierPrivilegesCallbacks();
                 } break;
             }
         }
@@ -1068,8 +1067,7 @@ public final class AppRestrictionController {
         }
     }
 
-    final class ConstantsObserver extends ContentObserver implements
-            OnPropertiesChangedListener {
+    final class ConstantsObserver implements OnPropertiesChangedListener {
         /**
          * Whether or not to set the app to restricted standby bucket automatically
          * when it's background-restricted.
@@ -1180,8 +1178,6 @@ public final class AppRestrictionController {
 
         volatile boolean mBgAutoRestrictAbusiveApps;
 
-        volatile boolean mRestrictedBucketEnabled;
-
         volatile long mBgAbusiveNotificationMinIntervalMs;
 
         volatile long mBgLongFgsNotificationMinIntervalMs;
@@ -1214,7 +1210,6 @@ public final class AppRestrictionController {
         volatile boolean mBgPromptAbusiveAppsToBgRestricted;
 
         ConstantsObserver(Handler handler, Context context) {
-            super(handler);
             mDefaultBgPromptFgsWithNotiToBgRestricted = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted);
             mDefaultBgPromptAbusiveAppToBgRestricted = context.getResources().getBoolean(
@@ -1260,27 +1255,8 @@ public final class AppRestrictionController {
             }
         }
 
-        @Override
-        public void onChange(boolean selfChange) {
-            updateSettings();
-        }
-
         public void start() {
-            final ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
-                    false, this);
-            updateSettings();
             updateDeviceConfig();
-        }
-
-        void updateSettings() {
-            mRestrictedBucketEnabled = isRestrictedBucketEnabled();
-        }
-
-        private boolean isRestrictedBucketEnabled() {
-            return Global.getInt(mContext.getContentResolver(),
-                    Global.ENABLE_RESTRICTED_BUCKET,
-                    Global.DEFAULT_ENABLE_RESTRICTED_BUCKET) == 1;
         }
 
         void updateDeviceConfig() {
@@ -1464,7 +1440,7 @@ public final class AppRestrictionController {
             };
 
     private final IUidObserver mUidObserver =
-            new IUidObserver.Stub() {
+            new UidObserver() {
                 @Override
                 public void onUidStateChanged(int uid, int procState, long procStateSeq,
                         int capability) {
@@ -1487,14 +1463,6 @@ public final class AppRestrictionController {
                 @Override
                 public void onUidActive(int uid) {
                     mBgHandler.obtainMessage(BgHandler.MSG_UID_ACTIVE, uid, 0).sendToTarget();
-                }
-
-                @Override
-                public void onUidCachedChanged(int uid, boolean cached) {
-                }
-
-                @Override
-                public void onUidProcAdjChanged(int uid) {
                 }
             };
 
@@ -1533,6 +1501,7 @@ public final class AppRestrictionController {
         initRolesInInterest();
         registerForUidObservers();
         registerForSystemBroadcasts();
+        registerCarrierPrivilegesCallbacks();
         mNotificationHelper.onSystemReady();
         mInjector.getAppStateTracker().addBackgroundRestrictedAppListener(
                 mBackgroundRestrictionListener);
@@ -1762,8 +1731,7 @@ public final class AppRestrictionController {
                         .isAppBackgroundRestricted(uid, packageName)) {
                     return new Pair<>(RESTRICTION_LEVEL_BACKGROUND_RESTRICTED, mEmptyTrackerInfo);
                 }
-                level = mConstantsObserver.mRestrictedBucketEnabled
-                        && standbyBucket == STANDBY_BUCKET_RESTRICTED
+                level = standbyBucket == STANDBY_BUCKET_RESTRICTED
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
@@ -1810,13 +1778,9 @@ public final class AppRestrictionController {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
         @RestrictionLevel int prevLevel = level;
         BaseAppStateTracker resultTracker = null;
-        final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
                     .getProposedRestrictionLevel(packageName, uid, maxLevel);
-            if (!isRestrictedBucketEnabled && l == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
-                l = RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
-            }
             level = Math.max(level, l);
             if (level != prevLevel) {
                 resultTracker = mAppStateTrackers.get(i);
@@ -2151,7 +2115,7 @@ public final class AppRestrictionController {
         return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
     }
 
-    private void applyRestrictionLevel(String pkgName, int uid,
+    void applyRestrictionLevel(String pkgName, int uid,
             @RestrictionLevel int level, TrackerInfo trackerInfo,
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;
@@ -2192,9 +2156,6 @@ public final class AppRestrictionController {
         }
         if (level >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && curLevel < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
-            if (!mConstantsObserver.mRestrictedBucketEnabled) {
-                return;
-            }
             // Moving the app standby bucket to restricted in the meanwhile.
             if (DEBUG_BG_RESTRICTION_CONTROLLER
                     && level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
@@ -2784,6 +2745,37 @@ public final class AppRestrictionController {
      */
     @ReasonCode
     int getBackgroundRestrictionExemptionReason(int uid) {
+        @ReasonCode int reason = getPotentialSystemExemptionReason(uid);
+        if (reason != REASON_DENIED) {
+            return reason;
+        }
+        final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
+        if (packages != null) {
+            // Check each packages to see if any of them is in the "fixed" exemption cases.
+            for (String pkg : packages) {
+                reason = getPotentialSystemExemptionReason(uid, pkg);
+                if (reason != REASON_DENIED) {
+                    return reason;
+                }
+            }
+            // Loop the packages again, and check the user-configurable exemptions.
+            for (String pkg : packages) {
+                reason = getPotentialUserAllowedExemptionReason(uid, pkg);
+                if (reason != REASON_DENIED) {
+                    return reason;
+                }
+            }
+        }
+        return REASON_DENIED;
+    }
+
+    /**
+     * @param uid The uid to check.
+     * @return The potential exemption reason of the given uid. The caller must decide
+     * whether or not it should be exempted.
+     */
+    @ReasonCode
+    int getPotentialSystemExemptionReason(int uid) {
         if (UserHandle.isCore(uid)) {
             return REASON_SYSTEM_UID;
         }
@@ -2811,37 +2803,58 @@ public final class AppRestrictionController {
         } else if (uidProcState <= PROCESS_STATE_PERSISTENT_UI) {
             return REASON_PROC_STATE_PERSISTENT_UI;
         }
-        final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
-        if (packages != null) {
-            final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
-            final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
-            final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
-            // Check each packages to see if any of them is in the "fixed" exemption cases.
-            for (String pkg : packages) {
-                if (isSystemModule(pkg)) {
-                    return REASON_SYSTEM_MODULE;
-                } else if (isCarrierApp(pkg)) {
-                    return REASON_CARRIER_PRIVILEGED_APP;
-                } else if (isExemptedFromSysConfig(pkg)) {
-                    return REASON_SYSTEM_ALLOW_LISTED;
-                } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
-                    return REASON_SYSTEM_ALLOW_LISTED;
-                } else if (pm.isPackageStateProtected(pkg, userId)) {
-                    return REASON_DPO_PROTECTED_APP;
-                } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
-                    return REASON_ACTIVE_DEVICE_ADMIN;
-                }
-            }
-            // Loop the packages again, and check the user-configurable exemptions.
-            for (String pkg : packages) {
-                if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
-                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
-                    return REASON_OP_ACTIVATE_VPN;
-                } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
-                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
-                    return REASON_OP_ACTIVATE_PLATFORM_VPN;
-                }
-            }
+        return REASON_DENIED;
+    }
+
+    /**
+     * @param uid The uid to check.
+     * @param pkgName The package name to check.
+     * @return The potential system-fixed exemption reason of the given uid/package. The caller
+     * must decide whether or not it should be exempted.
+     */
+    @ReasonCode
+    int getPotentialSystemExemptionReason(int uid, String pkg) {
+        final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+        final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
+        final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+        final ActivityManagerService activityManagerService = mInjector.getActivityManagerService();
+        final int userId = UserHandle.getUserId(uid);
+        if (isSystemModule(pkg)) {
+            return REASON_SYSTEM_MODULE;
+        } else if (isCarrierApp(pkg)) {
+            return REASON_CARRIER_PRIVILEGED_APP;
+        } else if (isExemptedFromSysConfig(pkg)) {
+            return REASON_SYSTEM_ALLOW_LISTED;
+        } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
+            return REASON_SYSTEM_ALLOW_LISTED;
+        } else if (pm.isPackageStateProtected(pkg, userId)) {
+            return REASON_DPO_PROTECTED_APP;
+        } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
+            return REASON_ACTIVE_DEVICE_ADMIN;
+        } else if (activityManagerService.mConstants.mFlagSystemExemptPowerRestrictionsEnabled
+                && appOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid, pkg)
+                == AppOpsManager.MODE_ALLOWED) {
+            return REASON_SYSTEM_EXEMPT_APP_OP;
+        }
+        return REASON_DENIED;
+    }
+
+    /**
+     * @param uid The uid to check.
+     * @param pkgName The package name to check.
+     * @return The potential user-allowed exemption reason of the given uid/package. The caller
+     * must decide whether or not it should be exempted.
+     */
+    @ReasonCode
+    int getPotentialUserAllowedExemptionReason(int uid, String pkg) {
+        final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+        if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
+                uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+            return REASON_OP_ACTIVATE_VPN;
+        } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+            return REASON_OP_ACTIVATE_PLATFORM_VPN;
         }
         if (isRoleHeldByUid(RoleManager.ROLE_DIALER, uid)) {
             return REASON_ROLE_DIALER;
@@ -2852,6 +2865,7 @@ public final class AppRestrictionController {
         if (isOnDeviceIdleAllowlist(uid)) {
             return REASON_ALLOWLISTED_PACKAGE;
         }
+        final ActivityManagerInternal am = mInjector.getActivityManagerInternal();
         if (am.isAssociatedCompanionApp(UserHandle.getUserId(uid), uid)) {
             return REASON_COMPANION_DEVICE_MANAGER;
         }
@@ -2860,32 +2874,61 @@ public final class AppRestrictionController {
 
     private boolean isCarrierApp(String packageName) {
         synchronized (mCarrierPrivilegedLock) {
-            if (mCarrierPrivilegedApps == null) {
-                fetchCarrierPrivilegedAppsCPL();
-            }
             if (mCarrierPrivilegedApps != null) {
-                return mCarrierPrivilegedApps.contains(packageName);
+                for (int i = mCarrierPrivilegedApps.size() - 1; i >= 0; i--) {
+                    if (mCarrierPrivilegedApps.valueAt(i).contains(packageName)) {
+                        return true;
+                    }
+                }
             }
             return false;
         }
     }
 
-    private void clearCarrierPrivilegedApps() {
-        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
-            Slog.i(TAG, "Clearing carrier privileged apps list");
+    private void registerCarrierPrivilegesCallbacks() {
+        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
+        if (telephonyManager == null) {
+            return;
         }
-        synchronized (mCarrierPrivilegedLock) {
-            mCarrierPrivilegedApps = null; // Need to be refetched.
+
+        final int numPhones = telephonyManager.getActiveModemCount();
+        final ArrayList<PhoneCarrierPrivilegesCallback> callbacks = new ArrayList<>();
+        for (int i = 0; i < numPhones; i++) {
+            final PhoneCarrierPrivilegesCallback callback = new PhoneCarrierPrivilegesCallback(i);
+            callbacks.add(callback);
+            telephonyManager.registerCarrierPrivilegesCallback(i, mBgExecutor, callback);
+        }
+        mCarrierPrivilegesCallbacks = callbacks;
+    }
+
+    private void unregisterCarrierPrivilegesCallbacks() {
+        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
+        if (telephonyManager == null) {
+            return;
+        }
+        final ArrayList<PhoneCarrierPrivilegesCallback> callbacks = mCarrierPrivilegesCallbacks;
+        if (callbacks != null) {
+            for (int i = callbacks.size() - 1; i >= 0; i--) {
+                telephonyManager.unregisterCarrierPrivilegesCallback(callbacks.get(i));
+            }
+            mCarrierPrivilegesCallbacks = null;
         }
     }
 
-    @GuardedBy("mCarrierPrivilegedLock")
-    private void fetchCarrierPrivilegedAppsCPL() {
-        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
-        mCarrierPrivilegedApps =
-                telephonyManager.getCarrierPrivilegedPackagesForAllActiveSubscriptions();
-        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
-            Slog.d(TAG, "apps with carrier privilege " + mCarrierPrivilegedApps);
+    private class PhoneCarrierPrivilegesCallback implements CarrierPrivilegesCallback {
+        private final int mPhoneId;
+
+        PhoneCarrierPrivilegesCallback(int phoneId) {
+            mPhoneId = phoneId;
+        }
+
+        @Override
+        public void onCarrierPrivilegesChanged(@NonNull Set<String> privilegedPackageNames,
+                @NonNull Set<Integer> privilegedUids) {
+            synchronized (mCarrierPrivilegedLock) {
+                mCarrierPrivilegedApps.put(mPhoneId,
+                        Collections.unmodifiableSet(privilegedPackageNames));
+            }
         }
     }
 
@@ -3253,7 +3296,6 @@ public final class AppRestrictionController {
     private void registerForSystemBroadcasts() {
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         packageFilter.addDataScheme("package");
         mContext.registerReceiverForAllUsers(mBroadcastReceiver, packageFilter, null, mBgHandler);
@@ -3266,6 +3308,9 @@ public final class AppRestrictionController {
         bootFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
         mContext.registerReceiverAsUser(mBootReceiver, UserHandle.SYSTEM,
                 bootFilter, null, mBgHandler);
+        final IntentFilter telFilter = new IntentFilter(
+                TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, telFilter, null, mBgHandler);
     }
 
     private void unregisterForSystemBroadcasts() {

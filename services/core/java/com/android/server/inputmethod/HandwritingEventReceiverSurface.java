@@ -27,19 +27,15 @@ import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-import com.android.server.policy.WindowManagerPolicy;
-
 final class HandwritingEventReceiverSurface {
 
     public static final String TAG = HandwritingEventReceiverSurface.class.getSimpleName();
     static final boolean DEBUG = HandwritingModeController.DEBUG;
 
-    // Place the layer below the highest layer to place it under gesture monitors. If the surface
-    // is above gesture monitors, then edge-back and swipe-up gestures won't work when this surface
-    // is intercepting.
+    // Place the layer at the highest layer so stylus cannot trigger gesture monitors
+    // (e.g. navigation bar, edge-back, etc) while handwriting is ongoing.
     // TODO(b/217538817): Specify the ordering in WM by usage.
-    private static final int HANDWRITING_SURFACE_LAYER =
-            WindowManagerPolicy.INPUT_DISPLAY_OVERLAY_LAYER;
+    private static final int HANDWRITING_SURFACE_LAYER = Integer.MAX_VALUE;
 
     private final InputWindowHandle mWindowHandle;
     private final InputChannel mClientChannel;

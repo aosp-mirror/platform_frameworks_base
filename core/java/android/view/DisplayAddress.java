@@ -33,7 +33,7 @@ public abstract class DisplayAddress implements Parcelable {
      *
      * @param physicalDisplayId A physical display ID.
      * @return The {@link Physical} address.
-     * @see SurfaceControl#getPhysicalDisplayIds
+     * @see com.android.server.display.DisplayControl#getPhysicalDisplayIds
      */
     @NonNull
     public static Physical fromPhysicalDisplayId(long physicalDisplayId) {
@@ -83,7 +83,7 @@ public abstract class DisplayAddress implements Parcelable {
          * Stable display ID combining port and model.
          *
          * @return An ID in the range [0, 2^64) interpreted as signed.
-         * @see SurfaceControl#getPhysicalDisplayIds
+         * @see com.android.server.display.DisplayControl#getPhysicalDisplayIds
          */
         public long getPhysicalDisplayId() {
             return mPhysicalDisplayId;

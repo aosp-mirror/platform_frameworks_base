@@ -27,7 +27,7 @@ using ::android::StringPiece;
 namespace aapt {
 namespace xml {
 
-std::string BuildPackageNamespace(const StringPiece& package, bool private_reference) {
+std::string BuildPackageNamespace(StringPiece package, bool private_reference) {
   std::string result = private_reference ? kSchemaPrivatePrefix : kSchemaPublicPrefix;
   result.append(package.data(), package.size());
   return result;
@@ -41,7 +41,7 @@ std::optional<ExtractedPackage> ExtractPackageFromNamespace(const std::string& n
     if (package.empty()) {
       return {};
     }
-    return ExtractedPackage{package.to_string(), false /* is_private */};
+    return ExtractedPackage{std::string(package), false /* is_private */};
 
   } else if (util::StartsWith(namespace_uri, kSchemaPrivatePrefix)) {
     StringPiece schema_prefix = kSchemaPrivatePrefix;
@@ -50,7 +50,7 @@ std::optional<ExtractedPackage> ExtractPackageFromNamespace(const std::string& n
     if (package.empty()) {
       return {};
     }
-    return ExtractedPackage{package.to_string(), true /* is_private */};
+    return ExtractedPackage{std::string(package), true /* is_private */};
 
   } else if (namespace_uri == kSchemaAuto) {
     return ExtractedPackage{std::string(), true /* is_private */};

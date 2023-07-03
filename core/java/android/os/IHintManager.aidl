@@ -24,10 +24,13 @@ interface IHintManager {
     /**
      * Creates a {@link Session} for the given set of threads and associates to a binder token.
      */
-   IHintSession createHintSession(in IBinder token, in int[] tids, long durationNanos);
+    IHintSession createHintSession(in IBinder token, in int[] tids, long durationNanos);
 
     /**
      * Get preferred rate limit in nano second.
      */
-   long getHintSessionPreferredRate();
+    long getHintSessionPreferredRate();
+
+    void setHintSessionThreads(in IHintSession hintSession, in int[] tids);
+    int[] getHintSessionThreadIds(in IHintSession hintSession);
 }

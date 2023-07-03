@@ -16,18 +16,21 @@
 
 package com.android.systemui.shared.system;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.view.RemoteAnimationTarget.MODE_CHANGING;
+import static android.view.RemoteAnimationTarget.MODE_CLOSING;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.ACTIVITY_TYPE_HOME;
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.MODE_CHANGING;
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.MODE_CLOSING;
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.MODE_OPENING;
+import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,6 +41,7 @@ import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
@@ -45,6 +49,7 @@ import android.window.TransitionInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.wm.shell.util.TransitionUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,16 +69,22 @@ public class RemoteTransitionTest extends SysuiTestCase {
     @Test
     public void testLegacyTargetExtract() {
         TransitionInfo combined = new TransitionInfoBuilder(TRANSIT_CLOSE)
-                .addChange(TRANSIT_CHANGE, FLAG_SHOW_WALLPAPER)
-                .addChange(TRANSIT_CLOSE, 0 /* flags */)
-                .addChange(TRANSIT_OPEN, FLAG_IS_WALLPAPER).build();
-        // Check non-wallpaper extraction
-        RemoteAnimationTargetCompat[] wrapped = RemoteAnimationTargetCompat.wrap(combined,
-                false /* wallpapers */, mock(SurfaceControl.Transaction.class), null /* leashes */);
+                .addChange(TRANSIT_CHANGE, FLAG_SHOW_WALLPAPER,
+                        createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_STANDARD))
+                // Embedded TaskFragment should be excluded when animated with Task.
+                .addChange(TRANSIT_CLOSE, FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY, null /* taskInfo */)
+                .addChange(TRANSIT_CLOSE, 0 /* flags */,
+                        createTaskInfo(2 /* taskId */, ACTIVITY_TYPE_STANDARD))
+                .addChange(TRANSIT_OPEN, FLAG_IS_WALLPAPER, null /* taskInfo */)
+                .addChange(TRANSIT_CHANGE, FLAG_IS_DIVIDER_BAR, null /* taskInfo */)
+                .build();
+        // Check apps extraction
+        RemoteAnimationTarget[] wrapped = RemoteAnimationTargetCompat.wrapApps(combined,
+                mock(SurfaceControl.Transaction.class), null /* leashes */);
         assertEquals(2, wrapped.length);
         int changeLayer = -1;
         int closeLayer = -1;
-        for (RemoteAnimationTargetCompat t : wrapped) {
+        for (RemoteAnimationTarget t : wrapped) {
             if (t.mode == MODE_CHANGING) {
                 changeLayer = t.prefixOrderIndex;
             } else if (t.mode == MODE_CLOSING) {
@@ -86,25 +97,33 @@ public class RemoteTransitionTest extends SysuiTestCase {
         assertTrue(closeLayer < changeLayer);
 
         // Check wallpaper extraction
-        RemoteAnimationTargetCompat[] wallps = RemoteAnimationTargetCompat.wrap(combined,
+        RemoteAnimationTarget[] wallps = RemoteAnimationTargetCompat.wrapNonApps(combined,
                 true /* wallpapers */, mock(SurfaceControl.Transaction.class), null /* leashes */);
         assertEquals(1, wallps.length);
         assertTrue(wallps[0].prefixOrderIndex < closeLayer);
         assertEquals(MODE_OPENING, wallps[0].mode);
+
+        // Check non-apps extraction
+        RemoteAnimationTarget[] nonApps = RemoteAnimationTargetCompat.wrapNonApps(combined,
+                false /* wallpapers */, mock(SurfaceControl.Transaction.class), null /* leashes */);
+        assertEquals(1, nonApps.length);
+        assertTrue(nonApps[0].prefixOrderIndex == Integer.MAX_VALUE);
+        assertEquals(MODE_CHANGING, nonApps[0].mode);
     }
 
     @Test
     public void testLegacyTargetWrapper() {
         TransitionInfo tinfo = new TransitionInfoBuilder(TRANSIT_CLOSE)
-                .addChange(TRANSIT_CHANGE, FLAG_TRANSLUCENT).build();
+                .addChange(TRANSIT_CHANGE, FLAG_TRANSLUCENT,
+                        createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_STANDARD)).build();
         final TransitionInfo.Change change = tinfo.getChanges().get(0);
         final Rect endBounds = new Rect(40, 60, 140, 200);
         change.setTaskInfo(createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_HOME));
         change.setEndAbsBounds(endBounds);
         change.setEndRelOffset(0, 0);
-        final RemoteAnimationTargetCompat wrapped = new RemoteAnimationTargetCompat(change,
-                0 /* order */, tinfo, mock(SurfaceControl.Transaction.class));
-        assertEquals(ACTIVITY_TYPE_HOME, wrapped.activityType);
+        RemoteAnimationTarget wrapped = TransitionUtil.newTarget(
+                change, 0 /* order */, tinfo, mock(SurfaceControl.Transaction.class), null);
+        assertEquals(ACTIVITY_TYPE_HOME, wrapped.windowConfiguration.getActivityType());
         assertEquals(new Rect(0, 0, 100, 140), wrapped.localBounds);
         assertEquals(endBounds, wrapped.screenSpaceBounds);
         assertTrue(wrapped.isTranslucent);
@@ -115,15 +134,17 @@ public class RemoteTransitionTest extends SysuiTestCase {
 
         TransitionInfoBuilder(@WindowManager.TransitionType int type) {
             mInfo = new TransitionInfo(type, 0 /* flags */);
-            mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
+            mInfo.addRootLeash(0, createMockSurface(true /* valid */), 0, 0);
         }
 
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
-                @TransitionInfo.ChangeFlags int flags) {
+                @TransitionInfo.ChangeFlags int flags, ActivityManager.RunningTaskInfo taskInfo) {
             final TransitionInfo.Change change =
                     new TransitionInfo.Change(null /* token */, createMockSurface(true));
             change.setMode(mode);
             change.setFlags(flags);
+            change.setTaskInfo(taskInfo);
+            change.setDisplayId(0, 0);
             mInfo.addChange(change);
             return this;
         }

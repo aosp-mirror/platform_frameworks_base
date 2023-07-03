@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.os.Trace;
+import android.provider.DeviceConfig;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -65,6 +67,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
+import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -73,6 +76,9 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.view.autofill.AutofillId;
+import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -240,6 +246,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The list allows multiple choices in a modal selection mode
      */
     public static final int CHOICE_MODE_MULTIPLE_MODAL = 3;
+
+    /**
+     * When flinging the stretch towards scrolling content, it should destretch quicker than the
+     * fling would normally do. The visual effect of flinging the stretch looks strange as little
+     * appears to happen at first and then when the stretch disappears, the content starts
+     * scrolling quickly.
+     */
+    private static final float FLING_DESTRETCH_FACTOR = 4f;
 
     /**
      * The thread that created this view.
@@ -457,7 +471,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     AbsPositionScroller mPositionScroller;
 
     /**
-     * The offset in pixels form the top of the AdapterView to the top
+     * The offset in pixels from the top of the AdapterView to the top
      * of the currently selected view. Used to save and restore state.
      */
     int mSelectedTop = 0;
@@ -632,6 +646,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The last scroll state reported to clients through {@link OnScrollListener}.
      */
     private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+
+    /**
+     * Indicates that reporting positions of child views to content capture is enabled via
+     * DeviceConfig.
+     */
+    private static boolean sContentCaptureReportingEnabledByDeviceConfig = false;
+
+    /**
+     * Listens for changes to DeviceConfig properties and updates stored values accordingly.
+     */
+    private static DeviceConfig.OnPropertiesChangedListener sDeviceConfigChangeListener = null;
+
+    /**
+     * Indicates that child positions of views should be reported to Content Capture the next time
+     * that active views are refreshed.
+     */
+    private boolean mReportChildrenToContentCaptureOnNextUpdate = true;
 
     /**
      * Helper object that renders and controls the fast scroll thumb.
@@ -850,8 +881,44 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public void adjustListItemSelectionBounds(Rect bounds);
     }
 
+    private static class DeviceConfigChangeListener
+            implements DeviceConfig.OnPropertiesChangedListener {
+        @Override
+        public void onPropertiesChanged(
+                @NonNull DeviceConfig.Properties properties) {
+            if (!DeviceConfig.NAMESPACE_CONTENT_CAPTURE.equals(properties.getNamespace())) {
+                return;
+            }
+
+            for (String key : properties.getKeyset()) {
+                if (!ContentCaptureManager.DEVICE_CONFIG_PROPERTY_REPORT_LIST_VIEW_CHILDREN
+                        .equals(key)) {
+                    continue;
+                }
+
+                sContentCaptureReportingEnabledByDeviceConfig = properties.getBoolean(key,
+                        false);
+            }
+        }
+    }
+
+    private static void setupDeviceConfigProperties() {
+        if (sDeviceConfigChangeListener == null) {
+            sContentCaptureReportingEnabledByDeviceConfig = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_REPORT_LIST_VIEW_CHILDREN,
+                    false);
+            sDeviceConfigChangeListener = new DeviceConfigChangeListener();
+            DeviceConfig.addOnPropertiesChangedListener(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                    ActivityThread.currentApplication().getMainExecutor(),
+                    sDeviceConfigChangeListener);
+        }
+    }
+
     public AbsListView(Context context) {
         super(context);
+        setupDeviceConfigProperties();
         mEdgeGlowBottom = new EdgeEffect(context);
         mEdgeGlowTop = new EdgeEffect(context);
         initAbsListView();
@@ -874,6 +941,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     public AbsListView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setupDeviceConfigProperties();
         mEdgeGlowBottom = new EdgeEffect(context, attrs);
         mEdgeGlowTop = new EdgeEffect(context, attrs);
         initAbsListView();
@@ -4216,9 +4284,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         // fling further.
                         boolean flingVelocity = Math.abs(initialVelocity) > mMinimumVelocity;
                         if (flingVelocity && !mEdgeGlowTop.isFinished()) {
-                            mEdgeGlowTop.onAbsorb(initialVelocity);
+                            if (shouldAbsorb(mEdgeGlowTop, initialVelocity)) {
+                                mEdgeGlowTop.onAbsorb(initialVelocity);
+                            } else {
+                                if (mFlingRunnable == null) {
+                                    mFlingRunnable = new FlingRunnable();
+                                }
+                                mFlingRunnable.start(-initialVelocity);
+                            }
                         } else if (flingVelocity && !mEdgeGlowBottom.isFinished()) {
-                            mEdgeGlowBottom.onAbsorb(-initialVelocity);
+                            if (shouldAbsorb(mEdgeGlowBottom, -initialVelocity)) {
+                                mEdgeGlowBottom.onAbsorb(-initialVelocity);
+                            } else {
+                                if (mFlingRunnable == null) {
+                                    mFlingRunnable = new FlingRunnable();
+                                }
+                                mFlingRunnable.start(-initialVelocity);
+                            }
                         } else if (flingVelocity
                                 && !((mFirstPosition == 0
                                 && firstChildTop == contentTop - mOverscrollDistance)
@@ -4301,6 +4383,60 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /**
+     * Returns true if edgeEffect should call onAbsorb() with veclocity or false if it should
+     * animate with a fling. It will animate with a fling if the velocity will remove the
+     * EdgeEffect through its normal operation.
+     *
+     * @param edgeEffect The EdgeEffect that might absorb the velocity.
+     * @param velocity The velocity of the fling motion
+     * @return true if the velocity should be absorbed or false if it should be flung.
+     */
+    private boolean shouldAbsorb(EdgeEffect edgeEffect, int velocity) {
+        if (velocity > 0) {
+            return true;
+        }
+        float distance = edgeEffect.getDistance() * getHeight();
+
+        // This is flinging without the spring, so let's see if it will fling past the overscroll
+        if (mFlingRunnable == null) {
+            mFlingRunnable = new FlingRunnable();
+        }
+        float flingDistance = mFlingRunnable.getSplineFlingDistance(-velocity);
+
+        return flingDistance < distance;
+    }
+
+    /**
+     * Used by consumeFlingInHorizontalStretch() and consumeFlinInVerticalStretch() for
+     * consuming deltas from EdgeEffects
+     * @param unconsumed The unconsumed delta that the EdgeEffets may consume
+     * @return The unconsumed delta after the EdgeEffects have had an opportunity to consume.
+     */
+    private int consumeFlingInStretch(int unconsumed) {
+        if (unconsumed < 0 && mEdgeGlowTop != null && mEdgeGlowTop.getDistance() != 0f) {
+            int size = getHeight();
+            float deltaDistance = unconsumed * FLING_DESTRETCH_FACTOR / size;
+            int consumed = Math.round(size / FLING_DESTRETCH_FACTOR
+                    * mEdgeGlowTop.onPullDistance(deltaDistance, 0.5f));
+            if (consumed != unconsumed) {
+                mEdgeGlowTop.finish();
+            }
+            return unconsumed - consumed;
+        }
+        if (unconsumed > 0 && mEdgeGlowBottom != null && mEdgeGlowBottom.getDistance() != 0f) {
+            int size = getHeight();
+            float deltaDistance = -unconsumed * FLING_DESTRETCH_FACTOR / size;
+            int consumed = Math.round(-size / FLING_DESTRETCH_FACTOR
+                    * mEdgeGlowBottom.onPullDistance(deltaDistance, 0.5f));
+            if (consumed != unconsumed) {
+                mEdgeGlowBottom.finish();
+            }
+            return unconsumed - consumed;
+        }
+        return unconsumed;
+    }
+
     private boolean shouldDisplayEdgeEffects() {
         return getOverScrollMode() != OVER_SCROLL_NEVER;
     }
@@ -4363,7 +4499,34 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
+                    // If we're moving down, we want the top item. If we're moving up, bottom item.
+                    final int motionIndex = delta > 0 ? 0 : getChildCount() - 1;
+
+                    int motionViewPrevTop = 0;
+                    View motionView = this.getChildAt(motionIndex);
+                    if (motionView != null) {
+                        motionViewPrevTop = motionView.getTop();
+                    }
+
+                    final int overscrollMode = getOverScrollMode();
+
                     if (!trackMotionScroll(delta, delta)) {
+                        return true;
+                    } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
+                            && (overscrollMode == OVER_SCROLL_ALWAYS
+                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS
+                            && !contentFits()))) {
+                        int motionViewRealTop = motionView.getTop();
+                        float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
+                                / ((float) getHeight());
+                        if (delta > 0) {
+                            mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
+                            mEdgeGlowTop.onRelease();
+                        } else {
+                            mEdgeGlowBottom.onPullDistance(-overscroll, 0.5f);
+                            mEdgeGlowBottom.onRelease();
+                        }
+                        invalidate();
                         return true;
                     }
                 }
@@ -4699,6 +4862,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mOnScrollListener.onScrollStateChanged(this, newState);
             }
         }
+
+        // When scrolling, we want to report changes in the active children to Content Capture,
+        // so set the flag to report on the next update only when scrolling has stopped or a fling
+        // scroll is performed.
+        if (newState == OnScrollListener.SCROLL_STATE_IDLE
+                || newState == OnScrollListener.SCROLL_STATE_FLING) {
+            mReportChildrenToContentCaptureOnNextUpdate = true;
+        }
     }
 
     /**
@@ -4754,6 +4925,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         FlingRunnable() {
             mScroller = new OverScroller(getContext());
+        }
+
+        float getSplineFlingDistance(int velocity) {
+            return (float) mScroller.getSplineFlingDistance(velocity);
         }
 
         // Use AbsListView#fling(int) instead
@@ -4878,6 +5053,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
 
                 if (mItemCount == 0 || getChildCount() == 0) {
+                    mEdgeGlowBottom.onRelease();
+                    mEdgeGlowTop.onRelease();
                     endFling();
                     return;
                 }
@@ -4888,7 +5065,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 // Flip sign to convert finger direction to list items direction
                 // (e.g. finger moving down means list is moving towards the top)
-                int delta = mLastFlingY - y;
+                int delta = consumeFlingInStretch(mLastFlingY - y);
 
                 // Pretend that each frame of a fling scroll is a touch scroll
                 if (delta > 0) {
@@ -6654,10 +6831,77 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mRecycler.mRecyclerListener = listener;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * This method will initialize the fields of the {@link ViewStructure}
+     * using the base implementation in {@link View}. On API level 33 and higher, it may also
+     * write information about the positions of active views to the extras bundle provided by the
+     * {@link ViewStructure}.
+     *
+     * NOTE: When overriding this method on API level 33, if not calling super() or if changing the
+     * logic for child views, be sure to provide values for the first active child view position and
+     * the list of active child views in the {@link ViewStructure}'s extras {@link Bundle} using the
+     * "android.view.ViewStructure.extra.ACTIVE_CHILDREN_IDS" and
+     * "android.view.ViewStructure.extra.FIRST_ACTIVE_POSITION" keys.
+     *
+     * @param structure {@link ViewStructure} to be filled in with structured view data.
+     * @param flags optional flags.
+     *
+     * @see View#AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+     */
+    @Override
+    public void onProvideContentCaptureStructure(
+            @NonNull ViewStructure structure, int flags) {
+        super.onProvideContentCaptureStructure(structure, flags);
+        if (!sContentCaptureReportingEnabledByDeviceConfig) {
+            return;
+        }
+
+        Bundle extras = structure.getExtras();
+
+        if (extras == null) {
+            Log.wtf(TAG, "Unexpected null extras Bundle in ViewStructure");
+            return;
+        }
+
+        int childCount = getChildCount();
+        ArrayList<AutofillId> idsList = new ArrayList<>(childCount);
+
+        for (int i = 0; i < childCount; ++i) {
+            View activeView = getChildAt(i);
+            if (activeView == null) {
+                continue;
+            }
+
+            idsList.add(activeView.getAutofillId());
+        }
+
+        extras.putParcelableArrayList(ViewStructure.EXTRA_ACTIVE_CHILDREN_IDS,
+                idsList);
+
+        extras.putInt(ViewStructure.EXTRA_FIRST_ACTIVE_POSITION,
+                getFirstVisiblePosition());
+    }
+
+    private void reportActiveViewsToContentCapture() {
+        if (!sContentCaptureReportingEnabledByDeviceConfig) {
+            return;
+        }
+
+        ContentCaptureSession session = getContentCaptureSession();
+        if (session != null) {
+            ViewStructure structure = session.newViewStructure(this);
+            onProvideContentCaptureStructure(structure, /* flags= */ 0);
+            session.notifyViewAppeared(structure);
+        }
+    }
+
     class AdapterDataSetObserver extends AdapterView<ListAdapter>.AdapterDataSetObserver {
         @Override
         public void onChanged() {
             super.onChanged();
+            mReportChildrenToContentCaptureOnNextUpdate = true;
             if (mFastScroll != null) {
                 mFastScroll.onSectionsChanged();
             }
@@ -6666,6 +6910,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public void onInvalidated() {
             super.onInvalidated();
+            mReportChildrenToContentCaptureOnNextUpdate = true;
             if (mFastScroll != null) {
                 mFastScroll.onSectionsChanged();
             }
@@ -6983,6 +7228,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // Remember the position so that setupChild() doesn't reset state.
                     lp.scrappedFromPosition = firstActivePosition + i;
                 }
+            }
+
+            if (mReportChildrenToContentCaptureOnNextUpdate && childCount > 0) {
+                AbsListView.this.reportActiveViewsToContentCapture();
+                mReportChildrenToContentCaptureOnNextUpdate = false;
             }
         }
 

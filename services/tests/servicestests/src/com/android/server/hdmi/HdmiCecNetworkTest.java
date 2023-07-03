@@ -67,8 +67,11 @@ public class HdmiCecNetworkTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
+
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService = new HdmiControlService(mContext, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()) {
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()) {
             @Override
             void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                 mDeviceEventListenerStatuses.add(status);
@@ -92,15 +95,35 @@ public class HdmiCecNetworkTest {
 
         mHdmiPortInfo = new HdmiPortInfo[5];
         mHdmiPortInfo[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, 0x2100)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2200)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[2] =
-                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+                new HdmiPortInfo.Builder(3, HdmiPortInfo.PORT_INPUT, 0x2000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[3] =
-                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, 0x3000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[4] =
-                new HdmiPortInfo(5, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+                new HdmiPortInfo.Builder(5, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiCecNetwork.initPortInfo();
 
@@ -604,5 +627,37 @@ public class HdmiCecNetworkTest {
         mHdmiCecNetwork.addCecDevice(HdmiDeviceInfo.INACTIVE_DEVICE);
 
         assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+    }
+
+    @Test
+    public void disableCec_clearCecLocalDevices() {
+        mHdmiCecNetwork.clearLocalDevices();
+        mHdmiCecNetwork.addLocalDevice(HdmiDeviceInfo.DEVICE_TV,
+                new HdmiCecLocalDeviceTv(mHdmiControlService));
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(1);
+        assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
+                HdmiCecLocalDeviceTv.class);
+        mHdmiControlService.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(0);
+    }
+
+    @Test
+    public void disableEarc_doNotClearCecLocalDevices() {
+        mHdmiCecNetwork.clearLocalDevices();
+        mHdmiCecNetwork.addLocalDevice(HdmiDeviceInfo.DEVICE_TV,
+                new HdmiCecLocalDeviceTv(mHdmiControlService));
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(1);
+        assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
+                HdmiCecLocalDeviceTv.class);
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(1);
+        assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
+                HdmiCecLocalDeviceTv.class);
     }
 }

@@ -17,8 +17,8 @@ package com.android.server.content;
 
 import android.app.ActivityManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.pm.UserPackage;
 import android.os.SystemClock;
-import android.util.Pair;
 
 import com.android.server.LocalServices;
 
@@ -26,8 +26,7 @@ import java.util.HashMap;
 
 class SyncAdapterStateFetcher {
 
-    private final HashMap<Pair<Integer, String>, Integer> mBucketCache =
-            new HashMap<>();
+    private final HashMap<UserPackage, Integer> mBucketCache = new HashMap<>();
 
     public SyncAdapterStateFetcher() {
     }
@@ -36,7 +35,7 @@ class SyncAdapterStateFetcher {
      * Return sync adapter state with a cache.
      */
     public int getStandbyBucket(int userId, String packageName) {
-        final Pair<Integer, String> key = Pair.create(userId, packageName);
+        final UserPackage key = UserPackage.of(userId, packageName);
         final Integer cached = mBucketCache.get(key);
         if (cached != null) {
             return cached;

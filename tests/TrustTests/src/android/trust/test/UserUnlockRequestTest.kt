@@ -79,6 +79,16 @@ class UserUnlockRequestTest {
             .isEqualTo(oldCount + 1)
     }
 
+    @Test
+    fun reportUserMayRequestUnlock_differentUserId_doesNotPropagateToAgent() {
+        val oldCount = trustAgentRule.agent.onUserMayRequestUnlockCallCount
+        trustManager.reportUserMayRequestUnlock(userId + 1)
+        await()
+
+        assertThat(trustAgentRule.agent.onUserMayRequestUnlockCallCount)
+            .isEqualTo(oldCount)
+    }
+
     companion object {
         private const val TAG = "UserUnlockRequestTest"
         private fun await() = Thread.sleep(250)

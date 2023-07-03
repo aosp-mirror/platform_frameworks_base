@@ -50,6 +50,8 @@
         android:id="@+id/banner_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textAlignment="viewStart"
         android:paddingTop="0dp"
         android:paddingBottom="4dp"
         android:textAppearance="@style/Banner.Title.SettingsLib"/>
@@ -58,6 +60,8 @@
         android:id="@+id/banner_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textAlignment="viewStart"
         android:paddingTop="0dp"
         android:paddingBottom="4dp"
         android:textAppearance="@style/Banner.Subtitle.SettingsLib"
@@ -67,6 +71,8 @@
         android:id="@+id/banner_summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textAlignment="viewStart"
         android:paddingTop="4dp"
         android:paddingBottom="8dp"
         android:textAppearance="@style/Banner.Summary.SettingsLib"/>

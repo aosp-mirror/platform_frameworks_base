@@ -289,6 +289,14 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
+    void setFocusTransferTarget(IBinder toToken) {
+        if (mHandle.focusTransferTarget == toToken) {
+            return;
+        }
+        mHandle.focusTransferTarget = toToken;
+        mChanged = true;
+    }
+
     @Override
     public String toString() {
         return mHandle + ", changed=" + mChanged;

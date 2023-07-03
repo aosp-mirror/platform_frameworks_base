@@ -98,6 +98,18 @@ public final class LongArrayMultiStateCounter implements Parcelable {
             native_getValues(mNativeObject, array);
         }
 
+        /**
+         * Combines contained values into a smaller array by aggregating them
+         * according to an index map.
+         */
+        public boolean combineValues(long[] array, int[] indexMap) {
+            if (indexMap.length != mLength) {
+                throw new IllegalArgumentException(
+                        "Wrong index map size " + indexMap.length + ", expected " + mLength);
+            }
+            return native_combineValues(mNativeObject, array, indexMap);
+        }
+
         @Override
         public String toString() {
             final long[] array = new long[mLength];
@@ -116,6 +128,10 @@ public final class LongArrayMultiStateCounter implements Parcelable {
 
         @FastNative
         private native void native_getValues(long nativeObject, long[] array);
+
+        @FastNative
+        private native boolean native_combineValues(long nativeObject, long[] array,
+                int[] indexMap);
     }
 
     private static final NativeAllocationRegistry sRegistry =

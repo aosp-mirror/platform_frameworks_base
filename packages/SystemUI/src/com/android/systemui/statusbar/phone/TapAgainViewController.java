@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.classifier.FalsingModule.DOUBLE_TAP_TIMEOUT_MS;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.util.ViewController;
@@ -32,7 +32,7 @@ import javax.inject.Named;
 /**
  * Controller for {@link TapAgainView}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class TapAgainViewController extends ViewController<TapAgainView> {
     private final DelayableExecutor mDelayableExecutor;
     private final ConfigurationController mConfigurationController;
@@ -84,7 +84,7 @@ public class TapAgainViewController extends ViewController<TapAgainView> {
     }
 
     /** Hides the associated view, possibly animating it. */
-    public void hide() {
+    private void hide() {
         mHideCanceler = null;
         mView.animateOut();
     }

@@ -219,9 +219,9 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /** {@hide} */
     private void enforceTreeForExtraUris(Bundle extras) {
-        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_URI));
-        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI));
-        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI));
+        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_URI, android.net.Uri.class));
+        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI, android.net.Uri.class));
+        enforceTree(extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI, android.net.Uri.class));
     }
 
     /** {@hide} */
@@ -979,6 +979,19 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * An unrestricted version of getType, which does not reveal sensitive information
+     */
+    @Override
+    public final @Nullable String getTypeAnonymous(@NonNull Uri uri) {
+        switch (mMatcher.match(uri)) {
+            case MATCH_ROOT:
+                return DocumentsContract.Root.MIME_TYPE_ITEM;
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Implementation is provided by the parent class. Can be overridden to
      * provide additional functionality, but subclasses <em>must</em> always
      * call the superclass. If the superclass returns {@code null}, the subclass
@@ -1091,11 +1104,11 @@ public abstract class DocumentsProvider extends ContentProvider {
         enforceTreeForExtraUris(extras);
 
         final Uri extraUri = validateIncomingNullableUri(
-                extras.getParcelable(DocumentsContract.EXTRA_URI));
+                extras.getParcelable(DocumentsContract.EXTRA_URI, android.net.Uri.class));
         final Uri extraTargetUri = validateIncomingNullableUri(
-                extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI));
+                extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI, android.net.Uri.class));
         final Uri extraParentUri = validateIncomingNullableUri(
-                extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI));
+                extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI, android.net.Uri.class));
 
         if (METHOD_EJECT_ROOT.equals(method)) {
             // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
@@ -1436,7 +1449,7 @@ public abstract class DocumentsProvider extends ContentProvider {
         enforceTree(uri);
         final String documentId = getDocumentId(uri);
         if (opts != null && opts.containsKey(ContentResolver.EXTRA_SIZE)) {
-            final Point sizeHint = opts.getParcelable(ContentResolver.EXTRA_SIZE);
+            final Point sizeHint = opts.getParcelable(ContentResolver.EXTRA_SIZE, android.graphics.Point.class);
             return openDocumentThumbnail(documentId, sizeHint, signal);
         }
         if ("*/*".equals(mimeTypeFilter)) {

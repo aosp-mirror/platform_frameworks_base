@@ -36,8 +36,14 @@ import java.lang.annotation.RetentionPolicy;
 public class DemuxCapabilities {
 
     /** @hide */
-    @IntDef(value = {Filter.TYPE_TS, Filter.TYPE_MMTP, Filter.TYPE_IP, Filter.TYPE_TLV,
-                    Filter.TYPE_ALP})
+    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+          Filter.TYPE_UNDEFINED,
+          Filter.TYPE_TS,
+          Filter.TYPE_MMTP,
+          Filter.TYPE_IP,
+          Filter.TYPE_TLV,
+          Filter.TYPE_ALP,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterCapabilities {}
 
@@ -51,14 +57,16 @@ public class DemuxCapabilities {
     private final int mPesFilterCount;
     private final int mPcrFilterCount;
     private final long mSectionFilterLength;
-    private final int mFilterCaps;
+    private final @FilterCapabilities int mFilterCaps;
+    private final @FilterCapabilities int[] mFilterCapsList;
     private final int[] mLinkCaps;
     private final boolean mSupportTimeFilter;
 
     // Used by JNI
     private DemuxCapabilities(int demuxCount, int recordCount, int playbackCount, int tsFilterCount,
             int sectionFilterCount, int audioFilterCount, int videoFilterCount, int pesFilterCount,
-            int pcrFilterCount, long sectionFilterLength, int filterCaps, int[] linkCaps,
+            int pcrFilterCount, long sectionFilterLength, int filterCaps,
+            @FilterCapabilities int[] filterCapsList, @FilterCapabilities int[] linkCaps,
             boolean timeFilter) {
         mDemuxCount = demuxCount;
         mRecordCount = recordCount;
@@ -71,6 +79,7 @@ public class DemuxCapabilities {
         mPcrFilterCount = pcrFilterCount;
         mSectionFilterLength = sectionFilterLength;
         mFilterCaps = filterCaps;
+        mFilterCapsList = filterCapsList;
         mLinkCaps = linkCaps;
         mSupportTimeFilter = timeFilter;
     }
@@ -145,6 +154,24 @@ public class DemuxCapabilities {
     @FilterCapabilities
     public int getFilterCapabilities() {
         return mFilterCaps;
+    }
+
+    /**
+     * Gets the list of filter main type capabilities in bit field.
+     *
+     * <p>Each element in the returned array represents the supported filter main types
+     * represented as bitwise OR of the types in {@link FilterConfiguration}.
+     * <p>Whereas getFilterCapabilities() returns the bitwise OR value of all the supported filter
+     * types in the system, this API returns a list of supported filter types in the system with
+     * each entry representing the supported filter types per demux resource.
+     *
+     * @return an array of supported filter main types for the demux resources in the system
+     *         an empty array should be returned for devices with Tuner HAL version 2 and below
+     */
+    @FilterCapabilities
+    @NonNull
+    public int[] getFilterTypeCapabilityList() {
+        return mFilterCapsList;
     }
 
     /**

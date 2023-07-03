@@ -23,12 +23,11 @@
 #include <string>
 #include <utility>
 
+#include "ResourceUtils.h"
 #include "android-base/file.h"
 #include "android-base/logging.h"
 #include "androidfw/ConfigDescription.h"
-
-#include "Diagnostics.h"
-#include "ResourceUtils.h"
+#include "androidfw/IDiagnostics.h"
 #include "configuration/ConfigurationParser.internal.h"
 #include "io/File.h"
 #include "io/FileSystem.h"
@@ -88,15 +87,10 @@ const std::array<StringPiece, 8> kAbiToStringMap = {
 
 constexpr const char* kAaptXmlNs = "http://schemas.android.com/tools/aapt";
 
-/** A default noop diagnostics context. */
-class NoopDiagnostics : public IDiagnostics {
- public:
-  void Log(Level level, DiagMessageActual& actualMsg) override {}
-};
-NoopDiagnostics noop_;
+android::NoOpDiagnostics noop_;
 
 /** Returns the value of the label attribute for a given element. */
-std::string GetLabel(const Element* element, IDiagnostics* diag) {
+std::string GetLabel(const Element* element, android::IDiagnostics* diag) {
   std::string label;
   for (const auto& attr : element->attributes) {
     if (attr.name == "label") {
@@ -106,18 +100,18 @@ std::string GetLabel(const Element* element, IDiagnostics* diag) {
   }
 
   if (label.empty()) {
-    diag->Error(DiagMessage() << "No label found for element " << element->name);
+    diag->Error(android::DiagMessage() << "No label found for element " << element->name);
   }
   return label;
 }
 
 /** Returns the value of the version-code-order attribute for a given element. */
-std::optional<int32_t> GetVersionCodeOrder(const Element* element, IDiagnostics* diag) {
+std::optional<int32_t> GetVersionCodeOrder(const Element* element, android::IDiagnostics* diag) {
   const xml::Attribute* version = element->FindAttribute("", "version-code-order");
   if (version == nullptr) {
     std::string label = GetLabel(element, diag);
-    diag->Error(DiagMessage() << "No version-code-order found for element '" << element->name
-                              << "' with label '" << label << "'");
+    diag->Error(android::DiagMessage() << "No version-code-order found for element '"
+                                       << element->name << "' with label '" << label << "'");
     return {};
   }
   return std::stoi(version->value);
@@ -158,15 +152,15 @@ bool CopyXmlReferences(const std::optional<std::string>& name, const Group<T>& g
  * success, or false if the either the placeholder is not found in the name, or the value is not
  * present and the placeholder was.
  */
-bool ReplacePlaceholder(const StringPiece& placeholder, const std::optional<StringPiece>& value,
-                        std::string* name, IDiagnostics* diag) {
+bool ReplacePlaceholder(StringPiece placeholder, const std::optional<StringPiece>& value,
+                        std::string* name, android::IDiagnostics* diag) {
   size_t offset = name->find(placeholder.data());
   bool found = (offset != std::string::npos);
 
   // Make sure the placeholder was present if the desired value is present.
   if (!found) {
     if (value) {
-      diag->Error(DiagMessage() << "Missing placeholder for artifact: " << placeholder);
+      diag->Error(android::DiagMessage() << "Missing placeholder for artifact: " << placeholder);
       return false;
     }
     return true;
@@ -176,7 +170,8 @@ bool ReplacePlaceholder(const StringPiece& placeholder, const std::optional<Stri
 
   // Make sure the placeholder was not present if the desired value was not present.
   if (!value) {
-    diag->Error(DiagMessage() << "Placeholder present but no value for artifact: " << placeholder);
+    diag->Error(android::DiagMessage()
+                << "Placeholder present but no value for artifact: " << placeholder);
     return false;
   }
 
@@ -184,7 +179,7 @@ bool ReplacePlaceholder(const StringPiece& placeholder, const std::optional<Stri
 
   // Make sure there was only one instance of the placeholder.
   if (name->find(placeholder.data()) != std::string::npos) {
-    diag->Error(DiagMessage() << "Placeholder present multiple times: " << placeholder);
+    diag->Error(android::DiagMessage() << "Placeholder present multiple times: " << placeholder);
     return false;
   }
   return true;
@@ -195,12 +190,12 @@ bool ReplacePlaceholder(const StringPiece& placeholder, const std::optional<Stri
  * element was successfully processed, otherwise returns false.
  */
 using ActionHandler = std::function<bool(configuration::PostProcessingConfiguration* config,
-                                         xml::Element* element, IDiagnostics* diag)>;
+                                         xml::Element* element, android::IDiagnostics* diag)>;
 
 /** Binds an ActionHandler to the current configuration being populated. */
 xml::XmlNodeAction::ActionFuncWithDiag Bind(configuration::PostProcessingConfiguration* config,
                                             const ActionHandler& handler) {
-  return [config, handler](xml::Element* root_element, SourcePathDiagnostics* diag) {
+  return [config, handler](xml::Element* root_element, android::SourcePathDiagnostics* diag) {
     return handler(config, root_element, diag);
   };
 }
@@ -209,10 +204,10 @@ xml::XmlNodeAction::ActionFuncWithDiag Bind(configuration::PostProcessingConfigu
 std::optional<OutputArtifact> ToOutputArtifact(const ConfiguredArtifact& artifact,
                                                const std::string& apk_name,
                                                const PostProcessingConfiguration& config,
-                                               IDiagnostics* diag) {
+                                               android::IDiagnostics* diag) {
   if (!artifact.name && !config.artifact_format) {
-    diag->Error(
-        DiagMessage() << "Artifact does not have a name and no global name template defined");
+    diag->Error(android::DiagMessage()
+                << "Artifact does not have a name and no global name template defined");
     return {};
   }
 
@@ -221,54 +216,54 @@ std::optional<OutputArtifact> ToOutputArtifact(const ConfiguredArtifact& artifac
                       : artifact.ToArtifactName(config.artifact_format.value(), apk_name, diag);
 
   if (!artifact_name) {
-    diag->Error(DiagMessage() << "Could not determine split APK artifact name");
+    diag->Error(android::DiagMessage() << "Could not determine split APK artifact name");
     return {};
   }
 
   OutputArtifact output_artifact;
   output_artifact.name = artifact_name.value();
 
-  SourcePathDiagnostics src_diag{{output_artifact.name}, diag};
+  android::SourcePathDiagnostics src_diag{{output_artifact.name}, diag};
   bool has_errors = false;
 
   if (!CopyXmlReferences(artifact.abi_group, config.abi_groups, &output_artifact.abis)) {
-    src_diag.Error(DiagMessage() << "Could not lookup required ABIs: "
-                                 << artifact.abi_group.value());
+    src_diag.Error(android::DiagMessage()
+                   << "Could not lookup required ABIs: " << artifact.abi_group.value());
     has_errors = true;
   }
 
   if (!CopyXmlReferences(artifact.locale_group, config.locale_groups, &output_artifact.locales)) {
-    src_diag.Error(DiagMessage() << "Could not lookup required locales: "
-                                 << artifact.locale_group.value());
+    src_diag.Error(android::DiagMessage()
+                   << "Could not lookup required locales: " << artifact.locale_group.value());
     has_errors = true;
   }
 
   if (!CopyXmlReferences(artifact.screen_density_group, config.screen_density_groups,
                          &output_artifact.screen_densities)) {
-    src_diag.Error(DiagMessage() << "Could not lookup required screen densities: "
-                                 << artifact.screen_density_group.value());
+    src_diag.Error(android::DiagMessage() << "Could not lookup required screen densities: "
+                                          << artifact.screen_density_group.value());
     has_errors = true;
   }
 
   if (!CopyXmlReferences(artifact.device_feature_group, config.device_feature_groups,
                          &output_artifact.features)) {
-    src_diag.Error(DiagMessage() << "Could not lookup required device features: "
-                                 << artifact.device_feature_group.value());
+    src_diag.Error(android::DiagMessage() << "Could not lookup required device features: "
+                                          << artifact.device_feature_group.value());
     has_errors = true;
   }
 
   if (!CopyXmlReferences(artifact.gl_texture_group, config.gl_texture_groups,
                          &output_artifact.textures)) {
-    src_diag.Error(DiagMessage() << "Could not lookup required OpenGL texture formats: "
-                                 << artifact.gl_texture_group.value());
+    src_diag.Error(android::DiagMessage() << "Could not lookup required OpenGL texture formats: "
+                                          << artifact.gl_texture_group.value());
     has_errors = true;
   }
 
   if (artifact.android_sdk) {
     auto entry = config.android_sdks.find(artifact.android_sdk.value());
     if (entry == config.android_sdks.end()) {
-      src_diag.Error(DiagMessage() << "Could not lookup required Android SDK version: "
-                                   << artifact.android_sdk.value());
+      src_diag.Error(android::DiagMessage() << "Could not lookup required Android SDK version: "
+                                            << artifact.android_sdk.value());
       has_errors = true;
     } else {
       output_artifact.android_sdk = {entry->second};
@@ -288,9 +283,9 @@ namespace configuration {
 /** Returns the binary reprasentation of the XML configuration. */
 std::optional<PostProcessingConfiguration> ExtractConfiguration(const std::string& contents,
                                                                 const std::string& config_path,
-                                                                IDiagnostics* diag) {
+                                                                android::IDiagnostics* diag) {
   StringInputStream in(contents);
-  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, diag, Source(config_path));
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, diag, android::Source(config_path));
   if (!doc) {
     return {};
   }
@@ -298,14 +293,14 @@ std::optional<PostProcessingConfiguration> ExtractConfiguration(const std::strin
   // Strip any namespaces from the XML as the XmlActionExecutor ignores anything with a namespace.
   Element* root = doc->root.get();
   if (root == nullptr) {
-    diag->Error(DiagMessage() << "Could not find the root element in the XML document");
+    diag->Error(android::DiagMessage() << "Could not find the root element in the XML document");
     return {};
   }
 
   std::string& xml_ns = root->namespace_uri;
   if (!xml_ns.empty()) {
     if (xml_ns != kAaptXmlNs) {
-      diag->Error(DiagMessage() << "Unknown namespace found on root element: " << xml_ns);
+      diag->Error(android::DiagMessage() << "Unknown namespace found on root element: " << xml_ns);
       return {};
     }
 
@@ -336,24 +331,24 @@ std::optional<PostProcessingConfiguration> ExtractConfiguration(const std::strin
       Bind(&config, DeviceFeatureGroupTagHandler));
 
   if (!executor.Execute(XmlActionExecutorPolicy::kNone, diag, doc.get())) {
-    diag->Error(DiagMessage() << "Could not process XML document");
+    diag->Error(android::DiagMessage() << "Could not process XML document");
     return {};
   }
 
   return {config};
 }
 
-const StringPiece& AbiToString(Abi abi) {
+StringPiece AbiToString(Abi abi) {
   return kAbiToStringMap.at(static_cast<size_t>(abi));
 }
 
 /**
  * Returns the common artifact base name from a template string.
  */
-std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk_name,
-                                      IDiagnostics* diag) {
+std::optional<std::string> ToBaseName(std::string result, StringPiece apk_name,
+                                      android::IDiagnostics* diag) {
   const StringPiece ext = file::GetExtension(apk_name);
-  size_t end_index = apk_name.to_string().rfind(ext.to_string());
+  size_t end_index = apk_name.rfind(ext);
   const std::string base_name =
       (end_index != std::string::npos) ? std::string{apk_name.begin(), end_index} : "";
 
@@ -376,17 +371,17 @@ std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk
     // If no extension is specified, and the name template does not end in the current extension,
     // add the existing extension.
     if (!util::EndsWith(result, ext)) {
-      result.append(ext.to_string());
+      result.append(ext);
     }
   }
 
   return result;
 }
 
-std::optional<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece& format,
-                                                              const StringPiece& apk_name,
-                                                              IDiagnostics* diag) const {
-  std::optional<std::string> base = ToBaseName(format.to_string(), apk_name, diag);
+std::optional<std::string> ConfiguredArtifact::ToArtifactName(StringPiece format,
+                                                              StringPiece apk_name,
+                                                              android::IDiagnostics* diag) const {
+  std::optional<std::string> base = ToBaseName(std::string(format), apk_name, diag);
   if (!base) {
     return {};
   }
@@ -419,8 +414,8 @@ std::optional<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece&
   return result;
 }
 
-std::optional<std::string> ConfiguredArtifact::Name(const StringPiece& apk_name,
-                                                    IDiagnostics* diag) const {
+std::optional<std::string> ConfiguredArtifact::Name(StringPiece apk_name,
+                                                    android::IDiagnostics* diag) const {
   if (!name) {
     return {};
   }
@@ -444,7 +439,7 @@ ConfigurationParser::ConfigurationParser(std::string contents, const std::string
 }
 
 std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
-    const android::StringPiece& apk_path) {
+    android::StringPiece apk_path) {
   std::optional<PostProcessingConfiguration> maybe_config =
       ExtractConfiguration(contents_, config_path_, diag_);
   if (!maybe_config) {
@@ -452,7 +447,7 @@ std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
   }
 
   // Convert from a parsed configuration to a list of artifacts for processing.
-  const std::string& apk_name = file::GetFilename(apk_path).to_string();
+  const std::string apk_name(file::GetFilename(apk_path));
   std::vector<OutputArtifact> output_artifacts;
 
   PostProcessingConfiguration& config = maybe_config.value();
@@ -473,7 +468,7 @@ std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
   }
 
   if (!config.ValidateVersionCodeOrdering(diag_)) {
-    diag_->Error(DiagMessage() << "could not validate post processing configuration");
+    diag_->Error(android::DiagMessage() << "could not validate post processing configuration");
     valid = false;
   }
 
@@ -493,7 +488,7 @@ namespace configuration {
 namespace handler {
 
 bool ArtifactTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                        IDiagnostics* diag) {
+                        android::IDiagnostics* diag) {
   ConfiguredArtifact artifact{};
   for (const auto& attr : root_element->attributes) {
     if (attr.name == "name") {
@@ -511,8 +506,8 @@ bool ArtifactTagHandler(PostProcessingConfiguration* config, Element* root_eleme
     } else if (attr.name == "device-feature-group") {
       artifact.device_feature_group = {attr.value};
     } else {
-      diag->Note(DiagMessage() << "Unknown artifact attribute: " << attr.name << " = "
-                               << attr.value);
+      diag->Note(android::DiagMessage()
+                 << "Unknown artifact attribute: " << attr.name << " = " << attr.value);
     }
   }
   config->artifacts.push_back(artifact);
@@ -520,11 +515,11 @@ bool ArtifactTagHandler(PostProcessingConfiguration* config, Element* root_eleme
 };
 
 bool ArtifactFormatTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                              IDiagnostics* /* diag */) {
+                              android::IDiagnostics* /* diag */) {
   for (auto& node : root_element->children) {
     xml::Text* t;
     if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-      config->artifact_format = TrimWhitespace(t->text).to_string();
+      config->artifact_format.emplace(TrimWhitespace(t->text));
       break;
     }
   }
@@ -532,7 +527,7 @@ bool ArtifactFormatTagHandler(PostProcessingConfiguration* config, Element* root
 };
 
 bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                        IDiagnostics* diag) {
+                        android::IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -560,17 +555,17 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "abi") {
-      diag->Error(DiagMessage() << "Unexpected element in ABI group: " << child->name);
+      diag->Error(android::DiagMessage() << "Unexpected element in ABI group: " << child->name);
       valid = false;
     } else {
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-          auto abi = kStringToAbiMap.find(TrimWhitespace(t->text).to_string());
+          auto abi = kStringToAbiMap.find(TrimWhitespace(t->text));
           if (abi != kStringToAbiMap.end()) {
             group.push_back(abi->second);
           } else {
-            diag->Error(DiagMessage() << "Could not parse ABI value: " << t->text);
+            diag->Error(android::DiagMessage() << "Could not parse ABI value: " << t->text);
             valid = false;
           }
           break;
@@ -583,7 +578,7 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
 };
 
 bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                                  IDiagnostics* diag) {
+                                  android::IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -609,9 +604,8 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
       // Copy the density with the minimum SDK version stripped out.
       group.push_back(config_descriptor.CopyWithoutSdkVersion());
     } else {
-      diag->Error(DiagMessage()
-                      << "Could not parse config descriptor for empty screen-density-group: "
-                      << label);
+      diag->Error(android::DiagMessage()
+                  << "Could not parse config descriptor for empty screen-density-group: " << label);
       valid = false;
     }
 
@@ -620,15 +614,15 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "screen-density") {
-      diag->Error(DiagMessage() << "Unexpected root_element in screen density group: "
-                                << child->name);
+      diag->Error(android::DiagMessage()
+                  << "Unexpected root_element in screen density group: " << child->name);
       valid = false;
     } else {
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
           ConfigDescription config_descriptor;
-          const android::StringPiece& text = TrimWhitespace(t->text);
+          android::StringPiece text = TrimWhitespace(t->text);
           bool parsed = ConfigDescription::Parse(text, &config_descriptor);
           if (parsed &&
               (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
@@ -636,7 +630,7 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
             // Copy the density with the minimum SDK version stripped out.
             group.push_back(config_descriptor.CopyWithoutSdkVersion());
           } else {
-            diag->Error(DiagMessage()
+            diag->Error(android::DiagMessage()
                         << "Could not parse config descriptor for screen-density: " << text);
             valid = false;
           }
@@ -650,7 +644,7 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
 };
 
 bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                           IDiagnostics* diag) {
+                           android::IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -676,9 +670,8 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
       // Copy the locale with the minimum SDK version stripped out.
       group.push_back(config_descriptor.CopyWithoutSdkVersion());
     } else {
-      diag->Error(DiagMessage()
-                      << "Could not parse config descriptor for empty screen-density-group: "
-                      << label);
+      diag->Error(android::DiagMessage()
+                  << "Could not parse config descriptor for empty screen-density-group: " << label);
       valid = false;
     }
 
@@ -687,15 +680,15 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "locale") {
-      diag->Error(DiagMessage() << "Unexpected root_element in screen density group: "
-                                << child->name);
+      diag->Error(android::DiagMessage()
+                  << "Unexpected root_element in screen density group: " << child->name);
       valid = false;
     } else {
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
           ConfigDescription config_descriptor;
-          const android::StringPiece& text = TrimWhitespace(t->text);
+          android::StringPiece text = TrimWhitespace(t->text);
           bool parsed = ConfigDescription::Parse(text, &config_descriptor);
           if (parsed &&
               (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
@@ -703,7 +696,7 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
             // Copy the locale with the minimum SDK version stripped out.
             group.push_back(config_descriptor.CopyWithoutSdkVersion());
           } else {
-            diag->Error(DiagMessage()
+            diag->Error(android::DiagMessage()
                         << "Could not parse config descriptor for screen-density: " << text);
             valid = false;
           }
@@ -717,7 +710,7 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
 };
 
 bool AndroidSdkTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                          IDiagnostics* diag) {
+                          android::IDiagnostics* diag) {
   AndroidSdk entry = AndroidSdk::ForMinSdk(-1);
   bool valid = true;
   for (const auto& attr : root_element->attributes) {
@@ -746,13 +739,14 @@ bool AndroidSdkTagHandler(PostProcessingConfiguration* config, Element* root_ele
     }
 
     if (!valid_attr) {
-      diag->Error(DiagMessage() << "Invalid attribute: " << attr.name << " = " << attr.value);
+      diag->Error(android::DiagMessage()
+                  << "Invalid attribute: " << attr.name << " = " << attr.value);
       valid = false;
     }
   }
 
   if (entry.min_sdk_version == -1) {
-    diag->Error(DiagMessage() << "android-sdk is missing minSdkVersion attribute");
+    diag->Error(android::DiagMessage() << "android-sdk is missing minSdkVersion attribute");
     valid = false;
   }
 
@@ -760,7 +754,7 @@ bool AndroidSdkTagHandler(PostProcessingConfiguration* config, Element* root_ele
   for (auto node : root_element->GetChildElements()) {
     if (node->name == "manifest") {
       if (entry.manifest) {
-        diag->Warn(DiagMessage() << "Found multiple manifest tags. Ignoring duplicates.");
+        diag->Warn(android::DiagMessage() << "Found multiple manifest tags. Ignoring duplicates.");
         continue;
       }
       entry.manifest = {AndroidManifest()};
@@ -772,7 +766,7 @@ bool AndroidSdkTagHandler(PostProcessingConfiguration* config, Element* root_ele
 };
 
 bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                              IDiagnostics* diag) {
+                              android::IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -791,7 +785,8 @@ bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root
   GlTexture result;
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "gl-texture") {
-      diag->Error(DiagMessage() << "Unexpected element in GL texture group: " << child->name);
+      diag->Error(android::DiagMessage()
+                  << "Unexpected element in GL texture group: " << child->name);
       valid = false;
     } else {
       for (const auto& attr : child->attributes) {
@@ -803,14 +798,15 @@ bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root
 
       for (auto* element : child->GetChildElements()) {
         if (element->name != "texture-path") {
-          diag->Error(DiagMessage() << "Unexpected element in gl-texture element: " << child->name);
+          diag->Error(android::DiagMessage()
+                      << "Unexpected element in gl-texture element: " << child->name);
           valid = false;
           continue;
         }
         for (auto& node : element->children) {
           xml::Text* t;
           if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-            result.texture_paths.push_back(TrimWhitespace(t->text).to_string());
+            result.texture_paths.emplace_back(TrimWhitespace(t->text));
           }
         }
       }
@@ -822,7 +818,7 @@ bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root
 };
 
 bool DeviceFeatureGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
-                                  IDiagnostics* diag) {
+                                  android::IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -840,14 +836,14 @@ bool DeviceFeatureGroupTagHandler(PostProcessingConfiguration* config, Element* 
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "supports-feature") {
-      diag->Error(DiagMessage() << "Unexpected root_element in device feature group: "
-                                << child->name);
+      diag->Error(android::DiagMessage()
+                  << "Unexpected root_element in device feature group: " << child->name);
       valid = false;
     } else {
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-          group.push_back(TrimWhitespace(t->text).to_string());
+          group.emplace_back(TrimWhitespace(t->text));
           break;
         }
       }

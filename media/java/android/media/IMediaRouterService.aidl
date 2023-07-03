@@ -23,6 +23,7 @@ import android.media.IMediaRouterClient;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouterClientState;
 import android.media.RouteDiscoveryPreference;
+import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 
@@ -49,7 +50,7 @@ interface IMediaRouterService {
     // MediaRouterService.java for readability.
 
     // Methods for MediaRouter2
-    void enforceMediaContentControlPermission();
+    boolean verifyPackageExists(String clientPackageName);
     List<MediaRoute2Info> getSystemRoutes();
     RoutingSessionInfo getSystemSessionInfo();
 
@@ -57,6 +58,8 @@ interface IMediaRouterService {
     void unregisterRouter2(IMediaRouter2 router);
     void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
             in RouteDiscoveryPreference preference);
+    void setRouteListingPreference(IMediaRouter2 router,
+            in @nullable RouteListingPreference routeListingPreference);
     void setRouteVolumeWithRouter2(IMediaRouter2 router, in MediaRoute2Info route, int volume);
 
     void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId, long managerRequestId,
@@ -91,4 +94,5 @@ interface IMediaRouterService {
     void setSessionVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, int volume);
     void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId, String sessionId);
+    boolean showMediaOutputSwitcher(String packageName);
 }

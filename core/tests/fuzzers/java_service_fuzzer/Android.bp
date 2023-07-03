@@ -1,0 +1,48 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+aidl_interface {
+    name: "fuzzTestInterface",
+    srcs: ["fuzztest/ITestService.aidl"],
+    unstable: true,
+    backend: {
+        java: {
+            enabled: true,
+        },
+    },
+}
+
+java_fuzz {
+    name: "java_binder_service_fuzzer",
+    srcs: [
+        "ServiceFuzzer.java",
+        "TestService.java",
+        ":framework-core-sources-for-fuzzers",
+    ],
+    static_libs: [
+        "jazzer",
+        "fuzzTestInterface-java",
+        "random_parcel_lib",
+    ],
+    jni_libs: [
+        "librandom_parcel_jni",
+        "libc++",
+        "libandroid_runtime",
+    ],
+    libs: [
+        "framework",
+        "unsupportedappusage",
+        "ext",
+        "framework-res",
+    ],
+    native_bridge_supported: true,
+    fuzz_config: {
+        cc: [
+            "smoreland@google.com",
+            "waghpawan@google.com",
+        ],
+        // Adds bugs to hotlist "AIDL fuzzers bugs" on buganizer
+        hotlists: ["4637097"],
+    },
+}

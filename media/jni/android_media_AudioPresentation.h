@@ -19,9 +19,13 @@
 
 #include "jni.h"
 
+#include <aidl/android/hardware/tv/tuner/AudioPresentation.h>
 #include <media/stagefright/foundation/ADebug.h>  // CHECK
 #include <media/stagefright/foundation/AudioPresentationInfo.h>
 #include <nativehelper/ScopedLocalRef.h>
+
+using ::aidl::android::hardware::tv::tuner::AudioPreselectionRenderingIndicationType;
+using TunerAudioPresentation = ::aidl::android::hardware::tv::tuner::AudioPresentation;
 
 namespace android {
 
@@ -94,6 +98,38 @@ struct JAudioPresentationInfo {
 
     static jobject asJobject(JNIEnv *env, const fields_t& fields) {
         return env->NewObject(fields.listClazz, fields.listConstructId);
+    }
+
+    static void addPresentations(JNIEnv *env, const fields_t& fields,
+            const std::vector<TunerAudioPresentation>& tunerAudioPresentations,
+            jobject presentationsJObj) {
+        AudioPresentationCollection apc = {};
+        static const std::map<AudioPreselectionRenderingIndicationType, MasteringIndication> mMap {
+            { AudioPreselectionRenderingIndicationType::NOT_INDICATED, MASTERING_NOT_INDICATED },
+            { AudioPreselectionRenderingIndicationType::STEREO, MASTERED_FOR_STEREO },
+            { AudioPreselectionRenderingIndicationType::TWO_DIMENSIONAL, MASTERED_FOR_SURROUND },
+            { AudioPreselectionRenderingIndicationType::THREE_DIMENSIONAL, MASTERED_FOR_3D },
+            { AudioPreselectionRenderingIndicationType::HEADPHONE, MASTERED_FOR_HEADPHONE },
+        };
+        for (const auto& tap : tunerAudioPresentations) {
+            AudioPresentationV1 ap;
+            ap.mPresentationId = tap.preselection.preselectionId;
+            ap.mProgramId = tap.ac4ShortProgramId;
+            for (const auto& md : tap.preselection.labels) {
+                ap.mLabels.insert(std::pair(md.language, md.text));
+            }
+            ap.mLanguage = tap.preselection.language;
+            ap.mMasteringIndication = MASTERING_NOT_INDICATED;
+            auto masteringSearch = mMap.find(tap.preselection.renderingIndication);
+            if (masteringSearch != mMap.end()) {
+                ap.mMasteringIndication = masteringSearch->second;
+            }
+            ap.mAudioDescriptionAvailable = tap.preselection.hasAudioDescription;
+            ap.mSpokenSubtitlesAvailable = tap.preselection.hasSpokenSubtitles;
+            ap.mDialogueEnhancementAvailable = tap.preselection.hasDialogueEnhancement;
+            apc.push_back(ap);
+        }
+        addPresentations(env, fields, apc, presentationsJObj);
     }
 
     static void addPresentations(JNIEnv *env, const fields_t& fields,

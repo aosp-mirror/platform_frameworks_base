@@ -50,12 +50,12 @@ public class NotificationActivity extends Activity {
         Intent resultIntent = new Intent(this, NotificationActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addNextIntentWithParentStack(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(0,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, NotificationActivity.class),
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
+                .setWhen(System.currentTimeMillis())
                 .setContentTitle("Flicker Test Notification")
                 .setContentText("Flicker Test Notification")
                 // Set the intent that will fire when the user taps the notification

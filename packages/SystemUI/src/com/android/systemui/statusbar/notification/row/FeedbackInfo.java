@@ -165,7 +165,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     private void positiveFeedback(View v) {
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
         handleFeedback(true);
     }
 
@@ -176,7 +176,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
             menuItem = mMenuRowPlugin.getLongpressMenuItem(mContext);
         }
 
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
         mNotificationGutsManager.openGuts(mExpandableNotificationRow, 0, 0, menuItem);
         handleFeedback(false);
     }
@@ -203,7 +203,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     private void closeControls(View v) {
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
     }
 
     @Override
@@ -232,7 +232,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     @Override
-    public boolean shouldBeSaved() {
+    public boolean shouldBeSavedOnClose() {
         return false;
     }
 

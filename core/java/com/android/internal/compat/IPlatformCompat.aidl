@@ -47,6 +47,7 @@ interface IPlatformCompat {
      * @param appInfo  representing the affected app
      * @throws SecurityException if logging is not allowed
      */
+    @EnforcePermission("LOG_COMPAT_CHANGE")
     void reportChange(long changeId, in ApplicationInfo appInfo);
 
     /**
@@ -60,6 +61,7 @@ interface IPlatformCompat {
      * @param packageName the package name of the app in question
      * @throws SecurityException if logging is not allowed
      */
+    @EnforcePermission("LOG_COMPAT_CHANGE")
     void reportChangeByPackageName(long changeId, in String packageName, int userId);
 
     /**
@@ -72,6 +74,7 @@ interface IPlatformCompat {
      * @param uid      the UID of the app in question
      * @throws SecurityException if logging is not allowed
      */
+    @EnforcePermission("LOG_COMPAT_CHANGE")
     void reportChangeByUid(long changeId, int uid);
 
     /**
@@ -90,6 +93,7 @@ interface IPlatformCompat {
      * @return {@code true} if the change is enabled for the current app
      * @throws SecurityException if logging or reading compat confis is not allowed
      */
+    @EnforcePermission(allOf={"LOG_COMPAT_CHANGE", "READ_COMPAT_CHANGE_CONFIG"})
     boolean isChangeEnabled(long changeId, in ApplicationInfo appInfo);
 
     /**
@@ -115,6 +119,7 @@ interface IPlatformCompat {
      * @return {@code true} if the change is enabled for the current app
      * @throws SecurityException if logging or reading compat confis is not allowed
      */
+    @EnforcePermission(allOf={"LOG_COMPAT_CHANGE", "READ_COMPAT_CHANGE_CONFIG"})
     boolean isChangeEnabledByPackageName(long changeId, in String packageName, int userId);
 
     /**
@@ -140,6 +145,7 @@ interface IPlatformCompat {
      * @return {@code true} if the change is enabled for the current app
      * @throws SecurityException if logging or reading compat confis is not allowed
      */
+    @EnforcePermission(allOf={"LOG_COMPAT_CHANGE", "READ_COMPAT_CHANGE_CONFIG"})
     boolean isChangeEnabledByUid(long changeId, int uid);
 
     /**
@@ -151,6 +157,7 @@ interface IPlatformCompat {
      * @param packageName the package name of the app whose changes will be overridden
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     void setOverrides(in CompatibilityChangeConfig overrides, in String packageName);
 
     /**
@@ -171,6 +178,7 @@ interface IPlatformCompat {
      *                           on specific apps by their package name
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD")
     void putAllOverridesOnReleaseBuilds(in CompatibilityOverridesByPackageConfig overridesByPackage);
 
     /**
@@ -190,6 +198,7 @@ interface IPlatformCompat {
      * @param packageName the package name of the app whose changes will be overridden
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD")
     void putOverridesOnReleaseBuilds(in CompatibilityOverrideConfig overrides, in String packageName);
 
     /**
@@ -201,6 +210,7 @@ interface IPlatformCompat {
      * @param packageName the package name of the app whose changes will be overridden
      * @throws SecurityException if overriding changes is not permitted.
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     void setOverridesForTest(in CompatibilityChangeConfig overrides, in String packageName);
 
     /**
@@ -213,6 +223,7 @@ interface IPlatformCompat {
      * @return {@code true} if an override existed
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     boolean clearOverride(long changeId, String packageName);
 
     /**
@@ -225,6 +236,7 @@ interface IPlatformCompat {
      * @return {@code true} if an override existed
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     boolean clearOverrideForTest(long changeId, String packageName);
 
     /**
@@ -245,6 +257,7 @@ interface IPlatformCompat {
      *                                   removed for specific apps by their package name
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD")
     void removeAllOverridesOnReleaseBuilds(in CompatibilityOverridesToRemoveByPackageConfig overridesToRemoveByPackage);
 
     /**
@@ -266,6 +279,7 @@ interface IPlatformCompat {
      *                            default behaviour
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD")
     void removeOverridesOnReleaseBuilds(in CompatibilityOverridesToRemoveConfig overridesToRemove, in String packageName);
 
     /**
@@ -280,6 +294,7 @@ interface IPlatformCompat {
      * @return The number of changes that were enabled.
      * @throws SecurityException if overriding changes is not permitted.
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     int enableTargetSdkChanges(in String packageName, int targetSdkVersion);
 
     /**
@@ -294,6 +309,7 @@ interface IPlatformCompat {
      * @return the number of changes that were disabled
      * @throws SecurityException if overriding changes is not permitted.
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     int disableTargetSdkChanges(in String packageName, int targetSdkVersion);
 
     /**
@@ -304,6 +320,7 @@ interface IPlatformCompat {
      * @param packageName the package name of the app whose overrides will be cleared
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     void clearOverrides(in String packageName);
 
     /**
@@ -314,6 +331,7 @@ interface IPlatformCompat {
      * @param packageName the package name of the app whose overrides will be cleared
      * @throws SecurityException if overriding changes is not permitted
      */
+    @EnforcePermission("OVERRIDE_COMPAT_CHANGE_CONFIG")
     void clearOverridesForTest(in String packageName);
 
     /**
@@ -323,6 +341,7 @@ interface IPlatformCompat {
      * @return a {@link CompatibilityChangeConfig}, representing whether a change is enabled for
      * the given app or not
      */
+    @EnforcePermission(allOf={"LOG_COMPAT_CHANGE", "READ_COMPAT_CHANGE_CONFIG"})
     CompatibilityChangeConfig getAppConfig(in ApplicationInfo appInfo);
 
     /**
@@ -330,6 +349,7 @@ interface IPlatformCompat {
      *
      * @return an array of {@link CompatibilityChangeInfo} known to the service
      */
+    @EnforcePermission("READ_COMPAT_CHANGE_CONFIG")
     CompatibilityChangeInfo[] listAllChanges();
 
     /**
@@ -338,10 +358,12 @@ interface IPlatformCompat {
      *
      * @return an array of {@link CompatibilityChangeInfo}
      */
+    @RequiresNoPermission
     CompatibilityChangeInfo[] listUIChanges();
 
     /**
      * Gets an instance that can determine whether a changeid can be overridden for a package name.
      */
+    @RequiresNoPermission
     IOverrideValidator getOverrideValidator();
 }

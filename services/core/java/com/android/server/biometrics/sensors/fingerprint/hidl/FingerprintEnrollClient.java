@@ -21,10 +21,13 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricStateListener;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.ISidefpsController;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -66,12 +69,14 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
+            @Nullable IUdfpsOverlay udfpsOverlay,
             @FingerprintManager.EnrollReason int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, sensorId, true /* shouldVibrate */, biometricLogger,
                 biometricContext);
         setRequestId(requestId);
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
+                sidefpsController, udfpsOverlay);
 
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
@@ -83,7 +88,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
         return new ClientMonitorCompositeCallback(
-                getLogger().createALSCallback(true /* startWithClient */), callback);
+                getLogger().getAmbientLightProbe(true /* startWithClient */), callback);
     }
 
     @Override
@@ -101,7 +106,8 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), getOverlayReasonFromEnrollReason(mEnrollReason), this);
+        mSensorOverlays.show(getSensorId(), getOverlayReasonFromEnrollReason(mEnrollReason),
+                this);
 
         BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
         try {
@@ -151,6 +157,8 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
                 controller.onEnrollmentHelp(getSensorId());
             }
         });
+
+        mCallback.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
     }
 
     @Override
@@ -161,13 +169,13 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     }
 
     @Override
-    public void onPointerDown(int x, int y, float minor, float major) {
+    public void onPointerDown(PointerContext pc) {
         mIsPointerDown = true;
-        UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+        UdfpsHelper.onFingerDown(getFreshDaemon(), (int) pc.x, (int) pc.y, pc.minor, pc.major);
     }
 
     @Override
-    public void onPointerUp() {
+    public void onPointerUp(PointerContext pc) {
         mIsPointerDown = false;
         UdfpsHelper.onFingerUp(getFreshDaemon());
     }

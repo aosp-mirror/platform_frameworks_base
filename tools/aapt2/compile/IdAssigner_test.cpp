@@ -191,12 +191,12 @@ TEST_F(IdAssignerTests, ExaustEntryIdsLastIdIsPublic) {
       for (auto& entry : type->entries) {
         if (!entry->id) {
           return ::testing::AssertionFailure()
-                 << "resource " << ResourceNameRef(package->name, type->type, entry->name)
+                 << "resource " << ResourceNameRef(package->name, type->named_type, entry->name)
                  << " has no ID";
         }
         if (!seen_ids.insert(entry->id.value()).second) {
           return ::testing::AssertionFailure()
-                 << "resource " << ResourceNameRef(package->name, type->type, entry->name)
+                 << "resource " << ResourceNameRef(package->name, type->named_type, entry->name)
                  << " has a non-unique ID" << std::hex << entry->id.value() << std::dec;
         }
       }

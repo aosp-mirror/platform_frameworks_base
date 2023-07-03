@@ -16,8 +16,8 @@
 
 package android.view;
 
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +27,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,10 +66,15 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class InsetsAnimationControlImplTest {
 
+    private static final int ID_STATUS_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, statusBars());
+    private static final int ID_NAVIGATION_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, navigationBars());
+
     private InsetsAnimationControlImpl mController;
 
     private SurfaceSession mSession = new SurfaceSession();
-    private SurfaceControl mTopLeash;
+    private SurfaceControl mStatusLeash;
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
 
@@ -81,36 +85,43 @@ public class InsetsAnimationControlImplTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mTopLeash = new SurfaceControl.Builder(mSession)
+        mStatusLeash = new SurfaceControl.Builder(mSession)
                 .setName("testSurface")
                 .build();
         mNavLeash = new SurfaceControl.Builder(mSession)
                 .setName("testSurface")
                 .build();
         mInsetsState = new InsetsState();
-        mInsetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 500, 100));
-        mInsetsState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
-        doNothing().when(mMockController).onRequestedVisibilityChanged(any());
-        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
+        mInsetsState.getOrCreateSource(ID_STATUS_BAR, statusBars())
+                .setFrame(new Rect(0, 0, 500, 100));
+        mInsetsState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
+                .setFrame(new Rect(400, 0, 500, 500));
+        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ID_STATUS_BAR,
+                WindowInsets.Type.statusBars(), mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
-                new InsetsSourceControl(
-                        ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0), Insets.of(0, 100, 0, 0)),
+                new InsetsSourceControl(ID_STATUS_BAR, WindowInsets.Type.statusBars(),
+                        mStatusLeash, true, new Point(0, 0), Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
-        InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
-                mInsetsState, () -> mMockTransaction, mMockController);
-        navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash,
-                new Point(400, 0), Insets.of(0, 0, 100, 0)), new int[1], new int[1]);
-        navConsumer.hide();
+        InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ID_NAVIGATION_BAR,
+                WindowInsets.Type.navigationBars(), mInsetsState,
+                () -> mMockTransaction, mMockController);
+        navConsumer.setControl(
+                new InsetsSourceControl(ID_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
+                        mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),
+                new int[1], new int[1]);
+        mMockController.setRequestedVisibleTypes(0, WindowInsets.Type.navigationBars());
+        navConsumer.applyLocalVisibilityOverride();
 
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
-        controls.put(ITYPE_STATUS_BAR, topConsumer.getControl());
-        controls.put(ITYPE_NAVIGATION_BAR, navConsumer.getControl());
+        controls.put(ID_STATUS_BAR, topConsumer.getControl());
+        controls.put(ID_NAVIGATION_BAR, navConsumer.getControl());
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),
-                0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */);
+                0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */,
+                null /* statsToken */);
         mController.setReadyDispatched(true);
     }
 
@@ -143,7 +154,7 @@ public class InsetsAnimationControlImplTest {
         assertEquals(2, params.size());
         SurfaceParams first = params.get(0);
         SurfaceParams second = params.get(1);
-        SurfaceParams topParams = first.surface == mTopLeash ? first : second;
+        SurfaceParams topParams = first.surface == mStatusLeash ? first : second;
         SurfaceParams navParams = first.surface == mNavLeash ? first : second;
         assertPosition(topParams.matrix, new Rect(0, 0, 500, 100), new Rect(0, -70, 500, 30));
         assertPosition(navParams.matrix, new Rect(400, 0, 500, 500), new Rect(460, 0, 560, 500));

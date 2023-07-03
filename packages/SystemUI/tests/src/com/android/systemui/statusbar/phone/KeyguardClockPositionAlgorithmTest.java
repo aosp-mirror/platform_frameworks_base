@@ -67,6 +67,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private float mQsExpansion;
     private int mCutoutTopInset = 0;
     private boolean mIsSplitShade = false;
+    private boolean mBypassEnabled = false;
+    private int mUnlockedStackScrollerPadding = 0;
     private float mUdfpsTop = -1;
     private float mClockBottom = SCREEN_HEIGHT / 2;
     private boolean mClockTopAligned;
@@ -264,9 +266,21 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
+    public void notifPositionAlignedWithClockAndBurnInOffsetInSplitShadeMode() {
+        setSplitShadeTopMargin(100); // this makes clock to be at 100
+        givenAOD();
+        mIsSplitShade = true;
+        givenMaxBurnInOffset(100);
+        givenHighestBurnInOffset(); // this makes clock to be at 200
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the notif padding adjusts for burn-in offset: clock position - burn-in offset
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(100);
+    }
+
+    @Test
     public void clockPositionedDependingOnMarginInSplitShade() {
         setSplitShadeTopMargin(400);
-        mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -294,7 +308,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void notifPaddingAccountsForMultiUserSwitcherInSplitShade() {
         setSplitShadeTopMargin(100);
         mUserSwitchHeight = 150;
-        mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -307,7 +320,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void clockDoesntAccountForMultiUserSwitcherInSplitShade() {
         setSplitShadeTopMargin(100);
         mUserSwitchHeight = 150;
-        mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -329,15 +341,52 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
-    public void notifMinPaddingAlignedWithClockInSplitShadeMode() {
+    public void notifPadding_splitShade() {
         givenLockScreen();
         mIsSplitShade = true;
         mKeyguardStatusHeight = 200;
         // WHEN the position algorithm is run
         positionClock();
         // THEN the padding DOESN'T adjust for keyguard status height.
-        assertThat(mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding())
-                .isEqualTo(mKeyguardStatusBarHeaderHeight);
+        assertThat(mClockPositionAlgorithm.getLockscreenNotifPadding(/* nsslTop= */ 10))
+                .isEqualTo(mKeyguardStatusBarHeaderHeight - 10);
+    }
+
+    @Test
+    public void notifPadding_portraitShade_bypassOff() {
+        givenLockScreen();
+        mIsSplitShade = false;
+        mBypassEnabled = false;
+
+        // mMinTopMargin = 100 = 80 + max(20, 0)
+        mKeyguardStatusBarHeaderHeight = 80;
+        mUserSwitchHeight = 20;
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin))
+                .thenReturn(0);
+
+        mKeyguardStatusHeight = 200;
+
+        // WHEN the position algorithm is run
+        positionClock();
+
+        // THEN padding = 300 = mMinTopMargin(100) + mKeyguardStatusHeight(200)
+        assertThat(mClockPositionAlgorithm.getLockscreenNotifPadding(/* nsslTop= */ 50))
+                .isEqualTo(300);
+    }
+
+    @Test
+    public void notifPadding_portraitShade_bypassOn() {
+        givenLockScreen();
+        mIsSplitShade = false;
+        mBypassEnabled = true;
+        mUnlockedStackScrollerPadding = 200;
+
+        // WHEN the position algorithm is run
+        positionClock();
+
+        // THEN padding = 150 = mUnlockedStackScrollerPadding(200) - nsslTop(50)
+        assertThat(mClockPositionAlgorithm.getLockscreenNotifPadding(/* nsslTop= */ 50))
+                .isEqualTo(150);
     }
 
     @Test
@@ -382,8 +431,22 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mQsExpansion = 1;
         // WHEN the clock position algorithm is run
         positionClock();
-        // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2).
+        // THEN the clock is transparent.
         assertThat(mClockPosition.clockAlpha).isEqualTo(TRANSPARENT);
+    }
+
+    @Test
+    public void clockNotHiddenWhenQsIsExpandedInSplitShade() {
+        // GIVEN on the split lock screen with QS expansion
+        givenLockScreen();
+        mIsSplitShade = true;
+        setSplitShadeTopMargin(100);
+        mQsExpansion = 1;
+
+        // WHEN the clock position algorithm is run
+        positionClock();
+
+        assertThat(mClockPosition.clockAlpha).isEqualTo(1);
     }
 
     @Test
@@ -524,6 +587,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void setSplitShadeTopMargin(int value) {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
                 .thenReturn(value);
+        mClockPositionAlgorithm.loadDimens(mResources);
     }
 
     private void givenHighestBurnInOffset() {
@@ -564,8 +628,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
                 0 /* userSwitchPreferredY */,
                 mDark,
                 ZERO_DRAG,
-                false /* bypassEnabled */,
-                0 /* unlockedStackScrollerPadding */,
+                mBypassEnabled,
+                mUnlockedStackScrollerPadding,
                 mQsExpansion,
                 mCutoutTopInset,
                 mIsSplitShade,

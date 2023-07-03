@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 /**
  * Represent a logical device of type TV residing in Android system.
  */
-final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
+public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceTv";
 
     // Whether ARC is available or not. "true" means that ARC is established between TV and
@@ -259,7 +259,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setActiveSource(targetDevice, "HdmiCecLocalDeviceTv#deviceSelect()");
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -272,7 +272,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void handleSelectInternalSource() {
         assertRunOnServiceThread();
         // Seq #18
-        if (mService.isControlEnabled()
+        if (mService.isCecControlEnabled()
                 && getActiveSource().logicalAddress != getDeviceInfo().getLogicalAddress()) {
             updateActiveSource(
                     getDeviceInfo().getLogicalAddress(),
@@ -371,7 +371,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         getActiveSource().invalidate();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setActivePortId(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -682,20 +682,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
-        clearDeviceInfoList();
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
                 new DeviceDiscoveryCallback() {
                     @Override
                     public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
                         for (HdmiDeviceInfo info : deviceInfos) {
                             mService.getHdmiCecNetwork().addCecDevice(info);
-                        }
-
-                        // Since we removed all devices when it starts and
-                        // device discovery action does not poll local devices,
-                        // we should put device info of local device manually here
-                        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
-                            mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
                         mSelectRequestBuffer.process();
@@ -742,7 +734,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // Seq #32
     void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled() || hasAction(DeviceDiscoveryAction.class)) {
+        if (!mService.isCecControlEnabled() || hasAction(DeviceDiscoveryAction.class)) {
             setSystemAudioMode(false);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -837,7 +829,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void enableAudioReturnChannel(boolean enabled) {
         assertRunOnServiceThread();
         HdmiDeviceInfo avr = getAvrDeviceInfo();
-        if (avr != null) {
+        if (avr != null && avr.getPortId() != Constants.INVALID_PORT_ID) {
             mService.enableAudioReturnChannel(avr.getPortId(), enabled);
         }
     }
@@ -899,10 +891,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @ServiceThreadOnly
     void startArcAction(boolean enabled) {
+        startArcAction(enabled, null);
+    }
+
+    @ServiceThreadOnly
+    void startArcAction(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         HdmiDeviceInfo info = getAvrDeviceInfo();
         if (info == null) {
             Slog.w(TAG, "Failed to start arc action; No AVR device.");
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
         if (!canStartArcUpdateAction(info.getLogicalAddress(), enabled)) {
@@ -910,19 +908,37 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (enabled && !isConnectedToArcPort(info.getPhysicalAddress())) {
                 displayOsd(OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT);
             }
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
+        if (enabled && mService.earcBlocksArcConnection()) {
+            Slog.i(TAG,
+                    "ARC connection blocked because eARC connection is established or being "
+                            + "established.");
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
 
-        // Terminate opposite action and start action if not exist.
+        // Terminate opposite action and create an action with callback.
         if (enabled) {
             removeAction(RequestArcTerminationAction.class);
-            if (!hasAction(RequestArcInitiationAction.class)) {
-                addAndStartAction(new RequestArcInitiationAction(this, info.getLogicalAddress()));
+            if (hasAction(RequestArcInitiationAction.class)) {
+                RequestArcInitiationAction existingInitiationAction =
+                        getActions(RequestArcInitiationAction.class).get(0);
+                existingInitiationAction.addCallback(callback);
+            } else {
+                addAndStartAction(
+                        new RequestArcInitiationAction(this, info.getLogicalAddress(), callback));
             }
         } else {
             removeAction(RequestArcInitiationAction.class);
-            if (!hasAction(RequestArcTerminationAction.class)) {
-                addAndStartAction(new RequestArcTerminationAction(this, info.getLogicalAddress()));
+            if (hasAction(RequestArcTerminationAction.class)) {
+                RequestArcTerminationAction existingTerminationAction =
+                        getActions(RequestArcTerminationAction.class).get(0);
+                existingTerminationAction.addCallback(callback);
+            } else {
+                addAndStartAction(
+                        new RequestArcTerminationAction(this, info.getLogicalAddress(), callback));
             }
         }
     }
@@ -1010,6 +1026,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleInitiateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
+        if (mService.earcBlocksArcConnection()) {
+            Slog.i(TAG,
+                    "ARC connection blocked because eARC connection is established or being "
+                            + "established.");
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
+        }
+
         if (!canStartArcUpdateAction(message.getSource(), true)) {
             HdmiDeviceInfo avrDeviceInfo = getAvrDeviceInfo();
             if (avrDeviceInfo == null) {
@@ -1023,9 +1046,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return Constants.ABORT_REFUSED;
         }
 
-        // In case where <Initiate Arc> is started by <Request ARC Initiation>
-        // need to clean up RequestArcInitiationAction.
-        removeAction(RequestArcInitiationAction.class);
+        // In case where <Initiate Arc> is started by <Request ARC Initiation>, this message is
+        // handled in RequestArcInitiationAction as well.
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), true);
         addAndStartAction(action);
@@ -1059,9 +1081,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return Constants.HANDLED;
         }
         // Do not check ARC configuration since the AVR might have been already removed.
-        // Clean up RequestArcTerminationAction in case <Terminate Arc> was started by
-        // <Request ARC Termination>.
-        removeAction(RequestArcTerminationAction.class);
+        // In case where <Terminate Arc> is started by <Request ARC Termination>, this
+        // message is handled in RequestArcTerminationAction as well.
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), false);
         addAndStartAction(action);
@@ -1181,7 +1202,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
-        return mService.isControlEnabled()
+        return mService.isCecControlEnabled()
                 && message.getSource() == Constants.ADDR_AUDIO_SYSTEM
                 && (message.getDestination() == Constants.ADDR_TV
                         || message.getDestination() == Constants.ADDR_BROADCAST)
@@ -1232,7 +1253,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void launchRoutingControl(boolean routingForBootup) {
         assertRunOnServiceThread();
         // Seq #24
-        if (getActivePortId() != Constants.INVALID_PORT_ID) {
+        if (getActivePortId() != Constants.INVALID_PORT_ID
+                && getActivePortId() != Constants.CEC_SWITCH_HOME) {
             if (!routingForBootup && !isProhibitMode()) {
                 int newPath = mService.portIdToPath(getActivePortId());
                 setActivePath(newPath);
@@ -1330,8 +1352,18 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioAutoInitiationAction.class);
         removeAction(VolumeControlAction.class);
 
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setSystemAudioMode(false);
+        }
+    }
+
+    @ServiceThreadOnly
+    private void forceDisableArcOnAllPins() {
+        List<HdmiPortInfo> ports = mService.getPortInfo();
+        for (HdmiPortInfo port : ports) {
+            if (isArcFeatureEnabled(port.getId())) {
+                mService.enableAudioReturnChannel(port.getId(), false);
+            }
         }
     }
 
@@ -1342,13 +1374,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (avr == null) {
             return;
         }
-        disableArc();
 
         // Seq #44.
         removeAllRunningArcAction();
         if (!hasAction(RequestArcTerminationAction.class) && isArcEstablished()) {
             addAndStartAction(new RequestArcTerminationAction(this, avr.getLogicalAddress()));
         }
+
+        // Disable ARC Pin earlier, prevent the case where AVR doesn't send <Terminate ARC> in time
+        forceDisableArcOnAllPins();
     }
 
     @ServiceThreadOnly
@@ -1364,7 +1398,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
         // Seq #11
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             return;
         }
         boolean sendStandbyOnSleep =
@@ -1403,7 +1437,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Constants.HandleMessageResult
     int startOneTouchRecord(int recorderAddress, byte[] recordSource) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceOneTouchRecordResult(recorderAddress, ONE_TOUCH_RECORD_CEC_DISABLED);
             return Constants.ABORT_NOT_IN_CORRECT_MODE;
@@ -1432,7 +1466,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void stopOneTouchRecord(int recorderAddress) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not stop one touch record. CEC control is disabled.");
             announceOneTouchRecordResult(recorderAddress, ONE_TOUCH_RECORD_CEC_DISABLED);
             return;
@@ -1466,7 +1500,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void startTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceTimerRecordingResult(recorderAddress,
                     TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED);
@@ -1502,7 +1536,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void clearTimerRecording(int recorderAddress, int sourceType, byte[] recordSource) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceClearTimerRecordingResult(recorderAddress, CLEAR_TIMER_STATUS_CEC_DISABLE);
             return;

@@ -19,23 +19,28 @@
     android:id="@+id/expand_button"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/notification_header_height"
     android:layout_gravity="top|end"
     android:contentDescription="@string/expand_button_content_description_collapsed"
-    android:padding="16dp"
+    android:paddingHorizontal="16dp"
     >
 
     <LinearLayout
         android:id="@+id/expand_button_pill"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/notification_expand_button_pill_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/notification_expand_button_pill_height"
         android:orientation="horizontal"
         android:background="@drawable/expand_button_pill_bg"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
         >
 
         <TextView
             android:id="@+id/expand_button_number"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/notification_expand_button_pill_height"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/notification_expand_button_pill_height"
             android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Info"
             android:gravity="center_vertical"
             android:paddingStart="8dp"

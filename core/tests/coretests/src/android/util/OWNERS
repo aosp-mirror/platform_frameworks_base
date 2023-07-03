@@ -1,0 +1,2 @@
+per-file NtpTrustedTimeTest.java = file:/services/core/java/com/android/server/timezonedetector/OWNERS
+per-file TypedValueTest.kt = file:/core/java/android/content/res/OWNERS

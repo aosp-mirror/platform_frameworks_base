@@ -100,6 +100,10 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
 
     private boolean action(int what, TextView widget, Spannable buffer) {
         Layout layout = widget.getLayout();
+        if (widget.isOffsetMappingAvailable()) {
+            // The text in the layout is transformed and has OffsetMapping, don't do anything.
+            return false;
+        }
 
         int padding = widget.getTotalPaddingTop() +
                       widget.getTotalPaddingBottom();

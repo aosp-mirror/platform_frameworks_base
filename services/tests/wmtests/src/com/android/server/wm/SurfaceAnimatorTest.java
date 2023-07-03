@@ -361,7 +361,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         @Override
         public Builder makeAnimationLeash() {
-            return new SurfaceControl.Builder(mSession) {
+            return new Builder(mSession) {
 
                 @Override
                 public SurfaceControl build() {

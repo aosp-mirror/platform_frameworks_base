@@ -262,8 +262,8 @@ public abstract class QuickAccessWalletService extends Service {
     private void onWalletCardsRequestedInternal(
             GetWalletCardsRequest request,
             IQuickAccessWalletServiceCallbacks callback) {
-        onWalletCardsRequested(request,
-                new GetWalletCardsCallbackImpl(request, callback, mHandler));
+        onWalletCardsRequested(
+                request, new GetWalletCardsCallbackImpl(request, callback, mHandler, this));
     }
 
     private void onTargetActivityIntentRequestedInternal(

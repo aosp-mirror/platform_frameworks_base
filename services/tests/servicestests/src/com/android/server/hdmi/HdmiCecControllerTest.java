@@ -100,14 +100,17 @@ public class HdmiCecControllerTest {
     public void SetUp() {
         mMyLooper = mTestLooper.getLooper();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlServiceSpy = spy(new HdmiControlService(
                 InstrumentationRegistry.getTargetContext(), Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()));
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doReturn(mMyLooper).when(mHdmiControlServiceSpy).getIoLooper();
         doReturn(mMyLooper).when(mHdmiControlServiceSpy).getServiceLooper();
         doAnswer(__ -> mCecVersion).when(mHdmiControlServiceSpy).getCecVersion();
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
@@ -132,9 +135,7 @@ public class HdmiCecControllerTest {
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         mTestLooper.dispatchAll();
 
-        synchronized (playbackDevice.mLock) {
-            mPlaybackLogicalAddress = playbackDevice.getDeviceInfo().getLogicalAddress();
-        }
+        mPlaybackLogicalAddress = playbackDevice.getDeviceInfo().getLogicalAddress();
         mTestLooper.dispatchAll();
     }
 

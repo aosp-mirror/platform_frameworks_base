@@ -24,11 +24,13 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class records statistics about PackageManagerService snapshots.  It maintains two sets of
@@ -59,9 +61,9 @@ public class SnapshotStatistics {
     public static final int SNAPSHOT_TICK_INTERVAL_MS = 60 * 1000;
 
     /**
-     * The number of ticks for long statistics.  This is one week.
+     * The interval of the snapshot statistics logging.
      */
-    public static final int SNAPSHOT_LONG_TICKS = 7 * 24 * 60;
+    private static final long SNAPSHOT_LOG_INTERVAL_US = TimeUnit.DAYS.toMicros(1);
 
     /**
      * The number snapshot event logs that can be generated in a single logging interval.
@@ -93,6 +95,28 @@ public class SnapshotStatistics {
     public static final int SNAPSHOT_SHORT_LIFETIME = 5;
 
     /**
+     *  Buckets to represent a range of the rebuild latency for the histogram of
+     *  snapshot rebuild latency.
+     */
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_1_MILLIS = 1;
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_2_MILLIS = 2;
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_5_MILLIS = 5;
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_10_MILLIS = 10;
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_20_MILLIS = 20;
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_50_MILLIS = 50;
+    private static final int REBUILD_LATENCY_BUCKET_LESS_THAN_100_MILLIS = 100;
+
+    /**
+     *  Buckets to represent a range of the reuse count for the histogram of
+     *  snapshot reuse counts.
+     */
+    private static final int REUSE_COUNT_BUCKET_LESS_THAN_1 = 1;
+    private static final int REUSE_COUNT_BUCKET_LESS_THAN_10 = 10;
+    private static final int REUSE_COUNT_BUCKET_LESS_THAN_100 = 100;
+    private static final int REUSE_COUNT_BUCKET_LESS_THAN_1000 = 1000;
+    private static final int REUSE_COUNT_BUCKET_LESS_THAN_10000 = 10000;
+
+    /**
      * The lock to control access to this object.
      */
     private final Object mLock = new Object();
@@ -111,11 +135,6 @@ public class SnapshotStatistics {
      * The number of events reported in the current tick.
      */
     private int mEventsReported = 0;
-
-    /**
-     * The tick counter.  At the default tick interval, this wraps every 4000 years or so.
-     */
-    private int mTicks = 0;
 
     /**
      * The handler used for the periodic ticks.
@@ -139,8 +158,6 @@ public class SnapshotStatistics {
 
         // The number of bins
         private int mCount;
-        // The mapping of low integers to bins
-        private int[] mBinMap;
         // The maximum mapped value.  Values at or above this are mapped to the
         // top bin.
         private int mMaxBin;
@@ -158,16 +175,6 @@ public class SnapshotStatistics {
             mCount = mUserKey.length + 1;
             // The maximum value is one more than the last one in the map.
             mMaxBin = mUserKey[mUserKey.length - 1] + 1;
-            mBinMap = new int[mMaxBin + 1];
-
-            int j = 0;
-            for (int i = 0; i < mUserKey.length; i++) {
-                while (j <= mUserKey[i]) {
-                    mBinMap[j] = i;
-                    j++;
-                }
-            }
-            mBinMap[mMaxBin] = mUserKey.length;
         }
 
         /**
@@ -175,9 +182,14 @@ public class SnapshotStatistics {
          */
         public int getBin(int x) {
             if (x >= 0 && x < mMaxBin) {
-                return mBinMap[x];
+                for (int i = 0; i < mUserKey.length; i++) {
+                    if (x <= mUserKey[i]) {
+                        return i;
+                    }
+                }
+                return 0; // should not happen
             } else if (x >= mMaxBin) {
-                return mBinMap[mMaxBin];
+                return mUserKey.length;
             } else {
                 // x is negative.  The bin will not be used.
                 return 0;
@@ -240,11 +252,6 @@ public class SnapshotStatistics {
         public int mTotalUsed = 0;
 
         /**
-         * The total number of times a snapshot was bypassed because corking was in effect.
-         */
-        public int mTotalCorked = 0;
-
-        /**
          * The total number of builds that count as big, which means they took longer than
          * SNAPSHOT_BIG_BUILD_TIME_NS.
          */
@@ -268,6 +275,11 @@ public class SnapshotStatistics {
         public int mMaxBuildTimeUs = 0;
 
         /**
+         * The maximum used count since the last log.
+         */
+        public int mMaxUsedCount = 0;
+
+        /**
          * Record the rebuild.  The parameters are the length of time it took to build the
          * latest snapshot, and the number of times the _previous_ snapshot was used.  A
          * negative value for used signals an invalid value, which is the case the first
@@ -284,7 +296,6 @@ public class SnapshotStatistics {
             }
 
             mTotalTimeUs += duration;
-            boolean reportIt = false;
 
             if (big) {
                 mBigBuilds++;
@@ -295,13 +306,9 @@ public class SnapshotStatistics {
             if (mMaxBuildTimeUs < duration) {
                 mMaxBuildTimeUs = duration;
             }
-        }
-
-        /**
-         * Record a cork.
-         */
-        private void corked() {
-            mTotalCorked++;
+            if (mMaxUsedCount < used) {
+                mMaxUsedCount = used;
+            }
         }
 
         private Stats(long now) {
@@ -321,11 +328,11 @@ public class SnapshotStatistics {
             mUsed = Arrays.copyOf(orig.mUsed, orig.mUsed.length);
             mTotalBuilds = orig.mTotalBuilds;
             mTotalUsed = orig.mTotalUsed;
-            mTotalCorked = orig.mTotalCorked;
             mBigBuilds = orig.mBigBuilds;
             mShortLived = orig.mShortLived;
             mTotalTimeUs = orig.mTotalTimeUs;
             mMaxBuildTimeUs = orig.mMaxBuildTimeUs;
+            mMaxUsedCount = orig.mMaxUsedCount;
         }
 
         /**
@@ -379,7 +386,6 @@ public class SnapshotStatistics {
          * Dump the summary statistics record.  Choose the header or the data.
          *    number of builds
          *    number of uses
-         *    number of corks
          *    number of big builds
          *    number of short lifetimes
          *    cumulative build time, in seconds
@@ -388,13 +394,13 @@ public class SnapshotStatistics {
         private void dumpStats(PrintWriter pw, String indent, long now, boolean header) {
             dumpPrefix(pw, indent, now, header, "Summary stats");
             if (header) {
-                pw.format(Locale.US, "  %10s  %10s  %10s  %10s  %10s  %10s  %10s",
-                          "TotBlds", "TotUsed", "TotCork", "BigBlds", "ShortLvd",
+                pw.format(Locale.US, "  %10s  %10s  %10s  %10s  %10s  %10s",
+                          "TotBlds", "TotUsed", "BigBlds", "ShortLvd",
                           "TotTime", "MaxTime");
             } else {
                 pw.format(Locale.US,
-                        "  %10d  %10d  %10d  %10d  %10d  %10d  %10d",
-                        mTotalBuilds, mTotalUsed, mTotalCorked, mBigBuilds, mShortLived,
+                        "  %10d  %10d  %10d  %10d  %10d  %10d",
+                        mTotalBuilds, mTotalUsed, mBigBuilds, mShortLived,
                         mTotalTimeUs / 1000, mMaxBuildTimeUs / 1000);
             }
             pw.println();
@@ -457,18 +463,19 @@ public class SnapshotStatistics {
         }
 
         /**
-         * Report the object via an event.  Presumably the record indicates an anomalous
-         * incident.
+         * Report the snapshot statistics to FrameworkStatsLog.
          */
-        private void report() {
-            EventLogTags.writePmSnapshotStats(
-                    mTotalBuilds, mTotalUsed, mBigBuilds, mShortLived,
-                    mMaxBuildTimeUs / US_IN_MS, mTotalTimeUs / US_IN_MS);
+        private void logSnapshotStatistics(int packageCount) {
+            final long avgLatencyUs = (mTotalBuilds == 0 ? 0 : mTotalTimeUs / mTotalBuilds);
+            final int avgUsedCount = (mTotalBuilds == 0 ? 0 : mTotalUsed / mTotalBuilds);
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.PACKAGE_MANAGER_SNAPSHOT_REPORTED, mTimes, mUsed,
+                    mMaxBuildTimeUs, mMaxUsedCount, avgLatencyUs, avgUsedCount, packageCount);
         }
     }
 
     /**
-     * Long statistics.  These roll over approximately every week.
+     * Long statistics.  These roll over approximately one day.
      */
     private Stats[] mLong;
 
@@ -478,10 +485,14 @@ public class SnapshotStatistics {
     private Stats[] mShort;
 
     /**
-     * The time of the last build.  This can be used to compute the length of time a
-     * snapshot existed before being replaced.
+     * The time of last logging to the FrameworkStatsLog.
      */
-    private long mLastBuildTime = 0;
+    private long mLastLogTimeUs;
+
+    /**
+     * The number of packages on the device.
+     */
+    private int mPackageCount;
 
     /**
      * Create a snapshot object.  Initialize the bin levels.  The last bin catches
@@ -489,8 +500,20 @@ public class SnapshotStatistics {
      */
     public SnapshotStatistics() {
         // Create the bin thresholds.  The time bins are in units of us.
-        mTimeBins = new BinMap(new int[] { 1, 2, 5, 10, 20, 50, 100 });
-        mUseBins = new BinMap(new int[] { 1, 2, 5, 10, 20, 50, 100 });
+        mTimeBins = new BinMap(new int[] {
+                REBUILD_LATENCY_BUCKET_LESS_THAN_1_MILLIS,
+                REBUILD_LATENCY_BUCKET_LESS_THAN_2_MILLIS,
+                REBUILD_LATENCY_BUCKET_LESS_THAN_5_MILLIS,
+                REBUILD_LATENCY_BUCKET_LESS_THAN_10_MILLIS,
+                REBUILD_LATENCY_BUCKET_LESS_THAN_20_MILLIS,
+                REBUILD_LATENCY_BUCKET_LESS_THAN_50_MILLIS,
+                REBUILD_LATENCY_BUCKET_LESS_THAN_100_MILLIS });
+        mUseBins = new BinMap(new int[] {
+                REUSE_COUNT_BUCKET_LESS_THAN_1,
+                REUSE_COUNT_BUCKET_LESS_THAN_10,
+                REUSE_COUNT_BUCKET_LESS_THAN_100,
+                REUSE_COUNT_BUCKET_LESS_THAN_1000,
+                REUSE_COUNT_BUCKET_LESS_THAN_10000 });
 
         // Create the raw statistics
         final long now = SystemClock.currentTimeMicro();
@@ -498,6 +521,7 @@ public class SnapshotStatistics {
         mLong[0] = new Stats(now);
         mShort = new Stats[10];
         mShort[0] = new Stats(now);
+        mLastLogTimeUs = now;
 
         // Create the message handler for ticks and start the ticker.
         mHandler = new Handler(Looper.getMainLooper()) {
@@ -530,13 +554,14 @@ public class SnapshotStatistics {
      * @param now The time at which the snapshot rebuild began, in ns.
      * @param done The time at which the snapshot rebuild completed, in ns.
      * @param hits The number of times the previous snapshot was used.
+     * @param packageCount The number of packages on the device.
      */
-    public final void rebuild(long now, long done, int hits) {
+    public final void rebuild(long now, long done, int hits, int packageCount) {
         // The duration has a span of about 2000s
         final int duration = (int) (done - now);
         boolean reportEvent = false;
         synchronized (mLock) {
-            mLastBuildTime = now;
+            mPackageCount = packageCount;
 
             final int timeBin = mTimeBins.getBin(duration / 1000);
             final int useBin = mUseBins.getBin(hits);
@@ -555,16 +580,6 @@ public class SnapshotStatistics {
         if (reportEvent) {
             // Report the first N big builds, and every new maximum after that.
             EventLogTags.writePmSnapshotRebuild(duration / US_IN_MS, hits);
-        }
-    }
-
-    /**
-     * Record a corked snapshot request.
-     */
-    public final void corked() {
-        synchronized (mLock) {
-            mShort[0].corked();
-            mLong[0].corked();
         }
     }
 
@@ -594,10 +609,12 @@ public class SnapshotStatistics {
     private void tick() {
         synchronized (mLock) {
             long now = SystemClock.currentTimeMicro();
-            mTicks++;
-            if (mTicks % SNAPSHOT_LONG_TICKS == 0) {
+            if (now - mLastLogTimeUs > SNAPSHOT_LOG_INTERVAL_US) {
                 shift(mLong, now);
+                mLastLogTimeUs = now;
+                mLong[mLong.length - 1].logSnapshotStatistics(mPackageCount);
             }
+
             shift(mShort, now);
             mEventsReported = 0;
         }
@@ -624,8 +641,7 @@ public class SnapshotStatistics {
      * Dump the statistics.  The format is compatible with the PackageManager dumpsys
      * output.
      */
-    public void dump(PrintWriter pw, String indent, long now, int unrecorded,
-                     int corkLevel, boolean brief) {
+    public void dump(PrintWriter pw, String indent, long now, int unrecorded, boolean brief) {
         // Grab the raw statistics under lock, but print them outside of the lock.
         Stats[] l;
         Stats[] s;
@@ -635,8 +651,7 @@ public class SnapshotStatistics {
             s = Arrays.copyOf(mShort, mShort.length);
             s[0] = new Stats(s[0]);
         }
-        pw.format(Locale.US, "%s Unrecorded-hits: %d  Cork-level: %d", indent,
-                  unrecorded, corkLevel);
+        pw.format(Locale.US, "%s Unrecorded-hits: %d", indent, unrecorded);
         pw.println();
         dump(pw, indent, now, l, s, "stats");
         if (brief) {

@@ -20,5 +20,5 @@ license {
 
 sh_binary {
     name: "ime",
-    src: "ime",
+    src: "ime.sh",
 }

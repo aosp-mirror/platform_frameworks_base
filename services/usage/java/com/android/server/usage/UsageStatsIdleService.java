@@ -15,6 +15,7 @@
  */
 package com.android.server.usage;
 
+import android.annotation.UserIdInt;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -35,65 +36,71 @@ import java.util.concurrent.TimeUnit;
 public class UsageStatsIdleService extends JobService {
 
     /**
-     * Base job ID for the pruning job - must be unique within the system server uid.
+     * Namespace for prune job
      */
-    private static final int PRUNE_JOB_ID = 546357475;
+    private static final String PRUNE_JOB_NS = "usagestats_prune";
+
     /**
-     * Job ID for the update mappings job - must be unique within the system server uid.
-     * Incrementing PRUNE_JOB_ID by 21475 (MAX_USER_ID) to ensure there is no overlap in job ids.
+     * Namespace for update mappings job
      */
-    private static final int UPDATE_MAPPINGS_JOB_ID = 546378950;
+    private static final String UPDATE_MAPPINGS_JOB_NS = "usagestats_mapping";
 
     private static final String USER_ID_KEY = "user_id";
 
-    static void scheduleJob(Context context, int userId) {
-        final int userJobId = PRUNE_JOB_ID + userId; // unique job id per user
+    /** Schedule a prune job */
+    static void schedulePruneJob(Context context, @UserIdInt int userId) {
         final ComponentName component = new ComponentName(context.getPackageName(),
                 UsageStatsIdleService.class.getName());
         final PersistableBundle bundle = new PersistableBundle();
         bundle.putInt(USER_ID_KEY, userId);
-        final JobInfo pruneJob = new JobInfo.Builder(userJobId, component)
+        final JobInfo pruneJob = new JobInfo.Builder(userId, component)
                 .setRequiresDeviceIdle(true)
                 .setExtras(bundle)
                 .setPersisted(true)
                 .build();
 
-        scheduleJobInternal(context, pruneJob, userJobId);
+        scheduleJobInternal(context, pruneJob, PRUNE_JOB_NS, userId);
     }
 
-    static void scheduleUpdateMappingsJob(Context context) {
+    static void scheduleUpdateMappingsJob(Context context, @UserIdInt int userId) {
         final ComponentName component = new ComponentName(context.getPackageName(),
                 UsageStatsIdleService.class.getName());
-        final JobInfo updateMappingsJob = new JobInfo.Builder(UPDATE_MAPPINGS_JOB_ID, component)
+        final PersistableBundle bundle = new PersistableBundle();
+        bundle.putInt(USER_ID_KEY, userId);
+        final JobInfo updateMappingsJob = new JobInfo.Builder(userId, component)
                 .setPersisted(true)
                 .setMinimumLatency(TimeUnit.DAYS.toMillis(1))
                 .setOverrideDeadline(TimeUnit.DAYS.toMillis(2))
+                .setExtras(bundle)
                 .build();
 
-        scheduleJobInternal(context, updateMappingsJob, UPDATE_MAPPINGS_JOB_ID);
+        scheduleJobInternal(context, updateMappingsJob, UPDATE_MAPPINGS_JOB_NS, userId);
     }
 
-    private static void scheduleJobInternal(Context context, JobInfo pruneJob, int jobId) {
-        final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
-        final JobInfo pendingPruneJob = jobScheduler.getPendingJob(jobId);
-        // only schedule a new prune job if one doesn't exist already for this user
-        if (!pruneJob.equals(pendingPruneJob)) {
-            jobScheduler.cancel(jobId); // cancel any previously scheduled prune job
-            jobScheduler.schedule(pruneJob);
+    private static void scheduleJobInternal(Context context, JobInfo jobInfo,
+            String namespace, int jobId) {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        jobScheduler = jobScheduler.forNamespace(namespace);
+        final JobInfo pendingJob = jobScheduler.getPendingJob(jobId);
+        // only schedule a new job if one doesn't exist already for this user
+        if (!jobInfo.equals(pendingJob)) {
+            jobScheduler.cancel(jobId); // cancel any previously scheduled job
+            jobScheduler.schedule(jobInfo);
         }
     }
 
-    static void cancelJob(Context context, int userId) {
-        cancelJobInternal(context, PRUNE_JOB_ID + userId);
+    static void cancelPruneJob(Context context, @UserIdInt int userId) {
+        cancelJobInternal(context, PRUNE_JOB_NS, userId);
     }
 
-    static void cancelUpdateMappingsJob(Context context) {
-        cancelJobInternal(context, UPDATE_MAPPINGS_JOB_ID);
+    static void cancelUpdateMappingsJob(Context context, @UserIdInt int userId) {
+        cancelJobInternal(context, UPDATE_MAPPINGS_JOB_NS, userId);
     }
 
-    private static void cancelJobInternal(Context context, int jobId) {
-        final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+    private static void cancelJobInternal(Context context, String namespace, int jobId) {
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
         if (jobScheduler != null) {
+            jobScheduler = jobScheduler.forNamespace(namespace);
             jobScheduler.cancel(jobId);
         }
     }
@@ -102,15 +109,19 @@ public class UsageStatsIdleService extends JobService {
     public boolean onStartJob(JobParameters params) {
         final PersistableBundle bundle = params.getExtras();
         final int userId = bundle.getInt(USER_ID_KEY, -1);
-        if (userId == -1 && params.getJobId() != UPDATE_MAPPINGS_JOB_ID) {
+
+        if (userId == -1) { // legacy job
             return false;
         }
 
+        // Do async
         AsyncTask.execute(() -> {
             final UsageStatsManagerInternal usageStatsManagerInternal = LocalServices.getService(
                     UsageStatsManagerInternal.class);
-            if (params.getJobId() == UPDATE_MAPPINGS_JOB_ID) {
-                final boolean jobFinished = usageStatsManagerInternal.updatePackageMappingsData();
+            final String jobNs = params.getJobNamespace();
+            if (UPDATE_MAPPINGS_JOB_NS.equals(jobNs)) {
+                final boolean jobFinished =
+                        usageStatsManagerInternal.updatePackageMappingsData(userId);
                 jobFinished(params, !jobFinished); // reschedule if data was not updated
             } else {
                 final boolean jobFinished =
@@ -118,6 +129,8 @@ public class UsageStatsIdleService extends JobService {
                 jobFinished(params, !jobFinished); // reschedule if data was not pruned
             }
         });
+
+        // Job is running asynchronously
         return true;
     }
 

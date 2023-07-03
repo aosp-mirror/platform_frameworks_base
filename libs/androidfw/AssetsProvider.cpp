@@ -73,9 +73,6 @@ std::unique_ptr<Asset> AssetsProvider::CreateAssetFromFd(base::unique_fd fd,
                                           (path != nullptr) ? base::unique_fd(-1) : std::move(fd));
 }
 
-ZipAssetsProvider::PathOrDebugName::PathOrDebugName(std::string&& value, bool is_path)
-    : value_(std::forward<std::string>(value)), is_path_(is_path) {}
-
 const std::string* ZipAssetsProvider::PathOrDebugName::GetPath() const {
   return is_path_ ? &value_ : nullptr;
 }
@@ -84,34 +81,42 @@ const std::string& ZipAssetsProvider::PathOrDebugName::GetDebugName() const {
   return value_;
 }
 
+void ZipAssetsProvider::ZipCloser::operator()(ZipArchive* a) const {
+  ::CloseArchive(a);
+}
+
 ZipAssetsProvider::ZipAssetsProvider(ZipArchiveHandle handle, PathOrDebugName&& path,
                                      package_property_t flags, time_t last_mod_time)
-    : zip_handle_(handle, ::CloseArchive),
-      name_(std::forward<PathOrDebugName>(path)),
+    : zip_handle_(handle),
+      name_(std::move(path)),
       flags_(flags),
       last_mod_time_(last_mod_time) {}
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
-                                                             package_property_t flags) {
+                                                             package_property_t flags,
+                                                             base::unique_fd fd) {
+  const auto released_fd = fd.ok() ? fd.release() : -1;
   ZipArchiveHandle handle;
-  if (int32_t result = OpenArchive(path.c_str(), &handle); result != 0) {
+  if (int32_t result = released_fd < 0 ? OpenArchive(path.c_str(), &handle)
+                                       : OpenArchiveFd(released_fd, path.c_str(), &handle)) {
     LOG(ERROR) << "Failed to open APK '" << path << "': " << ::ErrorCodeString(result);
     CloseArchive(handle);
     return {};
   }
 
   struct stat sb{.st_mtime = -1};
-  if (stat(path.c_str(), &sb) < 0) {
-    // Stat requires execute permissions on all directories path to the file. If the process does
-    // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
-    // always have to return true.
-    LOG(WARNING) << "Failed to stat file '" << path << "': "
-                 << base::SystemErrorCodeToString(errno);
+  // Skip all up-to-date checks if the file won't ever change.
+  if (!isReadonlyFilesystem(path.c_str())) {
+    if ((released_fd < 0 ? stat(path.c_str(), &sb) : fstat(released_fd, &sb)) < 0) {
+      // Stat requires execute permissions on all directories path to the file. If the process does
+      // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
+      // always have to return true.
+      PLOG(WARNING) << "Failed to stat file '" << path << "'";
+    }
   }
 
   return std::unique_ptr<ZipAssetsProvider>(
-      new ZipAssetsProvider(handle, PathOrDebugName{std::move(path),
-                                                    true /* is_path */}, flags, sb.st_mtime));
+      new ZipAssetsProvider(handle, PathOrDebugName::Path(std::move(path)), flags, sb.st_mtime));
 }
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
@@ -133,17 +138,19 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
   }
 
   struct stat sb{.st_mtime = -1};
-  if (fstat(released_fd, &sb) < 0) {
-    // Stat requires execute permissions on all directories path to the file. If the process does
-    // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
-    // always have to return true.
-    LOG(WARNING) << "Failed to fstat file '" << friendly_name << "': "
-                 << base::SystemErrorCodeToString(errno);
+  // Skip all up-to-date checks if the file won't ever change.
+  if (!isReadonlyFilesystem(released_fd)) {
+    if (fstat(released_fd, &sb) < 0) {
+      // Stat requires execute permissions on all directories path to the file. If the process does
+      // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
+      // always have to return true.
+      LOG(WARNING) << "Failed to fstat file '" << friendly_name
+                   << "': " << base::SystemErrorCodeToString(errno);
+    }
   }
 
-  return std::unique_ptr<ZipAssetsProvider>(
-      new ZipAssetsProvider(handle, PathOrDebugName{std::move(friendly_name),
-                                                    false /* is_path */}, flags, sb.st_mtime));
+  return std::unique_ptr<ZipAssetsProvider>(new ZipAssetsProvider(
+      handle, PathOrDebugName::DebugName(std::move(friendly_name)), flags, sb.st_mtime));
 }
 
 std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
@@ -210,9 +217,9 @@ std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
     return asset;
 }
 
-bool ZipAssetsProvider::ForEachFile(const std::string& root_path,
-                                    const std::function<void(const StringPiece&, FileType)>& f)
-                                    const {
+bool ZipAssetsProvider::ForEachFile(
+    const std::string& root_path,
+    base::function_ref<void(StringPiece, FileType)> f) const {
     std::string root_path_full = root_path;
     if (root_path_full.back() != '/') {
       root_path_full += '/';
@@ -238,8 +245,7 @@ bool ZipAssetsProvider::ForEachFile(const std::string& root_path,
       if (!leaf_file_path.empty()) {
         auto iter = std::find(leaf_file_path.begin(), leaf_file_path.end(), '/');
         if (iter != leaf_file_path.end()) {
-          std::string dir =
-              leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)).to_string();
+          std::string dir(leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)));
           dirs.insert(std::move(dir));
         } else {
           f(leaf_file_path, kFileTypeRegular);
@@ -277,6 +283,9 @@ const std::string& ZipAssetsProvider::GetDebugName() const {
 }
 
 bool ZipAssetsProvider::IsUpToDate() const {
+  if (last_mod_time_ == -1) {
+    return true;
+  }
   struct stat sb{};
   if (fstat(GetFileDescriptor(zip_handle_.get()), &sb) < 0) {
     // If fstat fails on the zip archive, return true so the zip archive the resource system does
@@ -287,10 +296,10 @@ bool ZipAssetsProvider::IsUpToDate() const {
 }
 
 DirectoryAssetsProvider::DirectoryAssetsProvider(std::string&& path, time_t last_mod_time)
-    : dir_(std::forward<std::string>(path)), last_mod_time_(last_mod_time) {}
+    : dir_(std::move(path)), last_mod_time_(last_mod_time) {}
 
 std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::string path) {
-  struct stat sb{};
+  struct stat sb;
   const int result = stat(path.c_str(), &sb);
   if (result == -1) {
     LOG(ERROR) << "Failed to find directory '" << path << "'.";
@@ -302,12 +311,13 @@ std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::st
     return nullptr;
   }
 
-  if (path[path.size() - 1] != OS_PATH_SEPARATOR) {
+  if (path.back() != OS_PATH_SEPARATOR) {
     path += OS_PATH_SEPARATOR;
   }
 
-  return std::unique_ptr<DirectoryAssetsProvider>(new DirectoryAssetsProvider(std::move(path),
-                                                                              sb.st_mtime));
+  const bool isReadonly = isReadonlyFilesystem(path.c_str());
+  return std::unique_ptr<DirectoryAssetsProvider>(
+      new DirectoryAssetsProvider(std::move(path), isReadonly ? -1 : sb.st_mtime));
 }
 
 std::unique_ptr<Asset> DirectoryAssetsProvider::OpenInternal(const std::string& path,
@@ -324,8 +334,7 @@ std::unique_ptr<Asset> DirectoryAssetsProvider::OpenInternal(const std::string& 
 
 bool DirectoryAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
-    const std::function<void(const StringPiece&, FileType)>& /* f */)
-    const {
+    base::function_ref<void(StringPiece, FileType)> /* f */) const {
   return true;
 }
 
@@ -338,7 +347,10 @@ const std::string& DirectoryAssetsProvider::GetDebugName() const {
 }
 
 bool DirectoryAssetsProvider::IsUpToDate() const {
-  struct stat sb{};
+  if (last_mod_time_ == -1) {
+    return true;
+  }
+  struct stat sb;
   if (stat(dir_.c_str(), &sb) < 0) {
     // If stat fails on the zip archive, return true so the zip archive the resource system does
     // attempt to refresh the ApkAsset.
@@ -349,8 +361,7 @@ bool DirectoryAssetsProvider::IsUpToDate() const {
 
 MultiAssetsProvider::MultiAssetsProvider(std::unique_ptr<AssetsProvider>&& primary,
                                          std::unique_ptr<AssetsProvider>&& secondary)
-                      : primary_(std::forward<std::unique_ptr<AssetsProvider>>(primary)),
-                        secondary_(std::forward<std::unique_ptr<AssetsProvider>>(secondary)) {
+    : primary_(std::move(primary)), secondary_(std::move(secondary)) {
   debug_name_ = primary_->GetDebugName() + " and " + secondary_->GetDebugName();
   path_ = (primary_->GetDebugName() != kEmptyDebugString) ? primary_->GetPath()
                                                           : secondary_->GetPath();
@@ -372,9 +383,9 @@ std::unique_ptr<Asset> MultiAssetsProvider::OpenInternal(const std::string& path
   return (asset) ? std::move(asset) : secondary_->Open(path, mode, file_exists);
 }
 
-bool MultiAssetsProvider::ForEachFile(const std::string& root_path,
-                                      const std::function<void(const StringPiece&, FileType)>& f)
-                                      const {
+bool MultiAssetsProvider::ForEachFile(
+    const std::string& root_path,
+    base::function_ref<void(StringPiece, FileType)> f) const {
   return primary_->ForEachFile(root_path, f) && secondary_->ForEachFile(root_path, f);
 }
 
@@ -397,8 +408,8 @@ std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create() {
   return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider({}));
 }
 
-std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create(const std::string& path) {
-  return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider(path));
+std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create(std::string path) {
+  return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider(std::move(path)));
 }
 
 std::unique_ptr<Asset> EmptyAssetsProvider::OpenInternal(const std::string& /* path */,
@@ -412,7 +423,7 @@ std::unique_ptr<Asset> EmptyAssetsProvider::OpenInternal(const std::string& /* p
 
 bool EmptyAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
-    const std::function<void(const StringPiece&, FileType)>& /* f */) const {
+    base::function_ref<void(StringPiece, FileType)> /* f */) const {
   return true;
 }
 
@@ -435,4 +446,4 @@ bool EmptyAssetsProvider::IsUpToDate() const {
   return true;
 }
 
-} // namespace android
+}  // namespace android

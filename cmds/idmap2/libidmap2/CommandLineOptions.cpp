@@ -17,6 +17,7 @@
 #include "idmap2/CommandLineOptions.h"
 
 #include <algorithm>
+#include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <memory>

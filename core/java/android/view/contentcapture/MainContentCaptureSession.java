@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -47,8 +46,6 @@ import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
@@ -64,6 +61,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -102,7 +100,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     private final AtomicBoolean mDisabled = new AtomicBoolean(false);
 
     @NonNull
-    private final Context mContext;
+    private final ContentCaptureManager.StrippedContext mContext;
 
     @NonNull
     private final ContentCaptureManager mManager;
@@ -196,7 +194,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
     }
 
-    protected MainContentCaptureSession(@NonNull Context context,
+    protected MainContentCaptureSession(@NonNull ContentCaptureManager.StrippedContext context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
             @NonNull IContentCaptureManager systemServerInterface) {
         mContext = context;
@@ -458,8 +456,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             case ContentCaptureEvent.TYPE_SESSION_FINISHED:
                 flushReason = FLUSH_REASON_SESSION_FINISHED;
                 break;
+            case ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING:
+                flushReason = FLUSH_REASON_VIEW_TREE_APPEARING;
+                break;
+            case ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED:
+                flushReason = FLUSH_REASON_VIEW_TREE_APPEARED;
+                break;
             default:
-                flushReason = FLUSH_REASON_FULL;
+                flushReason = forceFlush ? FLUSH_REASON_FORCE_FLUSH : FLUSH_REASON_FULL;
         }
 
         flush(flushReason);
@@ -527,7 +531,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Override
     @UiThread
     void flush(@FlushReason int reason) {
-        if (mEvents == null) return;
+        if (mEvents == null || mEvents.size() == 0) {
+            if (sVerbose) {
+                Log.v(TAG, "Don't flush for empty event buffer.");
+            }
+            return;
+        }
 
         if (mDisabled.get()) {
             Log.e(TAG, "handleForceFlush(" + getDebugState(reason) + "): should not be when "
@@ -550,8 +559,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int numberEvents = mEvents.size();
         final String reasonString = getFlushReasonAsString(reason);
-        if (sDebug) {
-            Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason));
+
+        if (sVerbose) {
+            ContentCaptureEvent event = mEvents.get(numberEvents - 1);
+            String forceString = (reason == FLUSH_REASON_FORCE_FLUSH) ? ". The force flush event "
+                    + ContentCaptureEvent.getTypeAsString(event.getType()) : "";
+            Log.v(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason)
+                    + forceString);
         }
         if (mFlushHistory != null) {
             // Logs reason, size, max size, idle timeout
@@ -630,7 +644,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         mComponentName = null;
         mEvents = null;
         if (mDirectServiceInterface != null) {
-            mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+            try {
+                mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+            } catch (NoSuchElementException e) {
+                Log.w(TAG, "IContentCaptureDirectManager does not exist");
+            }
         }
         mDirectServiceInterface = null;
         mHandler.removeMessages(MSG_FLUSH);
@@ -720,7 +738,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // Since the same CharSequence instance may be reused in the TextView, we need to make
         // a copy of its content so that its value will not be changed by subsequent updates
         // in the TextView.
-        final CharSequence eventText = stringOrSpannedStringWithoutNoCopySpans(text);
+        CharSequence trimmed = TextUtils.trimToParcelableSize(text);
+        final CharSequence eventText = trimmed != null && trimmed == text
+                ? trimmed.toString()
+                : trimmed;
 
         final int composingStart;
         final int composingEnd;
@@ -741,16 +762,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                         .setSelectionIndex(startIndex, endIndex)));
     }
 
-    private CharSequence stringOrSpannedStringWithoutNoCopySpans(CharSequence source) {
-        if (source == null) {
-            return null;
-        } else if (source instanceof Spanned) {
-            return new SpannableString(source, /* ignoreNoCopySpan= */ true);
-        } else {
-            return source.toString();
-        }
-    }
-
     /** Public because is also used by ViewRootImpl */
     public void notifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets) {
         mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
@@ -760,7 +771,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /** Public because is also used by ViewRootImpl */
     public void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
-        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH));
+        final boolean disableFlush = mManager.getFlushViewTreeAppearingEventDisabled();
+
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, type),
+                disableFlush ? !started : FORCE_FLUSH));
     }
 
     void notifySessionResumed(int sessionId) {

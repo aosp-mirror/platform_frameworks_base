@@ -21,10 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.usage.CacheQuotaHint;
 import android.test.AndroidTestCase;
 import android.util.Pair;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Before;
 import org.junit.Test;

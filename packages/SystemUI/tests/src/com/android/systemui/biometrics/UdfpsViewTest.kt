@@ -19,13 +19,15 @@ package com.android.systemui.biometrics
 import android.graphics.PointF
 import android.graphics.RectF
 import android.hardware.biometrics.SensorLocationInternal
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
 import android.view.Surface
 import androidx.test.filters.SmallTest
+import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -36,20 +38,20 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val SENSOR_X = 50
 private const val SENSOR_Y = 250
 private const val SENSOR_RADIUS = 10
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class UdfpsViewTest : SysuiTestCase() {
 
@@ -57,7 +59,7 @@ class UdfpsViewTest : SysuiTestCase() {
     var rule = MockitoJUnit.rule()
 
     @Mock
-    lateinit var hbmProvider: UdfpsHbmProvider
+    lateinit var hbmProvider: UdfpsDisplayModeProvider
     @Mock
     lateinit var animationViewController: UdfpsAnimationViewController<UdfpsAnimationView>
 
@@ -66,28 +68,18 @@ class UdfpsViewTest : SysuiTestCase() {
     @Before
     fun setup() {
         context.setTheme(R.style.Theme_AppCompat)
-        context.orCreateTestableResources.addOverride(
-            com.android.internal.R.integer.config_udfps_illumination_transition_ms, 0)
         view = LayoutInflater.from(context).inflate(R.layout.udfps_view, null) as UdfpsView
         view.animationViewController = animationViewController
         val sensorBounds = SensorLocationInternal("", SENSOR_X, SENSOR_Y, SENSOR_RADIUS).rect
-        view.overlayParams = UdfpsOverlayParams(sensorBounds, 1920, 1080, 1f, Surface.ROTATION_0)
-        view.setHbmProvider(hbmProvider)
+        view.overlayParams = UdfpsOverlayParams(sensorBounds, sensorBounds, 1920,
+            1080, 1f, Surface.ROTATION_0)
+        view.setUdfpsDisplayModeProvider(hbmProvider)
         ViewUtils.attachView(view)
     }
 
     @After
     fun cleanup() {
         ViewUtils.detachView(view)
-    }
-
-    @Test
-    fun forwardsEvents() {
-        view.dozeTimeTick()
-        verify(animationViewController).dozeTimeTick()
-
-        view.onTouchOutsideView()
-        verify(animationViewController).onTouchOutsideView()
     }
 
     @Test
@@ -136,34 +128,35 @@ class UdfpsViewTest : SysuiTestCase() {
     @Test
     fun isNotWithinSensorArea() {
         whenever(animationViewController.touchTranslation).thenReturn(PointF(0f, 0f))
-        assertThat(view.isWithinSensorArea(SENSOR_RADIUS * 2.5f, SENSOR_RADIUS.toFloat())).isFalse()
+        assertThat(view.isWithinSensorArea(SENSOR_RADIUS * 2.5f, SENSOR_RADIUS.toFloat()))
+            .isFalse()
         assertThat(view.isWithinSensorArea(SENSOR_RADIUS.toFloat(), SENSOR_RADIUS * 2.5f)).isFalse()
     }
 
     @Test
     fun startAndStopIllumination() {
         val onDone: Runnable = mock()
-        view.startIllumination(onDone)
+        view.configureDisplay(onDone)
 
         val illuminator = withArgCaptor<Runnable> {
-            verify(hbmProvider).enableHbm(anyBoolean(), capture())
+            verify(hbmProvider).enable(capture())
         }
 
-        assertThat(view.isIlluminationRequested).isTrue()
-        verify(animationViewController).onIlluminationStarting()
-        verify(animationViewController, never()).onIlluminationStopped()
+        assertThat(view.isDisplayConfigured).isTrue()
+        verify(animationViewController).onDisplayConfiguring()
+        verify(animationViewController, never()).onDisplayUnconfigured()
         verify(onDone, never()).run()
 
         // fake illumination event
         illuminator.run()
         waitForLooper()
         verify(onDone).run()
-        verify(hbmProvider, never()).disableHbm(any())
+        verify(hbmProvider, never()).disable(any())
 
-        view.stopIllumination()
-        assertThat(view.isIlluminationRequested).isFalse()
-        verify(animationViewController).onIlluminationStopped()
-        verify(hbmProvider).disableHbm(nullable(Runnable::class.java))
+        view.unconfigureDisplay()
+        assertThat(view.isDisplayConfigured).isFalse()
+        verify(animationViewController).onDisplayUnconfigured()
+        verify(hbmProvider).disable(nullable(Runnable::class.java))
     }
 
     private fun waitForLooper() = TestableLooper.get(this).processAllMessages()

@@ -28,20 +28,26 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.Executor;
+
 @SmallTest
 public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
 
+    private Executor mExecutor;
     private DozeMachine.Service mInner;
     private DozeSuspendScreenStatePreventingAdapter mWrapper;
 
     @Before
     public void setup() throws Exception {
+        mExecutor = new FakeExecutor(new FakeSystemClock());
         mInner = mock(DozeMachine.Service.class);
-        mWrapper = new DozeSuspendScreenStatePreventingAdapter(mInner);
+        mWrapper = new DozeSuspendScreenStatePreventingAdapter(mInner, mExecutor);
     }
 
     @Test
@@ -81,9 +87,9 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void forwards_requestWakeUp() throws Exception {
-        mWrapper.requestWakeUp();
-        verify(mInner).requestWakeUp();
+    public void forwards_requestWakeUp() {
+        mWrapper.requestWakeUp(DozeLog.REASON_SENSOR_PICKUP);
+        verify(mInner).requestWakeUp(DozeLog.REASON_SENSOR_PICKUP);
     }
 
     @Test
@@ -92,7 +98,8 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
         when(params.getDozeSuspendDisplayStateSupported()).thenReturn(false);
 
         assertEquals(DozeSuspendScreenStatePreventingAdapter.class,
-                DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params).getClass());
+                DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params, mExecutor)
+                        .getClass());
     }
 
     @Test
@@ -100,6 +107,7 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
         DozeParameters params = mock(DozeParameters.class);
         when(params.getDozeSuspendDisplayStateSupported()).thenReturn(true);
 
-        assertSame(mInner, DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params));
+        assertSame(mInner, DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(mInner, params,
+                mExecutor));
     }
 }

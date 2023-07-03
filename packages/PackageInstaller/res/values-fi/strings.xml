@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Sovellus on asennettu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Haluatko asentaa tämän sovelluksen?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Haluatko päivittää tämän sovelluksen?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Voiko <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> päivittää sovelluksen?\n\nTämän sovelluksen päivitykset tarjoaa yleensä <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa puhelimella olevasta lähteestä. Sovelluksen toiminnot voivat muuttua."</string>
     <string name="install_failed" msgid="5777824004474125469">"Sovellusta ei asennettu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin asennus estettiin."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Sovellusta ei asennettu, koska paketti on ristiriidassa nykyisen paketin kanssa."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Tämä käyttäjä ei voi asentaa tuntemattomia sovelluksia."</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Tämä käyttäjä ei voi asentaa sovelluksia."</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Päivitä silti"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Sovellusvalinnat"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Tallennustila ei riitä"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Sovelluksen <xliff:g id="APP_NAME">%1$s</xliff:g> asentaminen epäonnistui. Vapauta tallennustilaa ja yritä uudelleen."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Haluatko korvata tämän sovelluksen tehdasversiolla? Kaikki data poistetaan."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Haluatko korvata tämän sovelluksen tehdasversiolla? Kaikki data poistetaan. Tämä vaikuttaa kaikkiin laitteen käyttäjiin, myös työprofiileihin."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Säilytä <xliff:g id="SIZE">%1$s</xliff:g> sovellusdataa"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Haluatko poistaa tämän sovelluksen?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Haluatko poistaa tämän sovelluksen? Myös klooni (<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>) poistetaan."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Käynnissä olevat poistot"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Epäonnistuneet poistot"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Poistetaan…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Poistetaan pakettia <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Poisto valmis"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> poistettu"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Kopio (<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>) poistettu"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Poisto epäonnistui."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> on poistettu."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Poistetaan kloonia (<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>)…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktiivista laitteenhallintasovellusta ei voi poistaa käytöstä."</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Käyttäjän <xliff:g id="USERNAME">%1$s</xliff:g> aktiivista laitteenhallintasovellusta ei voi poistaa käytöstä."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Jotkin käyttäjät tai profiilit tarvitsevat tätä sovellusta, ja se poistettiin muilta."</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Tuntematon"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Turvallisuussyistä tablettisi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Turvallisuussyistä televisiosi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Turvallisuussyistä kellosi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Turvallisuussyistä puhelimesi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Tuntemattomat sovellukset voivat helpommin kaapata puhelimesi ja henkilökohtaiset tietosi. Lataamalla sovelluksia tästä lähteestä hyväksyt, että olet itse vastuussa puhelimellesi aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tuntemattomat sovellukset voivat helpommin kaapata tablettisi ja henkilökohtaiset tietosi. Lataamalla sovelluksia tästä lähteestä hyväksyt, että olet itse vastuussa tabletillesi aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Tuntemattomat sovellukset voivat helpommin kaapata televisiosi ja henkilökohtaiset tietosi. Lataamalla sovelluksen hyväksyt, että olet itse vastuussa mahdollisista televisiolle aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klooni: <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Jatka"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Asetukset"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear-sovellusten asennus/poistaminen"</string>

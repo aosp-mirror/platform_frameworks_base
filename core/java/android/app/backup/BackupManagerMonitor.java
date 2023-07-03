@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.os.Bundle;
 
 /**
@@ -129,6 +130,20 @@ public class BackupManagerMonitor {
    */
   public static final String EXTRA_LOG_OLD_VERSION = "android.app.backup.extra.LOG_OLD_VERSION";
 
+  /**
+   * ParcelableList: when we have an event of id LOG_EVENT_ID_AGENT_LOGGING_RESULTS we send a list
+   * of {@link android.app.backup.BackupRestoreEventLogger.DataTypeResult}.
+   */
+  public static final String EXTRA_LOG_AGENT_LOGGING_RESULTS =
+          "android.app.backup.extra.LOG_AGENT_LOGGING_RESULTS";
+
+  /**
+   * The operation type this log is associated with. See {@link OperationType}.
+   *
+   * @hide
+   */
+  public static final String EXTRA_LOG_OPERATION_TYPE = "android.app.backup.extra.OPERATION_TYPE";
+
   // TODO complete this list with all log messages. And document properly.
   public static final int LOG_EVENT_ID_FULL_BACKUP_CANCEL = 4;
   public static final int LOG_EVENT_ID_ILLEGAL_KEY = 5;
@@ -171,15 +186,10 @@ public class BackupManagerMonitor {
   public static final int LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION = 48;
   public static final int LOG_EVENT_ID_NO_PACKAGES = 49;
   public static final int LOG_EVENT_ID_TRANSPORT_IS_NULL = 50;
+  /** The transport returned {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED}. */
+  public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51;
 
-    /**
-     * The transport returned {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED}.
-     */
-    public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51;
-
-
-
-
+  public static final int LOG_EVENT_ID_AGENT_LOGGING_RESULTS = 52;
 
   /**
    * This method will be called each time something important happens on BackupManager.

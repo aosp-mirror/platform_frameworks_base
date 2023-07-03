@@ -19,6 +19,8 @@ package com.android.internal.app;
 import android.content.ComponentName;
 import android.content.pm.ResolveInfo;
 
+import com.android.internal.app.chooser.TargetInfo;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,14 +47,15 @@ public class FakeResolverComparatorModel implements ResolverComparatorModel {
     }
 
     @Override
-    public float getScore(ComponentName name) {
+    public float getScore(TargetInfo targetInfo) {
         return 0.0f;  // Models are not required to provide numerical scores.
     }
 
     @Override
-    public void notifyOnTargetSelected(ComponentName componentName) {
+    public void notifyOnTargetSelected(TargetInfo targetInfo) {
         System.out.println(
-                "User selected " + componentName + " under model " + System.identityHashCode(this));
+                "User selected " + targetInfo.getResolvedComponentName() + " under model "
+                        + System.identityHashCode(this));
     }
 
     private FakeResolverComparatorModel(Comparator<ResolveInfo> comparator) {

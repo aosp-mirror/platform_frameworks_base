@@ -368,6 +368,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @Override
     public void binderDied() {
         synchronized (mLock) {
             // It is possible that this service's package was force stopped during

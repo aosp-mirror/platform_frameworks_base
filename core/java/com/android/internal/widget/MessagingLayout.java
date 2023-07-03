@@ -164,9 +164,9 @@ public class MessagingLayout extends FrameLayout
         Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
         List<Notification.MessagingStyle.Message> newHistoricMessages
                 = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
-        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
+        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, android.app.Person.class));
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, android.app.RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
@@ -470,7 +470,8 @@ public class MessagingLayout extends FrameLayout
                 message = messages.get(i - histSize);
             }
             boolean isNewGroup = currentGroup == null;
-            Person sender = message.getMessage().getSenderPerson();
+            Person sender =
+                    message.getMessage() == null ? null : message.getMessage().getSenderPerson();
             CharSequence key = sender == null ? null
                     : sender.getKey() == null ? sender.getName() : sender.getKey();
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);

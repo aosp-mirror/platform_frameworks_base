@@ -31,6 +31,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -261,12 +262,12 @@ public class InstallLocationUtils {
 
         // We're left with new installations with either preferring external or auto, so just pick
         // volume with most space
+        String bestCandidate = !volumePaths.isEmpty() ? volumePaths.keyAt(0) : null;
         if (volumePaths.size() == 1) {
             if (checkFitOnVolume(storageManager, volumePaths.valueAt(0), params)) {
-                return volumePaths.keyAt(0);
+                return bestCandidate;
             }
         } else {
-            String bestCandidate = null;
             long bestCandidateAvailBytes = Long.MIN_VALUE;
             for (String vol : volumePaths.keySet()) {
                 final String volumePath = volumePaths.get(vol);
@@ -287,6 +288,14 @@ public class InstallLocationUtils {
                 return bestCandidate;
             }
 
+        }
+
+        // For new installations of a predefined size, check property to let it through
+        // regardless of the actual free space.
+        if (!volumePaths.isEmpty() && Integer.MAX_VALUE == params.sizeBytes
+                && SystemProperties.getBoolean("debug.pm.install_skip_size_check_for_maxint",
+                false)) {
+            return bestCandidate;
         }
 
         throw new IOException("No special requests, but no room on allowed volumes. "

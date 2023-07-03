@@ -184,7 +184,10 @@ public class HdmiSwitchClient extends HdmiClient {
      * <p>This returns an empty list when the current device does not have HDMI input.
      *
      * @return a list of {@link HdmiPortInfo}
+     *
+     * @deprecated Please use {@link HdmiControlManager#getPortInfo()} instead.
      */
+    @Deprecated
     @NonNull
     public List<HdmiPortInfo> getPortInfo() {
         try {

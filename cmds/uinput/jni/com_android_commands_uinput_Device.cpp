@@ -99,6 +99,7 @@ JNIEnv* DeviceCallback::getJNIEnv() {
 
 std::unique_ptr<UinputDevice> UinputDevice::open(int32_t id, const char* name, int32_t vid,
                                                  int32_t pid, uint16_t bus, uint32_t ffEffectsMax,
+                                                 const char* port,
                                                  std::unique_ptr<DeviceCallback> callback) {
     android::base::unique_fd fd(::open(UINPUT_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC));
     if (!fd.ok()) {
@@ -130,6 +131,9 @@ std::unique_ptr<UinputDevice> UinputDevice::open(int32_t id, const char* name, i
         ALOGE("UI_DEV_SETUP ioctl failed on fd %d: %s.", fd.get(), strerror(errno));
         return nullptr;
     }
+
+    // set the physical port.
+    ::ioctl(fd, UI_SET_PHYS, port);
 
     if (::ioctl(fd, UI_DEV_CREATE) != 0) {
         ALOGE("Unable to create uinput device: %s.", strerror(errno));
@@ -240,17 +244,19 @@ std::vector<int32_t> toVector(JNIEnv* env, jintArray javaArray) {
 }
 
 static jlong openUinputDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid,
-                              jint pid, jint bus, jint ffEffectsMax, jobject callback) {
+                              jint pid, jint bus, jint ffEffectsMax, jstring rawPort,
+                              jobject callback) {
     ScopedUtfChars name(env, rawName);
     if (name.c_str() == nullptr) {
         return 0;
     }
 
+    ScopedUtfChars port(env, rawPort);
     std::unique_ptr<uinput::DeviceCallback> cb =
             std::make_unique<uinput::DeviceCallback>(env, callback);
 
     std::unique_ptr<uinput::UinputDevice> d =
-            uinput::UinputDevice::open(id, name.c_str(), vid, pid, bus, ffEffectsMax,
+            uinput::UinputDevice::open(id, name.c_str(), vid, pid, bus, ffEffectsMax, port.c_str(),
                                        std::move(cb));
     return reinterpret_cast<jlong>(d.release());
 }
@@ -303,7 +309,7 @@ static void setAbsInfo(JNIEnv* env, jclass /* clazz */, jint handle, jint axisCo
 
 static JNINativeMethod sMethods[] = {
         {"nativeOpenUinputDevice",
-         "(Ljava/lang/String;IIIII"
+         "(Ljava/lang/String;IIIIILjava/lang/String;"
          "Lcom/android/commands/uinput/Device$DeviceCallback;)J",
          reinterpret_cast<void*>(openUinputDevice)},
         {"nativeInjectEvent", "(JIII)V", reinterpret_cast<void*>(injectEvent)},

@@ -79,6 +79,11 @@ public interface DeviceAdminStringProvider {
     String getDisabledBiometricsParentConsentTitle();
 
     /**
+     * Returns the dialog title when the setting is blocked by supervision app.
+     */
+    String getDisabledByParentContent();
+
+    /**
      * Returns the dialog contents for when biometrics require parental consent.
      */
     String getDisabledBiometricsParentConsentContent();

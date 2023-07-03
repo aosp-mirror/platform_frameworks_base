@@ -16,14 +16,12 @@
 
 package com.android.wm.shell.transition;
 
-import static android.hardware.HardwareBuffer.RGBA_8888;
-import static android.hardware.HardwareBuffer.USAGE_PROTECTED_CONTENT;
 import static android.util.RotationUtils.deltaRotation;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
-import static com.android.wm.shell.transition.DefaultTransitionHandler.startSurfaceAnimation;
+import static com.android.wm.shell.transition.DefaultTransitionHandler.buildSurfaceAnimation;
 import static com.android.wm.shell.transition.Transitions.TAG;
 
 import android.animation.Animator;
@@ -33,13 +31,9 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
-import android.media.Image;
-import android.media.ImageReader;
 import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -47,15 +41,15 @@ import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 
 import com.android.internal.R;
+import com.android.internal.policy.TransitionAnimation;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * This class handles the rotation animation when the device is rotated.
@@ -85,12 +79,8 @@ class ScreenRotationAnimation {
     private final Context mContext;
     private final TransactionPool mTransactionPool;
     private final float[] mTmpFloats = new float[9];
-    // Complete transformations being applied.
-    private final Matrix mSnapshotInitialMatrix = new Matrix();
-    /** The leash of display. */
+    /** The leash of the changing window container. */
     private final SurfaceControl mSurfaceControl;
-    private final Rect mStartBounds = new Rect();
-    private final Rect mEndBounds = new Rect();
 
     private final int mAnimHint;
     private final int mStartWidth;
@@ -108,8 +98,7 @@ class ScreenRotationAnimation {
      */
     private SurfaceControl mBackColorSurface;
     /** The leash using to animate screenshot layer. */
-    private SurfaceControl mAnimLeash;
-    private Transaction mTransaction;
+    private final SurfaceControl mAnimLeash;
 
     // The current active animation to move from the old to the new rotated
     // state.  Which animation is run here will depend on the old and new
@@ -137,9 +126,6 @@ class ScreenRotationAnimation {
         mStartRotation = change.getStartRotation();
         mEndRotation = change.getEndRotation();
 
-        mStartBounds.set(change.getStartAbsBounds());
-        mEndBounds.set(change.getEndAbsBounds());
-
         mAnimLeash = new SurfaceControl.Builder(session)
                 .setParent(rootLeash)
                 .setEffectLayer()
@@ -148,53 +134,60 @@ class ScreenRotationAnimation {
                 .build();
 
         try {
-            SurfaceControl.LayerCaptureArgs args =
-                    new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
-                            .setCaptureSecureLayers(true)
-                            .setAllowProtected(true)
-                            .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
-                            .build();
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureLayers(args);
-            if (screenshotBuffer == null) {
-                Slog.w(TAG, "Unable to take screenshot of display");
-                return;
+            if (change.getSnapshot() != null) {
+                mScreenshotLayer = change.getSnapshot();
+                t.reparent(mScreenshotLayer, mAnimLeash);
+                mStartLuma = change.getSnapshotLuma();
+            } else {
+                ScreenCapture.LayerCaptureArgs args =
+                        new ScreenCapture.LayerCaptureArgs.Builder(mSurfaceControl)
+                                .setCaptureSecureLayers(true)
+                                .setAllowProtected(true)
+                                .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
+                                .setHintForSeamlessTransition(true)
+                                .build();
+                ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                        ScreenCapture.captureLayers(args);
+                if (screenshotBuffer == null) {
+                    Slog.w(TAG, "Unable to take screenshot of display");
+                    return;
+                }
+
+                mScreenshotLayer = new SurfaceControl.Builder(session)
+                        .setParent(mAnimLeash)
+                        .setBLASTLayer()
+                        .setSecure(screenshotBuffer.containsSecureLayers())
+                        .setOpaque(true)
+                        .setCallsite("ShellRotationAnimation")
+                        .setName("RotationLayer")
+                        .build();
+
+                TransitionAnimation.configureScreenshotLayer(t, mScreenshotLayer, screenshotBuffer);
+                final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+                t.show(mScreenshotLayer);
+                if (!isCustomRotate()) {
+                    mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer,
+                            screenshotBuffer.getColorSpace());
+                }
+                hardwareBuffer.close();
             }
 
-            mScreenshotLayer = new SurfaceControl.Builder(session)
-                    .setParent(mAnimLeash)
-                    .setBLASTLayer()
-                    .setSecure(screenshotBuffer.containsSecureLayers())
-                    .setCallsite("ShellRotationAnimation")
-                    .setName("RotationLayer")
-                    .build();
-
-            GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
-                    screenshotBuffer.getHardwareBuffer());
-
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
-            t.setPosition(mAnimLeash, 0, 0);
-            t.setAlpha(mAnimLeash, 1);
             t.show(mAnimLeash);
-
-            t.setBuffer(mScreenshotLayer, buffer);
-            t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
-            t.show(mScreenshotLayer);
+            // Crop the real content in case it contains a larger child layer, e.g. wallpaper.
+            t.setCrop(mSurfaceControl, new Rect(0, 0, mEndWidth, mEndHeight));
 
             if (!isCustomRotate()) {
                 mBackColorSurface = new SurfaceControl.Builder(session)
                         .setParent(rootLeash)
                         .setColorLayer()
+                        .setOpaque(true)
                         .setCallsite("ShellRotationAnimation")
                         .setName("BackColorSurface")
                         .build();
 
-                HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-                mStartLuma = getMedianBorderLuma(hardwareBuffer, screenshotBuffer.getColorSpace());
-
                 t.setLayer(mBackColorSurface, -1);
                 t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
-                t.setAlpha(mBackColorSurface, 1);
                 t.show(mBackColorSurface);
             }
 
@@ -202,7 +195,7 @@ class ScreenRotationAnimation {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
-        setRotation(t);
+        setScreenshotTransform(t);
         t.apply();
     }
 
@@ -210,18 +203,35 @@ class ScreenRotationAnimation {
         return mAnimHint == ROTATION_ANIMATION_CROSSFADE || mAnimHint == ROTATION_ANIMATION_JUMPCUT;
     }
 
-    private void setRotation(SurfaceControl.Transaction t) {
-        // Compute the transformation matrix that must be applied
-        // to the snapshot to make it stay in the same original position
-        // with the current screen rotation.
-        int delta = deltaRotation(mEndRotation, mStartRotation);
-        createRotationMatrix(delta, mStartWidth, mStartHeight, mSnapshotInitialMatrix);
-        setRotationTransform(t, mSnapshotInitialMatrix);
-    }
-
-    private void setRotationTransform(SurfaceControl.Transaction t, Matrix matrix) {
+    private void setScreenshotTransform(SurfaceControl.Transaction t) {
         if (mScreenshotLayer == null) {
             return;
+        }
+        final Matrix matrix = new Matrix();
+        final int delta = deltaRotation(mEndRotation, mStartRotation);
+        if (delta != 0) {
+            // Compute the transformation matrix that must be applied to the snapshot to make it
+            // stay in the same original position with the current screen rotation.
+            switch (delta) {
+                case Surface.ROTATION_90:
+                    matrix.setRotate(90, 0, 0);
+                    matrix.postTranslate(mStartHeight, 0);
+                    break;
+                case Surface.ROTATION_180:
+                    matrix.setRotate(180, 0, 0);
+                    matrix.postTranslate(mStartWidth, mStartHeight);
+                    break;
+                case Surface.ROTATION_270:
+                    matrix.setRotate(270, 0, 0);
+                    matrix.postTranslate(0, mStartWidth);
+                    break;
+            }
+        } else if ((mEndWidth > mStartWidth) == (mEndHeight > mStartHeight)
+                && (mEndWidth != mStartWidth || mEndHeight != mStartHeight)) {
+            // Display resizes without rotation change.
+            final float scale = Math.max((float) mEndWidth / mStartWidth,
+                    (float) mEndHeight / mStartHeight);
+            matrix.setScale(scale, scale);
         }
         matrix.getValues(mTmpFloats);
         float x = mTmpFloats[Matrix.MTRANS_X];
@@ -230,17 +240,14 @@ class ScreenRotationAnimation {
         t.setMatrix(mScreenshotLayer,
                 mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                 mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-
-        t.setAlpha(mScreenshotLayer, (float) 1.0);
-        t.show(mScreenshotLayer);
     }
 
     /**
-     * Returns true if animating.
+     * Returns true if any animations were added to `animations`.
      */
-    public boolean startAnimation(@NonNull ArrayList<Animator> animations,
+    boolean buildAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, float animationScale,
-            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
+            @NonNull ShellExecutor mainExecutor) {
         if (mScreenshotLayer == null) {
             // Can't do animation.
             return false;
@@ -298,19 +305,16 @@ class ScreenRotationAnimation {
         mRotateEnterAnimation.restrictDuration(MAX_ANIMATION_DURATION);
         mRotateEnterAnimation.scaleCurrentDuration(animationScale);
 
-        mTransaction = mTransactionPool.acquire();
         if (customRotate) {
             mRotateAlphaAnimation.initialize(mEndWidth, mEndHeight, mStartWidth, mStartHeight);
             mRotateAlphaAnimation.restrictDuration(MAX_ANIMATION_DURATION);
             mRotateAlphaAnimation.scaleCurrentDuration(animationScale);
 
-            startScreenshotAlphaAnimation(animations, finishCallback, mainExecutor,
-                    animExecutor);
-            startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
+            buildScreenshotAlphaAnimation(animations, finishCallback, mainExecutor);
+            startDisplayRotation(animations, finishCallback, mainExecutor);
         } else {
-            startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
-            startScreenshotRotationAnimation(animations, finishCallback, mainExecutor,
-                    animExecutor);
+            startDisplayRotation(animations, finishCallback, mainExecutor);
+            startScreenshotRotationAnimation(animations, finishCallback, mainExecutor);
             //startColorAnimation(mTransaction, animationScale);
         }
 
@@ -318,27 +322,24 @@ class ScreenRotationAnimation {
     }
 
     private void startDisplayRotation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
-        startSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */,
-                0 /* cornerRadius */, null /* clipRect */);
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
+        buildSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
+                mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
+                null /* clipRect */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
-        startSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */,
-                0 /* cornerRadius */, null /* clipRect */);
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
+        buildSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
+                mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
+                null /* clipRect */);
     }
 
-    private void startScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
-        startSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */,
-                0 /* cornerRadius */, null /* clipRect */);
+    private void buildScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
+        buildSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
+                mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
+                null /* clipRect */);
     }
 
     private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {
@@ -378,133 +379,19 @@ class ScreenRotationAnimation {
     }
 
     public void kill() {
-        Transaction t = mTransaction != null ? mTransaction : mTransactionPool.acquire();
+        final Transaction t = mTransactionPool.acquire();
         if (mAnimLeash.isValid()) {
             t.remove(mAnimLeash);
         }
 
-        if (mScreenshotLayer != null) {
-            if (mScreenshotLayer.isValid()) {
-                t.remove(mScreenshotLayer);
-            }
-            mScreenshotLayer = null;
+        if (mScreenshotLayer != null && mScreenshotLayer.isValid()) {
+            t.remove(mScreenshotLayer);
         }
-        if (mBackColorSurface != null) {
-            if (mBackColorSurface.isValid()) {
-                t.remove(mBackColorSurface);
-            }
-            mBackColorSurface = null;
+        if (mBackColorSurface != null && mBackColorSurface.isValid()) {
+            t.remove(mBackColorSurface);
         }
         t.apply();
         mTransactionPool.release(t);
-    }
-
-    /**
-     * Converts the provided {@link HardwareBuffer} and converts it to a bitmap to then sample the
-     * luminance at the borders of the bitmap
-     * @return the average luminance of all the pixels at the borders of the bitmap
-     */
-    private static float getMedianBorderLuma(HardwareBuffer hardwareBuffer, ColorSpace colorSpace) {
-        // Cannot read content from buffer with protected usage.
-        if (hardwareBuffer == null || hardwareBuffer.getFormat() != RGBA_8888
-                || hasProtectedContent(hardwareBuffer)) {
-            return 0;
-        }
-
-        ImageReader ir = ImageReader.newInstance(hardwareBuffer.getWidth(),
-                hardwareBuffer.getHeight(), hardwareBuffer.getFormat(), 1);
-        ir.getSurface().attachAndQueueBufferWithColorSpace(hardwareBuffer, colorSpace);
-        Image image = ir.acquireLatestImage();
-        if (image == null || image.getPlanes().length == 0) {
-            return 0;
-        }
-
-        Image.Plane plane = image.getPlanes()[0];
-        ByteBuffer buffer = plane.getBuffer();
-        int width = image.getWidth();
-        int height = image.getHeight();
-        int pixelStride = plane.getPixelStride();
-        int rowStride = plane.getRowStride();
-        float[] borderLumas = new float[2 * width + 2 * height];
-
-        // Grab the top and bottom borders
-        int l = 0;
-        for (int x = 0; x < width; x++) {
-            borderLumas[l++] = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
-            borderLumas[l++] = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
-        }
-
-        // Grab the left and right borders
-        for (int y = 0; y < height; y++) {
-            borderLumas[l++] = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
-            borderLumas[l++] = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
-        }
-
-        // Cleanup
-        ir.close();
-
-        // Oh, is this too simple and inefficient for you?
-        // How about implementing a O(n) solution? https://en.wikipedia.org/wiki/Median_of_medians
-        Arrays.sort(borderLumas);
-        return borderLumas[borderLumas.length / 2];
-    }
-
-    /**
-     * @return whether the hardwareBuffer passed in is marked as protected.
-     */
-    private static boolean hasProtectedContent(HardwareBuffer hardwareBuffer) {
-        return (hardwareBuffer.getUsage() & USAGE_PROTECTED_CONTENT) == USAGE_PROTECTED_CONTENT;
-    }
-
-    private static float getPixelLuminance(ByteBuffer buffer, int x, int y,
-            int pixelStride, int rowStride) {
-        int offset = y * rowStride + x * pixelStride;
-        int pixel = 0;
-        pixel |= (buffer.get(offset) & 0xff) << 16;     // R
-        pixel |= (buffer.get(offset + 1) & 0xff) << 8;  // G
-        pixel |= (buffer.get(offset + 2) & 0xff);       // B
-        pixel |= (buffer.get(offset + 3) & 0xff) << 24; // A
-        return Color.valueOf(pixel).luminance();
-    }
-
-    /**
-     * Gets the average border luma by taking a screenshot of the {@param surfaceControl}.
-     * @see #getMedianBorderLuma(HardwareBuffer, ColorSpace)
-     */
-    private static float getLumaOfSurfaceControl(Rect bounds, SurfaceControl surfaceControl) {
-        if (surfaceControl ==  null) {
-            return 0;
-        }
-
-        Rect crop = new Rect(0, 0, bounds.width(), bounds.height());
-        SurfaceControl.ScreenshotHardwareBuffer buffer =
-                SurfaceControl.captureLayers(surfaceControl, crop, 1);
-        if (buffer == null) {
-            return 0;
-        }
-
-        return getMedianBorderLuma(buffer.getHardwareBuffer(), buffer.getColorSpace());
-    }
-
-    private static void createRotationMatrix(int rotation, int width, int height,
-            Matrix outMatrix) {
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                outMatrix.reset();
-                break;
-            case Surface.ROTATION_90:
-                outMatrix.setRotate(90, 0, 0);
-                outMatrix.postTranslate(height, 0);
-                break;
-            case Surface.ROTATION_180:
-                outMatrix.setRotate(180, 0, 0);
-                outMatrix.postTranslate(width, height);
-                break;
-            case Surface.ROTATION_270:
-                outMatrix.setRotate(270, 0, 0);
-                outMatrix.postTranslate(0, width);
-                break;
-        }
     }
 
     private static void applyColor(int startColor, int endColor, float[] rgbFloat,

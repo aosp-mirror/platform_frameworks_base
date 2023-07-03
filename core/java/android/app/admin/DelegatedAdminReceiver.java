@@ -156,7 +156,7 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
 
         if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
             int uid = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
-            Uri uri = intent.getParcelableExtra(EXTRA_CHOOSE_PRIVATE_KEY_URI);
+            Uri uri = intent.getParcelableExtra(EXTRA_CHOOSE_PRIVATE_KEY_URI, android.net.Uri.class);
             String alias = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_ALIAS);
             String chosenAlias = onChoosePrivateKeyAlias(context, intent, uid, uri, alias);
             setResultData(chosenAlias);

@@ -26,7 +26,7 @@ import java.lang.annotation.Retention;
 import javax.inject.Qualifier;
 
 /**
- * A {@link LogBuffer} for {@link com.android.systemui.media.ResumeMediaBrowser}
+ * A {@link LogBuffer} for {@link com.android.systemui.media.controls.resume.ResumeMediaBrowser}
  */
 @Qualifier
 @Documented

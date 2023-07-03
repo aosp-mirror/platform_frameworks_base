@@ -56,6 +56,12 @@ public final class UnsafeIntentLaunchViolation extends Violation {
         mIntent = Objects.requireNonNull(intent);
     }
 
+    /** @hide */
+    public UnsafeIntentLaunchViolation(@NonNull Intent intent, @NonNull String message) {
+        super(message);
+        mIntent = Objects.requireNonNull(intent);
+    }
+
     /**
      * Return the {@link Intent} which caused this violation to be raised. Note
      * that this value is not available if this violation has been serialized

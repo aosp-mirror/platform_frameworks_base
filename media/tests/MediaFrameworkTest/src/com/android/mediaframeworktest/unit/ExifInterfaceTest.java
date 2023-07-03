@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.test.AndroidTestCase;
 import android.util.Log;
 import android.system.ErrnoException;
@@ -37,6 +38,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Objects;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -353,20 +356,23 @@ public class ExifInterfaceTest extends AndroidTestCase {
         }
     }
 
-    private void testSaveAttributes_withFileName(File imageFile, ExpectedValue expectedValue)
+    private void testSaveAttributes_withFileName(File srcFile, ExpectedValue expectedValue)
             throws IOException {
+        File imageFile = clone(srcFile);
         String verboseTag = imageFile.getName();
 
         ExifInterface exifInterface = new ExifInterface(imageFile.getAbsolutePath());
         exifInterface.saveAttributes();
         exifInterface = new ExifInterface(imageFile.getAbsolutePath());
         compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+        assertBitmapsEquivalent(srcFile, imageFile);
+        assertSecondSaveProducesSameSizeFile(imageFile);
 
         // Test for modifying one attribute.
+        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
         String backupValue = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
         exifInterface.setAttribute(ExifInterface.TAG_MAKE, "abc");
         exifInterface.saveAttributes();
-        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
         assertEquals("abc", exifInterface.getAttribute(ExifInterface.TAG_MAKE));
         // Restore the backup value.
         exifInterface.setAttribute(ExifInterface.TAG_MAKE, backupValue);
@@ -480,5 +486,57 @@ public class ExifInterfaceTest extends AndroidTestCase {
     public void testReadExifDataFromVolantisJpg() throws Throwable {
         // Test if it is possible to parse the volantis generated JPEG smoothly.
         testExifInterfaceForJpeg(VOLANTIS_JPEG, R.array.volantis_jpg);
+    }
+
+    /**
+     * Asserts that {@code expectedImageFile} and {@code actualImageFile} can be decoded by
+     * {@link BitmapFactory} and the results have the same width, height and MIME type.
+     *
+     * <p>This does not check the image itself for similarity/equality.
+     */
+    private void assertBitmapsEquivalent(File expectedImageFile, File actualImageFile) {
+        BitmapFactory.Options expectedOptions = new BitmapFactory.Options();
+        Bitmap expectedBitmap = Objects.requireNonNull(
+                BitmapFactory.decodeFile(expectedImageFile.getAbsolutePath(), expectedOptions));
+        BitmapFactory.Options actualOptions = new BitmapFactory.Options();
+        Bitmap actualBitmap = Objects.requireNonNull(
+                BitmapFactory.decodeFile(actualImageFile.getAbsolutePath(), actualOptions));
+
+        assertEquals(expectedOptions.outWidth, actualOptions.outWidth);
+        assertEquals(expectedOptions.outHeight, actualOptions.outHeight);
+        assertEquals(expectedOptions.outMimeType, actualOptions.outMimeType);
+        assertEquals(expectedBitmap.getWidth(), actualBitmap.getWidth());
+        assertEquals(expectedBitmap.getHeight(), actualBitmap.getHeight());
+    }
+
+    /**
+     * Asserts that saving the file the second time (without modifying any attributes) produces
+     * exactly the same length file as the first save. The first save (with no modifications) is
+     * expected to (possibly) change the file length because {@link ExifInterface} may move/reformat
+     * the Exif block within the file, but the second save should not make further modifications.
+     */
+    private void assertSecondSaveProducesSameSizeFile(File imageFileAfterOneSave)
+            throws IOException {
+        File imageFileAfterTwoSaves = clone(imageFileAfterOneSave);
+        ExifInterface exifInterface = new ExifInterface(imageFileAfterTwoSaves.getAbsolutePath());
+        exifInterface.saveAttributes();
+        if (imageFileAfterOneSave.getAbsolutePath().endsWith(".png")
+                || imageFileAfterOneSave.getAbsolutePath().endsWith(".webp")) {
+            // PNG and (some) WebP files are (surprisingly) modified between the first and second
+            // save (b/249097443), so we check the difference between second and third save instead.
+            File imageFileAfterThreeSaves = clone(imageFileAfterTwoSaves);
+            exifInterface = new ExifInterface(imageFileAfterThreeSaves.getAbsolutePath());
+            exifInterface.saveAttributes();
+            assertEquals(imageFileAfterTwoSaves.length(), imageFileAfterThreeSaves.length());
+        } else {
+            assertEquals(imageFileAfterOneSave.length(), imageFileAfterTwoSaves.length());
+        }
+    }
+
+    private static File clone(File original) throws IOException {
+        final File cloned =
+                File.createTempFile("tmp_", +System.nanoTime() + "_" + original.getName());
+        FileUtils.copyFileOrThrow(original, cloned);
+        return cloned;
     }
 }

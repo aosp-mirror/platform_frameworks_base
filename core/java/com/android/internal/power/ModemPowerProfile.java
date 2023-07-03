@@ -158,11 +158,11 @@ public class ModemPowerProfile {
 
     private static final SparseArray<String> MODEM_TX_LEVEL_NAMES = new SparseArray<>(5);
     static {
-        MODEM_DRAIN_TYPE_NAMES.put(MODEM_TX_LEVEL_0, "0");
-        MODEM_DRAIN_TYPE_NAMES.put(MODEM_TX_LEVEL_1, "1");
-        MODEM_DRAIN_TYPE_NAMES.put(MODEM_TX_LEVEL_2, "2");
-        MODEM_DRAIN_TYPE_NAMES.put(MODEM_TX_LEVEL_3, "3");
-        MODEM_DRAIN_TYPE_NAMES.put(MODEM_TX_LEVEL_4, "4");
+        MODEM_TX_LEVEL_NAMES.put(MODEM_TX_LEVEL_0, "0");
+        MODEM_TX_LEVEL_NAMES.put(MODEM_TX_LEVEL_1, "1");
+        MODEM_TX_LEVEL_NAMES.put(MODEM_TX_LEVEL_2, "2");
+        MODEM_TX_LEVEL_NAMES.put(MODEM_TX_LEVEL_3, "3");
+        MODEM_TX_LEVEL_NAMES.put(MODEM_TX_LEVEL_4, "4");
     }
 
     private static final int[] MODEM_TX_LEVEL_MAP = new int[]{
@@ -418,7 +418,10 @@ public class ModemPowerProfile {
         return Double.NaN;
     }
 
-    private static String keyToString(int key) {
+    /**
+     * Returns a human readable version of a key.
+     */
+    public static String keyToString(int key) {
         StringBuilder sb = new StringBuilder();
         final int drainType = key & MODEM_DRAIN_TYPE_MASK;
         appendFieldToString(sb, "drain", MODEM_DRAIN_TYPE_NAMES, drainType);
@@ -427,6 +430,7 @@ public class ModemPowerProfile {
         if (drainType == MODEM_DRAIN_TYPE_TX) {
             final int txLevel = key & MODEM_TX_LEVEL_MASK;
             appendFieldToString(sb, "level", MODEM_TX_LEVEL_NAMES, txLevel);
+            sb.append(",");
         }
 
         final int ratType = key & MODEM_RAT_TYPE_MASK;

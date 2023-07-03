@@ -51,11 +51,20 @@ interface ControlsBindingController : UserAwareController {
     fun bindAndLoadSuggested(component: ComponentName, callback: LoadCallback)
 
     /**
-     * Request to bind to the given service.
+     * Request to bind to the given service. This should only be used for services using the full
+     * [ControlsProviderService] API, where SystemUI renders the devices' UI.
      *
      * @param component The [ComponentName] of the service to bind
      */
     fun bindService(component: ComponentName)
+
+    /**
+     * Bind to a service that provides a Device Controls panel (embedded activity). This will allow
+     * the app to remain "warm", and reduce latency.
+     *
+     * @param component The [ComponentName] of the [ControlsProviderService] to bind.
+     */
+    fun bindServiceForPanel(component: ComponentName)
 
     /**
      * Send a subscribe message to retrieve status of a set of controls.

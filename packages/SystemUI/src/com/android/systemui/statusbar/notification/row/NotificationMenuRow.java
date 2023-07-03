@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 import static android.view.HapticFeedbackConstants.CLOCK_TICK;
 
 import static com.android.systemui.SwipeHelper.SWIPED_FAR_ENOUGH_SIZE_FRACTION;
@@ -40,9 +39,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -253,9 +252,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mLeftMenuItems.clear();
         mRightMenuItems.clear();
 
-        boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
-                SHOW_NOTIFICATION_SNOOZE, 0) == 1;
-
+        final boolean showSnooze = mParent.getShowSnooze();
         // Construct the menu items based on the notification
         if (showSnooze) {
             // Only show snooze for non-foreground notifications, and if the setting is on

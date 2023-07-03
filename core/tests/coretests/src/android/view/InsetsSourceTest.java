@@ -16,15 +16,20 @@
 
 package android.view;
 
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.WindowInsets.Type.FIRST;
+import static android.view.WindowInsets.Type.LAST;
+import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.captionBar;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -45,9 +50,9 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class InsetsSourceTest {
 
-    private InsetsSource mSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
-    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME);
-    private InsetsSource mCaptionSource = new InsetsSource(ITYPE_CAPTION_BAR);
+    private final InsetsSource mSource = new InsetsSource(0 /* id */, navigationBars());
+    private final InsetsSource mImeSource = new InsetsSource(1 /* id */, ime());
+    private final InsetsSource mCaptionSource = new InsetsSource(2 /* id */, captionBar());
 
     @Before
     public void setUp() {
@@ -206,6 +211,57 @@ public class InsetsSourceTest {
         assertEquals(Insets.of(0, 0, 0, 0), insets);
     }
 
+    @Test
+    public void testCreateId() {
+        final int numSourcePerType = 2048;
+        final int numTotalSources = SIZE * numSourcePerType;
+        final SparseArray<InsetsSource> sources = new SparseArray<>(numTotalSources);
+        final Object owner = new Object();
+        for (int index = 0; index < numSourcePerType; index++) {
+            for (int type = FIRST; type <= LAST; type = type << 1) {
+                final int id = InsetsSource.createId(owner, index, type);
+                assertNull("Must not create the same ID.", sources.get(id));
+                sources.append(id, new InsetsSource(id, type));
+            }
+        }
+        assertEquals(numTotalSources, sources.size());
+    }
+
+    @Test
+    public void testGetIndex() {
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int indexFromId = InsetsSource.getIndex(id);
+                    assertEquals("index and indexFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", indexFromId=" + indexFromId + ".", index, indexFromId);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testGetType() {
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int typeFromId = InsetsSource.getType(id);
+                    assertEquals("type and typeFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", typeFromId=" + typeFromId + ".", type, typeFromId);
+                }
+            }
+        }
+    }
 
     // Parcel and equals already tested via InsetsStateTest
 }

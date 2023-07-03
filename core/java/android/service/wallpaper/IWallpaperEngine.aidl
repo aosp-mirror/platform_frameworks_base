@@ -32,6 +32,8 @@ interface IWallpaperEngine {
     oneway void setDisplayPadding(in Rect padding);
     @UnsupportedAppUsage
     oneway void setVisibility(boolean visible);
+    oneway void onScreenTurningOn();
+    oneway void onScreenTurnedOn();
     oneway void setInAmbientMode(boolean inAmbientDisplay, long animationDuration);
     @UnsupportedAppUsage
     oneway void dispatchPointer(in MotionEvent event);
@@ -42,9 +44,10 @@ interface IWallpaperEngine {
     @UnsupportedAppUsage
     oneway void destroy();
     oneway void setZoomOut(float scale);
-    oneway void scalePreview(in Rect positionInWindow);
+    oneway void resizePreview(in Rect positionInWindow);
     oneway void removeLocalColorsAreas(in List<RectF> regions);
     oneway void addLocalColorsAreas(in List<RectF> regions);
     SurfaceControl mirrorSurfaceControl();
     oneway void applyDimming(float dimAmount);
+    oneway void setWallpaperFlags(int which);
 }

@@ -23,10 +23,10 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupUtils;
 
