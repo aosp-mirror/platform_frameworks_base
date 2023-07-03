@@ -25,7 +25,6 @@ import android.graphics.Paint;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
-import android.os.SystemProperties;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
@@ -33,7 +32,6 @@ import android.text.style.TabStopSpan;
 import android.util.Log;
 import android.util.Pools.SynchronizedPool;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -75,13 +73,6 @@ public class StaticLayout extends Layout {
      * default values.
      */
     public final static class Builder {
-        // The content length threshold to enable LINE_BREAK_WORD_STYLE_PHRASE.
-        private static final int DEFAULT_LINECOUNT_THRESHOLD_FOR_PHRASE = 3;
-
-        // The property of content length threshold to enable LINE_BREAK_WORD_STYLE_PHRASE.
-        private static final String PROPERTY_LINECOUNT_THRESHOLD_FOR_PHRASE =
-                "android.phrase.linecount.threshold";
-
         private Builder() {}
 
         /**
@@ -440,53 +431,9 @@ public class StaticLayout extends Layout {
          */
         @NonNull
         public StaticLayout build() {
-            reviseLineBreakConfig();
             StaticLayout result = new StaticLayout(this);
             Builder.recycle(this);
             return result;
-        }
-
-        private void reviseLineBreakConfig() {
-            boolean autoPhraseBreaking = mLineBreakConfig.getAutoPhraseBreaking();
-            int wordStyle = mLineBreakConfig.getLineBreakWordStyle();
-            if (autoPhraseBreaking) {
-                if (wordStyle != LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE) {
-                    if (shouldEnablePhraseBreaking()) {
-                        mLineBreakConfig = LineBreakConfig.getLineBreakConfig(
-                                mLineBreakConfig.getLineBreakStyle(),
-                                LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE,
-                                mLineBreakConfig.getAutoPhraseBreaking());
-                    }
-                }
-            }
-        }
-
-        private boolean shouldEnablePhraseBreaking() {
-            if (TextUtils.isEmpty(mText) || mWidth <= 0) {
-                return false;
-            }
-            int lineLimit = SystemProperties.getInt(
-                    PROPERTY_LINECOUNT_THRESHOLD_FOR_PHRASE,
-                    DEFAULT_LINECOUNT_THRESHOLD_FOR_PHRASE);
-            double desiredWidth = (double) Layout.getDesiredWidth(mText, mStart,
-                    mEnd, mPaint, mTextDir);
-            int lineCount = (int) Math.ceil(desiredWidth / mWidth);
-            if (lineCount > 0 && lineCount <= lineLimit) {
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * Get the line break word style.
-         *
-         * @return The current line break word style.
-         *
-         * @hide
-         */
-        @VisibleForTesting
-        public int getLineBreakWordStyle() {
-            return mLineBreakConfig.getLineBreakWordStyle();
         }
 
         private CharSequence mText;
