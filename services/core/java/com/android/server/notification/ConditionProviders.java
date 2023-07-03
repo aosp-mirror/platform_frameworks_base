@@ -251,6 +251,11 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
+    protected boolean allowRebindForParentUser() {
+        return true;
+    }
+
+    @Override
     protected String getRequiredPermission() {
         return null;
     }
