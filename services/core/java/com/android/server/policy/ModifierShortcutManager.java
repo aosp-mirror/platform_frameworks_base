@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +24,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
+import android.hardware.input.InputManager;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -30,11 +33,14 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
+import com.android.server.input.KeyboardMetricsCollector;
+import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -88,11 +94,13 @@ class ModifierShortcutManager {
     }
 
     private final Context mContext;
+    private final Handler mHandler;
     private boolean mSearchKeyShortcutPending = false;
     private boolean mConsumeSearchKeyUp = true;
 
-    ModifierShortcutManager(Context context) {
+    ModifierShortcutManager(Context context, Handler handler) {
         mContext = context;
+        mHandler = handler;
         loadShortcuts();
     }
 
@@ -273,11 +281,13 @@ class ModifierShortcutManager {
      * Handle the shortcut to {@link Intent}
      *
      * @param kcm the {@link KeyCharacterMap} associated with the keyboard device.
-     * @param keyCode The key code of the event.
+     * @param keyEvent The key event.
      * @param metaState The meta key modifier state.
      * @return True if invoked the shortcut, otherwise false.
      */
-    private boolean handleIntentShortcut(KeyCharacterMap kcm, int keyCode, int metaState) {
+    @SuppressLint("MissingPermission")
+    private boolean handleIntentShortcut(KeyCharacterMap kcm, KeyEvent keyEvent, int metaState) {
+        final int keyCode = keyEvent.getKeyCode();
         // Shortcuts are invoked through Search+key, so intercept those here
         // Any printing key that is chorded with Search should be consumed
         // even if no shortcut was invoked.  This prevents text from being
@@ -307,6 +317,7 @@ class ModifierShortcutManager {
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
                             + " category=" + category);
                 }
+                logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(intent));
                 return true;
             } else {
                 return false;
@@ -323,9 +334,22 @@ class ModifierShortcutManager {
                         + "the activity to which it is registered was not found: "
                         + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
+            logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(shortcutIntent));
             return true;
         }
         return false;
+    }
+
+    private void logKeyboardShortcut(KeyEvent event, KeyboardLogEvent logEvent) {
+        mHandler.post(() -> handleKeyboardLogging(event, logEvent));
+    }
+
+    private void handleKeyboardLogging(KeyEvent event, KeyboardLogEvent logEvent) {
+        final InputManager inputManager = mContext.getSystemService(InputManager.class);
+        final InputDevice inputDevice = inputManager != null
+                ? inputManager.getInputDevice(event.getDeviceId()) : null;
+        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(inputDevice,
+                logEvent, event.getMetaState(), event.getKeyCode());
     }
 
     /**
@@ -360,7 +384,7 @@ class ModifierShortcutManager {
         }
 
         final KeyCharacterMap kcm = event.getKeyCharacterMap();
-        if (handleIntentShortcut(kcm, keyCode, metaState)) {
+        if (handleIntentShortcut(kcm, event, metaState)) {
             return true;
         }
 
