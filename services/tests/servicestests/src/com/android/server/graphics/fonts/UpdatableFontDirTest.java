@@ -140,7 +140,9 @@ public final class UpdatableFontDirTest {
     private List<File> mPreinstalledFontDirs;
     private final Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
     private final Function<Map<String, File>, FontConfig> mConfigSupplier =
-            (map) -> SystemFonts.getSystemFontConfig(map, 0, 0);
+            // /system/etc/font_fallback.xml is not accessible from application process, so
+            // use legacy fonts.xml for testing.
+            (map) -> SystemFonts.getSystemFontConfigForTesting("/system/etc/fonts.xml", map, 0, 0);
     private FakeFontFileParser mParser;
     private FakeFsverityUtil mFakeFsverityUtil;
 
