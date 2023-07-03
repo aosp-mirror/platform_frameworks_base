@@ -16,12 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.app.Instrumentation
-import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
-import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
@@ -29,13 +26,9 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.BySelector
-import androidx.test.uiautomator.UiObject2
-import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.wm.shell.flicker.LAUNCHER_UI_PACKAGE_NAME
+import com.android.wm.shell.flicker.SplitScreenUtils
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -73,13 +66,11 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
     AutoEnterPipOnGoToHomeTest(flicker) {
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     /** Second app used to enter split screen mode */
-    protected val secondAppForSplitScreen = getSplitScreenApp(instrumentation)
-    fun getSplitScreenApp(instrumentation: Instrumentation): StandardAppHelper =
-        SimpleAppHelper(
-            instrumentation,
-            ActivityOptions.SplitScreen.Primary.LABEL,
-            ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent()
-        )
+    private val secondAppForSplitScreen = SimpleAppHelper(
+        instrumentation,
+        ActivityOptions.SplitScreen.Primary.LABEL,
+        ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent()
+    )
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
@@ -88,14 +79,7 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
                 secondAppForSplitScreen.launchViaIntent(wmHelper)
                 pipApp.launchViaIntent(wmHelper)
                 tapl.goHome()
-                enterSplitScreen()
-                // wait until split screen is established
-                wmHelper
-                    .StateSyncBuilder()
-                    .withWindowSurfaceAppeared(pipApp)
-                    .withWindowSurfaceAppeared(secondAppForSplitScreen)
-                    .withSplitDividerVisible()
-                    .waitForAndVerify()
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, pipApp, secondAppForSplitScreen)
                 pipApp.enableAutoEnterForPipActivity()
             }
             teardown {
@@ -106,46 +90,6 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
             }
             transitions { tapl.goHome() }
         }
-
-    // TODO(b/285400227) merge the code in a common utility - this is copied from SplitScreenUtils
-    private val TIMEOUT_MS = 3_000L
-    private val overviewSnapshotSelector: BySelector
-        get() = By.res(LAUNCHER_UI_PACKAGE_NAME, "snapshot")
-    private fun enterSplitScreen() {
-        // Note: The initial split position in landscape is different between tablet and phone.
-        // In landscape, tablet will let the first app split to right side, and phone will
-        // split to left side.
-        if (tapl.isTablet) {
-            // TAPL's currentTask on tablet is sometimes not what we expected if the overview
-            // contains more than 3 task views. We need to use uiautomator directly to find the
-            // second task to split.
-            tapl.workspace.switchToOverview().overviewActions.clickSplit()
-            val snapshots =
-                tapl.device.wait(Until.findObjects(overviewSnapshotSelector), TIMEOUT_MS)
-            if (snapshots == null || snapshots.size < 1) {
-                error("Fail to find a overview snapshot to split.")
-            }
-
-            // Find the second task in the upper right corner in split select mode by sorting
-            // 'left' in descending order and 'top' in ascending order.
-            snapshots.sortWith { t1: UiObject2, t2: UiObject2 ->
-                t2.getVisibleBounds().left - t1.getVisibleBounds().left
-            }
-            snapshots.sortWith { t1: UiObject2, t2: UiObject2 ->
-                t1.getVisibleBounds().top - t2.getVisibleBounds().top
-            }
-            snapshots[0].click()
-        } else {
-            tapl.workspace
-                .switchToOverview()
-                .currentTask
-                .tapMenu()
-                .tapSplitMenuItem()
-                .currentTask
-                .open()
-        }
-        SystemClock.sleep(TIMEOUT_MS)
-    }
 
     @Presubmit
     @Test

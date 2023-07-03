@@ -26,7 +26,7 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.splitScreenEntered
 import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
-import com.android.wm.shell.flicker.splitscreen.SplitScreenUtils
+import com.android.wm.shell.flicker.SplitScreenUtils
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
