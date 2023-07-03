@@ -28,6 +28,7 @@ import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -106,9 +107,9 @@ class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlicker
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 209599395)
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() {}
 
     /** {@inheritDoc} */
     @Presubmit
