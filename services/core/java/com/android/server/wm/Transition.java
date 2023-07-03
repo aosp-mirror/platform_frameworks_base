@@ -615,12 +615,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         if (mParticipants.contains(wc)) return;
-        // Wallpaper is like in a static drawn state unless display may have changes, so exclude
-        // the case to reduce transition latency waiting for the unchanged wallpaper to redraw.
-        final boolean needSync = (!isWallpaper(wc) || mParticipants.contains(wc.mDisplayContent))
-                // Transient-hide may be hidden later, so no need to request redraw.
-                && !isInTransientHide(wc);
-        if (needSync) {
+        // Transient-hide may be hidden later, so no need to request redraw.
+        if (!isInTransientHide(wc)) {
             mSyncEngine.addToSyncSet(mSyncId, wc);
         }
         ChangeInfo info = mChanges.get(wc);
