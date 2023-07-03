@@ -26,6 +26,13 @@
             <corners android:radius="@dimen/rounded_slider_corner_radius"/>
         </shape>
     </item>
+    <item>
+        <shape>
+            <corners android:radius="@dimen/rounded_slider_corner_radius" />
+            <size android:height="@dimen/rounded_slider_height" />
+            <solid android:color="@color/brightness_slider_overlay_color" />
+        </shape>
+    </item>
     <item
         android:id="@+id/slider_icon"
         android:gravity="center_vertical|right"
