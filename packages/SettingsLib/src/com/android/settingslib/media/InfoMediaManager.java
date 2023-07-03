@@ -174,11 +174,13 @@ public abstract class InfoMediaManager extends MediaManager {
             MediaRoute2Info route, RouteListingPreference.Item routeListingPreferenceItem);
 
     @NonNull
-    protected abstract PhoneMediaDevice createPhoneMediaDevice(MediaRoute2Info route);
+    protected abstract PhoneMediaDevice createPhoneMediaDevice(MediaRoute2Info route,
+            RouteListingPreference.Item routeListingPreferenceItem);
 
     @NonNull
     protected abstract BluetoothMediaDevice createBluetoothMediaDevice(
-            MediaRoute2Info route, CachedBluetoothDevice cachedDevice);
+            MediaRoute2Info route, CachedBluetoothDevice cachedDevice,
+            RouteListingPreference.Item routeListingPreferenceItem);
 
     protected final void rebuildDeviceList() {
         mMediaDevices.clear();
@@ -593,7 +595,8 @@ public abstract class InfoMediaManager extends MediaManager {
             case TYPE_HDMI:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
-                mediaDevice = createPhoneMediaDevice(route);
+                mediaDevice = createPhoneMediaDevice(route,
+                        mPreferenceItemMap.getOrDefault(route.getId(), null));
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
@@ -603,7 +606,8 @@ public abstract class InfoMediaManager extends MediaManager {
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
                 if (cachedDevice != null) {
-                    mediaDevice = createBluetoothMediaDevice(route, cachedDevice);
+                    mediaDevice = createBluetoothMediaDevice(route, cachedDevice,
+                            mPreferenceItemMap.getOrDefault(route.getId(), null));
                 }
                 break;
             case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:

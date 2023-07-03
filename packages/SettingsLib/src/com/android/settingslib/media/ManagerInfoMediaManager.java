@@ -185,16 +185,20 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     @NonNull
-    protected PhoneMediaDevice createPhoneMediaDevice(MediaRoute2Info route) {
-        return new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName);
+    protected PhoneMediaDevice createPhoneMediaDevice(MediaRoute2Info route,
+            RouteListingPreference.Item routeListingPreferenceItem) {
+        return new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName,
+                routeListingPreferenceItem);
     }
 
     @Override
     @NonNull
     protected BluetoothMediaDevice createBluetoothMediaDevice(
-            MediaRoute2Info route, CachedBluetoothDevice cachedDevice) {
+            MediaRoute2Info route, CachedBluetoothDevice cachedDevice,
+            RouteListingPreference.Item routeListingPreferenceItem) {
         return new BluetoothMediaDevice(
-                mContext, cachedDevice, mRouterManager, route, mPackageName);
+                mContext, cachedDevice, mRouterManager, route, mPackageName,
+                routeListingPreferenceItem);
     }
 
     @VisibleForTesting
