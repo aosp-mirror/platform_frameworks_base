@@ -432,8 +432,7 @@ public abstract class WallpaperService extends Service {
             @Override
             public void resized(ClientWindowFrames frames, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, InsetsState insetsState,
-                    boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-                    int syncSeqId, boolean dragResizing) {
+                    boolean forceLayout, int displayId, int syncSeqId, boolean dragResizing) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
@@ -1287,9 +1286,9 @@ public abstract class WallpaperService extends Service {
                     visibleFrame.intersect(mInsetsState.getDisplayFrame());
                     WindowInsets windowInsets = mInsetsState.calculateInsets(visibleFrame,
                             null /* ignoringVisibilityState */, config.isScreenRound(),
-                            false /* alwaysConsumeSystemBars */, mLayout.softInputMode,
-                            mLayout.flags, SYSTEM_UI_FLAG_VISIBLE, mLayout.type,
-                            config.windowConfiguration.getWindowingMode(), null /* idSideMap */);
+                            mLayout.softInputMode, mLayout.flags, SYSTEM_UI_FLAG_VISIBLE,
+                            mLayout.type, config.windowConfiguration.getWindowingMode(),
+                            null /* idSideMap */);
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;

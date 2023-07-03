@@ -778,8 +778,8 @@ public class WindowStateTests extends WindowTestsBase {
             doThrow(new RemoteException("test")).when(win.mClient).resized(any() /* frames */,
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     any() /* insetsState */, anyBoolean() /* forceLayout */,
-                    anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
-                    anyInt() /* seqId */, anyBoolean() /* dragResizing */);
+                    anyInt() /* displayId */, anyInt() /* seqId */,
+                    anyBoolean() /* dragResizing */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();
