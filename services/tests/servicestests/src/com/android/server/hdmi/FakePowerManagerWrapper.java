@@ -24,10 +24,18 @@ import android.content.Context;
  */
 final class FakePowerManagerWrapper extends PowerManagerWrapper {
     private boolean mInteractive;
+    private WakeLockWrapper mWakeLock;
+    private boolean mWasWakeLockInstanceCreated = false;
+
 
     FakePowerManagerWrapper(@NonNull Context context) {
+        this(context, null);
+    }
+
+    FakePowerManagerWrapper(@NonNull Context context, WakeLockWrapper wakeLock) {
         super(context);
         mInteractive = true;
+        mWakeLock = wakeLock;
     }
 
     @Override
@@ -51,5 +59,48 @@ final class FakePowerManagerWrapper extends PowerManagerWrapper {
         return;
     }
 
-    // Don't stub WakeLock.
+    @Override
+    WakeLockWrapper newWakeLock(int levelAndFlags, String tag) {
+        if (mWakeLock == null) {
+            mWakeLock = new FakeWakeLockWrapper();
+        }
+        mWasWakeLockInstanceCreated = true;
+        return mWakeLock;
+    }
+
+    boolean wasWakeLockInstanceCreated() {
+        return mWasWakeLockInstanceCreated;
+    }
+
+    /**
+     * "Fake" wrapper for {@link PowerManager.WakeLock}, as opposed to a "Default" wrapper used by
+     * the framework - see {@link PowerManagerWrapper.DefaultWakeLockWrapper}.
+     */
+    public static class FakeWakeLockWrapper implements WakeLockWrapper {
+        private static final String TAG = "FakeWakeLockWrapper";
+        private boolean mWakeLockHeld = false;
+
+        @Override
+        public void acquire(long timeout) {
+            mWakeLockHeld = true;
+        }
+
+        @Override
+        public void acquire() {
+            mWakeLockHeld = true;
+        }
+
+        @Override
+        public void release() {
+            mWakeLockHeld = false;
+        }
+
+        @Override
+        public boolean isHeld() {
+            return mWakeLockHeld;
+        }
+
+        @Override
+        public void setReferenceCounted(boolean value) {}
+    }
 }
