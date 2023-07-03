@@ -1559,9 +1559,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
-            t.traceBegin("StartVibratorManagerService");
-            mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
-            t.traceEnd();
+            if (!isTv) {
+                t.traceBegin("StartVibratorManagerService");
+                mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartDynamicSystemService");
             dynamicSystem = new DynamicSystemService(context);
