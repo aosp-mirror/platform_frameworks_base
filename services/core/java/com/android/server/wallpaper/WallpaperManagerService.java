@@ -2038,7 +2038,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData data = null;
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
-                clearWallpaperLocked(callingPackage, false, which, userId, null);
+                clearWallpaperLocked(callingPackage, false, which, userId);
             } else {
                 clearWallpaperLocked(false, which, userId, null);
             }
@@ -2059,7 +2059,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private void clearWallpaperLocked(String callingPackage, boolean defaultFailed,
-            int which, int userId, IRemoteCallback reply) {
+            int which, int userId) {
 
         // Might need to bring it in the first time to establish our rewrite
         if (!mWallpaperMap.contains(userId)) {
@@ -2113,15 +2113,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         withCleanCallingIdentity(() -> clearWallpaperComponentLocked(wallpaper));
     }
 
+    // TODO(b/266818039) remove this version of the method
     private void clearWallpaperLocked(boolean defaultFailed, int which, int userId,
             IRemoteCallback reply) {
-
-        if (mIsLockscreenLiveWallpaperEnabled) {
-            String callingPackage = mPackageManagerInternal.getNameForUid(getCallingUid());
-            clearWallpaperLocked(callingPackage, defaultFailed, which, userId, reply);
-            return;
-        }
-
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
@@ -3291,21 +3285,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     boolean setWallpaperComponent(ComponentName name, String callingPackage,
             @SetWallpaperFlags int which, int userId) {
         if (mIsLockscreenLiveWallpaperEnabled) {
-            return setWallpaperComponentInternal(name, callingPackage, which, userId, null);
+            return setWallpaperComponentInternal(name, callingPackage, which, userId);
         } else {
             setWallpaperComponentInternalLegacy(name, callingPackage, which, userId);
             return true;
         }
     }
 
-    private boolean setWallpaperComponent(ComponentName name, @SetWallpaperFlags int which,
-            int userId) {
-        String callingPackage = mPackageManagerInternal.getNameForUid(getCallingUid());
-        return setWallpaperComponentInternal(name, callingPackage, which, userId, null);
-    }
-
     private boolean setWallpaperComponentInternal(ComponentName name, String callingPackage,
-            @SetWallpaperFlags int which, int userIdIn, IRemoteCallback reply) {
+            @SetWallpaperFlags int which, int userIdIn) {
         if (DEBUG) {
             Slog.v(TAG, "Setting new live wallpaper: which=" + which + ", component: " + name);
         }
@@ -3354,7 +3342,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             Slog.d(TAG, "publish system wallpaper changed!");
                         }
                         liveSync.complete();
-                        if (reply != null) reply.sendResult(null);
                     }
                 };
 
