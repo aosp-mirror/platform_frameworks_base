@@ -123,4 +123,5 @@ public final class PackageManagerServiceTestParams {
     public Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
     public boolean shouldStopSystemPackagesByDefault;
     public FreeStorageHelper freeStorageHelper;
+    public PackageMonitorCallbackHelper packageMonitorCallbackHelper;
 }
