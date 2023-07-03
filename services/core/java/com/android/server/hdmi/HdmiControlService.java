@@ -3664,7 +3664,7 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     @VisibleForTesting
     protected void onStandby(final int standbyAction) {
-        if (shouldAcquireWakeLock()) {
+        if (shouldAcquireWakeLockOnStandby()) {
             acquireWakeLock();
         }
         mWakeUpMessageReceived = false;
@@ -3793,7 +3793,7 @@ public class HdmiControlService extends SystemService {
         mStandbyMessageReceived = false;
     }
 
-    private boolean shouldAcquireWakeLock() {
+    private boolean shouldAcquireWakeLockOnStandby() {
         boolean sendStandbyOnSleep = false;
         if (tv() != null) {
             sendStandbyOnSleep = mHdmiCecConfig.getIntValue(
@@ -3809,7 +3809,7 @@ public class HdmiControlService extends SystemService {
     }
 
     /**
-     * Acquire the wake lock used to hold the thread until the standby process is finished.
+     * Acquire the wake lock used to hold the system awake until the standby process is finished.
      */
     @VisibleForTesting
     protected void acquireWakeLock() {
