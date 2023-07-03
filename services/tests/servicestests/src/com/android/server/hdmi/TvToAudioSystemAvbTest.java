@@ -262,4 +262,63 @@ public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
 
         assertThat(mNativeWrapper.getResultMessages()).isEmpty();
     }
+
+    @Test
+    public void adjustOnlyAvbEnabled_savlBecomesSupported_switchToAvb() {
+        enableAdjustOnlyAbsoluteVolumeBehavior();
+        mNativeWrapper.clearResultMessages();
+
+        // When the Audio System reports support for <Set Audio Volume Level>,
+        // the device should start the process for adopting AVB by sending <Give Audio Status>
+        receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
+        verifyGiveAudioStatusSent();
+
+        // The device should use adjust-only AVB while waiting for <Report Audio Status>
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY);
+
+        // The device should switch to AVB upon receiving <Report Audio Status>
+        receiveReportAudioStatus(60, false);
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
+
+    }
+
+    /**
+     * Tests that adjust-only AVB is not interrupted when a device's support for
+     * <Set Audio Volume Level> becomes unknown.
+     *
+     * This may currently occur when NewDeviceAction overwrites a device's info in HdmiCecNetwork.
+     * However, because replicating this scenario would be brittle and the behavior may change,
+     * this test does not simulate it and instead changes HdmiCecNetwork directly.
+     */
+    @Test
+    public void adjustOnlyAvbEnabled_savlSupportBecomesUnknown_keepUsingAdjustOnlyAvb() {
+        enableAdjustOnlyAbsoluteVolumeBehavior();
+        mNativeWrapper.clearResultMessages();
+
+        // Make sure the existing SetAudioVolumeLevelDiscoveryAction expires,
+        // so that we can check whether a new one is started.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS + 1);
+        mTestLooper.dispatchAll();
+
+        // Replace Audio System device info with one that has unknown support for all features
+        HdmiDeviceInfo updatedAudioSystemDeviceInfo =
+                mHdmiControlService.getHdmiCecNetwork().getDeviceInfo(Constants.ADDR_AUDIO_SYSTEM)
+                .toBuilder()
+                .setDeviceFeatures(DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN)
+                .build();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(updatedAudioSystemDeviceInfo);
+        mTestLooper.dispatchAll();
+
+        // The device should not switch away from adjust-only AVB
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY);
+
+        // The device should query support for <Set Audio Volume Level> again
+        assertThat(mNativeWrapper.getResultMessages()).contains(
+                SetAudioVolumeLevelMessage.build(
+                        getLogicalAddress(), getSystemAudioDeviceLogicalAddress(),
+                        Constants.AUDIO_VOLUME_STATUS_UNKNOWN));
+    }
 }
