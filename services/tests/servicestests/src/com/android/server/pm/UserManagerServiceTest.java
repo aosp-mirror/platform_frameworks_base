@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.app.ActivityManager;
 import android.app.PropertyInvalidatedCache;
@@ -28,6 +29,7 @@ import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
@@ -307,8 +309,10 @@ public class UserManagerServiceTest {
 
     private static String setSystemProperty(String name, String value) throws Exception {
         final String oldValue = runShellCommand("getprop " + name);
-        assertThat(runShellCommand("setprop " + name + " " + value))
-                .isEqualTo("");
+        assertWithMessage("can not set system property")
+                .that(runShellCommand("setprop " + name + " " + value)).isEqualTo("");
+        assertWithMessage("failed to set system property")
+                .that(SystemProperties.get(name)).isEqualTo(value);
         return oldValue;
     }
 
