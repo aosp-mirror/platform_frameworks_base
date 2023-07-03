@@ -352,6 +352,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
     private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
     private static final String ATTR_SPLASH_SCREEN_THEME = "splash-screen-theme";
+    private static final String ATTR_MIN_ASPECT_RATIO = "min-aspect-ratio";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_BUILD_FINGERPRINT = "buildFingerprint";
@@ -1127,7 +1128,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/,
                                 null /*splashscreenTheme*/,
-                                0 /*firstInstallTime*/
+                                0 /*firstInstallTime*/,
+                                PackageManager.USER_MIN_ASPECT_RATIO_UNSET
                         );
                     }
                 }
@@ -1794,7 +1796,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                     PackageManager.UNINSTALL_REASON_UNKNOWN,
                                     null /*harmfulAppWarning*/,
                                     null /* splashScreenTheme*/,
-                                    0 /*firstInstallTime*/
+                                    0 /*firstInstallTime*/,
+                                    PackageManager.USER_MIN_ASPECT_RATIO_UNSET
                             );
                         }
                         return;
@@ -1889,6 +1892,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 ATTR_SPLASH_SCREEN_THEME);
                         final long firstInstallTime = parser.getAttributeLongHex(null,
                                 ATTR_FIRST_INSTALL_TIME, 0);
+                        final int minAspectRatio = parser.getAttributeInt(null,
+                                ATTR_MIN_ASPECT_RATIO,
+                                PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
 
                         ArraySet<String> enabledComponents = null;
                         ArraySet<String> disabledComponents = null;
@@ -1965,7 +1971,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 enabledCaller, enabledComponents, disabledComponents, installReason,
                                 uninstallReason, harmfulAppWarning, splashScreenTheme,
                                 firstInstallTime != 0 ? firstInstallTime :
-                                        origFirstInstallTimes.getOrDefault(name, 0L));
+                                        origFirstInstallTimes.getOrDefault(name, 0L),
+                                minAspectRatio);
 
                         mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                     } else if (tagName.equals("preferred-activities")) {
@@ -2264,6 +2271,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         if (ustate.getSplashScreenTheme() != null) {
                             serializer.attribute(null, ATTR_SPLASH_SCREEN_THEME,
                                     ustate.getSplashScreenTheme());
+                        }
+                        if (ustate.getMinAspectRatio()
+                                != PackageManager.USER_MIN_ASPECT_RATIO_UNSET) {
+                            serializer.attributeInt(null, ATTR_MIN_ASPECT_RATIO,
+                                    ustate.getMinAspectRatio());
                         }
                         if (ustate.isSuspended()) {
                             for (int i = 0; i < ustate.getSuspendParams().size(); i++) {

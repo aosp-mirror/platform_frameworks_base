@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -5129,6 +5130,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @PackageManager.UserMinAspectRatio
+        public int getUserMinAspectRatio(@NonNull String packageName, int userId) {
+            final Computer snapshot = snapshotComputer();
+            final int callingUid = Binder.getCallingUid();
+            snapshot.enforceCrossUserPermission(
+                    callingUid, userId, false /* requireFullPermission */,
+                    false /* checkShell */, "getUserMinAspectRatio");
+            final PackageStateInternal packageState = snapshot
+                    .getPackageStateForInstalledAndFiltered(packageName, callingUid, userId);
+            return packageState == null ? USER_MIN_ASPECT_RATIO_UNSET
+                    : packageState.getUserStateOrDefault(userId).getMinAspectRatio();
+        }
+
+        @Override
         public Bundle getSuspendedPackageAppExtras(String packageName, int userId) {
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshot();
@@ -6091,6 +6106,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             scheduleWriteSettings();
             return true;
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.INSTALL_PACKAGES)
+        @Override
+        public void setUserMinAspectRatio(@NonNull String packageName, int userId,
+                @PackageManager.UserMinAspectRatio int aspectRatio) {
+            setUserMinAspectRatio_enforcePermission();
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            snapshot.enforceCrossUserPermission(callingUid, userId,
+                    false /* requireFullPermission */, false /* checkShell */,
+                    "setUserMinAspectRatio");
+            enforceOwnerRights(snapshot, packageName, callingUid);
+
+            final PackageStateInternal packageState = snapshot
+                    .getPackageStateForInstalledAndFiltered(packageName, callingUid, userId);
+            if (packageState == null) {
+                return;
+            }
+
+            if (packageState.getUserStateOrDefault(userId).getMinAspectRatio() == aspectRatio) {
+                return;
+            }
+
+            commitPackageStateMutation(null, packageName, state ->
+                    state.userState(userId).setMinAspectRatio(aspectRatio));
         }
 
         @Override
