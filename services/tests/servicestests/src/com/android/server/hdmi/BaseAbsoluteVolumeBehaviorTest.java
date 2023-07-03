@@ -137,6 +137,20 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
                     protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
                     }
+
+                    /**
+                     * Override displayOsd to prevent it from broadcasting an intent, which
+                     * can trigger a SecurityException.
+                     */
+                    @Override
+                    void displayOsd(int messageId) {
+                        // do nothing
+                    }
+
+                    @Override
+                    void displayOsd(int messageId, int extra) {
+                        // do nothing
+                    }
                 };
 
         mLooper = mTestLooper.getLooper();
