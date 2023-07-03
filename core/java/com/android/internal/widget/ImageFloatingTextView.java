@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Trace;
 import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -68,6 +69,7 @@ public class ImageFloatingTextView extends TextView {
     protected Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
             Layout.Alignment alignment, boolean shouldEllipsize,
             TextUtils.TruncateAt effectiveEllipsize, boolean useSaved) {
+        Trace.beginSection("ImageFloatingTextView#makeSingleLayout");
         TransformationMethod transformationMethod = getTransformationMethod();
         CharSequence text = getText();
         if (transformationMethod != null) {
@@ -110,7 +112,9 @@ public class ImageFloatingTextView extends TextView {
             builder.setIndents(null, margins);
         }
 
-        return builder.build();
+        final StaticLayout result = builder.build();
+        Trace.endSection();
+        return result;
     }
 
     /**
@@ -135,6 +139,7 @@ public class ImageFloatingTextView extends TextView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("ImageFloatingTextView#onMeasure");
         int availableHeight = MeasureSpec.getSize(heightMeasureSpec) - mPaddingTop - mPaddingBottom;
         if (getLayout() != null && getLayout().getHeight() != availableHeight) {
             // We've been measured before and the new size is different than before, lets make sure
@@ -161,6 +166,7 @@ public class ImageFloatingTextView extends TextView {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             }
         }
+        Trace.endSection();
     }
 
     @Override
