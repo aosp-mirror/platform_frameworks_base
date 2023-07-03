@@ -16,14 +16,28 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.VersionedPackage;
 import android.os.Binder;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.pm.pkg.ArchiveState;
+import com.android.server.pm.pkg.ArchiveState.ArchiveActivityInfo;
 import com.android.server.pm.pkg.PackageStateInternal;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,37 +49,103 @@ import java.util.Objects;
  */
 final class ArchiveManager {
 
+    private final Context mContext;
     private final PackageManagerService mPm;
 
-    ArchiveManager(PackageManagerService mPm) {
+    @Nullable
+    private LauncherApps mLauncherApps;
+
+    ArchiveManager(Context context, PackageManagerService mPm) {
+        this.mContext = context;
         this.mPm = mPm;
     }
 
     void archiveApp(
             @NonNull String packageName,
             @NonNull String callerPackageName,
-            int userId,
+            @NonNull UserHandle user,
             @NonNull IntentSender intentSender) throws PackageManager.NameNotFoundException {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(callerPackageName);
+        Objects.requireNonNull(user);
         Objects.requireNonNull(intentSender);
 
         Computer snapshot = mPm.snapshotComputer();
         int callingUid = Binder.getCallingUid();
+        int userId = user.getIdentifier();
         String callingPackageName = snapshot.getNameForUid(callingUid);
-        snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "archiveApp");
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, true,
+                "archiveApp");
         verifyCaller(callerPackageName, callingPackageName);
 
-        PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
+        PackageStateInternal ps = getPackageState(packageName, snapshot, callingUid, user);
+        verifyInstallOwnership(packageName, callingPackageName, ps.getInstallSource());
+
+        List<LauncherActivityInfo> mainActivities = getLauncherApps().getActivityList(
+                ps.getPackageName(),
+                new UserHandle(userId));
+        // TODO(b/291569242) Verify that this list is not empty and return failure with intentsender
+
+        storeArchiveState(ps, mainActivities, userId);
+
+        // TODO(b/278553670) Add special strings for the delete dialog
+        mPm.mInstallerService.uninstall(
+                new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                callerPackageName, DELETE_KEEP_DATA, intentSender, userId);
+    }
+
+    @NonNull
+    private static PackageStateInternal getPackageState(String packageName,
+            Computer snapshot, int callingUid, UserHandle user)
+            throws PackageManager.NameNotFoundException {
+        PackageStateInternal ps = snapshot.getPackageStateFiltered(packageName, callingUid,
+                user.getIdentifier());
         if (ps == null) {
             throw new PackageManager.NameNotFoundException(
                     TextUtils.formatSimple("Package %s not found.", packageName));
         }
+        return ps;
+    }
 
-        verifyInstallOwnership(packageName, callingPackageName, ps);
+    private LauncherApps getLauncherApps() {
+        if (mLauncherApps == null) {
+            mLauncherApps = mContext.getSystemService(LauncherApps.class);
+        }
+        return mLauncherApps;
+    }
 
-        // TODO(b/278553670) Complete implementations
-        throw new UnsupportedOperationException("Method not implemented.");
+    private void storeArchiveState(PackageStateInternal ps,
+            List<LauncherActivityInfo> mainActivities, int userId)
+            throws PackageManager.NameNotFoundException {
+        List<ArchiveActivityInfo> activityInfos = new ArrayList<>();
+        for (int i = 0; i < mainActivities.size(); i++) {
+            // TODO(b/278553670) Extract and store launcher icons
+            ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
+                    mainActivities.get(i).getLabel().toString(),
+                    Path.of("/TODO"), null);
+            activityInfos.add(activityInfo);
+        }
+        // TODO(b/278553670) Adapt installer check verifyInstallOwnership and check for null there
+        InstallSource installSource = ps.getInstallSource();
+        String installerPackageName = installSource.mUpdateOwnerPackageName != null
+                ? installSource.mUpdateOwnerPackageName : installSource.mInstallerPackageName;
+
+        synchronized (mPm.mLock) {
+            getPackageSetting(ps.getPackageName(), userId).modifyUserState(userId).setArchiveState(
+                    new ArchiveState(activityInfos, installerPackageName));
+        }
+    }
+
+    @NonNull
+    @GuardedBy("mPm.mLock")
+    private PackageSetting getPackageSetting(String packageName, int userId)
+            throws PackageManager.NameNotFoundException {
+        PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+        if (ps == null || !ps.getUserStateOrDefault(userId).isInstalled()) {
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("Package %s not found.", packageName));
+        }
+        return ps;
     }
 
     private static void verifyCaller(String callerPackageName, String callingPackageName) {
@@ -80,14 +160,14 @@ final class ArchiveManager {
     }
 
     private static void verifyInstallOwnership(String packageName, String callingPackageName,
-            PackageStateInternal ps) {
-        if (!TextUtils.equals(ps.getInstallSource().mInstallerPackageName,
+            InstallSource installSource) {
+        if (!TextUtils.equals(installSource.mInstallerPackageName,
                 callingPackageName)) {
             throw new SecurityException(
                     TextUtils.formatSimple("Caller is not the installer of record for %s.",
                             packageName));
         }
-        String updateOwnerPackageName = ps.getInstallSource().mUpdateOwnerPackageName;
+        String updateOwnerPackageName = installSource.mUpdateOwnerPackageName;
         if (updateOwnerPackageName != null
                 && !TextUtils.equals(updateOwnerPackageName, callingPackageName)) {
             throw new SecurityException(
