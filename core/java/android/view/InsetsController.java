@@ -797,9 +797,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
 
             WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
-                    mLastInsets.isRound(), false /* alwaysConsumeSystemBars */,
-                    mLastLegacySoftInputMode, mLastLegacyWindowFlags, mLastLegacySystemUiFlags,
-                    mWindowType, mLastWindowingMode, null /* idSideMap */);
+                    mLastInsets.isRound(), mLastLegacySoftInputMode, mLastLegacyWindowFlags,
+                    mLastLegacySystemUiFlags, mWindowType, mLastWindowingMode,
+                    null /* idSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets,
                     Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
@@ -955,21 +955,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see InsetsState#calculateInsets(Rect, InsetsState, boolean, boolean, int, int, int, int,
-     *      int, android.util.SparseIntArray)
+     * @see InsetsState#calculateInsets(Rect, InsetsState, boolean, int, int, int, int, int,
+     *      android.util.SparseIntArray)
      */
     @VisibleForTesting
-    public WindowInsets calculateInsets(boolean isScreenRound, boolean alwaysConsumeSystemBars,
-            int windowType, int windowingMode, int legacySoftInputMode, int legacyWindowFlags,
-            int legacySystemUiFlags) {
+    public WindowInsets calculateInsets(boolean isScreenRound, int windowType, int windowingMode,
+            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags) {
         mWindowType = windowType;
         mLastWindowingMode = windowingMode;
         mLastLegacySoftInputMode = legacySoftInputMode;
         mLastLegacyWindowFlags = legacyWindowFlags;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
         mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
-                isScreenRound, alwaysConsumeSystemBars, legacySoftInputMode, legacyWindowFlags,
-                legacySystemUiFlags, windowType, windowingMode, null /* idSideMap */);
+                isScreenRound, legacySoftInputMode, legacyWindowFlags, legacySystemUiFlags,
+                windowType, windowingMode, null /* idSideMap */);
         return mLastInsets;
     }
 

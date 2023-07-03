@@ -2342,6 +2342,64 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST = -130;
 
+    /**
+     * App minimum aspect ratio set by the user which will override app-defined aspect ratio.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "USER_MIN_ASPECT_RATIO_" }, value = {
+            USER_MIN_ASPECT_RATIO_UNSET,
+            USER_MIN_ASPECT_RATIO_SPLIT_SCREEN,
+            USER_MIN_ASPECT_RATIO_DISPLAY_SIZE,
+            USER_MIN_ASPECT_RATIO_4_3,
+            USER_MIN_ASPECT_RATIO_16_9,
+            USER_MIN_ASPECT_RATIO_3_2,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserMinAspectRatio {}
+
+    /**
+     * No aspect ratio override has been set by user.
+     *
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_UNSET = 0;
+
+    /**
+     * Aspect ratio override code: user forces app to split screen aspect ratio. This is adjusted to
+     * half of the screen without the split screen divider.
+     *
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_SPLIT_SCREEN = 1;
+
+    /**
+     * Aspect ratio override code: user forces app to the aspect ratio of the device display size.
+     * This will be the portrait aspect ratio of the device if the app is portrait or the landscape
+     * aspect ratio of the device if the app is landscape.
+     *
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_DISPLAY_SIZE = 2;
+
+    /**
+     * Aspect ratio override code: user forces app to 4:3 min aspect ratio
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_4_3 = 3;
+
+    /**
+     * Aspect ratio override code: user forces app to 16:9 min aspect ratio
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_16_9 = 4;
+
+    /**
+     * Aspect ratio override code: user forces app to 3:2 min aspect ratio
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_3_2 = 5;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,

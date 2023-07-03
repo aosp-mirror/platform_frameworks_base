@@ -112,15 +112,14 @@ public final class WindowMetricsController {
             Rect bounds, boolean isScreenRound, int windowingMode) {
         try {
             final InsetsState insetsState = new InsetsState();
-            final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(displayId, token, insetsState);
+            WindowManagerGlobal.getWindowManagerService().getWindowInsets(
+                    displayId, token, insetsState);
             final float overrideInvScale = CompatibilityInfo.getOverrideInvertedScale();
             if (overrideInvScale != 1f) {
                 insetsState.scale(overrideInvScale);
             }
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState */,
-                    isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING,
-                    0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
+                    isScreenRound, SOFT_INPUT_ADJUST_NOTHING, 0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
                     WindowManager.LayoutParams.INVALID_WINDOW_TYPE, windowingMode,
                     null /* idSideMap */);
         } catch (RemoteException e) {
