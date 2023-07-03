@@ -77,9 +77,8 @@ final class ArchiveManager {
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true,
                 "archiveApp");
         verifyCaller(callerPackageName, callingPackageName);
-
         PackageStateInternal ps = getPackageState(packageName, snapshot, callingUid, user);
-        verifyInstallOwnership(packageName, callingPackageName, ps.getInstallSource());
+        verifyInstaller(packageName, ps.getInstallSource());
 
         List<LauncherActivityInfo> mainActivities = getLauncherApps().getActivityList(
                 ps.getPackageName(),
@@ -125,7 +124,7 @@ final class ArchiveManager {
                     Path.of("/TODO"), null);
             activityInfos.add(activityInfo);
         }
-        // TODO(b/278553670) Adapt installer check verifyInstallOwnership and check for null there
+
         InstallSource installSource = ps.getInstallSource();
         String installerPackageName = installSource.mUpdateOwnerPackageName != null
                 ? installSource.mUpdateOwnerPackageName : installSource.mInstallerPackageName;
@@ -159,19 +158,13 @@ final class ArchiveManager {
         }
     }
 
-    private static void verifyInstallOwnership(String packageName, String callingPackageName,
-            InstallSource installSource) {
-        if (!TextUtils.equals(installSource.mInstallerPackageName,
-                callingPackageName)) {
+    private static void verifyInstaller(String packageName, InstallSource installSource) {
+        // TODO(b/291060290) Verify installer supports unarchiving
+        if (installSource.mUpdateOwnerPackageName == null
+                && installSource.mInstallerPackageName == null) {
             throw new SecurityException(
-                    TextUtils.formatSimple("Caller is not the installer of record for %s.",
+                    TextUtils.formatSimple("No installer found to archive app %s.",
                             packageName));
-        }
-        String updateOwnerPackageName = installSource.mUpdateOwnerPackageName;
-        if (updateOwnerPackageName != null
-                && !TextUtils.equals(updateOwnerPackageName, callingPackageName)) {
-            throw new SecurityException(
-                    TextUtils.formatSimple("Caller is not the update owner for %s.", packageName));
         }
     }
 }
