@@ -31,17 +31,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 import android.app.StatusBarManager;
@@ -268,8 +263,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         navBar.setHasSurface(true);
         navBarProvider.setServerVisible(true);
         final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        spyOn(policy);
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
 
         // Make both system bars invisible.
         mAppWindow.setRequestedVisibleTypes(
@@ -305,8 +298,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         addNavigationBar().getControllableInsetProvider().setServerVisible(true);
 
         final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        spyOn(policy);
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
@@ -341,8 +332,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         mAppWindow.mAboveInsetsState.addSource(navBarSource);
         mAppWindow.mAboveInsetsState.addSource(statusBarSource);
         final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        spyOn(policy);
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
@@ -390,8 +379,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final WindowState app2 = addWindow(TYPE_APPLICATION, "app");
 
         final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        spyOn(policy);
-        doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(app);
         policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
