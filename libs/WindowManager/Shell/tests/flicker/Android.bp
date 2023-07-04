@@ -138,7 +138,7 @@ android_test {
 android_test {
     name: "WMShellFlickerServiceTests",
     defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestSplitScreen.xml"],
+    additional_manifests: ["manifests/AndroidManifestService.xml"],
     package_name: "com.android.wm.shell.flicker.service",
     instrumentation_target_package: "com.android.wm.shell.flicker.service",
     srcs: [
