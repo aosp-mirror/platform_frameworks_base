@@ -49,6 +49,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.TraceUtils.Companion.traceAsync
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -442,8 +443,10 @@ constructor(
     }
 
     private suspend fun isFeatureDisabledByDevicePolicy(): Boolean =
-        withContext(backgroundDispatcher) {
-            devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+        traceAsync("isFeatureDisabledByDevicePolicy", TAG) {
+            withContext(backgroundDispatcher) {
+                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+            }
         }
 
     companion object {
