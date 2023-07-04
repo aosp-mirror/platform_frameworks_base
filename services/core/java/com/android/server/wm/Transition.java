@@ -2262,7 +2262,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // transitions anyways).
             return wc.getParent().asDisplayContent().getWindowingLayer();
         }
-        return wc.getParentSurfaceControl();
+        return wc.getParent().getSurfaceControl();
     }
 
     /**
