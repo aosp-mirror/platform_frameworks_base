@@ -171,6 +171,7 @@ public class InsetsControllerTest {
             mController.onStateChanged(state);
             mController.calculateInsets(
                     false,
+                    false,
                     TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mController.onFrameChanged(new Rect(0, 0, 100, 100));
