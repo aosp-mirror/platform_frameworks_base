@@ -434,7 +434,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
                 from);
         mInteractive = interactive;
-        if (!mInteractive && mMoving) {
+        if (!mInteractive && hideHandle && mMoving) {
             final int position = mSplitLayout.getDividePosition();
             mSplitLayout.flingDividePosition(
                     mLastDraggingPosition,
