@@ -1603,7 +1603,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
 
-        mController.mLoggerHandler.post(mLogger::logOnSend);
+        mLogger.logOnSendAsync(mController.mLoggerHandler);
         if (mLogger.mInfo != null) {
             mController.mTransitionTracer.logSentTransition(this, mTargets);
         }

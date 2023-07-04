@@ -98,7 +98,7 @@ public class SurfaceControlViewHostTests {
         mView1 = new Button(mActivity);
         mView2 = new Button(mActivity);
 
-        mActivity.runOnUiThread(() -> {
+        mInstrumentation.runOnMainSync(() -> {
             TestWindowlessWindowManager wwm = new TestWindowlessWindowManager(
                     mActivity.getResources().getConfiguration(), sc, null);
 
