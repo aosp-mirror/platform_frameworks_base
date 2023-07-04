@@ -1518,6 +1518,51 @@ public class HdmiControlService extends SystemService {
         }
     }
 
+    @ServiceThreadOnly
+    void sendCecCommand(HdmiCecMessage command) {
+        sendCecCommand(command, null);
+    }
+
+    @ServiceThreadOnly
+    void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+        switch (command.getOpcode()) {
+            case Constants.MESSAGE_ACTIVE_SOURCE:
+            case Constants.MESSAGE_IMAGE_VIEW_ON:
+            case Constants.MESSAGE_INACTIVE_SOURCE:
+            case Constants.MESSAGE_ROUTING_CHANGE:
+            case Constants.MESSAGE_SET_STREAM_PATH:
+            case Constants.MESSAGE_TEXT_VIEW_ON:
+                sendCecCommandWithRetries(command, callback);
+                break;
+            default:
+                sendCecCommandWithoutRetries(command, callback);
+        }
+    }
+
+    /**
+     * Create a {@link ResendCecCommandAction} that will retry sending the CEC message if it fails.
+     * @param command  command to be sent on the CEC bus.
+     * @param callback callback for handling the result of sending the command.
+     */
+    @ServiceThreadOnly
+    private void sendCecCommandWithRetries(HdmiCecMessage command,
+            @Nullable SendMessageCallback callback) {
+        assertRunOnServiceThread();
+        HdmiCecLocalDevice localDevice = getAllCecLocalDevices().get(0);
+        if (localDevice != null) {
+            sendCecCommandWithoutRetries(command, new SendMessageCallback() {
+                @Override
+                public void onSendCompleted(int result) {
+                    if (result != SendMessageResult.SUCCESS) {
+                        localDevice.addAndStartAction(new
+                                ResendCecCommandAction(localDevice, command, callback));
+                    }
+                }
+            });
+        }
+    }
+
+
     /**
      * Transmit a CEC command to CEC bus.
      *
@@ -1525,7 +1570,8 @@ public class HdmiControlService extends SystemService {
      * @param callback interface used to the result of send command
      */
     @ServiceThreadOnly
-    void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+    void sendCecCommandWithoutRetries(HdmiCecMessage command,
+            @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
         if (command.getValidationResult() == HdmiCecMessageValidator.OK
                 && verifyPhysicalAddresses(command)) {
@@ -1535,37 +1581,6 @@ public class HdmiControlService extends SystemService {
             if (callback != null) {
                 callback.onSendCompleted(SendMessageResult.FAIL);
             }
-        }
-    }
-
-    @ServiceThreadOnly
-    void sendCecCommand(HdmiCecMessage command) {
-        assertRunOnServiceThread();
-        switch (command.getOpcode()) {
-            case Constants.MESSAGE_ACTIVE_SOURCE:
-            case Constants.MESSAGE_IMAGE_VIEW_ON:
-            case Constants.MESSAGE_INACTIVE_SOURCE:
-            case Constants.MESSAGE_ROUTING_CHANGE:
-            case Constants.MESSAGE_SET_STREAM_PATH:
-            case Constants.MESSAGE_TEXT_VIEW_ON:
-                sendCecCommandWithRetries(command);
-                break;
-            default:
-                sendCecCommand(command, null);
-        }
-    }
-
-    /**
-     * Create a {@link SendCecCommandAction} that will retry to send the CEC message in case it
-     * fails.
-     * @param command that has to be sent in the CEC bus.
-     */
-    @ServiceThreadOnly
-    public void sendCecCommandWithRetries(HdmiCecMessage command) {
-        assertRunOnServiceThread();
-        HdmiCecLocalDevice localDevice = getAllCecLocalDevices().get(0);
-        if (localDevice != null) {
-            localDevice.addAndStartAction(new SendCecCommandAction(localDevice, command));
         }
     }
 

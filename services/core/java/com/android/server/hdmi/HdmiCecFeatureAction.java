@@ -191,6 +191,11 @@ abstract class HdmiCecFeatureAction {
         mService.sendCecCommand(cmd, callback);
     }
 
+    protected final void sendCommandWithoutRetries(HdmiCecMessage cmd,
+            HdmiControlService.SendMessageCallback callback) {
+        mService.sendCecCommandWithoutRetries(cmd, callback);
+    }
+
     protected final void addAndStartAction(HdmiCecFeatureAction action) {
         mSource.addAndStartAction(action);
     }
