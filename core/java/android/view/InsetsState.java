@@ -40,7 +40,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
-import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -137,8 +136,9 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
-            boolean isScreenRound, int legacySoftInputMode, int legacyWindowFlags,
-            int legacySystemUiFlags, int windowType, @WindowingMode int windowingMode,
+            boolean isScreenRound, boolean alwaysConsumeSystemBars,
+            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
+            int windowType, @WindowConfiguration.WindowingMode int windowingMode,
             @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
