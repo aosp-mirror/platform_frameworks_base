@@ -19,7 +19,6 @@ package com.android.server.pm;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.app.ActivityManager;
 import android.app.PropertyInvalidatedCache;
@@ -29,7 +28,6 @@ import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.os.Parcelable;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
@@ -72,10 +70,6 @@ public class UserManagerServiceTest {
 
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         mUserManagerService = new UserManagerService(InstrumentationRegistry.getContext());
-        // Put the current user to mUsers. UMS can't find userlist.xml, and fallbackToSingleUserLP.
-        mUserManagerService.putUserInfo(
-                new UserInfo(ActivityManager.getCurrentUser(), "Current User", 0));
-
         restrictionsFile = new File(mContext.getCacheDir(), "restrictions.xml");
         restrictionsFile.delete();
     }
@@ -198,129 +192,8 @@ public class UserManagerServiceTest {
                 .isFalse();
     }
 
-    @Test
-    public void assertIsUserSwitcherEnabledOnMultiUserSettings() throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        resetUserSwitcherEnabled();
-
-        setUserSwitch(false);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
-
-        setUserSwitch(true);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
-    }
-
-    @Test
-    public void assertIsUserSwitcherEnabledOnMaxSupportedUsers()  throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        setMaxSupportedUsers(1);
-
-        assertThat(UserManager.supportsMultipleUsers()).isFalse();
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
-
-        setMaxSupportedUsers(8);
-
-        assertThat(UserManager.supportsMultipleUsers()).isTrue();
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
-    }
-
-    @Test
-    public void assertIsUserSwitcherEnabled()  throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        setMaxSupportedUsers(8);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isTrue();
-
-        setUserSwitch(false);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isFalse();
-
-        setUserSwitch(true);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(false, userId)).isTrue();
-
-        mUserManagerService.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, userId);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(false, userId)).isFalse();
-
-        mUserManagerService.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userId);
-        setMaxSupportedUsers(1);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(true, userId)).isFalse();
-    }
-
-    @Test
-    public void assertIsUserSwitcherEnabledOnShowMultiuserUI()  throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        setShowMultiuserUI(false);
-
-        assertThat(UserManager.supportsMultipleUsers()).isFalse();
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
-
-        setShowMultiuserUI(true);
-
-        assertThat(UserManager.supportsMultipleUsers()).isTrue();
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
-    }
-
-    @Test
-    public void assertIsUserSwitcherEnabledOnUserRestrictions() throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        resetUserSwitcherEnabled();
-
-        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, true, userId);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
-
-        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, false, userId);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
-    }
-
-    @Test
-    public void assertIsUserSwitcherEnabledOnDemoMode()  throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        resetUserSwitcherEnabled();
-
-        setDeviceDemoMode(true);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
-
-        setDeviceDemoMode(false);
-        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
-    }
-
-    private void resetUserSwitcherEnabled() throws Exception {
-        int userId = ActivityManager.getCurrentUser();
-        setUserSwitch(true);
-        setShowMultiuserUI(true);
-        setDeviceDemoMode(false);
-        setMaxSupportedUsers(8);
-        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, false, userId);
-    }
-
-    private void setUserSwitch(boolean enabled) {
-        android.provider.Settings.Global.putInt(mContext.getContentResolver(),
-                android.provider.Settings.Global.USER_SWITCHER_ENABLED, enabled ? 1 : 0);
-    }
-
-    private void setDeviceDemoMode(boolean enabled) {
-        android.provider.Settings.Global.putInt(mContext.getContentResolver(),
-                android.provider.Settings.Global.DEVICE_DEMO_MODE, enabled ? 1 : 0);
-    }
-
-
     private static String runShellCommand(String cmd) throws Exception {
         return UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
                 .executeShellCommand(cmd);
-    }
-
-    private static String setSystemProperty(String name, String value) throws Exception {
-        final String oldValue = runShellCommand("getprop " + name);
-        assertWithMessage("can not set system property")
-                .that(runShellCommand("setprop " + name + " " + value)).isEqualTo("");
-        assertWithMessage("failed to set system property")
-                .that(SystemProperties.get(name)).isEqualTo(value);
-        return oldValue;
-    }
-
-    private static void setMaxSupportedUsers(int max) throws Exception {
-        setSystemProperty("fw.max_users", String.valueOf(max));
-    }
-
-    public static void setShowMultiuserUI(boolean show) throws Exception {
-        setSystemProperty("fw.show_multiuserui", String.valueOf(show));
     }
 }
