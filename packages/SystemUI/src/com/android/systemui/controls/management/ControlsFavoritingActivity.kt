@@ -163,7 +163,8 @@ class ControlsFavoritingActivity @Inject constructor(
                 }
 
                 executor.execute {
-                    structurePager.adapter = StructureAdapter(listOfStructures)
+                    structurePager.adapter = StructureAdapter(listOfStructures,
+                            currentUserTracker.currentUserId)
                     structurePager.setCurrentItem(structureIndex)
                     if (error) {
                         statusText.text = resources.getString(R.string.controls_favorite_load_error,
@@ -209,7 +210,7 @@ class ControlsFavoritingActivity @Inject constructor(
         structurePager.alpha = 0.0f
         pageIndicator.alpha = 0.0f
         structurePager.apply {
-            adapter = StructureAdapter(emptyList())
+            adapter = StructureAdapter(emptyList(), currentUserTracker.currentUserId)
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
