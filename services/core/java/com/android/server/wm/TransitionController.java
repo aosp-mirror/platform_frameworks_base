@@ -1434,7 +1434,7 @@ class TransitionController {
      * Beside `mCreateWallTimeMs`, all times are elapsed times and will all be reported relative
      * to when the transition was created.
      */
-    static class Logger {
+    static class Logger implements Runnable {
         long mCreateWallTimeMs;
         long mCreateTimeNs;
         long mRequestTimeNs;
@@ -1456,6 +1456,20 @@ class TransitionController {
                 sb.append(" via request=").append(mRequest);
             }
             return sb.toString();
+        }
+
+        void logOnSendAsync(Handler handler) {
+            handler.post(this);
+        }
+
+        @Override
+        public void run() {
+            try {
+                logOnSend();
+            } catch (Exception e) {
+                // In case TransitionRequestInfo#toString() accesses window container with race.
+                Slog.w(TAG, "Failed to log transition", e);
+            }
         }
 
         void logOnSend() {

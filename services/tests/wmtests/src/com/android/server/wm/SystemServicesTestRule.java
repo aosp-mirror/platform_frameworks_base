@@ -208,7 +208,11 @@ public class SystemServicesTestRule implements TestRule {
         spyOn(mContext);
 
         doReturn(null).when(mContext)
-                .registerReceiver(nullable(BroadcastReceiver.class), any(IntentFilter.class));
+                .registerReceiver(nullable(BroadcastReceiver.class), any(IntentFilter.class),
+                        nullable(String.class), nullable(Handler.class));
+        doReturn(null).when(mContext)
+                .registerReceiver(nullable(BroadcastReceiver.class), any(IntentFilter.class),
+                        nullable(String.class), nullable(Handler.class), anyInt());
         doReturn(null).when(mContext)
                 .registerReceiverAsUser(any(BroadcastReceiver.class), any(UserHandle.class),
                         any(IntentFilter.class), nullable(String.class), nullable(Handler.class));

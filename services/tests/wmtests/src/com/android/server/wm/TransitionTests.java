@@ -114,7 +114,11 @@ public class TransitionTests extends WindowTestsBase {
     private BLASTSyncEngine mSyncEngine;
 
     private Transition createTestTransition(int transitType, TransitionController controller) {
-        return new Transition(transitType, 0 /* flags */, controller, controller.mSyncEngine);
+        final Transition transition = new Transition(transitType, 0 /* flags */, controller,
+                controller.mSyncEngine);
+        spyOn(transition.mLogger);
+        doNothing().when(transition.mLogger).logOnSendAsync(any());
+        return transition;
     }
 
     private Transition createTestTransition(int transitType) {
