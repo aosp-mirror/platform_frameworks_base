@@ -138,6 +138,14 @@ public class CrossUserPackageVisibilityTests {
     }
 
     @Test
+    public void testGetUserMinAspectRatio_withCrossUserId() {
+        final int crossUserId = UserHandle.myUserId() + 1;
+        assertThrows(SecurityException.class,
+                () -> mIPackageManager.getUserMinAspectRatio(
+                        mInstrumentation.getContext().getPackageName(), crossUserId));
+    }
+
+    @Test
     public void testIsPackageSignedByKeySet_cannotDetectCrossUserPkg() throws Exception {
         final KeySet keySet = mIPackageManager.getSigningKeySet(mContext.getPackageName());
         assertThrows(IllegalArgumentException.class,

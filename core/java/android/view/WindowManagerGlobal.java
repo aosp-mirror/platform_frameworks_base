@@ -79,16 +79,9 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_SURFACE_RESIZED = 1 << 2;
 
     /**
-     * In multi-window we force show the system bars. Because we don't want that the surface size
-     * changes in this mode, we instead have a flag whether the system bar sizes should always be
-     * consumed, so the app is treated like there is no virtual system bars at all.
-     */
-    public static final int RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS = 1 << 3;
-
-    /**
      * The window manager has told the window it cannot draw this frame and should retry again.
      */
-    public static final int RELAYOUT_RES_CANCEL_AND_REDRAW = 1 << 4;
+    public static final int RELAYOUT_RES_CANCEL_AND_REDRAW = 1 << 3;
 
     /**
      * Flag for relayout: the client will be later giving
@@ -99,13 +92,7 @@ public final class WindowManagerGlobal {
 
     public static final int ADD_FLAG_IN_TOUCH_MODE = 0x1;
     public static final int ADD_FLAG_APP_VISIBLE = 0x2;
-    public static final int ADD_FLAG_USE_BLAST = 0x8;
-
-    /**
-     * Like {@link #RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS}, but as a "hint" when adding the
-     * window.
-     */
-    public static final int ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS = 0x4;
+    public static final int ADD_FLAG_USE_BLAST = 0x4;
 
     public static final int ADD_OKAY = 0;
     public static final int ADD_BAD_APP_TOKEN = -1;
