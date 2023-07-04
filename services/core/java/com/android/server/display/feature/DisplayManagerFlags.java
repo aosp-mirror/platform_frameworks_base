@@ -199,6 +199,11 @@ public class DisplayManagerFlags {
             Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
             Flags::idleScreenConfigInSubscribingLightSensor);
 
+    private final FlagState mVirtualDisplayLimit =
+            new FlagState(
+                    Flags.FLAG_VIRTUAL_DISPLAY_LIMIT,
+                    Flags::virtualDisplayLimit);
+
     private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
             Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
             Flags::normalBrightnessForDozeParameter
@@ -412,6 +417,10 @@ public class DisplayManagerFlags {
         return mNewHdrBrightnessModifier.isEnabled();
     }
 
+    public boolean isVirtualDisplayLimitEnabled() {
+        return mVirtualDisplayLimit.isEnabled();
+    }
+
     /**
      * @return Whether the useDozeBrightness parameter should be used
      */
@@ -476,6 +485,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mVirtualDisplayLimit);
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
