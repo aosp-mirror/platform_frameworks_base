@@ -2800,6 +2800,11 @@ public class InputManagerService extends IInputManager.Stub
         void notifyConfigurationChanged();
 
         /**
+         * This callback is invoked when the pointer location changes.
+         */
+        void notifyPointerLocationChanged(boolean pointerLocationEnabled);
+
+        /**
          * This callback is invoked when the camera lens cover switch changes state.
          * @param whenNanos the time when the change occurred
          * @param lensCovered true is the lens is covered
@@ -3379,6 +3384,10 @@ public class InputManagerService extends IInputManager.Stub
             }
             applyAdditionalDisplayInputPropertiesLocked(properties);
         }
+    }
+
+    void updatePointerLocationEnabled(boolean enabled) {
+        mWindowManagerCallbacks.notifyPointerLocationChanged(enabled);
     }
 
     void updateFocusEventDebugViewEnabled(boolean enabled) {
