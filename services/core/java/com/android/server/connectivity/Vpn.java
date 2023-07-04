@@ -288,9 +288,8 @@ public class Vpn {
      * <p>If retries have exceeded the length of this array, the last entry in the array will be
      * used as a repeating interval.
      */
-    // TODO: use ms instead to speed up the test.
-    private static final long[] DATA_STALL_RECOVERY_DELAYS_SEC =
-            {1L, 5L, 30L, 60L, 120L, 240L, 480L, 960L};
+    private static final long[] DATA_STALL_RECOVERY_DELAYS_MS =
+            {1000L, 5000L, 30000L, 60000L, 120000L, 240000L, 480000L, 960000L};
     /**
      * Maximum attempts to perform MOBIKE when the network is bad.
      */
@@ -693,11 +692,11 @@ public class Vpn {
          * Get the length of time to wait before perform data stall recovery when the validation
          * result is bad.
          */
-        public long getValidationFailRecoverySeconds(int count) {
-            if (count >= DATA_STALL_RECOVERY_DELAYS_SEC.length) {
-                return DATA_STALL_RECOVERY_DELAYS_SEC[DATA_STALL_RECOVERY_DELAYS_SEC.length - 1];
+        public long getValidationFailRecoveryMs(int count) {
+            if (count >= DATA_STALL_RECOVERY_DELAYS_MS.length) {
+                return DATA_STALL_RECOVERY_DELAYS_MS[DATA_STALL_RECOVERY_DELAYS_MS.length - 1];
             } else {
-                return DATA_STALL_RECOVERY_DELAYS_SEC[count];
+                return DATA_STALL_RECOVERY_DELAYS_MS[count];
             }
         }
 
@@ -3892,8 +3891,8 @@ public class Vpn {
                     // Trigger MOBIKE to recover first.
                     mExecutor.schedule(() -> {
                         maybeMigrateIkeSessionAndUpdateVpnTransportInfo(mActiveNetwork);
-                    }, mDeps.getValidationFailRecoverySeconds(mValidationFailRetryCount++),
-                            TimeUnit.SECONDS);
+                    }, mDeps.getValidationFailRecoveryMs(mValidationFailRetryCount++),
+                            TimeUnit.MILLISECONDS);
                     return;
                 }
 
@@ -3910,8 +3909,8 @@ public class Vpn {
                     // thread.
                     mScheduledHandleDataStallFuture = null;
                     // TODO: compute the delay based on the last recovery timestamp
-                }, mDeps.getValidationFailRecoverySeconds(mValidationFailRetryCount++),
-                        TimeUnit.SECONDS);
+                }, mDeps.getValidationFailRecoveryMs(mValidationFailRetryCount++),
+                        TimeUnit.MILLISECONDS);
             }
         }
 
