@@ -50,7 +50,6 @@ import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
-import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
@@ -5813,6 +5812,21 @@ public class CarrierConfigManager {
          */
         public static final int NR_SA_DISABLE_POLICY_VOWIFI_REGISTERED = 3;
 
+        /**
+         * This specifies whether the carrier support the global number format or not.
+         * {@link SubscriptionManager#getPhoneNumber(int)},
+         * {@link SubscriptionManager#getPhoneNumber(int, int)} with
+         * {@link SubscriptionManager#PHONE_NUMBER_SOURCE_IMS}
+         * In order to provide the phone number to the APIs, the framework extracts the phone
+         * number from the message received from the carrier server. If the carrier does not use
+         * global number format, the framework could not provide phone number.
+         * <p>
+         * If not set or set to false value, the framework handle only global number format URI.
+         * @hide
+         */
+        public static final String KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL =
+                KEY_PREFIX + "allow_non_global_phone_number_format_bool";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -5924,6 +5938,8 @@ public class CarrierConfigManager {
             defaults.putString(KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING, "");
             defaults.putString(KEY_IMS_USER_AGENT_STRING,
                                "#MANUFACTURER#_#MODEL#_Android#AV#_#BUILD#");
+
+            defaults.putBoolean(KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL, false);
 
             return defaults;
         }
