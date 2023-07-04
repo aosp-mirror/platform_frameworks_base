@@ -37,6 +37,7 @@ filegroup {
     name: "FlickerTestsActivityEmbedding-src",
     srcs: [
         "src/**/activityembedding/*.kt",
+        "src/**/activityembedding/open/*.kt",
         "src/**/activityembedding/close/*.kt",
         "src/**/activityembedding/rotation/*.kt",
     ],
@@ -147,6 +148,9 @@ android_test {
     srcs: [
         ":FlickerTestsBase-src",
         ":FlickerTestsAppLaunch-src",
+    ],
+    exclude_srcs: [
+        ":FlickerTestsActivityEmbedding-src",
     ],
 }
 
