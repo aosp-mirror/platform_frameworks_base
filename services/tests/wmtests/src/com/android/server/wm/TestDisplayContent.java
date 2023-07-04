@@ -77,6 +77,10 @@ class TestDisplayContent extends DisplayContent {
         spyOn(inputMonitor);
         doNothing().when(inputMonitor).resumeDispatchingLw(any());
 
+        final InsetsPolicy insetsPolicy = getInsetsPolicy();
+        WindowTestsBase.suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
+        WindowTestsBase.suppressInsetsAnimation(insetsPolicy.getTransientControlTarget());
+
         // For devices that set the sysprop ro.bootanim.set_orientation_<display_id>
         // See DisplayRotation#readDefaultDisplayRotation for context.
         // Without that, meaning of height and width in context of the tests can be swapped if
