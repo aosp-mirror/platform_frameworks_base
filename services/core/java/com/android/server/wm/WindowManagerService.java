@@ -1789,6 +1789,9 @@ public class WindowManagerService extends IWindowManager.Stub
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
 
+            if (displayPolicy.areSystemBarsForcedConsumedLw()) {
+                res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
+            }
             if (displayContent.isInTouchMode()) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
@@ -2490,6 +2493,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (win.mActivityRecord != null) {
                 win.mActivityRecord.updateReportedVisibilityLocked();
+            }
+            if (displayPolicy.areSystemBarsForcedConsumedLw()) {
+                result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
             }
             if (!win.isGoneForLayout()) {
                 win.mResizedWhileGone = false;
@@ -9040,7 +9046,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void getWindowInsets(int displayId, IBinder token, InsetsState outInsetsState) {
+    public boolean getWindowInsets(int displayId, IBinder token, InsetsState outInsetsState) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -9051,6 +9057,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final WindowToken winToken = dc.getWindowToken(token);
                 dc.getInsetsPolicy().getInsetsForWindowMetrics(winToken, outInsetsState);
+                return dc.getDisplayPolicy().areSystemBarsForcedConsumedLw();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

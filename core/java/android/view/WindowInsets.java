@@ -1429,6 +1429,14 @@ public final class WindowInsets {
 
         /** @hide */
         @NonNull
+        public Builder setAlwaysConsumeSystemBars(boolean alwaysConsumeSystemBars) {
+            // TODO (b/277891341): Remove this and related usages. This has been replaced by
+            //                     #setForceConsumingTypes.
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
         public Builder setForceConsumingTypes(@InsetsType int forceConsumingTypes) {
             mForceConsumingTypes = forceConsumingTypes;
             return this;

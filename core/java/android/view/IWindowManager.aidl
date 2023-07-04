@@ -754,8 +754,10 @@ interface IWindowManager
 
     /**
      * Called to get the expected window insets.
+     *
+     * @return {@code true} if system bars are always consumed.
      */
-    void getWindowInsets(int displayId, in IBinder token, out InsetsState outInsetsState);
+    boolean getWindowInsets(int displayId, in IBinder token, out InsetsState outInsetsState);
 
     /**
      * Returns a list of {@link android.view.DisplayInfo} for the logical display. This is not

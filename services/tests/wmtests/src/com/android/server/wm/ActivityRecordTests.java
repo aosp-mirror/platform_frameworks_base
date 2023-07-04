@@ -3354,7 +3354,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         // to client if the app didn't request IME visible.
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
-                insetsStateCaptor.capture(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
+                insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
+                anyBoolean());
         assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
     }
 
