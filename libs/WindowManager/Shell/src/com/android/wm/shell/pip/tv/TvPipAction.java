@@ -77,6 +77,19 @@ abstract class TvPipAction {
         return mActionType;
     }
 
+    static String getActionTypeString(@ActionType int actionType) {
+        switch (actionType) {
+            case ACTION_FULLSCREEN: return "ACTION_FULLSCREEN";
+            case ACTION_CLOSE: return "ACTION_CLOSE";
+            case ACTION_MOVE: return "ACTION_MOVE";
+            case ACTION_EXPAND_COLLAPSE: return "ACTION_EXPAND_COLLAPSE";
+            case ACTION_CUSTOM: return "ACTION_CUSTOM";
+            case ACTION_CUSTOM_CLOSE: return "ACTION_CUSTOM_CLOSE";
+            default:
+                return "UNDEFINED";
+        }
+    }
+
     abstract void populateButton(@NonNull TvWindowMenuActionButton button, Handler mainHandler);
 
     abstract PendingIntent getPendingIntent();
