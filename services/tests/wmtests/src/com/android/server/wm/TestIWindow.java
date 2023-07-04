@@ -46,7 +46,8 @@ public class TestIWindow extends IWindow.Stub {
     @Override
     public void resized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfig, InsetsState insetsState, boolean forceLayout,
-            int displayId, int seqId, boolean dragResizing) throws RemoteException {
+            boolean alwaysConsumeSystemBars, int displayId, int seqId, boolean dragResizing)
+            throws RemoteException {
     }
 
     @Override

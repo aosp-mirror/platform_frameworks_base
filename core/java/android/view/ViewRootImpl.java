@@ -82,6 +82,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
@@ -740,6 +741,7 @@ public final class ViewRootImpl implements ViewParent,
 
     final Rect mPendingBackDropFrame = new Rect();
 
+    boolean mPendingAlwaysConsumeSystemBars;
     private int mRelayoutSeq;
     private final Rect mWinFrameInScreen = new Rect();
     private final InsetsState mTempInsets = new InsetsState();
@@ -1364,6 +1366,9 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
+                mAttachInfo.mAlwaysConsumeSystemBars =
+                        (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS) != 0;
+                mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
                 mInsetsController.onStateChanged(mTempInsets);
                 mInsetsController.onControlsChanged(mTempControls.get());
                 final InsetsState state = mInsetsController.getState();
@@ -1877,8 +1882,8 @@ public final class ViewRootImpl implements ViewParent,
         final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg2;
         CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
         final boolean forceNextWindowRelayout = args.argi1 != 0;
-        final int displayId = args.argi2;
-        final boolean dragResizing = args.argi4 != 0;
+        final int displayId = args.argi3;
+        final boolean dragResizing = args.argi5 != 0;
 
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
@@ -1930,7 +1935,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mForceNextWindowRelayout |= forceNextWindowRelayout;
-        mSyncSeqId = args.argi3 > mSyncSeqId ? args.argi3 : mSyncSeqId;
+        mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
+        mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
 
         if (msg == MSG_RESIZED_REPORT) {
             reportNextDraw("resized");
@@ -2815,8 +2821,8 @@ public final class ViewRootImpl implements ViewParent,
         if (mLastWindowInsets == null || forceConstruct) {
             final Configuration config = getConfiguration();
             mLastWindowInsets = mInsetsController.calculateInsets(
-                    config.isScreenRound(), mWindowAttributes.type,
-                    config.windowConfiguration.getWindowingMode(),
+                    config.isScreenRound(), mAttachInfo.mAlwaysConsumeSystemBars,
+                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
                     mWindowAttributes.softInputMode, mWindowAttributes.flags,
                     (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));
@@ -3278,6 +3284,8 @@ public final class ViewRootImpl implements ViewParent,
                     surfaceSizeChanged = true;
                     mLastSurfaceSize.set(mSurfaceSize.x, mSurfaceSize.y);
                 }
+                final boolean alwaysConsumeSystemBarsChanged =
+                        mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars;
                 updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();
                 surfaceDestroyed = hadSurface && !mSurface.isValid();
@@ -3290,6 +3298,10 @@ public final class ViewRootImpl implements ViewParent,
                         || surfaceControlChanged) && mSurface.isValid();
                 if (surfaceReplaced) {
                     mSurfaceSequenceId++;
+                }
+                if (alwaysConsumeSystemBarsChanged) {
+                    mAttachInfo.mAlwaysConsumeSystemBars = mPendingAlwaysConsumeSystemBars;
+                    dispatchApplyInsets = true;
                 }
                 if (updateCaptionInsets()) {
                     dispatchApplyInsets = true;
@@ -8281,6 +8293,9 @@ public final class ViewRootImpl implements ViewParent,
             CompatibilityInfo.applyOverrideScaleIfNeeded(mPendingMergedConfiguration);
             mInsetsController.onStateChanged(mTempInsets);
             mInsetsController.onControlsChanged(mTempControls.get());
+
+            mPendingAlwaysConsumeSystemBars =
+                    (relayoutResult & RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS) != 0;
         }
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
@@ -8903,7 +8918,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
-            int displayId, int syncSeqId, boolean dragResizing) {
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
@@ -8922,9 +8937,10 @@ public final class ViewRootImpl implements ViewParent,
                 ? new MergedConfiguration(mergedConfiguration) : mergedConfiguration;
         args.arg3 = insetsState;
         args.argi1 = forceLayout ? 1 : 0;
-        args.argi2 = displayId;
-        args.argi3 = syncSeqId;
-        args.argi4 = dragResizing ? 1 : 0;
+        args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
+        args.argi3 = displayId;
+        args.argi4 = syncSeqId;
+        args.argi5 = dragResizing ? 1 : 0;
 
         msg.obj = args;
         mHandler.sendMessage(msg);
@@ -10318,11 +10334,12 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
-                boolean forceLayout, int displayId, int syncSeqId, boolean dragResizing) {
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
+                boolean dragResizing) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
-                        forceLayout, displayId, syncSeqId, dragResizing);
+                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
             }
         }
 

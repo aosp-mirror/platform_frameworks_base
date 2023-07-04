@@ -206,7 +206,8 @@ public class TaskSnapshotWindow {
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
-                boolean forceLayout, int displayId, int seqId, boolean dragResizing) {
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int seqId,
+                boolean dragResizing) {
             final TaskSnapshotWindow snapshot = mOuter.get();
             if (snapshot == null) {
                 return;
