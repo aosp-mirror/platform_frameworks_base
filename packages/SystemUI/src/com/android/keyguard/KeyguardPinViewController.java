@@ -77,6 +77,7 @@ public class KeyguardPinViewController
             });
         }
         mPasswordEntry.setUserActivityListener(this::onUserInput);
+        mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
     }
 
