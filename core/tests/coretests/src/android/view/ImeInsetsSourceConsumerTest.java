@@ -81,6 +81,7 @@ public class ImeInsetsSourceConsumerTest {
                     Insets.of(10, 10, 10, 10), rect, rect, rect, rect));
             mController.calculateInsets(
                     false,
+                    false,
                     TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mImeConsumer = mController.getImeSourceConsumer();

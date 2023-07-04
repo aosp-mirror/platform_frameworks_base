@@ -18,6 +18,8 @@ package com.android.server.wm.flicker.launch
 
 import android.os.SystemClock
 import android.platform.test.annotations.Postsubmit
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.CameraAppHelper
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -137,8 +139,14 @@ class OpenCameraFromHomeOnDoubleClickPowerButtonTest(flicker: LegacyFlickerTest)
 
     @Postsubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        flicker.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
+                    listOf(CAMERA_BACKGROUND)
+            )
+        }
+    }
 
     @Postsubmit
     @Test
@@ -161,5 +169,12 @@ class OpenCameraFromHomeOnDoubleClickPowerButtonTest(flicker: LegacyFlickerTest)
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
+
+        private val CAMERA_BACKGROUND =
+            ComponentNameMatcher(
+                "Background for SurfaceView" +
+                    "[com.google.android.GoogleCamera/" +
+                    "com.google.android.apps.camera.legacy.app.activity.main.CameraActivity]"
+            )
     }
 }

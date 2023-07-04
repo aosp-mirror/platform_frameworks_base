@@ -108,6 +108,7 @@ android_test {
         ":FlickerTestsAppLaunch-src",
         ":FlickerTestsQuickswitch-src",
         ":FlickerTestsRotation-src",
+        ":FlickerTestsNotification-src",
     ],
 }
 

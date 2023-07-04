@@ -347,7 +347,8 @@ public class SystemWindows {
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration newMergedConfiguration, InsetsState insetsState,
-                boolean forceLayout, int displayId, int syncSeqId, boolean dragResizing) {}
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
+                boolean dragResizing) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
