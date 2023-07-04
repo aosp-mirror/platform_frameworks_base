@@ -205,7 +205,7 @@ open class ControlsEditingActivity @Inject constructor(
         val elevation = resources.getFloat(R.dimen.control_card_elevation)
         val recyclerView = requireViewById<RecyclerView>(R.id.list)
         recyclerView.alpha = 0.0f
-        val adapter = ControlAdapter(elevation).apply {
+        val adapter = ControlAdapter(elevation, userTracker.userId).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 var hasAnimated = false
                 override fun onChanged() {
