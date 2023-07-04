@@ -894,7 +894,7 @@ final class LetterboxUiController {
                         this::shouldLetterboxHaveRoundedCorners,
                         this::getLetterboxBackgroundColor,
                         this::hasWallpaperBackgroundForLetterbox,
-                        this::getLetterboxWallpaperBlurRadius,
+                        this::getLetterboxWallpaperBlurRadiusPx,
                         this::getLetterboxWallpaperDarkScrimAlpha,
                         this::handleHorizontalDoubleTap,
                         this::handleVerticalDoubleTap,
@@ -1315,7 +1315,7 @@ final class LetterboxUiController {
             case LETTERBOX_BACKGROUND_WALLPAPER:
                 if (hasWallpaperBackgroundForLetterbox()) {
                     // Color is used for translucent scrim that dims wallpaper.
-                    return Color.valueOf(Color.BLACK);
+                    return mLetterboxConfiguration.getLetterboxBackgroundColor();
                 }
                 Slog.w(TAG, "Wallpaper option is selected for letterbox background but "
                         + "blur is not supported by a device or not supported in the current "
@@ -1472,10 +1472,10 @@ final class LetterboxUiController {
                         // Don't use wallpaper as a background if letterboxed for display cutout.
                         && isLetterboxedNotForDisplayCutout(mainWindow)
                         // Check that dark scrim alpha or blur radius are provided
-                        && (getLetterboxWallpaperBlurRadius() > 0
+                        && (getLetterboxWallpaperBlurRadiusPx() > 0
                                 || getLetterboxWallpaperDarkScrimAlpha() > 0)
                         // Check that blur is supported by a device if blur radius is provided.
-                        && (getLetterboxWallpaperBlurRadius() <= 0
+                        && (getLetterboxWallpaperBlurRadiusPx() <= 0
                                 || isLetterboxWallpaperBlurSupported());
         if (mShowWallpaperForLetterboxBackground != wallpaperShouldBeShown) {
             mShowWallpaperForLetterboxBackground = wallpaperShouldBeShown;
@@ -1483,9 +1483,9 @@ final class LetterboxUiController {
         }
     }
 
-    private int getLetterboxWallpaperBlurRadius() {
-        int blurRadius = mLetterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadius();
-        return blurRadius < 0 ? 0 : blurRadius;
+    private int getLetterboxWallpaperBlurRadiusPx() {
+        int blurRadius = mLetterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadiusPx();
+        return Math.max(blurRadius, 0);
     }
 
     private float getLetterboxWallpaperDarkScrimAlpha() {
@@ -1535,7 +1535,7 @@ final class LetterboxUiController {
             pw.println(prefix + "  letterboxBackgroundWallpaperDarkScrimAlpha="
                     + getLetterboxWallpaperDarkScrimAlpha());
             pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
-                    + getLetterboxWallpaperBlurRadius());
+                    + getLetterboxWallpaperBlurRadiusPx());
         }
 
         pw.println(prefix + "  isHorizontalReachabilityEnabled="

@@ -1028,7 +1028,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     private boolean setupLetterboxConfigurationWithBackgroundType(
             @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
-        mWm.mLetterboxConfiguration.setLetterboxBackgroundType(letterboxBackgroundType);
+        mWm.mLetterboxConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
         return mWm.isLetterboxBackgroundMultiColored();
     }
 }
