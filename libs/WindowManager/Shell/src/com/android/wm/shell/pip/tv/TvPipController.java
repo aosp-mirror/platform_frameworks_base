@@ -478,6 +478,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mActionBroadcastReceiver.unregister();
 
         mTvPipMenuController.closeMenu();
+        mTvPipActionsProvider.reset();
         mTvPipBoundsState.resetTvPipState();
         mTvPipBoundsController.reset();
         setState(STATE_NO_PIP);
