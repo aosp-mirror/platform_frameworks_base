@@ -126,6 +126,7 @@ public class PromptInfo implements Parcelable {
         return false;
     }
 
+    // LINT.IfChange
     public boolean containsPrivateApiConfigurations() {
         if (mDisallowBiometricsIfPolicyExists) {
             return true;
@@ -141,9 +142,14 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mReceiveSystemEvents) {
             return true;
+        } else if (mIgnoreEnrollmentState) {
+            return true;
+        } else if (mIsForLegacyFingerprintManager) {
+            return true;
         }
         return false;
     }
+    // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/BiometricPrompt.java)
 
     // Setters
 
