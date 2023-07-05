@@ -110,17 +110,17 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         sExpectedDefaultSizes.put(16f / 9, new Size(600, 338));
         sExpectedMinSizes.put(16f / 9, new Size(501, 282));
 
-        sExpectedMaxSizes.put(4f / 3, new Size(892, 669));
-        sExpectedDefaultSizes.put(4f / 3, new Size(535, 401));
+        sExpectedMaxSizes.put(4f / 3, new Size(893, 670));
+        sExpectedDefaultSizes.put(4f / 3, new Size(536, 402));
         sExpectedMinSizes.put(4f / 3, new Size(447, 335));
 
-        sExpectedMaxSizes.put(3f / 4, new Size(669, 892));
-        sExpectedDefaultSizes.put(3f / 4, new Size(401, 535));
+        sExpectedMaxSizes.put(3f / 4, new Size(670, 893));
+        sExpectedDefaultSizes.put(3f / 4, new Size(402, 536));
         sExpectedMinSizes.put(3f / 4, new Size(335, 447));
 
-        sExpectedMaxSizes.put(9f / 16, new Size(562, 999));
-        sExpectedDefaultSizes.put(9f / 16, new Size(337, 599));
-        sExpectedMinSizes.put(9f / 16, new Size(281, 500));
+        sExpectedMaxSizes.put(9f / 16, new Size(563, 1001));
+        sExpectedDefaultSizes.put(9f / 16, new Size(338, 601));
+        sExpectedMinSizes.put(9f / 16, new Size(282, 501));
     }
 
     private void forEveryTestCaseCheck(Map<Float, Size> expectedSizes,
@@ -192,7 +192,7 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         // an initial size with 16:9 aspect ratio
         Size initSize = new Size(600, 337);
 
-        Size expectedSize = new Size(337, 599);
+        Size expectedSize = new Size(338, 601);
         Size actualSize = mPipSizeSpecHandler.getSizeForAspectRatio(initSize, 9f / 16);
 
         Assert.assertEquals(expectedSize, actualSize);
