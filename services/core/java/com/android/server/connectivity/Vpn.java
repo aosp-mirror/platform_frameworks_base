@@ -385,6 +385,7 @@ public class Vpn {
     private final INetworkManagementService mNms;
     private final INetd mNetd;
     @VisibleForTesting
+    @GuardedBy("this")
     protected VpnConfig mConfig;
     private final NetworkProvider mNetworkProvider;
     @VisibleForTesting
@@ -1602,6 +1603,8 @@ public class Vpn {
         return network;
     }
 
+    // TODO : this is not synchronized(this) but reads from mConfig, which is dangerous
+    // This file makes an effort to avoid partly initializing mConfig, but this is still not great
     private LinkProperties makeLinkProperties() {
         // The design of disabling IPv6 is only enabled for IKEv2 VPN because it needs additional
         // logic to handle IPv6 only VPN, and the IPv6 only VPN may be restarted when its MTU
@@ -1683,6 +1686,7 @@ public class Vpn {
      * registering a new NetworkAgent. This is not always possible if the new VPN configuration
      * has certain changes, in which case this method would just return {@code false}.
      */
+    // TODO : this method is not synchronized(this) but reads from mConfig
     private boolean updateLinkPropertiesInPlaceIfPossible(NetworkAgent agent, VpnConfig oldConfig) {
         // NetworkAgentConfig cannot be updated without registering a new NetworkAgent.
         // Strictly speaking, bypassability is affected by lockdown and therefore it's possible
@@ -2273,7 +2277,12 @@ public class Vpn {
      */
     public synchronized VpnConfig getVpnConfig() {
         enforceControlPermission();
-        return mConfig;
+        // Constructor of VpnConfig cannot take a null parameter. Return null directly if mConfig is
+        // null
+        if (mConfig == null) return null;
+        // mConfig is guarded by "this" and can be modified by another thread as soon as
+        // this method returns, so this method must return a copy.
+        return new VpnConfig(mConfig);
     }
 
     @Deprecated
@@ -2319,6 +2328,7 @@ public class Vpn {
         }
     };
 
+    @GuardedBy("this")
     private void cleanupVpnStateLocked() {
         mStatusIntent = null;
         resetNetworkCapabilities();
@@ -2841,9 +2851,7 @@ public class Vpn {
         }
 
         final boolean isLegacyVpn = mVpnRunner instanceof LegacyVpnRunner;
-
         mVpnRunner.exit();
-        mVpnRunner = null;
 
         // LegacyVpn uses daemons that must be shut down before new ones are brought up.
         // The same limitation does not apply to Platform VPNs.
@@ -3087,6 +3095,7 @@ public class Vpn {
                     }
         };
 
+        // GuardedBy("Vpn.this") (annotation can't be applied to constructor)
         IkeV2VpnRunner(
                 @NonNull Ikev2VpnProfile profile, @NonNull ScheduledThreadPoolExecutor executor) {
             super(TAG);
@@ -3704,11 +3713,14 @@ public class Vpn {
         }
 
         public void updateVpnTransportInfoAndNetCap(int keepaliveDelaySec) {
-            final VpnTransportInfo info = new VpnTransportInfo(
-                    getActiveVpnType(),
-                    mConfig.session,
-                    mConfig.allowBypass && !mLockdown,
-                    areLongLivedTcpConnectionsExpensive(keepaliveDelaySec));
+            final VpnTransportInfo info;
+            synchronized (Vpn.this) {
+                info = new VpnTransportInfo(
+                        getActiveVpnType(),
+                        mConfig.session,
+                        mConfig.allowBypass && !mLockdown,
+                        areLongLivedTcpConnectionsExpensive(keepaliveDelaySec));
+            }
             final boolean ncUpdateRequired = !info.equals(mNetworkCapabilities.getTransportInfo());
             if (ncUpdateRequired) {
                 mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
@@ -4202,7 +4214,7 @@ public class Vpn {
          * consistency of the Ikev2VpnRunner fields.
          */
         private void disconnectVpnRunner() {
-            mEventChanges.log("[VPNRunner] Disconnect runner, underlying network" + mActiveNetwork);
+            mEventChanges.log("[VPNRunner] Disconnect runner, underlying net " + mActiveNetwork);
             mActiveNetwork = null;
             mUnderlyingNetworkCapabilities = null;
             mUnderlyingLinkProperties = null;
@@ -4273,6 +4285,7 @@ public class Vpn {
             }
         };
 
+        // GuardedBy("Vpn.this") (annotation can't be applied to constructor)
         LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd, VpnProfile profile) {
             super(TAG);
             if (racoon == null && mtpd == null) {
@@ -4480,46 +4493,46 @@ public class Vpn {
                 }
 
                 // Set the interface and the addresses in the config.
-                mConfig.interfaze = parameters[0].trim();
-
-                mConfig.addLegacyAddresses(parameters[1]);
-                // Set the routes if they are not set in the config.
-                if (mConfig.routes == null || mConfig.routes.isEmpty()) {
-                    mConfig.addLegacyRoutes(parameters[2]);
-                }
-
-                // Set the DNS servers if they are not set in the config.
-                if (mConfig.dnsServers == null || mConfig.dnsServers.size() == 0) {
-                    String dnsServers = parameters[3].trim();
-                    if (!dnsServers.isEmpty()) {
-                        mConfig.dnsServers = Arrays.asList(dnsServers.split(" "));
-                    }
-                }
-
-                // Set the search domains if they are not set in the config.
-                if (mConfig.searchDomains == null || mConfig.searchDomains.size() == 0) {
-                    String searchDomains = parameters[4].trim();
-                    if (!searchDomains.isEmpty()) {
-                        mConfig.searchDomains = Arrays.asList(searchDomains.split(" "));
-                    }
-                }
-
-                // Add a throw route for the VPN server endpoint, if one was specified.
-                if (endpointAddress instanceof Inet4Address) {
-                    mConfig.routes.add(new RouteInfo(
-                            new IpPrefix(endpointAddress, 32), null /*gateway*/,
-                            null /*iface*/, RTN_THROW));
-                } else if (endpointAddress instanceof Inet6Address) {
-                    mConfig.routes.add(new RouteInfo(
-                            new IpPrefix(endpointAddress, 128), null /*gateway*/,
-                            null /*iface*/, RTN_THROW));
-                } else {
-                    Log.e(TAG, "Unknown IP address family for VPN endpoint: "
-                            + endpointAddress);
-                }
-
-                // Here is the last step and it must be done synchronously.
                 synchronized (Vpn.this) {
+                    mConfig.interfaze = parameters[0].trim();
+
+                    mConfig.addLegacyAddresses(parameters[1]);
+                    // Set the routes if they are not set in the config.
+                    if (mConfig.routes == null || mConfig.routes.isEmpty()) {
+                        mConfig.addLegacyRoutes(parameters[2]);
+                    }
+
+                    // Set the DNS servers if they are not set in the config.
+                    if (mConfig.dnsServers == null || mConfig.dnsServers.size() == 0) {
+                        String dnsServers = parameters[3].trim();
+                        if (!dnsServers.isEmpty()) {
+                            mConfig.dnsServers = Arrays.asList(dnsServers.split(" "));
+                        }
+                    }
+
+                    // Set the search domains if they are not set in the config.
+                    if (mConfig.searchDomains == null || mConfig.searchDomains.size() == 0) {
+                        String searchDomains = parameters[4].trim();
+                        if (!searchDomains.isEmpty()) {
+                            mConfig.searchDomains = Arrays.asList(searchDomains.split(" "));
+                        }
+                    }
+
+                    // Add a throw route for the VPN server endpoint, if one was specified.
+                    if (endpointAddress instanceof Inet4Address) {
+                        mConfig.routes.add(new RouteInfo(
+                                new IpPrefix(endpointAddress, 32), null /*gateway*/,
+                                null /*iface*/, RTN_THROW));
+                    } else if (endpointAddress instanceof Inet6Address) {
+                        mConfig.routes.add(new RouteInfo(
+                                new IpPrefix(endpointAddress, 128), null /*gateway*/,
+                                null /*iface*/, RTN_THROW));
+                    } else {
+                        Log.e(TAG, "Unknown IP address family for VPN endpoint: "
+                                + endpointAddress);
+                    }
+
+                    // Here is the last step and it must be done synchronously.
                     // Set the start time
                     mConfig.startTime = SystemClock.elapsedRealtime();
 
@@ -4753,25 +4766,26 @@ public class Vpn {
 
         try {
             // Build basic config
-            mConfig = new VpnConfig();
+            final VpnConfig config = new VpnConfig();
             if (VpnConfig.LEGACY_VPN.equals(packageName)) {
-                mConfig.legacy = true;
-                mConfig.session = profile.name;
-                mConfig.user = profile.key;
+                config.legacy = true;
+                config.session = profile.name;
+                config.user = profile.key;
 
                 // TODO: Add support for configuring meteredness via Settings. Until then, use a
                 // safe default.
-                mConfig.isMetered = true;
+                config.isMetered = true;
             } else {
-                mConfig.user = packageName;
-                mConfig.isMetered = profile.isMetered;
+                config.user = packageName;
+                config.isMetered = profile.isMetered;
             }
-            mConfig.startTime = SystemClock.elapsedRealtime();
-            mConfig.proxyInfo = profile.proxy;
-            mConfig.requiresInternetValidation = profile.requiresInternetValidation;
-            mConfig.excludeLocalRoutes = profile.excludeLocalRoutes;
-            mConfig.allowBypass = profile.isBypassable;
-            mConfig.disallowedApplications = getAppExclusionList(mPackage);
+            config.startTime = SystemClock.elapsedRealtime();
+            config.proxyInfo = profile.proxy;
+            config.requiresInternetValidation = profile.requiresInternetValidation;
+            config.excludeLocalRoutes = profile.excludeLocalRoutes;
+            config.allowBypass = profile.isBypassable;
+            config.disallowedApplications = getAppExclusionList(mPackage);
+            mConfig = config;
 
             switch (profile.type) {
                 case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
@@ -4785,6 +4799,7 @@ public class Vpn {
                     mVpnRunner.start();
                     break;
                 default:
+                    mConfig = null;
                     updateState(DetailedState.FAILED, "Invalid platform VPN type");
                     Log.d(TAG, "Unknown VPN profile type: " + profile.type);
                     break;
