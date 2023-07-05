@@ -61,6 +61,7 @@ constructor(
 
     private val pin: PinBouncerViewModel by lazy {
         PinBouncerViewModel(
+            applicationContext = applicationContext,
             applicationScope = applicationScope,
             interactor = interactor,
             isInputEnabled = isInputEnabled,

@@ -316,4 +316,16 @@ public class SingleKeyGestureTests {
         pressKey(KEYCODE_POWER, 0 /* pressTime */);
         assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
+
+    // Verify short press should not be triggered if no very long press behavior defined but the
+    // press time exceeded the very long press timeout.
+    @Test
+    public void testTimeoutExceedVeryLongPress() throws InterruptedException {
+        mVeryLongPressOnPowerBehavior = false;
+
+        pressKey(KEYCODE_POWER, mVeryLongPressTime + 50);
+        assertTrue(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+        assertEquals(mVeryLongPressed.getCount(), 1);
+        assertEquals(mShortPressed.getCount(), 1);
+    }
 }

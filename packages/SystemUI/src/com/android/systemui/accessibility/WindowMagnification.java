@@ -28,6 +28,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
@@ -71,6 +72,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
     private SysUiState mSysUiState;
+
+    @VisibleForTesting
+    SparseArray<SparseArray<Float>> mUsersScales = new SparseArray();
 
     private static class ControllerSupplier extends
             DisplayIdIndexSupplier<WindowMagnificationController> {
@@ -293,6 +297,19 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     @MainThread
     void removeMagnificationButton(int displayId) {
         mModeSwitchesController.removeButton(displayId);
+    }
+
+    @MainThread
+    void setUserMagnificationScale(int userId, int displayId, float scale) {
+        SparseArray<Float> scales = mUsersScales.get(userId);
+        if (scales == null) {
+            scales = new SparseArray<>();
+            mUsersScales.put(userId, scales);
+        }
+        if (scales.contains(displayId) && scales.get(displayId) == scale) {
+            return;
+        }
+        scales.put(displayId, scale);
     }
 
     @VisibleForTesting

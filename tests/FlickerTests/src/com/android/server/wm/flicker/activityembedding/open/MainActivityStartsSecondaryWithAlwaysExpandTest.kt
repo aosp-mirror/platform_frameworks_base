@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.open
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
@@ -24,8 +24,10 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -54,7 +56,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
             testApp.launchViaIntent(wmHelper)
             testApp.launchSecondaryActivity(wmHelper)
             startDisplayBounds =
-              wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
+                wmHelper.currentState.layerState.physicalDisplayBounds ?: error("Display not found")
         }
         transitions {
             // Launch C with alwaysExpand
@@ -66,23 +68,14 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
         }
     }
 
-    @FlakyTest(bugId = 286952194)
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisibleAtStartAndEnd() {}
+    @Ignore("Not applicable to this CUJ.") override fun navBarWindowIsVisibleAtStartAndEnd() {}
 
-    @FlakyTest(bugId = 286952194)
-    @Presubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() {}
+    @Ignore("Not applicable to this CUJ.") override fun statusBarWindowIsAlwaysVisible() {}
 
-    @FlakyTest(bugId = 286952194)
-    @Presubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() {}
+    @Ignore("Not applicable to this CUJ.") override fun statusBarLayerPositionAtStartAndEnd() {}
 
     /** Transition begins with a split. */
-    @Presubmit
+    @FlakyTest(bugId = 286952194)
     @Test
     fun startsWithSplit() {
         flicker.assertWmStart {
@@ -94,7 +87,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
     }
 
     /** Main activity should become invisible after being covered by always expand activity. */
-    @Presubmit
+    @FlakyTest(bugId = 286952194)
     @Test
     fun mainActivityLayerBecomesInvisible() {
         flicker.assertLayers {
@@ -105,7 +98,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
     }
 
     /** Secondary activity should become invisible after being covered by always expand activity. */
-    @Presubmit
+    @FlakyTest(bugId = 286952194)
     @Test
     fun secondaryActivityLayerBecomesInvisible() {
         flicker.assertLayers {
@@ -116,7 +109,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
     }
 
     /** At the end of transition always expand activity is in fullscreen. */
-    @Presubmit
+    @FlakyTest(bugId = 286952194)
     @Test
     fun endsWithAlwaysExpandActivityCoveringFullScreen() {
         flicker.assertWmEnd {
