@@ -255,20 +255,18 @@ fun LegacyFlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(
         invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
             val snapshotLayers =
                 it.subjects.filter { subject ->
-                    subject.name.contains(ComponentNameMatcher.SNAPSHOT.toLayerName()) &&
+                    ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(subject.layer) &&
                         subject.isVisible
                 }
+            val visibleAreas =
+                snapshotLayers
+                    .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
+                    .toTypedArray()
+            val snapshotRegion = RegionSubject(visibleAreas, timestamp)
             // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
-            if (snapshotLayers.isNotEmpty()) {
-                val visibleAreas =
-                    snapshotLayers
-                        .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
-                        .toTypedArray()
-                val snapshotRegion = RegionSubject(visibleAreas, timestamp)
+            if (snapshotRegion.region.isNotEmpty) {
                 val appVisibleRegion = it.visibleRegion(component)
-                if (snapshotRegion.region.isNotEmpty) {
-                    snapshotRegion.coversExactly(appVisibleRegion.region)
-                }
+                snapshotRegion.coversExactly(appVisibleRegion.region)
             }
         }
     }
