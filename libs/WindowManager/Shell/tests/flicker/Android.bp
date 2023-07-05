@@ -30,19 +30,26 @@ filegroup {
 
 filegroup {
     name: "WMShellFlickerTestsBubbles-src",
-    srcs: ["src/**/bubble/*.kt"],
+    srcs: ["src/com/android/wm/shell/flicker/bubble/*.kt"],
 }
 
 filegroup {
     name: "WMShellFlickerTestsPip-src",
-    srcs: ["src/**/pip/*.kt"],
+    srcs: ["src/com/android/wm/shell/flicker/pip/*.kt"],
 }
 
 filegroup {
     name: "WMShellFlickerTestsSplitScreen-src",
     srcs: [
-        "src/**/splitscreen/*.kt",
-        "src/**/splitscreen/benchmark/*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/benchmark/*.kt",
+    ],
+}
+
+filegroup {
+    name: "WMShellFlickerServiceTests-src",
+    srcs: [
+        "src/com/android/wm/shell/flicker/service/**/*.kt",
     ],
 }
 
@@ -124,5 +131,17 @@ android_test {
     srcs: [
         ":WMShellFlickerTestsBase-src",
         ":WMShellFlickerTestsSplitScreen-src",
+    ],
+}
+
+android_test {
+    name: "WMShellFlickerServiceTests",
+    defaults: ["WMShellFlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestSplitScreen.xml"],
+    package_name: "com.android.wm.shell.flicker.service",
+    instrumentation_target_package: "com.android.wm.shell.flicker.service",
+    srcs: [
+        ":WMShellFlickerTestsBase-src",
+        ":WMShellFlickerServiceTests-src",
     ],
 }
