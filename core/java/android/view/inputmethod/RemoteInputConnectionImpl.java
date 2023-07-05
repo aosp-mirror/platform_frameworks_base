@@ -1118,7 +1118,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             @InputConnection.CursorUpdateFilter int cursorUpdateFilter, int imeDisplayId) {
         final InputConnection ic = getInputConnection();
         if (ic == null || !isActive()) {
-            Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+            Log.w(TAG, "requestCursorUpdates on inactive InputConnection");
             return false;
         }
         if (mParentInputMethodManager.mRequestCursorUpdateDisplayIdCheck.get()
