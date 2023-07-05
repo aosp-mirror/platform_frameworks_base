@@ -35,6 +35,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
+import android.content.pm.UserInfo;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
@@ -49,6 +50,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -220,6 +222,16 @@ public final class MovePackageHelper {
                     "Not enough free space to move");
         }
 
+        try {
+            for (int index = 0; index < installedUserIds.length; index++) {
+                prepareUserDataForVolumeIfRequired(volumeUuid, installedUserIds[index], storage);
+            }
+        } catch (RuntimeException e) {
+            freezer.close();
+            throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                    "Failed to prepare user storage while moving app");
+        }
+
         mPm.mMoveCallbacks.notifyStatusChanged(moveId, 10);
 
         final CountDownLatch installedLatch = new CountDownLatch(1);
@@ -364,6 +376,29 @@ public final class MovePackageHelper {
         }
 
         return true;
+    }
+
+    private void prepareUserDataForVolumeIfRequired(String volumeUuid, int userId,
+            StorageManager storageManager) {
+        if (TextUtils.isEmpty(volumeUuid)
+                || doesDataDirectoryExistForUser(volumeUuid, userId)) {
+            return;
+        }
+        if (DEBUG_INSTALL) {
+            Slog.d(TAG, "Preparing user directories for user u" + userId + " for UUID "
+                    + volumeUuid);
+        }
+        final UserInfo user = mPm.mUserManager.getUserInfo(userId);
+        if (user == null) return;
+        // This call is same as StorageEventHelper#loadPrivatePackagesInner which prepares
+        // the storage before reconciling apps
+        storageManager.prepareUserStorage(volumeUuid, user.id, user.serialNumber,
+                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+    }
+
+    private boolean doesDataDirectoryExistForUser(String uuid, int userId) {
+        final File userDirectoryFile = Environment.getDataUserCeDirectory(uuid, userId);
+        return userDirectoryFile != null && userDirectoryFile.exists();
     }
 
     public static class MoveCallbacks extends Handler {
