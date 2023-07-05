@@ -2928,7 +2928,7 @@ public class WallpaperManager {
     public static ComponentName getCmfDefaultWallpaperComponent(Context context) {
         ComponentName cn = null;
         String[] cmfWallpaperMap = context.getResources().getStringArray(
-                com.android.internal.R.array.cmf_default_wallpaper_component);
+                com.android.internal.R.array.default_wallpaper_component_per_device_color);
         if (cmfWallpaperMap == null || cmfWallpaperMap.length == 0) {
             Log.d(TAG, "No CMF wallpaper config");
             return getDefaultWallpaperComponent(context);
