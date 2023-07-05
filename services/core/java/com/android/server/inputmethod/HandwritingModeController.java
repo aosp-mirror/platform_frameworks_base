@@ -291,6 +291,10 @@ final class HandwritingModeController {
         reset(false /* reinitializing */);
     }
 
+    void setInkWindowInitializer(Runnable inkWindowInitializer) {
+        mInkWindowInitRunnable = inkWindowInitializer;
+    }
+
     private void reset(boolean reinitializing) {
         if (mHandwritingEventReceiver != null) {
             mHandwritingEventReceiver.dispose();
