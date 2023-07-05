@@ -827,6 +827,20 @@ public class WindowMagnificationManager implements
     }
 
     /**
+     * Notify System UI the magnification scale on the specified display for userId is changed.
+     *
+     * @param userId the user id.
+     * @param displayId the logical display id.
+     * @param scale magnification scale.
+     */
+    public boolean onUserMagnificationScaleChanged(int userId, int displayId, float scale) {
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.onUserMagnificationScaleChanged(userId, displayId, scale);
+        }
+    }
+
+    /**
      * Returns the screen-relative X coordinate of the center of the magnified bounds.
      *
      * @param displayId The logical display id

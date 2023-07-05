@@ -17,7 +17,7 @@
 package com.android.internal.accessibility.common;
 
 /**
- * Collection of common constants for accessibility shortcut.
+ * Collection of common constants for accessibility magnification.
  */
 public final class MagnificationConstants {
     private MagnificationConstants() {}
