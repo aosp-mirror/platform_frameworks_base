@@ -1093,7 +1093,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
             mViewportDraggingState.prepareForZoomInTemporary(shortcutTriggered);
 
-            zoomInTemporary(down.getX(), down.getY());
+            zoomInTemporary(down.getX(), down.getY(), shortcutTriggered);
 
             transitionTo(mViewportDraggingState);
         }
@@ -1150,14 +1150,20 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
     }
 
-    private void zoomInTemporary(float centerX, float centerY) {
+    private void zoomInTemporary(float centerX, float centerY, boolean shortcutTriggered) {
         final float currentScale = mFullScreenMagnificationController.getScale(mDisplayId);
         final float persistedScale = MathUtils.constrain(
                 mFullScreenMagnificationController.getPersistedScale(mDisplayId),
                 MIN_SCALE, MAX_SCALE);
 
         final boolean isActivated = mFullScreenMagnificationController.isActivated(mDisplayId);
-        final float scale = isActivated ? (currentScale + 1.0f) : persistedScale;
+        final boolean isShortcutTriggered = shortcutTriggered;
+        final boolean isZoomedOutFromService =
+                mFullScreenMagnificationController.isZoomedOutFromService(mDisplayId);
+
+        boolean zoomInWithPersistedScale =
+                !isActivated || isShortcutTriggered || isZoomedOutFromService;
+        final float scale = zoomInWithPersistedScale ?  persistedScale : (currentScale + 1.0f);
         zoomToScale(scale, centerX, centerY);
     }
 
