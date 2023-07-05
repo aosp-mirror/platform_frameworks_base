@@ -67,6 +67,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         )
     private val underTest =
         PinBouncerViewModel(
+            applicationContext = context,
             applicationScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
