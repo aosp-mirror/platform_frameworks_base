@@ -18,7 +18,6 @@ package com.android.systemui.qs.external
 
 import android.content.Context
 import android.graphics.drawable.Icon
-import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -67,8 +66,7 @@ class TileRequestDialog(
     }
 
     private fun createTileView(tileData: TileData): QSTileView {
-        val themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-        val tile = QSTileViewImpl(themedContext, QSIconViewImpl(themedContext), true)
+        val tile = QSTileViewImpl(context, QSIconViewImpl(context), true)
         val state = QSTile.BooleanState().apply {
             label = tileData.label
             handlesLongClick = false

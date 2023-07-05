@@ -28,7 +28,7 @@
         </item>
         <item>
             <shape android:shape="rectangle">
-                <solid android:color="?attr/shadeActive"/>
+                <solid android:color="?android:attr/colorAccent"/>
                 <corners android:radius="@dimen/qs_footer_action_corner_radius"/>
             </shape>
         </item>
