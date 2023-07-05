@@ -89,4 +89,9 @@ public class SplitScreenUtils {
             int userId1, int userId2) {
         return (packageName1 != null && packageName1.equals(packageName2)) && (userId1 == userId2);
     }
+
+    /** Generates a common log message for split screen failures */
+    public static String splitFailureMessage(String caller, String reason) {
+        return "(" + caller + ") Splitscreen aborted: " + reason;
+    }
 }
