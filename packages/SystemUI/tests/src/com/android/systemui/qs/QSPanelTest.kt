@@ -15,11 +15,9 @@ package com.android.systemui.qs
 
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
-import android.testing.TestableContext
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
-import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.accessibility.AccessibilityNodeInfo
@@ -57,24 +55,19 @@ class QSPanelTest : SysuiTestCase() {
 
     private lateinit var footer: View
 
-    private val themedContext = TestableContext(
-            ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-    )
-
     @Before
     @Throws(Exception::class)
     fun setup() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        // Apply only the values of the theme that are not defined
 
         testableLooper.runWithLooper {
-            qsPanel = QSPanel(themedContext, null)
+            qsPanel = QSPanel(context, null)
             qsPanel.mUsingMediaPlayer = true
 
             qsPanel.initialize(qsLogger)
             // QSPanel inflates a footer inside of it, mocking it here
-            footer = LinearLayout(themedContext).apply { id = R.id.qs_footer }
+            footer = LinearLayout(context).apply { id = R.id.qs_footer }
             qsPanel.addView(footer, MATCH_PARENT, 100)
             qsPanel.onFinishInflate()
             // Provides a parent with non-zero size for QSPanel
@@ -112,12 +105,12 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
                 QSPanelControllerBase.TileRecord(
                     mock(QSTile::class.java),
-                    QSTileViewImpl(themedContext, QSIconViewImpl(themedContext))
+                    QSTileViewImpl(context, QSIconViewImpl(context))
                 )
             )
 
-        val mediaView = FrameLayout(themedContext)
-        mediaView.addView(View(themedContext), MATCH_PARENT, 800)
+        val mediaView = FrameLayout(context)
+        mediaView.addView(View(context), MATCH_PARENT, 800)
 
         qsPanel.setUsingHorizontalLayout(/* horizontal */ true, mediaView, /* force */ true)
         qsPanel.measure(
@@ -142,12 +135,12 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
             QSPanelControllerBase.TileRecord(
                 mock(QSTile::class.java),
-                QSTileViewImpl(themedContext, QSIconViewImpl(themedContext))
+                QSTileViewImpl(context, QSIconViewImpl(context))
             )
         )
 
-        val mediaView = FrameLayout(themedContext)
-        mediaView.addView(View(themedContext), MATCH_PARENT, 800)
+        val mediaView = FrameLayout(context)
+        mediaView.addView(View(context), MATCH_PARENT, 800)
 
         qsPanel.setUsingHorizontalLayout(/* horizontal */ true, mediaView, /* force */ true)
         qsPanel.measure(
@@ -168,10 +161,7 @@ class QSPanelTest : SysuiTestCase() {
     @Test
     fun testBottomPadding() {
         val padding = 10
-        themedContext.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_bottom,
-                padding
-        )
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_bottom, padding)
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingBottom).isEqualTo(padding)
     }
@@ -180,11 +170,8 @@ class QSPanelTest : SysuiTestCase() {
     fun testTopPadding() {
         val padding = 10
         val paddingCombined = 100
-        themedContext.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        themedContext.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top,
-                paddingCombined
-        )
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, paddingCombined)
 
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingTop).isEqualTo(paddingCombined)

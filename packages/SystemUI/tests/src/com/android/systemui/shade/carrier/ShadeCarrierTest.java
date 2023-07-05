@@ -20,10 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -50,9 +48,7 @@ public class ShadeCarrierTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mTestableLooper = TestableLooper.get(this);
-        Context themedContext =
-                new ContextThemeWrapper(mContext, R.style.Theme_SystemUI_QuickSettings);
-        LayoutInflater inflater = LayoutInflater.from(themedContext);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         mContext.ensureTestableResources();
         mTestableLooper.runWithLooper(() ->
                 mShadeCarrier = (ShadeCarrier) inflater.inflate(R.layout.shade_carrier, null));
