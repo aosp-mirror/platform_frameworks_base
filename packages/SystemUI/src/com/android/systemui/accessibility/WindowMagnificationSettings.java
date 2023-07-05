@@ -172,7 +172,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         };
     }
 
-    private class ZoomSeekbarChangeListener implements SeekBar.OnSeekBarChangeListener {
+    private class ZoomSeekbarChangeListener implements
+            SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             float scale = (progress / (float) mSeekBarMagnitude) + SCALE_MIN_VALUE;
@@ -195,6 +196,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            // Do nothing
+        }
+
+        @Override
+        public void onUserInteractionFinalized(SeekBar seekBar, @ControlUnitType int control) {
             // Do nothing
         }
     }
@@ -521,7 +527,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0,
                 UserHandle.USER_CURRENT);
         setScaleSeekbar(scale);
-        mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
+        mZoomSeekbar.setOnSeekBarWithIconButtonsChangeListener(new ZoomSeekbarChangeListener());
 
         mAllowDiagonalScrollingView =
                 (LinearLayout) mSettingView.findViewById(R.id.magnifier_horizontal_lock_view);
