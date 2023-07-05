@@ -1284,6 +1284,12 @@ public class DisplayPolicy {
         return ANIMATION_STYLEABLE;
     }
 
+    // TODO (b/277891341): Remove this and related usages. This has been replaced by
+    //                     InsetsSource#FLAG_FORCE_CONSUMING.
+    public boolean areSystemBarsForcedConsumedLw() {
+        return false;
+    }
+
     /**
      * Computes the frames of display (its logical size, rotation and cutout should already be set)
      * used to layout window. This method only changes the given display frames, insets state and
