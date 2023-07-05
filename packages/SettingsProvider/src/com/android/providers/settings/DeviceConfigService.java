@@ -75,6 +75,15 @@ public final class DeviceConfigService extends Binder {
         }
     }
 
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+      final IContentProvider iprovider = mProvider.getIContentProvider();
+      pw.println("device config properties:");
+      for (String line : MyShellCommand.listAll(iprovider)) {
+        pw.println(line);
+      }
+    }
+
     private void callUpdableDeviceConfigShellCommandHandler(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
         int result = -1;
@@ -109,6 +118,31 @@ public final class DeviceConfigService extends Binder {
 
         MyShellCommand(SettingsProvider provider) {
             mProvider = provider;
+        }
+
+        public static List<String> listAll(IContentProvider provider) {
+            final ArrayList<String> lines = new ArrayList<>();
+
+            try {
+                Bundle args = new Bundle();
+                args.putInt(Settings.CALL_METHOD_USER_KEY,
+                        ActivityManager.getService().getCurrentUser().id);
+                Bundle b = provider.call(new AttributionSource(Process.myUid(),
+                                resolveCallingPackage(), null), Settings.AUTHORITY,
+                        Settings.CALL_METHOD_LIST_CONFIG, null, args);
+                if (b != null) {
+                    Map<String, String> flagsToValues =
+                            (HashMap) b.getSerializable(Settings.NameValueTable.VALUE);
+                    for (String key : flagsToValues.keySet()) {
+                        lines.add(key + "=" + flagsToValues.get(key));
+                    }
+                }
+
+                Collections.sort(lines);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Failed in IPC", e);
+            }
+            return lines;
         }
 
         @SuppressLint("AndroidFrameworkRequiresPermission")
@@ -389,31 +423,6 @@ public final class DeviceConfigService extends Binder {
                 throw new RuntimeException("Failed in IPC", e);
             }
             return success;
-        }
-
-        private List<String> listAll(IContentProvider provider) {
-            final ArrayList<String> lines = new ArrayList<>();
-
-            try {
-                Bundle args = new Bundle();
-                args.putInt(Settings.CALL_METHOD_USER_KEY,
-                        ActivityManager.getService().getCurrentUser().id);
-                Bundle b = provider.call(new AttributionSource(Process.myUid(),
-                                resolveCallingPackage(), null), Settings.AUTHORITY,
-                        Settings.CALL_METHOD_LIST_CONFIG, null, args);
-                if (b != null) {
-                    Map<String, String> flagsToValues =
-                            (HashMap) b.getSerializable(Settings.NameValueTable.VALUE);
-                    for (String key : flagsToValues.keySet()) {
-                        lines.add(key + "=" + flagsToValues.get(key));
-                    }
-                }
-
-                Collections.sort(lines);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed in IPC", e);
-            }
-            return lines;
         }
 
         private static String resolveCallingPackage() {
