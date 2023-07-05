@@ -126,6 +126,19 @@ public class BatteryStatsHistoryTest {
     }
 
     @Test
+    public void testAtraceExcludedState() {
+        mHistory.forceRecordAllHistory();
+
+        Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
+
+        mHistory.recordStateStartEvent(mClock.elapsedRealtime(),
+                mClock.uptimeMillis(), HistoryItem.STATE_WAKE_LOCK_FLAG);
+
+        Mockito.verify(mTracer, Mockito.never()).traceCounter(
+                Mockito.anyString(), Mockito.anyInt());
+    }
+
+    @Test
     public void testAtraceNumericalState() {
         InOrder inOrder = Mockito.inOrder(mTracer);
         Mockito.when(mTracer.tracingEnabled()).thenReturn(true);

@@ -129,6 +129,13 @@ public class BatteryStatsHistory {
     static final int EXTENSION_CPU_USAGE_HEADER_FLAG = 0x00000004;
     static final int EXTENSION_CPU_USAGE_FLAG = 0x00000008;
 
+    // For state1, trace everything except the wakelock bit (which can race with
+    // suspend) and the running bit (which isn't meaningful in traces).
+    static final int STATE1_TRACE_MASK = ~(HistoryItem.STATE_WAKE_LOCK_FLAG
+                                          | HistoryItem.STATE_CPU_RUNNING_FLAG);
+    // For state2, trace all bit changes.
+    static final int STATE2_TRACE_MASK = ~0;
+
     private final Parcel mHistoryBuffer;
     private final File mSystemDir;
     private final HistoryStepDetailsCalculator mStepDetailsCalculator;
@@ -1270,8 +1277,9 @@ public class BatteryStatsHistory {
     /**
      * Writes changes to a HistoryItem state bitmap to Atrace.
      */
-    private void recordTraceCounters(int oldval, int newval, BitDescription[] descriptions) {
-        int diff = oldval ^ newval;
+    private void recordTraceCounters(int oldval, int newval, int mask,
+            BitDescription[] descriptions) {
+        int diff = (oldval ^ newval) & mask;
         if (diff == 0) return;
 
         for (int i = 0; i < descriptions.length; i++) {
@@ -1284,7 +1292,6 @@ public class BatteryStatsHistory {
             } else {
                 value = (newval & bd.mask) >> bd.shift;
             }
-
             mTracer.traceCounter("battery_stats." + bd.name, value);
         }
     }
@@ -1325,9 +1332,9 @@ public class BatteryStatsHistory {
     private void writeHistoryItem(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
         if (mTracer != null && mTracer.tracingEnabled()) {
             recordTraceEvents(cur.eventCode, cur.eventTag);
-            recordTraceCounters(mTraceLastState, cur.states,
+            recordTraceCounters(mTraceLastState, cur.states, STATE1_TRACE_MASK,
                     BatteryStats.HISTORY_STATE_DESCRIPTIONS);
-            recordTraceCounters(mTraceLastState2, cur.states2,
+            recordTraceCounters(mTraceLastState2, cur.states2, STATE2_TRACE_MASK,
                     BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
             mTraceLastState = cur.states;
             mTraceLastState2 = cur.states2;
