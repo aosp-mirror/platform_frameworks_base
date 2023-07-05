@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.open
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
@@ -24,6 +24,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -32,8 +33,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test launching a secondary activity over an existing split. By default the new secondary
- * activity will stack over the previous secondary activity.
+ * Test launching a secondary activity over an existing split. By default the new secondary activity
+ * will stack over the previous secondary activity.
  *
  * Setup: From Activity A launch a split A|B.
  *
@@ -45,8 +46,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenThirdActivityOverSplitTest (flicker: LegacyFlickerTest) :
-        ActivityEmbeddingTestBase(flicker) {
+class OpenThirdActivityOverSplitTest(flicker: LegacyFlickerTest) :
+    ActivityEmbeddingTestBase(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
@@ -56,12 +57,10 @@ class OpenThirdActivityOverSplitTest (flicker: LegacyFlickerTest) :
             testApp.launchSecondaryActivity(wmHelper)
 
             startDisplayBounds =
-                    wmHelper.currentState.layerState.physicalDisplayBounds
-                            ?: error("Can't get display bounds")
+                wmHelper.currentState.layerState.physicalDisplayBounds
+                    ?: error("Can't get display bounds")
         }
-        transitions {
-            testApp.launchThirdActivity(wmHelper)
-        }
+        transitions { testApp.launchThirdActivity(wmHelper) }
         teardown {
             tapl.goHome()
             testApp.exit(wmHelper)
@@ -79,36 +78,33 @@ class OpenThirdActivityOverSplitTest (flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     fun mainActivityLayersAlwaysVisible() {
-        flicker.assertLayers {
-            isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        }
+        flicker.assertLayers { isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
 
         flicker.assertLayersStart {
-            val display = this.entry.displays.firstOrNull { it.isOn && !it.isVirtual }
+            val display =
+                this.entry.displays.firstOrNull { it.isOn && !it.isVirtual }
                     ?: error("No non-virtual and on display found")
             val mainActivityRegion =
-                    this.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                this.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             val secondaryActivityRegion =
-                    this.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                            .region
-            mainActivityRegion
-                    .plus(secondaryActivityRegion)
-                    .coversExactly(display.layerStackSpace)
+                this.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT).region
+            mainActivityRegion.plus(secondaryActivityRegion).coversExactly(display.layerStackSpace)
         }
 
         flicker.assertLayersEnd {
-            val display = this.entry.displays.firstOrNull { it.isOn && !it.isVirtual }
+            val display =
+                this.entry.displays.firstOrNull { it.isOn && !it.isVirtual }
                     ?: error("No non-virtual and on display found")
             val mainActivityRegion =
-                    this.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                this.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             val secondaryActivityRegion =
-                    this.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                this.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             secondaryActivityRegion.isEmpty()
             val thirdActivityRegion =
-                    this.visibleRegion(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                this.visibleRegion(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
             mainActivityRegion
-                    .plus(thirdActivityRegion.region)
-                    .coversExactly(display.layerStackSpace)
+                .plus(thirdActivityRegion.region)
+                .coversExactly(display.layerStackSpace)
         }
     }
 
@@ -118,13 +114,15 @@ class OpenThirdActivityOverSplitTest (flicker: LegacyFlickerTest) :
     fun thirdActivityWindowLaunchesIntoSplit() {
         flicker.assertWm {
             isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .isAppWindowInvisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
-                    .then()
-                    .isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .isAppWindowVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
-                    .then()
-                    .isAppWindowVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
-                    .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT) // expectation
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                .then()
+                .isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .isAppWindowVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                .then()
+                .isAppWindowVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                .isAppWindowInvisible(
+                    ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT
+                ) // expectation
         }
     }
 
@@ -134,13 +132,13 @@ class OpenThirdActivityOverSplitTest (flicker: LegacyFlickerTest) :
     fun thirdActivityLayerLaunchesIntoSplit() {
         flicker.assertLayers {
             isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .isInvisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .isVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
-                    .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .isInvisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .isVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.THIRD_ACTIVITY_COMPONENT)
+                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }
     }
 
@@ -149,9 +147,7 @@ class OpenThirdActivityOverSplitTest (flicker: LegacyFlickerTest) :
     @Test
     fun backgroundLayerNeverVisible() {
         val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
-        flicker.assertLayers {
-            isInvisible(backgroundColorLayer)
-        }
+        flicker.assertLayers { isInvisible(backgroundColorLayer) }
     }
 
     companion object {
