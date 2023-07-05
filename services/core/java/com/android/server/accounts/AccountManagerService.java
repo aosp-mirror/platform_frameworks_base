@@ -4932,7 +4932,10 @@ public class AccountManagerService
             p.setDataPosition(0);
             Bundle simulateBundle = p.readBundle();
             p.recycle();
-            Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT, Intent.class);
+            Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
+            if (intent != null && intent.getClass() != Intent.class) {
+                return false;
+            }
             Intent simulateIntent = simulateBundle.getParcelable(AccountManager.KEY_INTENT,
                     Intent.class);
             if (intent == null) {
