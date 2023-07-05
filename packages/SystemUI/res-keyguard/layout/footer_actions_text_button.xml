@@ -33,7 +33,7 @@
         android:layout_marginEnd="12dp"
         android:contentDescription="@null"
         android:src="@drawable/ic_info_outline"
-        android:tint="?attr/onSurfaceVariant" />
+        android:tint="?android:attr/textColorSecondary" />
 
     <TextView
         android:id="@+id/text"
@@ -43,7 +43,7 @@
         android:maxLines="1"
         android:ellipsize="end"
         android:textAppearance="@style/TextAppearance.QS.SecurityFooter"
-        android:textColor="?attr/onSurfaceVariant"/>
+        android:textColor="?android:attr/textColorSecondary"/>
 
     <ImageView
         android:id="@+id/new_dot"
@@ -62,5 +62,5 @@
         android:contentDescription="@null"
         android:src="@*android:drawable/ic_chevron_end"
         android:autoMirrored="true"
-        android:tint="?attr/onSurfaceVariant" />
+        android:tint="?android:attr/textColorSecondary" />
 </com.android.systemui.animation.view.LaunchableLinearLayout>
