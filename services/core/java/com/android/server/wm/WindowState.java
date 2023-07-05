@@ -2470,6 +2470,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     if (allowExitAnimation && mWinAnimator.applyAnimationLocked(transit, false)) {
                         ProtoLog.v(WM_DEBUG_ANIM,
                                 "Set animatingExit: reason=remove/applyAnimation win=%s", this);
+                        if (startingWindow && mSurfaceAnimator.hasLeash()) {
+                            // Keep starting window on top during fade-out animation.
+                            getPendingTransaction().setLayer(mSurfaceAnimator.mLeash,
+                                    Integer.MAX_VALUE);
+                        }
                         mAnimatingExit = true;
 
                         // mAnimatingExit affects canAffectSystemUiFlags(). Run layout such that
