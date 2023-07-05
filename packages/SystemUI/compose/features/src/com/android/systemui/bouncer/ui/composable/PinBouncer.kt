@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalAnimationApi::class)
+@file:OptIn(ExperimentalAnimationApi::class, ExperimentalAnimationGraphicsApi::class)
 
 package com.android.systemui.bouncer.ui.composable
 
@@ -29,11 +29,14 @@ import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,8 +64,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Constraints
@@ -70,6 +75,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
+import com.android.internal.R.id.image
 import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.bouncer.ui.viewmodel.EnteredKey
@@ -139,7 +145,8 @@ private fun PinInputDisplay(viewModel: PinBouncerViewModel) {
                         else -> EntryVisibility.Hidden
                     }
 
-                ObscuredInputEntry(updateTransition(visibility, label = "Pin Entry $entry"))
+                val shape = viewModel.pinShapes.getShape(entry.sequenceNumber)
+                PinInputEntry(shape, updateTransition(visibility, label = "Pin Entry $entry"))
 
                 LaunchedEffect(entry) {
                     // Remove entry from visiblePinEntries once the hide transition completed.
@@ -171,15 +178,11 @@ private sealed class EntryVisibility {
 }
 
 @Composable
-private fun ObscuredInputEntry(transition: Transition<EntryVisibility>) {
+private fun PinInputEntry(shapeResourceId: Int, transition: Transition<EntryVisibility>) {
     // spec: http://shortn/_DEhE3Xl2bi
-    val shapePadding = 6.dp
-    val shapeOvershootSize = 22.dp
     val dismissStaggerDelayMs = 33
     val dismissDurationMs = 450
     val expansionDurationMs = 250
-    val shapeExpandDurationMs = 83
-    val shapeRetractDurationMs = 167
     val shapeCollapseDurationMs = 200
 
     val animatedEntryWidth by
@@ -194,19 +197,17 @@ private fun ObscuredInputEntry(transition: Transition<EntryVisibility>) {
             },
             label = "entry space"
         ) { state ->
-            if (state == EntryVisibility.Shown) entryShapeSize + (shapePadding * 2) else 0.dp
+            if (state == EntryVisibility.Shown) entryShapeSize else 0.dp
         }
 
     val animatedShapeSize by
         transition.animateDp(
             transitionSpec = {
                 when {
-                    EntryVisibility.Hidden isTransitioningTo EntryVisibility.Shown ->
-                        keyframes {
-                            durationMillis = shapeExpandDurationMs + shapeRetractDurationMs
-                            0.dp at 0 with Easings.Linear
-                            shapeOvershootSize at shapeExpandDurationMs with Easings.Legacy
-                        }
+                    EntryVisibility.Hidden isTransitioningTo EntryVisibility.Shown -> {
+                        // The AVD contains the entry transition.
+                        snap()
+                    }
                     targetState is EntryVisibility.BulkHidden -> {
                         val target = targetState as EntryVisibility.BulkHidden
                         tween(
@@ -220,17 +221,21 @@ private fun ObscuredInputEntry(transition: Transition<EntryVisibility>) {
             },
             label = "shape size"
         ) { state ->
-            when (state) {
-                EntryVisibility.Shown -> entryShapeSize
-                else -> 0.dp
-            }
+            if (state == EntryVisibility.Shown) entryShapeSize else 0.dp
         }
 
     val dotColor = MaterialTheme.colorScheme.onSurfaceVariant
     Layout(
         content = {
-            // TODO(b/282730134): add support for dot shapes.
-            Canvas(Modifier) { drawCircle(dotColor) }
+            val image = AnimatedImageVector.animatedVectorResource(shapeResourceId)
+            var atEnd by remember { mutableStateOf(false) }
+            Image(
+                painter = rememberAnimatedVectorPainter(image, atEnd),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                colorFilter = ColorFilter.tint(dotColor),
+            )
+            LaunchedEffect(Unit) { atEnd = true }
         }
     ) { measurables, _ ->
         val shapeSizePx = animatedShapeSize.roundToPx()
@@ -507,7 +512,7 @@ private suspend fun showFailureAnimation(
     }
 }
 
-private val entryShapeSize = 16.dp
+private val entryShapeSize = 30.dp
 
 private val pinButtonSize = 84.dp
 private val pinButtonErrorShrinkFactor = 67.dp / pinButtonSize
