@@ -161,7 +161,7 @@ public final class StageTaskListenerTests extends ShellTestCase {
         childTask.supportsMultiWindow = false;
 
         mStageTaskListener.onTaskInfoChanged(childTask);
-        verify(mCallbacks).onNoLongerSupportMultiWindow();
+        verify(mCallbacks).onNoLongerSupportMultiWindow(childTask);
     }
 
     @Test
