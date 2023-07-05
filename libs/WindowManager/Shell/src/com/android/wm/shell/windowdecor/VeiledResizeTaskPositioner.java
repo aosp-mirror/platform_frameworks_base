@@ -80,8 +80,6 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         mTransactionSupplier = supplier;
         mTransitions = transitions;
         mDisallowedAreaForEndBoundsHeight = disallowedAreaForEndBoundsHeight;
-        mDisplayController.getDisplayLayout(windowDecoration.mDisplay.getDisplayId())
-                .getStableBounds(mStableBounds);
     }
 
     @Override
@@ -100,6 +98,10 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         }
         mDragStartListener.onDragStart(mDesktopWindowDecoration.mTaskInfo.taskId);
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
+        if (mStableBounds.isEmpty()) {
+            mDisplayController.getDisplayLayout(mDesktopWindowDecoration.mDisplay.getDisplayId())
+                    .getStableBounds(mStableBounds);
+        }
     }
 
     @Override
