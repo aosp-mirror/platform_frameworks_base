@@ -118,25 +118,8 @@
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
     <attr name="wallpaperTextColorAccent" format="reference|color" />
     <attr name="backgroundProtectedStyle" format="reference" />
-
-    <!-- color attribute tokens for QS -->
-    <attr name="isQsTheme" format="boolean" />
-    <attr name="underSurface" format="reference|color"/>
-    <attr name="shadeActive" format="reference|color" />
-    <attr name="onShadeActive" format="reference|color" />
-    <attr name="onShadeActiveVariant" format="reference|color" />
-    <attr name="shadeInactive" format="reference|color" />
-    <attr name="onShadeInactive" format="reference|color" />
-    <attr name="onShadeInactiveVariant" format="reference|color" />
-    <attr name="shadeDisabled" format="reference|color" />
-    <attr name="surfaceBright" format="reference|color" />
-    <attr name="scHigh" format="reference|color" />
-    <attr name="tertiary" format="reference|color" />
-    <attr name="onSurface" format="reference|color" />
-    <attr name="onSurfaceVariant" format="reference|color" />
-    <attr name="outline" format="reference|color" />
-    <attr name="primary" format="reference|color" />
-
+    <attr name="offStateColor" format="reference|color" />
+    <attr name="underSurfaceColor" format="reference|color" />
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />
