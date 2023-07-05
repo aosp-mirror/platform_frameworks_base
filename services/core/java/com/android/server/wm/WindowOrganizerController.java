@@ -30,6 +30,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REQUEST_FOCUS_ON_TASK
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_COMPANION_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_RELATIVE_BOUNDS;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_UNKNOWN;
@@ -1347,6 +1348,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         task.mChildren.add(index, taskFragment);
                     }
                 }
+                break;
+            }
+            case OP_TYPE_SET_ISOLATED_NAVIGATION: {
+                final boolean isolatedNav = operation.isIsolatedNav();
+                taskFragment.setIsolatedNav(isolatedNav);
                 break;
             }
         }

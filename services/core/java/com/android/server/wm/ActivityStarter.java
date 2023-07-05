@@ -3097,7 +3097,18 @@ class ActivityStarter {
         } else {
             TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
             if (candidateTf == null) {
-                final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */);
+                // Puts the activity on the top-most non-isolated navigation TF, unless the
+                // activity is launched from the same TF.
+                final TaskFragment sourceTaskFragment =
+                        mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
+                final ActivityRecord top = task.getActivity(r -> {
+                    if (!r.canBeTopRunning()) {
+                        return false;
+                    }
+                    final TaskFragment taskFragment = r.getTaskFragment();
+                    return !taskFragment.isIsolatedNav() || (sourceTaskFragment != null
+                            && sourceTaskFragment == taskFragment);
+                });
                 if (top != null) {
                     candidateTf = top.getTaskFragment();
                 }
