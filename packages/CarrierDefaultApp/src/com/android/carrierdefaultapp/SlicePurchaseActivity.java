@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.android.phone.slice.SlicePurchaseController;
 
@@ -113,8 +114,10 @@ public class SlicePurchaseActivity extends Activity {
             return;
         }
 
-        // Create and configure WebView
-        setupWebView();
+        // Clear any cookies that might be persisted from previous sessions before loading WebView
+        CookieManager.getInstance().removeAllCookies(value -> {
+            setupWebView();
+        });
     }
 
     protected void onPurchaseSuccessful() {
@@ -176,12 +179,7 @@ public class SlicePurchaseActivity extends Activity {
     private void setupWebView() {
         // Create WebView
         mWebView = new WebView(this);
-
-        // Clear any cookies and state that might be saved from previous sessions
-        CookieManager.getInstance().removeAllCookies(null);
-        CookieManager.getInstance().flush();
-        mWebView.clearCache(true);
-        mWebView.clearHistory();
+        mWebView.setWebViewClient(new WebViewClient());
 
         // Enable JavaScript for the carrier purchase website to send results back to
         //  the slice purchase application.
