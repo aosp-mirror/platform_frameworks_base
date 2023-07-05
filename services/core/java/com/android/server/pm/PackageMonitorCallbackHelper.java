@@ -68,6 +68,21 @@ class PackageMonitorCallbackHelper {
         }
     }
 
+    public void onUserRemoved(int userId) {
+        RemoteCallbackList<IRemoteCallback> callbacks;
+        synchronized (mLock) {
+            callbacks = mCallbacks;
+        }
+        int registerCount = callbacks.getRegisteredCallbackCount();
+        for (int i = 0; i < registerCount; i++) {
+            int registerUserId = (int) callbacks.getRegisteredCallbackCookie(i);
+            if (registerUserId == userId) {
+                IRemoteCallback callback = callbacks.getRegisteredCallbackItem(i);
+                unregisterPackageMonitorCallback(callback);
+            }
+        }
+    }
+
     public void notifyPackageAddedForNewUsers(String packageName,
             @AppIdInt int appId, @NonNull int[] userIds, @NonNull int[] instantUserIds,
             int dataLoaderType) {
