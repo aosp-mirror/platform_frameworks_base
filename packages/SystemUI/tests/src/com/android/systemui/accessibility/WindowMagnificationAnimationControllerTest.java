@@ -53,7 +53,6 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -66,8 +65,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-// TODO(b/288926821): un-ignore once fixed
-@Ignore("Needs deeper investigation/refactoring, see b/289212459 and b/289392705")
 @LargeTest
 @RunWith(AndroidTestingRunner.class)
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
@@ -75,8 +72,11 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     private static final float DEFAULT_SCALE = 4.0f;
     private static final float DEFAULT_CENTER_X = 400.0f;
     private static final float DEFAULT_CENTER_Y = 500.0f;
-    // The duration couldn't too short, otherwise the ValueAnimator won't work in expectation.
-    private static final long ANIMATION_DURATION_MS = 300;
+    // The duration and period couldn't too short, otherwise the ValueAnimator and
+    //    Instrumentation.runOnMainSync won't work in expectation. (b/288926821)
+    private static final long ANIMATION_DURATION_MS = 600;
+    private static final long WAIT_FULL_ANIMATION_PERIOD = 1000;
+    private static final long WAIT_INTERMEDIATE_ANIMATION_PERIOD = 250;
 
     private AtomicReference<Float> mCurrentScale = new AtomicReference<>((float) 0);
     private AtomicReference<Float> mCurrentCenterX = new AtomicReference<>((float) 0);
@@ -118,8 +118,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mWindowManager = spy(new TestableWindowManager(wm));
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
 
-        mWaitingAnimationPeriod = 2 * ANIMATION_DURATION_MS;
-        mWaitIntermediateAnimationPeriod = ANIMATION_DURATION_MS / 2;
+        mWaitingAnimationPeriod = WAIT_FULL_ANIMATION_PERIOD;
+        mWaitIntermediateAnimationPeriod = WAIT_INTERMEDIATE_ANIMATION_PERIOD;
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, newValueAnimator());
         mController = new SpyWindowMagnificationController(mContext, mHandler,
@@ -749,7 +749,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void moveWindowMagnifier_enabled_vertical_only_expectedValue() {
+    public void moveWindowMagnifierWithYXRatioLargerThanBase_enabled_movedOnlyVertically() {
         enableWindowMagnificationWithoutAnimation();
 
         // should move vertically since offsetY/offsetX > HORIZONTAL_LOCK_BASE
@@ -765,7 +765,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void moveWindowMagnifier_enabled_horinzontal_only_expectedValue() {
+    public void moveWindowMagnifierWithYXRatioLessThanBase_enabled_movedOnlyHorizontally() {
         enableWindowMagnificationWithoutAnimation();
 
         // should move vertically since offsetY/offsetX <= HORIZONTAL_LOCK_BASE
@@ -781,7 +781,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void moveWindowMagnifier_enabled_setDiagonalEnabled_expectedValues() {
+    public void moveWindowMagnifier_magnifierEnabledAndDiagonalEnabled_movedDiagonally() {
         enableWindowMagnificationWithoutAnimation();
 
         final float offsetX = 50.0f;
