@@ -34,6 +34,7 @@ android_library {
         "PlatformComposeCore",
 
         "androidx.compose.runtime_runtime",
+        "androidx.compose.animation_animation-graphics",
         "androidx.compose.material3_material3",
         "androidx.activity_activity-compose",
     ],

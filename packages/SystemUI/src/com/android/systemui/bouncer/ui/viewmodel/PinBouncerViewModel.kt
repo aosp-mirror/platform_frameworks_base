@@ -16,6 +16,8 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.content.Context
+import com.android.keyguard.PinShapeAdapter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +31,7 @@ import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the PIN code bouncer UI. */
 class PinBouncerViewModel(
+    applicationContext: Context,
     private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
@@ -36,6 +39,8 @@ class PinBouncerViewModel(
     AuthMethodBouncerViewModel(
         isInputEnabled = isInputEnabled,
     ) {
+
+    val pinShapes = PinShapeAdapter(applicationContext)
 
     private val mutablePinEntries = MutableStateFlow<List<EnteredKey>>(emptyList())
     val pinEntries: StateFlow<List<EnteredKey>> = mutablePinEntries
