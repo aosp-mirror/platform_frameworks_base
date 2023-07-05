@@ -619,6 +619,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (!isInTransientHide(wc)) {
             mSyncEngine.addToSyncSet(mSyncId, wc);
         }
+        if (wc.asWindowToken() != null && wc.asWindowToken().mRoundedCornerOverlay) {
+            // Only need to sync the transaction (SyncSet) without ChangeInfo because cutout and
+            // rounded corner overlay never need animations. Especially their surfaces may be put
+            // in root (null, see WindowToken#makeSurface()) that cannot reparent.
+            return;
+        }
         ChangeInfo info = mChanges.get(wc);
         if (info == null) {
             info = new ChangeInfo(wc);
