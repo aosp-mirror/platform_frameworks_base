@@ -365,6 +365,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(false));
                 mDesktopTasksController.ifPresent(c -> c.moveToFullscreen(mTaskId));
                 decoration.closeHandleMenu();
+            } else if (id == R.id.split_screen_button) {
+                decoration.closeHandleMenu();
+                mDesktopTasksController.ifPresent(c -> {
+                    c.requestSplit(decoration.mTaskInfo);
+                });
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
             } else if (id == R.id.select_button) {

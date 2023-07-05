@@ -145,8 +145,10 @@ import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Coordinates the staging (visibility, sizing, ...) of the split-screen {@link MainStage} and
@@ -186,6 +188,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
     private final List<SplitScreen.SplitScreenListener> mListeners = new ArrayList<>();
+    private final Set<SplitScreen.SplitSelectListener> mSelectListeners = new HashSet<>();
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -461,6 +464,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     SplitscreenEventLogger getLogger() {
         return mLogger;
+    }
+
+    void requestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+            WindowContainerTransaction wct) {
+        boolean enteredSplitSelect = false;
+        for (SplitScreen.SplitSelectListener listener : mSelectListeners) {
+            enteredSplitSelect |= listener.onRequestEnterSplitSelect(taskInfo);
+        }
+        if (enteredSplitSelect) mTaskOrganizer.applyTransaction(wct);
     }
 
     void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
@@ -1656,6 +1668,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     void unregisterSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         mListeners.remove(listener);
+    }
+
+    void registerSplitSelectListener(SplitScreen.SplitSelectListener listener) {
+        mSelectListeners.add(listener);
+    }
+
+    void unregisterSplitSelectListener(SplitScreen.SplitSelectListener listener) {
+        mSelectListeners.remove(listener);
     }
 
     void sendStatusToListener(SplitScreen.SplitScreenListener listener) {

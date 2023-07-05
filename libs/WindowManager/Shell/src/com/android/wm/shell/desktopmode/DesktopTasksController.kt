@@ -22,6 +22,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
@@ -33,7 +34,6 @@ import android.os.IBinder
 import android.os.SystemProperties
 import android.util.DisplayMetrics.DENSITY_DEFAULT
 import android.view.SurfaceControl
-import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
@@ -56,6 +56,7 @@ import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -104,6 +105,9 @@ class DesktopTasksController(
     private val transitionAreaHeight
         get() = context.resources.getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_transition_area_height)
+
+    // This is public to avoid cyclic dependency; it is set by SplitScreenController
+    lateinit var splitScreenController: SplitScreenController
 
     init {
         desktopMode = DesktopModeImpl()
@@ -260,6 +264,19 @@ class DesktopTasksController(
             shellTaskOrganizer.applyTransaction(wct)
             releaseVisualIndicator()
         }
+    }
+
+    /**
+     * Perform needed cleanup transaction once animation is complete. Bounds need to be set
+     * here instead of initial wct to both avoid flicker and to have task bounds to use for
+     * the staging animation.
+     *
+     * @param taskInfo task entering split that requires a bounds update
+     */
+    fun onDesktopSplitSelectAnimComplete(taskInfo: RunningTaskInfo) {
+        val wct = WindowContainerTransaction()
+        wct.setBounds(taskInfo.token, null)
+        shellTaskOrganizer.applyTransaction(wct)
     }
 
     /** Move a task with given `taskId` to fullscreen */
@@ -688,11 +705,41 @@ class DesktopTasksController(
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.setBounds(taskInfo.token, null)
         if (isDesktopDensityOverrideSet()) {
-            wct.setDensityDpi(taskInfo.token, getFullscreenDensityDpi())
+            wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
     }
 
-    private fun getFullscreenDensityDpi(): Int {
+    /**
+     * Adds split screen changes to a transaction. Note that bounds are not reset here due to
+     * animation; see {@link onDesktopSplitSelectAnimComplete}
+     */
+    private fun addMoveToSplitChanges(
+        wct: WindowContainerTransaction,
+        taskInfo: RunningTaskInfo
+    ) {
+        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_MULTI_WINDOW)
+        // The task's density may have been overridden in freeform; revert it here as we don't
+        // want it overridden in multi-window.
+        wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
+    }
+
+    /**
+     * Requests a task be transitioned from desktop to split select. Applies needed windowing
+     * changes if this transition is enabled.
+     */
+    fun requestSplit(
+        taskInfo: RunningTaskInfo
+    ) {
+        val windowingMode = taskInfo.windowingMode
+        if (windowingMode == WINDOWING_MODE_FULLSCREEN || windowingMode == WINDOWING_MODE_FREEFORM
+        ) {
+            val wct = WindowContainerTransaction()
+            addMoveToSplitChanges(wct, taskInfo)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct)
+        }
+    }
+
+    private fun getDefaultDensityDpi(): Int {
         return context.resources.displayMetrics.densityDpi
     }
 
@@ -967,6 +1014,13 @@ class DesktopTasksController(
                 true /* blocking */
             )
             return result[0]
+        }
+
+        override fun onDesktopSplitSelectAnimComplete(taskInfo: RunningTaskInfo) {
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                controller,
+                "onDesktopSplitSelectAnimComplete"
+            ) { c -> c.onDesktopSplitSelectAnimComplete(taskInfo) }
         }
 
         override fun setTaskListener(listener: IDesktopTaskListener?) {
