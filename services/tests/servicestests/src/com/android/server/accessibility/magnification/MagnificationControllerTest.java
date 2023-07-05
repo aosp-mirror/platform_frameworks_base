@@ -666,6 +666,21 @@ public class MagnificationControllerTest {
         assertEquals(config.getCenterX(), actualConfig.getCenterX(), 0);
         assertEquals(config.getCenterY(), actualConfig.getCenterY(), 0);
         assertEquals(config.getScale(), actualConfig.getScale(), 0);
+
+        verify(mWindowMagnificationManager).onUserMagnificationScaleChanged(
+                /* userId= */ anyInt(), eq(TEST_DISPLAY), eq(config.getScale()));
+    }
+
+    @Test
+    public void onSourceBoundChanged_windowEnabled_notifyMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+        reset(mWindowMagnificationManager);
+
+        mMagnificationController.onSourceBoundsChanged(TEST_DISPLAY, TEST_RECT);
+
+        verify(mWindowMagnificationManager).onUserMagnificationScaleChanged(
+                /* userId= */ anyInt(), eq(TEST_DISPLAY), eq(DEFAULT_SCALE));
     }
 
     @Test
@@ -794,6 +809,7 @@ public class MagnificationControllerTest {
         verify(mMagnificationController).onWindowMagnificationActivationState(
                 eq(TEST_DISPLAY), eq(true));
     }
+
     @Test
     public void deactivateWindowMagnification_windowActivated_triggerCallbackAndLogUsage()
             throws RemoteException {
