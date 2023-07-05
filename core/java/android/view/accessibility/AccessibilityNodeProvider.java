@@ -45,6 +45,10 @@ import java.util.List;
  * View itself. Similarly the returned instance is responsible for performing accessibility
  * actions on any virtual view or the root view itself. For example:
  * </p>
+ * <aside class="note">
+ * <b>Note:</b> Consider using a {@link androidx.customview.widget.ExploreByTouchHelper}, a utility
+ * extension of AccessibilityNodeProvider, to simplify many aspects of providing information to
+ * accessibility services and managing accessibility focus. </aside>
  * <div>
  * <div class="ds-selector-tabs"><section><h3 id="kotlin">Kotlin</h3>
  * <pre class="prettyprint lang-kotlin">
