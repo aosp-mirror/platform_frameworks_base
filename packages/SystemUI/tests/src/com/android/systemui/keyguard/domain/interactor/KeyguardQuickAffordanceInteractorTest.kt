@@ -293,24 +293,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun quickAffordance_hiddenWhenQuickSettingsIsVisible() =
-        testScope.runTest {
-            repository.setQuickSettingsVisible(true)
-            quickAccessWallet.setState(
-                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                    icon = ICON,
-                )
-            )
-
-            val collectedValue =
-                collectLastValue(
-                    underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_END)
-                )
-
-            assertThat(collectedValue()).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
-        }
-
-    @Test
     fun quickAffordance_hiddenWhenUserIsInLockdownMode() =
         testScope.runTest {
             biometricSettingsRepository.setIsUserInLockdown(true)

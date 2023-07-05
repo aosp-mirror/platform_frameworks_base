@@ -23,7 +23,10 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.KeyguardIndicationController
 import kotlinx.coroutines.DisposableHandle
@@ -49,7 +52,9 @@ object KeyguardIndicationAreaBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardIndicationAreaViewModel,
+        keyguardRootViewModel: KeyguardRootViewModel,
         indicationController: KeyguardIndicationController,
+        featureFlags: FeatureFlags,
     ): DisposableHandle {
         val indicationArea: ViewGroup = view.requireViewById(R.id.keyguard_indication_area)
         indicationController.setIndicationArea(indicationArea)
@@ -66,15 +71,28 @@ object KeyguardIndicationAreaBinder {
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
-                        viewModel.alpha.collect { alpha ->
-                            view.importantForAccessibility =
-                                if (alpha == 0f) {
-                                    View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                } else {
-                                    View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                }
+                        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                            keyguardRootViewModel.alpha.collect { alpha ->
+                                view.importantForAccessibility =
+                                    if (alpha == 0f) {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                    } else {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                    }
 
-                            indicationArea.alpha = alpha
+                                indicationArea.alpha = alpha
+                            }
+                        } else {
+                            viewModel.alpha.collect { alpha ->
+                                view.importantForAccessibility =
+                                    if (alpha == 0f) {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                    } else {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                    }
+
+                                indicationArea.alpha = alpha
+                            }
                         }
                     }
 
