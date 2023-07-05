@@ -16,12 +16,8 @@
 */
 -->
 <resources>
-    <!-- padding for container with status icons and battery -->
-    <dimen name="status_bar_icons_padding_end">12dp</dimen>
-    <!-- it's a bit smaller on large screen to account for status_bar_icon_horizontal_margin -->
+    <!-- it's a bit smaller on 720dp to account for status_bar_icon_horizontal_margin -->
     <dimen name="status_bar_icons_padding_start">10dp</dimen>
-
-    <dimen name="status_bar_padding_end">0dp</dimen>
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_horizontal_margin">1dp</dimen>
