@@ -62,18 +62,18 @@ constructor(
     /** Clicks the button to launch a third activity over a secondary activity. */
     fun launchThirdActivity(wmHelper: WindowManagerStateHelper) {
         val launchButton =
-                uiDevice.wait(
-                        Until.findObject(By.res(getPackage(), "launch_third_activity_button")),
-                        FIND_TIMEOUT
-                )
+            uiDevice.wait(
+                Until.findObject(By.res(getPackage(), "launch_third_activity_button")),
+                FIND_TIMEOUT
+            )
         require(launchButton != null) { "Can't find launch third activity button on screen." }
         launchButton.click()
         wmHelper
-                .StateSyncBuilder()
-                .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_STOPPED)
-                .withActivityState(THIRD_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-                .waitForAndVerify()
+            .StateSyncBuilder()
+            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_STOPPED)
+            .withActivityState(THIRD_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .waitForAndVerify()
     }
 
     /**

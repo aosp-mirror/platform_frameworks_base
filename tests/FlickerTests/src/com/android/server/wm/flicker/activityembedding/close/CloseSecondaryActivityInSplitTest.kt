@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.close
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
@@ -24,6 +24,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
