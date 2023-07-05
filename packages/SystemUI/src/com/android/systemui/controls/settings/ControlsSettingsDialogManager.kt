@@ -135,7 +135,7 @@ internal constructor(
         val listener = DialogListener(prefs, attempts, onAttemptCompleted)
         val d =
             dialogProvider(activityContext, R.style.Theme_SystemUI_Dialog).apply {
-                setIcon(R.drawable.ic_warning)
+                setIcon(R.drawable.ic_lock_locked)
                 setOnCancelListener(listener)
                 setNeutralButton(R.string.controls_settings_dialog_neutral_button, listener)
                 setPositiveButton(R.string.controls_settings_dialog_positive_button, listener)
