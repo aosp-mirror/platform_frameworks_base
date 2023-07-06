@@ -31,7 +31,7 @@ public class ShadowSmsApplication {
     private static ComponentName sDefaultSmsApplication;
 
     @Resetter
-    public void reset() {
+    public static void reset() {
         sDefaultSmsApplication = null;
     }
 

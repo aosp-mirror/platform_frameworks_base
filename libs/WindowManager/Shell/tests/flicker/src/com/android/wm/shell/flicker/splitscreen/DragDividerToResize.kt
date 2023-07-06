@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -26,13 +25,9 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsChanges
-import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
 import com.android.wm.shell.flicker.splitscreen.benchmark.DragDividerToResizeBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -57,19 +52,6 @@ class DragDividerToResize(override val flicker: LegacyFlickerTest) :
             defaultTeardown(this)
             thisTransition(this)
         }
-
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    override fun cujCompleted() {
-        flicker.appWindowIsVisibleAtStart(primaryApp)
-        flicker.appWindowIsVisibleAtStart(secondaryApp)
-        flicker.splitScreenDividerIsVisibleAtStart()
-
-        flicker.appWindowIsVisibleAtEnd(primaryApp)
-        flicker.appWindowIsVisibleAtEnd(secondaryApp)
-        flicker.splitScreenDividerIsVisibleAtEnd()
-    }
 
     @Presubmit
     @Test

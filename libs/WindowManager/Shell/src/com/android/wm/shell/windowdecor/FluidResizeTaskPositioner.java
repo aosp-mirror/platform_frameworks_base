@@ -63,8 +63,6 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
         mDragStartListener = dragStartListener;
         mTransactionSupplier = supplier;
         mDisallowedAreaForEndBoundsHeight = disallowedAreaForEndBoundsHeight;
-        mDisplayController.getDisplayLayout(windowDecoration.mDisplay.getDisplayId())
-                .getStableBounds(mStableBounds);
     }
 
     @Override
@@ -80,6 +78,10 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
             mTaskOrganizer.applyTransaction(wct);
         }
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
+        if (mStableBounds.isEmpty()) {
+            mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
+                    .getStableBounds(mStableBounds);
+        }
     }
 
     @Override

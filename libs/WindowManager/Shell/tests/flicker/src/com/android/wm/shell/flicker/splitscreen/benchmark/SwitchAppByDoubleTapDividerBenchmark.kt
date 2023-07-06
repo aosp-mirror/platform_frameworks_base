@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.PlatinumTest
-import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -27,10 +25,9 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import com.android.wm.shell.flicker.SplitScreenUtils
+import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -39,7 +36,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: LegacyFlickerTest) :
+abstract class SwitchAppByDoubleTapDividerBenchmark(override val flicker: LegacyFlickerTest) :
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
@@ -51,14 +48,6 @@ open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: LegacyFlic
                 waitForLayersToSwitch(wmHelper)
                 waitForWindowsToSwitch(wmHelper)
             }
-        }
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            withoutTracing(this)
-            defaultSetup(this)
-            defaultTeardown(this)
-            thisTransition(this)
         }
 
     private fun waitForWindowsToSwitch(wmHelper: WindowManagerStateHelper) {
@@ -132,14 +121,6 @@ open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: LegacyFlic
     private fun isLandscape(rotation: Rotation): Boolean {
         val displayBounds = WindowUtils.getDisplayBounds(rotation)
         return displayBounds.width > displayBounds.height
-    }
-
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    open fun cujCompleted() {
-        // TODO(b/246490534): Add validation for switched app after withAppTransitionIdle is
-        // robust enough to get the correct end state.
     }
 
     companion object {

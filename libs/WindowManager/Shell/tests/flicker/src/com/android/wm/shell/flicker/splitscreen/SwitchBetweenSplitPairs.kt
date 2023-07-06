@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -28,15 +27,10 @@ import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowBecomesVisible
-import com.android.wm.shell.flicker.appWindowIsInvisibleAtEnd
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.layerBecomesInvisible
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsSnapToDivider
-import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
 import com.android.wm.shell.flicker.splitscreen.benchmark.SwitchBetweenSplitPairsBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -61,21 +55,6 @@ class SwitchBetweenSplitPairs(override val flicker: LegacyFlickerTest) :
             defaultTeardown(this)
             thisTransition(this)
         }
-
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    override fun cujCompleted() {
-        flicker.appWindowIsVisibleAtStart(thirdApp)
-        flicker.appWindowIsVisibleAtStart(fourthApp)
-        flicker.splitScreenDividerIsVisibleAtStart()
-
-        flicker.appWindowIsVisibleAtEnd(primaryApp)
-        flicker.appWindowIsVisibleAtEnd(secondaryApp)
-        flicker.appWindowIsInvisibleAtEnd(thirdApp)
-        flicker.appWindowIsInvisibleAtEnd(fourthApp)
-        flicker.splitScreenDividerIsVisibleAtEnd()
-    }
 
     @Presubmit
     @Test

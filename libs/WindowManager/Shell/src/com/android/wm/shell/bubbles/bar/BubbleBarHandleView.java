@@ -21,7 +21,8 @@ import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Outline;
-import android.graphics.Rect;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -37,8 +38,12 @@ import com.android.wm.shell.R;
 public class BubbleBarHandleView extends View {
     private static final long COLOR_CHANGE_DURATION = 120;
 
-    private int mHandleWidth;
-    private int mHandleHeight;
+    // The handle view is currently rendered as 3 evenly spaced dots.
+    private int mDotSize;
+    private int mDotSpacing;
+    // Path used to draw the dots
+    private final Path mPath = new Path();
+
     private @ColorInt int mHandleLightColor;
     private @ColorInt int mHandleDarkColor;
     private @Nullable ObjectAnimator mColorChangeAnim;
@@ -58,11 +63,10 @@ public class BubbleBarHandleView extends View {
     public BubbleBarHandleView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-
-        mHandleWidth = getResources().getDimensionPixelSize(
-                R.dimen.bubble_bar_expanded_view_handle_width);
-        mHandleHeight = getResources().getDimensionPixelSize(
-                R.dimen.bubble_bar_expanded_view_handle_height);
+        mDotSize = getResources().getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_caption_dot_size);
+        mDotSpacing = getResources().getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_caption_dot_spacing);
         mHandleLightColor = ContextCompat.getColor(getContext(),
                 R.color.bubble_bar_expanded_view_handle_light);
         mHandleDarkColor = ContextCompat.getColor(getContext(),
@@ -74,13 +78,26 @@ public class BubbleBarHandleView extends View {
             public void getOutline(View view, Outline outline) {
                 final int handleCenterX = view.getWidth() / 2;
                 final int handleCenterY = view.getHeight() / 2;
-                final float handleRadius = mHandleHeight / 2f;
-                Rect handleBounds = new Rect(
-                        handleCenterX - mHandleWidth / 2,
-                        handleCenterY - mHandleHeight / 2,
-                        handleCenterX + mHandleWidth / 2,
-                        handleCenterY + mHandleHeight / 2);
-                outline.setRoundRect(handleBounds, handleRadius);
+                final int handleTotalWidth = mDotSize * 3 + mDotSpacing * 2;
+                final int handleLeft = handleCenterX - handleTotalWidth / 2;
+                final int handleTop = handleCenterY - mDotSize / 2;
+                final int handleBottom = handleTop + mDotSize;
+                RectF dot1 = new RectF(
+                        handleLeft, handleTop,
+                        handleLeft + mDotSize, handleBottom);
+                RectF dot2 = new RectF(
+                        dot1.right + mDotSpacing, handleTop,
+                        dot1.right + mDotSpacing + mDotSize, handleBottom
+                );
+                RectF dot3 = new RectF(
+                        dot2.right + mDotSpacing, handleTop,
+                        dot2.right + mDotSpacing + mDotSize, handleBottom
+                );
+                mPath.reset();
+                mPath.addOval(dot1, Path.Direction.CW);
+                mPath.addOval(dot2, Path.Direction.CW);
+                mPath.addOval(dot3, Path.Direction.CW);
+                outline.setPath(mPath);
             }
         });
     }

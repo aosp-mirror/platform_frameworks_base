@@ -145,7 +145,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mDisplay.getDisplayId(),
                     0 /* taskCornerRadius */,
                     mDecorationContainerSurface,
-                    mDragPositioningCallback);
+                    mDragPositioningCallback,
+                    mSurfaceControlBuilderSupplier,
+                    mSurfaceControlTransactionSupplier);
         }
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())

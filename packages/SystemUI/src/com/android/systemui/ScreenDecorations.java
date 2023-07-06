@@ -36,6 +36,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.graphics.common.AlphaInterpretation;
@@ -171,7 +172,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     private int mTintColor = Color.BLACK;
     @VisibleForTesting
     protected DisplayDecorationSupport mHwcScreenDecorationSupport;
-    private Display.Mode mDisplayMode;
+    private final Point mDisplaySize = new Point();
     @VisibleForTesting
     protected DisplayInfo mDisplayInfo = new DisplayInfo();
     private DisplayCutout mDisplayCutout;
@@ -484,7 +485,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mContext.getDisplay().getDisplayInfo(mDisplayInfo);
         mRotation = mDisplayInfo.rotation;
-        mDisplayMode = mDisplayInfo.getMode();
+        mDisplaySize.x = mDisplayInfo.getNaturalWidth();
+        mDisplaySize.y = mDisplayInfo.getNaturalHeight();
         mDisplayUniqueId = mDisplayInfo.uniqueId;
         mDisplayCutout = mDisplayInfo.displayCutout;
         mRoundedCornerResDelegate =
@@ -505,10 +507,12 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
             public void onDisplayChanged(int displayId) {
                 mContext.getDisplay().getDisplayInfo(mDisplayInfo);
                 final int newRotation = mDisplayInfo.rotation;
-                final Display.Mode newDisplayMode = mDisplayInfo.getMode();
                 if ((mOverlays != null || mScreenDecorHwcWindow != null)
                         && (mRotation != newRotation
-                        || displayModeChanged(mDisplayMode, newDisplayMode))) {
+                        || displaySizeChanged(mDisplaySize, mDisplayInfo))) {
+                    final Point newSize = new Point();
+                    newSize.x = mDisplayInfo.getNaturalWidth();
+                    newSize.y = mDisplayInfo.getNaturalHeight();
                     // We cannot immediately update the orientation. Otherwise
                     // WindowManager is still deferring layout until it has finished dispatching
                     // the config changes, which may cause divergence between what we draw
@@ -520,9 +524,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
                     if (mRotation != newRotation) {
                         mLogger.logRotationChangeDeferred(mRotation, newRotation);
                     }
-                    if (displayModeChanged(mDisplayMode, newDisplayMode)) {
-                        mLogger.logDisplayModeChanged(
-                                newDisplayMode.getModeId(), mDisplayMode.getModeId());
+                    if (!mDisplaySize.equals(newSize)) {
+                        mLogger.logDisplaySizeChanged(mDisplaySize, newSize);
                     }
 
                     if (mOverlays != null) {
@@ -531,7 +534,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
                                 final ViewGroup overlayView = mOverlays[i].getRootView();
                                 overlayView.getViewTreeObserver().addOnPreDrawListener(
                                         new RestartingPreDrawListener(
-                                                overlayView, i, newRotation, newDisplayMode));
+                                                overlayView, i, newRotation, newSize));
                             }
                         }
                     }
@@ -541,7 +544,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
                                 new RestartingPreDrawListener(
                                         mScreenDecorHwcWindow,
                                         -1, // Pass -1 for views with no specific position.
-                                        newRotation, newDisplayMode));
+                                        newRotation, newSize));
                     }
                     if (mScreenDecorHwcLayer != null) {
                         mScreenDecorHwcLayer.pendingConfigChange = true;
@@ -943,15 +946,8 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         }
     }
 
-    private static boolean displayModeChanged(Display.Mode oldMode, Display.Mode newMode) {
-        if (oldMode == null) {
-            return true;
-        }
-
-        // We purposely ignore refresh rate and id changes here, because we don't need to
-        // invalidate for those, and they can trigger the refresh rate to increase
-        return oldMode.getPhysicalWidth() != newMode.getPhysicalWidth()
-                || oldMode.getPhysicalHeight() != newMode.getPhysicalHeight();
+    private static boolean displaySizeChanged(Point size, DisplayInfo info) {
+        return size.x != info.getNaturalWidth() || size.y != info.getNaturalHeight();
     }
 
     private int getOverlayWindowGravity(@BoundsPosition int pos) {
@@ -1170,14 +1166,14 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         if (mRotation != newRotation) {
             mDotViewController.setNewRotation(newRotation);
         }
-        final Display.Mode newMod = mDisplayInfo.getMode();
         final DisplayCutout newCutout = mDisplayInfo.displayCutout;
 
         if (!mPendingConfigChange
-                && (newRotation != mRotation || displayModeChanged(mDisplayMode, newMod)
+                && (newRotation != mRotation || displaySizeChanged(mDisplaySize, mDisplayInfo)
                 || !Objects.equals(newCutout, mDisplayCutout))) {
             mRotation = newRotation;
-            mDisplayMode = newMod;
+            mDisplaySize.x = mDisplayInfo.getNaturalWidth();
+            mDisplaySize.y = mDisplayInfo.getNaturalHeight();
             mDisplayCutout = newCutout;
             float ratio = getPhysicalPixelDisplaySizeRatio();
             mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(ratio);
@@ -1494,31 +1490,29 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
         private final View mView;
         private final int mTargetRotation;
-        private final Display.Mode mTargetDisplayMode;
+        private final Point mTargetDisplaySize;
         // Pass -1 for ScreenDecorHwcLayer since it's a fullscreen window and has no specific
         // position.
         private final int mPosition;
 
         private RestartingPreDrawListener(View view, @BoundsPosition int position,
-                int targetRotation, Display.Mode targetDisplayMode) {
+                int targetRotation, Point targetDisplaySize) {
             mView = view;
             mTargetRotation = targetRotation;
-            mTargetDisplayMode = targetDisplayMode;
+            mTargetDisplaySize = targetDisplaySize;
             mPosition = position;
         }
 
         @Override
         public boolean onPreDraw() {
             mView.getViewTreeObserver().removeOnPreDrawListener(this);
-            if (mTargetRotation == mRotation
-                    && !displayModeChanged(mDisplayMode, mTargetDisplayMode)) {
+            if (mTargetRotation == mRotation && mDisplaySize.equals(mTargetDisplaySize)) {
                 if (DEBUG_LOGGING) {
                     final String title = mPosition < 0 ? "ScreenDecorHwcLayer"
                             : getWindowTitleByPos(mPosition);
                     Log.i(TAG, title + " already in target rot "
                             + mTargetRotation + " and in target resolution "
-                            + mTargetDisplayMode.getPhysicalWidth() + "x"
-                            + mTargetDisplayMode.getPhysicalHeight()
+                            + mTargetDisplaySize.x + "x" + mTargetDisplaySize.y
                             + ", allow draw without restarting it");
                 }
                 return true;
@@ -1533,8 +1527,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
                         : getWindowTitleByPos(mPosition);
                 Log.i(TAG, title
                         + " restarting listener fired, restarting draw for rot " + mRotation
-                        + ", resolution " + mDisplayMode.getPhysicalWidth() + "x"
-                        + mDisplayMode.getPhysicalHeight());
+                        + ", resolution " + mDisplaySize.x + "x" + mDisplaySize.y);
             }
             mView.invalidate();
             return false;
@@ -1560,19 +1553,18 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         public boolean onPreDraw() {
             mContext.getDisplay().getDisplayInfo(mDisplayInfo);
             final int displayRotation = mDisplayInfo.rotation;
-            final Display.Mode displayMode = mDisplayInfo.getMode();
-            if ((displayRotation != mRotation || displayModeChanged(mDisplayMode, displayMode))
+            if ((displayRotation != mRotation || displaySizeChanged(mDisplaySize, mDisplayInfo))
                     && !mPendingConfigChange) {
                 if (DEBUG_LOGGING) {
                     if (displayRotation != mRotation) {
                         Log.i(TAG, "Drawing rot " + mRotation + ", but display is at rot "
                                 + displayRotation + ". Restarting draw");
                     }
-                    if (displayModeChanged(mDisplayMode, displayMode)) {
-                        Log.i(TAG, "Drawing at " + mDisplayMode.getPhysicalWidth()
-                                + "x" + mDisplayMode.getPhysicalHeight() + ", but display is at "
-                                + displayMode.getPhysicalWidth() + "x"
-                                + displayMode.getPhysicalHeight() + ". Restarting draw");
+                    if (displaySizeChanged(mDisplaySize, mDisplayInfo)) {
+                        Log.i(TAG, "Drawing at " + mDisplaySize.x + "x" + mDisplaySize.y
+                                + ", but display is at "
+                                + mDisplayInfo.getNaturalWidth() + "x"
+                                + mDisplayInfo.getNaturalHeight() + ". Restarting draw");
                     }
                 }
                 mView.invalidate();

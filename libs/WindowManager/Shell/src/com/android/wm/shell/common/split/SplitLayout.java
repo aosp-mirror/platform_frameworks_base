@@ -593,9 +593,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     void flingDividePosition(int from, int to, int duration,
             @Nullable Runnable flingFinishedCallback) {
         if (from == to) {
-            // No animation run, still callback to stop resizing.
-            mSplitLayoutHandler.onLayoutSizeChanged(this);
-
             if (flingFinishedCallback != null) {
                 flingFinishedCallback.run();
             }
@@ -773,20 +770,25 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2) {
         boolean boundsChanged = false;
         if (!mBounds1.equals(mWinBounds1) || !task1.token.equals(mWinToken1)) {
-            wct.setBounds(task1.token, mBounds1);
-            wct.setSmallestScreenWidthDp(task1.token, getSmallestWidthDp(mBounds1));
+            setTaskBounds(wct, task1, mBounds1);
             mWinBounds1.set(mBounds1);
             mWinToken1 = task1.token;
             boundsChanged = true;
         }
         if (!mBounds2.equals(mWinBounds2) || !task2.token.equals(mWinToken2)) {
-            wct.setBounds(task2.token, mBounds2);
-            wct.setSmallestScreenWidthDp(task2.token, getSmallestWidthDp(mBounds2));
+            setTaskBounds(wct, task2, mBounds2);
             mWinBounds2.set(mBounds2);
             mWinToken2 = task2.token;
             boundsChanged = true;
         }
         return boundsChanged;
+    }
+
+    /** Set bounds to the {@link WindowContainerTransaction} for single task. */
+    public void setTaskBounds(WindowContainerTransaction wct,
+            ActivityManager.RunningTaskInfo task, Rect bounds) {
+        wct.setBounds(task.token, bounds);
+        wct.setSmallestScreenWidthDp(task.token, getSmallestWidthDp(bounds));
     }
 
     private int getSmallestWidthDp(Rect bounds) {

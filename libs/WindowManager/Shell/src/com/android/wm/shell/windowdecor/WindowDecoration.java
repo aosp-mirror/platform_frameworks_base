@@ -64,6 +64,24 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         implements AutoCloseable {
 
     /**
+     * The Z-order of {@link #mCaptionContainerSurface}.
+     * <p>
+     * We use {@link #mDecorationContainerSurface} to define input window for task resizing; by
+     * layering it in front of {@link #mCaptionContainerSurface}, we can allow it to handle input
+     * prior to caption view itself, treating corner inputs as resize events rather than
+     * repositioning.
+     */
+    static final int CAPTION_LAYER_Z_ORDER = -1;
+    /**
+     * The Z-order of the task input sink in {@link DragPositioningCallback}.
+     * <p>
+     * This task input sink is used to prevent undesired dispatching of motion events out of task
+     * bounds; by layering it behind {@link #mCaptionContainerSurface}, we allow captions to handle
+     * input events first.
+     */
+    static final int INPUT_SINK_Z_ORDER = -2;
+
+    /**
      * System-wide context. Only used to create context with overridden configurations.
      */
     final Context mContext;
@@ -238,11 +256,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
         final int captionWidth = taskBounds.width();
 
-        // We use mDecorationContainerSurface to define input window for task resizing; by layering
-        // it in front of mCaptionContainerSurface, we can allow it to handle input prior to
-        // caption view itself, treating corner inputs as resize events rather than repositioning.
         startT.setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
-                .setLayer(mCaptionContainerSurface, -1)
+                .setLayer(mCaptionContainerSurface, CAPTION_LAYER_Z_ORDER)
                 .show(mCaptionContainerSurface);
 
         if (ViewRootImpl.CAPTION_ON_SHELL) {

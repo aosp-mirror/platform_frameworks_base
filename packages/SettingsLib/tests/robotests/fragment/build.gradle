@@ -1,0 +1,48 @@
+plugins {
+    id "net.ltgt.errorprone" version "0.0.13"
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    android {
+        sourceSets {
+            main {
+                res.srcDirs = ['src/test/resources/res']
+            }
+        }
+        testOptions {
+            unitTests {
+                includeAndroidResources = true
+            }
+        }
+    }
+}
+
+dependencies {
+    // Project dependencies
+    compileOnly project(":robolectric")
+
+    // Compile dependencies
+    compileOnly AndroidSdk.MAX_SDK.coordinates
+    compileOnly "androidx.core:core:1.0.0-rc02"
+    compileOnly 'androidx.fragment:fragment:1.0.0-rc02'
+    compileOnly "androidx.lifecycle:lifecycle-viewmodel:2.0.0-rc01"
+    compileOnly "androidx.lifecycle:lifecycle-common:2.0.0-beta01"
+
+    // Testing dependencies
+    testImplementation "com.google.truth:truth:0.44"
+    testImplementation "org.mockito:mockito-core:2.5.4"
+    testImplementation "androidx.arch.core:core-common:2.0.0-beta01"
+    testImplementation "androidx.arch.core:core-runtime:2.0.0-rc01"
+    testImplementation "androidx.collection:collection:1.0.0-rc01"
+    testImplementation "androidx.core:core:1.0.0-rc02"
+    testImplementation 'androidx.fragment:fragment:1.0.0-rc02'
+    testImplementation "androidx.lifecycle:lifecycle-viewmodel:2.0.0-rc01"
+    testImplementation "androidx.lifecycle:lifecycle-common:2.0.0-beta01"
+    testImplementation "androidx.lifecycle:lifecycle-runtime:2.0.0-rc01"
+    testImplementation "androidx.lifecycle:lifecycle-livedata-core:2.0.0-rc01"
+    testImplementation "androidx.loader:loader:1.0.0-rc02"
+}

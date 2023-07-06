@@ -22,8 +22,8 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import com.android.wm.shell.flicker.SplitScreenUtils
+import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -33,7 +33,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class UnlockKeyguardToSplitScreenBenchmark(override val flicker: LegacyFlickerTest) :
+abstract class UnlockKeyguardToSplitScreenBenchmark(override val flicker: LegacyFlickerTest) :
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
@@ -45,14 +45,6 @@ open class UnlockKeyguardToSplitScreenBenchmark(override val flicker: LegacyFlic
                 device.pressMenu()
                 wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
             }
-        }
-
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            defaultSetup(this)
-            defaultTeardown(this)
-            thisTransition(this)
         }
 
     companion object {

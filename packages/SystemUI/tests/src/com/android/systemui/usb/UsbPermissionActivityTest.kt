@@ -25,8 +25,8 @@ import android.testing.TestableLooper
 import android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.google.common.truth.Truth.assertThat
 
 import javax.inject.Inject
@@ -49,19 +49,17 @@ class UsbPermissionActivityTest : SysuiTestCase() {
 
     open class UsbPermissionActivityTestable @Inject constructor (
         val message: UsbAudioWarningDialogMessage
-    )
-        : UsbPermissionActivity(UsbAudioWarningDialogMessage())
+    ) : UsbPermissionActivity(UsbAudioWarningDialogMessage())
 
     @Rule
     @JvmField
-    var activityRule = ActivityTestRule<UsbPermissionActivityTestable>(
-            object : SingleActivityFactory<UsbPermissionActivityTestable>(
-                    UsbPermissionActivityTestable::class.java
-            ) {
-                    override fun create(intent: Intent?): UsbPermissionActivityTestable {
-                        return UsbPermissionActivityTestable(mMessage)
-                    }
-            }, false, false)
+    var activityRule = ActivityTestRule(
+            /* activityFactory= */ SingleActivityFactory {
+                UsbPermissionActivityTestable(mMessage)
+            },
+            /* initialTouchMode= */ false,
+            /* launchActivity= */ false,
+    )
 
     private val activityIntent = Intent(mContext, UsbPermissionActivityTestable::class.java)
             .apply {

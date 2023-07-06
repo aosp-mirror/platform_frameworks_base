@@ -137,8 +137,10 @@ abstract class ThemedResourceCache<T> {
      */
     @UnsupportedAppUsage
     public void onConfigurationChange(@Config int configChanges) {
-        prune(configChanges);
-        mGeneration++;
+        synchronized (this) {
+            pruneLocked(configChanges);
+            mGeneration++;
+        }
     }
 
     /**
@@ -214,22 +216,20 @@ abstract class ThemedResourceCache<T> {
      *                      simply prune missing weak references
      * @return {@code true} if the cache is completely empty after pruning
      */
-    private boolean prune(@Config int configChanges) {
-        synchronized (this) {
-            if (mThemedEntries != null) {
-                for (int i = mThemedEntries.size() - 1; i >= 0; i--) {
-                    if (pruneEntriesLocked(mThemedEntries.valueAt(i), configChanges)) {
-                        mThemedEntries.removeAt(i);
-                    }
+    private boolean pruneLocked(@Config int configChanges) {
+        if (mThemedEntries != null) {
+            for (int i = mThemedEntries.size() - 1; i >= 0; i--) {
+                if (pruneEntriesLocked(mThemedEntries.valueAt(i), configChanges)) {
+                    mThemedEntries.removeAt(i);
                 }
             }
-
-            pruneEntriesLocked(mNullThemedEntries, configChanges);
-            pruneEntriesLocked(mUnthemedEntries, configChanges);
-
-            return mThemedEntries == null && mNullThemedEntries == null
-                    && mUnthemedEntries == null;
         }
+
+        pruneEntriesLocked(mNullThemedEntries, configChanges);
+        pruneEntriesLocked(mUnthemedEntries, configChanges);
+
+        return mThemedEntries == null && mNullThemedEntries == null
+                && mUnthemedEntries == null;
     }
 
     private boolean pruneEntriesLocked(@Nullable LongSparseArray<WeakReference<T>> entries,

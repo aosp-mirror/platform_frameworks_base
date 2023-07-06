@@ -95,6 +95,7 @@ android_test {
         ":WMShellFlickerTestsBubbles-src",
         ":WMShellFlickerTestsPip-src",
         ":WMShellFlickerTestsSplitScreen-src",
+        ":WMShellFlickerServiceTests-src",
     ],
 }
 

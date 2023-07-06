@@ -16,21 +16,17 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.PlatinumTest
-import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.splitScreenEntered
-import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import com.android.wm.shell.flicker.SplitScreenUtils
+import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -39,8 +35,9 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class EnterSplitScreenByDragFromShortcutBenchmark(override val flicker: LegacyFlickerTest) :
-    SplitScreenBase(flicker) {
+abstract class EnterSplitScreenByDragFromShortcutBenchmark(
+    override val flicker: LegacyFlickerTest
+) : SplitScreenBase(flicker) {
     @Before
     fun before() {
         Assume.assumeTrue(tapl.isTablet)
@@ -61,25 +58,6 @@ open class EnterSplitScreenByDragFromShortcutBenchmark(override val flicker: Leg
             SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
         }
     }
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            withoutTracing(this)
-            defaultSetup(this)
-            defaultTeardown(this)
-            thisTransition(this)
-        }
-
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    fun cujCompleted() =
-        flicker.splitScreenEntered(
-            primaryApp,
-            secondaryApp,
-            fromOtherApp = false,
-            appExistAtStart = false
-        )
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
