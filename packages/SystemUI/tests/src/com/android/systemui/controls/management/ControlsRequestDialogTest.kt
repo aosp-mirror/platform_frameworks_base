@@ -30,8 +30,8 @@ import android.testing.TestableLooper
 import androidx.lifecycle.Lifecycle
 import androidx.test.filters.MediumTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.settings.UserTracker
@@ -81,19 +81,18 @@ class ControlsRequestDialogTest : SysuiTestCase() {
 
     @Rule
     @JvmField
-    var activityRule = ActivityTestRule<TestControlsRequestDialog>(
-            object : SingleActivityFactory<TestControlsRequestDialog>(
-                    TestControlsRequestDialog::class.java
-            ) {
-                    override fun create(intent: Intent?): TestControlsRequestDialog {
-                        return TestControlsRequestDialog(
-                                mainExecutor,
-                                controller,
-                                userTracker,
-                                listingController
-                        )
-                    }
-            }, false, false)
+    var activityRule = ActivityTestRule(
+        /* activityFactory= */ SingleActivityFactory {
+            TestControlsRequestDialog(
+                    mainExecutor,
+                    controller,
+                    userTracker,
+                    listingController
+            )
+        },
+        /* initialTouchMode= */ false,
+        /* launchActivity= */ false,
+    )
 
     private lateinit var control: Control
 
