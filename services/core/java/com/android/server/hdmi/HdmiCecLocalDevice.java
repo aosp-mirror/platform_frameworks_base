@@ -1013,6 +1013,12 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         assertRunOnServiceThread();
         mActions.add(action);
         if (mService.isPowerStandby() || !mService.isAddressAllocated()) {
+            if (action.getClass() == ResendCecCommandAction.class) {
+                Slog.i(TAG, "Not ready to start ResendCecCommandAction. "
+                        + "This action is cancelled.");
+                removeAction(action);
+                return;
+            }
             Slog.i(TAG, "Not ready to start action. Queued for deferred start:" + action);
             return;
         }
@@ -1295,6 +1301,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         removeAction(AbsoluteVolumeAudioStatusAction.class);
         removeAction(SetAudioVolumeLevelDiscoveryAction.class);
         removeAction(ActiveSourceAction.class);
+        removeAction(ResendCecCommandAction.class);
 
         mPendingActionClearedCallback =
                 new PendingActionClearedCallback() {

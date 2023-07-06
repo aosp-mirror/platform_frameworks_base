@@ -17,7 +17,7 @@
 package com.android.server.hdmi;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
-import static com.android.server.hdmi.SendCecCommandAction.SEND_COMMAND_RETRY_MS;
+import static com.android.server.hdmi.ResendCecCommandAction.SEND_COMMAND_RETRY_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,11 +38,11 @@ import org.junit.runners.JUnit4;
 
 import java.util.Collections;
 
-/** Tests for {@link SendCecCommandAction} */
+/** Tests for {@link ResendCecCommandAction} */
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class SendCecCommandActionTvTest {
+public class ResendCecCommandActionTvTest {
     private static final String TAG = "SendCecCommandActionTvTest";
     private HdmiControlService mHdmiControlService;
     private HdmiCecLocalDevice mTvDevice;

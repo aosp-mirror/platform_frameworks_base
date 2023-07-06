@@ -17,11 +17,12 @@
 package com.android.server.hdmi;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
-import static com.android.server.hdmi.SendCecCommandAction.SEND_COMMAND_RETRY_MS;
+import static com.android.server.hdmi.ResendCecCommandAction.SEND_COMMAND_RETRY_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
@@ -38,11 +39,11 @@ import org.junit.runners.JUnit4;
 
 import java.util.Collections;
 
-/** Tests for {@link SendCecCommandAction} */
+/** Tests for {@link ResendCecCommandAction} */
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class SendCecCommandActionPlaybackTest {
+public class ResendCecCommandActionPlaybackTest {
     private static final String TAG = "SendCecCommandActionPlaybackTest";
     private HdmiControlService mHdmiControlService;
     private HdmiCecLocalDevice mPlaybackDevice;
@@ -51,6 +52,7 @@ public class SendCecCommandActionPlaybackTest {
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress;
+    private boolean mIsPowerStandby;
 
     @Before
     public void setUp() throws Exception {
@@ -63,7 +65,7 @@ public class SendCecCommandActionPlaybackTest {
 
             @Override
             boolean isPowerStandby() {
-                return false;
+                return mIsPowerStandby;
             }
 
             @Override
@@ -71,6 +73,7 @@ public class SendCecCommandActionPlaybackTest {
                 // do nothing
             }
         };
+        mIsPowerStandby = false;
 
         mMyLooper = mTestLooper.getLooper();
         mHdmiControlService.setIoLooper(mMyLooper);
@@ -146,6 +149,35 @@ public class SendCecCommandActionPlaybackTest {
         mTestLooper.moveTimeForward(SEND_COMMAND_RETRY_MS);
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSourceMessage);
+    }
+
+    @Test
+    public void sendCecCommand_inactiveSource_onStandby_powerControlModeNone_sendMessage() {
+        mPlaybackDevice.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_NONE);
+        mPlaybackDevice.setActiveSource(mPlaybackDevice.getDeviceInfo().getLogicalAddress(),
+                mPhysicalAddress, "SendCecCommandActionPlaybackTest");
+        mIsPowerStandby = true;
+        mPlaybackDevice.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage inactiveSourceMessage = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(inactiveSourceMessage);
+    }
+
+    @Test
+    public void sendCecCommand_inactiveSource_onStandby_initiatedByCec_sendMessage() {
+        mPlaybackDevice.setActiveSource(mPlaybackDevice.getDeviceInfo().getLogicalAddress(),
+                mPhysicalAddress, "SendCecCommandActionPlaybackTest");
+        mIsPowerStandby = true;
+        mPlaybackDevice.onStandby(true, HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage inactiveSourceMessage = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(inactiveSourceMessage);
     }
 
     @Test
@@ -292,5 +324,55 @@ public class SendCecCommandActionPlaybackTest {
         mTestLooper.moveTimeForward(SEND_COMMAND_RETRY_MS);
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportPhysicalAddress);
+    }
+
+    @Test
+    public void sendCecCommand_inactiveSource_sendMessageFails_afterStandby_noResendMessage() {
+        mNativeWrapper.setMessageSendResult(Constants.MESSAGE_INACTIVE_SOURCE,
+                SendMessageResult.BUSY);
+        mPlaybackDevice.setActiveSource(mPlaybackDevice.getDeviceInfo().getLogicalAddress(),
+                mPhysicalAddress, "SendCecCommandActionPlaybackTest");
+        mIsPowerStandby = true;
+        mPlaybackDevice.onStandby(true, HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage inactiveSourceMessage = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
+        assertThat(mNativeWrapper.getResultMessages()).contains(inactiveSourceMessage);
+
+        mNativeWrapper.clearResultMessages();
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSourceMessage);
+
+        mTestLooper.moveTimeForward(SEND_COMMAND_RETRY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSourceMessage);
+    }
+
+    @Test
+    public void sendCecCommand_onStandby_removeAction_noResendMessage() {
+        mNativeWrapper.setMessageSendResult(Constants.MESSAGE_INACTIVE_SOURCE,
+                SendMessageResult.BUSY);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage inactiveSourceMessage = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
+        mHdmiControlService.sendCecCommand(inactiveSourceMessage);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(inactiveSourceMessage);
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(SEND_COMMAND_RETRY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSourceMessage);
+
+        mTestLooper.dispatchAll();
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSourceMessage);
+
+        mTestLooper.moveTimeForward(SEND_COMMAND_RETRY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSourceMessage);
     }
 }

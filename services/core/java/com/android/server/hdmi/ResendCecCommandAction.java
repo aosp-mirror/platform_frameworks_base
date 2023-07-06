@@ -16,23 +16,29 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.hardware.tv.hdmi.cec.SendMessageResult;
 import android.util.Slog;
 
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
- * Action that sends a CEC command. If the message fails to be sent, it tries again for
- * RETRANSMISSION_COUNT times.
+ * Action that retries RETRANSMISSION_COUNT times to send a CEC command when the first attempt to
+ * send the message failed.
+ *
+ * This action starts with a delay of SEND_COMMAND_RETRY_MS milliseconds.
+ *
+ * If this action can't be started it will be canceled and not deferred.
+ * See {@link HdmiCecLocalDevice#addAndStartAction}.
  */
-public class SendCecCommandAction extends HdmiCecFeatureAction {
-    private static final String TAG = "SendCecCommandAction";
-    private static final int RETRANSMISSION_COUNT = 2;
+public class ResendCecCommandAction extends HdmiCecFeatureAction {
+    private static final String TAG = "ResendCecCommandAction";
+    private static final int RETRANSMISSION_COUNT = 1;
     private static final int STATE_WAIT_FOR_RESEND_COMMAND = 1;
     static final int SEND_COMMAND_RETRY_MS = 300;
 
     private final HdmiCecMessage mCommand;
     private int mRetransmissionCount = 0;
+    private final SendMessageCallback mResultCallback;
     private final SendMessageCallback mCallback = new SendMessageCallback(){
         @Override
         public void onSendCompleted(int result) {
@@ -41,20 +47,26 @@ public class SendCecCommandAction extends HdmiCecFeatureAction {
                 mState = STATE_WAIT_FOR_RESEND_COMMAND;
                 addTimer(mState, SEND_COMMAND_RETRY_MS);
             } else {
+                if (mResultCallback != null) {
+                    mResultCallback.onSendCompleted(result);
+                }
                 finish();
             }
         }
     };
 
-    SendCecCommandAction(HdmiCecLocalDevice source, HdmiCecMessage command) {
+    ResendCecCommandAction(HdmiCecLocalDevice source, HdmiCecMessage command,
+            SendMessageCallback callback) {
         super(source);
         mCommand = command;
+        mResultCallback = callback;
+        mState = STATE_WAIT_FOR_RESEND_COMMAND;
+        addTimer(mState, SEND_COMMAND_RETRY_MS);
     }
 
     @Override
     boolean start() {
-        Slog.d(TAG, "SendCecCommandAction started");
-        sendCommand(mCommand, mCallback);
+        Slog.d(TAG, "ResendCecCommandAction started");
         return true;
     }
 
@@ -66,8 +78,8 @@ public class SendCecCommandAction extends HdmiCecFeatureAction {
             return;
         }
         if (mState == STATE_WAIT_FOR_RESEND_COMMAND) {
-            Slog.d(TAG, "sendCecCommand failed, retry");
-            sendCommand(mCommand, mCallback);
+            Slog.d(TAG, "sendCommandWithoutRetries failed, retry");
+            sendCommandWithoutRetries(mCommand, mCallback);
         }
     }
 
