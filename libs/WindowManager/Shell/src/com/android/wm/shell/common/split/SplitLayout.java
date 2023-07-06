@@ -593,9 +593,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     void flingDividePosition(int from, int to, int duration,
             @Nullable Runnable flingFinishedCallback) {
         if (from == to) {
-            // No animation run, still callback to stop resizing.
-            mSplitLayoutHandler.onLayoutSizeChanged(this);
-
             if (flingFinishedCallback != null) {
                 flingFinishedCallback.run();
             }
