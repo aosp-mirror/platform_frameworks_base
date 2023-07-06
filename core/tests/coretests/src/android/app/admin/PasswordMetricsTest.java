@@ -42,6 +42,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 
@@ -417,6 +418,21 @@ public class PasswordMetricsTest {
         assertValidationErrors(
                 validateCredential(adminMetrics, PASSWORD_COMPLEXITY_LOW, password),
                 PasswordValidationError.TOO_SHORT, 6);
+    }
+
+    private LockscreenCredential createPattern(String patternString) {
+        return LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
+                patternString.getBytes()));
+    }
+
+    @Test
+    public void testValidateCredential_pattern() {
+        PasswordMetrics adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_NONE, createPattern("123")),
+                PasswordValidationError.TOO_SHORT, 4);
+        assertValidationErrors(
+                validateCredential(adminMetrics, PASSWORD_COMPLEXITY_NONE, createPattern("1234")));
     }
 
     /**
