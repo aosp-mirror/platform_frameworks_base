@@ -144,7 +144,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         private Context mContext;
         private IAuthService mService;
 
-        // LINT.IfChange
         /**
          * Creates a builder for a {@link BiometricPrompt} dialog.
          * @param context The {@link Context} that will be used to build the prompt.
@@ -418,7 +417,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @NonNull
-        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
         public Builder setDisallowBiometricsIfPolicyExists(boolean checkDevicePolicyManager) {
             mPromptInfo.setDisallowBiometricsIfPolicyExists(checkDevicePolicyManager);
             return this;
@@ -431,7 +429,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @NonNull
-        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
         public Builder setReceiveSystemEvents(boolean set) {
             mPromptInfo.setReceiveSystemEvents(set);
             return this;
@@ -445,7 +442,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @NonNull
-        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
         public Builder setIgnoreEnrollmentState(boolean ignoreEnrollmentState) {
             mPromptInfo.setIgnoreEnrollmentState(ignoreEnrollmentState);
             return this;
@@ -458,12 +454,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @NonNull
-        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
         public Builder setIsForLegacyFingerprintManager(int sensorId) {
             mPromptInfo.setIsForLegacyFingerprintManager(sensorId);
             return this;
         }
-        // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/PromptInfo.java)
 
         /**
          * Creates a {@link BiometricPrompt}.
