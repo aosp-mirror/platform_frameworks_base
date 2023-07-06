@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
@@ -562,5 +563,48 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
         verify(mTaskViewTaskController, never()).cleanUpPendingTask();
+    }
+
+    @Test
+    public void testSetCaptionInsets_noTaskInitially() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        Rect insets = new Rect(0, 400, 0, 0);
+        mTaskView.setCaptionInsets(Insets.of(insets));
+        mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
+
+        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
+        verify(mOrganizer, never()).applyTransaction(any());
+
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        reset(mOrganizer);
+        reset(mTaskViewTaskController);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
+
+        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
+        verify(mOrganizer).applyTransaction(any());
+    }
+
+    @Test
+    public void testSetCaptionInsets_withTask() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        reset(mTaskViewTaskController);
+        reset(mOrganizer);
+
+        Rect insets = new Rect(0, 400, 0, 0);
+        mTaskView.setCaptionInsets(Insets.of(insets));
+        mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
+        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
+        verify(mOrganizer).applyTransaction(any());
     }
 }

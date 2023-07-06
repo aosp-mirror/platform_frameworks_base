@@ -33,6 +33,7 @@ import android.os.Binder;
 import android.util.CloseGuard;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -81,6 +82,10 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private boolean mNotifiedForInitialized;
     private TaskView.Listener mListener;
     private Executor mListenerExecutor;
+
+    /** Used to inset the activity content to allow space for a caption bar. */
+    private final Binder mCaptionInsetsOwner = new Binder();
+    private Rect mCaptionInsets;
 
     public TaskViewTaskController(Context context, ShellTaskOrganizer organizer,
             TaskViewTransitions taskViewTransitions, SyncTransactionQueue syncQueue) {
@@ -436,6 +441,32 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mTaskViewTransitions.closeTaskView(wct, this);
     }
 
+    /**
+     * Sets a region of the task to inset to allow for a caption bar.
+     *
+     * @param captionInsets the rect for the insets in screen coordinates.
+     */
+    void setCaptionInsets(Rect captionInsets) {
+        if (mCaptionInsets != null && mCaptionInsets.equals(captionInsets)) {
+            return;
+        }
+        mCaptionInsets = captionInsets;
+        applyCaptionInsetsIfNeeded();
+    }
+
+    void applyCaptionInsetsIfNeeded() {
+        if (mTaskToken == null) return;
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (mCaptionInsets != null) {
+            wct.addInsetsSource(mTaskToken, mCaptionInsetsOwner, 0,
+                    WindowInsets.Type.captionBar(), mCaptionInsets);
+        } else {
+            wct.removeInsetsSource(mTaskToken, mCaptionInsetsOwner, 0,
+                    WindowInsets.Type.captionBar());
+        }
+        mTaskOrganizer.applyTransaction(wct);
+    }
+
     /** Should be called when the client surface is destroyed. */
     public void surfaceDestroyed() {
         mSurfaceCreated = false;
@@ -564,6 +595,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
             mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
             wct.setBounds(mTaskToken, boundsOnScreen);
+            applyCaptionInsetsIfNeeded();
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely
