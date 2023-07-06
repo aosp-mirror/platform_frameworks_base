@@ -27,11 +27,12 @@ import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
 import com.android.systemui.biometrics.domain.model.BiometricModalities
-import com.android.systemui.biometrics.domain.model.BiometricModality
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
@@ -48,7 +49,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mock
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
@@ -204,7 +204,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun plays_haptic_on_errors() = runGenericTest {
-        viewModel.showTemporaryError("so sad", hapticFeedback = true)
+        viewModel.showTemporaryError(
+            "so sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
 
         verify(vibrator).vibrateAuthError(any())
         verify(vibrator, never()).vibrateAuthSuccess(any())
@@ -212,7 +217,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun plays_haptic_on_errors_unless_skipped() = runGenericTest {
-        viewModel.showTemporaryError("still sad", hapticFeedback = false)
+        viewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = false,
+        )
 
         verify(vibrator, never()).vibrateAuthError(any())
         verify(vibrator, never()).vibrateAuthSuccess(any())
@@ -287,7 +297,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(canTryAgain).isFalse()
         }
 
-        val errorJob = launch { viewModel.showTemporaryError("error") }
+        val errorJob = launch {
+            viewModel.showTemporaryError(
+                "error",
+                messageAfterError = "",
+                authenticateAfterError = false,
+            )
+        }
         verifyNoError()
         errorJob.join()
         verifyNoError()
@@ -306,12 +322,66 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(messageIsShowing).isTrue()
     }
 
-    //    @Test
-    fun `suppress errors`() = runGenericTest {
-        val errorMessage = "woot"
-        val message by collectLastValue(viewModel.message)
+    @Test
+    fun suppress_temporary_error() = runGenericTest {
+        val messages by collectValues(viewModel.message)
 
-        val errorJob = launch { viewModel.showTemporaryError(errorMessage) }
+        for (error in listOf("never", "see", "me")) {
+            launch {
+                viewModel.showTemporaryError(
+                    error,
+                    messageAfterError = "or me",
+                    authenticateAfterError = false,
+                    suppressIf = { _ -> true },
+                )
+            }
+        }
+
+        testScheduler.advanceUntilIdle()
+        assertThat(messages).containsExactly(PromptMessage.Empty)
+    }
+
+    @Test
+    fun suppress_temporary_error_when_already_showing_when_requested() =
+        suppress_temporary_error_when_already_showing(suppress = true)
+
+    @Test
+    fun do_not_suppress_temporary_error_when_already_showing_when_not_requested() =
+        suppress_temporary_error_when_already_showing(suppress = false)
+
+    private fun suppress_temporary_error_when_already_showing(suppress: Boolean) = runGenericTest {
+        val errors = listOf("woot", "oh yeah", "nope")
+        val afterSuffix = "(after)"
+        val expectedErrorMessage = if (suppress) errors.first() else errors.last()
+        val messages by collectValues(viewModel.message)
+
+        for (error in errors) {
+            launch {
+                viewModel.showTemporaryError(
+                    error,
+                    messageAfterError = "$error $afterSuffix",
+                    authenticateAfterError = false,
+                    suppressIf = { currentMessage -> suppress && currentMessage.isError },
+                )
+            }
+        }
+
+        testScheduler.runCurrent()
+        assertThat(messages)
+            .containsExactly(
+                PromptMessage.Empty,
+                PromptMessage.Error(expectedErrorMessage),
+            )
+            .inOrder()
+
+        testScheduler.advanceUntilIdle()
+        assertThat(messages)
+            .containsExactly(
+                PromptMessage.Empty,
+                PromptMessage.Error(expectedErrorMessage),
+                PromptMessage.Help("$expectedErrorMessage $afterSuffix"),
+            )
+            .inOrder()
     }
 
     @Test

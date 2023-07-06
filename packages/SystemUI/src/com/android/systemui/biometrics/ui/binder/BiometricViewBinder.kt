@@ -46,9 +46,9 @@ import com.android.systemui.biometrics.AuthIconController
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.model.BiometricModalities
-import com.android.systemui.biometrics.domain.model.BiometricModality
-import com.android.systemui.biometrics.domain.model.asBiometricModality
+import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.biometrics.shared.model.asBiometricModality
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
 import com.android.systemui.biometrics.ui.viewmodel.FingerprintStartMode
 import com.android.systemui.biometrics.ui.viewmodel.PromptMessage
@@ -396,7 +396,6 @@ private class Spaghetti(
 
     private var lifecycleScope: CoroutineScope? = null
     private var modalities: BiometricModalities = BiometricModalities()
-    private var faceFailedAtLeastOnce = false
     private var legacyCallback: Callback? = null
 
     override var legacyIconController: AuthIconController? = null
@@ -476,19 +475,15 @@ private class Spaghetti(
         viewModel.ensureFingerprintHasStarted(isDelayed = true)
 
         applicationScope.launch {
-            val suppress =
-                modalities.hasFaceAndFingerprint &&
-                    (failedModality == BiometricModality.Face) &&
-                    faceFailedAtLeastOnce
-            if (failedModality == BiometricModality.Face) {
-                faceFailedAtLeastOnce = true
-            }
-
             viewModel.showTemporaryError(
                 failureReason,
                 messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
                 authenticateAfterError = modalities.hasFingerprint,
-                suppressIfErrorShowing = suppress,
+                suppressIf = { currentMessage ->
+                    modalities.hasFaceAndFingerprint &&
+                        failedModality == BiometricModality.Face &&
+                        currentMessage.isError
+                },
                 failedModality = failedModality,
             )
         }
@@ -501,11 +496,10 @@ private class Spaghetti(
         }
 
         applicationScope.launch {
-            val suppress =
-                modalities.hasFaceAndFingerprint && (errorModality == BiometricModality.Face)
             viewModel.showTemporaryError(
                 error,
-                suppressIfErrorShowing = suppress,
+                messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
+                authenticateAfterError = modalities.hasFingerprint,
             )
             delay(BiometricPrompt.HIDE_DIALOG_DELAY.toLong())
             legacyCallback?.onAction(Callback.ACTION_ERROR)
@@ -522,6 +516,7 @@ private class Spaghetti(
             viewModel.showTemporaryError(
                 help,
                 messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
+                authenticateAfterError = modalities.hasFingerprint,
                 hapticFeedback = false,
             )
         }

@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
-import com.android.systemui.biometrics.domain.model.BiometricModality
+import com.android.systemui.biometrics.shared.model.BiometricModality
 
 /**
  * The authenticated state with the [authenticatedModality] (when [isAuthenticated]) with an
