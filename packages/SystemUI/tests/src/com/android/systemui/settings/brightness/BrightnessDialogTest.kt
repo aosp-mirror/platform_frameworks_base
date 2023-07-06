@@ -16,7 +16,6 @@
 
 package com.android.systemui.settings.brightness
 
-import android.content.Intent
 import android.graphics.Rect
 import android.os.Handler
 import android.testing.AndroidTestingRunner
@@ -25,9 +24,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
@@ -59,19 +58,17 @@ class BrightnessDialogTest : SysuiTestCase() {
     @JvmField
     var activityRule =
         ActivityTestRule(
-            object : SingleActivityFactory<TestDialog>(TestDialog::class.java) {
-                override fun create(intent: Intent?): TestDialog {
-                    return TestDialog(
-                        userTracker,
-                        displayTracker,
-                        brightnessSliderControllerFactory,
-                        mainExecutor,
-                        backgroundHandler
-                    )
-                }
+            /* activityFactory= */ SingleActivityFactory {
+                TestDialog(
+                    userTracker,
+                    displayTracker,
+                    brightnessSliderControllerFactory,
+                    mainExecutor,
+                    backgroundHandler
+                )
             },
-            false,
-            false
+            /* initialTouchMode= */ false,
+            /* launchActivity= */ false,
         )
 
     @Before

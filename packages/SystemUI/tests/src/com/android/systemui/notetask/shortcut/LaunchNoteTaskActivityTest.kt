@@ -16,14 +16,13 @@
 
 package com.android.systemui.notetask.shortcut
 
-import android.content.Intent
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.util.mockito.any
@@ -47,12 +46,8 @@ class LaunchNoteTaskActivityTest : SysuiTestCase() {
     @JvmField
     val activityRule =
         ActivityTestRule<LaunchNoteTaskActivity>(
-            /* activityFactory= */ object :
-                SingleActivityFactory<LaunchNoteTaskActivity>(LaunchNoteTaskActivity::class.java) {
-                override fun create(intent: Intent?) =
-                    LaunchNoteTaskActivity(
-                        controller = noteTaskController,
-                    )
+            /* activityFactory= */ SingleActivityFactory {
+                LaunchNoteTaskActivity(controller = noteTaskController)
             },
             /* initialTouchMode= */ false,
             /* launchActivity= */ false,

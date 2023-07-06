@@ -13,9 +13,9 @@ import android.window.OnBackInvokedDispatcher
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
@@ -91,24 +91,19 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
     @JvmField
     var activityRule =
         ActivityTestRule(
-            object :
-                SingleActivityFactory<TestableControlsFavoritingActivity>(
-                    TestableControlsFavoritingActivity::class.java
-                ) {
-                override fun create(intent: Intent?): TestableControlsFavoritingActivity {
-                    return TestableControlsFavoritingActivity(
-                        featureFlags,
-                        executor,
-                        controller,
-                        listingController,
-                        userTracker,
-                        mockDispatcher,
-                        latch
-                    )
-                }
+            /* activityFactory= */ SingleActivityFactory {
+                TestableControlsFavoritingActivity(
+                    featureFlags,
+                    executor,
+                    controller,
+                    listingController,
+                    userTracker,
+                    mockDispatcher,
+                    latch
+                )
             },
-            false,
-            false
+            /* initialTouchMode= */ false,
+            /* launchActivity= */ false,
         )
 
     @Before
