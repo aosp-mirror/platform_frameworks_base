@@ -42,6 +42,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -1773,7 +1774,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
                             sbn.getKey());
                     wakeUpForFullScreenIntent();
-                    notification.fullScreenIntent.send();
+                    ActivityOptions opts = ActivityOptions.makeBasic();
+                    opts.setPendingIntentBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    notification.fullScreenIntent.send(opts.toBundle());
                     entry.notifyFullScreenIntentLaunched();
                 } catch (PendingIntent.CanceledException e) {
                 }

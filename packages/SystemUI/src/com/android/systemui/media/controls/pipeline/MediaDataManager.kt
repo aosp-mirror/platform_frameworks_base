@@ -1253,6 +1253,9 @@ class MediaDataManager(
         return try {
             val options = BroadcastOptions.makeBasic()
             options.setInteractive(true)
+            options.setPendingIntentBackgroundActivityStartMode(
+                BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+            )
             intent.send(options.toBundle())
             true
         } catch (e: PendingIntent.CanceledException) {
