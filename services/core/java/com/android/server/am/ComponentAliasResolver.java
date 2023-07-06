@@ -162,7 +162,7 @@ public class ComponentAliasResolver {
                     // avoid deadlocks.
                     if (enabled) {
                         mPackageMonitor.register(mAm.mContext, UserHandle.ALL,
-                                /* externalStorage= */ false, BackgroundThread.getHandler());
+                                BackgroundThread.getHandler());
                     } else {
                         mPackageMonitor.unregister();
                     }
