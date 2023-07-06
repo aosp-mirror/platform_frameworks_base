@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -67,6 +68,10 @@ public class BubbleBarLayerView extends FrameLayout
 
     private final Region mTouchableRegion = new Region();
     private final Rect mTempRect = new Rect();
+
+    // Used to ensure touch target size for the menu shown on a bubble expanded view
+    private TouchDelegate mHandleTouchDelegate;
+    private final Rect mHandleTouchBounds = new Rect();
 
     public BubbleBarLayerView(Context context, BubbleController controller) {
         super(context);
@@ -164,7 +169,17 @@ public class BubbleBarLayerView extends FrameLayout
 
         mIsExpanded = true;
         mBubbleController.getSysuiProxy().onStackExpandChanged(true);
-        mAnimationHelper.animateExpansion(mExpandedBubble);
+        mAnimationHelper.animateExpansion(mExpandedBubble, () -> {
+            if (mExpandedView == null) return;
+            // Touch delegate for the menu
+            BubbleBarHandleView view = mExpandedView.getHandleView();
+            view.getBoundsOnScreen(mHandleTouchBounds);
+            mHandleTouchBounds.top -= mPositioner.getBubblePaddingTop();
+            mHandleTouchDelegate = new TouchDelegate(mHandleTouchBounds,
+                    mExpandedView.getHandleView());
+            setTouchDelegate(mHandleTouchDelegate);
+        });
+
         showScrim(true);
     }
 
@@ -175,6 +190,7 @@ public class BubbleBarLayerView extends FrameLayout
         mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
+        setTouchDelegate(null);
         showScrim(false);
     }
 
