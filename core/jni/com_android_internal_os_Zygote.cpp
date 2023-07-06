@@ -356,6 +356,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_DEFAULT = 3 << 21,
     NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
+    DEBUG_ENABLE_PTRACE = 1 << 25,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1887,8 +1888,10 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     }
 
     // Set process properties to enable debugging if required.
-    if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_JDWP) != 0) {
+    if ((runtime_flags & RuntimeFlags::DEBUG_ENABLE_PTRACE) != 0) {
         EnableDebugger();
+        // Don't pass unknown flag to the ART runtime.
+        runtime_flags &= ~RuntimeFlags::DEBUG_ENABLE_PTRACE;
     }
     if ((runtime_flags & RuntimeFlags::PROFILE_FROM_SHELL) != 0) {
         // simpleperf needs the process to be dumpable to profile it.

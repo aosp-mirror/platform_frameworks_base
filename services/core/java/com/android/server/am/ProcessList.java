@@ -1741,6 +1741,7 @@ public final class ProcessList {
 
             if (debuggableFlag) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                runtimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
                 runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.

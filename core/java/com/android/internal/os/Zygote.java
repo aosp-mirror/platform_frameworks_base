@@ -195,6 +195,11 @@ public final class Zygote {
      */
     public static final int PROFILEABLE = 1 << 24;
 
+    /**
+     * Enable ptrace.  This is enabled on eng or userdebug builds, or if the app is debuggable.
+     */
+    public static final int DEBUG_ENABLE_PTRACE = 1 << 25;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
@@ -1027,6 +1032,9 @@ public final class Zygote {
     static void applyDebuggerSystemProperty(ZygoteArguments args) {
         if (Build.IS_ENG || ENABLE_JDWP) {
             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+        }
+        if (RoSystemProperties.DEBUGGABLE) {
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
         }
     }
 
