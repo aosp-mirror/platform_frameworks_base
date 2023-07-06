@@ -26,7 +26,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="18dp"/>
-            <solid android:color="?androidprv:attr/materialColorPrimaryFixed"/>
+            <solid android:color="?androidprv:attr/colorAccentPrimary"/>
         </shape>
     </item>
 </ripple>

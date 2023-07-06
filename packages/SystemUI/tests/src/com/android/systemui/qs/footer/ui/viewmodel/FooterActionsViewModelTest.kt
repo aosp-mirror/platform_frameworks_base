@@ -21,7 +21,6 @@ import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
-import android.view.ContextThemeWrapper
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
@@ -64,8 +63,6 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     private val testScope = TestScope()
     private lateinit var utils: FooterActionsTestUtils
 
-    private val themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-
     @Before
     fun setUp() {
         utils = FooterActionsTestUtils(context, TestableLooper.get(this), testScope.testScheduler)
@@ -87,14 +84,8 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
                 )
             )
-        assertThat(settings.backgroundColor).isEqualTo(R.attr.shadeInactive)
-        assertThat(settings.iconTint)
-            .isEqualTo(
-                Utils.getColorAttrDefaultColor(
-                    themedContext,
-                    R.attr.onShadeInactiveVariant,
-                )
-            )
+        assertThat(settings.backgroundColor).isEqualTo(R.attr.offStateColor)
+        assertThat(settings.iconTint).isNull()
     }
 
     @Test
@@ -114,12 +105,12 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
                 )
             )
-        assertThat(power.backgroundColor).isEqualTo(R.attr.shadeActive)
+        assertThat(power.backgroundColor).isEqualTo(com.android.internal.R.attr.colorAccent)
         assertThat(power.iconTint)
             .isEqualTo(
                 Utils.getColorAttrDefaultColor(
-                    themedContext,
-                    R.attr.onShadeActive,
+                    context,
+                    com.android.internal.R.attr.textColorOnAccent,
                 ),
             )
     }
@@ -179,7 +170,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         assertThat(userSwitcher).isNotNull()
         assertThat(userSwitcher!!.icon)
             .isEqualTo(Icon.Loaded(picture, ContentDescription.Loaded("Signed in as foo")))
-        assertThat(userSwitcher.backgroundColor).isEqualTo(R.attr.shadeInactive)
+        assertThat(userSwitcher.backgroundColor).isEqualTo(R.attr.offStateColor)
 
         // Change the current user name.
         userSwitcherControllerWrapper.currentUserName = "bar"
