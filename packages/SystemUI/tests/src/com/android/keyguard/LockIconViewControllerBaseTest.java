@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -95,6 +96,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected @Mock KeyguardTransitionRepository mTransitionRepository;
     protected @Mock CommandQueue mCommandQueue;
     protected FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
+    protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+
 
     protected LockIconViewController mUnderTest;
 
@@ -167,7 +170,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                         mFeatureFlags,
                         new FakeKeyguardBouncerRepository()
                 ),
-                mFeatureFlags
+                mFeatureFlags,
+                mPrimaryBouncerInteractor
         );
     }
 
