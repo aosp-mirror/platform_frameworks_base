@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import android.view.MotionEvent;
 
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -39,16 +40,24 @@ public interface ShadeController {
     void instantCollapseShade();
 
     /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
-    void animateCollapseShade();
+    default void animateCollapseShade() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
+    }
 
     /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
-    void animateCollapseShade(int flags);
+    default void animateCollapseShade(int flags) {
+        animateCollapseShade(flags, false, false, 1.0f);
+    }
 
     /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
-    void animateCollapseShadeForced();
+    default void animateCollapseShadeForced() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
+    }
 
     /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
-    void animateCollapseShadeForcedDelayed();
+    default void animateCollapseShadeForcedDelayed() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
+    }
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
@@ -155,17 +164,17 @@ public interface ShadeController {
     void onLaunchAnimationEnd(boolean launchIsFullScreen);
 
     /** Sets the listener for when the visibility of the shade changes. */
-    void setVisibilityListener(ShadeVisibilityListener listener);
+    default void setVisibilityListener(ShadeVisibilityListener listener) {};
 
     /** */
-    void setNotificationPresenter(NotificationPresenter presenter);
+    default void setNotificationPresenter(NotificationPresenter presenter) {};
 
     /** */
-    void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController notificationShadeWindowViewController);
+    default void setNotificationShadeWindowViewController(
+            NotificationShadeWindowViewController notificationShadeWindowViewController) {};
 
     /** */
-    void setShadeViewController(ShadeViewController shadeViewController);
+    default void setShadeViewController(ShadeViewController shadeViewController) {};
 
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {
