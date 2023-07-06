@@ -87,7 +87,7 @@ private fun createLight(lightId: Int, lightType: Int, suggestedBrightnessLevels:
  * Tests for {@link KeyboardBacklightController}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyboardBacklightControllerTests
+ * atest InputTests:KeyboardBacklightControllerTests
  */
 @Presubmit
 class KeyboardBacklightControllerTests {

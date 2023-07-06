@@ -45,7 +45,7 @@ import kotlin.test.fail
  * Tests for [InputManager.KeyboardBacklightListener].
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:KeyboardBacklightListenerTest
+ * atest InputTests:KeyboardBacklightListenerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)

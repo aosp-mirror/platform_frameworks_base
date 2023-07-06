@@ -43,7 +43,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.view.InputDevice;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +63,7 @@ import java.util.List;
  * Tests for {@link InputDeviceLightsManager}.
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:InputDeviceLightsManagerTest
+ * atest InputTests:InputDeviceLightsManagerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
@@ -81,7 +81,8 @@ public class InputDeviceLightsManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        final Context context = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
+        final Context context = spy(
+                new ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()));
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
 
         when(mIInputManagerMock.getInputDevice(eq(DEVICE_ID))).thenReturn(

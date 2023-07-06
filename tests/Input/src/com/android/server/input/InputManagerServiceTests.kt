@@ -20,6 +20,8 @@ package com.android.server.input
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayViewport
+import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.os.IInputConstants
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
@@ -27,9 +29,10 @@ import android.provider.Settings
 import android.test.mock.MockContentResolver
 import android.view.Display
 import android.view.PointerIcon
-import androidx.test.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.util.test.FakeSettingsProvider
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -59,7 +62,7 @@ import java.util.concurrent.TimeUnit
  * Tests for {@link InputManagerService}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:InputManagerServiceTests
+ * atest InputTests:InputManagerServiceTests
  */
 @Presubmit
 class InputManagerServiceTests {
@@ -87,7 +90,7 @@ class InputManagerServiceTests {
 
     @Before
     fun setup() {
-        context = spy(ContextWrapper(InstrumentationRegistry.getContext()))
+        context = spy(ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()))
         contentResolver = MockContentResolver(context)
         contentResolver.addProvider(Settings.AUTHORITY, FakeSettingsProvider())
         whenever(context.contentResolver).thenReturn(contentResolver)
@@ -105,8 +108,18 @@ class InputManagerServiceTests {
                     localService = service!!
                 }
             })
+        InputManagerGlobal.resetInstance(service)
+        val inputManager = InputManager(context)
+        whenever(context.getSystemService(InputManager::class.java)).thenReturn(inputManager)
+        whenever(context.getSystemService(Context.INPUT_SERVICE)).thenReturn(inputManager)
+
         assertTrue("Local service must be registered", this::localService.isInitialized)
         service.setWindowManagerCallbacks(wmCallbacks)
+    }
+
+    @After
+    fun tearDown() {
+        InputManagerGlobal.clearInstance()
     }
 
     @Test

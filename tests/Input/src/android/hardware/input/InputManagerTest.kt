@@ -41,7 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner
  * Tests for [InputManager].
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:InputManagerTest
+ * atest InputTests:InputManagerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)

@@ -77,7 +77,7 @@ private fun createKeyboard(
  * Tests for {@link Default UI} and {@link New UI}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyboardLayoutManagerTests
+ * atest InputTests:KeyboardLayoutManagerTests
  */
 @Presubmit
 class KeyboardLayoutManagerTests {

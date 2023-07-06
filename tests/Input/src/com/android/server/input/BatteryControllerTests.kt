@@ -167,7 +167,7 @@ private fun createMockListener(): IInputDeviceBatteryListener {
  * Tests for {@link InputDeviceBatteryController}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:InputDeviceBatteryControllerTests
+ * atest InputTests:InputDeviceBatteryControllerTests
  */
 @Presubmit
 class BatteryControllerTests {

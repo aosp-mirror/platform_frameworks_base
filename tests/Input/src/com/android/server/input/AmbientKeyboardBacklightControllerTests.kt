@@ -55,7 +55,7 @@ import org.mockito.junit.MockitoJUnit
  * Tests for {@link AmbientKeyboardBacklightController}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:AmbientKeyboardBacklightControllerTests
+ * atest InputTests:AmbientKeyboardBacklightControllerTests
  */
 @Presubmit
 class AmbientKeyboardBacklightControllerTests {

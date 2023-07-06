@@ -46,7 +46,7 @@ import org.mockito.junit.MockitoJUnitRunner
  * Tests for [InputManager.InputDeviceBatteryListener].
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:InputDeviceBatteryListenerTest
+ * atest InputTests:InputDeviceBatteryListenerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)

@@ -58,7 +58,7 @@ private fun createImeSubtype(
  * Tests for {@link KeyboardMetricsCollector}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyboardMetricsCollectorTests
+ * atest InputTests:KeyboardMetricsCollectorTests
  */
 @Presubmit
 class KeyboardMetricsCollectorTests {

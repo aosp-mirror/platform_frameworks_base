@@ -54,7 +54,7 @@ private fun createKeyboard(deviceId: Int): InputDevice =
  * Tests for {@link KeyRemapper}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyRemapperTests
+ * atest InputTests:KeyRemapperTests
  */
 @Presubmit
 class KeyRemapperTests {
