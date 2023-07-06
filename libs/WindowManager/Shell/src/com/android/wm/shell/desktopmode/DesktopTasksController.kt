@@ -63,6 +63,7 @@ import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -204,7 +205,11 @@ class DesktopTasksController(
      * Moves a single task to freeform and sets the taskBounds to the passed in bounds,
      * startBounds
      */
-    fun moveToFreeform(taskInfo: RunningTaskInfo, startBounds: Rect) {
+    fun moveToFreeform(
+            taskInfo: RunningTaskInfo,
+            startBounds: Rect,
+            dragToDesktopValueAnimator: MoveToDesktopAnimator
+    ) {
         KtProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: moveToFreeform with bounds taskId=%d",
@@ -216,8 +221,8 @@ class DesktopTasksController(
         wct.setBounds(taskInfo.token, startBounds)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            enterDesktopTaskTransitionHandler.startTransition(
-                    Transitions.TRANSIT_ENTER_FREEFORM, wct, mOnAnimationFinishedCallback)
+            enterDesktopTaskTransitionHandler.startMoveToFreeformAnimation(wct,
+                    dragToDesktopValueAnimator, mOnAnimationFinishedCallback)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
@@ -270,7 +275,7 @@ class DesktopTasksController(
      * Move a task to fullscreen after being dragged from fullscreen and released back into
      * status bar area
      */
-    fun cancelMoveToFreeform(task: RunningTaskInfo, position: Point) {
+    fun cancelMoveToFreeform(task: RunningTaskInfo, moveToDesktopAnimator: MoveToDesktopAnimator) {
         KtProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: cancelMoveToFreeform taskId=%d",
@@ -280,8 +285,8 @@ class DesktopTasksController(
         wct.setBounds(task.token, null)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(
-                wct, position) { t ->
+            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct,
+                    moveToDesktopAnimator) { t ->
                 val callbackWCT = WindowContainerTransaction()
                 visualIndicator?.releaseVisualIndicator(t)
                 visualIndicator = null
