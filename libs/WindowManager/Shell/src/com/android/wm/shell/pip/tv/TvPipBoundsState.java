@@ -81,6 +81,7 @@ public class TvPipBoundsState extends PipBoundsState {
         super(context, pipSizeSpecHandler, pipDisplayLayoutState);
         mContext = context;
         updateDefaultGravity();
+        mTvPipGravity = mDefaultGravity;
         mPreviousCollapsedGravity = mDefaultGravity;
         mIsTvExpandedPipSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE);
