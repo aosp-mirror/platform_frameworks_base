@@ -84,6 +84,7 @@ public class BrightnessDialog extends Activity {
         window.getDecorView();
         window.setLayout(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        getTheme().applyStyle(R.style.Theme_SystemUI_QuickSettings, false);
 
         setContentView(R.layout.brightness_mirror_container);
         FrameLayout frame = findViewById(R.id.brightness_mirror_container);
