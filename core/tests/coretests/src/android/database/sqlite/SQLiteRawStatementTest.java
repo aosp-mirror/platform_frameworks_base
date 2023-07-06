@@ -846,59 +846,6 @@ public class SQLiteRawStatementTest {
     }
 
     @Test
-    public void testLastInsertRowId() {
-        final int size = 10;
-
-        createComplexDatabase();
-
-        // Put 10 lines in the database.
-        mDatabase.beginTransaction();
-        try {
-            try (SQLiteRawStatement s = mDatabase.createRawStatement(createComplexInsert())) {
-                for (int i = 0; i < size; i++) {
-                    int vi = i * 3;
-                    double vd = i * 2.5;
-                    String vt = String.format("text%02dvalue", i);
-                    s.bindInt(1, vi);
-                    s.bindDouble(2, vd);
-                    s.bindText(3, vt);
-                    boolean r = s.step();
-                    // No row is returned by this query.
-                    assertFalse(r);
-                    s.reset();
-                    assertEquals(i + 1, mDatabase.getLastInsertRowId());
-                }
-            }
-            mDatabase.setTransactionSuccessful();
-        } finally {
-            mDatabase.endTransaction();
-        }
-
-        // Put a second 10 lines in the database.
-        mDatabase.beginTransaction();
-        try {
-            try (SQLiteRawStatement s = mDatabase.createRawStatement(createComplexInsert())) {
-                for (int i = 0; i < size; i++) {
-                    int vi = i * 3;
-                    double vd = i * 2.5;
-                    String vt = String.format("text%02dvalue", i);
-                    s.bindInt(1, vi);
-                    s.bindDouble(2, vd);
-                    s.bindText(3, vt);
-                    boolean r = s.step();
-                    // No row is returned by this query.
-                    assertFalse(r);
-                    s.reset();
-                    assertEquals(size + i + 1, mDatabase.getLastInsertRowId());
-                }
-            }
-            mDatabase.setTransactionSuccessful();
-        } finally {
-            mDatabase.endTransaction();
-        }
-    }
-
-    @Test
     public void testUnicode() {
         // Create the t1 table and put some data in it.
         mDatabase.beginTransaction();

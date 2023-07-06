@@ -988,9 +988,29 @@ public final class SQLiteSession {
      * necessary to acquire and release the connection: the connection has already been acquired.
      * @hide
      */
-    long lastInsertRowId() {
+    long getLastInsertRowId() {
         throwIfNoTransaction();
-        return mConnection.lastInsertRowId();
+        return mConnection.getLastInsertRowId();
+    }
+
+    /**
+     * Return the number of database rows that were changed by the most recent SQL statement on
+     * this connection.
+     * @hide
+     */
+    long getLastChangedRowsCount() {
+        throwIfNoTransaction();
+        return mConnection.getLastChangedRowsCount();
+    }
+
+    /**
+     * Return the total number of database rows that were changed on the current connection, since
+     * it was created.
+     * @hide
+     */
+    long getTotalChangedRowsCount() {
+        throwIfNoTransaction();
+        return mConnection.getTotalChangedRowsCount();
     }
 
     /**
