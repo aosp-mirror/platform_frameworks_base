@@ -20,20 +20,18 @@ import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** View-model for the keyguard indication area view */
-@OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardIndicationAreaViewModel
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
-    private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
-    private val keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
+    bottomAreaInteractor: KeyguardBottomAreaInteractor,
+    keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
     private val burnInHelperWrapper: BurnInHelperWrapper,
 ) {
 
