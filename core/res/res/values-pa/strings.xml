@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਟੈਬਲੈੱਟ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ਸਟ੍ਰੀਮਿੰਗ ਦੌਰਾਨ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ਸਟ੍ਰੀਮਿੰਗ ਦੌਰਾਨ ਤਸਵੀਰ-ਵਿੱਚ-ਤਸਵੀਰ ਨਹੀਂ ਦੇਖੀ ਜਾ ਸਕਦੀ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ਸਿਸਟਮ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ਕਾਰਡ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ਘੜੀਆਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਲਈ ਸੰਬੰਧੀ ਘੜੀ ਪ੍ਰੋਫਾਈਲ ਇਜਾਜ਼ਤ"</string>

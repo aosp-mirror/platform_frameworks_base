@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් දුරකථනයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් ටැබ්ලටයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ප්‍රවාහය කරන අතරේ මෙයට ප්‍රවේශ විය නොහැක. ඒ වෙනුවට ඔබේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ප්‍රවාහය අතරේ පින්තූරයේ-පින්තූරය බැලිය නොහැක"</string>
     <string name="system_locale_title" msgid="711882686834677268">"පද්ධති පෙරනිමිය"</string>
     <string name="default_card_name" msgid="9198284935962911468">"කාඩ්පත <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ඔරලෝසු කළමනාකරණය කිරීමට සහායක ඔරලෝසු පැතිකඩ අවසරය"</string>

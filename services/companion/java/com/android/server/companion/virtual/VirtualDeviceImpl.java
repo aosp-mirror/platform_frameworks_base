@@ -1053,8 +1053,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     void onEnteringPipBlocked(int uid) {
-        showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_pip_blocked,
-                Toast.LENGTH_LONG, mContext.getMainLooper());
+        // Do nothing. ActivityRecord#checkEnterPictureInPictureState logs that the display does not
+        // support PiP.
     }
 
     void playSoundEffect(int effectType) {

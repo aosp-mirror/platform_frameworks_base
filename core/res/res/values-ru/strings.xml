@@ -2322,7 +2322,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства <xliff:g id="DEVICE">%1$s</xliff:g> нет доступа к камере телефона."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере планшета."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Этот контент недоступен во время трансляции. Используйте телефон."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Нельзя запустить режим \"Картинка в картинке\" во время потоковой передачи"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системные настройки по умолчанию"</string>
     <string name="default_card_name" msgid="9198284935962911468">"КАРТА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Разрешение для сопутствующего приложения управлять часами"</string>

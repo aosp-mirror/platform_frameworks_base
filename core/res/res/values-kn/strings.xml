@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಫೋನ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ಸ್ಟ್ರೀಮ್ ಮಾಡುವಾಗ ಇದನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ಸ್ಟ್ರೀಮ್ ಮಾಡುವಾಗ ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ವೀಕ್ಷಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ಸಿಸ್ಟಂ ಡೀಫಾಲ್ಟ್"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ಕಾರ್ಡ್ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ವಾಚ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸುವುದಕ್ಕಾಗಿ ಕಂಪ್ಯಾನಿಯನ್ ವಾಚ್ ಪ್ರೊಫೈಲ್ ಅನುಮತಿ"</string>

@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"스트리밍 중에는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"스트리밍 중에는 PIP 모드를 볼 수 없습니다."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"시계 관리를 위한 호환 시계 프로필 권한"</string>

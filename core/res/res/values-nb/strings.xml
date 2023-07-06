@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Det er ikke mulig å få tilgang til telefonkameraet fra <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Det er ikke mulig å få tilgang til kameraet på nettbrettet fra <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Dette er ikke tilgjengelig under strømming. Prøv på telefonen i stedet."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Kan ikke se bilde-i-bilde under strømming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemstandard"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Klokkeprofil-tillatelse for følgeapp for å administrere klokker"</string>

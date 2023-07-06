@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан телефон камерасын пайдалану мүмкін емес."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан планшет камерасын пайдалану мүмкін емес."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Трансляция кезінде контентті көру мүмкін емес. Оның орнына телефоннан көріңіз."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Трансляция кезінде суреттегі суретті көру мүмкін емес."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Жүйенің әдепкі параметрі"</string>
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g>-КАРТА"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Сағаттарды басқаруға арналған қосымша сағат профилінің рұқсаты"</string>

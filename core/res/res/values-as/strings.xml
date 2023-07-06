@@ -2320,7 +2320,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা টেবলেটটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ষ্ট্ৰীম কৰি থকাৰ সময়ত এইটো এক্সেছ কৰিব নোৱাৰি। তাৰ পৰিৱৰ্তে আপোনাৰ ফ’নত চেষ্টা কৰি চাওক।"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ষ্ট্ৰীম কৰি থকাৰ সময়ত picture-in-picture চাব নোৱাৰি"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ছিষ্টেম ডিফ’ল্ট"</string>
     <string name="default_card_name" msgid="9198284935962911468">"কাৰ্ড <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ঘড়ী পৰিচালনা কৰিবলৈ সহযোগী ঘড়ীৰ প্ৰ’ফাইলৰ অনুমতি"</string>
