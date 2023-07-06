@@ -123,6 +123,8 @@ public abstract class InfoMediaManager extends MediaManager {
      */
     protected abstract boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device);
 
+    protected abstract void transferToRoute(@NonNull MediaRoute2Info route);
+
     protected abstract void selectRoute(
             @NonNull MediaRoute2Info route, @NonNull RoutingSessionInfo info);
 
@@ -142,6 +144,8 @@ public abstract class InfoMediaManager extends MediaManager {
     protected abstract List<MediaRoute2Info> getSelectedRoutes(@NonNull RoutingSessionInfo info);
 
     protected abstract void setSessionVolume(@NonNull RoutingSessionInfo info, int volume);
+
+    protected abstract void setRouteVolume(@NonNull MediaRoute2Info route, int volume);
 
     @Nullable
     protected abstract RouteListingPreference getRouteListingPreference();
@@ -164,23 +168,6 @@ public abstract class InfoMediaManager extends MediaManager {
 
     @NonNull
     protected abstract List<MediaRoute2Info> getTransferableRoutes(@NonNull String packageName);
-
-    @NonNull
-    protected abstract ComplexMediaDevice createComplexMediaDevice(
-            MediaRoute2Info route, RouteListingPreference.Item routeListingPreferenceItem);
-
-    @NonNull
-    protected abstract InfoMediaDevice createInfoMediaDevice(
-            MediaRoute2Info route, RouteListingPreference.Item routeListingPreferenceItem);
-
-    @NonNull
-    protected abstract PhoneMediaDevice createPhoneMediaDevice(MediaRoute2Info route,
-            RouteListingPreference.Item routeListingPreferenceItem);
-
-    @NonNull
-    protected abstract BluetoothMediaDevice createBluetoothMediaDevice(
-            MediaRoute2Info route, CachedBluetoothDevice cachedDevice,
-            RouteListingPreference.Item routeListingPreferenceItem);
 
     protected final void rebuildDeviceList() {
         mMediaDevices.clear();
@@ -209,6 +196,20 @@ public abstract class InfoMediaManager extends MediaManager {
      */
     MediaDevice getCurrentConnectedDevice() {
         return mCurrentConnectedDevice;
+    }
+
+    /* package */ void connectToDevice(MediaDevice device) {
+        if (device.mRouteInfo == null) {
+            Log.w(TAG, "Unable to connect. RouteInfo is empty");
+            return;
+        }
+
+        if (TextUtils.isEmpty(mPackageName)) {
+            connectDeviceWithoutPackageName(device);
+        } else {
+            device.setConnectedRecord();
+            transferToRoute(device.mRouteInfo);
+        }
     }
 
     /**
@@ -335,7 +336,8 @@ public abstract class InfoMediaManager extends MediaManager {
         final List<MediaDevice> deviceList = new ArrayList<>();
         for (MediaRoute2Info route : getSelectableRoutes(info)) {
             deviceList.add(
-                    createInfoMediaDevice(route, mPreferenceItemMap.get(route.getId())));
+                    new InfoMediaDevice(
+                            mContext, route, mPackageName, mPreferenceItemMap.get(route.getId())));
         }
         return deviceList;
     }
@@ -361,7 +363,8 @@ public abstract class InfoMediaManager extends MediaManager {
         final List<MediaDevice> deviceList = new ArrayList<>();
         for (MediaRoute2Info route : getDeselectableRoutes(info)) {
             deviceList.add(
-                    createInfoMediaDevice(route, mPreferenceItemMap.get(route.getId())));
+                    new InfoMediaDevice(
+                            mContext, route, mPackageName, mPreferenceItemMap.get(route.getId())));
             Log.d(TAG, route.getName() + " is deselectable for " + mPackageName);
         }
         return deviceList;
@@ -388,9 +391,18 @@ public abstract class InfoMediaManager extends MediaManager {
         final List<MediaDevice> deviceList = new ArrayList<>();
         for (MediaRoute2Info route : getSelectedRoutes(info)) {
             deviceList.add(
-                    createInfoMediaDevice(route, mPreferenceItemMap.get(route.getId())));
+                    new InfoMediaDevice(
+                            mContext, route, mPackageName, mPreferenceItemMap.get(route.getId())));
         }
         return deviceList;
+    }
+
+    /* package */ void adjustDeviceVolume(MediaDevice device, int volume) {
+        if (device.mRouteInfo == null) {
+            Log.w(TAG, "Unable to set volume. RouteInfo is empty");
+            return;
+        }
+        setRouteVolume(device.mRouteInfo, volume);
     }
 
     void adjustSessionVolume(RoutingSessionInfo info, int volume) {
@@ -585,7 +597,12 @@ public abstract class InfoMediaManager extends MediaManager {
             case TYPE_REMOTE_CAR:
             case TYPE_REMOTE_SMARTWATCH:
             case TYPE_REMOTE_SMARTPHONE:
-                mediaDevice = createInfoMediaDevice(route, mPreferenceItemMap.get(route.getId()));
+                mediaDevice =
+                        new InfoMediaDevice(
+                                mContext,
+                                route,
+                                mPackageName,
+                                mPreferenceItemMap.get(route.getId()));
                 break;
             case TYPE_BUILTIN_SPEAKER:
             case TYPE_USB_DEVICE:
@@ -595,8 +612,12 @@ public abstract class InfoMediaManager extends MediaManager {
             case TYPE_HDMI:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
-                mediaDevice = createPhoneMediaDevice(route,
-                        mPreferenceItemMap.getOrDefault(route.getId(), null));
+                mediaDevice =
+                        new PhoneMediaDevice(
+                                mContext,
+                                route,
+                                mPackageName,
+                                mPreferenceItemMap.getOrDefault(route.getId(), null));
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
@@ -606,14 +627,22 @@ public abstract class InfoMediaManager extends MediaManager {
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
                 if (cachedDevice != null) {
-                    mediaDevice = createBluetoothMediaDevice(route, cachedDevice,
-                            mPreferenceItemMap.getOrDefault(route.getId(), null));
+                    mediaDevice =
+                            new BluetoothMediaDevice(
+                                    mContext,
+                                    cachedDevice,
+                                    route,
+                                    mPackageName,
+                                    mPreferenceItemMap.getOrDefault(route.getId(), null));
                 }
                 break;
             case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
                 mediaDevice =
-                        createComplexMediaDevice(
-                                route, mPreferenceItemMap.get(route.getId()));
+                        new ComplexMediaDevice(
+                                mContext,
+                                route,
+                                mPackageName,
+                                mPreferenceItemMap.get(route.getId()));
             default:
                 Log.w(TAG, "addMediaDevice() unknown device type : " + deviceType);
                 break;
