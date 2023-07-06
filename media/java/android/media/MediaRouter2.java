@@ -1084,6 +1084,16 @@ public final class MediaRouter2 {
         return filteredRoutes;
     }
 
+    @NonNull
+    private List<MediaRoute2Info> getRoutesWithIds(@NonNull List<String> routeIds) {
+        synchronized (mLock) {
+            return routeIds.stream()
+                    .map(mRoutes::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+    }
+
     private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
         for (RouteCallbackRecord record : mRouteCallbackRecords) {
             List<MediaRoute2Info> filteredRoutes =
@@ -1388,7 +1398,7 @@ public final class MediaRouter2 {
             synchronized (mControllerLock) {
                 selectedRouteIds = mSessionInfo.getSelectedRoutes();
             }
-            return mImpl.getRoutesWithIds(selectedRouteIds);
+            return getRoutesWithIds(selectedRouteIds);
         }
 
         /**
@@ -1400,7 +1410,7 @@ public final class MediaRouter2 {
             synchronized (mControllerLock) {
                 selectableRouteIds = mSessionInfo.getSelectableRoutes();
             }
-            return mImpl.getRoutesWithIds(selectableRouteIds);
+            return getRoutesWithIds(selectableRouteIds);
         }
 
         /**
@@ -1412,7 +1422,7 @@ public final class MediaRouter2 {
             synchronized (mControllerLock) {
                 deselectableRouteIds = mSessionInfo.getDeselectableRoutes();
             }
-            return mImpl.getRoutesWithIds(deselectableRouteIds);
+            return getRoutesWithIds(deselectableRouteIds);
         }
 
         /**
@@ -1981,7 +1991,6 @@ public final class MediaRouter2 {
                 boolean shouldNotifyStop,
                 RoutingController controller);
 
-        List<MediaRoute2Info> getRoutesWithIds(List<String> routeIds);
     }
 
     /**
@@ -2410,13 +2419,6 @@ public final class MediaRouter2 {
                 boolean shouldNotifyStop,
                 RoutingController controller) {
             releaseSession(controller.getRoutingSessionInfo());
-        }
-
-        @Override
-        public List<MediaRoute2Info> getRoutesWithIds(List<String> routeIds) {
-            return getRoutes().stream()
-                    .filter(r -> routeIds.contains(r.getId()))
-                    .collect(Collectors.toList());
         }
 
         /**
@@ -3065,14 +3067,5 @@ public final class MediaRouter2 {
             }
         }
 
-        @Override
-        public List<MediaRoute2Info> getRoutesWithIds(List<String> routeIds) {
-            synchronized (mLock) {
-                return routeIds.stream()
-                        .map(mRoutes::get)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-            }
-        }
     }
 }
