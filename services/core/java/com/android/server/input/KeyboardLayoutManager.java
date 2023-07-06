@@ -28,6 +28,7 @@ import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.settings.SettingsEnums;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1168,6 +1169,8 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
         if (targetDevice != null) {
             intent.putExtra(Settings.EXTRA_INPUT_DEVICE_IDENTIFIER, targetDevice.getIdentifier());
+            intent.putExtra(
+                    Settings.EXTRA_ENTRYPOINT, SettingsEnums.KEYBOARD_CONFIGURED_NOTIFICATION);
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
