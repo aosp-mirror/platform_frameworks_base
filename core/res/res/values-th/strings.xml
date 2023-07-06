@@ -2311,7 +2311,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"เข้าถึงกล้องของโทรศัพท์จาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"เข้าถึงกล้องของแท็บเล็ตจาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"เข้าถึงเนื้อหานี้ไม่ได้ขณะที่สตรีมมิง โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ดูการแสดงภาพซ้อนภาพขณะสตรีมไม่ได้"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ค่าเริ่มต้นของระบบ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ซิมการ์ด <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"สิทธิ์สำหรับโปรไฟล์ในนาฬิกาที่ใช้ร่วมกันเพื่อจัดการนาฬิกา"</string>
