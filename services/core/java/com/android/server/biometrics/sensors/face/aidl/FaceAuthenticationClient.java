@@ -43,7 +43,6 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
-import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
@@ -242,9 +241,6 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
                 vendorCode,
                 getTargetUserId()));
 
-        if (error == BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL) {
-            BiometricNotificationUtils.showReEnrollmentNotification(getContext());
-        }
         super.onError(error, vendorCode);
     }
 
