@@ -63,23 +63,20 @@ public class PackageMonitorTest {
     public void testPackageMonitorMultipleRegisterThrowsException() throws Exception {
         PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
 
-        spyPackageMonitor.register(mMockContext, UserHandle.ALL, false /* externalStorage */,
-                mMockHandler);
+        spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
         assertThat(spyPackageMonitor.getRegisteredHandler()).isEqualTo(mMockHandler);
         verify(mMockContext, times(2)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
                 eq(null), eq(mMockHandler));
 
         assertThrows(IllegalStateException.class,
-                () -> spyPackageMonitor.register(mMockContext, UserHandle.ALL,
-                        false /* externalStorage */, mMockHandler));
+                () -> spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler));
     }
 
     @Test
     public void testPackageMonitorRegisterMultipleUnRegisterThrowsException() throws Exception {
         PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
 
-        spyPackageMonitor.register(mMockContext, UserHandle.ALL, false /* externalStorage */,
-                mMockHandler);
+        spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
         spyPackageMonitor.unregister();
 
         assertThrows(IllegalStateException.class, spyPackageMonitor::unregister);
