@@ -91,6 +91,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManagerInternal;
@@ -632,6 +633,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     SettingsObserver mSettingsObserver;
     ModifierShortcutManager mModifierShortcutManager;
+    /** Currently fully consumed key codes per device */
+    private final SparseArray<Set<Integer>> mConsumedKeysForDevice = new SparseArray<>();
     PowerManager.WakeLock mBroadcastWakeLock;
     PowerManager.WakeLock mPowerKeyWakeLock;
     boolean mHavePendingMediaKeyRepeatWithWakeLock;
@@ -1817,7 +1820,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDisplayId = displayId;
         }
 
-        int handleHomeButton(IBinder focusedToken, KeyEvent event) {
+        boolean handleHomeButton(IBinder focusedToken, KeyEvent event) {
             final boolean keyguardOn = keyguardOn();
             final int repeatCount = event.getRepeatCount();
             final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
@@ -1838,12 +1841,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHomePressed = false;
                 if (mHomeConsumed) {
                     mHomeConsumed = false;
-                    return -1;
+                    return true;
                 }
 
                 if (canceled) {
                     Log.i(TAG, "Ignoring HOME; event canceled.");
-                    return -1;
+                    return true;
                 }
 
                 // Delay handling home if a double-tap is possible.
@@ -1855,13 +1858,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mHomeDoubleTapPending = true;
                         mHandler.postDelayed(mHomeDoubleTapTimeoutRunnable,
                                 ViewConfiguration.getDoubleTapTimeout());
-                        return -1;
+                        return true;
                     }
                 }
 
                 // Post to main thread to avoid blocking input pipeline.
                 mHandler.post(() -> handleShortPressOnHome(mDisplayId));
-                return -1;
+                return true;
             }
 
             final KeyInterceptionInfo info =
@@ -1873,12 +1876,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || (info.layoutParamsType == TYPE_NOTIFICATION_SHADE
                         && isKeyguardShowing())) {
                     // the "app" is keyguard, so give it the key
-                    return 0;
+                    return false;
                 }
                 for (int t : WINDOW_TYPES_WHERE_HOME_DOESNT_WORK) {
                     if (info.layoutParamsType == t) {
                         // don't do anything, but also don't pass it to the app
-                        return -1;
+                        return true;
                     }
                 }
             }
@@ -1903,7 +1906,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             event.getEventTime()));
                 }
             }
-            return -1;
+            return true;
         }
 
         private void handleDoubleTapOnHome() {
@@ -2949,24 +2952,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
             int policyFlags) {
-        final boolean keyguardOn = keyguardOn();
         final int keyCode = event.getKeyCode();
-        final int repeatCount = event.getRepeatCount();
-        final int metaState = event.getMetaState();
         final int flags = event.getFlags();
-        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
-        final boolean canceled = event.isCanceled();
-        final int displayId = event.getDisplayId();
-        final long key_consumed = -1;
-        final long key_not_consumed = 0;
+        final long keyConsumed = -1;
+        final long keyNotConsumed = 0;
+        final int deviceId = event.getDeviceId();
 
         if (DEBUG_INPUT) {
-            Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
-                    + repeatCount + " keyguardOn=" + keyguardOn + " canceled=" + canceled);
+            Log.d(TAG,
+                    "interceptKeyTi keyCode=" + keyCode + " action=" + event.getAction()
+                            + " repeatCount=" + event.getRepeatCount() + " keyguardOn="
+                            + keyguardOn() + " canceled=" + event.isCanceled());
         }
 
         if (mKeyCombinationManager.isKeyConsumed(event)) {
-            return key_consumed;
+            return keyConsumed;
         }
 
         if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
@@ -2977,8 +2977,54 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        // Cancel any pending meta actions if we see any other keys being pressed between the down
-        // of the meta key and its corresponding up.
+        Set<Integer> consumedKeys = mConsumedKeysForDevice.get(deviceId);
+        if (consumedKeys == null) {
+            consumedKeys = new HashSet<>();
+            mConsumedKeysForDevice.put(deviceId, consumedKeys);
+        }
+
+        if (interceptSystemKeysAndShortcuts(focusedToken, event)
+                && event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            consumedKeys.add(keyCode);
+            return keyConsumed;
+        }
+
+        boolean needToConsumeKey = consumedKeys.contains(keyCode);
+        if (event.getAction() == KeyEvent.ACTION_UP || event.isCanceled()) {
+            consumedKeys.remove(keyCode);
+            if (consumedKeys.isEmpty()) {
+                mConsumedKeysForDevice.remove(deviceId);
+            }
+        }
+
+        return needToConsumeKey ? keyConsumed : keyNotConsumed;
+    }
+
+    // You can only start consuming the key gesture if ACTION_DOWN and repeat count
+    // is 0. If you start intercepting the key halfway, then key will not be consumed
+    // and will be sent to apps for processing too.
+    // e.g. If a certain combination is only handled on ACTION_UP (i.e.
+    // interceptShortcut() returns true only for ACTION_UP), then since we already
+    // sent the ACTION_DOWN events to the application, we MUST also send the
+    // ACTION_UP to the application.
+    // So, to ensure that your intercept logic works properly, and we don't send any
+    // conflicting events to application, make sure to consume the event on
+    // ACTION_DOWN even if you want to do something on ACTION_UP. This is essential
+    // to maintain event parity and to not have incomplete key gestures.
+    @SuppressLint("MissingPermission")
+    private boolean interceptSystemKeysAndShortcuts(IBinder focusedToken, KeyEvent event) {
+        final boolean keyguardOn = keyguardOn();
+        final int keyCode = event.getKeyCode();
+        final int repeatCount = event.getRepeatCount();
+        final int metaState = event.getMetaState();
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        final boolean canceled = event.isCanceled();
+        final int displayId = event.getDisplayId();
+        final int deviceId = event.getDeviceId();
+        final boolean firstDown = down && repeatCount == 0;
+
+        // Cancel any pending meta actions if we see any other keys being pressed between the
+        // down of the meta key and its corresponding up.
         if (mPendingMetaAction && !KeyEvent.isMetaKey(keyCode)) {
             mPendingMetaAction = false;
         }
@@ -2992,50 +3038,49 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 dismissKeyboardShortcutsMenu();
                 mPendingMetaAction = false;
                 mPendingCapsLockToggle = false;
-                return key_consumed;
+                return true;
             }
         }
 
-        switch(keyCode) {
+        switch (keyCode) {
             case KeyEvent.KEYCODE_HOME:
-                logKeyboardSystemsEvent(event, FrameworkStatsLog
-                        .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__HOME);
+                logKeyboardSystemsEvent(event,
+                        FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__HOME);
                 return handleHomeShortcuts(displayId, focusedToken, event);
             case KeyEvent.KEYCODE_MENU:
                 // Hijack modified menu keys for debugging features
                 final int chordBug = KeyEvent.META_SHIFT_ON;
 
-                if (down && repeatCount == 0) {
-                    if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                        Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                        mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                                null, null, null, 0, null, null);
-                        return key_consumed;
-                    }
+                if (mEnableShiftMenuBugReports && firstDown
+                        && (metaState & chordBug) == chordBug) {
+                    Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
+                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
+                            null, null, null, 0, null, null);
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_RECENT_APPS:
-                if (down && repeatCount == 0) {
+                if (firstDown) {
                     showRecentApps(false /* triggeredFromAltTab */);
-                    logKeyboardSystemsEvent(event, FrameworkStatsLog
-                            .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RECENT_APPS);
+                    logKeyboardSystemsEvent(event,
+                            FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RECENT_APPS);
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_APP_SWITCH:
                 if (!keyguardOn) {
-                    if (down && repeatCount == 0) {
+                    if (firstDown) {
                         preloadRecentApps();
                     } else if (!down) {
                         toggleRecentApps();
                     }
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_A:
-                if (down && event.isMetaPressed()) {
+                if (firstDown && event.isMetaPressed()) {
                     launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
-                            event.getDeviceId(),
-                            event.getEventTime(), AssistUtils.INVOCATION_TYPE_UNKNOWN);
-                    return key_consumed;
+                            deviceId, event.getEventTime(),
+                            AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_H:
@@ -3045,73 +3090,73 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_I:
-                if (down && event.isMetaPressed()) {
+                if (firstDown && event.isMetaPressed()) {
                     showSystemSettings();
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_L:
-                if (down && event.isMetaPressed() && repeatCount == 0) {
+                if (firstDown && event.isMetaPressed()) {
                     lockNow(null /* options */);
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_N:
-                if (down && event.isMetaPressed()) {
+                if (firstDown && event.isMetaPressed()) {
                     if (event.isCtrlPressed()) {
                         sendSystemKeyToStatusBarAsync(event);
                     } else {
                         toggleNotificationPanel();
                     }
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_S:
-                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_T:
-                if (down && event.isMetaPressed()) {
+                if (firstDown && event.isMetaPressed()) {
                     toggleTaskbar();
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_UP:
-                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
                         statusbar.goToFullscreenFromSplit();
+                        return true;
                     }
-                    return key_consumed;
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     enterStageSplitFromRunningApp(true /* leftOrTop */);
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     enterStageSplitFromRunningApp(false /* leftOrTop */);
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_SLASH:
-                if (down && repeatCount == 0 && event.isMetaPressed() && !keyguardOn) {
+                if (firstDown && event.isMetaPressed() && !keyguardOn) {
                     toggleKeyboardShortcutsMenu(event.getDeviceId());
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_ASSIST:
                 Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_VOICE_ASSIST:
                 Slog.wtf(TAG, "KEYCODE_VOICE_ASSIST should be handled in"
                         + " interceptKeyBeforeQueueing");
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_VIDEO_APP_1:
             case KeyEvent.KEYCODE_VIDEO_APP_2:
             case KeyEvent.KEYCODE_VIDEO_APP_3:
@@ -3129,7 +3174,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DEMO_APP_3:
             case KeyEvent.KEYCODE_DEMO_APP_4:
                 Slog.wtf(TAG, "KEYCODE_APP_X should be handled in interceptKeyBeforeQueueing");
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
                 if (down) {
@@ -3169,20 +3214,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
                             UserHandle.CURRENT_OR_SELF);
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
                 if (down) {
                     mInputManagerInternal.decrementKeyboardBacklight(event.getDeviceId());
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP:
                 if (down) {
                     mInputManagerInternal.incrementKeyboardBacklight(event.getDeviceId());
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE:
                 // TODO: Add logic
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE:
@@ -3190,7 +3235,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // On TVs or when the configuration is enabled, volume keys never
                     // go to the foreground app.
                     dispatchDirectAudioEvent(event);
-                    return key_consumed;
+                    return true;
                 }
 
                 // If the device is in VR mode and keys are "internal" (e.g. on the side of the
@@ -3199,26 +3244,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mDefaultDisplayPolicy.isPersistentVrModeEnabled()) {
                     final InputDevice d = event.getDevice();
                     if (d != null && !d.isExternal()) {
-                        return key_consumed;
+                        return true;
                     }
                 }
                 break;
             case KeyEvent.KEYCODE_TAB:
-                if (down && event.isMetaPressed()) {
-                    if (!keyguardOn && isUserSetupComplete()) {
+                if (firstDown && !keyguardOn && isUserSetupComplete()) {
+                    if (event.isMetaPressed()) {
                         showRecentApps(false);
-                        return key_consumed;
-                    }
-                } else if (down && repeatCount == 0) {
-                    // Display task switcher for ALT-TAB.
-                    if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
+                        return true;
+                    } else if (mRecentAppsHeldModifiers == 0) {
                         final int shiftlessModifiers =
                                 event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                         if (KeyEvent.metaStateHasModifiers(
                                 shiftlessModifiers, KeyEvent.META_ALT_ON)) {
                             mRecentAppsHeldModifiers = shiftlessModifiers;
                             showRecentApps(true);
-                            return key_consumed;
+                            return true;
                         }
                     }
                 }
@@ -3230,18 +3272,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_NOTIFICATION:
                 if (!down) {
                     toggleNotificationPanel();
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_SEARCH:
-                if (down && repeatCount == 0 && !keyguardOn()) {
-                    switch(mSearchKeyBehavior) {
+                if (firstDown && !keyguardOn) {
+                    switch (mSearchKeyBehavior) {
                         case SEARCH_BEHAVIOR_TARGET_ACTIVITY: {
                             launchTargetSearchActivity();
-                            return key_consumed;
+                            return true;
                         }
                         case SEARCH_BEHAVIOR_DEFAULT_SEARCH:
                         default:
@@ -3250,21 +3292,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_LANGUAGE_SWITCH:
-                if (down && repeatCount == 0) {
+                if (firstDown) {
                     int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                     sendSwitchKeyboardLayout(event, direction);
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_SPACE:
                 // Handle keyboard layout switching. (META + SPACE)
-                if ((metaState & KeyEvent.META_META_MASK) == 0) {
-                    return key_not_consumed;
-                }
-                if (down && repeatCount == 0) {
+                if (firstDown && event.isMetaPressed()) {
                     int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                     sendSwitchKeyboardLayout(event, direction);
-                    return key_consumed;
+                    return true;
                 }
                 break;
             case KeyEvent.KEYCODE_META_LEFT:
@@ -3289,7 +3328,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mPendingMetaAction = false;
                     }
                 }
-                return key_consumed;
+                return true;
             case KeyEvent.KEYCODE_ALT_LEFT:
             case KeyEvent.KEYCODE_ALT_RIGHT:
                 if (down) {
@@ -3305,14 +3344,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             && (metaState & mRecentAppsHeldModifiers) == 0) {
                         mRecentAppsHeldModifiers = 0;
                         hideRecentApps(true, false);
-                        return key_consumed;
+                        return true;
                     }
 
                     // Toggle Caps Lock on META-ALT.
                     if (mPendingCapsLockToggle) {
                         mInputManagerInternal.toggleCapsLock(event.getDeviceId());
                         mPendingCapsLockToggle = false;
-                        return key_consumed;
+                        return true;
                     }
                 }
                 break;
@@ -3322,24 +3361,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL:
                 Slog.wtf(TAG, "KEYCODE_STYLUS_BUTTON_* should be handled in"
                         + " interceptKeyBeforeQueueing");
-                return key_consumed;
+                return true;
         }
-
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
-            return key_consumed;
+            return true;
         }
 
         // Reserve all the META modifier combos for system behavior
-        if ((metaState & KeyEvent.META_META_ON) != 0) {
-            return key_consumed;
-        }
-
-        // Let the application handle the key.
-        return key_not_consumed;
+        return (metaState & KeyEvent.META_META_ON) != 0;
     }
 
-    private int handleHomeShortcuts(int displayId, IBinder focusedToken, KeyEvent event) {
+    private boolean handleHomeShortcuts(int displayId, IBinder focusedToken, KeyEvent event) {
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
