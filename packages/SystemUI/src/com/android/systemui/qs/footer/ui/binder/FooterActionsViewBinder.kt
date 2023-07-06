@@ -244,8 +244,8 @@ class FooterActionsViewBinder @Inject constructor() {
 
         val backgroundResource =
             when (model.backgroundColor) {
-                R.attr.shadeInactive -> R.drawable.qs_footer_action_circle
-                R.attr.shadeActive -> R.drawable.qs_footer_action_circle_color
+                R.attr.offStateColor -> R.drawable.qs_footer_action_circle
+                com.android.internal.R.attr.colorAccent -> R.drawable.qs_footer_action_circle_color
                 else -> error("Unsupported icon background resource ${model.backgroundColor}")
             }
         buttonView.setBackgroundResource(backgroundResource)

@@ -15,7 +15,6 @@
   limitations under the License.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -48,7 +47,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Dialog.Title"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:fontFamily="@*android:string/config_headlineFontFamily"
                     android:text="@string/screenrecord_permission_dialog_title"
                     android:layout_marginTop="22dp"
@@ -57,7 +56,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
-                    android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?android:textColorSecondary"
                     android:gravity="center"
                     android:layout_marginBottom="20dp"/>
 
@@ -81,7 +81,6 @@
                         android:minHeight="48dp"
                         android:layout_weight="1"
                         android:popupBackground="@drawable/screenrecord_spinner_background"
-                        android:textColor="?androidprv:attr/materialColorOnSurface"
                         android:dropDownWidth="274dp"
                         android:prompt="@string/screenrecord_audio_label"/>
                     <Switch
@@ -118,7 +117,7 @@
                         android:text="@string/screenrecord_taps_label"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:fontFamily="@*android:string/config_headlineFontFamily"
-                        android:textColor="?androidprv:attr/materialColorOnSurface"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:importantForAccessibility="no"/>
                     <Switch
                         android:layout_width="wrap_content"
