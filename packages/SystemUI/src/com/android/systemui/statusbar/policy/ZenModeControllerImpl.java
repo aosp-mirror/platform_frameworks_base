@@ -28,6 +28,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
@@ -122,7 +123,12 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
                 userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
-                updateZenModeConfig();
+                try {
+                    Trace.beginSection("updateZenModeConfig");
+                    updateZenModeConfig();
+                } finally {
+                    Trace.endSection();
+                }
             }
         };
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
