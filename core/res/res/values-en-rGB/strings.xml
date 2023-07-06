@@ -2305,7 +2305,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Can’t access the phone’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Can’t access the tablet’s camera from your <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"This can’t be accessed while streaming. Try on your phone instead."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Can’t view picture-in-picture while streaming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"System default"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Companion watch profile permission to manage watches"</string>

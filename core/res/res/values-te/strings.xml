@@ -2305,7 +2305,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి ఫోన్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి టాబ్లెట్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"స్ట్రీమింగ్ చేస్తున్నప్పుడు దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"స్ట్రీమింగ్ చేస్తున్నప్పుడు పిక్చర్-ఇన్-పిక్చర్ చూడలేరు"</string>
     <string name="system_locale_title" msgid="711882686834677268">"సిస్టమ్ ఆటోమేటిక్ సెట్టింగ్"</string>
     <string name="default_card_name" msgid="9198284935962911468">"కార్డ్ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"వాచ్‌లను మేనేజ్ చేయడానికి సహాయక వాచ్ ప్రొఫైల్ అనుమతి"</string>

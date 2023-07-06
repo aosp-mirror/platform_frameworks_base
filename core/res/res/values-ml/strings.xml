@@ -2305,7 +2305,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഫോണിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"സ്ട്രീം ചെയ്യുമ്പോൾ ഇത് ആക്സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"സ്ട്രീമിംഗിനിടെ ചിത്രത്തിനുള്ളിൽ ചിത്രം കാണാനാകില്ല"</string>
     <string name="system_locale_title" msgid="711882686834677268">"സിസ്‌റ്റം ഡിഫോൾട്ട്"</string>
     <string name="default_card_name" msgid="9198284935962911468">"കാർഡ് <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"വാച്ചുകൾ മാനേജ് ചെയ്യുന്നതിന് സഹകാരി ആപ്പിനുള്ള വാച്ച് പ്രൊഫൈൽ അനുമതി"</string>
