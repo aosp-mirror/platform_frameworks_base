@@ -25,7 +25,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -58,12 +57,10 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSettings;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {UtilsTest.ShadowSecure.class, UtilsTest.ShadowLocationManager.class})
+@Config(shadows = {UtilsTest.ShadowLocationManager.class})
 public class UtilsTest {
     private static final double[] TEST_PERCENTAGES = {0, 0.4, 0.5, 0.6, 49, 49.3, 49.8, 50, 100};
     private static final String TAG = "UtilsTest";
@@ -94,7 +91,7 @@ public class UtilsTest {
         mContext = spy(RuntimeEnvironment.application);
         when(mContext.getSystemService(Context.LOCATION_SERVICE)).thenReturn(mLocationManager);
         when(mContext.getSystemService(UsbManager.class)).thenReturn(mUsbManager);
-        ShadowSecure.reset();
+        ShadowSettings.ShadowSecure.reset();
         mAudioManager = mContext.getSystemService(AudioManager.class);
     }
 
@@ -111,15 +108,16 @@ public class UtilsTest {
                 Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
 
         assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
-                .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
+                Settings.Secure.LOCATION_CHANGER,
+                Settings.Secure.LOCATION_CHANGER_UNKNOWN)).isEqualTo(
+                Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
     }
 
     @Test
     public void testFormatPercentage_RoundTrue_RoundUpIfPossible() {
-        final String[] expectedPercentages = {PERCENTAGE_0, PERCENTAGE_0, PERCENTAGE_1,
-                PERCENTAGE_1, PERCENTAGE_49, PERCENTAGE_49, PERCENTAGE_50, PERCENTAGE_50,
-                PERCENTAGE_100};
+        final String[] expectedPercentages =
+                {PERCENTAGE_0, PERCENTAGE_0, PERCENTAGE_1, PERCENTAGE_1, PERCENTAGE_49,
+                        PERCENTAGE_49, PERCENTAGE_50, PERCENTAGE_50, PERCENTAGE_100};
 
         for (int i = 0, size = TEST_PERCENTAGES.length; i < size; i++) {
             final String percentage = Utils.formatPercentage(TEST_PERCENTAGES[i], true);
@@ -129,9 +127,9 @@ public class UtilsTest {
 
     @Test
     public void testFormatPercentage_RoundFalse_NoRound() {
-        final String[] expectedPercentages = {PERCENTAGE_0, PERCENTAGE_0, PERCENTAGE_0,
-                PERCENTAGE_0, PERCENTAGE_49, PERCENTAGE_49, PERCENTAGE_49, PERCENTAGE_50,
-                PERCENTAGE_100};
+        final String[] expectedPercentages =
+                {PERCENTAGE_0, PERCENTAGE_0, PERCENTAGE_0, PERCENTAGE_0, PERCENTAGE_49,
+                        PERCENTAGE_49, PERCENTAGE_49, PERCENTAGE_50, PERCENTAGE_100};
 
         for (int i = 0, size = TEST_PERCENTAGES.length; i < size; i++) {
             final String percentage = Utils.formatPercentage(TEST_PERCENTAGES[i], false);
@@ -143,12 +141,7 @@ public class UtilsTest {
     public void testGetDefaultStorageManagerDaysToRetain_storageManagerDaysToRetainUsesResources() {
         Resources resources = mock(Resources.class);
         when(resources.getInteger(
-                eq(
-                        com.android
-                                .internal
-                                .R
-                                .integer
-                                .config_storageManagerDaystoRetainDefault)))
+                eq(com.android.internal.R.integer.config_storageManagerDaystoRetainDefault)))
                 .thenReturn(60);
         assertThat(Utils.getDefaultStorageManagerDaysToRetain(resources)).isEqualTo(60);
     }
@@ -161,31 +154,6 @@ public class UtilsTest {
 
     private static ArgumentMatcher<Intent> actionMatches(String expected) {
         return intent -> TextUtils.equals(expected, intent.getAction());
-    }
-
-    @Implements(value = Settings.Secure.class)
-    public static class ShadowSecure extends ShadowSettings.ShadowSecure {
-        private static Map<String, Integer> map = new HashMap<>();
-
-        @Implementation
-        public static boolean putIntForUser(ContentResolver cr, String name, int value,
-                int userHandle) {
-            map.put(name, value);
-            return true;
-        }
-
-        @Implementation
-        public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
-            if (map.containsKey(name)) {
-                return map.get(name);
-            } else {
-                return def;
-            }
-        }
-
-        public static void reset() {
-            map.clear();
-        }
     }
 
     @Implements(value = LocationManager.class)
@@ -337,9 +305,8 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_statusIsFull_returnFullString() {
-        final Intent intent = new Intent()
-                .putExtra(BatteryManager.EXTRA_LEVEL, 100)
-                .putExtra(BatteryManager.EXTRA_SCALE, 100);
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100).putExtra(
+                BatteryManager.EXTRA_SCALE, 100);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
@@ -348,9 +315,8 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_statusIsFullAndUseCompactStatus_returnFullyChargedString() {
-        final Intent intent = new Intent()
-                .putExtra(BatteryManager.EXTRA_LEVEL, 100)
-                .putExtra(BatteryManager.EXTRA_SCALE, 100);
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100).putExtra(
+                BatteryManager.EXTRA_SCALE, 100);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
@@ -516,7 +482,6 @@ public class UtilsTest {
         when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
-        when(mUsbPortStatus.getComplianceWarnings())
-                .thenReturn(new int[]{complianceWarningType});
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{complianceWarningType});
     }
 }
