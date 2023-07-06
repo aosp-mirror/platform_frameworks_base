@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,20 @@
 
 package com.android.settingslib.testutils.shadow;
 
-import android.content.ComponentName;
-import android.content.Context;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
-import com.android.internal.telephony.SmsApplication;
+import android.content.ContentResolver;
+import android.provider.Settings;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.Resetter;
+import org.robolectric.shadows.ShadowSettings;
 
-@Implements(SmsApplication.class)
-public class ShadowSmsApplication {
-
-    private static ComponentName sDefaultSmsApplication;
-
-    @Resetter
-    public static void reset() {
-        sDefaultSmsApplication = null;
-    }
-
-    @Implementation
-    protected static ComponentName getDefaultSmsApplication(Context context, boolean update) {
-        return sDefaultSmsApplication;
-    }
-
-    public static void setDefaultSmsApplication(ComponentName cn) {
-        sDefaultSmsApplication = cn;
+@Implements(value = Settings.Secure.class)
+public class ShadowSecure extends ShadowSettings.ShadowSecure {
+    @Implementation(minSdk = JELLY_BEAN_MR1)
+    public static boolean putStringForUser(ContentResolver cr, String name, String value,
+            int userHandle) {
+        return putString(cr, name, value);
     }
 }
