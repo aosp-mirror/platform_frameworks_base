@@ -398,7 +398,8 @@
         <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+    <!-- Cannot double inherit. Use Theme.SystemUI.QuickSettings in code to match -->
+    <style name="BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
