@@ -16,17 +16,14 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.PlatinumTest
-import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import com.android.wm.shell.flicker.SplitScreenUtils
+import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -35,7 +32,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SwitchBetweenSplitPairsBenchmark(override val flicker: LegacyFlickerTest) :
+abstract class SwitchBetweenSplitPairsBenchmark(override val flicker: LegacyFlickerTest) :
     SplitScreenBase(flicker) {
     protected val thirdApp = SplitScreenUtils.getIme(instrumentation)
     protected val fourthApp = SplitScreenUtils.getSendNotification(instrumentation)
@@ -63,8 +60,6 @@ open class SwitchBetweenSplitPairsBenchmark(override val flicker: LegacyFlickerT
             defaultTeardown(this)
             thisTransition(this)
         }
-
-    @PlatinumTest(focusArea = "sysui") @Presubmit @Test open fun cujCompleted() {}
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

@@ -66,11 +66,12 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
     AutoEnterPipOnGoToHomeTest(flicker) {
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     /** Second app used to enter split screen mode */
-    private val secondAppForSplitScreen = SimpleAppHelper(
-        instrumentation,
-        ActivityOptions.SplitScreen.Primary.LABEL,
-        ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent()
-    )
+    private val secondAppForSplitScreen =
+        SimpleAppHelper(
+            instrumentation,
+            ActivityOptions.SplitScreen.Primary.LABEL,
+            ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent()
+        )
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit

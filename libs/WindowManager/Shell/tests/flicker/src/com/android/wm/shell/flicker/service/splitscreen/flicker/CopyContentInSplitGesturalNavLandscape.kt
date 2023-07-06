@@ -29,9 +29,7 @@ import org.junit.runner.RunWith
 
 @RunWith(FlickerServiceJUnit4ClassRunner::class)
 class CopyContentInSplitGesturalNavLandscape : CopyContentInSplit(Rotation.ROTATION_90) {
-    @ExpectedScenarios([])
-    @Test
-    override fun copyContentInSplit() = super.copyContentInSplit()
+    @ExpectedScenarios([]) @Test override fun copyContentInSplit() = super.copyContentInSplit()
 
     companion object {
         @JvmStatic
