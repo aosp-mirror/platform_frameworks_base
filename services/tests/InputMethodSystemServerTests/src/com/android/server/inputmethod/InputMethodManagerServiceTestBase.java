@@ -19,6 +19,7 @@ package com.android.server.inputmethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -145,8 +146,7 @@ public class InputMethodManagerServiceTestBase {
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
 
-        mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        spyOn(mContext);
+        mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
 
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
         mIsLargeScreen = mContext.getResources().getConfiguration()
