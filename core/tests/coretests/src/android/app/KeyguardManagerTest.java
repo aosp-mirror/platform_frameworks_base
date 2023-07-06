@@ -174,6 +174,22 @@ public class KeyguardManagerTest {
     }
 
     @Test
+    public void setLock_validatesCredential() {
+        // setLock() should validate the credential before setting it.  Test one example, which is
+        // that PINs must contain only ASCII digits 0-9, i.e. bytes 48-57.  Using bytes 0-9 is
+        // incorrect and should *not* be accepted.
+        byte[] invalidPin = new byte[] { 1, 2, 3, 4 };
+        byte[] validPin = "1234".getBytes();
+
+        assertFalse(mKeyguardManager.setLock(KeyguardManager.PIN, invalidPin, -1, null));
+        assertFalse(mKeyguardManager.isDeviceSecure());
+
+        assertTrue(mKeyguardManager.setLock(KeyguardManager.PIN, validPin, -1, null));
+        assertTrue(mKeyguardManager.isDeviceSecure());
+        assertTrue(mKeyguardManager.setLock(-1, null, KeyguardManager.PIN, validPin));
+    }
+
+    @Test
     public void checkLock_correctCredentials() {
         // Set to `true` to behave as if SET_INITIAL_LOCK permission had been granted.
         doReturn(true).when(mKeyguardManager).checkInitialLockMethodUsage();
