@@ -969,7 +969,7 @@ public final class CachedAppOptimizerTest {
 
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
-        if (CachedAppOptimizer.ENABLE_FILE_COMPACT) {
+        if (CachedAppOptimizer.ENABLE_SHARED_AND_CODE_COMPACT) {
             // We force a some compaction
             mCachedAppOptimizerUnderTest.compactApp(processRecord,
                     CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP,
