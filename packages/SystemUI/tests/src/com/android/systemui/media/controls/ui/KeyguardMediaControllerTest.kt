@@ -193,12 +193,34 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun dozeWakeUpAnimationWaiting_inSplitShade_mediaIsHidden() {
+        val splitShadeContainer = FrameLayout(context)
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+        keyguardMediaController.useSplitShade = true
+
+        keyguardMediaController.isDozeWakeUpAnimationWaiting = true
+
+        assertThat(splitShadeContainer.visibility).isEqualTo(GONE)
+    }
+
+    @Test
     fun dozing_inSingleShade_mediaIsVisible() {
         val splitShadeContainer = FrameLayout(context)
         keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
         keyguardMediaController.useSplitShade = false
 
         setDozing()
+
+        assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
+    }
+
+    @Test
+    fun dozeWakeUpAnimationWaiting_inSingleShade_mediaIsVisible() {
+        val splitShadeContainer = FrameLayout(context)
+        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
+        keyguardMediaController.useSplitShade = false
+
+        keyguardMediaController.isDozeWakeUpAnimationWaiting = true
 
         assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }
