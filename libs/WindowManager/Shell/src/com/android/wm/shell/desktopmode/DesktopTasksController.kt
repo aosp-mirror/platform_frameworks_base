@@ -286,7 +286,7 @@ class DesktopTasksController(
                 visualIndicator?.releaseVisualIndicator(t)
                 visualIndicator = null
                 addMoveToFullscreenChanges(callbackWCT, task)
-                shellTaskOrganizer.applyTransaction(callbackWCT)
+                transitions.startTransition(TRANSIT_CHANGE, callbackWCT, null /* handler */)
             }
         } else {
             addMoveToFullscreenChanges(wct, task)
