@@ -189,15 +189,15 @@ constructor(
         )
     }
 
-    fun logDisplayModeChanged(currentMode: Int, newMode: Int) {
+    fun logDisplaySizeChanged(currentSize: Point, newSize: Point) {
         logBuffer.log(
             TAG,
             INFO,
             {
-                int1 = currentMode
-                int2 = newMode
+                str1 = currentSize.flattenToString()
+                str2 = newSize.flattenToString()
             },
-            { "Resolution changed, deferring mode change to $int2, staying at $int1" },
+            { "Resolution changed, deferring size change to $str2, staying at $str1" },
         )
     }
 
