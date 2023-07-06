@@ -716,8 +716,7 @@ class MediaDataManager(
         val appUid = currentEntry?.appUid ?: Process.INVALID_UID
         val isExplicit =
             desc.extras?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
-                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT &&
-                mediaFlags.isExplicitIndicatorEnabled()
+                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
 
         val progress =
             if (mediaFlags.isResumeProgressEnabled()) {
@@ -826,12 +825,10 @@ class MediaDataManager(
 
         // Explicit Indicator
         var isExplicit = false
-        if (mediaFlags.isExplicitIndicatorEnabled()) {
-            val mediaMetadataCompat = MediaMetadataCompat.fromMediaMetadata(metadata)
-            isExplicit =
-                mediaMetadataCompat?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
-                    MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
-        }
+        val mediaMetadataCompat = MediaMetadataCompat.fromMediaMetadata(metadata)
+        isExplicit =
+            mediaMetadataCompat?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
+                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
 
         // Artist name
         var artist: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)

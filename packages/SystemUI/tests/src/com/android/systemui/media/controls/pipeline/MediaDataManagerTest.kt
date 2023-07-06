@@ -261,7 +261,6 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(SMARTSPACE_CREATION_TIME)
         whenever(mediaSmartspaceTarget.expiryTimeMillis).thenReturn(SMARTSPACE_EXPIRY_TIME)
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
-        whenever(mediaFlags.isExplicitIndicatorEnabled()).thenReturn(true)
         whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(false)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(false)
