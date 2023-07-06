@@ -23,7 +23,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
@@ -38,11 +37,10 @@ import org.junit.runners.Parameterized
  * Test IME window closing back to app window transitions. To run this test: `atest
  * FlickerTests:CloseImeWindowToAppTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
+class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */

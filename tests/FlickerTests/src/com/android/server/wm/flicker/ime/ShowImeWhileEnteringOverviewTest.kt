@@ -24,7 +24,6 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.traces.parsers.WindowManagerStateHelper
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
@@ -41,11 +40,10 @@ import org.junit.runners.Parameterized
  * Test IME window layer will be associated with the app task when going to the overview screen. To
  * run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
+class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val imeTestApp =
         ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 

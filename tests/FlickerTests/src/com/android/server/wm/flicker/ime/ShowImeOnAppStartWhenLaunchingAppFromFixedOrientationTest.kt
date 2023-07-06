@@ -25,7 +25,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.setRotation
@@ -41,11 +40,10 @@ import org.junit.runners.Parameterized
  * (e.g. Launcher activity). To run this test: `atest
  * FlickerTests:ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyFlickerTest) :
+class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyFlickerTest) :
     BaseTest(flicker) {
     private val imeTestApp =
         ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
@@ -86,23 +84,28 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Le
         val layerTrace = flicker.reader.readLayersTrace() ?: error("Unable to read layers trace")
 
         // Find the entries immediately after the IME snapshot has disappeared
-        val imeSnapshotRemovedEntries = layerTrace.entries.asSequence()
-            .zipWithNext { prev, next ->
-                if (ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(prev.visibleLayers) &&
-                    !ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(next.visibleLayers)) {
-                    next
-                } else {
-                    null
+        val imeSnapshotRemovedEntries =
+            layerTrace.entries
+                .asSequence()
+                .zipWithNext { prev, next ->
+                    if (
+                        ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(prev.visibleLayers) &&
+                            !ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(next.visibleLayers)
+                    ) {
+                        next
+                    } else {
+                        null
+                    }
                 }
-            }
-            .filterNotNull()
+                .filterNotNull()
 
         // If we find it, make sure the IME is visible and fully animated in.
         imeSnapshotRemovedEntries.forEach { entry ->
             val entrySubject = LayerTraceEntrySubject(entry)
-            val imeLayerSubjects = entrySubject.subjects.filter {
-                ComponentNameMatcher.IME.layerMatchesAnyOf(it.layer) && it.isVisible
-            }
+            val imeLayerSubjects =
+                entrySubject.subjects.filter {
+                    ComponentNameMatcher.IME.layerMatchesAnyOf(it.layer) && it.isVisible
+                }
 
             entrySubject
                 .check { "InputMethod must exist and be visible" }
@@ -110,10 +113,7 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Le
                 .isEqual(true)
 
             imeLayerSubjects.forEach { imeLayerSubject ->
-                imeLayerSubject
-                    .check { "alpha" }
-                    .that(imeLayerSubject.layer.color.a)
-                    .isEqual(1.0f)
+                imeLayerSubject.check { "alpha" }.that(imeLayerSubject.layer.color.a).isEqual(1.0f)
             }
         }
     }

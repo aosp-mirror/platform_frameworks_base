@@ -26,7 +26,6 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import org.junit.Assert.assertFalse
@@ -41,12 +40,10 @@ import org.junit.runners.Parameterized
  * Test IME snapshot mechanism won't apply when transitioning from non-IME focused dialog activity.
  * To run this test: `atest FlickerTests:LaunchAppShowImeAndDialogThemeAppTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ShowImeWhileDismissingThemedPopupDialogTest(flicker: LegacyFlickerTest) :
-    BaseTest(flicker) {
+class ShowImeWhileDismissingThemedPopupDialogTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
