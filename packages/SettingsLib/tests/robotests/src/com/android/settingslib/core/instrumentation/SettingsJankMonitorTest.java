@@ -36,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.CujType;
+import com.android.settingslib.testutils.OverpoweredReflectionHelper;
 import com.android.settingslib.testutils.shadow.ShadowInteractionJankMonitor;
 
 import org.junit.Before;
@@ -51,7 +52,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
-import org.robolectric.util.ReflectionHelpers;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -83,8 +83,10 @@ public class SettingsJankMonitorTest {
     public void setUp() {
         ShadowInteractionJankMonitor.reset();
         when(ShadowInteractionJankMonitor.MOCK_INSTANCE.begin(any())).thenReturn(true);
-        ReflectionHelpers.setStaticField(SettingsJankMonitor.class, "scheduledExecutorService",
-                mScheduledExecutorService);
+        OverpoweredReflectionHelper
+                .setStaticField(SettingsJankMonitor.class,
+                        "scheduledExecutorService",
+                        mScheduledExecutorService);
     }
 
     @Test
