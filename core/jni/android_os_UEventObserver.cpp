@@ -71,7 +71,11 @@ static jstring nativeWaitForNextEvent(JNIEnv *env, jclass clazz) {
         }
         buffer[length] = '\0';
 
-        ALOGV("Received uevent message: %s", buffer);
+        IF_ALOGV() {
+            std::string message(buffer, length);
+            std::replace(message.begin(), message.end(), '\0', ' ');
+            ALOGV("Received uevent message: %s", message.c_str());
+        }
 
         if (isMatch(buffer, length)) {
             // Assume the message is ASCII.
