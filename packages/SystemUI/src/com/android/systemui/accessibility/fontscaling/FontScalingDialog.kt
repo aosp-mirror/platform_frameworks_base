@@ -26,12 +26,13 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.android.systemui.R
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
+import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener
+import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener.ControlUnitType
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
@@ -105,28 +106,32 @@ class FontScalingDialog(
         lastProgress.set(fontSizeValueToIndex(currentScale))
         seekBarWithIconButtonsView.setProgress(lastProgress.get())
 
-        seekBarWithIconButtonsView.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                var isTrackingTouch = false
-
+        seekBarWithIconButtonsView.setOnSeekBarWithIconButtonsChangeListener(
+            object : OnSeekBarWithIconButtonsChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                     // Always provide preview configuration for text first when there is a change
                     // in the seekbar progress.
                     createTextPreview(progress)
-
-                    if (!isTrackingTouch) {
-                        // The seekbar progress is changed by icon buttons
-                        changeFontSize(progress, CHANGE_BY_BUTTON_DELAY_MS)
-                    }
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    isTrackingTouch = true
+                    // Do nothing
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    isTrackingTouch = false
-                    changeFontSize(seekBar.progress, CHANGE_BY_SEEKBAR_DELAY_MS)
+                    // Do nothing
+                }
+
+                override fun onUserInteractionFinalized(
+                    seekBar: SeekBar,
+                    @ControlUnitType control: Int
+                ) {
+                    if (control == ControlUnitType.BUTTON) {
+                        // The seekbar progress is changed by icon buttons
+                        changeFontSize(seekBar.progress, CHANGE_BY_BUTTON_DELAY_MS)
+                    } else {
+                        changeFontSize(seekBar.progress, CHANGE_BY_SEEKBAR_DELAY_MS)
+                    }
                 }
             }
         )

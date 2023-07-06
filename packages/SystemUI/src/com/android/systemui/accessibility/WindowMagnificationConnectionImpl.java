@@ -99,6 +99,12 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
+    public void onUserMagnificationScaleChanged(int userId, int displayId, float scale) {
+        mHandler.post(() -> mWindowMagnification.setUserMagnificationScale(
+                userId, displayId, scale));
+    }
+
+    @Override
     public void setConnectionCallback(IWindowMagnificationConnectionCallback callback) {
         mConnectionCallback = callback;
     }

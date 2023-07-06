@@ -388,21 +388,10 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     SurfaceControl.Builder makeSurface() {
         final SurfaceControl.Builder builder = super.makeSurface();
-        // The overlay may use COLOR_MODE_A8 that needs to be at the top of the display to avoid
-        // additional memory usage, see b/235601833. Note that getParentSurfaceControl() must use
-        // the same parent.
         if (mRoundedCornerOverlay) {
             builder.setParent(null);
         }
         return builder;
-    }
-
-    @Override
-    public SurfaceControl getParentSurfaceControl() {
-        if (mRoundedCornerOverlay) {
-            return null;
-        }
-        return super.getParentSurfaceControl();
     }
 
     boolean isClientVisible() {

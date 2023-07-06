@@ -29,7 +29,7 @@
             <shape android:shape="rectangle">
                 <corners android:radius="?android:attr/buttonCornerRadius"/>
                 <solid android:color="@android:color/transparent"/>
-                <stroke android:color="?androidprv:attr/colorAccentPrimaryVariant"
+                <stroke android:color="?androidprv:attr/materialColorPrimary"
                         android:width="1dp"
                 />
                 <padding android:left="@dimen/dialog_button_horizontal_padding"
