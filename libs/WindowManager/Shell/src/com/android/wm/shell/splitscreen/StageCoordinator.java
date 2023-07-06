@@ -1570,6 +1570,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // split bounds.
             wct.setSmallestScreenWidthDp(mMainStage.mRootTaskInfo.token,
                     SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
+            mSplitLayout.getInvisibleBounds(mTempRect1);
+            mSplitLayout.setTaskBounds(wct, mSideStage.mRootTaskInfo, mTempRect1);
         }
         wct.reorder(mRootTaskInfo.token, true);
         setRootForceTranslucent(false, wct);
