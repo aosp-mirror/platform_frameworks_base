@@ -228,12 +228,12 @@
     <dimen name="bubble_user_education_stack_padding">16dp</dimen>
     <!-- Size of the bubble bar (height), should match transient_taskbar_size in Launcher. -->
     <dimen name="bubblebar_size">72dp</dimen>
-    <!-- The size of the drag handle / menu shown along with a bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_handle_size">40dp</dimen>
-    <!-- The width of the drag handle shown along with a bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_handle_width">128dp</dimen>
-    <!-- The height of the drag handle shown along with a bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
+    <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
+    <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
+    <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
+    <dimen name="bubble_bar_expanded_view_caption_dot_spacing">4dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->
