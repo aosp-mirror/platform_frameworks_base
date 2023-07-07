@@ -1090,7 +1090,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             + container);
                     break;
                 }
-                container.addLocalInsetsFrameProvider(hop.getInsetsFrameProvider());
+                container.addLocalInsetsFrameProvider(
+                        hop.getInsetsFrameProvider(), hop.getInsetsFrameOwner());
                 break;
             }
             case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER: {
@@ -1100,7 +1101,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                     + container);
                     break;
                 }
-                container.removeLocalInsetsFrameProvider(hop.getInsetsFrameProvider());
+                container.removeLocalInsetsFrameProvider(
+                        hop.getInsetsFrameProvider(), hop.getInsetsFrameOwner());
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: {
