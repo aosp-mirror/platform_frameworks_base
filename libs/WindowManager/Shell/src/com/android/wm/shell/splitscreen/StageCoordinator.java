@@ -219,6 +219,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mIsDropEntering;
     private boolean mIsExiting;
     private boolean mIsRootTranslucent;
+    @VisibleForTesting
+    int mTopStageAfterFoldDismiss;
 
     private DefaultMixedHandler mMixedHandler;
     private final Toast mSplitUnsupportedToast;
@@ -1310,6 +1312,24 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final StageTaskListener toTop = mainStageVisible ? mMainStage : mSideStage;
             exitSplitScreen(toTop, EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
         }
+
+        // Dismiss split if the flag record any side of stages.
+        if (mTopStageAfterFoldDismiss != STAGE_TYPE_UNDEFINED) {
+            if (ENABLE_SHELL_TRANSITIONS) {
+                // Need manually clear here due to this transition might be aborted due to keyguard
+                // on top and lead to no visible change.
+                clearSplitPairedInRecents(EXIT_REASON_DEVICE_FOLDED);
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
+                mSplitTransitions.startDismissTransition(wct, this,
+                        mTopStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
+            } else {
+                exitSplitScreen(
+                        mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
+                        EXIT_REASON_DEVICE_FOLDED);
+            }
+            mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+        }
     }
 
     void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
@@ -1346,15 +1366,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!mMainStage.isActive() || mIsExiting) return;
 
         onSplitScreenExit();
+        clearSplitPairedInRecents(exitReason);
 
-        mRecentTasks.ifPresent(recentTasks -> {
-            // Notify recents if we are exiting in a way that breaks the pair, and disable further
-            // updates to splits in the recents until we enter split again
-            if (shouldBreakPairedTaskInRecents(exitReason) && mShouldUpdateRecents) {
-                recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
-                recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
-            }
-        });
         mShouldUpdateRecents = false;
         mIsDividerRemoteAnimating = false;
         mSplitRequest = null;
@@ -1479,6 +1492,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             default:
                 return false;
         }
+    }
+
+    private void clearSplitPairedInRecents(@ExitReason int exitReason) {
+        if (!shouldBreakPairedTaskInRecents(exitReason) || !mShouldUpdateRecents) return;
+
+        mRecentTasks.ifPresent(recentTasks -> {
+            // Notify recents if we are exiting in a way that breaks the pair, and disable further
+            // updates to splits in the recents until we enter split again
+            mMainStage.doForAllChildTasks(taskId -> recentTasks.removeSplitPair(taskId));
+            mSideStage.doForAllChildTasks(taskId -> recentTasks.removeSplitPair(taskId));
+        });
     }
 
     /**
@@ -2208,7 +2232,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    void updateSurfaces(SurfaceControl.Transaction transaction) {
+    /**
+     * Update surfaces of the split screen layout based on the current state
+     * @param transaction to write the updates to
+     */
+    public void updateSurfaces(SurfaceControl.Transaction transaction) {
         updateSurfaceBounds(mSplitLayout, transaction, /* applyResizingOffset */ false);
         mSplitLayout.update(transaction);
     }
@@ -2227,26 +2255,18 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @VisibleForTesting
     void onFoldedStateChanged(boolean folded) {
-        int topStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+        mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         if (!folded) return;
 
-        if (!mMainStage.isActive()) return;
+        if (!isSplitActive() || !isSplitScreenVisible()) return;
 
+        // To avoid split dismiss when user fold the device and unfold to use later, we only
+        // record the flag here and try to dismiss on wakeUp callback to ensure split dismiss
+        // when user interact on phone folded.
         if (mMainStage.isFocused()) {
-            topStageAfterFoldDismiss = STAGE_TYPE_MAIN;
+            mTopStageAfterFoldDismiss = STAGE_TYPE_MAIN;
         } else if (mSideStage.isFocused()) {
-            topStageAfterFoldDismiss = STAGE_TYPE_SIDE;
-        }
-
-        if (ENABLE_SHELL_TRANSITIONS) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            prepareExitSplitScreen(topStageAfterFoldDismiss, wct);
-            mSplitTransitions.startDismissTransition(wct, this,
-                    topStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
-        } else {
-            exitSplitScreen(
-                    topStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
-                    EXIT_REASON_DEVICE_FOLDED);
+            mTopStageAfterFoldDismiss = STAGE_TYPE_SIDE;
         }
     }
 
