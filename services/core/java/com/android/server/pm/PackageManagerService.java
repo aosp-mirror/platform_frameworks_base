@@ -4299,6 +4299,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mAppsFilter.onUserDeleted(snapshotComputer(), userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
+        mPackageMonitorCallbackHelper.onUserRemoved(userId);
     }
 
     /**
