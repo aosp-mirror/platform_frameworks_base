@@ -34,7 +34,7 @@ public class BouncerScrimController implements ScrimController {
 
     @Override
     public void show() {
-        mStatusBarKeyguardViewManager.showBouncer(false);
+        mStatusBarKeyguardViewManager.showPrimaryBouncer(false);
     }
 
     @Override

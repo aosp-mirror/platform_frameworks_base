@@ -71,8 +71,13 @@ public class PipTouchHandler {
     private static final String TAG = "PipTouchHandler";
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
 
-    private static final boolean ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
-            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", false);
+    private boolean mEnablePipKeepClearAlgorithm =
+            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", true);
+
+    @VisibleForTesting
+    void setEnablePipKeepClearAlgorithm(boolean value) {
+        mEnablePipKeepClearAlgorithm = value;
+    }
 
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
@@ -194,11 +199,6 @@ public class PipTouchHandler {
         mMotionHelper = pipMotionHelper;
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
-        mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
-                        mMotionHelper, pipTaskOrganizer, mPipDismissTargetHandler,
-                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
-                        menuController, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
                     if (mPipBoundsState.isStashed()) {
@@ -215,6 +215,11 @@ public class PipTouchHandler {
                 },
                 menuController::hideMenu,
                 mainExecutor);
+        mPipResizeGestureHandler =
+                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
+                        mMotionHelper, mTouchState, pipTaskOrganizer, mPipDismissTargetHandler,
+                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
+                        menuController, mainExecutor);
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds,
@@ -427,7 +432,7 @@ public class PipTouchHandler {
             if (mTouchState.isUserInteracting() && mTouchState.isDragging()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
-            } else if (ENABLE_PIP_KEEP_CLEAR_ALGORITHM) {
+            } else if (mEnablePipKeepClearAlgorithm) {
                 // Ignore moving PiP if keep clear algorithm is enabled, since IME and shelf height
                 // now are accounted for in the keep clear algorithm calculations
             } else {
@@ -548,6 +553,11 @@ public class PipTouchHandler {
     public boolean handleTouchEvent(InputEvent inputEvent) {
         // Skip any non motion events
         if (!(inputEvent instanceof MotionEvent)) {
+            return true;
+        }
+
+        // do not process input event if not allowed
+        if (!mTouchState.getAllowInputEvents()) {
             return true;
         }
 

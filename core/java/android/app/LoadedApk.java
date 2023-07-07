@@ -1401,99 +1401,95 @@ public final class LoadedApk {
         if (mApplication != null) {
             return mApplication;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
 
+        synchronized (sApplications) {
+            final Application cached = sApplications.get(mPackageName);
+            if (cached != null) {
+                // Looks like this is always happening for the system server, because
+                // the LoadedApk created in systemMain() -> attach() isn't cached properly?
+                if (!"android".equals(mPackageName)) {
+                    Slog.wtfStack(TAG, "App instance already created for package=" + mPackageName
+                            + " instance=" + cached);
+                }
+                if (!allowDuplicateInstances) {
+                    mApplication = cached;
+                    return cached;
+                }
+                // Some apps intentionally call makeApplication() to create a new Application
+                // instance... Sigh...
+            }
+        }
 
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
+        Application app = null;
+
+        final String myProcessName = Process.myProcessName();
+        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
+                myProcessName);
+        if (forceDefaultAppClass || (appClass == null)) {
+            appClass = "android.app.Application";
         }
 
         try {
-            synchronized (sApplications) {
-                final Application cached = sApplications.get(mPackageName);
-                if (cached != null) {
-                    // Looks like this is always happening for the system server, because
-                    // the LoadedApk created in systemMain() -> attach() isn't cached properly?
-                    if (!"android".equals(mPackageName)) {
-                        Slog.wtfStack(TAG, "App instance already created for package="
-                                + mPackageName + " instance=" + cached);
-                    }
-                    if (!allowDuplicateInstances) {
-                        mApplication = cached;
-                        return cached;
-                    }
-                    // Some apps intentionally call makeApplication() to create a new Application
-                    // instance... Sigh...
-                }
+            final java.lang.ClassLoader cl = getClassLoader();
+            if (!mPackageName.equals("android")) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "initializeJavaContextClassLoader");
+                initializeJavaContextClassLoader();
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
 
-            Application app = null;
+            // Rewrite the R 'constants' for all library apks.
+            SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
+                    false, false);
+            for (int i = 0, n = packageIdentifiers.size(); i < n; i++) {
+                final int id = packageIdentifiers.keyAt(i);
+                if (id == 0x01 || id == 0x7f) {
+                    continue;
+                }
 
-            final String myProcessName = Process.myProcessName();
-            String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
-                    myProcessName);
-            if (forceDefaultAppClass || (appClass == null)) {
-                appClass = "android.app.Application";
+                rewriteRValues(cl, packageIdentifiers.valueAt(i), id);
             }
 
-            try {
-                final java.lang.ClassLoader cl = getClassLoader();
-                if (!mPackageName.equals("android")) {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                            "initializeJavaContextClassLoader");
-                    initializeJavaContextClassLoader();
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                }
-
-                // Rewrite the R 'constants' for all library apks.
-                SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
-                        false, false);
-                for (int i = 0, n = packageIdentifiers.size(); i < n; i++) {
-                    final int id = packageIdentifiers.keyAt(i);
-                    if (id == 0x01 || id == 0x7f) {
-                        continue;
-                    }
-
-                    rewriteRValues(cl, packageIdentifiers.valueAt(i), id);
-                }
-
-                ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
-                // The network security config needs to be aware of multiple
-                // applications in the same process to handle discrepancies
-                NetworkSecurityConfigProvider.handleNewApplication(appContext);
-                app = mActivityThread.mInstrumentation.newApplication(
-                        cl, appClass, appContext);
-                appContext.setOuterContext(app);
-            } catch (Exception e) {
-                if (!mActivityThread.mInstrumentation.onException(app, e)) {
-                    throw new RuntimeException(
-                        "Unable to instantiate application " + appClass
-                        + " package " + mPackageName + ": " + e.toString(), e);
-                }
+            ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
+            // The network security config needs to be aware of multiple
+            // applications in the same process to handle discrepancies
+            NetworkSecurityConfigProvider.handleNewApplication(appContext);
+            app = mActivityThread.mInstrumentation.newApplication(
+                    cl, appClass, appContext);
+            appContext.setOuterContext(app);
+        } catch (Exception e) {
+            if (!mActivityThread.mInstrumentation.onException(app, e)) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                throw new RuntimeException(
+                    "Unable to instantiate application " + appClass
+                    + " package " + mPackageName + ": " + e.toString(), e);
             }
-            mActivityThread.mAllApplications.add(app);
-            mApplication = app;
-            if (!allowDuplicateInstances) {
-                synchronized (sApplications) {
-                    sApplications.put(mPackageName, app);
-                }
-            }
-
-            if (instrumentation != null) {
-                try {
-                    instrumentation.callApplicationOnCreate(app);
-                } catch (Exception e) {
-                    if (!instrumentation.onException(app, e)) {
-                        throw new RuntimeException(
-                            "Unable to create application " + app.getClass().getName()
-                            + ": " + e.toString(), e);
-                    }
-                }
-            }
-
-            return app;
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+        mActivityThread.mAllApplications.add(app);
+        mApplication = app;
+        if (!allowDuplicateInstances) {
+            synchronized (sApplications) {
+                sApplications.put(mPackageName, app);
+            }
+        }
+
+        if (instrumentation != null) {
+            try {
+                instrumentation.callApplicationOnCreate(app);
+            } catch (Exception e) {
+                if (!instrumentation.onException(app, e)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    throw new RuntimeException(
+                        "Unable to create application " + app.getClass().getName()
+                        + ": " + e.toString(), e);
+                }
+            }
+        }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        return app;
     }
 
     @UnsupportedAppUsage
@@ -1672,10 +1668,13 @@ public final class LoadedApk {
     static final class ReceiverDispatcher {
 
         final static class InnerReceiver extends IIntentReceiver.Stub {
+            final IApplicationThread mApplicationThread;
             final WeakReference<LoadedApk.ReceiverDispatcher> mDispatcher;
             final LoadedApk.ReceiverDispatcher mStrongRef;
 
-            InnerReceiver(LoadedApk.ReceiverDispatcher rd, boolean strong) {
+            InnerReceiver(IApplicationThread thread, LoadedApk.ReceiverDispatcher rd,
+                    boolean strong) {
+                mApplicationThread = thread;
                 mDispatcher = new WeakReference<LoadedApk.ReceiverDispatcher>(rd);
                 mStrongRef = strong ? rd : null;
             }
@@ -1722,7 +1721,8 @@ public final class LoadedApk {
                         if (extras != null) {
                             extras.setAllowFds(false);
                         }
-                        mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
+                        mgr.finishReceiver(mApplicationThread.asBinder(), resultCode, data,
+                                extras, false, intent.getFlags());
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -1829,7 +1829,7 @@ public final class LoadedApk {
             }
 
             mAppThread = appThread;
-            mIIntentReceiver = new InnerReceiver(this, !registered);
+            mIIntentReceiver = new InnerReceiver(mAppThread, this, !registered);
             mReceiver = receiver;
             mContext = context;
             mActivityThread = activityThread;

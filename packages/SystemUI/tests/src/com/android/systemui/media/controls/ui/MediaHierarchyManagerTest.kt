@@ -180,6 +180,57 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBlockedWhenConfigurationChangesAndScreenOff() {
+        // Let's set it onto QS:
+        mediaHierarchyManager.qsExpansion = 1.0f
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+        val observer = wakefullnessObserver.value
+        assertNotNull("lifecycle observer wasn't registered", observer)
+        observer.onStartedGoingToSleep()
+        clearInvocations(mediaCarouselController)
+        configurationController.notifyConfigurationChanged()
+        verify(mediaCarouselController, times(0))
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+    }
+
+    @Test
+    fun testAllowedWhenConfigurationChanges() {
+        // Let's set it onto QS:
+        mediaHierarchyManager.qsExpansion = 1.0f
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+        clearInvocations(mediaCarouselController)
+        configurationController.notifyConfigurationChanged()
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+    }
+
+    @Test
     fun testAllowedWhenNotTurningOff() {
         // Let's set it onto QS:
         mediaHierarchyManager.qsExpansion = 1.0f
@@ -338,6 +389,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun getGuidedTransformationTranslationY_previousHostInvisible_returnsZero() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(false)
+
+        assertThat(mediaHierarchyManager.getGuidedTransformationTranslationY()).isEqualTo(0)
+    }
+
+    @Test
     fun isCurrentlyInGuidedTransformation_hostsVisible_returnsTrue() {
         goToLockscreen()
         enterGuidedTransformation()
@@ -408,6 +468,21 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 anyLong(),
                 anyLong()
             )
+    }
+
+    @Test
+    fun testQsExpandedChanged_noQqsMedia() {
+        // When we are looking at QQS with active media
+        whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
+        whenever(statusBarStateController.isExpanded).thenReturn(true)
+
+        // When there is no longer any active media
+        whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
+        mediaHierarchyManager.qsExpanded = false
+
+        // Then the carousel is set to not visible
+        verify(mediaCarouselScrollHandler).visibleToUser = false
+        assertThat(mediaCarouselScrollHandler.visibleToUser).isFalse()
     }
 
     private fun enableSplitShade() {

@@ -129,7 +129,7 @@ class SnapshotPersistQueue {
         }
     }
 
-    private void deleteSnapshot(int index, int userId, PersistInfoProvider provider) {
+    void deleteSnapshot(int index, int userId, PersistInfoProvider provider) {
         final File protoFile = provider.getProtoFile(index, userId);
         final File bitmapLowResFile = provider.getLowResolutionBitmapFile(index, userId);
         protoFile.delete();
@@ -314,6 +314,11 @@ class SnapshotPersistQueue {
             }
 
             final Bitmap swBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false /* isMutable */);
+            if (swBitmap == null) {
+                Slog.e(TAG, "Bitmap conversion from (config=" + bitmap.getConfig() + ", isMutable="
+                        + bitmap.isMutable() + ") to (config=ARGB_8888, isMutable=false) failed.");
+                return false;
+            }
 
             final File file = mPersistInfoProvider.getHighResolutionBitmapFile(mId, mUserId);
             try {

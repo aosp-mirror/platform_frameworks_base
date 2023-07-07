@@ -165,4 +165,14 @@ public class SoundTriggerHalMaxModelLimiter implements ISoundTriggerHal {
     public void flushCallbacks() {
         mDelegate.flushCallbacks();
     }
+
+    @Override
+    public void clientAttached(IBinder binder) {
+        mDelegate.clientAttached(binder);
+    }
+
+    @Override
+    public void clientDetached(IBinder binder) {
+        mDelegate.clientDetached(binder);
+    }
 }

@@ -52,10 +52,10 @@ import android.view.animation.Interpolator;
 
 import androidx.core.graphics.ColorUtils;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.util.drawable.DrawableSize;
@@ -92,6 +92,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_ICON, STATE_DOT, STATE_HIDDEN})
     public @interface VisibleState { }
+
+    /** Returns a human-readable string of {@link VisibleState}. */
+    public static String getVisibleStateString(@VisibleState int state) {
+        switch(state) {
+            case STATE_ICON: return "ICON";
+            case STATE_DOT: return "DOT";
+            case STATE_HIDDEN: return "HIDDEN";
+            default: return "UNKNOWN";
+        }
+    }
 
     private static final String TAG = "StatusBarIconView";
     private static final Property<StatusBarIconView, Float> ICON_APPEAR_AMOUNT
@@ -561,7 +571,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Override
     public String toString() {
         return "StatusBarIconView("
-                + "slot='" + mSlot + " alpha=" + getAlpha() + " icon=" + mIcon
+                + "slot='" + mSlot + "' alpha=" + getAlpha() + " icon=" + mIcon
+                + " visibleState=" + getVisibleStateString(getVisibleState())
                 + " iconColor=#" + Integer.toHexString(mIconColor)
                 + " notification=" + mNotification + ')';
     }

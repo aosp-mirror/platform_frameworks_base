@@ -106,6 +106,8 @@ final class AutofillInlineSuggestionsRequestSession {
     @GuardedBy("mLock")
     private boolean mImeSessionInvalidated = false;
 
+    private boolean mImeShowing = false;
+
     AutofillInlineSuggestionsRequestSession(
             @NonNull InputMethodManagerInternal inputMethodManagerInternal, int userId,
             @NonNull ComponentName componentName, @NonNull Handler handler, @NonNull Object lock,
@@ -320,6 +322,7 @@ final class AutofillInlineSuggestionsRequestSession {
             if (mDestroyed) {
                 return;
             }
+            mImeShowing = imeInputViewStarted;
             if (mImeCurrentFieldId != null) {
                 boolean imeInputStartedChanged = (mImeInputStarted != imeInputStarted);
                 boolean imeInputViewStartedChanged = (mImeInputViewStarted != imeInputViewStarted);
@@ -361,6 +364,12 @@ final class AutofillInlineSuggestionsRequestSession {
                 return;
             }
             mImeSessionInvalidated = true;
+        }
+    }
+
+    boolean isImeShowing() {
+        synchronized (mLock) {
+            return !mDestroyed && mImeShowing;
         }
     }
 

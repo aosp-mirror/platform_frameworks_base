@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
@@ -91,7 +92,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         Dumpable {
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
-    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
+    private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final LightBarTransitionsController.Factory mLightBarTransitionsControllerFactory;
     private boolean mInitialized;
     private CommandQueue mCommandQueue;
@@ -166,16 +167,20 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private BackAnimation mBackAnimation;
 
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Inject
     public TaskbarDelegate(Context context,
-            EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
-            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
-        mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
 
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
-        mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
+        mPipListener = (bounds) -> {
+            mEdgeBackGestureHandler.setPipStashExclusionBounds(bounds);
+        };
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mStatusBarKeyguardViewManager.setTaskbarDelegate(this);
     }
 
     public void setDependencies(CommandQueue commandQueue,
@@ -201,6 +206,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mBackAnimation = backAnimation;
         mLightBarTransitionsController = createLightBarTransitionsController();
         mTaskStackChangeListeners = taskStackChangeListeners;
+        mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
@@ -218,7 +224,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
                     }
                 });
-        controller.overrideIconTintForNavMode(true);
 
         return controller;
     }
@@ -233,8 +238,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mOverviewProxyService.addCallback(this);
         onNavigationModeChanged(mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.init();
-        mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
         mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
@@ -258,8 +261,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mOverviewProxyService.removeCallback(this);
         mNavigationModeController.removeListener(this);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.destroy();
-        mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
         mWindowContext = null;
         mAutoHideController.setNavigationBar(null);
@@ -428,6 +429,19 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mAutoHideController.suspendAutoHide();
         } else {
             mAutoHideController.resumeSuspendedAutoHide();
+        }
+    }
+
+    @Override
+    public void toggleTaskbar() {
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onTaskbarToggled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "onTaskbarToggled() failed", e);
         }
     }
 

@@ -16,6 +16,8 @@
 
 package com.android.server.broadcastradio;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.hardware.broadcastradio.IBroadcastRadio;
 import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
@@ -23,6 +25,7 @@ import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -86,8 +89,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
 
     @Override
     public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
-            boolean withAudio, ITunerCallback callback, int targetSdkVersion)
-            throws RemoteException {
+            boolean withAudio, ITunerCallback callback) throws RemoteException {
         if (isDebugEnabled()) {
             Slogf.d(TAG, "Opening module %d", moduleId);
         }
@@ -95,7 +97,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         if (callback == null) {
             throw new IllegalArgumentException("Callback must not be null");
         }
-        return mHalAidl.openSession(moduleId, bandConfig, withAudio, callback, targetSdkVersion);
+        return mHalAidl.openSession(moduleId, bandConfig, withAudio, callback);
     }
 
     @Override
@@ -113,6 +115,13 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        if (mService.getContext().checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            printWriter.println("Permission Denial: can't dump AIDL BroadcastRadioService from "
+                    + "from pid=" + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + Manifest.permission.DUMP);
+            return;
+        }
         IndentingPrintWriter radioPrintWriter = new IndentingPrintWriter(printWriter);
         radioPrintWriter.printf("BroadcastRadioService\n");
 

@@ -19,7 +19,6 @@ package com.android.systemui.animation
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.graphics.Typeface
-import android.graphics.fonts.FontVariationAxis
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
@@ -27,22 +26,17 @@ import android.text.TextPaint
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import kotlin.math.ceil
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-
-import kotlin.math.ceil
-
-private val PAINT = TextPaint().apply {
-    textSize = 32f
-}
+import org.mockito.Mockito.`when`
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -61,15 +55,13 @@ class TextAnimatorTest : SysuiTestCase() {
         val paint = mock(TextPaint::class.java)
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
-        val textAnimator = TextAnimator(layout, {}).apply {
-            this.textInterpolator = textInterpolator
-            this.animator = valueAnimator
-        }
+        val textAnimator =
+            TextAnimator(layout, null, {}).apply {
+                this.textInterpolator = textInterpolator
+                this.animator = valueAnimator
+            }
 
-        textAnimator.setTextStyle(
-                weight = 400,
-                animate = true
-        )
+        textAnimator.setTextStyle(weight = 400, animate = true)
 
         // If animation is requested, the base state should be rebased and the target state should
         // be updated.
@@ -93,15 +85,13 @@ class TextAnimatorTest : SysuiTestCase() {
         val paint = mock(TextPaint::class.java)
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
-        val textAnimator = TextAnimator(layout, {}).apply {
-            this.textInterpolator = textInterpolator
-            this.animator = valueAnimator
-        }
+        val textAnimator =
+            TextAnimator(layout, null, {}).apply {
+                this.textInterpolator = textInterpolator
+                this.animator = valueAnimator
+            }
 
-        textAnimator.setTextStyle(
-                weight = 400,
-                animate = false
-        )
+        textAnimator.setTextStyle(weight = 400, animate = false)
 
         // If animation is not requested, the progress should be 1 which is end of animation and the
         // base state is rebased to target state by calling rebase.
@@ -123,15 +113,16 @@ class TextAnimatorTest : SysuiTestCase() {
         `when`(textInterpolator.targetPaint).thenReturn(paint)
         val animationEndCallback = mock(Runnable::class.java)
 
-        val textAnimator = TextAnimator(layout, {}).apply {
-            this.textInterpolator = textInterpolator
-            this.animator = valueAnimator
-        }
+        val textAnimator =
+            TextAnimator(layout, null, {}).apply {
+                this.textInterpolator = textInterpolator
+                this.animator = valueAnimator
+            }
 
         textAnimator.setTextStyle(
-                weight = 400,
-                animate = true,
-                onAnimationEnd = animationEndCallback
+            weight = 400,
+            animate = true,
+            onAnimationEnd = animationEndCallback
         )
 
         // Verify animationEnd callback has been added.
@@ -149,102 +140,28 @@ class TextAnimatorTest : SysuiTestCase() {
         val layout = makeLayout("Hello, World", PAINT)
         val valueAnimator = mock(ValueAnimator::class.java)
         val textInterpolator = mock(TextInterpolator::class.java)
-        val paint = TextPaint().apply {
-            typeface = Typeface.createFromFile("/system/fonts/Roboto-Regular.ttf")
-        }
-        `when`(textInterpolator.targetPaint).thenReturn(paint)
-
-        val textAnimator = TextAnimator(layout, {}).apply {
-            this.textInterpolator = textInterpolator
-            this.animator = valueAnimator
-        }
-
-        textAnimator.setTextStyle(
-                weight = 400,
-                animate = true
-        )
-
-        val prevTypeface = paint.typeface
-
-        textAnimator.setTextStyle(
-                weight = 700,
-                animate = true
-        )
-
-        assertThat(paint.typeface).isNotSameInstanceAs(prevTypeface)
-
-        textAnimator.setTextStyle(
-                weight = 400,
-                animate = true
-        )
-
-        assertThat(paint.typeface).isSameInstanceAs(prevTypeface)
-    }
-
-    @Test
-    fun testSetTextStyle_addWeight() {
-        testWeightChange("", 100, FontVariationAxis.fromFontVariationSettings("'wght' 100")!!)
-    }
-
-    @Test
-    fun testSetTextStyle_changeWeight() {
-        testWeightChange(
-                "'wght' 500",
-                100,
-                FontVariationAxis.fromFontVariationSettings("'wght' 100")!!
-        )
-    }
-
-    @Test
-    fun testSetTextStyle_addWeightWithOtherAxis() {
-        testWeightChange(
-                "'wdth' 100",
-                100,
-                FontVariationAxis.fromFontVariationSettings("'wght' 100, 'wdth' 100")!!
-        )
-    }
-
-    @Test
-    fun testSetTextStyle_changeWeightWithOtherAxis() {
-        testWeightChange(
-                "'wght' 500, 'wdth' 100",
-                100,
-                FontVariationAxis.fromFontVariationSettings("'wght' 100, 'wdth' 100")!!
-        )
-    }
-
-    private fun testWeightChange(
-            initialFontVariationSettings: String,
-            weight: Int,
-            expectedFontVariationSettings: Array<FontVariationAxis>
-    ) {
-        val layout = makeLayout("Hello, World", PAINT)
-        val valueAnimator = mock(ValueAnimator::class.java)
-        val textInterpolator = mock(TextInterpolator::class.java)
         val paint =
-                TextPaint().apply {
-                    typeface = Typeface.createFromFile("/system/fonts/Roboto-Regular.ttf")
-                    fontVariationSettings = initialFontVariationSettings
-                }
+            TextPaint().apply {
+                typeface = Typeface.createFromFile("/system/fonts/Roboto-Regular.ttf")
+            }
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
         val textAnimator =
-                TextAnimator(layout, {}).apply {
-                    this.textInterpolator = textInterpolator
-                    this.animator = valueAnimator
-                }
-        textAnimator.setTextStyle(weight = weight, animate = false)
-
-        val resultFontVariationList =
-                FontVariationAxis.fromFontVariationSettings(
-                        textInterpolator.targetPaint.fontVariationSettings
-                )
-        expectedFontVariationSettings.forEach { expectedAxis ->
-            val resultAxis = resultFontVariationList?.filter { it.tag == expectedAxis.tag }?.get(0)
-            assertThat(resultAxis).isNotNull()
-            if (resultAxis != null) {
-                assertThat(resultAxis.styleValue).isEqualTo(expectedAxis.styleValue)
+            TextAnimator(layout, null, {}).apply {
+                this.textInterpolator = textInterpolator
+                this.animator = valueAnimator
             }
-        }
+
+        textAnimator.setTextStyle(weight = 400, animate = true)
+
+        val prevTypeface = paint.typeface
+
+        textAnimator.setTextStyle(weight = 700, animate = true)
+
+        assertThat(paint.typeface).isNotSameInstanceAs(prevTypeface)
+
+        textAnimator.setTextStyle(weight = 400, animate = true)
+
+        assertThat(paint.typeface).isSameInstanceAs(prevTypeface)
     }
 }

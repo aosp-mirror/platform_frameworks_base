@@ -19,6 +19,7 @@ package android.view;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 
@@ -51,11 +52,13 @@ public class InsetsSourceTest {
 
     private final InsetsSource mSource = new InsetsSource(0 /* id */, navigationBars());
     private final InsetsSource mImeSource = new InsetsSource(1 /* id */, ime());
+    private final InsetsSource mCaptionSource = new InsetsSource(2 /* id */, captionBar());
 
     @Before
     public void setUp() {
         mSource.setVisible(true);
         mImeSource.setVisible(true);
+        mCaptionSource.setVisible(true);
     }
 
     @Test
@@ -104,6 +107,17 @@ public class InsetsSourceTest {
         Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
         assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_caption_resizing() {
+        mCaptionSource.setFrame(new Rect(0, 0, 100, 100));
+        Insets insets = mCaptionSource.calculateInsets(new Rect(0, 0, 200, 200), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+        insets = mCaptionSource.calculateInsets(new Rect(0, 0, 50, 200), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+        insets = mCaptionSource.calculateInsets(new Rect(100, 100, 200, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
     }
 
     @Test
@@ -211,6 +225,42 @@ public class InsetsSourceTest {
             }
         }
         assertEquals(numTotalSources, sources.size());
+    }
+
+    @Test
+    public void testGetIndex() {
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int indexFromId = InsetsSource.getIndex(id);
+                    assertEquals("index and indexFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", indexFromId=" + indexFromId + ".", index, indexFromId);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testGetType() {
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int typeFromId = InsetsSource.getType(id);
+                    assertEquals("type and typeFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", typeFromId=" + typeFromId + ".", type, typeFromId);
+                }
+            }
+        }
     }
 
     // Parcel and equals already tested via InsetsStateTest

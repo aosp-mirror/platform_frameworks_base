@@ -33,7 +33,6 @@ import androidx.test.filters.LargeTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -132,8 +131,7 @@ class MotionPredictorBenchmark {
             predictor.record(moveEvent)
             val predictionTime = eventTime + eventInterval
             val predicted = predictor.predict(predictionTime.toNanos())
-            assertEquals(1, predicted.size)
-            assertTrue(predicted[0].eventTime <= (predictionTime + offset).toMillis())
+            assertTrue(predicted.eventTime <= (predictionTime + offset).toMillis())
         }
     }
 

@@ -174,6 +174,7 @@ public:
     }
 
     void trimMemory(TrimLevel level);
+    void trimCaches(CacheTrimLevel level);
 
     /**
      * isCurrent provides a way to query, if the caller is running on
@@ -235,7 +236,6 @@ private:
     bool mFrameCallbackTaskPending;
 
     TimeLord mTimeLord;
-    nsecs_t mDispatchFrameDelay = 4_ms;
     RenderState* mRenderState;
     EglManager* mEglManager;
     WebViewFunctorManager& mFunctorManager;

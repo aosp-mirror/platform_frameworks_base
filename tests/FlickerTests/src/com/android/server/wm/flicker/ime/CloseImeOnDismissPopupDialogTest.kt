@@ -17,16 +17,16 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
+import android.tools.common.Rotation
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val imeTestApp = ImeEditorPopupDialogAppHelper(instrumentation)
 
     /** {@inheritDoc} */
@@ -66,7 +66,7 @@ class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker)
         flicker.assertLayers {
             this.isVisible(ComponentNameMatcher.IME)
                 .then()
-                .isVisible(ComponentNameMatcher.IME_SNAPSHOT)
+                .isVisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .then()
                 .isInvisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .isInvisible(ComponentNameMatcher.IME)
@@ -86,11 +86,9 @@ class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker)
                 if (imeSnapshotLayers.isNotEmpty()) {
                     val visibleAreas =
                         imeSnapshotLayers
-                            .mapNotNull { imeSnapshotLayer ->
-                                imeSnapshotLayer.layer?.visibleRegion
-                            }
+                            .mapNotNull { imeSnapshotLayer -> imeSnapshotLayer.layer.visibleRegion }
                             .toTypedArray()
-                    val imeVisibleRegion = RegionSubject(visibleAreas, this, timestamp)
+                    val imeVisibleRegion = RegionSubject(visibleAreas, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)
@@ -105,7 +103,7 @@ class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker)
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

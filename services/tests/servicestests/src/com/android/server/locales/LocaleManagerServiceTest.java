@@ -52,6 +52,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.PackageConfig;
 
@@ -104,6 +105,7 @@ public class LocaleManagerServiceTest {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageMonitor = mock(PackageMonitor.class);
 
+        doReturn(mMockContext).when(mMockContext).createContextAsUser(any(), anyInt());
         // For unit tests, set the default installer info
         doReturn(DEFAULT_INSTALL_SOURCE_INFO).when(mMockPackageManager)
                 .getInstallSourceInfo(anyString());
@@ -136,7 +138,8 @@ public class LocaleManagerServiceTest {
 
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    LocaleList.getEmptyLocaleList(), false);
+                    LocaleList.getEmptyLocaleList(), false, FrameworkStatsLog
+                            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS);
             fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
@@ -151,7 +154,8 @@ public class LocaleManagerServiceTest {
     public void testSetApplicationLocales_nullPackageName_fails() throws Exception {
         try {
             mLocaleManagerService.setApplicationLocales(/* appPackageName = */ null,
-                    DEFAULT_USER_ID, LocaleList.getEmptyLocaleList(), false);
+                    DEFAULT_USER_ID, LocaleList.getEmptyLocaleList(), false,
+                    FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS);
             fail("Expected NullPointerException");
         } finally {
             verify(mMockBackupHelper, times(0)).notifyBackupManager();
@@ -165,7 +169,8 @@ public class LocaleManagerServiceTest {
 
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    /* locales = */ null, false);
+                    /* locales = */ null, false, FrameworkStatsLog
+                            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS);
             fail("Expected NullPointerException");
         } finally {
             verify(mMockBackupHelper, times(0)).notifyBackupManager();
@@ -183,7 +188,8 @@ public class LocaleManagerServiceTest {
         setUpPassingPermissionCheckFor(Manifest.permission.CHANGE_CONFIGURATION);
 
         mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                DEFAULT_LOCALES, true);
+                DEFAULT_LOCALES, true, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DELEGATE);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
         verify(mMockBackupHelper, times(1)).notifyBackupManager();
@@ -196,7 +202,8 @@ public class LocaleManagerServiceTest {
                 .when(mMockPackageManager).getPackageUidAsUser(anyString(), any(), anyInt());
 
         mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                DEFAULT_LOCALES, false);
+                DEFAULT_LOCALES, false, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
         verify(mMockBackupHelper, times(1)).notifyBackupManager();
@@ -208,7 +215,8 @@ public class LocaleManagerServiceTest {
                 .when(mMockPackageManager).getPackageUidAsUser(anyString(), any(), anyInt());
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    LocaleList.getEmptyLocaleList(), false);
+                    LocaleList.getEmptyLocaleList(), false, FrameworkStatsLog
+                            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS);
             fail("Expected IllegalArgumentException");
         } finally {
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());

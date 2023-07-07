@@ -892,6 +892,35 @@ TEST_F(ManifestFixerTest, InsertCompileSdkVersions) {
   EXPECT_THAT(attr->value, StrEq("P"));
 }
 
+TEST_F(ManifestFixerTest, DoNotInsertCompileSdkVersions) {
+  std::string input = R"(<manifest package="com.pkg" />)";
+  ManifestFixerOptions options;
+  options.no_compile_sdk_metadata = true;
+  options.compile_sdk_version = {"28"};
+  options.compile_sdk_version_codename = {"P"};
+
+  std::unique_ptr<xml::XmlResource> manifest = VerifyWithOptions(input, options);
+  ASSERT_THAT(manifest, NotNull());
+
+  // There should be a declaration of kSchemaAndroid, even when the input
+  // didn't have one.
+  EXPECT_EQ(manifest->root->namespace_decls.size(), 1);
+  EXPECT_EQ(manifest->root->namespace_decls[0].prefix, "android");
+  EXPECT_EQ(manifest->root->namespace_decls[0].uri, xml::kSchemaAndroid);
+
+  xml::Attribute* attr = manifest->root->FindAttribute(xml::kSchemaAndroid, "compileSdkVersion");
+  ASSERT_THAT(attr, IsNull());
+
+  attr = manifest->root->FindAttribute(xml::kSchemaAndroid, "compileSdkVersionCodename");
+  ASSERT_THAT(attr, IsNull());
+
+  attr = manifest->root->FindAttribute("", "platformBuildVersionCode");
+  ASSERT_THAT(attr, IsNull());
+
+  attr = manifest->root->FindAttribute("", "platformBuildVersionName");
+  ASSERT_THAT(attr, IsNull());
+}
+
 TEST_F(ManifestFixerTest, OverrideCompileSdkVersions) {
   std::string input = R"(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="android"
@@ -963,6 +992,63 @@ TEST_F(ManifestFixerTest, UnexpectedElementsInManifest) {
   // By default the flag should be set to 'false'.
   manifest = Verify(input);
   ASSERT_THAT(manifest, IsNull());
+}
+
+TEST_F(ManifestFixerTest, InsertFingerprintPrefixIfNotExist) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+      </manifest>)";
+  ManifestFixerOptions options;
+  options.fingerprint_prefixes = {"foo", "bar"};
+
+  std::unique_ptr<xml::XmlResource> manifest = VerifyWithOptions(input, options);
+  ASSERT_THAT(manifest, NotNull());
+  xml::Element* install_constraints = manifest->root.get()->FindChild({}, "install-constraints");
+  ASSERT_THAT(install_constraints, NotNull());
+  std::vector<xml::Element*> fingerprint_prefixes = install_constraints->GetChildElements();
+  EXPECT_EQ(fingerprint_prefixes.size(), 2);
+  xml::Attribute* attr;
+  EXPECT_THAT(fingerprint_prefixes[0]->name, StrEq("fingerprint-prefix"));
+  attr = fingerprint_prefixes[0]->FindAttribute(xml::kSchemaAndroid, "value");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("foo"));
+  EXPECT_THAT(fingerprint_prefixes[1]->name, StrEq("fingerprint-prefix"));
+  attr = fingerprint_prefixes[1]->FindAttribute(xml::kSchemaAndroid, "value");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("bar"));
+}
+
+TEST_F(ManifestFixerTest, AppendFingerprintPrefixIfExists) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+          <install-constraints>
+            <fingerprint-prefix android:value="foo" />
+          </install-constraints>
+      </manifest>)";
+  ManifestFixerOptions options;
+  options.fingerprint_prefixes = {"bar", "baz"};
+
+  std::unique_ptr<xml::XmlResource> manifest = VerifyWithOptions(input, options);
+  ASSERT_THAT(manifest, NotNull());
+  xml::Element* install_constraints = manifest->root.get()->FindChild({}, "install-constraints");
+  ASSERT_THAT(install_constraints, NotNull());
+  std::vector<xml::Element*> fingerprint_prefixes = install_constraints->GetChildElements();
+  EXPECT_EQ(fingerprint_prefixes.size(), 3);
+  xml::Attribute* attr;
+  EXPECT_THAT(fingerprint_prefixes[0]->name, StrEq("fingerprint-prefix"));
+  attr = fingerprint_prefixes[0]->FindAttribute(xml::kSchemaAndroid, "value");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("foo"));
+  EXPECT_THAT(fingerprint_prefixes[1]->name, StrEq("fingerprint-prefix"));
+  attr = fingerprint_prefixes[1]->FindAttribute(xml::kSchemaAndroid, "value");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("bar"));
+  EXPECT_THAT(fingerprint_prefixes[2]->name, StrEq("fingerprint-prefix"));
+  attr = fingerprint_prefixes[2]->FindAttribute(xml::kSchemaAndroid, "value");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("baz"));
 }
 
 TEST_F(ManifestFixerTest, UsesLibraryMustHaveNonEmptyName) {

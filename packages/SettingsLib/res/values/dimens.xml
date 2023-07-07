@@ -67,6 +67,8 @@
 
     <!-- SignalDrawable -->
     <dimen name="signal_icon_size">15dp</dimen>
+    <!-- The size of the roaming icon in the top-left corner of the signal icon. -->
+    <dimen name="signal_icon_size_roaming">8dp</dimen>
 
     <!-- Size of nearby icon -->
     <dimen name="bt_nearby_icon_size">24dp</dimen>
@@ -110,6 +112,16 @@
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
 
-    <!-- Size of grant admin privileges dialog padding -->
-    <dimen name="grant_admin_dialog_padding">16dp</dimen>
+    <dimen name="dialog_content_padding">16dp</dimen>
+    <dimen name="radio_button_padding">12dp</dimen>
+    <dimen name="radio_button_padding_start">8dp</dimen>
+
+    <dimen name="dialog_button_horizontal_padding">16dp</dimen>
+    <dimen name="dialog_button_vertical_padding">8dp</dimen>
+    <!-- The button will be 48dp tall, but the background needs to be 36dp tall -->
+    <dimen name="dialog_button_vertical_inset">6dp</dimen>
+    <dimen name="dialog_top_padding">24dp</dimen>
+    <dimen name="dialog_bottom_padding">18dp</dimen>
+    <dimen name="dialog_side_padding">24dp</dimen>
+    <dimen name="dialog_button_bar_top_padding">32dp</dimen>
 </resources>

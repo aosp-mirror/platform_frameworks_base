@@ -21,6 +21,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.database.ContentObserver
+import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
 import android.util.MathUtils
@@ -64,9 +66,11 @@ import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
+import java.util.Locale
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -104,12 +108,14 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val globalSettings: GlobalSettings,
 ) : Dumpable {
     /** The current width of the carousel */
-    private var currentCarouselWidth: Int = 0
+    var currentCarouselWidth: Int = 0
+        private set
 
     /** The current height of the carousel */
-    @VisibleForTesting var currentCarouselHeight: Int = 0
+    private var currentCarouselHeight: Int = 0
 
     /** Are we currently showing only active players */
     private var currentlyShowingOnlyActive: Boolean = false
@@ -165,6 +171,16 @@ constructor(
             }
         }
 
+    private var carouselLocale: Locale? = null
+
+    private val animationScaleObserver: ContentObserver =
+        object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
+            }
+        }
+
+    /** Whether the media card currently has the "expanded" layout */
     @VisibleForTesting
     var currentlyExpanded = true
         set(value) {
@@ -194,7 +210,6 @@ constructor(
 
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
-            var lastOrientation = -1
 
             override fun onDensityOrFontScaleChanged() {
                 // System font changes should only happen when UMO is offscreen or a flicker may
@@ -211,18 +226,20 @@ constructor(
             override fun onConfigChanged(newConfig: Configuration?) {
                 if (newConfig == null) return
                 isRtl = newConfig.layoutDirection == View.LAYOUT_DIRECTION_RTL
-                val newOrientation = newConfig.orientation
-                if (lastOrientation != newOrientation) {
-                    // The players actually depend on the orientation possibly, so we have to
-                    // recreate them (at least on large screen devices)
-                    lastOrientation = newOrientation
-                    updatePlayers(recreateMedia = true)
-                }
             }
 
             override fun onUiModeChanged() {
                 updatePlayers(recreateMedia = false)
                 inflateSettingsButton()
+            }
+
+            override fun onLocaleListChanged() {
+                // Update players only if system primary language changes.
+                if (carouselLocale != context.resources.configuration.locales.get(0)) {
+                    carouselLocale = context.resources.configuration.locales.get(0)
+                    updatePlayers(recreateMedia = true)
+                    inflateSettingsButton()
+                }
             }
         }
 
@@ -230,8 +247,10 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onStrongAuthStateChanged(userId: Int) {
                 if (keyguardUpdateMonitor.isUserInLockdown(userId)) {
+                    debugLogger.logCarouselHidden()
                     hideMediaCarousel()
                 } else if (keyguardUpdateMonitor.isUserUnlocked(userId)) {
+                    debugLogger.logCarouselVisible()
                     showMediaCarousel()
                 }
             }
@@ -266,6 +285,7 @@ constructor(
                 this::logSmartspaceImpression,
                 logger
             )
+        carouselLocale = context.resources.configuration.locales.get(0)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -303,7 +323,7 @@ constructor(
                     receivedSmartspaceCardLatency: Int,
                     isSsReactivated: Boolean
                 ) {
-                    debugLogger.logMediaLoaded(key)
+                    debugLogger.logMediaLoaded(key, data.active)
                     if (addOrUpdatePlayer(key, oldKey, data, isSsReactivated)) {
                         // Log card received if a new resumable media card is added
                         MediaPlayerData.getMediaPlayer(key)?.let {
@@ -506,6 +526,7 @@ constructor(
         mediaHostStatesManager.addCallback(
             object : MediaHostStatesManager.Callback {
                 override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
+                    updateUserVisibility()
                     if (location == desiredLocation) {
                         onDesiredLocationChanged(desiredLocation, mediaHostState, animate = false)
                     }
@@ -519,6 +540,12 @@ constructor(
                 listenForAnyStateToGoneKeyguardTransition(this)
             }
         }
+
+        // Notifies all active players about animation scale changes.
+        globalSettings.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            animationScaleObserver
+        )
     }
 
     private fun inflateSettingsButton() {
@@ -842,10 +869,12 @@ constructor(
      * @param startLocation the start location of our state or -1 if this is directly set
      * @param endLocation the ending location of our state.
      * @param progress the progress of the transition between startLocation and endlocation. If
+     *
      * ```
      *                 this is not a guided transformation, this will be 1.0f
      * @param immediately
      * ```
+     *
      * should this state be applied immediately, canceling all animations?
      */
     fun setCurrentState(
@@ -1089,17 +1118,17 @@ constructor(
      *
      * @param eventId UI event id (e.g. 800 for SMARTSPACE_CARD_SEEN)
      * @param instanceId id to uniquely identify a card, e.g. each headphone generates a new
-     * instanceId
+     *   instanceId
      * @param uid uid for the application that media comes from
      * @param surfaces list of display surfaces the media card is on (e.g. lockscreen, shade) when
-     * the event happened
+     *   the event happened
      * @param interactedSubcardRank the rank for interacted media item for recommendation card, -1
-     * for tapping on card but not on any media item, 0 for first media item, 1 for second, etc.
+     *   for tapping on card but not on any media item, 0 for first media item, 1 for second, etc.
      * @param interactedSubcardCardinality how many media items were shown to the user when there is
-     * user interaction
+     *   user interaction
      * @param rank the rank for media card in the media carousel, starting from 0
      * @param receivedLatencyMillis latency in milliseconds for card received events. E.g. latency
-     * between headphone connection to sysUI displays media recommendation card
+     *   between headphone connection to sysUI displays media recommendation card
      * @param isSwipeToDismiss whether is to log swipe-to-dismiss event
      */
     fun logSmartspaceCardReported(
@@ -1360,6 +1389,7 @@ internal object MediaPlayerData {
 
     /**
      * Removes media player given the key.
+     *
      * @param isDismissed determines whether the media player is removed from the carousel.
      */
     fun removeMediaPlayer(key: String, isDismissed: Boolean = false) =

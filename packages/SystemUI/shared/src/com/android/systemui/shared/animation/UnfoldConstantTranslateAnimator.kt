@@ -65,34 +65,44 @@ class UnfoldConstantTranslateAnimator(
             } else {
                 1
             }
-        viewsToTranslate.forEach { (view, direction, shouldBeAnimated) ->
-            if (shouldBeAnimated()) {
-                view.get()?.translationX = xTrans * direction.multiplier * rtlMultiplier
-            }
+        viewsToTranslate.forEach { (view, direction, func) ->
+            view.get()?.let { func(it, xTrans * direction.multiplier * rtlMultiplier) }
         }
     }
 
     /** Finds in [parent] all views specified by [ids] and register them for the animation. */
     private fun registerViewsForAnimation(parent: ViewGroup, ids: Set<ViewIdToTranslate>) {
         viewsToTranslate =
-            ids.mapNotNull { (id, dir, pred) ->
-                parent.findViewById<View>(id)?.let { view ->
-                    ViewToTranslate(WeakReference(view), dir, pred)
+            ids.asSequence()
+                .filter { it.shouldBeAnimated() }
+                .mapNotNull {
+                    parent.findViewById<View>(it.viewId)?.let { view ->
+                        ViewToTranslate(WeakReference(view), it.direction, it.translateFunc)
+                    }
                 }
-            }
+                .toList()
     }
 
-    /** Represents a view to animate. [rootView] should contain a view with [viewId] inside. */
+    /**
+     * Represents a view to animate. [rootView] should contain a view with [viewId] inside.
+     * [shouldBeAnimated] is only evaluated when the viewsToTranslate is registered in
+     * [registerViewsForAnimation].
+     */
     data class ViewIdToTranslate(
         val viewId: Int,
         val direction: Direction,
-        val shouldBeAnimated: () -> Boolean = { true }
+        val shouldBeAnimated: () -> Boolean = { true },
+        val translateFunc: (View, Float) -> Unit = { view, value -> view.translationX = value },
     )
 
+    /**
+     * Represents a view whose animation process is in-progress. It should be immutable because the
+     * started animation should be completed.
+     */
     private data class ViewToTranslate(
         val view: WeakReference<View>,
         val direction: Direction,
-        val shouldBeAnimated: () -> Boolean
+        val translateFunc: (View, Float) -> Unit,
     )
 
     /** Direction of the animation. */

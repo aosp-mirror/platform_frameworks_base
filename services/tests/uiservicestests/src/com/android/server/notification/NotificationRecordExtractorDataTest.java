@@ -98,6 +98,41 @@ public class NotificationRecordExtractorDataTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testHasDiffs_autoBundled() {
+        NotificationRecord r = generateRecord();
+
+        NotificationRecordExtractorData extractorData = new NotificationRecordExtractorData(
+                1,
+                r.getPackageVisibilityOverride(),
+                r.canShowBadge(),
+                r.canBubble(),
+                r.getNotification().isBubbleNotification(),
+                r.getChannel(),
+                r.getGroupKey(),
+                r.getPeopleOverride(),
+                r.getSnoozeCriteria(),
+                r.getUserSentiment(),
+                r.getSuppressedVisualEffects(),
+                r.getSystemGeneratedSmartActions(),
+                r.getSmartReplies(),
+                r.getImportance(),
+                r.getRankingScore(),
+                r.isConversation(),
+                r.getProposedImportance(),
+                r.hasSensitiveContent());
+
+        Bundle signals = new Bundle();
+        signals.putString(Adjustment.KEY_GROUP_KEY, "ranker_group");
+        Adjustment adjustment = new Adjustment("pkg", r.getKey(), signals, "", 0);
+        r.addAdjustment(adjustment);
+        NotificationAdjustmentExtractor adjustmentExtractor = new NotificationAdjustmentExtractor();
+        adjustmentExtractor.process(r);
+
+        assertTrue(extractorData.hasDiffForRankingLocked(r, 1));
+        assertTrue(extractorData.hasDiffForLoggingLocked(r, 1));
+    }
+
+    @Test
     public void testHasDiffs_sensitiveContentChange() {
         NotificationRecord r = generateRecord();
 

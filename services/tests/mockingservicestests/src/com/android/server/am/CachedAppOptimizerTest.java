@@ -17,9 +17,11 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+
 import static com.android.server.am.ActivityManagerService.Injector;
-import static com.android.server.am.CachedAppOptimizer.compactActionIntToAction;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -34,27 +36,29 @@ import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
+
 import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.android.modules.utils.testing.TestableDeviceConfig;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
+
+import org.junit.After;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Tests for {@link CachedAppOptimizer}.
@@ -63,9 +67,6 @@ import org.mockito.junit.MockitoJUnitRunner;
  * atest FrameworksMockingServicesTests:CachedAppOptimizerTest
  */
 @Presubmit
-@RunWith(MockitoJUnitRunner.class)
-@Ignore("TODO(b/226641572): this test is broken and it cannot use ExtendedMockitoTestCase as it "
-        + "uses TestableDeviceConfigRule, which creates its own mockito session")
 public final class CachedAppOptimizerTest {
 
     private ServiceThread mThread;
@@ -84,16 +85,22 @@ public final class CachedAppOptimizerTest {
     @Mock
     private PackageManagerInternal mPackageManagerInt;
 
-    @Rule
-    public final TestableDeviceConfig.TestableDeviceConfigRule
-            mDeviceConfigRule = new TestableDeviceConfig.TestableDeviceConfigRule();
+    private final TestableDeviceConfig mDeviceConfig = new TestableDeviceConfig();
+
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .dynamiclyConfigureSessionBuilder(
+                    sessionBuilder -> mDeviceConfig.setUpMockedClasses(sessionBuilder))
+            .build();
+
     @Before
     public void setUp() {
         System.loadLibrary("mockingservicestestjni");
+        mDeviceConfig.setUpMockBehaviors();
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
@@ -124,6 +131,7 @@ public final class CachedAppOptimizerTest {
         mHandlerThread.quit();
         mThread.quit();
         mCountDown = null;
+        mDeviceConfig.tearDown();
     }
 
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, String processName,
@@ -146,12 +154,6 @@ public final class CachedAppOptimizerTest {
         synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
             assertThat(mCachedAppOptimizerUnderTest.useCompaction()).isEqualTo(
                     CachedAppOptimizer.DEFAULT_USE_COMPACTION);
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1));
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2));
             assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeSome).isEqualTo(
                     CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1);
             assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeFull).isEqualTo(
@@ -164,10 +166,6 @@ public final class CachedAppOptimizerTest {
                     CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE);
             assertThat(mCachedAppOptimizerUnderTest.mFreezerStatsdSampleRate).isEqualTo(
                     CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE);
-            assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                    CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-            assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                    CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
             assertThat(mCachedAppOptimizerUnderTest.mFullAnonRssThrottleKb).isEqualTo(
                     CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
             assertThat(mCachedAppOptimizerUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
@@ -200,12 +198,6 @@ public final class CachedAppOptimizerTest {
         assertThat(CachedAppOptimizer.DEFAULT_USE_COMPACTION).isTrue();
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_USE_COMPACTION, "true", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_1,
-                Integer.toString((CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_2,
-                Integer.toString((CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1), false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_THROTTLE_1,
                 Long.toString(CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
@@ -257,12 +249,6 @@ public final class CachedAppOptimizerTest {
         assertThat(mCachedAppOptimizerUnderTest.useCompaction()).isTrue();
         assertThat(mCachedAppOptimizerUnderTest.mCachedAppOptimizerThread.isAlive()).isTrue();
 
-        assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                .isEqualTo(compactActionIntToAction(
-                        (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1));
-        assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                .isEqualTo(compactActionIntToAction(
-                        (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1));
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeSome).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeFull).isEqualTo(
@@ -271,10 +257,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4 + 1);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mFullDeltaRssThrottleKb).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMinOomAdj).isEqualTo(
@@ -285,10 +267,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
         assertThat(mCachedAppOptimizerUnderTest.mFreezerStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mFullAnonRssThrottleKb).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1);
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle).containsExactly(1, 2, 3);
@@ -395,72 +373,6 @@ public final class CachedAppOptimizerTest {
     }
 
     @Test
-    public void compactAction_listensToDeviceConfigChanges() throws InterruptedException {
-        mCachedAppOptimizerUnderTest.init();
-
-        // When we override new values for the compaction action with reasonable values...
-
-        // There are four possible values for compactAction[Some|Full].
-        for (int i = 1; i < 5; i++) {
-            mCountDown = new CountDownLatch(2);
-            int expectedSome = (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1 + i) % 4 + 1;
-            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    CachedAppOptimizer.KEY_COMPACT_ACTION_1, Integer.toString(expectedSome), false);
-            int expectedFull = (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2 + i) % 4 + 1;
-            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    CachedAppOptimizer.KEY_COMPACT_ACTION_2, Integer.toString(expectedFull), false);
-            assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
-
-            // Then the updates are reflected in the flags.
-            synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
-                assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                        .isEqualTo(compactActionIntToAction(expectedSome));
-                assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                        .isEqualTo(compactActionIntToAction(expectedFull));
-            }
-        }
-    }
-
-    @Test
-    public void compactAction_listensToDeviceConfigChangesBadValues() throws InterruptedException {
-        mCachedAppOptimizerUnderTest.init();
-
-        // When we override new values for the compaction action with bad values ...
-        mCountDown = new CountDownLatch(2);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_1, "foo", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_2, "foo", false);
-        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
-
-        synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
-            // Then the default values are reflected in the flag
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1));
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2));
-        }
-
-        mCountDown = new CountDownLatch(2);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_1, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_2, "", false);
-        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
-
-        synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1));
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2));
-        }
-    }
-
-    @Test
     public void compactThrottle_listensToDeviceConfigChanges() throws InterruptedException {
         mCachedAppOptimizerUnderTest.init();
 
@@ -501,10 +413,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4 + 1);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMinOomAdj).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleMaxOomAdj).isEqualTo(
@@ -530,10 +438,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
 
         // Repeat for each of the throttle keys.
         mCountDown = new CountDownLatch(1);
@@ -548,10 +452,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -565,10 +465,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -582,10 +478,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -599,10 +491,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -616,10 +504,6 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5);
-        assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
-                CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6);
     }
 
     @Test
@@ -1029,15 +913,7 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRssAfterCompaction(rssAfter);
 
         // When moving within cached state
-        mCachedAppOptimizerUnderTest.onOomAdjustChanged(
-                ProcessList.CACHED_APP_MIN_ADJ, ProcessList.CACHED_APP_MIN_ADJ + 1, processRecord);
-        waitForHandler();
-        // THEN process IS NOT compacted.
-        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
-
-        // When moving into cached state
-        mCachedAppOptimizerUnderTest.onOomAdjustChanged(ProcessList.CACHED_APP_MIN_ADJ - 1,
-                ProcessList.CACHED_APP_MIN_ADJ + 1, processRecord);
+        mCachedAppOptimizerUnderTest.onProcessFrozen(processRecord);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -1099,14 +975,17 @@ public final class CachedAppOptimizerTest {
 
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
-        // We force a some compaction
-        mCachedAppOptimizerUnderTest.compactApp(processRecord,
-                CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP, true);
-        waitForHandler();
-        // then process is compacted.
-        CachedAppOptimizer.CompactProfile executedCompactProfile =
-                processRecord.mOptRecord.getLastCompactProfile();
-        assertThat(executedCompactProfile).isEqualTo(CachedAppOptimizer.CompactProfile.SOME);
+        if (CachedAppOptimizer.ENABLE_FILE_COMPACT) {
+            // We force a some compaction
+            mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                    CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP,
+                    true);
+            waitForHandler();
+            // then process is compacted.
+            CachedAppOptimizer.CompactProfile executedCompactProfile =
+                    processRecord.mOptRecord.getLastCompactProfile();
+            assertThat(executedCompactProfile).isEqualTo(CachedAppOptimizer.CompactProfile.SOME);
+        }
     }
 
     private void setFlag(String key, String value, boolean defaultValue) throws Exception {
@@ -1183,7 +1062,7 @@ public final class CachedAppOptimizerTest {
         }
 
         @Override
-        public void performCompaction(CachedAppOptimizer.CompactAction action, int pid)
+        public void performCompaction(CachedAppOptimizer.CompactProfile profile, int pid)
                 throws IOException {
             mRss = mRssAfterCompaction;
         }

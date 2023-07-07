@@ -129,9 +129,9 @@ interface ISub {
      * @param uniqueId This is the unique identifier for the subscription within the specific
      *                      subscription type.
      * @param subscriptionType the type of subscription to be removed
-     * @return 0 if success, < 0 on error.
+     * @return true if success, false on error.
      */
-    int removeSubInfo(String uniqueId, int subscriptionType);
+    boolean removeSubInfo(String uniqueId, int subscriptionType);
 
     /**
      * Set SIM icon tint color by simInfo index
@@ -260,12 +260,10 @@ interface ISub {
 
     int[] getActiveSubIdList(boolean visibleOnly);
 
-    int setSubscriptionProperty(int subId, String propKey, String propValue);
+    void setSubscriptionProperty(int subId, String propKey, String propValue);
 
     String getSubscriptionProperty(int subId, String propKey, String callingPackage,
             String callingFeatureId);
-
-    boolean setSubscriptionEnabled(boolean enable, int subId);
 
     boolean isSubscriptionEnabled(int subId);
 
@@ -277,7 +275,7 @@ interface ISub {
 
     boolean canDisablePhysicalSubscription();
 
-    int setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
+    void setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
 
     int setDeviceToDeviceStatusSharing(int sharing, int subId);
 
@@ -354,13 +352,6 @@ interface ISub {
        * @hide
        */
        List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(in UserHandle userHandle);
-
-       /**
-        * @return {@code true} if using SubscriptionManagerService instead of
-        * SubscriptionController.
-        */
-       //TODO: Removed before U AOSP public release.
-       boolean isSubscriptionManagerServiceEnabled();
 
       /**
        * Called during setup wizard restore flow to attempt to restore the backed up sim-specific

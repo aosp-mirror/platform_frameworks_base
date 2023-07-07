@@ -17,11 +17,12 @@
 package com.android.systemui.temporarydisplay
 
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogcatEchoTracker
+import com.android.systemui.log.LogcatEchoTracker
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -50,6 +51,7 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
                 override val priority: ViewPriority = ViewPriority.CRITICAL
                 override val windowTitle: String = "Test Window Title"
                 override val wakeReason: String = "wake reason"
+                override val instanceId: InstanceId = InstanceId.fakeInstanceId(0)
             }
 
         logger.logViewAddition(info)

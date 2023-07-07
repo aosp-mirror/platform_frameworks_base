@@ -35,7 +35,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
@@ -65,7 +65,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.PowerAllowlistInternal;
 import com.android.server.job.ConstantsProto;
@@ -382,30 +382,10 @@ public final class QuotaController extends StateController {
                 }
             };
 
-    private class QcUidObserver extends IUidObserver.Stub {
+    private class QcUidObserver extends UidObserver {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_PROCESS_STATE_CHANGED, uid, procState).sendToTarget();
-        }
-
-        @Override
-        public void onUidGone(int uid, boolean disabled) {
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     }
 
@@ -560,13 +540,14 @@ public final class QuotaController extends StateController {
             @NonNull BackgroundJobsController backgroundJobsController,
             @NonNull ConnectivityController connectivityController) {
         super(service);
-        mHandler = new QcHandler(mContext.getMainLooper());
+        mHandler = new QcHandler(AppSchedulingModuleThread.get().getLooper());
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
         mIsEnabled = !mConstants.USE_TARE_POLICY;
-        mInQuotaAlarmQueue = new InQuotaAlarmQueue(mContext, mContext.getMainLooper());
+        mInQuotaAlarmQueue =
+                new InQuotaAlarmQueue(mContext, AppSchedulingModuleThread.get().getLooper());
 
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
@@ -792,6 +773,14 @@ public final class QuotaController extends StateController {
             // If quota is currently "free", then the job can run for the full amount of time,
             // regardless of bucket (hence using charging instead of isQuotaFreeLocked()).
             if (mService.isBatteryCharging()
+                    // The top and foreground cases here were added because apps in those states
+                    // aren't really restricted and the work could be something the user is
+                    // waiting for. Now that user-initiated jobs are a defined concept, we may
+                    // not need these exemptions as much. However, UIJs are currently limited
+                    // (as of UDC) to data transfer work. There may be other work that could
+                    // rely on this exception. Once we add more UIJ types, we can re-evaluate
+                    // the need for these exceptions.
+                    // TODO: re-evaluate the need for these exceptions
                     || mTopAppCache.get(jobStatus.getSourceUid())
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid())) {
@@ -1649,7 +1638,7 @@ public final class QuotaController extends StateController {
         mEJPkgTimers.forEach(mTimerChargingUpdateFunctor);
         mPkgTimers.forEach(mTimerChargingUpdateFunctor);
         // Now update jobs out of band so broadcast processing can proceed.
-        JobSchedulerBackgroundThread.getHandler().post(() -> {
+        AppSchedulingModuleThread.getHandler().post(() -> {
             synchronized (mLock) {
                 maybeUpdateAllConstraintsLocked();
             }
@@ -2486,7 +2475,7 @@ public final class QuotaController extends StateController {
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 final int bucketIndex = JobSchedulerService.standbyBucketToBucketIndex(bucket);
                 updateStandbyBucket(userId, packageName, bucketIndex);
             });
@@ -2938,7 +2927,7 @@ public final class QuotaController extends StateController {
         if (mQcConstants.mShouldReevaluateConstraints || mIsEnabled == mConstants.USE_TARE_POLICY) {
             mIsEnabled = !mConstants.USE_TARE_POLICY;
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 synchronized (mLock) {
                     invalidateAllExecutionStatsLocked();
                     maybeUpdateAllConstraintsLocked();
@@ -3172,7 +3161,8 @@ public final class QuotaController extends StateController {
         private static final int DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = 20;
         private static final long DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS = 5000; // 5 seconds
         private static final long DEFAULT_MIN_QUOTA_CHECK_DELAY_MS = MINUTE_IN_MILLIS;
-        private static final long DEFAULT_EJ_LIMIT_EXEMPTED_MS = 45 * MINUTE_IN_MILLIS;
+        // TODO(267949143): set a different limit for headless system apps
+        private static final long DEFAULT_EJ_LIMIT_EXEMPTED_MS = 60 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_ACTIVE_MS = 30 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_WORKING_MS = DEFAULT_EJ_LIMIT_ACTIVE_MS;
         private static final long DEFAULT_EJ_LIMIT_FREQUENT_MS = 10 * MINUTE_IN_MILLIS;

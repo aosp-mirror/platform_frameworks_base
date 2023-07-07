@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.compat.CompatChanges;
@@ -519,9 +520,9 @@ public class ContextWrapper extends Context {
     @Override
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
-            @Nullable String[] excludedPackages) {
+            @Nullable String[] excludedPackages, @Nullable BroadcastOptions options) {
         mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions,
-                excludedPackages);
+                excludedPackages, options);
     }
 
     /** @hide */
@@ -1482,5 +1483,16 @@ public class ContextWrapper extends Context {
         }
         // Do nothing if the callback hasn't been registered to Application Context by
         // super.unregisterComponentCallbacks() for Application that is targeting prior to T.
+    }
+
+    /**
+     * Closes temporary system dialogs. Some examples of temporary system dialogs are the
+     * notification window-shade and the recent tasks dialog.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    public void closeSystemDialogs() {
+        mBase.closeSystemDialogs();
     }
 }

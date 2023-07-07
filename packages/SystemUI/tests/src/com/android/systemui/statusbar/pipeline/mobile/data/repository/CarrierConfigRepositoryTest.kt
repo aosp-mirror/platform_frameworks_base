@@ -24,8 +24,8 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest.Companion.createTestConfig
-import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -96,7 +96,7 @@ class CarrierConfigRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `carrier config stream produces int-bundle pairs`() =
+    fun carrierConfigStreamProducesIntBundlePairs() =
         testScope.runTest {
             var latest: Pair<Int, PersistableBundle>? = null
             val job = underTest.carrierConfigStream.onEach { latest = it }.launchIn(this)
@@ -111,7 +111,7 @@ class CarrierConfigRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `carrier config stream ignores invalid subscriptions`() =
+    fun carrierConfigStreamIgnoresInvalidSubscriptions() =
         testScope.runTest {
             var latest: Pair<Int, PersistableBundle>? = null
             val job = underTest.carrierConfigStream.onEach { latest = it }.launchIn(this)
@@ -124,19 +124,19 @@ class CarrierConfigRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getOrCreateConfig - uses default config if no override`() {
+    fun getOrCreateConfig_usesDefaultConfigIfNoOverride() {
         val config = underTest.getOrCreateConfigForSubId(123)
         assertThat(config.isUsingDefault).isTrue()
     }
 
     @Test
-    fun `getOrCreateConfig - uses override if exists`() {
+    fun getOrCreateConfig_usesOverrideIfExists() {
         val config = underTest.getOrCreateConfigForSubId(SUB_ID_1)
         assertThat(config.isUsingDefault).isFalse()
     }
 
     @Test
-    fun `config - updates while config stream is collected`() =
+    fun config_updatesWhileConfigStreamIsCollected() =
         testScope.runTest {
             CONFIG_1.putBoolean(CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false)
 

@@ -18,7 +18,8 @@ package android.text;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.graphics.Paint;
+import android.graphics.TemporaryBuffer;
+import android.graphics.text.GraphemeBreak;
 
 /**
  * Implementation of {@code SegmentFinder} using grapheme clusters as the text segment. Whitespace
@@ -31,8 +32,8 @@ import android.graphics.Paint;
  *     Segmentation - Grapheme Cluster Boundaries</a>
  */
 public class GraphemeClusterSegmentFinder extends SegmentFinder {
-    private final CharSequence mText;
-    private final TextPaint mTextPaint;
+    private static AutoGrowArray.FloatArray sTempAdvances = null;
+    private final boolean[] mIsGraphemeBreak;
 
     /**
      * Constructs a GraphemeClusterSegmentFinder instance for the specified text which uses the
@@ -43,51 +44,73 @@ public class GraphemeClusterSegmentFinder extends SegmentFinder {
      */
     public GraphemeClusterSegmentFinder(
             @NonNull CharSequence text, @NonNull TextPaint textPaint) {
-        mText = text;
-        mTextPaint = textPaint;
+
+        if (sTempAdvances == null) {
+            sTempAdvances = new AutoGrowArray.FloatArray(text.length());
+        } else if (sTempAdvances.size() < text.length()) {
+            sTempAdvances.resize(text.length());
+        }
+
+        mIsGraphemeBreak = new boolean[text.length()];
+        float[] advances = sTempAdvances.getRawArray();
+        char[] chars = TemporaryBuffer.obtain(text.length());
+
+        TextUtils.getChars(text, 0, text.length(), chars, 0);
+
+        textPaint.getTextWidths(chars, 0, text.length(), advances);
+
+        GraphemeBreak.isGraphemeBreak(advances, chars, /* start= */ 0, /* end= */ text.length(),
+                mIsGraphemeBreak);
+        TemporaryBuffer.recycle(chars);
+    }
+
+    private int previousBoundary(@IntRange(from = 0) int offset) {
+        if (offset <= 0) return DONE;
+        do {
+            --offset;
+        } while (offset > 0 && !mIsGraphemeBreak[offset]);
+        return offset;
+    }
+
+    private int nextBoundary(@IntRange(from = 0) int offset) {
+        if (offset >= mIsGraphemeBreak.length) return DONE;
+        do {
+            ++offset;
+        } while (offset < mIsGraphemeBreak.length && !mIsGraphemeBreak[offset]);
+        return offset;
     }
 
     @Override
     public int previousStartBoundary(@IntRange(from = 0) int offset) {
-        if (offset == 0) return DONE;
-        int boundary = mTextPaint.getTextRunCursor(
-                mText, 0, mText.length(), false, offset, Paint.CURSOR_BEFORE);
-        return boundary == -1 ? DONE : boundary;
+        return previousBoundary(offset);
     }
 
     @Override
     public int previousEndBoundary(@IntRange(from = 0) int offset) {
         if (offset == 0) return DONE;
-        int boundary = mTextPaint.getTextRunCursor(
-                mText, 0, mText.length(), false, offset, Paint.CURSOR_BEFORE);
+        int boundary = previousBoundary(offset);
         // Check that there is another cursor position before, otherwise this is not a valid
         // end boundary.
-        if (mTextPaint.getTextRunCursor(
-                mText, 0, mText.length(), false, boundary, Paint.CURSOR_BEFORE) == -1) {
+        if (boundary == DONE || previousBoundary(boundary) == DONE) {
             return DONE;
         }
-        return boundary == -1 ? DONE : boundary;
+        return boundary;
     }
 
     @Override
     public int nextStartBoundary(@IntRange(from = 0) int offset) {
-        if (offset == mText.length()) return DONE;
-        int boundary = mTextPaint.getTextRunCursor(
-                mText, 0, mText.length(), false, offset, Paint.CURSOR_AFTER);
+        if (offset == mIsGraphemeBreak.length) return DONE;
+        int boundary = nextBoundary(offset);
         // Check that there is another cursor position after, otherwise this is not a valid
         // start boundary.
-        if (mTextPaint.getTextRunCursor(
-                mText, 0, mText.length(), false, boundary, Paint.CURSOR_AFTER) == -1) {
+        if (boundary == DONE || nextBoundary(boundary) == DONE) {
             return DONE;
         }
-        return boundary == -1 ? DONE : boundary;
+        return boundary;
     }
 
     @Override
     public int nextEndBoundary(@IntRange(from = 0) int offset) {
-        if (offset == mText.length()) return DONE;
-        int boundary = mTextPaint.getTextRunCursor(
-                mText, 0, mText.length(), false, offset, Paint.CURSOR_AFTER);
-        return boundary == -1 ? DONE : boundary;
+        return nextBoundary(offset);
     }
 }

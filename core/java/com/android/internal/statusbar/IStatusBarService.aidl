@@ -29,6 +29,7 @@ import android.media.MediaRoute2Info;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.logging.InstanceId;
@@ -110,7 +111,8 @@ interface IStatusBarService
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);
     @UnsupportedAppUsage
-    void handleSystemKey(in int key);
+    void handleSystemKey(in KeyEvent key);
+    int getLastSystemKey();
 
     /**
      * Methods to show toast messages for screen pinning
@@ -121,8 +123,7 @@ interface IStatusBarService
     // Used to show the authentication dialog (Biometrics, Device Credential)
     void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation,
-            int userId, long operationId, String opPackageName, long requestId,
-            int multiSensorConfig);
+            int userId, long operationId, String opPackageName, long requestId);
 
     // Used to notify the authentication dialog that a biometric has been authenticated
     void onBiometricAuthenticated(int modality);

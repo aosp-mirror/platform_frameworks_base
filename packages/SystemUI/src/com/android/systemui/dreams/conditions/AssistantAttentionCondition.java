@@ -18,10 +18,13 @@ package com.android.systemui.dreams.conditions;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Condition;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * {@link AssistantAttentionCondition} provides a signal when assistant has the user's attention.
@@ -58,8 +61,10 @@ public class AssistantAttentionCondition extends Condition {
 
     @Inject
     public AssistantAttentionCondition(
+            @Application CoroutineScope scope,
             DreamOverlayStateController dreamOverlayStateController,
             AssistUtils assistUtils) {
+        super(scope);
         mDreamOverlayStateController = dreamOverlayStateController;
         mAssistUtils = assistUtils;
     }
@@ -73,6 +78,11 @@ public class AssistantAttentionCondition extends Condition {
     protected void stop() {
         disableVisualQueryDetection();
         mDreamOverlayStateController.removeCallback(mCallback);
+    }
+
+    @Override
+    protected int getStartStrategy() {
+        return START_EAGERLY;
     }
 
     private void enableVisualQueryDetection() {

@@ -17,8 +17,8 @@
 package com.android.systemui.keyguard.ui
 
 import androidx.test.filters.SmallTest
+import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState

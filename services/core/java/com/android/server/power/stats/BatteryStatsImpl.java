@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
@@ -498,14 +499,6 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-    }
-
-    /** Handles calls to AlarmManager */
-    public interface AlarmInterface {
-        /** Schedule an RTC alarm */
-        void schedule(long rtcTimeMs, long windowLengthMs);
-        /** Cancel the previously scheduled alarm */
-        void cancel();
     }
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
@@ -1569,8 +1562,15 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     protected BatteryStatsConfig mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
 
-    @VisibleForTesting
-    protected AlarmInterface mLongPlugInAlarmInterface = null;
+    @GuardedBy("this")
+    private AlarmManager mAlarmManager = null;
+
+    private final AlarmManager.OnAlarmListener mLongPlugInAlarmHandler = () ->
+            mHandler.post(() -> {
+                synchronized (BatteryStatsImpl.this) {
+                    maybeResetWhilePluggedInLocked();
+                }
+            });
 
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
@@ -1675,6 +1675,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     String mLastWakeupReason = null;
     long mLastWakeupUptimeMs = 0;
+    long mLastWakeupElapsedTimeMs = 0;
     private final HashMap<String, SamplingTimer> mWakeupReasonStats = new HashMap<>();
 
     public Map<String, ? extends Timer> getWakeupReasonStats() {
@@ -1743,7 +1744,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (historyDirectory == null) {
             mCheckinFile = null;
             mStatsFile = null;
-            mHistory = new BatteryStatsHistory(mStepDetailsCalculator, mClock);
+            mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_FILES,
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         } else {
             mCheckinFile = new AtomicFile(new File(historyDirectory, "batterystats-checkin.bin"));
             mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
@@ -4744,17 +4746,19 @@ public class BatteryStatsImpl extends BatteryStats {
                 requestWakelockCpuUpdate();
             }
 
-            getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs)
-                    .noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
+            Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
+            uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
+
+            int procState = uidStats.mProcessState;
 
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
                         wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE, procState);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
                         mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE, procState);
             }
         }
     }
@@ -4795,16 +4799,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 requestWakelockCpuUpdate();
             }
 
-            getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs)
-                    .noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
+            Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
+            uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
+
+            int procState = uidStats.mProcessState;
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
                         wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE, procState);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
                         mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE, procState);
             }
 
             if (mappedUid != uid) {
@@ -5043,7 +5049,7 @@ public class BatteryStatsImpl extends BatteryStats {
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptimeMs * 1000, 1, elapsedRealtimeMs); // time in in microseconds
             FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason,
-                    /* duration_usec */ deltaUptimeMs * 1000);
+                    /* duration_usec */ deltaUptimeMs * 1000, mLastWakeupElapsedTimeMs);
             mLastWakeupReason = null;
         }
     }
@@ -5054,6 +5060,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mHistory.recordWakeupEvent(elapsedRealtimeMs, uptimeMs, reason);
         mLastWakeupReason = reason;
         mLastWakeupUptimeMs = uptimeMs;
+        mLastWakeupElapsedTimeMs = elapsedRealtimeMs;
     }
 
     @GuardedBy("this")
@@ -10881,14 +10888,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (systemDir == null) {
             mStatsFile = null;
-            mHistory = new BatteryStatsHistory(mStepDetailsCalculator, mClock);
+            mCheckinFile = null;
+            mDailyFile = null;
+            mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_FILES,
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         } else {
             mStatsFile = new AtomicFile(new File(systemDir, "batterystats.bin"));
+            mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
+            mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
             mHistory = new BatteryStatsHistory(systemDir, mConstants.MAX_HISTORY_FILES,
                     mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         }
-        mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
-        mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
@@ -11053,18 +11063,6 @@ public class BatteryStatsImpl extends BatteryStats {
     public void setBatteryStatsConfig(BatteryStatsConfig config) {
         synchronized (this) {
             mBatteryStatsConfig = config;
-        }
-    }
-
-    /**
-     * Injects an AlarmInterface for the long plug in alarm.
-     */
-    public void setLongPlugInAlarmInterface(AlarmInterface longPlugInAlarmInterface) {
-        synchronized (this) {
-            mLongPlugInAlarmInterface = longPlugInAlarmInterface;
-            if (mBatteryPluggedIn) {
-                scheduleNextResetWhilePluggedInCheck();
-            }
         }
     }
 
@@ -12684,8 +12682,8 @@ public class BatteryStatsImpl extends BatteryStats {
             energy = info.getControllerEnergyUsed();
             if (!info.getUidTraffic().isEmpty()) {
                 for (UidTraffic traffic : info.getUidTraffic()) {
-                    uidRxBytes.incrementValue(traffic.getUid(), traffic.getRxBytes());
-                    uidTxBytes.incrementValue(traffic.getUid(), traffic.getTxBytes());
+                    uidRxBytes.put(traffic.getUid(), traffic.getRxBytes());
+                    uidTxBytes.put(traffic.getUid(), traffic.getTxBytes());
                 }
             }
         }
@@ -14169,6 +14167,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Might reset battery stats if conditions are met. Assumed the device is currently plugged in.
      */
+    @VisibleForTesting
     @GuardedBy("this")
     public void maybeResetWhilePluggedInLocked() {
         final long elapsedRealtimeMs = mClock.elapsedRealtime();
@@ -14185,28 +14184,31 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     private void scheduleNextResetWhilePluggedInCheck() {
-        if (mLongPlugInAlarmInterface != null) {
-            final long timeoutMs = mClock.currentTimeMillis()
-                    + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
-                    * DateUtils.HOUR_IN_MILLIS;
-            Calendar nextAlarm = Calendar.getInstance();
-            nextAlarm.setTimeInMillis(timeoutMs);
+        if (mAlarmManager == null) return;
+        final long timeoutMs = mClock.currentTimeMillis()
+                + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
+                * DateUtils.HOUR_IN_MILLIS;
+        Calendar nextAlarm = Calendar.getInstance();
+        nextAlarm.setTimeInMillis(timeoutMs);
 
-            // Find the 2 AM the same day as the end of the minimum duration.
-            // This logic does not handle a Daylight Savings transition, or a timezone change
-            // while the alarm has been set. The need to reset after a long period while plugged
-            // in is not strict enough to warrant a well architected out solution.
-            nextAlarm.set(Calendar.MILLISECOND, 0);
-            nextAlarm.set(Calendar.SECOND, 0);
-            nextAlarm.set(Calendar.MINUTE, 0);
-            nextAlarm.set(Calendar.HOUR_OF_DAY, 2);
-            long nextTimeMs = nextAlarm.getTimeInMillis();
-            if (nextTimeMs < timeoutMs) {
-                // The 2AM on the day of the timeout, move on the next day.
-                nextTimeMs += DateUtils.DAY_IN_MILLIS;
-            }
-            mLongPlugInAlarmInterface.schedule(nextTimeMs, DateUtils.HOUR_IN_MILLIS);
+        // Find the 2 AM the same day as the end of the minimum duration.
+        // This logic does not handle a Daylight Savings transition, or a timezone change
+        // while the alarm has been set. The need to reset after a long period while plugged
+        // in is not strict enough to warrant a well architected out solution.
+        nextAlarm.set(Calendar.MILLISECOND, 0);
+        nextAlarm.set(Calendar.SECOND, 0);
+        nextAlarm.set(Calendar.MINUTE, 0);
+        nextAlarm.set(Calendar.HOUR_OF_DAY, 2);
+        long possibleNextTimeMs = nextAlarm.getTimeInMillis();
+        if (possibleNextTimeMs < timeoutMs) {
+            // The 2AM on the day of the timeout, move on the next day.
+            possibleNextTimeMs += DateUtils.DAY_IN_MILLIS;
         }
+        final long nextTimeMs = possibleNextTimeMs;
+        final AlarmManager am = mAlarmManager;
+        mHandler.post(() -> am.setWindow(AlarmManager.RTC, nextTimeMs,
+                DateUtils.HOUR_IN_MILLIS,
+                TAG, mLongPlugInAlarmHandler, mHandler));
     }
 
 
@@ -14335,8 +14337,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
             }
             mBatteryPluggedIn = false;
-            if (mLongPlugInAlarmInterface != null) {
-                mLongPlugInAlarmInterface.cancel();
+            if (mAlarmManager != null) {
+                final AlarmManager am = mAlarmManager;
+                mHandler.post(() -> {
+                    // No longer plugged in. Cancel the long plug in alarm.
+                    am.cancel(mLongPlugInAlarmHandler);
+                });
             }
             mHistory.recordBatteryState(mSecRealtime, mSecUptime, level, mBatteryPluggedIn);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
@@ -14607,17 +14613,13 @@ public class BatteryStatsImpl extends BatteryStats {
 
     // Inform StatsLog of setBatteryState changes.
     private void reportChangesToStatsLog(final int status, final int plugType, final int level) {
-        if (!mHaveBatteryLevel) {
-            return;
-        }
-
-        if (mBatteryStatus != status) {
+        if (!mHaveBatteryLevel || mBatteryStatus != status) {
             FrameworkStatsLog.write(FrameworkStatsLog.CHARGING_STATE_CHANGED, status);
         }
-        if (mBatteryPlugType != plugType) {
+        if (!mHaveBatteryLevel || mBatteryPlugType != plugType) {
             FrameworkStatsLog.write(FrameworkStatsLog.PLUGGED_STATE_CHANGED, plugType);
         }
-        if (mBatteryLevel != level) {
+        if (!mHaveBatteryLevel || mBatteryLevel != level) {
             FrameworkStatsLog.write(FrameworkStatsLog.BATTERY_LEVEL_CHANGED, level);
         }
     }
@@ -15174,6 +15176,14 @@ public class BatteryStatsImpl extends BatteryStats {
     public void systemServicesReady(Context context) {
         mConstants.startObserving(context.getContentResolver());
         registerUsbStateReceiver(context);
+
+        synchronized (this) {
+            mAlarmManager = context.getSystemService(AlarmManager.class);
+            if (mBatteryPluggedIn) {
+                // Already plugged in. Schedule the long plug in alarm.
+                scheduleNextResetWhilePluggedInCheck();
+            }
+        }
     }
 
     /**

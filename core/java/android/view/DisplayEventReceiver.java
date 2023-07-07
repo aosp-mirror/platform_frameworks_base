@@ -81,7 +81,10 @@ public abstract class DisplayEventReceiver {
     // GC'd while the native peer of the receiver is using them.
     private MessageQueue mMessageQueue;
 
+    private final VsyncEventData mVsyncEventData = new VsyncEventData();
+
     private static native long nativeInit(WeakReference<DisplayEventReceiver> receiver,
+            WeakReference<VsyncEventData> vsyncEventData,
             MessageQueue messageQueue, int vsyncSource, int eventRegistration, long layerHandle);
     private static native long nativeGetDisplayEventReceiverFinalizer();
     @FastNative
@@ -124,7 +127,9 @@ public abstract class DisplayEventReceiver {
         }
 
         mMessageQueue = looper.getQueue();
-        mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this), mMessageQueue,
+        mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this),
+                new WeakReference<VsyncEventData>(mVsyncEventData),
+                mMessageQueue,
                 vsyncSource, eventRegistration, layerHandle);
         mFreeNativeResources = sNativeAllocationRegistry.registerNativeAllocation(this,
                 mReceiverPtr);
@@ -141,28 +146,44 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = null;
     }
 
-    static final class VsyncEventData {
-
-        static final FrameTimeline[] INVALID_FRAME_TIMELINES =
-                {new FrameTimeline(FrameInfo.INVALID_VSYNC_ID, Long.MAX_VALUE, Long.MAX_VALUE)};
+    /**
+     * Class to capture all inputs required for syncing events data.
+     *
+     * @hide
+     */
+    public static final class VsyncEventData {
+        // The max capacity of frame timeline choices.
+        // Must be in sync with VsyncEventData::kFrameTimelinesCapacity in
+        // frameworks/native/libs/gui/include/gui/VsyncEventData.h
+        static final int FRAME_TIMELINES_CAPACITY = 7;
 
         public static class FrameTimeline {
-            FrameTimeline(long vsyncId, long expectedPresentTime, long deadline) {
+            FrameTimeline() {}
+
+            // Called from native code.
+            @SuppressWarnings("unused")
+            FrameTimeline(long vsyncId, long expectedPresentationTime, long deadline) {
                 this.vsyncId = vsyncId;
-                this.expectedPresentTime = expectedPresentTime;
+                this.expectedPresentationTime = expectedPresentationTime;
                 this.deadline = deadline;
+            }
+
+            void copyFrom(FrameTimeline other) {
+                vsyncId = other.vsyncId;
+                expectedPresentationTime = other.expectedPresentationTime;
+                deadline = other.deadline;
             }
 
             // The frame timeline vsync id, used to correlate a frame
             // produced by HWUI with the timeline data stored in Surface Flinger.
-            public final long vsyncId;
+            public long vsyncId = FrameInfo.INVALID_VSYNC_ID;
 
             // The frame timestamp for when the frame is expected to be presented.
-            public final long expectedPresentTime;
+            public long expectedPresentationTime = Long.MAX_VALUE;
 
             // The frame deadline timestamp in {@link System#nanoTime()} timebase that it is
             // allotted for the frame to be completed.
-            public final long deadline;
+            public long deadline = Long.MAX_VALUE;
         }
 
         /**
@@ -170,25 +191,38 @@ public abstract class DisplayEventReceiver {
          * {@link FrameInfo#VSYNC} to the current vsync in case Choreographer callback was heavily
          * delayed by the app.
          */
-        public final long frameInterval;
+        public long frameInterval = -1;
 
         public final FrameTimeline[] frameTimelines;
 
-        public final int preferredFrameTimelineIndex;
+        public int preferredFrameTimelineIndex = 0;
+
+        public int frameTimelinesLength = 0;
+
+        VsyncEventData() {
+            frameTimelines = new FrameTimeline[FRAME_TIMELINES_CAPACITY];
+            for (int i = 0; i < frameTimelines.length; i++) {
+                frameTimelines[i] = new FrameTimeline();
+            }
+        }
 
         // Called from native code.
         @SuppressWarnings("unused")
         VsyncEventData(FrameTimeline[] frameTimelines, int preferredFrameTimelineIndex,
-                long frameInterval) {
+                int frameTimelinesLength, long frameInterval) {
             this.frameTimelines = frameTimelines;
             this.preferredFrameTimelineIndex = preferredFrameTimelineIndex;
+            this.frameTimelinesLength = frameTimelinesLength;
             this.frameInterval = frameInterval;
         }
 
-        VsyncEventData() {
-            this.frameInterval = -1;
-            this.frameTimelines = INVALID_FRAME_TIMELINES;
-            this.preferredFrameTimelineIndex = 0;
+        void copyFrom(VsyncEventData other) {
+            preferredFrameTimelineIndex = other.preferredFrameTimelineIndex;
+            frameTimelinesLength = other.frameTimelinesLength;
+            frameInterval = other.frameInterval;
+            for (int i = 0; i < frameTimelines.length; i++) {
+                frameTimelines[i].copyFrom(other.frameTimelines[i]);
+            }
         }
 
         public FrameTimeline preferredFrameTimeline() {
@@ -294,9 +328,8 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame,
-            VsyncEventData vsyncEventData) {
-        onVsync(timestampNanos, physicalDisplayId, frame, vsyncEventData);
+    private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame) {
+        onVsync(timestampNanos, physicalDisplayId, frame, mVsyncEventData);
     }
 
     // Called from native code.

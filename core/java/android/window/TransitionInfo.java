@@ -21,9 +21,11 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -58,6 +60,7 @@ import java.util.List;
  * @hide
  */
 public final class TransitionInfo implements Parcelable {
+    private static final String TAG = "TransitionInfo";
 
     /**
      * Modes are only a sub-set of all the transit-types since they are per-container
@@ -95,9 +98,6 @@ public final class TransitionInfo implements Parcelable {
 
     /** The container is the display. */
     public static final int FLAG_IS_DISPLAY = 1 << 5;
-
-    /** The container can show on top of lock screen. */
-    public static final int FLAG_OCCLUDES_KEYGUARD = 1 << 6;
 
     /**
      * Only for IS_DISPLAY containers. Is set if the display has system alert windows. This is
@@ -147,8 +147,17 @@ public final class TransitionInfo implements Parcelable {
     /** The task is launching behind home. */
     public static final int FLAG_TASK_LAUNCHING_BEHIND = 1 << 19;
 
+    /** The task became the top-most task even if it didn't change visibility. */
+    public static final int FLAG_MOVED_TO_TOP = 1 << 20;
+
+    /**
+     * This transition must be the only transition when it starts (ie. it must wait for all other
+     * transition animations to finish).
+     */
+    public static final int FLAG_SYNC = 1 << 21;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 20;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 22;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -163,7 +172,6 @@ public final class TransitionInfo implements Parcelable {
             FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT,
             FLAG_IS_VOICE_INTERACTION,
             FLAG_IS_DISPLAY,
-            FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
             FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY,
@@ -177,18 +185,22 @@ public final class TransitionInfo implements Parcelable {
             FLAG_BACK_GESTURE_ANIMATED,
             FLAG_NO_ANIMATION,
             FLAG_TASK_LAUNCHING_BEHIND,
+            FLAG_MOVED_TO_TOP,
+            FLAG_SYNC,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
 
     private final @TransitionType int mType;
-    private final @TransitionFlags int mFlags;
+    private @TransitionFlags int mFlags;
+    private int mTrack = 0;
     private final ArrayList<Change> mChanges = new ArrayList<>();
-
-    private SurfaceControl mRootLeash;
-    private final Point mRootOffset = new Point();
+    private final ArrayList<Root> mRoots = new ArrayList<>();
 
     private AnimationOptions mOptions;
+
+    /** This is only a BEST-EFFORT id used for log correlation. DO NOT USE for any real work! */
+    private int mDebugId = -1;
 
     /** @hide */
     public TransitionInfo(@TransitionType int type, @TransitionFlags int flags) {
@@ -200,11 +212,10 @@ public final class TransitionInfo implements Parcelable {
         mType = in.readInt();
         mFlags = in.readInt();
         in.readTypedList(mChanges, Change.CREATOR);
-        mRootLeash = new SurfaceControl();
-        mRootLeash.readFromParcel(in);
-        mRootLeash.setUnreleasedWarningCallSite("TransitionInfo");
-        mRootOffset.readFromParcel(in);
+        in.readTypedList(mRoots, Root.CREATOR);
         mOptions = in.readTypedObject(AnimationOptions.CREATOR);
+        mDebugId = in.readInt();
+        mTrack = in.readInt();
     }
 
     @Override
@@ -213,9 +224,10 @@ public final class TransitionInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeInt(mFlags);
         dest.writeTypedList(mChanges);
-        mRootLeash.writeToParcel(dest, flags);
-        mRootOffset.writeToParcel(dest, flags);
+        dest.writeTypedList(mRoots, flags);
         dest.writeTypedObject(mOptions, flags);
+        dest.writeInt(mDebugId);
+        dest.writeInt(mTrack);
     }
 
     @NonNull
@@ -238,10 +250,15 @@ public final class TransitionInfo implements Parcelable {
         return 0;
     }
 
-    /** @see #getRootLeash() */
-    public void setRootLeash(@NonNull SurfaceControl leash, int offsetLeft, int offsetTop) {
-        mRootLeash = leash;
-        mRootOffset.set(offsetLeft, offsetTop);
+    /** @see #getRoot */
+    public void addRootLeash(int displayId, @NonNull SurfaceControl leash,
+            int offsetLeft, int offsetTop) {
+        mRoots.add(new Root(displayId, leash, offsetLeft, offsetTop));
+    }
+
+    /** @see #getRoot */
+    public void addRoot(Root other) {
+        mRoots.add(other);
     }
 
     public void setAnimationOptions(AnimationOptions options) {
@@ -252,8 +269,40 @@ public final class TransitionInfo implements Parcelable {
         return mType;
     }
 
+    public void setFlags(int flags) {
+        mFlags = flags;
+    }
+
     public int getFlags() {
         return mFlags;
+    }
+
+    /**
+     * @return The number of animation roots. Most transitions should have 1, but there may be more
+     *         in some cases (such as a transition spanning multiple displays).
+     */
+    public int getRootCount() {
+        return mRoots.size();
+    }
+
+    /**
+     * @return the transition-root at a specific index.
+     */
+    @NonNull
+    public Root getRoot(int idx) {
+        return mRoots.get(idx);
+    }
+
+    /**
+     * @return the index of the transition-root associated with `displayId` or -1 if not found.
+     */
+    public int findRootIndex(int displayId) {
+        for (int i = 0; i < mRoots.size(); ++i) {
+            if (mRoots.get(i).mDisplayId == displayId) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -261,19 +310,20 @@ public final class TransitionInfo implements Parcelable {
      * participants to animate within. This will generally be placed at the highest-z-order
      * shared ancestor of all participants. While this is non-null, it's possible for the rootleash
      * to be invalid if the transition is a no-op.
+     *
+     * @deprecated Use {@link #getRoot} instead. This call assumes there is only one root.
      */
+    @Deprecated
     @NonNull
     public SurfaceControl getRootLeash() {
-        if (mRootLeash == null) {
-            throw new IllegalStateException("Trying to get a leash which wasn't set");
+        if (mRoots.isEmpty()) {
+            throw new IllegalStateException("Trying to get a root leash from a no-op transition.");
         }
-        return mRootLeash;
-    }
-
-    /** @return the offset (relative to the screen) of the root leash. */
-    @NonNull
-    public Point getRootOffset() {
-        return mRootOffset;
+        if (mRoots.size() > 1) {
+            android.util.Log.e(TAG, "Assuming one animation root when there are more.",
+                    new Throwable());
+        }
+        return mRoots.get(0).mLeash;
     }
 
     public AnimationOptions getAnimationOptions() {
@@ -317,11 +367,42 @@ public final class TransitionInfo implements Parcelable {
         return (mFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0;
     }
 
+    /** Gets which animation track this transition should run on. */
+    public int getTrack() {
+        return mTrack;
+    }
+
+    /** Sets which animation track this transition should run on. */
+    public void setTrack(int track) {
+        mTrack = track;
+    }
+
+    /**
+     * Set an arbitrary "debug" id for this info. This id will not be used for any "real work",
+     * it is just for debugging and logging.
+     */
+    public void setDebugId(int id) {
+        mDebugId = id;
+    }
+
+    /** Get the "debug" id of this info. Do NOT use this for real work, only use for debugging. */
+    public int getDebugId() {
+        return mDebugId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + transitTypeToString(mType) + " f=0x" + Integer.toHexString(mFlags)
-                + " ro=" + mRootOffset + " c=[");
+        sb.append("{id=").append(mDebugId).append(" t=").append(transitTypeToString(mType))
+                .append(" f=0x").append(Integer.toHexString(mFlags)).append(" trk=").append(mTrack)
+                .append(" r=[");
+        for (int i = 0; i < mRoots.size(); ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(mRoots.get(i).mDisplayId).append("@").append(mRoots.get(i).mOffset);
+        }
+        sb.append("] c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -339,8 +420,8 @@ public final class TransitionInfo implements Parcelable {
             case TRANSIT_NONE: return "NONE";
             case TRANSIT_OPEN: return "OPEN";
             case TRANSIT_CLOSE: return "CLOSE";
-            case TRANSIT_TO_FRONT: return "SHOW";
-            case TRANSIT_TO_BACK: return "HIDE";
+            case TRANSIT_TO_FRONT: return "TO_FRONT";
+            case TRANSIT_TO_BACK: return "TO_BACK";
             case TRANSIT_CHANGE: return "CHANGE";
             default: return "<unknown:" + mode + ">";
         }
@@ -372,9 +453,6 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_IS_DISPLAY) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IS_DISPLAY");
         }
-        if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
-            sb.append(sb.length() == 0 ? "" : "|").append("OCCLUDES_KEYGUARD");
-        }
         if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("DISPLAY_HAS_ALERT_WINDOWS");
         }
@@ -402,8 +480,14 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_TASK_LAUNCHING_BEHIND) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "TASK_LAUNCHING_BEHIND");
         }
+        if ((flags & FLAG_SYNC) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "SYNC");
+        }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
+        }
+        if ((flags & FLAG_MOVED_TO_TOP) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("MOVE_TO_TOP");
         }
         return sb.toString();
     }
@@ -448,8 +532,8 @@ public final class TransitionInfo implements Parcelable {
                 c.mSnapshot = null;
             }
         }
-        if (mRootLeash != null) {
-            mRootLeash.release();
+        for (int i = 0; i < mRoots.size(); ++i) {
+            mRoots.get(i).mLeash.release();
         }
     }
 
@@ -466,6 +550,16 @@ public final class TransitionInfo implements Parcelable {
     }
 
     /**
+     * Updates the callsites of all the surfaces in this transition, which aids in the debugging of
+     * lingering surfaces.
+     */
+    public void setUnreleasedWarningCallSiteForAllSurfaces(String callsite) {
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            mChanges.get(i).getLeash().setUnreleasedWarningCallSite(callsite);
+        }
+    }
+
+    /**
      * Makes a copy of this as if it were parcel'd and unparcel'd. This implies that surfacecontrol
      * refcounts are incremented which allows the "remote" receiver to release them without breaking
      * the caller's references. Use this only if you need to "send" this to a local function which
@@ -473,13 +567,16 @@ public final class TransitionInfo implements Parcelable {
      */
     public TransitionInfo localRemoteCopy() {
         final TransitionInfo out = new TransitionInfo(mType, mFlags);
+        out.mTrack = mTrack;
+        out.mDebugId = mDebugId;
         for (int i = 0; i < mChanges.size(); ++i) {
             out.mChanges.add(mChanges.get(i).localRemoteCopy());
         }
-        out.mRootLeash = mRootLeash != null ? new SurfaceControl(mRootLeash, "localRemote") : null;
+        for (int i = 0; i < mRoots.size(); ++i) {
+            out.mRoots.add(mRoots.get(i).localRemoteCopy());
+        }
         // Doesn't have any native stuff, so no need for actual copy
         out.mOptions = mOptions;
-        out.mRootOffset.set(mRootOffset);
         return out;
     }
 
@@ -496,6 +593,8 @@ public final class TransitionInfo implements Parcelable {
         private final Point mEndRelOffset = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
         private boolean mAllowEnterPip;
+        private int mStartDisplayId = INVALID_DISPLAY;
+        private int mEndDisplayId = INVALID_DISPLAY;
         private @Surface.Rotation int mStartRotation = ROTATION_UNDEFINED;
         private @Surface.Rotation int mEndRotation = ROTATION_UNDEFINED;
         /**
@@ -526,6 +625,8 @@ public final class TransitionInfo implements Parcelable {
             mEndRelOffset.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
             mAllowEnterPip = in.readBoolean();
+            mStartDisplayId = in.readInt();
+            mEndDisplayId = in.readInt();
             mStartRotation = in.readInt();
             mEndRotation = in.readInt();
             mEndFixedRotation = in.readInt();
@@ -546,6 +647,8 @@ public final class TransitionInfo implements Parcelable {
             out.mEndRelOffset.set(mEndRelOffset);
             out.mTaskInfo = mTaskInfo;
             out.mAllowEnterPip = mAllowEnterPip;
+            out.mStartDisplayId = mStartDisplayId;
+            out.mEndDisplayId = mEndDisplayId;
             out.mStartRotation = mStartRotation;
             out.mEndRotation = mEndRotation;
             out.mEndFixedRotation = mEndFixedRotation;
@@ -605,6 +708,12 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the allowEnterPip flag which represents AppOpsManager check on PiP permission */
         public void setAllowEnterPip(boolean allowEnterPip) {
             mAllowEnterPip = allowEnterPip;
+        }
+
+        /** Sets the start and end rotation of this container. */
+        public void setDisplayId(int start, int end) {
+            mStartDisplayId = start;
+            mEndDisplayId = end;
         }
 
         /** Sets the start and end rotation of this container. */
@@ -725,6 +834,14 @@ public final class TransitionInfo implements Parcelable {
             return mAllowEnterPip;
         }
 
+        public int getStartDisplayId() {
+            return mStartDisplayId;
+        }
+
+        public int getEndDisplayId() {
+            return mEndDisplayId;
+        }
+
         @Surface.Rotation
         public int getStartRotation() {
             return mStartRotation;
@@ -776,6 +893,8 @@ public final class TransitionInfo implements Parcelable {
             mEndRelOffset.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
             dest.writeBoolean(mAllowEnterPip);
+            dest.writeInt(mStartDisplayId);
+            dest.writeInt(mEndDisplayId);
             dest.writeInt(mStartRotation);
             dest.writeInt(mEndRotation);
             dest.writeInt(mEndFixedRotation);
@@ -822,6 +941,11 @@ public final class TransitionInfo implements Parcelable {
             if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
                 sb.append(" eo="); sb.append(mEndRelOffset);
             }
+            sb.append(" d=");
+            if (mStartDisplayId != mEndDisplayId) {
+                sb.append(mStartDisplayId).append("->");
+            }
+            sb.append(mEndDisplayId);
             if (mStartRotation != mEndRotation) {
                 sb.append(" r="); sb.append(mStartRotation);
                 sb.append("->"); sb.append(mEndRotation);
@@ -947,6 +1071,11 @@ public final class TransitionInfo implements Parcelable {
 
         public static AnimationOptions makeCrossProfileAnimOptions() {
             AnimationOptions options = new AnimationOptions(ANIM_OPEN_CROSS_PROFILE_APPS);
+            return options;
+        }
+
+        public static AnimationOptions makeSceneTransitionAnimOptions() {
+            AnimationOptions options = new AnimationOptions(ANIM_SCENE_TRANSITION);
             return options;
         }
 
@@ -1106,6 +1235,88 @@ public final class TransitionInfo implements Parcelable {
                             return new CustomActivityTransition[size];
                         }
                     };
+        }
+    }
+
+    /**
+     * An animation root in a transition. There is one of these for each display that contains
+     * participants. It will be placed, in z-order, right above the top-most participant and at the
+     * same position in the hierarchy. As a result, if all participants are animating within a
+     * part of the screen, the root-leash will only be in that part of the screen. In these cases,
+     * it's relative position (from the screen) is stored in {@link Root#getOffset}.
+     */
+    public static final class Root implements Parcelable {
+        private final int mDisplayId;
+        private final SurfaceControl mLeash;
+        private final Point mOffset = new Point();
+
+        public Root(int displayId, @NonNull SurfaceControl leash, int offsetLeft, int offsetTop) {
+            mDisplayId = displayId;
+            mLeash = leash;
+            mOffset.set(offsetLeft, offsetTop);
+        }
+
+        private Root(Parcel in) {
+            mDisplayId = in.readInt();
+            mLeash = new SurfaceControl();
+            mLeash.readFromParcel(in);
+            mLeash.setUnreleasedWarningCallSite("TransitionInfo.Root");
+            mOffset.readFromParcel(in);
+        }
+
+        private Root localRemoteCopy() {
+            return new Root(mDisplayId, new SurfaceControl(mLeash, "localRemote"),
+                    mOffset.x, mOffset.y);
+        }
+
+        /** @return the id of the display this root is on. */
+        public int getDisplayId() {
+            return mDisplayId;
+        }
+
+        /** @return the root's leash. Surfaces should be parented to this while animating. */
+        @NonNull
+        public SurfaceControl getLeash() {
+            return mLeash;
+        }
+
+        /** @return the offset (relative to its screen) of the root leash. */
+        @NonNull
+        public Point getOffset() {
+            return mOffset;
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mDisplayId);
+            mLeash.writeToParcel(dest, flags);
+            mOffset.writeToParcel(dest, flags);
+        }
+
+        @NonNull
+        public static final Creator<Root> CREATOR =
+                new Creator<Root>() {
+                    @Override
+                    public Root createFromParcel(Parcel in) {
+                        return new Root(in);
+                    }
+
+                    @Override
+                    public Root[] newArray(int size) {
+                        return new Root[size];
+                    }
+                };
+
+        /** @hide */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return mDisplayId + "@" + mOffset + ":" + mLeash;
         }
     }
 }

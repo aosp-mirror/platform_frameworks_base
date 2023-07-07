@@ -17,7 +17,10 @@
 package android.net.wifi.sharedconnectivity.service;
 
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
-import android.net.wifi.sharedconnectivity.app.TetherNetwork;
+import android.net.wifi.sharedconnectivity.app.HotspotNetwork;
+import android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus;
+import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
+import android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.service.ISharedConnectivityCallback;
 
 /*
@@ -26,8 +29,13 @@ import android.net.wifi.sharedconnectivity.service.ISharedConnectivityCallback;
 interface ISharedConnectivityService {
     void registerCallback(in ISharedConnectivityCallback callback);
     void unregisterCallback(in ISharedConnectivityCallback callback);
-    void connectTetherNetwork(in TetherNetwork network);
-    void disconnectTetherNetwork(in TetherNetwork network);
+    void connectHotspotNetwork(in HotspotNetwork network);
+    void disconnectHotspotNetwork(in HotspotNetwork network);
     void connectKnownNetwork(in KnownNetwork network);
     void forgetKnownNetwork(in KnownNetwork network);
+    List<HotspotNetwork> getHotspotNetworks();
+    List<KnownNetwork> getKnownNetworks();
+    SharedConnectivitySettingsState getSettingsState();
+    HotspotNetworkConnectionStatus getHotspotNetworkConnectionStatus();
+    KnownNetworkConnectionStatus getKnownNetworkConnectionStatus();
 }

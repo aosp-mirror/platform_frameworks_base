@@ -449,7 +449,6 @@ class WindowStateAnimator {
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
                     mSurfaceController.showRobustly(t);
-                    mAnimator.requestRemovalOfReplacedWindows(w);
                     mLastHidden = false;
                     final DisplayContent displayContent = w.getDisplayContent();
                     if (!displayContent.getLastHasContent()) {
@@ -504,13 +503,6 @@ class WindowStateAnimator {
     }
 
     void applyEnterAnimationLocked() {
-        // If we are the new part of a window replacement transition and we have requested
-        // not to animate, we instead want to make it seamless, so we don't want to apply
-        // an enter transition.
-        if (mWin.mSkipEnterAnimationForSeamlessReplacement) {
-            return;
-        }
-
         final int transit;
         if (mEnterAnimationPending) {
             mEnterAnimationPending = false;

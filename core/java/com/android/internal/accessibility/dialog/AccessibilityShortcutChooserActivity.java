@@ -95,6 +95,13 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
     private void onTargetSelected(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityTarget target = mTargets.get(position);
+        if (target instanceof AccessibilityServiceTarget
+                || target instanceof AccessibilityActivityTarget) {
+            if (sendRestrictedDialogIntentIfNeeded(target)) {
+                return;
+            }
+        }
+
         target.onSelected();
         mMenuDialog.dismiss();
     }
@@ -102,13 +109,39 @@ public class AccessibilityShortcutChooserActivity extends Activity {
     private void onTargetChecked(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityTarget target = mTargets.get(position);
 
-        if ((target instanceof AccessibilityServiceTarget) && !target.isShortcutEnabled()) {
-            showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target, mTargetAdapter);
-            return;
+        if (!target.isShortcutEnabled()) {
+            if (target instanceof AccessibilityServiceTarget
+                    || target instanceof AccessibilityActivityTarget) {
+                if (sendRestrictedDialogIntentIfNeeded(target)) {
+                    return;
+                }
+            }
+
+            if (target instanceof AccessibilityServiceTarget) {
+                showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
+                        mTargetAdapter);
+                return;
+            }
         }
 
         target.onCheckedChanged(!target.isShortcutEnabled());
         mTargetAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Sends restricted dialog intent if the accessibility target is disallowed.
+     *
+     * @return true if sends restricted dialog intent, otherwise false.
+     */
+    private boolean sendRestrictedDialogIntentIfNeeded(AccessibilityTarget target) {
+        if (AccessibilityTargetHelper.isAccessibilityTargetAllowed(this,
+                target.getComponentName().getPackageName(), target.getUid())) {
+            return false;
+        }
+
+        AccessibilityTargetHelper.sendRestrictedDialogIntent(this,
+                target.getComponentName().getPackageName(), target.getUid());
+        return true;
     }
 
     private void showPermissionDialogIfNeeded(Context context,

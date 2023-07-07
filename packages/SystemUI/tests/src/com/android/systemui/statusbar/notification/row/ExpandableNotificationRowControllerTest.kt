@@ -21,25 +21,28 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider
+import com.android.systemui.statusbar.notification.collection.render.FakeNodeController
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartReplyConstants
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.wmshell.BubblesManager
@@ -68,7 +71,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val metricsLogger: MetricsLogger = mock()
     private val logBufferLogger: NotificationRowLogger = mock()
     private val listContainer: NotificationListContainer = mock()
-    private val mediaManager: NotificationMediaManager = mock()
+    private val childrenContainer: NotificationChildrenContainer = mock()
     private val smartReplyConstants: SmartReplyConstants = mock()
     private val smartReplyController: SmartReplyController = mock()
     private val pluginManager: PluginManager = mock()
@@ -90,6 +93,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val bubblesManager: BubblesManager = mock()
     private val dragController: ExpandableNotificationRowDragController = mock()
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
+    private val statusBarService: IStatusBarService = mock()
+
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -103,7 +108,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 metricsLogger,
                 logBufferLogger,
                 listContainer,
-                mediaManager,
                 smartReplyConstants,
                 smartReplyController,
                 pluginManager,
@@ -127,8 +131,10 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 peopleNotificationIdentifier,
                 Optional.of(bubblesManager),
                 dragController,
-                dismissibilityProvider
+                dismissibilityProvider,
+                statusBarService
             )
+        whenever(view.childrenContainer).thenReturn(childrenContainer)
     }
 
     @After
@@ -138,8 +144,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
 
     @Test
     fun offerKeepInParent_parentDismissed() {
-        whenever(featureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION))
-            .thenReturn(true)
         whenever(view.isParentDismissed).thenReturn(true)
 
         Assert.assertTrue(controller.offerToKeepInParentForAnimation())
@@ -148,9 +152,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
 
     @Test
     fun offerKeepInParent_parentNotDismissed() {
-        whenever(featureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION))
-            .thenReturn(true)
-
         Assert.assertFalse(controller.offerToKeepInParentForAnimation())
         Mockito.verify(view, never()).setKeepInParentForDismissAnimation(anyBoolean())
     }
@@ -172,5 +173,33 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
 
         Assert.assertFalse(controller.removeFromParentIfKeptForAnimation())
         Mockito.verifyNoMoreInteractions(parentView)
+    }
+
+    @Test
+    fun removeChild_whenTransfer() {
+        val childView: ExpandableNotificationRow = mock()
+        val childNodeController = FakeNodeController(childView)
+
+        // GIVEN a child is removed for transfer
+        controller.removeChild(childNodeController, /* isTransfer= */ true)
+
+        // VERIFY the listContainer is not notified
+        Mockito.verify(childView).isChangingPosition = eq(true)
+        Mockito.verify(view).removeChildNotification(eq(childView))
+        Mockito.verify(listContainer, never()).notifyGroupChildRemoved(any(), any())
+    }
+
+    @Test
+    fun removeChild_whenNotTransfer() {
+        val childView: ExpandableNotificationRow = mock()
+        val childNodeController = FakeNodeController(childView)
+
+        // GIVEN a child is removed for real
+        controller.removeChild(childNodeController, /* isTransfer= */ false)
+
+        // VERIFY the listContainer is passed the childrenContainer for transient animations
+        Mockito.verify(childView, never()).isChangingPosition = any()
+        Mockito.verify(view).removeChildNotification(eq(childView))
+        Mockito.verify(listContainer).notifyGroupChildRemoved(eq(childView), eq(childrenContainer))
     }
 }

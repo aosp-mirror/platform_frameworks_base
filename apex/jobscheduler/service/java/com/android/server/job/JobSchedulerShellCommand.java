@@ -670,6 +670,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 + " [PACKAGE] [JOB_ID]");
         pw.println("    Trigger immediate timeout of currently executing jobs, as if their");
         pw.println("    execution timeout had expired.");
+        pw.println("    This is the equivalent of calling `stop -s 3 -i 3`.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         all users");

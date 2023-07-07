@@ -69,7 +69,7 @@ public abstract class Animator implements Cloneable {
      * backing field for backgroundPauseDelay property. This could be simply a hardcoded
      * value in AnimationHandler, but it is useful to be able to change the value in tests.
      */
-    private static long sBackgroundPauseDelay = 10000;
+    private static long sBackgroundPauseDelay = 1000;
 
     /**
      * A cache of the values in a list. Used so that when calling the list, we have a copy
@@ -77,6 +77,13 @@ public abstract class Animator implements Cloneable {
      * allocation on every notification.
      */
     private Object[] mCachedList;
+
+    /**
+     * Tracks whether we've notified listeners of the onAnimationStart() event. This can be
+     * complex to keep track of since we notify listeners at different times depending on
+     * startDelay and whether start() was called before end().
+     */
+    boolean mStartListenersCalled = false;
 
     /**
      * Sets the duration for delaying pausing animators when apps go into the background.
@@ -165,7 +172,9 @@ public abstract class Animator implements Cloneable {
      * @see AnimatorPauseListener
      */
     public void pause() {
-        if (isStarted() && !mPaused) {
+        // We only want to pause started Animators or animators that setCurrentPlayTime()
+        // have been called on. mStartListenerCalled will be true if seek has happened.
+        if ((isStarted() || mStartListenersCalled) && !mPaused) {
             mPaused = true;
             notifyPauseListeners(AnimatorCaller.ON_PAUSE);
         }
@@ -444,6 +453,7 @@ public abstract class Animator implements Cloneable {
                 anim.mPauseListeners = new ArrayList<AnimatorPauseListener>(mPauseListeners);
             }
             anim.mCachedList = null;
+            anim.mStartListenersCalled = false;
             return anim;
         } catch (CloneNotSupportedException e) {
            throw new AssertionError();
@@ -558,13 +568,13 @@ public abstract class Animator implements Cloneable {
      * repetition. lastPlayTime is similar and is used to calculate how many repeats have been
      * done between the two times.
      */
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {}
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {}
 
     /**
      * Internal use only. This animates any animation that has ended since lastPlayTime.
      * If an animation hasn't been finished, no change will be made.
      */
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {}
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {}
 
     /**
      * Internal use only. Adds all start times (after delay) to and end times to times.
@@ -606,6 +616,22 @@ public abstract class Animator implements Cloneable {
      */
     void notifyPauseListeners(AnimatorCaller<AnimatorPauseListener, Animator> notification) {
         callOnList(mPauseListeners, notification, this, false);
+    }
+
+    void notifyStartListeners(boolean isReversing) {
+        boolean startListenersCalled = mStartListenersCalled;
+        mStartListenersCalled = true;
+        if (mListeners != null && !startListenersCalled) {
+            notifyListeners(AnimatorCaller.ON_START, isReversing);
+        }
+    }
+
+    void notifyEndListeners(boolean isReversing) {
+        boolean startListenersCalled = mStartListenersCalled;
+        mStartListenersCalled = false;
+        if (mListeners != null && startListenersCalled) {
+            notifyListeners(AnimatorCaller.ON_END, isReversing);
+        }
     }
 
     /**

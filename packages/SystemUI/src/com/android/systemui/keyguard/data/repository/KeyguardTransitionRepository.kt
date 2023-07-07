@@ -68,8 +68,11 @@ interface KeyguardTransitionRepository {
     /**
      * Begin a transition from one state to another. Transitions are interruptible, and will issue a
      * [TransitionStep] with state = [TransitionState.CANCELED] before beginning the next one.
+     *
+     * When canceled, there are two options: to continue from the current position of the prior
+     * transition, or to reset the position. When [resetIfCanceled] == true, it will do the latter.
      */
-    fun startTransition(info: TransitionInfo): UUID?
+    fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean = false): UUID?
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -130,7 +133,10 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         )
     }
 
-    override fun startTransition(info: TransitionInfo): UUID? {
+    override fun startTransition(
+        info: TransitionInfo,
+        resetIfCanceled: Boolean,
+    ): UUID? {
         if (lastStep.from == info.from && lastStep.to == info.to) {
             Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
             return null
@@ -138,7 +144,11 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         val startingValue =
             if (lastStep.transitionState != TransitionState.FINISHED) {
                 Log.i(TAG, "Transition still active: $lastStep, canceling")
-                lastStep.value
+                if (resetIfCanceled) {
+                    0f
+                } else {
+                    lastStep.value
+                }
             } else {
                 0f
             }
@@ -150,35 +160,28 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             // An animator was provided, so use it to run the transition
             animator.setFloatValues(startingValue, 1f)
             animator.duration = ((1f - startingValue) * animator.duration).toLong()
-            val updateListener =
-                object : AnimatorUpdateListener {
-                    override fun onAnimationUpdate(animation: ValueAnimator) {
-                        emitTransition(
-                            TransitionStep(
-                                info,
-                                (animation.getAnimatedValue() as Float),
-                                TransitionState.RUNNING
-                            )
-                        )
-                    }
-                }
+            val updateListener = AnimatorUpdateListener { animation ->
+                emitTransition(
+                    TransitionStep(
+                        info,
+                        (animation.animatedValue as Float),
+                        TransitionState.RUNNING
+                    )
+                )
+            }
             val adapter =
                 object : AnimatorListenerAdapter() {
                     override fun onAnimationStart(animation: Animator) {
                         emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        endAnimation(animation, lastStep.value, TransitionState.CANCELED)
+                        endAnimation(lastStep.value, TransitionState.CANCELED)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        endAnimation(animation, 1f, TransitionState.FINISHED)
+                        endAnimation(1f, TransitionState.FINISHED)
                     }
 
-                    private fun endAnimation(
-                        animation: Animator,
-                        value: Float,
-                        state: TransitionState
-                    ) {
+                    private fun endAnimation(value: Float, state: TransitionState) {
                         emitTransition(TransitionStep(info, value, state))
                         animator.removeListener(this)
                         animator.removeUpdateListener(updateListener)
@@ -191,7 +194,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             return@startTransition null
         }
             ?: run {
-                emitTransition(TransitionStep(info, 0f, TransitionState.STARTED))
+                emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
 
                 // No animator, so it's manual. Provide a mechanism to callback
                 updateTransitionId = UUID.randomUUID()
@@ -227,10 +230,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     }
 
     private fun trace(step: TransitionStep, isManual: Boolean) {
-        if (
-            step.transitionState != TransitionState.STARTED &&
-                step.transitionState != TransitionState.FINISHED
-        ) {
+        if (step.transitionState == TransitionState.RUNNING) {
             return
         }
         val traceName =
@@ -243,7 +243,10 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         val traceCookie = traceName.hashCode()
         if (step.transitionState == TransitionState.STARTED) {
             Trace.beginAsyncSection(traceName, traceCookie)
-        } else if (step.transitionState == TransitionState.FINISHED) {
+        } else if (
+            step.transitionState == TransitionState.FINISHED ||
+                step.transitionState == TransitionState.CANCELED
+        ) {
             Trace.endAsyncSection(traceName, traceCookie)
         }
     }

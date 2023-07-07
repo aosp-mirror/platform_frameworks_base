@@ -31,6 +31,7 @@ android_test {
         "services.backup",
         "services.companion",
         "services.core",
+        "services.credentials",
         "services.devicepolicy",
         "services.net",
         "services.people",
@@ -41,6 +42,7 @@ android_test {
         "androidx.test.ext.truth",
         "androidx.test.runner",
         "androidx.test.rules",
+        "androidx.test.ext.junit",
         "cts-wm-util",
         "platform-compat-test-rules",
         "mockito-target-minus-junit4",
@@ -112,9 +114,9 @@ android_test {
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",
-        ":StubTestApp",
         ":SuspendTestApp",
         ":MediaButtonReceiverHolderTestHelperApp",
+        "data/broken_shortcut.xml",
     ],
 
     java_resources: [

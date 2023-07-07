@@ -86,6 +86,12 @@ class TaskFragmentContainer {
     @Nullable
     private Intent mPendingAppearedIntent;
 
+    /**
+     * The activities that were explicitly requested to be launched in its current TaskFragment,
+     * but haven't been added to {@link #mInfo} yet.
+     */
+    final ArrayList<IBinder> mPendingAppearedInRequestedTaskFragmentActivities = new ArrayList<>();
+
     /** Containers that are dependent on this one and should be completely destroyed on exit. */
     private final List<TaskFragmentContainer> mContainersToFinishOnExit =
             new ArrayList<>();
@@ -145,6 +151,11 @@ class TaskFragmentContainer {
     @VisibleForTesting
     @Nullable
     Runnable mAppearEmptyTimeout;
+
+    /**
+     * Whether this TaskFragment contains activities of another process/package.
+     */
+    private boolean mHasCrossProcessActivities;
 
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
@@ -296,6 +307,8 @@ class TaskFragmentContainer {
 
     void removePendingAppearedActivity(@NonNull IBinder activityToken) {
         mPendingAppearedActivities.remove(activityToken);
+        // Also remove the activity from the mPendingInRequestedTaskFragmentActivities.
+        mPendingAppearedInRequestedTaskFragmentActivities.remove(activityToken);
     }
 
     @GuardedBy("mController.mLock")
@@ -410,10 +423,18 @@ class TaskFragmentContainer {
             mAppearEmptyTimeout = null;
         }
 
+        mHasCrossProcessActivities = false;
         mInfo = info;
         if (mInfo == null || mInfo.isEmpty()) {
             return;
         }
+
+        // Contains activities of another process if the activities size is not matched to the
+        // running activity count
+        if (mInfo.getRunningActivityCount() != mInfo.getActivities().size()) {
+            mHasCrossProcessActivities = true;
+        }
+
         // Only track the pending Intent when the container is empty.
         mPendingAppearedIntent = null;
         if (mPendingAppearedActivities.isEmpty()) {
@@ -424,7 +445,7 @@ class TaskFragmentContainer {
         for (int i = mPendingAppearedActivities.size() - 1; i >= 0; --i) {
             final IBinder activityToken = mPendingAppearedActivities.get(i);
             if (infoActivities.contains(activityToken)) {
-                mPendingAppearedActivities.remove(i);
+                removePendingAppearedActivity(activityToken);
             }
         }
     }
@@ -718,6 +739,34 @@ class TaskFragmentContainer {
      */
     void setLastCompanionTaskFragment(@Nullable IBinder fragmentToken) {
         mLastCompanionTaskFragment = fragmentToken;
+    }
+
+    /**
+     * Adds the pending appeared activity that has requested to be launched in this task fragment.
+     * @see android.app.ActivityClient#isRequestedToLaunchInTaskFragment
+     */
+    void addPendingAppearedInRequestedTaskFragmentActivity(Activity activity) {
+        final IBinder activityToken = activity.getActivityToken();
+        if (hasActivity(activityToken)) {
+            return;
+        }
+        mPendingAppearedInRequestedTaskFragmentActivities.add(activity.getActivityToken());
+    }
+
+    /**
+     * Checks if the given activity has requested to be launched in this task fragment.
+     * @see #addPendingAppearedInRequestedTaskFragmentActivity
+     */
+    boolean isActivityInRequestedTaskFragment(IBinder activityToken) {
+        if (mInfo != null && mInfo.getActivitiesRequestedInTaskFragment().contains(activityToken)) {
+            return true;
+        }
+        return mPendingAppearedInRequestedTaskFragmentActivities.contains(activityToken);
+    }
+
+    /** Whether contains activities of another process */
+    boolean hasCrossProcessActivities() {
+        return mHasCrossProcessActivities;
     }
 
     /** Gets the parent leaf Task id. */

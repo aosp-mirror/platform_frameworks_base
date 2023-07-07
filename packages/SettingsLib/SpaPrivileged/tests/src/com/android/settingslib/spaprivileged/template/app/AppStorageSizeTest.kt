@@ -20,6 +20,7 @@ import android.app.usage.StorageStats
 import android.app.usage.StorageStatsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager.NameNotFoundException
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -60,9 +61,11 @@ class AppStorageSizeTest {
     @Before
     fun setUp() {
         whenever(context.storageStatsManager).thenReturn(storageStatsManager)
-        whenever(storageStatsManager.queryStatsForPackage(
-            app.storageUuid, app.packageName, app.userHandle
-        )).thenReturn(STATS)
+        whenever(
+            storageStatsManager.queryStatsForPackage(
+                app.storageUuid, app.packageName, app.userHandle
+            )
+        ).thenReturn(STATS)
     }
 
     @Test
@@ -76,6 +79,24 @@ class AppStorageSizeTest {
         }
 
         composeTestRule.waitUntil { storageSize.value == "120 B" }
+    }
+
+    @Test
+    fun getStorageSize_throwException() {
+        var storageSize = stateOf("Computing")
+        whenever(
+            storageStatsManager.queryStatsForPackage(
+                app.storageUuid, app.packageName, app.userHandle
+            )
+        ).thenThrow(NameNotFoundException())
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides context) {
+                storageSize = app.getStorageSize()
+            }
+        }
+
+        composeTestRule.waitUntil { storageSize.value == "" }
     }
 
     companion object {

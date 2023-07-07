@@ -30,11 +30,13 @@ import java.util.Locale;
 /**
  * Extends {@link Slog} by providing overloaded methods that take string formatting.
  *
- * <p><strong>Note: </strong>the overloaded methods won't create the formatted message if the
- * respective logging level is disabled for the tag, but the compiler will still create an
- * intermediate array of the objects for the {@code vargars}, which could affect garbage collection.
- * So, if you're calling these method in a critical path, make sure to explicitly check for the
- * level before calling them.
+ * <p><strong>Note: </strong>Like the other logging classes, e.g. {@link Log} and {@link Slog}, the
+ * methods in this class log unconditionally regardless of {@link Log#isLoggable(String, int)}.
+ * Therefore, these methods exist just for the convenience of handling formatting.  (Even if they
+ * did check {@link Log#isLoggable(String, int)} before formatting and logging, calling a varargs
+ * method in Java still involves an array allocation.)  If you need to avoid the overhead of logging
+ * on a performance-critical path, either don't use logging in that place, or make the logging
+ * conditional on a static boolean defaulting to false.
  */
 public final class Slogf {
 
@@ -54,11 +56,6 @@ public final class Slogf {
 
     private Slogf() {
         throw new UnsupportedOperationException("provides only static methods");
-    }
-
-    /** Same as {@link Log#isLoggable(String, int)}. */
-    public static boolean isLoggable(String tag, int level) {
-        return Log.isLoggable(tag, level);
     }
 
     /** Same as {@link Slog#v(String, String)}. */
@@ -146,166 +143,62 @@ public final class Slogf {
         return Slog.println(priority, tag, msg);
     }
 
-    /**
-     * Logs a {@link Log.VERBOSE} message.
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#VERBOSE} logging
-     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
-     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
-     * you're calling this method in a critical path, make sure to explicitly do the check before
-     * calling it.
-     */
+    /** Logs a {@link Log.VERBOSE} message. */
     public static void v(String tag, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.VERBOSE)) return;
-
         v(tag, getMessage(format, args));
     }
 
-    /**
-     * Logs a {@link Log.VEBOSE} message with a throwable
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#VERBOSE} logging
-     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
-     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
-     * you're calling this method in a critical path, make sure to explicitly do the check before
-     * calling it.
-     */
+    /** Logs a {@link Log.VERBOSE} message with a throwable. */
     public static void v(String tag, Throwable throwable, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.VERBOSE)) return;
-
         v(tag, getMessage(format, args), throwable);
     }
 
-    /**
-     * Logs a {@link Log.DEBUG} message.
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#DEBUG} logging is
-     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
-     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
-     * calling this method in a critical path, make sure to explicitly do the check before calling
-     * it.
-     */
+    /** Logs a {@link Log.DEBUG} message. */
     public static void d(String tag, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.DEBUG)) return;
-
         d(tag, getMessage(format, args));
     }
 
-    /**
-     * Logs a {@link Log.DEBUG} message with a throwable
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#DEBUG} logging
-     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
-     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
-     * you're calling this method in a critical path, make sure to explicitly do the check before
-     * calling it.
-     */
+    /** Logs a {@link Log.DEBUG} message with a throwable. */
     public static void d(String tag, Throwable throwable, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.DEBUG)) return;
-
         d(tag, getMessage(format, args), throwable);
     }
 
-    /**
-     * Logs a {@link Log.INFO} message.
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#INFO} logging is
-     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
-     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
-     * calling this method in a critical path, make sure to explicitly do the check before calling
-     * it.
-     */
+    /** Logs a {@link Log.INFO} message. */
     public static void i(String tag, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.INFO)) return;
-
         i(tag, getMessage(format, args));
     }
 
-    /**
-     * Logs a {@link Log.INFO} message with a throwable
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#INFO} logging
-     * is enabled for the given {@code tag}, but the compiler will still create an intermediate
-     * array of the objects for the {@code vargars}, which could affect garbage collection. So, if
-     * you're calling this method in a critical path, make sure to explicitly do the check before
-     * calling it.
-     */
+    /** Logs a {@link Log.INFO} message with a throwable. */
     public static void i(String tag, Throwable throwable, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.INFO)) return;
-
         i(tag, getMessage(format, args), throwable);
     }
 
-    /**
-     * Logs a {@link Log.WARN} message.
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
-     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
-     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
-     * calling this method in a critical path, make sure to explicitly do the check before calling
-     * it.
-     */
+    /** Logs a {@link Log.WARN} message. */
     public static void w(String tag, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.WARN)) return;
-
         w(tag, getMessage(format, args));
     }
 
-    /**
-     * Logs a {@link Log.WARN} message with a throwable
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
-     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
-     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
-     * calling this method in a critical path, make sure to explicitly do the check before calling
-     * it.
-     */
+    /** Logs a {@link Log.WARN} message with a throwable. */
     public static void w(String tag, Throwable throwable, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.WARN)) return;
-
         w(tag, getMessage(format, args), throwable);
     }
 
-    /**
-     * Logs a {@link Log.ERROR} message.
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#ERROR} logging is
-     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
-     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
-     * calling this method in a critical path, make sure to explicitly do the check before calling
-     * it.
-     */
+    /** Logs a {@link Log.ERROR} message. */
     public static void e(String tag, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.ERROR)) return;
-
         e(tag, getMessage(format, args));
     }
 
-    /**
-     * Logs a {@link Log.ERROR} message with a throwable
-     *
-     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#ERROR} logging is
-     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
-     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
-     * calling this method in a critical path, make sure to explicitly do the check before calling
-     * it.
-     */
+    /** Logs a {@link Log.ERROR} message with a throwable. */
     public static void e(String tag, Throwable throwable, String format, @Nullable Object... args) {
-        if (!isLoggable(tag, Log.ERROR)) return;
-
         e(tag, getMessage(format, args), throwable);
     }
 
-    /**
-     * Logs a {@code wtf} message.
-     */
+    /** Logs a {@code wtf} message. */
     public static void wtf(String tag, String format, @Nullable Object... args) {
         wtf(tag, getMessage(format, args));
     }
 
-    /**
-     * Logs a {@code wtf} message with a throwable.
-     */
+    /** Logs a {@code wtf} message with a throwable. */
     public static void wtf(String tag, Throwable throwable, String format,
             @Nullable Object... args) {
         wtf(tag, getMessage(format, args), throwable);

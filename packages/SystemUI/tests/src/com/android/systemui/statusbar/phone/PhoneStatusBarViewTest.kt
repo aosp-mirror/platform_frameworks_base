@@ -19,8 +19,9 @@ package com.android.systemui.statusbar.phone
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
+import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.ShadeViewController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +32,7 @@ import org.mockito.MockitoAnnotations
 class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var notificationPanelViewController: NotificationPanelViewController
+    private lateinit var shadeViewController: ShadeViewController
     @Mock
     private lateinit var panelView: ViewGroup
 
@@ -94,16 +95,17 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         // No assert needed, just testing no crash
     }
 
-    private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
+    private class TestTouchEventHandler : Gefingerpoken {
         var lastInterceptEvent: MotionEvent? = null
         var lastEvent: MotionEvent? = null
         var handleTouchReturnValue: Boolean = false
 
-        override fun onInterceptTouchEvent(event: MotionEvent?) {
+        override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
             lastInterceptEvent = event
+            return handleTouchReturnValue
         }
 
-        override fun handleTouchEvent(event: MotionEvent?): Boolean {
+        override fun onTouchEvent(event: MotionEvent?): Boolean {
             lastEvent = event
             return handleTouchReturnValue
         }

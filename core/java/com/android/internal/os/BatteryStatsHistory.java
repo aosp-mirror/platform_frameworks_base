@@ -259,6 +259,8 @@ public class BatteryStatsHistory {
     }
 
     private TraceDelegate mTracer;
+    private int mTraceLastState = 0;
+    private int mTraceLastState2 = 0;
 
     /**
      * Constructor
@@ -330,7 +332,10 @@ public class BatteryStatsHistory {
         }
     }
 
-    public BatteryStatsHistory(HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
+    public BatteryStatsHistory(int maxHistoryFiles, int maxHistoryBufferSize,
+            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
+        mMaxHistoryFiles = maxHistoryFiles;
+        mMaxHistoryBufferSize = maxHistoryBufferSize;
         mStepDetailsCalculator = stepDetailsCalculator;
         mTracer = new TraceDelegate();
         mClock = clock;
@@ -1238,7 +1243,6 @@ public class BatteryStatsHistory {
      */
     private void recordTraceEvents(int code, HistoryTag tag) {
         if (code == HistoryItem.EVENT_NONE) return;
-        if (!mTracer.tracingEnabled()) return;
 
         final int idx = code & HistoryItem.EVENT_TYPE_MASK;
         final String prefix = (code & HistoryItem.EVENT_FLAG_START) != 0 ? "+" :
@@ -1267,8 +1271,6 @@ public class BatteryStatsHistory {
      * Writes changes to a HistoryItem state bitmap to Atrace.
      */
     private void recordTraceCounters(int oldval, int newval, BitDescription[] descriptions) {
-        if (!mTracer.tracingEnabled()) return;
-
         int diff = oldval ^ newval;
         if (diff == 0) return;
 
@@ -1321,6 +1323,16 @@ public class BatteryStatsHistory {
     }
 
     private void writeHistoryItem(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
+        if (mTracer != null && mTracer.tracingEnabled()) {
+            recordTraceEvents(cur.eventCode, cur.eventTag);
+            recordTraceCounters(mTraceLastState, cur.states,
+                    BatteryStats.HISTORY_STATE_DESCRIPTIONS);
+            recordTraceCounters(mTraceLastState2, cur.states2,
+                    BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
+            mTraceLastState = cur.states;
+            mTraceLastState2 = cur.states2;
+        }
+
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
@@ -1341,12 +1353,6 @@ public class BatteryStatsHistory {
                     + Integer.toHexString(diffStates2) + " lastDiff2="
                     + Integer.toHexString(lastDiffStates2));
         }
-
-        recordTraceEvents(cur.eventCode, cur.eventTag);
-        recordTraceCounters(mHistoryLastWritten.states,
-                cur.states, BatteryStats.HISTORY_STATE_DESCRIPTIONS);
-        recordTraceCounters(mHistoryLastWritten.states2,
-                cur.states2, BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
 
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
                 && timeDiffMs < 1000 && (diffStates & lastDiffStates) == 0
@@ -1465,6 +1471,11 @@ public class BatteryStatsHistory {
         mHistoryLastLastWritten.setTo(mHistoryLastWritten);
         final boolean hasTags = mHistoryLastWritten.tagsFirstOccurrence || cur.tagsFirstOccurrence;
         mHistoryLastWritten.setTo(mHistoryBaseTimeMs + elapsedRealtimeMs, cmd, cur);
+        if (mHistoryLastWritten.time < mHistoryLastLastWritten.time - 60000) {
+            Slog.wtf(TAG, "Significantly earlier event written to battery history:"
+                    + " time=" + mHistoryLastWritten.time
+                    + " previous=" + mHistoryLastLastWritten.time);
+        }
         mHistoryLastWritten.tagsFirstOccurrence = hasTags;
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
         mLastHistoryElapsedRealtimeMs = elapsedRealtimeMs;
@@ -1905,12 +1916,6 @@ public class BatteryStatsHistory {
             in.setDataPosition(curPos + bufSize);
         }
 
-        if (DEBUG) {
-            StringBuilder sb = new StringBuilder(128);
-            sb.append("****************** OLD mHistoryBaseTimeMs: ");
-            TimeUtils.formatDuration(mHistoryBaseTimeMs, sb);
-            Slog.i(TAG, sb.toString());
-        }
         mHistoryBaseTimeMs = historyBaseTime;
         if (DEBUG) {
             StringBuilder sb = new StringBuilder(128);
@@ -1919,11 +1924,10 @@ public class BatteryStatsHistory {
             Slog.i(TAG, sb.toString());
         }
 
-        // We are just arbitrarily going to insert 1 minute from the sample of
-        // the last run until samples in this run.
         if (mHistoryBaseTimeMs > 0) {
-            long oldnow = mClock.elapsedRealtime();
-            mHistoryBaseTimeMs = mHistoryBaseTimeMs - oldnow + 1;
+            long elapsedRealtimeMs = mClock.elapsedRealtime();
+            mLastHistoryElapsedRealtimeMs = elapsedRealtimeMs;
+            mHistoryBaseTimeMs = mHistoryBaseTimeMs - elapsedRealtimeMs + 1;
             if (DEBUG) {
                 StringBuilder sb = new StringBuilder(128);
                 sb.append("****************** ADJUSTED mHistoryBaseTimeMs: ");

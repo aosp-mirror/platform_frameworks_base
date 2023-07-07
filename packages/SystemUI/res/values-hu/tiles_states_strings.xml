@@ -176,7 +176,9 @@
     <item msgid="8014986104355098744">"Ki"</item>
     <item msgid="5966994759929723339">"Be"</item>
   </string-array>
-    <!-- no translation found for tile_states_font_scaling:0 (3173069902082305985) -->
-    <!-- no translation found for tile_states_font_scaling:1 (2478289035899842865) -->
-    <!-- no translation found for tile_states_font_scaling:2 (5137565285664080143) -->
+  <string-array name="tile_states_font_scaling">
+    <item msgid="3173069902082305985">"Nem áll rendelkezésre"</item>
+    <item msgid="2478289035899842865">"Ki"</item>
+    <item msgid="5137565285664080143">"Be"</item>
+  </string-array>
 </resources>

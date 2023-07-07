@@ -49,9 +49,9 @@ public final class GetCredentialProviderData extends ProviderData implements Par
             @NonNull List<AuthenticationEntry> authenticationEntries,
             @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
-        mCredentialEntries = credentialEntries;
-        mActionChips = actionChips;
-        mAuthenticationEntries = authenticationEntries;
+        mCredentialEntries = new ArrayList<>(credentialEntries);
+        mActionChips = new ArrayList<>(actionChips);
+        mAuthenticationEntries = new ArrayList<>(authenticationEntries);
         mRemoteEntry = remoteEntry;
     }
 

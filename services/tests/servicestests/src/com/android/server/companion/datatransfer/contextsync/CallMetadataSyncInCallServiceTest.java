@@ -47,24 +47,24 @@ public class CallMetadataSyncInCallServiceTest {
 
     @Test
     public void getCallForId_invalid() {
-        when(mMockCrossDeviceCall.getId()).thenReturn(-1L);
-        final CrossDeviceCall call = mSyncInCallService.getCallForId(-1L,
+        when(mMockCrossDeviceCall.getId()).thenReturn(null);
+        final CrossDeviceCall call = mSyncInCallService.getCallForId(null,
                 List.of(mMockCrossDeviceCall));
         assertWithMessage("Unexpectedly found a match for call id").that(call).isNull();
     }
 
     @Test
     public void getCallForId_noMatch() {
-        when(mMockCrossDeviceCall.getId()).thenReturn(5L);
-        final CrossDeviceCall call = mSyncInCallService.getCallForId(1L,
+        when(mMockCrossDeviceCall.getId()).thenReturn("123abc");
+        final CrossDeviceCall call = mSyncInCallService.getCallForId("abc123",
                 List.of(mMockCrossDeviceCall));
         assertWithMessage("Unexpectedly found a match for call id").that(call).isNull();
     }
 
     @Test
     public void getCallForId_hasMatch() {
-        when(mMockCrossDeviceCall.getId()).thenReturn(5L);
-        final CrossDeviceCall call = mSyncInCallService.getCallForId(5L,
+        when(mMockCrossDeviceCall.getId()).thenReturn("123abc");
+        final CrossDeviceCall call = mSyncInCallService.getCallForId("123abc",
                 List.of(mMockCrossDeviceCall));
         assertWithMessage("Unexpectedly did not find a match for call id").that(call).isNotNull();
     }

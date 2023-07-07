@@ -222,7 +222,7 @@ class UserSystemPackageInstaller {
             final Set<String> userAllowlist = getInstallablePackagesForUserId(userId);
 
             pmInt.forEachPackageState(packageState -> {
-                if (packageState.getPkg() == null) {
+                if (packageState.getPkg() == null || !packageState.isSystem()) {
                     return;
                 }
                 boolean install = (userAllowlist == null

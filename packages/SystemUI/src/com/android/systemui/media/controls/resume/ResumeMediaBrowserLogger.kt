@@ -18,9 +18,9 @@ package com.android.systemui.media.controls.resume
 
 import android.content.ComponentName
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.MediaBrowserLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** A logger for events in [ResumeMediaBrowser]. */
@@ -52,10 +52,12 @@ class ResumeMediaBrowserLogger @Inject constructor(@MediaBrowserLog private val 
      * event.
      *
      * @param isBrowserConnected true if there's a currently connected
+     *
      * ```
      *     [android.media.browse.MediaBrowser] and false otherwise.
      * @param componentName
      * ```
+     *
      * the component name for the [ResumeMediaBrowser] that triggered this log.
      */
     fun logSessionDestroyed(isBrowserConnected: Boolean, componentName: ComponentName) =

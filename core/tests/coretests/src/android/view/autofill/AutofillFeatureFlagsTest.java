@@ -51,40 +51,10 @@ public class AutofillFeatureFlagsTest {
         assertThat(fillDialogHints[1]).isEqualTo("creditCardNumber");
     }
 
-    @Test
-    public void testIsCredentialManagerEnabled() {
-        setCredentialManagerEnabled(false);
-        assertThat(AutofillFeatureFlags.isCredentialManagerEnabled()).isFalse();
-        setCredentialManagerEnabled(true);
-        assertThat(AutofillFeatureFlags.isCredentialManagerEnabled()).isTrue();
-    }
-
-    @Test
-    public void testShouldIgnoreCredentialManagerViews() {
-        setCredentialManagerEnabled(false);
-        setIgnoreCredentialManagerViews(true);
-        // Overall feature is disabled, so we shouldn't ignore views.
-        assertThat(AutofillFeatureFlags.shouldIgnoreCredentialViews()).isFalse();
-        setCredentialManagerEnabled(true);
-        assertThat(AutofillFeatureFlags.shouldIgnoreCredentialViews()).isTrue();
-    }
-
     private static void setFillDialogHints(String value) {
         setDeviceConfig(
                 AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS,
                 value);
-    }
-
-    private static void setCredentialManagerEnabled(boolean value) {
-        setDeviceConfig(
-                AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED,
-                String.valueOf(value));
-    }
-
-    private static void setIgnoreCredentialManagerViews(boolean value) {
-        setDeviceConfig(
-                AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_IGNORE_VIEWS,
-                String.valueOf(value));
     }
 
     private static void setDeviceConfig(String key, String value) {

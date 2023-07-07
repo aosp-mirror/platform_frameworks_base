@@ -26,6 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.EnableZenModeDialog
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
@@ -60,6 +61,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
 
@@ -97,7 +99,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `dnd not available - picker state hidden`() =
+    fun dndNotAvailable_pickerStateHidden() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(false)
@@ -113,7 +115,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `dnd available - picker state visible`() =
+    fun dndAvailable_pickerStateVisible() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(true)
@@ -132,7 +134,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `onTriggered - dnd mode is not ZEN_MODE_OFF - set to ZEN_MODE_OFF`() =
+    fun onTriggered_dndModeIsNotZEN_MODE_OFF_setToZEN_MODE_OFF() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(true)
@@ -157,7 +159,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting FOREVER - set zen without condition`() =
+    fun onTriggered_dndModeIsZEN_MODE_OFF_settingFOREVER_setZenWithoutCondition() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(true)
@@ -182,7 +184,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `onTriggered - dnd ZEN_MODE_OFF - setting not FOREVER or PROMPT - zen with condition`() =
+    fun onTriggered_dndZEN_MODE_OFF_settingNotFOREVERorPROMPT_zenWithCondition() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(true)
@@ -207,7 +209,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting is PROMPT - show dialog`() =
+    fun onTriggered_dndModeIsZEN_MODE_OFF_settingIsPROMPT_showDialog() =
         testScope.runTest {
             // given
             val expandable: Expandable = mock()
@@ -230,7 +232,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `lockScreenState - dndAvailable starts as true - change to false - State is Hidden`() =
+    fun lockScreenState_dndAvailableStartsAsTrue_changeToFalse_StateIsHidden() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(true)
@@ -249,7 +251,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `lockScreenState - dndMode starts as ZEN_MODE_OFF - change to not OFF - State Visible`() =
+    fun lockScreenState_dndModeStartsAsZEN_MODE_OFF_changeToNotOFF_StateVisible() =
         testScope.runTest {
             // given
             whenever(zenModeController.isZenAvailable).thenReturn(true)

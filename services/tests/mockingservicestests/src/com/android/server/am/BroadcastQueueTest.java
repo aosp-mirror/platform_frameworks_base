@@ -16,11 +16,17 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,6 +34,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -53,6 +60,7 @@ import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
+import android.app.UidObserver;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -73,6 +81,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerExemptionManager;
 import android.os.SystemClock;
+import android.os.TestLooperManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -83,6 +92,7 @@ import android.util.proto.ProtoOutputStream;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.AlarmManagerInternal;
 import com.android.server.DropBoxManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.Injector;
@@ -103,10 +113,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -141,6 +151,7 @@ public class BroadcastQueueTest {
 
     private Context mContext;
     private HandlerThread mHandlerThread;
+    private TestLooperManager mLooper;
     private AtomicInteger mNextPid;
 
     @Mock
@@ -153,11 +164,15 @@ public class BroadcastQueueTest {
     private PackageManagerInternal mPackageManagerInt;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInt;
+    @Mock
+    private AlarmManagerInternal mAlarmManagerInt;
 
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
     BroadcastConstants mConstants;
     private BroadcastSkipPolicy mSkipPolicy;
+    private UidObserver mUidObserver;
+    private UidObserver mUidCachedStateObserver;
 
     /**
      * Desired behavior of the next
@@ -198,12 +213,19 @@ public class BroadcastQueueTest {
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
+
+        // Pause all event processing until a test chooses to resume
+        mLooper = Objects.requireNonNull(InstrumentationRegistry.getInstrumentation()
+                .acquireLooperManager(mHandlerThread.getLooper()));
+
         mNextPid = new AtomicInteger(100);
 
         LocalServices.removeServiceForTest(DropBoxManagerInternal.class);
         LocalServices.addService(DropBoxManagerInternal.class, mDropBoxManagerInt);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
+        LocalServices.removeServiceForTest(AlarmManagerInternal.class);
+        LocalServices.addService(AlarmManagerInternal.class, mAlarmManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
         doNothing().when(mPackageManagerInt).setPackageStoppedState(any(), anyBoolean(), anyInt());
         doAnswer((invocation) -> {
@@ -215,7 +237,7 @@ public class BroadcastQueueTest {
         realAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
-        realAms.mOomAdjuster.mCachedAppOptimizer = spy(realAms.mOomAdjuster.mCachedAppOptimizer);
+        realAms.mOomAdjuster = spy(realAms.mOomAdjuster);
         realAms.mPackageManagerInt = mPackageManagerInt;
         realAms.mUsageStatsService = mUsageStatsManagerInt;
         realAms.mProcessesReady = true;
@@ -223,6 +245,7 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting startProcessLocked() for "
                     + Arrays.toString(invocation.getArguments()));
+            assertHealth();
             final ProcessStartBehavior behavior = mNextProcessStartBehavior
                     .getAndSet(ProcessStartBehavior.SUCCESS);
             if (behavior == ProcessStartBehavior.FAIL_NULL) {
@@ -239,6 +262,7 @@ public class BroadcastQueueTest {
                     // Create a different process that will be linked to the
                     // returned process via a predecessor/successor relationship
                     mActiveProcesses.remove(res);
+                    res.setKilled(true);
                     deliverRes = makeActiveProcessRecord(ai, processName,
                           ProcessBehavior.NORMAL, UnaryOperator.identity());
                     deliverRes.mPredecessor = res;
@@ -248,17 +272,27 @@ public class BroadcastQueueTest {
                     deliverRes = res;
                     break;
             }
+            res.setPendingStart(true);
             mHandlerThread.getThreadHandler().post(() -> {
+                res.setPendingStart(false);
                 synchronized (mAms) {
                     switch (behavior) {
                         case SUCCESS:
                         case SUCCESS_PREDECESSOR:
-                            mQueue.onApplicationAttachedLocked(deliverRes);
+                            try {
+                                mQueue.onApplicationAttachedLocked(deliverRes);
+                            } catch (BroadcastDeliveryFailedException e) {
+                                Log.v(TAG, "Error while invoking onApplicationAttachedLocked", e);
+                            }
                             break;
                         case FAIL_TIMEOUT:
                         case FAIL_TIMEOUT_PREDECESSOR:
                             mActiveProcesses.remove(deliverRes);
                             mQueue.onApplicationTimeoutLocked(deliverRes);
+                            break;
+                        case KILLED_WITHOUT_NOTIFY:
+                            mActiveProcesses.remove(res);
+                            res.setKilled(true);
                             break;
                         default:
                             throw new UnsupportedOperationException();
@@ -281,9 +315,21 @@ public class BroadcastQueueTest {
         }).when(mAms).getProcessRecordLocked(any(), anyInt());
         doNothing().when(mAms).appNotResponding(any(), any());
 
+        doAnswer((invocation) -> {
+            mUidObserver = invocation.getArgument(0);
+            return null;
+        }).when(mAms).registerUidObserver(any(), anyInt(),
+                eq(ActivityManager.PROCESS_STATE_TOP), any());
+        doAnswer((invocation) -> {
+            mUidCachedStateObserver = invocation.getArgument(0);
+            return null;
+        }).when(mAms).registerUidObserver(any(), anyInt(),
+                eq(ActivityManager.PROCESS_STATE_LAST_ACTIVITY), any());
+
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 100;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
+        mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
 
         mSkipPolicy = spy(new BroadcastSkipPolicy(mAms));
         doReturn(null).when(mSkipPolicy).shouldSkipMessage(any(), any());
@@ -305,6 +351,8 @@ public class BroadcastQueueTest {
         } else {
             throw new UnsupportedOperationException();
         }
+
+        mQueue.start(mContext.getContentResolver());
     }
 
     @After
@@ -342,25 +390,6 @@ public class BroadcastQueueTest {
         }
     }
 
-    /**
-     * Helper that leverages try-with-resources to pause dispatch of
-     * {@link #mHandlerThread} until released.
-     */
-    static class SyncBarrier implements AutoCloseable {
-        private final int mToken;
-        private HandlerThread mThread;
-
-        SyncBarrier(HandlerThread thread) {
-            mThread = thread;
-            mToken = mThread.getLooper().getQueue().postSyncBarrier();
-        }
-
-        @Override
-        public void close() throws Exception {
-            mThread.getLooper().getQueue().removeSyncBarrier(mToken);
-        }
-    }
-
     private enum ProcessStartBehavior {
         /** Process starts successfully */
         SUCCESS,
@@ -372,6 +401,8 @@ public class BroadcastQueueTest {
         FAIL_TIMEOUT_PREDECESSOR,
         /** Process fails by immediately returning null */
         FAIL_NULL,
+        /** Process is killed without reporting to BroadcastQueue */
+        KILLED_WITHOUT_NOTIFY,
     }
 
     private enum ProcessBehavior {
@@ -387,6 +418,12 @@ public class BroadcastQueueTest {
 
     private ProcessRecord makeActiveProcessRecord(String packageName) throws Exception {
         return makeActiveProcessRecord(packageName, packageName, ProcessBehavior.NORMAL,
+                UserHandle.USER_SYSTEM);
+    }
+
+    private ProcessRecord makeActiveProcessRecord(String packageName, String processName)
+            throws Exception {
+        return makeActiveProcessRecord(packageName, processName, ProcessBehavior.NORMAL,
                 UserHandle.USER_SYSTEM);
     }
 
@@ -446,7 +483,8 @@ public class BroadcastQueueTest {
 
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
-                    + Arrays.toString(invocation.getArguments()));
+                    + Arrays.toString(invocation.getArguments()) + " package " + ai.packageName);
+            assertHealth();
             final Intent intent = invocation.getArgument(0);
             final Bundle extras = invocation.getArgument(5);
             mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
@@ -467,7 +505,8 @@ public class BroadcastQueueTest {
 
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
-                    + Arrays.toString(invocation.getArguments()));
+                    + Arrays.toString(invocation.getArguments()) + " package " + ai.packageName);
+            assertHealth();
             final Intent intent = invocation.getArgument(1);
             final Bundle extras = invocation.getArgument(4);
             final boolean ordered = invocation.getArgument(5);
@@ -509,6 +548,11 @@ public class BroadcastQueueTest {
     static ResolveInfo withPriority(ResolveInfo info, int priority) {
         info.priority = priority;
         return info;
+    }
+
+    static BroadcastFilter withPriority(BroadcastFilter filter, int priority) {
+        filter.setPriority(priority);
+        return filter;
     }
 
     static ResolveInfo makeManifestReceiver(String packageName, String name) {
@@ -582,7 +626,19 @@ public class BroadcastQueueTest {
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
                 AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
                 Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId,
-                BackgroundStartPrivileges.NONE, false, null);
+                BackgroundStartPrivileges.NONE, false, null, PROCESS_STATE_UNKNOWN);
+    }
+
+    private void setProcessFreezable(ProcessRecord app, boolean pendingFreeze, boolean frozen) {
+        app.mOptRecord.setPendingFreeze(pendingFreeze);
+        app.mOptRecord.setFrozen(frozen);
+    }
+
+    private void assertHealth() {
+        if (mImpl == Impl.MODERN) {
+            // If this fails, it'll throw a clear reason message
+            ((BroadcastQueueModernImpl) mQueue).assertHealthLocked();
+        }
     }
 
     private static Map<String, Object> asMap(Bundle bundle) {
@@ -644,8 +700,15 @@ public class BroadcastQueueTest {
         }
     }
 
+    /**
+     * Un-pause our handler to process pending events, wait for our queue to go
+     * idle, and then re-pause the handler.
+     */
     private void waitForIdle() throws Exception {
-        mQueue.waitForIdle(null);
+        mLooper.release();
+        mQueue.waitForIdle(LOG_WRITER_INFO);
+        mLooper = Objects.requireNonNull(InstrumentationRegistry.getInstrumentation()
+                .acquireLooperManager(mHandlerThread.getLooper()));
     }
 
     private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {
@@ -683,12 +746,22 @@ public class BroadcastQueueTest {
                 anyInt(), anyInt(), any());
     }
 
-    private void verifyScheduleRegisteredReceiver(ProcessRecord app,
+    private void verifyScheduleRegisteredReceiver(ProcessRecord app, Intent intent)
+            throws Exception {
+        verifyScheduleRegisteredReceiver(times(1), app, intent, UserHandle.USER_SYSTEM);
+    }
+
+    private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
             Intent intent) throws Exception {
-        verify(app.getThread()).scheduleRegisteredReceiver(
+        verifyScheduleRegisteredReceiver(mode, app, intent, UserHandle.USER_SYSTEM);
+    }
+
+    private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
+            Intent intent, int userId) throws Exception {
+        verify(app.getThread(), mode).scheduleRegisteredReceiver(
                 any(), argThat(filterEqualsIgnoringComponent(intent)),
                 anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+                eq(userId), anyInt(), anyInt(), any());
     }
 
     private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
@@ -744,14 +817,11 @@ public class BroadcastQueueTest {
         // about the actual output, just that we don't crash
         mQueue.dumpDebug(new ProtoOutputStream(),
                 ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
-        mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
+        mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(Writer.nullWriter()),
                 null, 0, true, true, true, null, false);
         mQueue.dumpToDropBoxLocked(TAG);
 
         BroadcastQueue.logv(TAG);
-        BroadcastQueue.logv(TAG, null);
-        BroadcastQueue.logv(TAG, new PrintWriter(new ByteArrayOutputStream()));
-
         BroadcastQueue.logw(TAG);
 
         assertNotNull(mQueue.toString());
@@ -927,8 +997,8 @@ public class BroadcastQueueTest {
                 // cold-started apps to be thawed, but the modern stack does
             } else {
                 // Confirm that app was thawed
-                verify(mAms.mOomAdjuster.mCachedAppOptimizer, atLeastOnce()).unfreezeTemporarily(
-                        eq(receiverApp), eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
+                verify(mAms.mOomAdjuster, atLeastOnce()).unfreezeTemporarily(
+                        eq(receiverApp), eq(OOM_ADJ_REASON_START_RECEIVER));
 
                 // Confirm that we added package to process
                 verify(receiverApp, atLeastOnce()).addPackage(eq(receiverApp.info.packageName),
@@ -1074,6 +1144,7 @@ public class BroadcastQueueTest {
         final ProcessRecord restartedReceiverApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
                 getUidForPackage(PACKAGE_GREEN));
         assertNotEquals(receiverApp, restartedReceiverApp);
+        verifyScheduleReceiver(restartedReceiverApp, airplane);
         verifyScheduleReceiver(restartedReceiverApp, timezone);
     }
 
@@ -1122,29 +1193,27 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
-                    List.of(makeRegisteredReceiver(receiverApp),
-                            makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
-                            makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
-                            makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE)))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
+                List.of(makeRegisteredReceiver(receiverApp),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE)))));
 
-            synchronized (mAms) {
-                mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_GREEN, Set.of(CLASS_GREEN),
-                        UserHandle.USER_SYSTEM);
+        synchronized (mAms) {
+            mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_GREEN, Set.of(CLASS_GREEN),
+                    UserHandle.USER_SYSTEM);
 
-                // Also try clearing out other unrelated things that should leave
-                // the final receiver intact
-                mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_RED, null,
-                        UserHandle.USER_SYSTEM);
-                mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
-            }
+            // Also try clearing out other unrelated things that should leave
+            // the final receiver intact
+            mQueue.cleanupDisabledPackageReceiversLocked(PACKAGE_RED, null,
+                    UserHandle.USER_SYSTEM);
+            mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
 
             // To maximize test coverage, dump current state; we're not worried
             // about the actual output, just that we don't crash
             mQueue.dumpDebug(new ProtoOutputStream(),
                     ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
-            mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
+            mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(Writer.nullWriter()),
                     null, 0, true, true, true, null, false);
         }
 
@@ -1166,21 +1235,19 @@ public class BroadcastQueueTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final Intent timeZone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_GUEST, new ArrayList<>(
-                    List.of(makeRegisteredReceiver(callerApp),
-                            makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
-                            makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN, USER_GUEST),
-                            makeManifestReceiver(PACKAGE_YELLOW, CLASS_BLUE, USER_GUEST)))));
-            enqueueBroadcast(makeBroadcastRecord(timeZone, callerApp, USER_GUEST, new ArrayList<>(
-                    List.of(makeRegisteredReceiver(callerApp),
-                            makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
-                            makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN, USER_GUEST),
-                            makeManifestReceiver(PACKAGE_YELLOW, CLASS_BLUE, USER_GUEST)))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_GUEST, new ArrayList<>(
+                List.of(makeRegisteredReceiver(callerApp),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN, USER_GUEST),
+                        makeManifestReceiver(PACKAGE_YELLOW, CLASS_BLUE, USER_GUEST)))));
+        enqueueBroadcast(makeBroadcastRecord(timeZone, callerApp, USER_GUEST, new ArrayList<>(
+                List.of(makeRegisteredReceiver(callerApp),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN, USER_GUEST),
+                        makeManifestReceiver(PACKAGE_YELLOW, CLASS_BLUE, USER_GUEST)))));
 
-            synchronized (mAms) {
-                mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
-            }
+        synchronized (mAms) {
+            mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
         }
 
         waitForIdle();
@@ -1206,15 +1273,12 @@ public class BroadcastQueueTest {
         final ProcessRecord oldApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
-                    List.of(makeRegisteredReceiver(oldApp),
-                            makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)))));
-
-            synchronized (mAms) {
-                oldApp.killLocked(TAG, 42, false);
-                mQueue.onApplicationCleanupLocked(oldApp);
-            }
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
+                List.of(makeRegisteredReceiver(oldApp),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)))));
+        synchronized (mAms) {
+            oldApp.killLocked(TAG, 42, false);
+            mQueue.onApplicationCleanupLocked(oldApp);
         }
         waitForIdle();
 
@@ -1234,6 +1298,88 @@ public class BroadcastQueueTest {
         // Confirm that we saw final manifest broadcast
         verifyScheduleReceiver(times(1), newApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
+    }
+
+    /**
+     * Verify that when BroadcastQueue doesn't get notified when a process gets killed, it
+     * doesn't get stuck.
+     */
+    @Test
+    public void testKillWithoutNotify() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        mNextProcessStartBehavior.set(ProcessStartBehavior.KILLED_WITHOUT_NOTIFY);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
+                withPriority(makeRegisteredReceiver(receiverBlueApp), 5),
+                withPriority(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW), 0))));
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_ORANGE, CLASS_ORANGE))));
+
+        waitForIdle();
+        final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
+                getUidForPackage(PACKAGE_ORANGE));
+
+        verifyScheduleReceiver(times(1), receiverGreenApp, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+        verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
+        verifyScheduleReceiver(times(1), receiverOrangeApp, timezone);
+    }
+
+    /**
+     * Verify that a broadcast sent to a frozen app, which gets killed as part of unfreezing
+     * process due to pending sync binder transactions, is delivered as expected.
+     */
+    @Test
+    public void testDeliveryToFrozenApp_killedWhileUnfreeze() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        // Mark the app as killed while unfreezing it, which can happen either when we directly
+        // try to unfreeze it or when it is done as part of OomAdjust computation.
+        doAnswer(invocation -> {
+            final ProcessRecord app = invocation.getArgument(0);
+            if (app == receiverBlueApp) {
+                app.setKilled(true);
+                mActiveProcesses.remove(app);
+            }
+            return null;
+        }).when(mAms.mOomAdjuster).unfreezeTemporarily(eq(receiverBlueApp), anyInt());
+        doAnswer(invocation -> {
+            final ProcessRecord app = invocation.getArgument(0);
+            if (app == receiverBlueApp) {
+                app.setKilled(true);
+                mActiveProcesses.remove(app);
+            }
+            return null;
+        }).when(mAms).enqueueOomAdjTargetLocked(eq(receiverBlueApp));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+
+        waitForIdle();
+        final ProcessRecord restartedReceiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        assertNotEquals(receiverBlueApp, restartedReceiverBlueApp);
+        // Legacy queue will always try delivering the broadcast even if the process
+        // has been killed.
+        if (mImpl == Impl.MODERN) {
+            verifyScheduleReceiver(never(), receiverBlueApp, airplane);
+        } else {
+            verifyScheduleReceiver(times(1), receiverBlueApp, airplane);
+        }
+        // Verify that the new process receives the broadcast.
+        verifyScheduleReceiver(times(1), restartedReceiverBlueApp, airplane);
     }
 
     @Test
@@ -1370,8 +1516,8 @@ public class BroadcastQueueTest {
                 anyInt(), any());
 
         // Finally, verify that we thawed the final receiver
-        verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(callerApp),
-                eq(OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER));
+        verify(mAms.mOomAdjuster).unfreezeTemporarily(eq(callerApp),
+                eq(OOM_ADJ_REASON_FINISH_RECEIVER));
     }
 
     /**
@@ -1520,7 +1666,7 @@ public class BroadcastQueueTest {
                 null, null, null, null, AppOpsManager.OP_NONE, BroadcastOptions.makeBasic(),
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), null, null,
                 Activity.RESULT_OK, null, null, false, false, false, UserHandle.USER_SYSTEM,
-                backgroundStartPrivileges, false, null);
+                backgroundStartPrivileges, false, null, PROCESS_STATE_UNKNOWN);
         enqueueBroadcast(r);
 
         waitForIdle();
@@ -1587,17 +1733,14 @@ public class BroadcastQueueTest {
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
-                    List.of(makeRegisteredReceiver(receiverBlueApp, 10),
-                            makeRegisteredReceiver(receiverGreenApp, 10),
-                            makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
-                            makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW),
-                            makeRegisteredReceiver(receiverYellowApp, -10))));
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
-                    List.of(makeRegisteredReceiver(receiverBlueApp))));
-        }
-
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeRegisteredReceiver(receiverBlueApp, 10),
+                        makeRegisteredReceiver(receiverGreenApp, 10),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW),
+                        makeRegisteredReceiver(receiverYellowApp, -10))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverBlueApp))));
         waitForIdle();
 
         // Ignore the final foreground broadcast
@@ -1622,6 +1765,81 @@ public class BroadcastQueueTest {
     }
 
     /**
+     * Verify prioritized receivers work as expected with deferrable broadcast - broadcast to
+     * app in cached state should be deferred and the rest should be delivered as per the priority
+     * order.
+     */
+    @Test
+    public void testPrioritized_withDeferrableBroadcasts() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+        final ProcessRecord receiverOrangeApp = makeActiveProcessRecord(PACKAGE_ORANGE);
+
+        setProcessFreezable(receiverGreenApp, true, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        setProcessFreezable(receiverBlueApp, false, true);
+        mQueue.onProcessFreezableChangedLocked(receiverBlueApp);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        final List receivers = List.of(
+                makeRegisteredReceiver(callerApp, 10),
+                makeRegisteredReceiver(receiverGreenApp, 9),
+                makeRegisteredReceiver(receiverBlueApp, 8),
+                makeRegisteredReceiver(receiverYellowApp, 8),
+                makeRegisteredReceiver(receiverOrangeApp, 7)
+        );
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, opts, receivers));
+        waitForIdle();
+
+        // Green ignored since it's in cached state
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, timeTick);
+        // Blue ignored since it's in cached state
+        verifyScheduleRegisteredReceiver(never(), receiverBlueApp, timeTick);
+
+        final IApplicationThread redThread = mAms.getProcessRecordLocked(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED)).getThread();
+        final IApplicationThread yellowThread = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW)).getThread();
+        final IApplicationThread orangeThread = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
+                getUidForPackage(PACKAGE_ORANGE)).getThread();
+
+        // Verify apps that are not in cached state will receive the broadcast in the order
+        // we expect.
+        final InOrder inOrder = inOrder(redThread, yellowThread, orangeThread);
+        inOrder.verify(redThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+        inOrder.verify(yellowThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+        inOrder.verify(orangeThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+
+        // Shift blue to be active and confirm that deferred broadcast is delivered
+        setProcessFreezable(receiverBlueApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverBlueApp);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, timeTick);
+
+        // Shift green to be active and confirm that deferred broadcast is delivered
+        setProcessFreezable(receiverGreenApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
+    }
+
+    /**
      * Verify that we handle replacing a pending broadcast.
      */
     @Test
@@ -1640,17 +1858,15 @@ public class BroadcastQueueTest {
         final IIntentReceiver resultToFirst = mock(IIntentReceiver.class);
         final IIntentReceiver resultToSecond = mock(IIntentReceiver.class);
 
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            enqueueBroadcast(makeOrderedBroadcastRecord(timezoneFirst, callerApp,
-                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
-                            makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
-                    resultToFirst, null));
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
-                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_RED))));
-            enqueueBroadcast(makeOrderedBroadcastRecord(timezoneSecond, callerApp,
-                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
-                    resultToSecond, null));
-        }
+        enqueueBroadcast(makeOrderedBroadcastRecord(timezoneFirst, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
+                resultToFirst, null));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_RED))));
+        enqueueBroadcast(makeOrderedBroadcastRecord(timezoneSecond, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
+                resultToSecond, null));
 
         waitForIdle();
         final IApplicationThread blueThread = mAms.getProcessRecordLocked(PACKAGE_BLUE,
@@ -1731,14 +1947,12 @@ public class BroadcastQueueTest {
         timeTickFirst.putExtra(Intent.EXTRA_INDEX, "third");
         timeTickThird.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
 
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            enqueueBroadcast(makeBroadcastRecord(timeTickFirst, callerApp,
-                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
-            enqueueBroadcast(makeBroadcastRecord(timeTickSecond, callerApp,
-                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
-            enqueueBroadcast(makeBroadcastRecord(timeTickThird, callerApp,
-                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
-        }
+        enqueueBroadcast(makeBroadcastRecord(timeTickFirst, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+        enqueueBroadcast(makeBroadcastRecord(timeTickSecond, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+        enqueueBroadcast(makeBroadcastRecord(timeTickThird, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
 
         waitForIdle();
         final IApplicationThread blueThread = mAms.getProcessRecordLocked(PACKAGE_BLUE,
@@ -1761,6 +1975,34 @@ public class BroadcastQueueTest {
     }
 
     @Test
+    public void testReplacePending_diffReceivers() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp);
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp);
+        final BroadcastFilter receiverYellow = makeRegisteredReceiver(receiverYellowApp);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreen, 10),
+                withPriority(receiverBlue, 5),
+                withPriority(receiverYellow, 0))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreen, 10),
+                withPriority(receiverBlue, 5))));
+
+        waitForIdle();
+
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+        verifyScheduleRegisteredReceiver(never(), receiverYellowApp, airplane);
+    }
+
+    @Test
     public void testIdleAndBarrier() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
@@ -1773,35 +2015,65 @@ public class BroadcastQueueTest {
         assertTrue(mQueue.isIdleLocked());
         assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
 
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-            enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
-                    List.of(makeRegisteredReceiver(receiverApp))));
-            afterFirst = SystemClock.uptimeMillis();
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+        afterFirst = SystemClock.uptimeMillis();
 
-            assertFalse(mQueue.isIdleLocked());
-            assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
-            assertFalse(mQueue.isBeyondBarrierLocked(afterFirst));
+        assertFalse(mQueue.isIdleLocked());
+        assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
+        assertFalse(mQueue.isBeyondBarrierLocked(afterFirst));
 
-            final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
-                    List.of(makeRegisteredReceiver(receiverApp))));
-            afterSecond = SystemClock.uptimeMillis() + 10;
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+        afterSecond = SystemClock.uptimeMillis() + 10;
 
-            assertFalse(mQueue.isIdleLocked());
-            assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
-            assertFalse(mQueue.isBeyondBarrierLocked(afterFirst));
-            assertFalse(mQueue.isBeyondBarrierLocked(afterSecond));
-        }
+        assertFalse(mQueue.isIdleLocked());
+        assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
+        assertFalse(mQueue.isBeyondBarrierLocked(afterFirst));
+        assertFalse(mQueue.isBeyondBarrierLocked(afterSecond));
 
-        mQueue.waitForBarrier(null);
+        mLooper.release();
+
+        mQueue.waitForBarrier(LOG_WRITER_INFO);
         assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
 
-        mQueue.waitForIdle(null);
+        mQueue.waitForIdle(LOG_WRITER_INFO);
         assertTrue(mQueue.isIdleLocked());
         assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
         assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
         assertTrue(mQueue.isBeyondBarrierLocked(afterSecond));
+    }
+
+    @Test
+    public void testWaitForBroadcastDispatch() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        assertTrue(mQueue.isDispatchedLocked(timeTick));
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+
+        assertTrue(mQueue.isDispatchedLocked(timeTick));
+        assertFalse(mQueue.isDispatchedLocked(timezone));
+
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+
+        assertFalse(mQueue.isDispatchedLocked(timeTick));
+        assertFalse(mQueue.isDispatchedLocked(timezone));
+
+        mLooper.release();
+
+        mQueue.waitForDispatched(timeTick, LOG_WRITER_INFO);
+        assertTrue(mQueue.isDispatchedLocked(timeTick));
+
+        mQueue.waitForDispatched(timezone, LOG_WRITER_INFO);
+        assertTrue(mQueue.isDispatchedLocked(timezone));
     }
 
     /**
@@ -1876,6 +2148,46 @@ public class BroadcastQueueTest {
     }
 
     /**
+     * Confirm how many times a pathological broadcast pattern results in OOM
+     * adjusts; watches for performance regressions.
+     */
+    @Test
+    public void testOomAdjust_TriggerCount() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        // Send 8 broadcasts, 4 receivers in the first process,
+        // and 2 alternating in each of the remaining processes
+        synchronized (mAms) {
+            for (int i = 0; i < 8; i++) {
+                final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+                mQueue.enqueueBroadcastLocked(makeBroadcastRecord(intent, callerApp,
+                        List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                                makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW),
+                                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                                makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+            }
+        }
+        waitForIdle();
+
+        final int expectedTimes;
+        switch (mImpl) {
+            // Original stack requested for every single receiver; yikes
+            case DEFAULT: expectedTimes = 64; break;
+            // Modern stack requests once each time we promote a process to
+            // running; we promote "green" twice, and "blue" and "yellow" once
+            case MODERN: expectedTimes = 4; break;
+            default: throw new UnsupportedOperationException();
+        }
+
+        verify(mAms, times(expectedTimes))
+                .updateOomAdjPendingTargetsLocked(eq(OOM_ADJ_REASON_START_RECEIVER));
+    }
+
+    /**
      * Verify that expected events are triggered when a broadcast is finished.
      */
     @Test
@@ -1903,25 +2215,23 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            final Object greenReceiver = makeRegisteredReceiver(receiverGreenApp);
-            final Object blueReceiver = makeRegisteredReceiver(receiverBlueApp);
-            final Object yellowReceiver = makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW);
-            final Object orangeReceiver = makeManifestReceiver(PACKAGE_ORANGE, CLASS_ORANGE);
-            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
-                    List.of(greenReceiver, blueReceiver, yellowReceiver, orangeReceiver)));
+        final Object greenReceiver = makeRegisteredReceiver(receiverGreenApp);
+        final Object blueReceiver = makeRegisteredReceiver(receiverBlueApp);
+        final Object yellowReceiver = makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW);
+        final Object orangeReceiver = makeManifestReceiver(PACKAGE_ORANGE, CLASS_ORANGE);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(greenReceiver, blueReceiver, yellowReceiver, orangeReceiver)));
 
-            doAnswer(invocation -> {
-                final BroadcastRecord r = invocation.getArgument(0);
-                final Object o = invocation.getArgument(1);
-                if (airplane.getAction().equals(r.intent.getAction())
-                        && (isReceiverEquals(o, greenReceiver)
-                                || isReceiverEquals(o, orangeReceiver))) {
-                    return "test skipped receiver";
-                }
-                return null;
-            }).when(mSkipPolicy).shouldSkipMessage(any(BroadcastRecord.class), any());
-        }
+        doAnswer(invocation -> {
+            final BroadcastRecord r = invocation.getArgument(0);
+            final Object o = invocation.getArgument(1);
+            if (airplane.getAction().equals(r.intent.getAction())
+                    && (isReceiverEquals(o, greenReceiver)
+                            || isReceiverEquals(o, orangeReceiver))) {
+                return "test skipped receiver";
+            }
+            return null;
+        }).when(mSkipPolicy).shouldSkipMessage(any(BroadcastRecord.class), any());
 
         waitForIdle();
         // Verify that only blue and yellow receiver apps received the broadcast.
@@ -1933,5 +2243,162 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
                 getUidForPackage(PACKAGE_ORANGE));
         assertNull(receiverOrangeApp);
+    }
+
+    /**
+     * Verify broadcasts to runtime receivers in cached processes are deferred
+     * until that process leaves the cached state.
+     */
+    @Test
+    public void testDeferralPolicy_UntilActive() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+
+        setProcessFreezable(receiverGreenApp, true, true);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        setProcessFreezable(receiverBlueApp, true, false);
+        mQueue.onProcessFreezableChangedLocked(receiverBlueApp);
+        setProcessFreezable(receiverYellowApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverYellowApp);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, opts,
+                List.of(makeRegisteredReceiver(receiverGreenApp),
+                        makeRegisteredReceiver(receiverBlueApp),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeRegisteredReceiver(receiverYellowApp))));
+        waitForIdle();
+
+        // Green ignored since it's in cached state
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, airplane);
+
+        // Blue delivered both since it has a manifest receiver
+        verifyScheduleReceiver(times(1), receiverBlueApp, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+
+        // Yellow delivered since it's not cached
+        verifyScheduleRegisteredReceiver(times(1), receiverYellowApp, airplane);
+
+        // Shift green to be active and confirm that deferred broadcast is delivered
+        setProcessFreezable(receiverGreenApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+    }
+
+    /**
+     * Verify broadcasts to a runtime receiver in cached process is deferred even when a different
+     * process in the same package is not cached.
+     */
+    @Test
+    public void testDeferralPolicy_UntilActive_WithMultiProcessUid() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp1 = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverGreenApp2 = makeActiveProcessRecord(PACKAGE_GREEN,
+                PACKAGE_GREEN + "_proc2");
+
+        setProcessFreezable(receiverGreenApp1, true, true);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp1);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, opts,
+                List.of(makeRegisteredReceiver(receiverGreenApp1),
+                        makeRegisteredReceiver(receiverGreenApp2))));
+        waitForIdle();
+
+        // 1st process in Green package is ignored since it is in a cached state
+        // but the 2nd process should still receive the broadcast.
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp1, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp2, airplane);
+
+        // Shift the 1st process in Green package to be active and confirm that deferred broadcast
+        // is delivered
+        setProcessFreezable(receiverGreenApp1, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp1);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp1, airplane);
+    }
+
+    @Test
+    public void testBroadcastDelivery_uidForeground() throws Exception {
+        // Legacy stack doesn't support prioritization to foreground app.
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
+                ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp);
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, callerApp,
+                List.of(receiverBlue));
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick, callerApp,
+                List.of(receiverBlue, receiverGreen));
+
+        enqueueBroadcast(airplaneRecord);
+        enqueueBroadcast(timeTickRecord);
+
+        waitForIdle();
+        // Verify that broadcasts to receiverGreenApp gets scheduled first.
+        assertThat(getReceiverScheduledTime(timeTickRecord, receiverGreen))
+                .isLessThan(getReceiverScheduledTime(airplaneRecord, receiverBlue));
+        assertThat(getReceiverScheduledTime(timeTickRecord, receiverGreen))
+                .isLessThan(getReceiverScheduledTime(timeTickRecord, receiverBlue));
+    }
+
+    @Test
+    public void testPrioritizedBroadcastDelivery_uidForeground() throws Exception {
+        // Legacy stack doesn't support prioritization to foreground app.
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
+                ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp, 10);
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp, 5);
+        final BroadcastRecord prioritizedRecord = makeBroadcastRecord(timeTick, callerApp,
+                List.of(receiverBlue, receiverGreen));
+
+        enqueueBroadcast(prioritizedRecord);
+
+        waitForIdle();
+        // Verify that uid foreground-ness does not impact that delivery of prioritized broadcast.
+        // That is, broadcast to receiverBlueApp gets scheduled before the one to receiverGreenApp.
+        assertThat(getReceiverScheduledTime(prioritizedRecord, receiverGreen))
+                .isGreaterThan(getReceiverScheduledTime(prioritizedRecord, receiverBlue));
+    }
+
+    private long getReceiverScheduledTime(@NonNull BroadcastRecord r, @NonNull Object receiver) {
+        for (int i = 0; i < r.receivers.size(); ++i) {
+            if (isReceiverEquals(receiver, r.receivers.get(i))) {
+                return r.scheduledTime[i];
+            }
+        }
+        fail(receiver + "not found in " + r);
+        return -1;
     }
 }

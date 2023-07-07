@@ -37,7 +37,25 @@ data class GetCredentialUiState(
 internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
     return state.providerDisplayInfo.sortedUserNameToCredentialEntryList.isNotEmpty() ||
         state.providerDisplayInfo.authenticationEntryList.isNotEmpty() ||
-        state.providerDisplayInfo.remoteEntry != null
+        (state.providerDisplayInfo.remoteEntry != null &&
+            !state.requestDisplayInfo.preferImmediatelyAvailableCredentials)
+}
+
+internal fun findAutoSelectEntry(providerDisplayInfo: ProviderDisplayInfo): CredentialEntryInfo? {
+    if (providerDisplayInfo.authenticationEntryList.isNotEmpty()) {
+        return null
+    }
+    if (providerDisplayInfo.sortedUserNameToCredentialEntryList.size == 1) {
+        val entryList = providerDisplayInfo.sortedUserNameToCredentialEntryList.firstOrNull()
+            ?: return null
+        if (entryList.sortedCredentialEntryList.size == 1) {
+            val entry = entryList.sortedCredentialEntryList.firstOrNull() ?: return null
+            if (entry.isAutoSelectable) {
+                return entry
+            }
+        }
+    }
+    return null
 }
 
 data class ProviderInfo(
@@ -76,10 +94,13 @@ class CredentialEntryInfo(
     val credentialType: CredentialType,
     /** Localized type value of this credential used for display purpose. */
     val credentialTypeDisplayName: String,
+    val providerDisplayName: String,
     val userName: String,
     val displayName: String?,
     val icon: Drawable?,
+    val shouldTintIcon: Boolean,
     val lastUsedTimeMillis: Instant?,
+    val isAutoSelectable: Boolean,
 ) : BaseEntry(
     providerId,
     entryKey,
@@ -96,6 +117,7 @@ class AuthenticationEntryInfo(
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
     val title: String,
+    val providerDisplayName: String,
     val icon: Drawable,
     // The entry had been unlocked and turned out to be empty. Used to determine whether to
     // show "Tap to unlock" or "No sign-in info" for this entry.
@@ -140,11 +162,20 @@ class ActionEntryInfo(
     entrySubkey,
     pendingIntent,
     fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = false,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
 )
 
 data class RequestDisplayInfo(
     val appName: String,
+    val preferImmediatelyAvailableCredentials: Boolean,
+    val preferIdentityDocUi: Boolean,
+    // A top level branding icon + display name preferred by the app.
+    val preferTopBrandingContent: TopBrandingContent?,
+)
+
+data class TopBrandingContent(
+    val icon: Drawable,
+    val displayName: String,
 )
 
 /**
@@ -245,7 +276,6 @@ private fun toActiveEntry(
 private fun toGetScreenState(
     providerDisplayInfo: ProviderDisplayInfo
 ): GetScreenState {
-
     return if (providerDisplayInfo.sortedUserNameToCredentialEntryList.isEmpty() &&
         providerDisplayInfo.remoteEntry == null &&
         providerDisplayInfo.authenticationEntryList.all { it.isUnlockedAndEmpty })

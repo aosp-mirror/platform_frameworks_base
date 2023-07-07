@@ -17,19 +17,19 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.NavBar
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.service.PlatformConsts
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import com.android.wm.shell.flicker.splitScreenEntered
+import com.android.wm.shell.flicker.splitscreen.benchmark.SwitchBackToSplitFromAnotherAppBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,28 +45,14 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SwitchBackToSplitFromAnotherApp(flicker: FlickerTest) : SplitScreenBase(flicker) {
-    val thirdApp = SplitScreenUtils.getNonResizeable(instrumentation)
-
+class SwitchBackToSplitFromAnotherApp(override val flicker: FlickerTest) :
+    SwitchBackToSplitFromAnotherAppBenchmark(flicker), ICommonAssertions {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
-
-                thirdApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder().withWindowSurfaceAppeared(thirdApp).waitForAndVerify()
-            }
-            transitions {
-                tapl.launchedAppState.quickSwitchToPreviousApp()
-                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
-
-    @IwTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = true)
 
     @Presubmit
     @Test
@@ -166,7 +152,7 @@ class SwitchBackToSplitFromAnotherApp(flicker: FlickerTest) : SplitScreenBase(fl
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
         }
     }

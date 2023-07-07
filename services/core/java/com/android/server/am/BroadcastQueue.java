@@ -69,14 +69,6 @@ public abstract class BroadcastQueue {
         Slog.v(TAG, msg);
     }
 
-    static void logv(@NonNull String msg, @Nullable PrintWriter pw) {
-        logv(msg);
-        if (pw != null) {
-            pw.println(msg);
-            pw.flush();
-        }
-    }
-
     static void checkState(boolean expression, @NonNull String msg) {
         if (!expression) {
             throw new IllegalStateException(msg);
@@ -156,7 +148,8 @@ public abstract class BroadcastQueue {
      *         dispatching a pending broadcast
      */
     @GuardedBy("mService")
-    public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app);
+    public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
+            throws BroadcastDeliveryFailedException;
 
     /**
      * Signal from OS internals that the given process has timed out during
@@ -181,6 +174,13 @@ public abstract class BroadcastQueue {
     public abstract void onApplicationCleanupLocked(@NonNull ProcessRecord app);
 
     /**
+     * Signal from OS internals that the given process is in a freezable state and will be
+     * frozen soon after.
+     */
+    @GuardedBy("mService")
+    public abstract void onProcessFreezableChangedLocked(@NonNull ProcessRecord app);
+
+    /**
      * Signal from OS internals that the given package (or some subset of that
      * package) has been disabled or uninstalled, and that any pending
      * broadcasts should be cleaned up.
@@ -200,7 +200,7 @@ public abstract class BroadcastQueue {
     public abstract boolean isIdleLocked();
 
     /**
-     * Quickly determine if this queue has broadcasts enqueued before the given
+     * Quickly determine if this queue has non-deferred broadcasts enqueued before the given
      * barrier timestamp that are still waiting to be delivered.
      *
      * @see #waitForIdle
@@ -208,6 +208,15 @@ public abstract class BroadcastQueue {
      */
     @GuardedBy("mService")
     public abstract boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime);
+
+    /**
+     * Quickly determine if this queue has non-deferred broadcasts waiting to be dispatched,
+     * that match {@code intent}, as defined by {@link Intent#filterEquals(Intent)}.
+     *
+     * @see #waitForDispatched(Intent, PrintWriter)
+     */
+    @GuardedBy("mService")
+    public abstract boolean isDispatchedLocked(@NonNull Intent intent);
 
     /**
      * Wait until this queue becomes completely idle.
@@ -219,10 +228,10 @@ public abstract class BroadcastQueue {
      * since running apps can continue sending new broadcasts in perpetuity;
      * consider using {@link #waitForBarrier} instead.
      */
-    public abstract void waitForIdle(@Nullable PrintWriter pw);
+    public abstract void waitForIdle(@NonNull PrintWriter pw);
 
     /**
-     * Wait until any currently waiting broadcasts have been dispatched.
+     * Wait until any currently waiting non-deferred broadcasts have been dispatched.
      * <p>
      * Any broadcasts waiting to be delivered at some point in the future will
      * be dispatched as quickly as possible.
@@ -230,7 +239,16 @@ public abstract class BroadcastQueue {
      * Callers are advised that this method will <em>not</em> wait for any
      * future broadcasts that are newly enqueued after being invoked.
      */
-    public abstract void waitForBarrier(@Nullable PrintWriter pw);
+    public abstract void waitForBarrier(@NonNull PrintWriter pw);
+
+    /**
+     * Wait until all non-deferred broadcasts matching {@code intent}, as defined by
+     * {@link Intent#filterEquals(Intent)}, have been dispatched.
+     * <p>
+     * Any broadcasts waiting to be delivered at some point in the future will
+     * be dispatched as quickly as possible.
+     */
+    public abstract void waitForDispatched(@NonNull Intent intent, @NonNull PrintWriter pw);
 
     /**
      * Delays delivering broadcasts to the specified package.

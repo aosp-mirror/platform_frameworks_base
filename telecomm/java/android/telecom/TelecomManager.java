@@ -744,10 +744,6 @@ public class TelecomManager {
      * state of calls in the self-managed {@link ConnectionService}.  An example use-case is
      * exposing these calls to an automotive device via its companion app.
      * <p>
-     * This meta-data can only be set for an {@link InCallService} which also sets
-     * {@link #METADATA_IN_CALL_SERVICE_UI}. Only the default phone/dialer app, or a car-mode
-     * {@link InCallService} can see self-managed calls.
-     * <p>
      * See also {@link Connection#PROPERTY_SELF_MANAGED}.
      */
     public static final String METADATA_INCLUDE_SELF_MANAGED_CALLS =
@@ -895,9 +891,13 @@ public class TelecomManager {
             "android.telecom.extra.NOTIFICATION_PHONE_NUMBER";
 
     /**
-     * The intent to clear missed calls.
+     * Included in the extras of the {@link #ACTION_SHOW_MISSED_CALLS_NOTIFICATION}, provides a
+     * pending intent which can be used to clear the missed calls notification and mark unread
+     * missed call log entries as read.
      * @hide
+     * @deprecated Use {@link #cancelMissedCallsNotification()} instead.
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT =
             "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
@@ -2073,6 +2073,14 @@ public class TelecomManager {
      * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
      * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
      * <p>
+     * Specify the address associated with the incoming call using
+     * {@link #EXTRA_INCOMING_CALL_ADDRESS}.  If an incoming call is from an anonymous source, omit
+     * this extra and ensure you specify a valid number presentation via
+     * {@link Connection#setAddress(Uri, int)} on the {@link Connection} instance you return in
+     * your
+     * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * implementation.
+     * <p>
      * The incoming call you are adding is assumed to have a video state of
      * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
      * {@link #EXTRA_INCOMING_VIDEO_STATE} is specified.
@@ -2089,7 +2097,10 @@ public class TelecomManager {
      * For a self-managed {@link ConnectionService}, a {@link SecurityException} will be thrown if
      * the {@link PhoneAccount} has {@link PhoneAccount#CAPABILITY_SELF_MANAGED} and the calling app
      * does not have {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
-     *
+     * <p>
+     * <p>
+     * <b>Note</b>: {@link android.app.Notification.CallStyle} notifications should be posted after
+     * the call is added to Telecom in order for the notification to be non-dismissible.
      * @param phoneAccount A {@link PhoneAccountHandle} registered with
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
@@ -2254,9 +2265,10 @@ public class TelecomManager {
     }
 
     /**
-     * Removes the missed-call notification if one is present.
+     * Removes the missed-call notification if one is present and marks missed calls in the call
+     * log as read.
      * <p>
-     * Requires that the method-caller be set as the system dialer app.
+     * Requires that the method-caller be set as the default dialer app.
      * </p>
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -2336,7 +2348,10 @@ public class TelecomManager {
      * {@link PhoneAccount} with the {@link PhoneAccount#CAPABILITY_PLACE_EMERGENCY_CALLS}
      * capability, depending on external factors, such as network conditions and Modem/SIM status.
      * </p>
-     *
+     * <p>
+     * <p>
+     * <b>Note</b>: {@link android.app.Notification.CallStyle} notifications should be posted after
+     * the call is placed in order for the notification to be non-dismissible.
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */
@@ -2669,71 +2684,78 @@ public class TelecomManager {
     }
 
     /**
-     * Reports a new call with the specified {@link CallAttributes} to the telecom service. This
-     * method can be used to report both incoming and outgoing calls.  By reporting the call, the
-     * system is aware of the call and can provide updates on services (ex. Another device wants to
-     * disconnect the call) or events (ex. a new Bluetooth route became available).
-     *
+     * Add a call to the Android system service Telecom. This allows the system to start tracking an
+     * incoming or outgoing call with the specified {@link CallAttributes}.  Once a call is added,
+     * a {@link android.app.Notification.CallStyle} notification should be posted and when the
+     * call is ready to be disconnected, use {@link CallControl#disconnect(DisconnectCause,
+     * Executor, OutcomeReceiver)} which is provided by the
+     * {@code pendingControl#onResult(CallControl)}.
      * <p>
-     * The difference between this API call and {@link TelecomManager#placeCall(Uri, Bundle)} or
-     * {@link TelecomManager#addNewIncomingCall(PhoneAccountHandle, Bundle)} is that this API
-     * will asynchronously provide an update on whether the new call was added successfully via
-     * an {@link OutcomeReceiver}.  Additionally, callbacks will run on the executor thread that was
-     * passed in.
-     *
      * <p>
-     * Note: Only packages that register with
+     * <p>
+     * <b>Call Lifecycle</b>: Your app is given foreground execution priority as long as you have a
+     * valid call and are posting a {@link android.app.Notification.CallStyle} notification.
+     * When your application is given foreground execution priority, your app is treated as a
+     * foreground service. Foreground execution priority will prevent the
+     * {@link android.app.ActivityManager} from killing your application when it is placed the
+     * background. Foreground execution priority is removed from your app when all of your app's
+     * calls terminate or your app no longer posts a valid notification.
+     * <p>
+     * <p>
+     * <p>
+     * <b>Note</b>: Only packages that register with
      * {@link PhoneAccount#CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS}
      * can utilize this API. {@link PhoneAccount}s that set the capabilities
      * {@link PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION},
      * {@link PhoneAccount#CAPABILITY_CALL_PROVIDER},
      * {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}
      * are not supported and will cause an exception to be thrown.
-     *
      * <p>
-     * Usage example:
+     * <p>
+     * <p>
+     * <b>Usage example:</b>
      * <pre>
-     *
-     *  // An app should first define their own construct of a Call that overrides all the
-     *  // {@link CallControlCallback}s and {@link CallEventCallback}s
-     *  private class MyVoipCall {
-     *   public String callId = "";
-     *
-     *   public CallControlCallEventCallback handshakes = new
-     *                       CallControlCallEventCallback() {
-     *                         // override/ implement all {@link CallControlCallback}s
+     *  // Its up to your app on how you want to wrap the objects. One such implementation can be:
+     *  class MyVoipCall {
+     *    ...
+     *      public CallControlCallEventCallback handshakes = new  CallControlCallback() {
+     *                         ...
      *                        }
-     *   public CallEventCallback events = new
-     *                       CallEventCallback() {
-     *                         // override/ implement all {@link CallEventCallback}s
+     *
+     *      public CallEventCallback events = new CallEventCallback() {
+     *                         ...
      *                        }
-     *   public MyVoipCall(String id){
-     *       callId = id;
+     *
+     *      public MyVoipCall(String id){
+     *          ...
+     *      }
      *  }
-     *
-     * PhoneAccountHandle handle = new PhoneAccountHandle(
-     *                          new ComponentName("com.example.voip.app",
-     *                                            "com.example.voip.app.NewCallActivity"), "123");
-     *
-     * CallAttributes callAttributes = new CallAttributes.Builder(handle,
-     *                                             CallAttributes.DIRECTION_OUTGOING,
-     *                                            "John Smith", Uri.fromParts("tel", "123", null))
-     *                                            .build();
      *
      * MyVoipCall myFirstOutgoingCall = new MyVoipCall("1");
      *
-     * telecomManager.addCall(callAttributes, Runnable::run, new OutcomeReceiver() {
+     * telecomManager.addCall(callAttributes,
+     *                        Runnable::run,
+     *                        new OutcomeReceiver() {
      *                              public void onResult(CallControl callControl) {
-     *                                 // The call has been added successfully
+     *                                 // The call has been added successfully. For demonstration
+     *                                 // purposes, the call is disconnected immediately ...
+     *                                 callControl.disconnect(
+     *                                                 new DisconnectCause(DisconnectCause.LOCAL) )
      *                              }
-     *                           }, myFirstOutgoingCall.handshakes, myFirstOutgoingCall.events);
+     *                           },
+     *                           myFirstOutgoingCall.handshakes,
+     *                           myFirstOutgoingCall.events);
      * </pre>
      *
-     * @param callAttributes    attributes of the new call (incoming or outgoing, address, etc. )
-     * @param executor          thread to run background CallEventCallback updates on
-     * @param pendingControl    OutcomeReceiver that receives the result of addCall transaction
-     * @param handshakes        object that overrides {@link CallControlCallback}s
-     * @param events            object that overrides {@link CallEventCallback}s
+     * @param callAttributes attributes of the new call (incoming or outgoing, address, etc.)
+     * @param executor       execution context to run {@link CallControlCallback} updates on
+     * @param pendingControl Receives the result of addCall transaction. Upon success, a
+     *                       CallControl object is provided which can be used to do things like
+     *                       disconnect the call that was added.
+     * @param handshakes     callback that receives <b>actionable</b> updates that originate from
+     *                       Telecom.
+     * @param events         callback that receives <b>non</b>-actionable updates that originate
+     *                       from Telecom.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
     @SuppressLint("SamShouldBeLast")

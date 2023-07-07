@@ -631,10 +631,14 @@ final class Constants {
     static final String DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX = "enable_earc_tx";
     static final String DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX =
             "transition_arc_to_earc_tx";
+    // Name is abbreviated slightly to avoid line length issues
+    static final String DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI =
+            "enable_numeric_soundbar_volume_ui_on_tv";
     @StringDef({
             DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE,
             DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX,
-            DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX
+            DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX,
+            DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI
     })
     @interface FeatureFlag {}
 

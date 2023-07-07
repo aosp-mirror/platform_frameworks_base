@@ -70,7 +70,7 @@ public class AudioSystem
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
     }
 
-    /* These values must be kept in sync with system/audio.h */
+    /* These values must be kept in sync with system/media/audio/include/system/audio-hal-enums.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
@@ -961,7 +961,8 @@ public class AudioSystem
      */
 
     //
-    // audio device definitions: must be kept in sync with values in system/core/audio.h
+    // audio device definitions: must be kept in sync with values
+    // in system/media/audio/include/system/audio-hal-enums.h
     //
     /** @hide */
     public static final int DEVICE_NONE = 0x0;
@@ -1236,6 +1237,9 @@ public class AudioSystem
     public static final Set<Integer> DEVICE_IN_ALL_SCO_SET;
     /** @hide */
     public static final Set<Integer> DEVICE_IN_ALL_USB_SET;
+    /** @hide */
+    public static final Set<Integer> DEVICE_IN_ALL_BLE_SET;
+
     static {
         DEVICE_IN_ALL_SET = new HashSet<>();
         DEVICE_IN_ALL_SET.add(DEVICE_IN_COMMUNICATION);
@@ -1275,6 +1279,66 @@ public class AudioSystem
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_ACCESSORY);
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_DEVICE);
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_HEADSET);
+
+        DEVICE_IN_ALL_BLE_SET = new HashSet<>();
+        DEVICE_IN_ALL_BLE_SET.add(DEVICE_IN_BLE_HEADSET);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothDevice(int deviceType) {
+        return isBluetoothA2dpOutDevice(deviceType)
+                || isBluetoothScoDevice(deviceType)
+                || isBluetoothLeDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothOutDevice(int deviceType) {
+        return isBluetoothA2dpOutDevice(deviceType)
+                || isBluetoothScoOutDevice(deviceType)
+                || isBluetoothLeOutDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothInDevice(int deviceType) {
+        return isBluetoothScoInDevice(deviceType)
+                || isBluetoothLeInDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothA2dpOutDevice(int deviceType) {
+        return DEVICE_OUT_ALL_A2DP_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothScoOutDevice(int deviceType) {
+        return DEVICE_OUT_ALL_SCO_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothScoInDevice(int deviceType) {
+        return DEVICE_IN_ALL_SCO_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothScoDevice(int deviceType) {
+        return isBluetoothScoOutDevice(deviceType)
+                || isBluetoothScoInDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothLeOutDevice(int deviceType) {
+        return DEVICE_OUT_ALL_BLE_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothLeInDevice(int deviceType) {
+        return DEVICE_IN_ALL_BLE_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothLeDevice(int deviceType) {
+        return isBluetoothLeOutDevice(deviceType)
+                || isBluetoothLeInDevice(deviceType);
     }
 
     /** @hide */

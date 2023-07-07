@@ -351,8 +351,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         final TaskFragment taskFragment1 = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
         final ActivityRecord activity0 = taskFragment0.getTopMostActivity();
         final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity0.setVisibility(true /* visible */, false /* deferHidingClient */);
-        activity1.setVisibility(true /* visible */, false /* deferHidingClient */);
+        activity0.setVisibility(true);
+        activity1.setVisibility(true);
         spyOn(mAtm.mTaskFragmentOrganizerController);
 
         // Move activity to pinned.
@@ -585,6 +585,15 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         // Making the activity0 be the focused activity and ensure the focused app is updated.
         activity0.moveFocusableActivityToTop("test");
+        assertEquals(activity0, mDisplayContent.mFocusedApp);
+
+        // Moving activity1 to top and make both the two activities resumed.
+        activity1.moveFocusableActivityToTop("test");
+        activity0.setState(RESUMED, "test");
+        activity1.setState(RESUMED, "test");
+
+        // Verifies that the focus app can be updated to an Activity in the adjacent TF
+        mAtm.setFocusedTask(task.mTaskId, activity0);
         assertEquals(activity0, mDisplayContent.mFocusedApp);
     }
 

@@ -16,7 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
@@ -25,8 +24,6 @@ import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
-import static com.android.server.job.controllers.FlexibilityController.NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
-import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
@@ -46,6 +43,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -54,6 +52,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -68,10 +67,12 @@ import com.android.server.job.JobStatusShortInfoProto;
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Predicate;
 
 /**
@@ -90,6 +91,13 @@ import java.util.function.Predicate;
 public final class JobStatus {
     private static final String TAG = "JobScheduler.JobStatus";
     static final boolean DEBUG = JobSchedulerService.DEBUG;
+
+    private static MessageDigest sMessageDigest;
+    /** Cache of namespace to hash to reduce how often we need to generate the namespace hash. */
+    @GuardedBy("sNamespaceHashCache")
+    private static final ArrayMap<String, String> sNamespaceHashCache = new ArrayMap<>();
+    /** Maximum size of {@link #sNamespaceHashCache}. */
+    private static final int MAX_NAMESPACE_CACHE_SIZE = 128;
 
     private static final int NUM_CONSTRAINT_CHANGE_HISTORY = 10;
 
@@ -115,12 +123,11 @@ public final class JobStatus {
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
     static final int CONSTRAINT_PREFETCH = 1 << 23;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
-    static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
+    static final int CONSTRAINT_FLEXIBLE = 1 << 21;
 
     private static final int IMPLICIT_CONSTRAINTS = 0
             | CONSTRAINT_BACKGROUND_NOT_RESTRICTED
             | CONSTRAINT_DEVICE_NOT_DOZING
-            | CONSTRAINT_FLEXIBLE
             | CONSTRAINT_TARE_WEALTH
             | CONSTRAINT_WITHIN_QUOTA;
 
@@ -235,6 +242,10 @@ public final class JobStatus {
     final String sourceTag;
     @Nullable
     private final String mNamespace;
+    @Nullable
+    private final String mNamespaceHash;
+    /** An ID that can be used to uniquely identify the job when logging statsd metrics. */
+    private final long mLoggingJobId;
 
     final String tag;
 
@@ -298,6 +309,7 @@ public final class JobStatus {
 
     // Constraints.
     final int requiredConstraints;
+    private final int mPreferredConstraints;
     private final int mRequiredConstraintsOfInterest;
     int satisfiedConstraints = 0;
     private int mSatisfiedConstraintsOfInterest = 0;
@@ -378,6 +390,11 @@ public final class JobStatus {
      * and is thus considered demoted from whatever privileged state it had in the past.
      */
     public static final int INTERNAL_FLAG_DEMOTED_BY_USER = 1 << 1;
+    /**
+     * Flag for {@link #mInternalFlags}: this job is demoted by the system
+     * from running as a user-initiated job.
+     */
+    public static final int INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ = 1 << 2;
 
     /** Minimum difference between start and end time to have flexible constraint */
     @VisibleForTesting
@@ -387,6 +404,12 @@ public final class JobStatus {
      * as opposed to {@link JobInfo#flags} that's set by callers.
      */
     private int mInternalFlags;
+
+    /**
+     * The cumulative amount of time this job has run for, including previous executions.
+     * This is reset for periodic jobs upon a successful job execution.
+     */
+    private long mCumulativeExecutionTimeMs;
 
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
@@ -407,6 +430,13 @@ public final class JobStatus {
      * when it started running. This isn't copied over when a job is rescheduled.
      */
     public boolean startedAsUserInitiatedJob = false;
+    /**
+     * Whether this particular JobStatus instance started with the foreground flag
+     * (or more accurately, did <b>not</b> have the
+     * {@link android.content.Context#BIND_NOT_FOREGROUND} flag
+     * included in its binding flags when started).
+     */
+    public boolean startedWithForegroundFlag = false;
 
     public boolean startedWithImmediacyPrivilege = false;
 
@@ -553,12 +583,15 @@ public final class JobStatus {
             int sourceUserId, int standbyBucket, @Nullable String namespace, String tag,
             int numFailures, int numSystemStops,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
-            long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags,
+            long lastSuccessfulRunTime, long lastFailedRunTime, long cumulativeExecutionTimeMs,
+            int internalFlags,
             int dynamicConstraints) {
         this.job = job;
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
         mNamespace = namespace;
+        mNamespaceHash = generateNamespaceHash(namespace);
+        mLoggingJobId = generateLoggingId(namespace, job.getId());
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -581,9 +614,10 @@ public final class JobStatus {
             this.sourceTag = tag;
         }
 
+        final String bnNamespace = namespace == null ? "" :  "@" + namespace + "@";
         this.batteryName = this.sourceTag != null
-                ? this.sourceTag + ":" + job.getService().getPackageName()
-                : job.getService().flattenToShortString();
+                ? bnNamespace + this.sourceTag + ":" + job.getService().getPackageName()
+                : bnNamespace + job.getService().flattenToShortString();
         this.tag = "*job*/" + this.batteryName + "#" + job.getId();
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
@@ -618,24 +652,26 @@ public final class JobStatus {
         }
         mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
 
-        mPreferUnmetered = job.getRequiredNetwork() != null
-                && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED);
+        mPreferredConstraints = job.getPreferredConstraintFlags();
 
-        final boolean lacksSomeFlexibleConstraints =
-                ((~requiredConstraints) & SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS) != 0
-                        || mPreferUnmetered;
+        // Exposing a preferredNetworkRequest API requires that we make sure that the preferred
+        // NetworkRequest is a subset of the required NetworkRequest. We currently don't have the
+        // code to ensure that, so disable this part for now.
+        // TODO(236261941): look into enabling flexible network constraint requests
+        mPreferUnmetered = false;
+                // && job.getRequiredNetwork() != null
+                // && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED);
+
         final boolean satisfiesMinWindowException =
                 (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
                 >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
 
         // The first time a job is rescheduled it will not be subject to flexible constraints.
         // Otherwise, every consecutive reschedule increases a jobs' flexibility deadline.
-        if (!isRequestedExpeditedJob() && !job.isUserInitiated()
+        if (mPreferredConstraints != 0 && !isRequestedExpeditedJob() && !job.isUserInitiated()
                 && satisfiesMinWindowException
-                && (numFailures + numSystemStops) != 1
-                && lacksSomeFlexibleConstraints) {
-            mNumRequiredFlexibleConstraints =
-                    NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);
+                && (numFailures + numSystemStops) != 1) {
+            mNumRequiredFlexibleConstraints = Integer.bitCount(mPreferredConstraints);
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
         } else {
             mNumRequiredFlexibleConstraints = 0;
@@ -650,6 +686,8 @@ public final class JobStatus {
         } else {
             mReadyDynamicSatisfied = false;
         }
+
+        mCumulativeExecutionTimeMs = cumulativeExecutionTimeMs;
 
         mLastSuccessfulRunTime = lastSuccessfulRunTime;
         mLastFailedRunTime = lastFailedRunTime;
@@ -685,6 +723,7 @@ public final class JobStatus {
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(), jobStatus.getNumSystemStops(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
+                jobStatus.getCumulativeExecutionTimeMs(),
                 jobStatus.getInternalFlags(), jobStatus.mDynamicConstraints);
         mPersistedUtcTimes = jobStatus.mPersistedUtcTimes;
         if (jobStatus.mPersistedUtcTimes != null) {
@@ -712,13 +751,15 @@ public final class JobStatus {
             int standbyBucket, @Nullable String namespace, String sourceTag,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
+            long cumulativeExecutionTimeMs,
             Pair<Long, Long> persistedExecutionTimesUTC,
             int innerFlags, int dynamicConstraints) {
         this(job, callingUid, sourcePkgName, sourceUserId,
                 standbyBucket, namespace,
                 sourceTag, /* numFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime, innerFlags, dynamicConstraints);
+                lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
+                innerFlags, dynamicConstraints);
 
         // Only during initial inflation do we record the UTC-timebase execution bounds
         // read from the persistent store.  If we ever have to recreate the JobStatus on
@@ -736,14 +777,16 @@ public final class JobStatus {
     public JobStatus(JobStatus rescheduling,
             long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int numFailures, int numSystemStops,
-            long lastSuccessfulRunTime, long lastFailedRunTime) {
+            long lastSuccessfulRunTime, long lastFailedRunTime,
+            long cumulativeExecutionTimeMs) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getStandbyBucket(), rescheduling.getNamespace(),
                 rescheduling.getSourceTag(), numFailures, numSystemStops,
                 newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime, rescheduling.getInternalFlags(),
+                lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
+                rescheduling.getInternalFlags(),
                 rescheduling.mDynamicConstraints);
     }
 
@@ -781,7 +824,65 @@ public final class JobStatus {
                 standbyBucket, namespace, tag, /* numFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
+                /* cumulativeExecutionTime */ 0,
                 /*innerFlags=*/ 0, /* dynamicConstraints */ 0);
+    }
+
+    private long generateLoggingId(@Nullable String namespace, int jobId) {
+        if (namespace == null) {
+            return jobId;
+        }
+        return ((long) namespace.hashCode()) << 31 | jobId;
+    }
+
+    @Nullable
+    private static String generateNamespaceHash(@Nullable String namespace) {
+        if (namespace == null) {
+            return null;
+        }
+        if (namespace.trim().isEmpty()) {
+            // Input is composed of all spaces (or nothing at all).
+            return namespace;
+        }
+        synchronized (sNamespaceHashCache) {
+            final int idx = sNamespaceHashCache.indexOfKey(namespace);
+            if (idx >= 0) {
+                return sNamespaceHashCache.valueAt(idx);
+            }
+        }
+        String hash = null;
+        try {
+            // .hashCode() can result in conflicts that would make distinguishing between
+            // namespaces hard and reduce the accuracy of certain metrics. Use SHA-256
+            // to generate the hash since the probability of collision is extremely low.
+            if (sMessageDigest == null) {
+                sMessageDigest = MessageDigest.getInstance("SHA-256");
+            }
+            final byte[] digest = sMessageDigest.digest(namespace.getBytes());
+            // Convert to hexadecimal representation
+            StringBuilder hexBuilder = new StringBuilder(digest.length);
+            for (byte byteChar : digest) {
+                hexBuilder.append(String.format("%02X", byteChar));
+            }
+            hash = hexBuilder.toString();
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Couldn't hash input", e);
+        }
+        if (hash == null) {
+            // If we get to this point, something went wrong with the MessageDigest above.
+            // Don't return the raw input value (which would defeat the purpose of hashing).
+            return "failed_namespace_hash";
+        }
+        hash = hash.intern();
+        synchronized (sNamespaceHashCache) {
+            if (sNamespaceHashCache.size() >= MAX_NAMESPACE_CACHE_SIZE) {
+                // Drop a random mapping instead of dropping at a predefined index to avoid
+                // potentially always dropping the same mapping.
+                sNamespaceHashCache.removeAt((new Random()).nextInt(MAX_NAMESPACE_CACHE_SIZE));
+            }
+            sNamespaceHashCache.put(namespace, hash);
+        }
+        return hash;
     }
 
     public void enqueueWorkLocked(JobWorkItem work) {
@@ -814,6 +915,13 @@ public final class JobStatus {
         return null;
     }
 
+    /** Returns the number of {@link JobWorkItem JobWorkItems} attached to this job. */
+    public int getWorkCount() {
+        final int pendingCount = pendingWork == null ? 0 : pendingWork.size();
+        final int executingCount = executingWork == null ? 0 : executingWork.size();
+        return pendingCount + executingCount;
+    }
+
     public boolean hasWorkLocked() {
         return (pendingWork != null && pendingWork.size() > 0) || hasExecutingWorkLocked();
     }
@@ -828,6 +936,10 @@ public final class JobStatus {
         }
     }
 
+    /**
+     * Returns {@code true} if the JobWorkItem queue was updated,
+     * and {@code false} if nothing changed.
+     */
     public boolean completeWorkLocked(int workId) {
         if (executingWork != null) {
             final int N = executingWork.size();
@@ -925,6 +1037,11 @@ public final class JobStatus {
         return job.getId();
     }
 
+    /** Returns an ID that can be used to uniquely identify the job when logging statsd metrics. */
+    public long getLoggingJobId() {
+        return mLoggingJobId;
+    }
+
     public void printUniqueId(PrintWriter pw) {
         if (mNamespace != null) {
             pw.print(mNamespace);
@@ -978,13 +1095,77 @@ public final class JobStatus {
         return UserHandle.getUserId(callingUid);
     }
 
+    private boolean shouldBlameSourceForTimeout() {
+        // If the system scheduled the job on behalf of an app, assume the app is the one
+        // doing the work and blame the app directly. This is the case with things like
+        // syncs via SyncManager.
+        // If the system didn't schedule the job on behalf of an app, then
+        // blame the app doing the actual work. Proxied jobs are a little tricky.
+        // Proxied jobs scheduled by built-in system apps like DownloadManager may be fine
+        // and we could consider exempting those jobs. For example, in DownloadManager's
+        // case, all it does is download files and the code is vetted. A timeout likely
+        // means it's downloading a large file, which isn't an error. For now, DownloadManager
+        // is an exempted app, so this shouldn't be an issue.
+        // However, proxied jobs coming from other system apps (such as those that can
+        // be updated separately from an OTA) may not be fine and we would want to apply
+        // this policy to those jobs/apps.
+        // TODO(284512488): consider exempting DownloadManager or other system apps
+        return UserHandle.isCore(callingUid);
+    }
+
+    /**
+     * Returns the package name that should most likely be blamed for the job timing out.
+     */
+    public String getTimeoutBlamePackageName() {
+        if (shouldBlameSourceForTimeout()) {
+            return sourcePackageName;
+        }
+        return getServiceComponent().getPackageName();
+    }
+
+    /**
+     * Returns the UID that should most likely be blamed for the job timing out.
+     */
+    public int getTimeoutBlameUid() {
+        if (shouldBlameSourceForTimeout()) {
+            return sourceUid;
+        }
+        return callingUid;
+    }
+
+    /**
+     * Returns the userId that should most likely be blamed for the job timing out.
+     */
+    public int getTimeoutBlameUserId() {
+        if (shouldBlameSourceForTimeout()) {
+            return sourceUserId;
+        }
+        return UserHandle.getUserId(callingUid);
+    }
+
     /**
      * Returns an appropriate standby bucket for the job, taking into account any standby
      * exemptions.
      */
     public int getEffectiveStandbyBucket() {
+        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        final boolean isBuggy = jsi.isAppConsideredBuggy(
+                getUserId(), getServiceComponent().getPackageName(),
+                getTimeoutBlameUserId(), getTimeoutBlamePackageName());
+
         final int actualBucket = getStandbyBucket();
         if (actualBucket == EXEMPTED_INDEX) {
+            // EXEMPTED apps always have their jobs exempted, even if they're buggy, because the
+            // user has explicitly told the system to avoid restricting the app for power reasons.
+            if (isBuggy) {
+                final String pkg;
+                if (getServiceComponent().getPackageName().equals(sourcePackageName)) {
+                    pkg = sourcePackageName;
+                } else {
+                    pkg = getServiceComponent().getPackageName() + "/" + sourcePackageName;
+                }
+                Slog.w(TAG, "Exempted app " + pkg + " considered buggy");
+            }
             return actualBucket;
         }
         if (uidActive || getJob().isExemptedFromAppStandby()) {
@@ -992,13 +1173,18 @@ public final class JobStatus {
             // like other ACTIVE apps.
             return ACTIVE_INDEX;
         }
+        // If the app is considered buggy, but hasn't yet been put in the RESTRICTED bucket
+        // (potentially because it's used frequently by the user), limit its effective bucket
+        // so that it doesn't get to run as much as a normal ACTIVE app.
+        final int highestBucket = isBuggy ? WORKING_INDEX : ACTIVE_INDEX;
         if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
                 && mHasMediaBackupExemption) {
-            // Cap it at WORKING_INDEX as media back up jobs are important to the user, and the
+            // Treat it as if it's at least WORKING_INDEX since media backup jobs are important
+            // to the user, and the
             // source package may not have been used directly in a while.
-            return Math.min(WORKING_INDEX, actualBucket);
+            return Math.max(highestBucket, Math.min(WORKING_INDEX, actualBucket));
         }
-        return actualBucket;
+        return Math.max(highestBucket, actualBucket);
     }
 
     /** Returns the real standby bucket of the job. */
@@ -1071,8 +1257,14 @@ public final class JobStatus {
         return true;
     }
 
+    @Nullable
     public String getNamespace() {
         return mNamespace;
+    }
+
+    @Nullable
+    public String getNamespaceHash() {
+        return mNamespaceHash;
     }
 
     public String getSourceTag() {
@@ -1101,8 +1293,23 @@ public final class JobStatus {
      */
     @JobInfo.Priority
     public int getEffectivePriority() {
-        final int rawPriority = job.getPriority();
+        final boolean isDemoted =
+                (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) != 0
+                        || (job.isUserInitiated()
+                        && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ) != 0);
+        final int maxPriority;
+        if (isDemoted) {
+            // If the job was demoted for some reason, limit its priority to HIGH.
+            maxPriority = JobInfo.PRIORITY_HIGH;
+        } else {
+            maxPriority = JobInfo.PRIORITY_MAX;
+        }
+        final int rawPriority = Math.min(maxPriority, job.getPriority());
         if (numFailures < 2) {
+            return rawPriority;
+        }
+        if (shouldTreatAsUserInitiatedJob()) {
+            // Don't drop priority of UI jobs.
             return rawPriority;
         }
         // Slowly decay priority of jobs to prevent starvation of other jobs.
@@ -1129,6 +1336,14 @@ public final class JobStatus {
 
     public void addInternalFlags(int flags) {
         mInternalFlags |= flags;
+    }
+
+    public void removeInternalFlags(int flags) {
+        mInternalFlags = mInternalFlags & ~flags;
+    }
+
+    int getPreferredConstraintFlags() {
+        return mPreferredConstraints;
     }
 
     public int getSatisfiedConstraintFlags() {
@@ -1298,6 +1513,14 @@ public final class JobStatus {
         return job.isPersisted();
     }
 
+    public long getCumulativeExecutionTimeMs() {
+        return mCumulativeExecutionTimeMs;
+    }
+
+    public void incrementCumulativeExecutionTime(long incrementMs) {
+        mCumulativeExecutionTimeMs += incrementMs;
+    }
+
     public long getEarliestRunTime() {
         return earliestRunTimeElapsedMillis;
     }
@@ -1390,8 +1613,13 @@ public final class JobStatus {
      * for any reason.
      */
     public boolean shouldTreatAsUserInitiatedJob() {
+        // isUserBgRestricted is intentionally excluded from this method. It should be fine to
+        // treat the job as a UI job while the app is TOP, but just not in the background.
+        // Instead of adding a proc state check here, the parts of JS that can make the distinction
+        // and care about the distinction can do the check.
         return getJob().isUserInitiated()
-                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) == 0;
+                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) == 0
+                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ) == 0;
     }
 
     /**
@@ -1434,6 +1662,11 @@ public final class JobStatus {
                 // EJs can't run in Battery Saver if we explicitly require that Battery Saver is off
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                         && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
+    }
+
+    /** Returns whether or not the app is background restricted by the user (FAS). */
+    public boolean isUserBgRestricted() {
+        return mIsUserBgRestricted;
     }
 
     /** @return true if the constraint was changed, false otherwise. */
@@ -2110,9 +2343,9 @@ public final class JobStatus {
             sb.append(" READY");
         } else {
             sb.append(" satisfied:0x").append(Integer.toHexString(satisfiedConstraints));
+            final int requiredConstraints = mRequiredConstraintsOfInterest | IMPLICIT_CONSTRAINTS;
             sb.append(" unsatisfied:0x").append(Integer.toHexString(
-                    (satisfiedConstraints & (mRequiredConstraintsOfInterest | IMPLICIT_CONSTRAINTS))
-                            ^ mRequiredConstraintsOfInterest));
+                    (satisfiedConstraints & requiredConstraints) ^ requiredConstraints));
         }
         sb.append("}");
         return sb.toString();
@@ -2490,6 +2723,9 @@ public final class JobStatus {
         pw.print("Required constraints:");
         dumpConstraints(pw, requiredConstraints);
         pw.println();
+        pw.print("Preferred constraints:");
+        dumpConstraints(pw, mPreferredConstraints);
+        pw.println();
         pw.print("Dynamic constraints:");
         dumpConstraints(pw, mDynamicConstraints);
         pw.println();
@@ -2582,6 +2818,12 @@ public final class JobStatus {
         }
         pw.decreaseIndent();
 
+        pw.print("Started with foreground flag: ");
+        pw.println(startedWithForegroundFlag);
+        if (mIsUserBgRestricted) {
+            pw.println("User BG restricted");
+        }
+
         if (changedAuthorities != null) {
             pw.println("Changed authorities:");
             pw.increaseIndent();
@@ -2638,6 +2880,11 @@ public final class JobStatus {
         pw.print(", original latest=");
         formatRunTime(pw, mOriginalLatestRunTimeElapsedMillis, NO_LATEST_RUNTIME, nowElapsed);
         pw.println();
+        if (mCumulativeExecutionTimeMs != 0) {
+            pw.print("Cumulative execution time=");
+            TimeUtils.formatDuration(mCumulativeExecutionTimeMs, pw);
+            pw.println();
+        }
         if (numFailures != 0) {
             pw.print("Num failures: "); pw.println(numFailures);
         }

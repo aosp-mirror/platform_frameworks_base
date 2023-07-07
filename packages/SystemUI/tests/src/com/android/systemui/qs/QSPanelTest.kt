@@ -27,6 +27,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.QSTileView
+import com.android.systemui.qs.QSPanelControllerBase.TileRecord
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
@@ -165,26 +167,11 @@ class QSPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun testTopPadding_notCombinedHeaders() {
-        qsPanel.setUsingCombinedHeaders(false)
+    fun testTopPadding() {
         val padding = 10
         val paddingCombined = 100
         context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        context.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
-
-        qsPanel.updatePadding()
-        assertThat(qsPanel.paddingTop).isEqualTo(padding)
-    }
-
-    @Test
-    fun testTopPadding_combinedHeaders() {
-        qsPanel.setUsingCombinedHeaders(true)
-        val padding = 10
-        val paddingCombined = 100
-        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        context.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, paddingCombined)
 
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingTop).isEqualTo(paddingCombined)
@@ -205,6 +192,18 @@ class QSPanelTest : SysuiTestCase() {
 
         val actionCollapse = AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE
         verify(accessibilityInfo, never()).addAction(actionCollapse)
+    }
+
+    @Test
+    fun addTile_callbackAdded() {
+        val tile = mock(QSTile::class.java)
+        val tileView = mock(QSTileView::class.java)
+
+        val record = TileRecord(tile, tileView)
+
+        qsPanel.addTile(record)
+
+        verify(tile).addCallback(record.callback)
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {

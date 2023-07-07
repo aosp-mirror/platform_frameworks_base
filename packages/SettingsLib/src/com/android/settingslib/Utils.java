@@ -67,6 +67,10 @@ public class Utils {
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
 
+    @VisibleForTesting
+    static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
+            "incompatible_charger_warning_disabled";
+
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
@@ -575,9 +579,15 @@ public class Utils {
 
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
+        UserManager um = context.getSystemService(UserManager.class);
+        boolean isClone = um.getProfiles(user.getIdentifier()).stream()
+                .anyMatch(profile ->
+                        profile.isCloneProfile() && profile.id == user.getIdentifier());
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
             return iconFactory
-                    .createBadgedIconBitmap(icon, new IconOptions().setUser(user))
+                    .createBadgedIconBitmap(
+                            icon,
+                            new IconOptions().setUser(user).setIsCloneProfile(isClone))
                     .newIcon(context);
         }
     }
@@ -646,6 +656,19 @@ public class Utils {
 
     /** Whether there is any incompatible chargers in the current UsbPort? */
     public static boolean containsIncompatibleChargers(Context context, String tag) {
+        // Avoid the caller doesn't have permission to read the "Settings.Secure" data.
+        try {
+            // Whether the incompatible charger warning is disabled or not
+            if (Settings.Secure.getInt(context.getContentResolver(),
+                    INCOMPATIBLE_CHARGER_WARNING_DISABLED, 0) == 1) {
+                Log.d(tag, "containsIncompatibleChargers: disabled");
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e(tag, "containsIncompatibleChargers()", e);
+            return false;
+        }
+
         final List<UsbPort> usbPortList =
                 context.getSystemService(UsbManager.class).getPorts();
         if (usbPortList == null || usbPortList.isEmpty()) {
@@ -665,8 +688,12 @@ public class Utils {
                 continue;
             }
             for (int complianceWarningType : complianceWarnings) {
-                if (complianceWarningType != 0) {
-                    return true;
+                switch (complianceWarningType) {
+                    case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                    case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                        return true;
+                    default:
+                        break;
                 }
             }
         }

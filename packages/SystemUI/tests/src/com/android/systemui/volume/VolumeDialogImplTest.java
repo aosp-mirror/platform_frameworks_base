@@ -17,22 +17,27 @@
 package com.android.systemui.volume;
 
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
+import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,7 +46,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -53,11 +57,11 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.util.DeviceConfigProxyFake;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.statusbar.policy.FakeConfigurationController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,8 +83,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerVibrate;
     View mDrawerMute;
     View mDrawerNormal;
-    private DeviceConfigProxyFake mDeviceConfigProxy;
-    private FakeExecutor mExecutor;
+    private TestableLooper mTestableLooper;
+    private ConfigurationController mConfigurationController;
+    private int mOriginalOrientation;
 
     @Mock
     VolumeDialogController mVolumeDialogController;
@@ -91,8 +96,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     DeviceProvisionedController mDeviceProvisionedController;
     @Mock
-    ConfigurationController mConfigurationController;
-    @Mock
     MediaOutputDialogFactory mMediaOutputDialogFactory;
     @Mock
     VolumePanelFactory mVolumePanelFactory;
@@ -102,6 +105,17 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private DumpManager mDumpManager;
+    @Mock CsdWarningDialog mCsdWarningDialog;
+    @Mock
+    DevicePostureController mPostureController;
+
+    private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
+            new CsdWarningDialog.Factory() {
+        @Override
+        public CsdWarningDialog create(int warningType, Runnable onCleanup) {
+            return mCsdWarningDialog;
+        }
+    };
 
     @Before
     public void setup() throws Exception {
@@ -109,8 +123,14 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         getContext().addMockSystemService(KeyguardManager.class, mKeyguard);
 
-        mDeviceConfigProxy = new DeviceConfigProxyFake();
-        mExecutor = new FakeExecutor(new FakeSystemClock());
+        mTestableLooper = TestableLooper.get(this);
+
+        when(mPostureController.getDevicePosture())
+                .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
+
+        mOriginalOrientation = mContext.getResources().getConfiguration().orientation;
+
+        mConfigurationController = new FakeConfigurationController();
 
         mDialog = new VolumeDialogImpl(
                 getContext(),
@@ -122,10 +142,10 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
-                mDeviceConfigProxy,
-                mExecutor,
-                mDumpManager
-            );
+                mCsdWarningDialogFactory,
+                mPostureController,
+                mTestableLooper.getLooper(),
+                mDumpManager);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -142,9 +162,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 VolumePrefs.SHOW_RINGER_TOAST_COUNT + 1);
 
         Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
-
-        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "false", false);
     }
 
     private State createShellState() {
@@ -216,6 +233,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(VolumeDialogController.Callbacks.class);
         verify(mVolumeDialogController).addCallback(controllerCallbackCapture.capture(), any());
         VolumeDialogController.Callbacks callbacks = controllerCallbackCapture.getValue();
+
         callbacks.onShowSafetyWarning(AudioManager.FLAG_SHOW_UI);
         verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
                 VolumeDialogImpl.DIALOG_SAFETYWARNING_TIMEOUT_MILLIS,
@@ -319,28 +337,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
      * API does not exist. So we do the next best thing; we check the cached icon id.
      */
     @Test
-    public void notificationVolumeSeparated_theRingerIconChanges() {
-        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "true", false);
-
-        mExecutor.runAllReady(); // for the config change to take effect
-
-        // assert icon is new based on res id
+    public void notificationVolumeSeparated_theRingerIconChangesToSpeakerIcon() {
+        // already separated. assert icon is new based on res id
         assertEquals(mDialog.mVolumeRingerIconDrawableId,
                 R.drawable.ic_speaker_on);
         assertEquals(mDialog.mVolumeRingerMuteIconDrawableId,
                 R.drawable.ic_speaker_mute);
-    }
-
-    @Test
-    public void notificationVolumeNotSeparated_theRingerIconRemainsTheSame() {
-        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "false", false);
-
-        mExecutor.runAllReady();
-
-        assertEquals(mDialog.mVolumeRingerIconDrawableId, R.drawable.ic_volume_ringer);
-        assertEquals(mDialog.mVolumeRingerMuteIconDrawableId, R.drawable.ic_volume_ringer_mute);
     }
 
     @Test
@@ -350,6 +352,173 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         // animation has ended.
         verify(mVolumeDialogController, times(0)).notifyVisible(false);
         mDialog.getDialogView().animate().cancel();
+    }
+
+    @Test
+    public void showCsdWarning_dialogShown() {
+        mDialog.showCsdWarningH(AudioManager.CSD_WARNING_DOSE_REACHED_1X,
+                CsdWarningDialog.NO_ACTION_TIMEOUT_MS);
+
+        verify(mCsdWarningDialog).show();
+    }
+
+    @Test
+    public void ifPortraitHalfOpen_drawVerticallyTop() {
+        DevicePostureController devicePostureController = mock(DevicePostureController.class);
+        when(devicePostureController.getDevicePosture())
+                .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
+
+        VolumeDialogImpl dialog = new VolumeDialogImpl(
+                getContext(),
+                mVolumeDialogController,
+                mAccessibilityMgr,
+                mDeviceProvisionedController,
+                mConfigurationController,
+                mMediaOutputDialogFactory,
+                mVolumePanelFactory,
+                mActivityStarter,
+                mInteractionJankMonitor,
+                mCsdWarningDialogFactory,
+                devicePostureController,
+                mTestableLooper.getLooper(),
+                mDumpManager
+        );
+        dialog.init(0 , null);
+
+        verify(devicePostureController).addCallback(any());
+        dialog.onPostureChanged(DevicePostureController.DEVICE_POSTURE_HALF_OPENED);
+        mTestableLooper.processAllMessages(); // let dismiss() finish
+
+        setOrientation(Configuration.ORIENTATION_PORTRAIT);
+
+        // Call show() to trigger layout updates before verifying position
+        dialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages(); // let show() finish before assessing its side-effect
+
+        int gravity = dialog.getWindowGravity();
+        assertEquals(Gravity.TOP, gravity & Gravity.VERTICAL_GRAVITY_MASK);
+    }
+
+    @Test
+    public void ifPortraitAndOpen_drawCenterVertically() {
+        DevicePostureController devicePostureController = mock(DevicePostureController.class);
+        when(devicePostureController.getDevicePosture())
+                .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
+
+        VolumeDialogImpl dialog = new VolumeDialogImpl(
+                getContext(),
+                mVolumeDialogController,
+                mAccessibilityMgr,
+                mDeviceProvisionedController,
+                mConfigurationController,
+                mMediaOutputDialogFactory,
+                mVolumePanelFactory,
+                mActivityStarter,
+                mInteractionJankMonitor,
+                mCsdWarningDialogFactory,
+                devicePostureController,
+                mTestableLooper.getLooper(),
+                mDumpManager
+        );
+        dialog.init(0, null);
+
+        verify(devicePostureController).addCallback(any());
+        dialog.onPostureChanged(DevicePostureController.DEVICE_POSTURE_OPENED);
+        mTestableLooper.processAllMessages(); // let dismiss() finish
+
+        setOrientation(Configuration.ORIENTATION_PORTRAIT);
+
+        dialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages(); // let show() finish before assessing its side-effect
+
+        int gravity = dialog.getWindowGravity();
+        assertEquals(Gravity.CENTER_VERTICAL, gravity & Gravity.VERTICAL_GRAVITY_MASK);
+    }
+
+    @Test
+    public void ifLandscapeAndHalfOpen_drawCenterVertically() {
+        DevicePostureController devicePostureController = mock(DevicePostureController.class);
+        when(devicePostureController.getDevicePosture())
+                .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
+
+        VolumeDialogImpl dialog = new VolumeDialogImpl(
+                getContext(),
+                mVolumeDialogController,
+                mAccessibilityMgr,
+                mDeviceProvisionedController,
+                mConfigurationController,
+                mMediaOutputDialogFactory,
+                mVolumePanelFactory,
+                mActivityStarter,
+                mInteractionJankMonitor,
+                mCsdWarningDialogFactory,
+                devicePostureController,
+                mTestableLooper.getLooper(),
+                mDumpManager
+        );
+        dialog.init(0, null);
+
+        verify(devicePostureController).addCallback(any());
+        dialog.onPostureChanged(DevicePostureController.DEVICE_POSTURE_HALF_OPENED);
+        mTestableLooper.processAllMessages(); // let dismiss() finish
+
+        setOrientation(Configuration.ORIENTATION_LANDSCAPE);
+
+        dialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages(); // let show() finish before assessing its side-effect
+
+        int gravity = dialog.getWindowGravity();
+        assertEquals(Gravity.CENTER_VERTICAL, gravity & Gravity.VERTICAL_GRAVITY_MASK);
+    }
+
+    @Test
+    public void dialogInit_addsPostureControllerCallback() {
+        // init is already called in setup
+        verify(mPostureController).addCallback(any());
+    }
+
+    @Test
+    public void dialogDestroy_removesPostureControllerCallback() {
+        VolumeDialogImpl dialog = new VolumeDialogImpl(
+                getContext(),
+                mVolumeDialogController,
+                mAccessibilityMgr,
+                mDeviceProvisionedController,
+                mConfigurationController,
+                mMediaOutputDialogFactory,
+                mVolumePanelFactory,
+                mActivityStarter,
+                mInteractionJankMonitor,
+                mCsdWarningDialogFactory,
+                mPostureController,
+                mTestableLooper.getLooper(),
+                mDumpManager
+        );
+        dialog.init(0, null);
+
+        verify(mPostureController, never()).removeCallback(any());
+
+        dialog.destroy();
+
+        verify(mPostureController).removeCallback(any());
+    }
+
+    private void setOrientation(int orientation) {
+        Configuration config = new Configuration();
+        config.orientation = orientation;
+        if (mConfigurationController != null) {
+            mConfigurationController.onConfigurationChanged(config);
+        }
+    }
+
+    @After
+    public void teardown() {
+        if (mDialog != null) {
+            mDialog.clearInternalHandlerAfterTest();
+        }
+        setOrientation(mOriginalOrientation);
+        mTestableLooper.processAllMessages();
+        reset(mPostureController);
     }
 
 /*

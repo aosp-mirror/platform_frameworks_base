@@ -190,8 +190,7 @@ public final class PowerManager {
     /**
      * Wake lock flag: Turn the screen on when the wake lock is acquired.
      * <p>
-     * This flag requires {@link android.Manifest.permission#TURN_SCREEN_ON} for apps targeting
-     * Android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and higher.
+     * This flag will require {@link android.Manifest.permission#TURN_SCREEN_ON} in future releases.
      * </p><p>
      * Normally wake locks don't actually wake the device, they just cause the screen to remain on
      * once it's already on. This flag will cause the device to wake up when the wake lock is
@@ -1150,13 +1149,17 @@ public final class PowerManager {
                 }
             };
 
-    private final PropertyInvalidatedCache<Void, Boolean> mInteractiveCache =
-            new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
+    private final PropertyInvalidatedCache<Integer, Boolean> mInteractiveCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(MAX_CACHE_ENTRIES,
                 CACHE_KEY_IS_INTERACTIVE_PROPERTY) {
                 @Override
-                public Boolean recompute(Void query) {
+                public Boolean recompute(Integer displayId) {
                     try {
-                        return mService.isInteractive();
+                        if (displayId == null) {
+                            return mService.isInteractive();
+                        } else {
+                            return mService.isDisplayInteractive(displayId);
+                        }
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -1802,6 +1805,18 @@ public final class PowerManager {
         return mInteractiveCache.query(null);
     }
 
+    /**
+     * Returns the interactive state for a specific display, which may not be the same as the
+     * global wakefulness (which is true when any display is awake).
+     *
+     * @param displayId
+     * @return whether the given display is present and interactive, or false
+     *
+     * @hide
+     */
+    public boolean isInteractive(int displayId) {
+        return mInteractiveCache.query(displayId);
+    }
 
     /**
      * Returns {@code true} if this device supports rebooting userspace.

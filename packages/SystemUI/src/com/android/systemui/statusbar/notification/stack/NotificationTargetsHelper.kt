@@ -4,7 +4,6 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.Roundable
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -20,14 +19,14 @@ class NotificationTargetsHelper
 constructor(
     featureFlags: FeatureFlags,
 ) {
-    private val useRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)
 
     /**
      * This method looks for views that can be rounded (and implement [Roundable]) during a
      * notification swipe.
+     *
      * @return The [Roundable] targets above/below the [viewSwiped] (if available). The
-     * [RoundableTargets.before] and [RoundableTargets.after] parameters can be `null` if there is
-     * no above/below notification or the notification is not part of the same section.
+     *   [RoundableTargets.before] and [RoundableTargets.after] parameters can be `null` if there is
+     *   no above/below notification or the notification is not part of the same section.
      */
     fun findRoundableTargets(
         viewSwiped: ExpandableNotificationRow,
@@ -46,10 +45,6 @@ constructor(
                 .toList()
         if (notificationParent != null && childrenContainer != null) {
             // We are inside a notification group
-
-            if (!useRoundnessSourceTypes) {
-                return RoundableTargets(null, null, null)
-            }
 
             val visibleGroupChildren = childrenContainer.attachedChildren.filter { it.isVisible }
             val indexOfParentSwipedView = visibleGroupChildren.indexOf(viewSwiped)

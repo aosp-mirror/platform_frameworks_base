@@ -44,6 +44,8 @@ import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.testing.TestableContext;
 import android.util.DebugUtils;
 import android.view.InputDevice;
@@ -52,6 +54,7 @@ import android.view.ViewConfiguration;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
@@ -168,8 +171,8 @@ public class FullScreenMagnificationGestureHandlerTest {
                 new Object(),
                 mMagnificationInfoChangedCallback,
                 new MagnificationScaleProvider(mContext),
-                () -> null
-        ) {
+                () -> null,
+                ConcurrentUtils.DIRECT_EXECUTOR) {
             @Override
             public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;
@@ -414,6 +417,15 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testMagnifierDeactivates_shortcutTriggeredState_returnToIdleState() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+
+        assertIn(STATE_IDLE);
+    }
+
+    @Test
     public void testThreeFingersOneTap_activatedState_dispatchMotionEvents() {
         goFromStateIdleTo(STATE_ACTIVATED);
         final EventCaptor eventCaptor = new EventCaptor();
@@ -505,6 +517,91 @@ public class FullScreenMagnificationGestureHandlerTest {
         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
 
         verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
+    }
+
+    @Test
+    public void testTransitToPanningState_scaleDifferenceOverThreshold_startDetecting() {
+        final float scale = 2.0f;
+        final float threshold = FullScreenMagnificationGestureHandler.PanningScalingState
+                .CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD;
+        final float persistedScale = (1.0f + threshold) * scale + 1.0f;
+        mFullScreenMagnificationController.setScale(DISPLAY_0, persistedScale, DEFAULT_X,
+                DEFAULT_Y, /* animate= */ false,
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mFullScreenMagnificationController.persistScale(DISPLAY_0);
+        mFullScreenMagnificationController.setScale(DISPLAY_0, scale, DEFAULT_X,
+                DEFAULT_Y, /* animate= */ false,
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+
+        mMgh.transitionTo(mMgh.mPanningScalingState);
+
+        assertTrue(mMgh.mPanningScalingState.mDetectingPassPersistedScale);
+
+        mMgh.clearAndTransitionToStateDetecting();
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+    }
+
+    @Test
+    public void testTransitToPanningState_scaleDifferenceLessThanThreshold_doNotDetect() {
+        final float scale = 2.0f;
+        final float threshold = FullScreenMagnificationGestureHandler.PanningScalingState
+                .CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD;
+        final float persistedScale = (1.0f + threshold) * scale - 0.1f;
+        mFullScreenMagnificationController.setScale(DISPLAY_0, persistedScale, DEFAULT_X,
+                DEFAULT_Y, /* animate= */ false,
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mFullScreenMagnificationController.persistScale(DISPLAY_0);
+        mFullScreenMagnificationController.setScale(DISPLAY_0, scale, DEFAULT_X,
+                DEFAULT_Y, /* animate= */ false,
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+
+        mMgh.transitionTo(mMgh.mPanningScalingState);
+
+        assertFalse(mMgh.mPanningScalingState.mDetectingPassPersistedScale);
+
+        mMgh.clearAndTransitionToStateDetecting();
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+    }
+
+    @Test
+    public void testPanningScaleToPersistedScale_detecting_vibrateAndClear() {
+        Vibrator vibrator = mock(Vibrator.class);
+        mContext.addMockSystemService(Vibrator.class, vibrator);
+
+        mMgh.mPanningScalingState.mDetectingPassPersistedScale = true;
+
+        final float persistedScale =
+                mFullScreenMagnificationController.getPersistedScale(DISPLAY_0);
+
+        mMgh.transitionTo(mMgh.mPanningScalingState);
+        mMgh.mPanningScalingState.setScaleAndClearIfNeeded(persistedScale, DEFAULT_X, DEFAULT_Y);
+
+        verify(vibrator).vibrate(any(VibrationEffect.class));
+        assertFalse(mMgh.mPanningScalingState.mScaling);
+
+        mMgh.clearAndTransitionToStateDetecting();
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+    }
+
+    @Test
+    public void testPanningScaleOverThreshold_notDetecting_startDetecting() {
+        final float persistedScale =
+                mFullScreenMagnificationController.getPersistedScale(DISPLAY_0);
+
+        mFullScreenMagnificationController.setScale(DISPLAY_0, persistedScale, DEFAULT_X,
+                DEFAULT_Y, /* animate= */ false,
+                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mMgh.transitionTo(mMgh.mPanningScalingState);
+
+        final float threshold = FullScreenMagnificationGestureHandler.PanningScalingState
+                .CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD;
+        final float scale = (1.0f + threshold) * persistedScale + 1.0f;
+        mMgh.mPanningScalingState.setScaleAndClearIfNeeded(scale, DEFAULT_X, DEFAULT_Y);
+
+        assertTrue(mMgh.mPanningScalingState.mDetectingPassPersistedScale);
+
+        mMgh.clearAndTransitionToStateDetecting();
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
     }
 
     private void assertActionsInOrder(List<MotionEvent> actualEvents,

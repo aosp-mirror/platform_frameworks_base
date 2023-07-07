@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.events
 
-import android.animation.Animator
+import androidx.core.animation.Animator
 import android.annotation.UiThread
 import android.graphics.Point
 import android.graphics.Rect
@@ -26,7 +26,7 @@ import android.view.View
 import android.widget.FrameLayout
 import com.android.internal.annotations.GuardedBy
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController

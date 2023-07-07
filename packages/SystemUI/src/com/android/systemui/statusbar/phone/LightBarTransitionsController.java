@@ -24,20 +24,20 @@ import android.os.SystemClock;
 import android.util.MathUtils;
 import android.util.TimeUtils;
 
+import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 
 /**
  * Class to control all aspects about light bar changes.
@@ -115,7 +115,6 @@ public class LightBarTransitionsController implements Dumpable {
     };
 
     private final Context mContext;
-    private Boolean mOverrideIconTintForNavMode;
 
     @AssistedInject
     public LightBarTransitionsController(
@@ -276,19 +275,11 @@ public class LightBarTransitionsController implements Dumpable {
     }
 
     /**
-     * Specify an override value to return for {@link #overrideIconTintForNavMode(boolean)}.
-     */
-    public void overrideIconTintForNavMode(boolean overrideValue) {
-        mOverrideIconTintForNavMode = overrideValue;
-    }
-    /**
      * Return whether to use the tint calculated in this class for nav icons.
      */
     public boolean supportsIconTintForNavMode(int navigationMode) {
         // In gesture mode, we already do region sampling to update tint based on content beneath.
-        return mOverrideIconTintForNavMode != null
-                ? mOverrideIconTintForNavMode
-                : !QuickStepContract.isGesturalMode(navigationMode);
+        return !QuickStepContract.isGesturalMode(navigationMode);
     }
 
     /**

@@ -17,12 +17,12 @@
 package com.android.server.wm.flicker.close
 
 import android.platform.test.annotations.FlakyTest
+import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,20 +40,27 @@ import org.junit.runners.Parameterized
  *     Launch an app [testApp] and wait animation to complete
  *     Press back button
  * ```
+ *
  * To run only the presubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
  * ```
+ *
  * To run only the postsubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
  * ```
+ *
  * To run only the flaky assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

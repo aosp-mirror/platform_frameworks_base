@@ -20,7 +20,7 @@ import android.annotation.Nullable;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.expresslog.Counter;
+import com.android.modules.expresslog.Counter;
 
 import java.io.IOException;
 import java.util.Arrays;

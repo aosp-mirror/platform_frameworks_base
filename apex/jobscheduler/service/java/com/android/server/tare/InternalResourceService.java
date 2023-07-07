@@ -205,6 +205,11 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArrayMap<String, ArraySet<String>> mInstallers = new SparseArrayMap<>();
 
+    /** The package name of the wellbeing app. */
+    @GuardedBy("mLock")
+    @Nullable
+    private String mWellbeingPackage;
+
     private volatile boolean mHasBattery = true;
     @EconomyManager.EnabledMode
     private volatile int mEnabledMode;
@@ -496,6 +501,24 @@ public class InternalResourceService extends SystemService {
         }
     }
 
+    boolean isHeadlessSystemApp(final int userId, @NonNull String pkgName) {
+        if (pkgName == null) {
+            Slog.wtfStack(TAG, "isHeadlessSystemApp called with null package");
+            return false;
+        }
+        synchronized (mLock) {
+            final InstalledPackageInfo ipo = getInstalledPackageInfo(userId, pkgName);
+            if (ipo != null && ipo.isHeadlessSystemApp) {
+                return true;
+            }
+            // The wellbeing app is pre-set on the device, not expected to be interacted with
+            // much by the user, but can be expected to do work in the background on behalf of
+            // the user. As such, it's a pseudo-headless system app, so treat it as a headless
+            // system app.
+            return pkgName.equals(mWellbeingPackage);
+        }
+    }
+
     boolean isPackageExempted(final int userId, @NonNull String pkgName) {
         synchronized (mLock) {
             return mExemptedApps.contains(pkgName);
@@ -625,7 +648,8 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), packageInfo);
+            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), userId,
+                    packageInfo);
             final InstalledPackageInfo oldIpo = mPkgCache.add(userId, pkgName, ipo);
             maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             mUidToPackageCache.add(uid, pkgName);
@@ -683,7 +707,7 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo =
-                        new InstalledPackageInfo(getContext(), pkgs.get(i));
+                        new InstalledPackageInfo(getContext(), userId, pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
@@ -963,7 +987,7 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo =
-                        new InstalledPackageInfo(getContext(), pkgs.get(i));
+                        new InstalledPackageInfo(getContext(), userId, pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
@@ -1096,6 +1120,9 @@ public class InternalResourceService extends SystemService {
         }
         synchronized (mLock) {
             registerListeners();
+            // As of Android UDC, users can't change the wellbeing package, so load it once
+            // as soon as possible and don't bother trying to update it afterwards.
+            mWellbeingPackage = mPackageManager.getWellbeingPackageName();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             // Get the current battery presence, if available. This would succeed if TARE is
             // toggled long after boot.
@@ -1321,6 +1348,12 @@ public class InternalResourceService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
+        }
+
+        @Override
+        @EconomyManager.EnabledMode
+        public int getEnabledMode() {
+            return InternalResourceService.this.getEnabledMode();
         }
 
         @Override
@@ -1731,6 +1764,10 @@ public class InternalResourceService extends SystemService {
             pw.print("Exempted apps", mExemptedApps);
             pw.println();
 
+            pw.println();
+            pw.print("Wellbeing app=");
+            pw.println(mWellbeingPackage == null ? "None" : mWellbeingPackage);
+
             boolean printedVips = false;
             pw.println();
             pw.print("VIPs:");
@@ -1809,6 +1846,37 @@ public class InternalResourceService extends SystemService {
 
             pw.println();
             mAnalyst.dump(pw);
+
+            // Put this at the end since this may be a lot and we want to have the earlier
+            // information easily accessible.
+            boolean printedInterestingIpos = false;
+            pw.println();
+            pw.print("Interesting apps:");
+            pw.increaseIndent();
+            for (int u = 0; u < mPkgCache.numMaps(); ++u) {
+                for (int p = 0; p < mPkgCache.numElementsForKeyAt(u); ++p) {
+                    final InstalledPackageInfo ipo = mPkgCache.valueAt(u, p);
+
+                    // Printing out every single app will be too much. Only print apps that
+                    // have some interesting characteristic.
+                    final boolean isInteresting = ipo.hasCode
+                            && ipo.isHeadlessSystemApp
+                            && !UserHandle.isCore(ipo.uid);
+                    if (!isInteresting) {
+                        continue;
+                    }
+
+                    printedInterestingIpos = true;
+                    pw.println();
+                    pw.print(ipo);
+                }
+            }
+            if (printedInterestingIpos) {
+                pw.println();
+            } else {
+                pw.print(" None");
+            }
+            pw.decreaseIndent();
         }
     }
 }

@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -39,34 +39,30 @@ import org.junit.runners.Parameterized
  *     Select "Via code behind" radio button
  *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
  * ```
- * Notes:
- * ```
- *     1. All assertions are inherited from [EnterPipTest]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
- * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTransition(flicker) {
-    /** Defines the transition used to run the test */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                pipApp.launchViaIntent(wmHelper)
-                pipApp.enableEnterPipOnUserLeaveHint()
-            }
-            teardown {
-                // close gracefully so that onActivityUnpinned() can be called before force exit
-                pipApp.closePipWindow(wmHelper)
-                pipApp.exit(wmHelper)
-            }
-            transitions { tapl.goHome() }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { tapl.goHome() }
+    }
+
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntent(wmHelper)
+            pipApp.enableEnterPipOnUserLeaveHint()
         }
+    }
+
+    override val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            // close gracefully so that onActivityUnpinned() can be called before force exit
+            pipApp.closePipWindow(wmHelper)
+            pipApp.exit(wmHelper)
+        }
+    }
 
     @Presubmit
     @Test
@@ -82,10 +78,18 @@ open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTransitio
 
     @Presubmit
     @Test
-    override fun pipAppLayerOrOverlayAlwaysVisible() {
+    override fun pipAppLayerAlwaysVisible() {
         // pip layer in gesture nav will disappear during transition
         Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
-        super.pipAppLayerOrOverlayAlwaysVisible()
+        super.pipAppLayerAlwaysVisible()
+    }
+
+    @Presubmit
+    @Test
+    override fun pipOverlayLayerAppearThenDisappear() {
+        // no overlay in gesture nav for non-auto enter PiP transition
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.pipOverlayLayerAppearThenDisappear()
     }
 
     @Presubmit

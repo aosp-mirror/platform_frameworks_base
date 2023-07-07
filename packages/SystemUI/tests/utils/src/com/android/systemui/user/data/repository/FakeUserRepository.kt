@@ -79,6 +79,10 @@ class FakeUserRepository : UserRepository {
         return _userSwitcherSettings.value.isSimpleUserSwitcher
     }
 
+    override fun isUserSwitcherEnabled(): Boolean {
+        return _userSwitcherSettings.value.isUserSwitcherEnabled
+    }
+
     fun setUserInfos(infos: List<UserInfo>) {
         _userInfos.value = infos
     }
@@ -99,5 +103,9 @@ class FakeUserRepository : UserRepository {
 
     fun setGuestUserAutoCreated(value: Boolean) {
         _isGuestUserAutoCreated = value
+    }
+
+    fun setUserSwitching(value: Boolean) {
+        _userSwitchingInProgress.value = value
     }
 }

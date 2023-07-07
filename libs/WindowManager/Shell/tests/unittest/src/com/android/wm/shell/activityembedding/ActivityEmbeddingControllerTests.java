@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -28,9 +29,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -57,7 +62,8 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
     @Before
     public void setup() {
         super.setUp();
-        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
+        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(),
+                any());
     }
 
     @Test
@@ -82,10 +88,13 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
 
     @Test
     public void testStartAnimation_containsNonActivityEmbeddingChange() {
+        final TransitionInfo.Change nonEmbeddedOpen = createChange(0 /* flags */);
+        final TransitionInfo.Change embeddedOpen = createEmbeddedChange(
+                EMBEDDED_LEFT_BOUNDS, EMBEDDED_LEFT_BOUNDS, TASK_BOUNDS);
+        nonEmbeddedOpen.setMode(TRANSIT_OPEN);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
-                .addChange(createEmbeddedChange(
-                        EMBEDDED_LEFT_BOUNDS, EMBEDDED_LEFT_BOUNDS, TASK_BOUNDS))
-                .addChange(createChange(0 /* flags */))
+                .addChange(embeddedOpen)
+                .addChange(nonEmbeddedOpen)
                 .build();
 
         // No-op because it contains non-embedded change.
@@ -95,6 +104,22 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         verifyNoMoreInteractions(mStartTransaction);
         verifyNoMoreInteractions(mFinishTransaction);
         verifyNoMoreInteractions(mFinishCallback);
+
+        final TransitionInfo.Change nonEmbeddedClose = createChange(0 /* flags */);
+        nonEmbeddedClose.setMode(TRANSIT_CLOSE);
+        nonEmbeddedClose.setEndAbsBounds(TASK_BOUNDS);
+        final TransitionInfo.Change embeddedOpen2 = createEmbeddedChange(
+                EMBEDDED_RIGHT_BOUNDS, EMBEDDED_RIGHT_BOUNDS, TASK_BOUNDS);
+        final TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(embeddedOpen)
+                .addChange(embeddedOpen2)
+                .addChange(nonEmbeddedClose)
+                .build();
+        // Ok to animate because nonEmbeddedClose is occluded by embeddedOpen and embeddedOpen2.
+        assertTrue(mController.startAnimation(mTransition, info2, mStartTransaction,
+                mFinishTransaction, mFinishCallback));
+        // The non-embedded change is dropped to avoid affecting embedded animation.
+        assertFalse(info2.getChanges().contains(nonEmbeddedClose));
     }
 
     @Test
@@ -160,6 +185,44 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
                 mFinishTransaction);
         verify(mStartTransaction).apply();
         verifyNoMoreInteractions(mFinishTransaction);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testMergeAnimation() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(createEmbeddedChange(
+                        EMBEDDED_LEFT_BOUNDS, EMBEDDED_LEFT_BOUNDS, TASK_BOUNDS))
+                .build();
+
+        final ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mController.onAnimationFinished(mTransition);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        doReturn(animator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
+        mController.startAnimation(mTransition, info, mStartTransaction,
+                mFinishTransaction, mFinishCallback);
+        verify(mFinishCallback, never()).onTransitionFinished(any(), any());
+        mController.mergeAnimation(mTransition, info, new SurfaceControl.Transaction(),
+                mTransition,
+                (wct, cb) -> {
+                });
+        verify(mFinishCallback).onTransitionFinished(any(), any());
     }
 
     @Test

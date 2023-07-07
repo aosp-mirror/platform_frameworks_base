@@ -22,20 +22,11 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
-import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -47,39 +38,16 @@ import kotlinx.coroutines.launch
  * the list of available mobile lines of service for which we want to show icons.
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MobileUiAdapter
 @Inject
 constructor(
-    interactor: MobileIconsInteractor,
     private val iconController: StatusBarIconController,
-    private val iconsViewModelFactory: MobileIconsViewModel.Factory,
-    private val logger: MobileInputLogger,
+    val mobileIconsViewModel: MobileIconsViewModel,
+    private val logger: MobileViewLogger,
     @Application private val scope: CoroutineScope,
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) : CoreStartable {
-    private val mobileSubIds: Flow<List<Int>> =
-        interactor.filteredSubscriptions
-            .mapLatest { subscriptions ->
-                subscriptions.map { subscriptionModel -> subscriptionModel.subscriptionId }
-            }
-            .distinctUntilChanged()
-            .onEach { logger.logUiAdapterSubIdsUpdated(it) }
-
-    /**
-     * We expose the list of tracked subscriptions as a flow of a list of ints, where each int is
-     * the subscriptionId of the relevant subscriptions. These act as a key into the layouts which
-     * house the mobile infos.
-     *
-     * NOTE: this should go away as the view presenter learns more about this data pipeline
-     */
-    private val mobileSubIdsState: StateFlow<List<Int>> =
-        mobileSubIds.stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
-
-    /** In order to keep the logs tame, we will reuse the same top-level mobile icons view model */
-    val mobileIconsViewModel = iconsViewModelFactory.create(mobileSubIdsState)
-
     private var isCollecting: Boolean = false
     private var lastValue: List<Int>? = null
 
@@ -91,7 +59,7 @@ constructor(
         if (statusBarPipelineFlags.useNewMobileIcons()) {
             scope.launch {
                 isCollecting = true
-                mobileSubIds.collectLatest {
+                mobileIconsViewModel.subscriptionIdsFlow.collectLatest {
                     logger.logUiAdapterSubIdsSentToIconController(it)
                     lastValue = it
                     iconController.setNewMobileIconSubIds(it)

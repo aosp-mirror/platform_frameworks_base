@@ -28,8 +28,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.service.assist.classification.FieldClassificationRequest;
 import android.service.assist.classification.FieldClassificationResponse;
 import android.service.assist.classification.FieldClassificationService;
@@ -41,6 +43,8 @@ import android.util.Slog;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Class responsible for connection with the Remote {@link FieldClassificationService}.
@@ -131,8 +135,9 @@ final class RemoteFieldClassificationService
     }
 
     public void onFieldClassificationRequest(@NonNull FieldClassificationRequest request,
-            FieldClassificationServiceCallbacks fieldClassificationServiceCallbacks) {
-
+            WeakReference<FieldClassificationServiceCallbacks>
+                fieldClassificationServiceCallbacksWeakRef) {
+        final long startTime = SystemClock.elapsedRealtime();
         if (sVerbose) {
             Slog.v(TAG, "onFieldClassificationRequest request:" + request);
         }
@@ -144,6 +149,7 @@ final class RemoteFieldClassificationService
                                 new IFieldClassificationCallback.Stub() {
                                     @Override
                                     public void onCancellable(ICancellationSignal cancellation) {
+                                        logLatency(startTime);
                                         if (sDebug) {
                                             Log.d(TAG, "onCancellable");
                                         }
@@ -151,8 +157,30 @@ final class RemoteFieldClassificationService
 
                                     @Override
                                     public void onSuccess(FieldClassificationResponse response) {
+                                        logLatency(startTime);
                                         if (sDebug) {
-                                            Log.d(TAG, "onSuccess Response: " + response);
+                                            if (Build.IS_DEBUGGABLE) {
+                                                Slog.d(TAG, "onSuccess Response: " + response);
+                                            } else {
+                                                String msg = "";
+                                                if (response == null
+                                                        || response.getClassifications() == null) {
+                                                    msg = "null response";
+                                                } else {
+                                                    msg = "size: "
+                                                            + response.getClassifications().size();
+                                                }
+                                                Slog.d(TAG, "onSuccess " + msg);
+                                            }
+                                        }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                        Helper.weakDeref(
+                                                                fieldClassificationServiceCallbacksWeakRef,
+                                                                TAG, "onSuccess "
+                                                        );
+                                        if (fieldClassificationServiceCallbacks == null) {
+                                            return;
                                         }
                                         fieldClassificationServiceCallbacks
                                                 .onClassificationRequestSuccess(response);
@@ -160,9 +188,21 @@ final class RemoteFieldClassificationService
 
                                     @Override
                                     public void onFailure() {
+                                        logLatency(startTime);
                                         if (sDebug) {
-                                            Log.d(TAG, "onFailure");
+                                            Slog.d(TAG, "onFailure");
                                         }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                        Helper.weakDeref(
+                                                                fieldClassificationServiceCallbacksWeakRef,
+                                                                TAG, "onFailure "
+                                                        );
+                                        if (fieldClassificationServiceCallbacks == null) {
+                                            return;
+                                        }
+                                        fieldClassificationServiceCallbacks
+                                                .onClassificationRequestFailure(0, null);
                                     }
 
                                     @Override
@@ -173,5 +213,13 @@ final class RemoteFieldClassificationService
                                     @Override
                                     public void cancel() throws RemoteException {}
                                 }));
+    }
+
+    private void logLatency(long startTime) {
+        final FieldClassificationEventLogger logger = FieldClassificationEventLogger.createLogger();
+        logger.startNewLogForRequest();
+        logger.maybeSetLatencyMillis(
+                SystemClock.elapsedRealtime() - startTime);
+        logger.logAndEndEvent();
     }
 }

@@ -76,7 +76,10 @@ public final class CallControl {
     }
 
     /**
-     * Request Telecom set the call state to active.
+     * Request Telecom set the call state to active. This method should be called when either an
+     * outgoing call is ready to go active or a held call is ready to go active again. For incoming
+     * calls that are ready to be answered, use
+     * {@link CallControl#answer(int, Executor, OutcomeReceiver)}.
      *
      * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
      *                 will be called on.
@@ -96,6 +99,43 @@ public final class CallControl {
             try {
                 mServerInterface.setActive(mCallId,
                         new CallControlResultReceiver("setActive", executor, callback));
+
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
+     * Request Telecom answer an incoming call.  For outgoing calls and calls that have been placed
+     * on hold, use {@link CallControl#setActive(Executor, OutcomeReceiver)}.
+     *
+     * @param videoState to report to Telecom. Telecom will store VideoState in the event another
+     *                   service/device requests it in order to continue the call on another screen.
+     * @param executor   The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                   will be called on.
+     * @param callback   that will be completed on the Telecom side that details success or failure
+     *                   of the requested operation.
+     *
+     *                   {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
+     *                   switched the call state to active
+     *
+     *                   {@link OutcomeReceiver#onError} will be called if Telecom has failed to set
+     *                   the call state to active.  A {@link CallException} will be passed
+     *                   that details why the operation failed.
+     */
+    public void answer(@android.telecom.CallAttributes.CallType int videoState,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CallException> callback) {
+        validateVideoState(videoState);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.answer(videoState, mCallId,
+                        new CallControlResultReceiver("answer", executor, callback));
 
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -147,10 +187,8 @@ public final class CallControl {
      *                        <li>{@link DisconnectCause#REJECTED}</li>
      *                        <li>{@link DisconnectCause#MISSED}</li>
      *                        </ul>
-     *
      * @param executor        The {@link Executor} on which the {@link OutcomeReceiver} callback
      *                        will be called on.
-     *
      * @param callback        That will be completed on the Telecom side that details success or
      *                        failure of the requested operation.
      *
@@ -254,6 +292,39 @@ public final class CallControl {
     }
 
     /**
+     * Raises an event to the {@link android.telecom.InCallService} implementations tracking this
+     * call via {@link android.telecom.Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * These events and the associated extra keys for the {@code Bundle} parameter are mutually
+     * defined by a VoIP application and {@link android.telecom.InCallService}. This API is used to
+     * relay additional information about a call other than what is specified in the
+     * {@link android.telecom.CallAttributes} to {@link android.telecom.InCallService}s. This might
+     * include, for example, a change to the list of participants in a meeting, or the name of the
+     * speakers who have their hand raised. Where appropriate, the {@link InCallService}s tracking
+     * this call may choose to render this additional information about the call. An automotive
+     * calling UX, for example may have enough screen real estate to indicate the number of
+     * participants in a meeting, but to prevent distractions could suppress the list of
+     * participants.
+     *
+     * @param event a string event identifier agreed upon between a VoIP application and an
+     *              {@link android.telecom.InCallService}
+     * @param extras a {@link android.os.Bundle} containing information about the event, as agreed
+     *              upon between a VoIP application and {@link android.telecom.InCallService}.
+     */
+    public void sendEvent(@NonNull String event, @NonNull Bundle extras) {
+        Objects.requireNonNull(event);
+        Objects.requireNonNull(extras);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.sendEvent(mCallId, event, extras);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
      * Since {@link OutcomeReceiver}s cannot be passed via AIDL, a ResultReceiver (which can) must
      * wrap the Clients {@link OutcomeReceiver} passed in and await for the Telecom Server side
      * response in {@link ResultReceiver#onReceiveResult(int, Bundle)}.
@@ -315,4 +386,13 @@ public final class CallControl {
         }
     }
 
+    /** @hide */
+    private void validateVideoState(@android.telecom.CallAttributes.CallType int videoState) {
+        if (videoState != CallAttributes.AUDIO_CALL && videoState != CallAttributes.VIDEO_CALL) {
+            throw new IllegalArgumentException(TextUtils.formatSimple(
+                    "The VideoState argument passed in, %d , is not a valid VideoState. The "
+                            + "VideoState choices are limited to CallAttributes.AUDIO_CALL or"
+                            + "CallAttributes.VIDEO_CALL", videoState));
+        }
+    }
 }

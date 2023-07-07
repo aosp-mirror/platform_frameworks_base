@@ -622,15 +622,11 @@ public class BaseInputConnection implements InputConnection {
         if (b < 0) {
             b = 0;
         }
-
-        if (b + length > content.length()) {
-            length = content.length() - b;
-        }
-
+        int end = (int) Math.min((long) b + length, content.length());
         if ((flags&GET_TEXT_WITH_STYLES) != 0) {
-            return content.subSequence(b, b + length);
+            return content.subSequence(b, end);
         }
-        return TextUtils.substring(content, b, b + length);
+        return TextUtils.substring(content, b, end);
     }
 
     /**
@@ -666,13 +662,9 @@ public class BaseInputConnection implements InputConnection {
             selEnd = tmp;
         }
 
-        int contentLength = content.length();
-        int startPos = selStart - beforeLength;
-        int endPos = selEnd + afterLength;
-
         // Guards the start and end pos within range [0, contentLength].
-        startPos = Math.max(0, startPos);
-        endPos = Math.min(contentLength, endPos);
+        int startPos = Math.max(0, selStart - beforeLength);
+        int endPos = (int) Math.min((long) selEnd + afterLength, content.length());
 
         CharSequence surroundingText;
         if ((flags & GET_TEXT_WITH_STYLES) != 0) {

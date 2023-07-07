@@ -64,6 +64,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
+            ServerFlags.KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT,
             ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED
     );
 
@@ -174,7 +175,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             }
         }, filter, null, null /* main thread */);
 
-        // Add async callbacks for global settings being changed.
+        // Add async callbacks for changes to global settings that influence behavior.
         ContentResolver contentResolver = mContext.getContentResolver();
         ContentObserver contentObserver = new ContentObserver(mContext.getMainThreadHandler()) {
             @Override
@@ -184,6 +185,9 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         };
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true, contentObserver);
+        contentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE_EXPLICIT), true,
+                contentObserver);
 
         // Add async callbacks for user scoped location settings being changed.
         contentResolver.registerContentObserver(
@@ -239,8 +243,9 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public synchronized boolean updateConfiguration(@UserIdInt int userId,
-            @NonNull TimeZoneConfiguration requestedConfiguration, boolean bypassUserPolicyChecks) {
-        Objects.requireNonNull(requestedConfiguration);
+            @NonNull TimeZoneConfiguration requestedConfigurationUpdates,
+            boolean bypassUserPolicyChecks) {
+        Objects.requireNonNull(requestedConfigurationUpdates);
 
         ConfigurationInternal configurationInternal = getConfigurationInternal(userId);
         TimeZoneCapabilities capabilities =
@@ -248,7 +253,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         TimeZoneConfiguration oldConfiguration = configurationInternal.asConfiguration();
 
         final TimeZoneConfiguration newConfiguration =
-                capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfiguration);
+                capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfigurationUpdates);
         if (newConfiguration == null) {
             // The changes could not be made because the user's capabilities do not allow it.
             return false;
@@ -256,7 +261,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
         // Store the configuration / notify as needed. This will cause the mEnvironment to invoke
         // handleConfigChanged() asynchronously.
-        storeConfiguration(userId, newConfiguration);
+        storeConfiguration(userId, requestedConfigurationUpdates, newConfiguration);
 
         return true;
     }
@@ -268,15 +273,20 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
      */
     @GuardedBy("this")
     private void storeConfiguration(@UserIdInt int userId,
-            @NonNull TimeZoneConfiguration configuration) {
-        Objects.requireNonNull(configuration);
+            @NonNull TimeZoneConfiguration requestedConfigurationUpdates,
+            @NonNull TimeZoneConfiguration newConfiguration) {
+        Objects.requireNonNull(newConfiguration);
 
         // Avoid writing the auto detection enabled setting for devices that do not support auto
         // time zone detection: if we wrote it down then we'd set the value explicitly, which would
         // prevent detecting "default" later. That might influence what happens on later releases
         // that support new types of auto detection on the same hardware.
         if (isAutoDetectionFeatureSupported()) {
-            final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
+            if (requestedConfigurationUpdates.hasIsAutoDetectionEnabled()) {
+                // Record that the auto detection enabled setting has now been set explicitly.
+                Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE_EXPLICIT, 1);
+            }
+            final boolean autoDetectionEnabled = newConfiguration.isAutoDetectionEnabled();
             setAutoDetectionEnabledIfRequired(autoDetectionEnabled);
 
             // Only write the geo detection enabled setting when its values is used, e.g.:
@@ -288,10 +298,10 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             // Not being able to detect if the user has actually expressed a preference could
             // influence what happens on later releases that start to support geo detection on the
             // user's same hardware.
-            if (!getGeoDetectionSettingEnabledOverride().isPresent()
+            if (getGeoDetectionSettingEnabledOverride().isEmpty()
                     && isGeoTimeZoneDetectionFeatureSupported()
                     && isTelephonyTimeZoneDetectionFeatureSupported()) {
-                final boolean geoDetectionEnabledSetting = configuration.isGeoDetectionEnabled();
+                final boolean geoDetectionEnabledSetting = newConfiguration.isGeoDetectionEnabled();
                 setGeoDetectionEnabledSettingIfRequired(userId, geoDetectionEnabledSetting);
             }
         }
@@ -335,7 +345,31 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     }
 
     private boolean getAutoDetectionEnabledSetting() {
-        return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
+        boolean autoDetectionEnabledSetting =
+                Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
+
+        Optional<Boolean> optionalFlagValue = mServerFlags.getOptionalBoolean(
+                ServerFlags.KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT);
+        if (optionalFlagValue.isPresent()) {
+            // This branch is rare: it is expected to happen only for internal testers.
+
+            if (Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE_EXPLICIT, 0) == 0) {
+                // The device hasn't explicitly had the auto detection enabled setting updated via a
+                // call to storeConfiguration(). This means the device is allowed to use a server
+                // flag to determine the default.
+                boolean flagValue = optionalFlagValue.get();
+
+                // Best effort to keep the setting in sync with the flag in case something is
+                // observing the (public API) Settings.Global.AUTO_TIME_ZONE directly. This change
+                // will cause listeners to fire asynchronously but any cascade should stop after one
+                // round.
+                if (flagValue != autoDetectionEnabledSetting) {
+                    Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, flagValue ? 1 : 0);
+                }
+                autoDetectionEnabledSetting = flagValue;
+            }
+        }
+        return autoDetectionEnabledSetting;
     }
 
     private boolean getGeoDetectionEnabledSetting(@UserIdInt int userId) {

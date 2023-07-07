@@ -24,6 +24,7 @@ import static android.content.res.Resources.ID_NULL;
 
 import android.Manifest;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.KeyguardManager;
@@ -314,8 +315,15 @@ public class SuspendedAppActivity extends AlertActivity
                         sendBroadcastAsUser(reportUnsuspend, UserHandle.of(mUserId));
 
                         if (mOnUnsuspend != null) {
+                            Bundle activityOptions =
+                                    ActivityOptions.makeBasic()
+                                            .setPendingIntentBackgroundActivityStartMode(
+                                                    ActivityOptions
+                                                            .MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                            .toBundle();
                             try {
-                                mOnUnsuspend.sendIntent(this, 0, null, null, null);
+                                mOnUnsuspend.sendIntent(this, 0, null, null, null, null,
+                                        activityOptions);
                             } catch (IntentSender.SendIntentException e) {
                                 Slog.e(TAG, "Error while starting intent " + mOnUnsuspend, e);
                             }

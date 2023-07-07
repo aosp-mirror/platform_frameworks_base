@@ -27,6 +27,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.util.concurrent.Executor;
+
 
 /**
  * Basic implementation of for {@link IDreamOverlay} for testing.
@@ -39,6 +41,12 @@ public abstract class DreamOverlayService extends Service {
 
     // The last client that started dreaming and hasn't ended
     private OverlayClient mCurrentClient;
+
+    /**
+     * Executor used to run callbacks that subclasses will implement. Any calls coming over Binder
+     * from {@link OverlayClient} should perform the work they need to do on this executor.
+     */
+    private Executor mExecutor;
 
     // An {@link IDreamOverlayClient} implementation that identifies itself when forwarding
     // requests to the {@link DreamOverlayService}
@@ -61,17 +69,9 @@ public abstract class DreamOverlayService extends Service {
             mService.startDream(this, params);
         }
 
-
-
         @Override
         public void wakeUp() {
-            mService.wakeUp(this, () -> {
-                try {
-                    mDreamOverlayCallback.onWakeUpComplete();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not notify dream of wakeUp", e);
-                }
-            });
+            mService.wakeUp(this);
         }
 
         @Override
@@ -97,12 +97,20 @@ public abstract class DreamOverlayService extends Service {
     }
 
     private void startDream(OverlayClient client, WindowManager.LayoutParams params) {
-        endDream(mCurrentClient);
-        mCurrentClient = client;
-        onStartDream(params);
+        // Run on executor as this is a binder call from OverlayClient.
+        mExecutor.execute(() -> {
+            endDreamInternal(mCurrentClient);
+            mCurrentClient = client;
+            onStartDream(params);
+        });
     }
 
     private void endDream(OverlayClient client) {
+        // Run on executor as this is a binder call from OverlayClient.
+        mExecutor.execute(() -> endDreamInternal(client));
+    }
+
+    private void endDreamInternal(OverlayClient client) {
         if (client == null || client != mCurrentClient) {
             return;
         }
@@ -111,12 +119,15 @@ public abstract class DreamOverlayService extends Service {
         mCurrentClient = null;
     }
 
-    private void wakeUp(OverlayClient client, Runnable callback) {
-        if (mCurrentClient != client) {
-            return;
-        }
+    private void wakeUp(OverlayClient client) {
+        // Run on executor as this is a binder call from OverlayClient.
+        mExecutor.execute(() -> {
+            if (mCurrentClient != client) {
+                return;
+            }
 
-        onWakeUp(callback);
+            onWakeUp();
+        });
     }
 
     private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
@@ -134,6 +145,25 @@ public abstract class DreamOverlayService extends Service {
     public DreamOverlayService() {
     }
 
+    /**
+     * This constructor allows providing an executor to run callbacks on.
+     *
+     * @hide
+     */
+    public DreamOverlayService(@NonNull Executor executor) {
+        mExecutor = executor;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (mExecutor == null) {
+            // If no executor was provided, use the main executor. onCreate is the earliest time
+            // getMainExecutor is available.
+            mExecutor = getMainExecutor();
+        }
+    }
+
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
@@ -143,6 +173,10 @@ public abstract class DreamOverlayService extends Service {
     /**
      * This method is overridden by implementations to handle when the dream has started and the
      * window is ready to be interacted with.
+     *
+     * This callback will be run on the {@link Executor} provided in the constructor if provided, or
+     * on the main executor if none was provided.
+     *
      * @param layoutParams The {@link android.view.WindowManager.LayoutParams} associated with the
      *                     dream window.
      */
@@ -150,20 +184,17 @@ public abstract class DreamOverlayService extends Service {
 
     /**
      * This method is overridden by implementations to handle when the dream has been requested
-     * to wakeup. This allows any overlay animations to run. By default, the method will invoke
-     * the callback immediately.
-     *
-     * @param onCompleteCallback The callback to trigger to notify the dream service that the
-     *                           overlay has completed waking up.
+     * to wakeup.
      * @hide
      */
-    public void onWakeUp(@NonNull Runnable onCompleteCallback) {
-        onCompleteCallback.run();
-    }
+    public void onWakeUp() {}
 
     /**
      * This method is overridden by implementations to handle when the dream has ended. There may
      * be earlier signals leading up to this step, such as @{@link #onWakeUp(Runnable)}.
+     *
+     * This callback will be run on the {@link Executor} provided in the constructor if provided, or
+     * on the main executor if none was provided.
      */
     public void onEndDream() {
     }

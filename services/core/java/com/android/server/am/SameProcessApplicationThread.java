@@ -25,6 +25,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import java.util.List;
@@ -77,17 +78,23 @@ public class SameProcessApplicationThread extends IApplicationThread.Default {
 
     @Override
     public void scheduleReceiverList(List<ReceiverInfo> info) {
-        for (int i = 0; i < info.size(); i++) {
-            ReceiverInfo r = info.get(i);
-            if (r.registered) {
-                scheduleRegisteredReceiver(r.receiver, r.intent,
-                        r.resultCode, r.data, r.extras, r.ordered, r.sticky, r.assumeDelivered,
-                        r.sendingUser, r.processState, r.sendingUid, r.sendingPackage);
-            } else {
-                scheduleReceiver(r.intent, r.activityInfo, r.compatInfo,
-                        r.resultCode, r.data, r.extras, r.sync, r.assumeDelivered,
-                        r.sendingUser, r.processState, r.sendingUid, r.sendingPackage);
+        mHandler.post(() -> {
+            try {
+                mWrapped.scheduleReceiverList(info);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
-        }
+        });
+    }
+
+    @Override
+    public void schedulePing(RemoteCallback pong) {
+        mHandler.post(() -> {
+            try {
+                mWrapped.schedulePing(pong);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

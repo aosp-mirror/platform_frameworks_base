@@ -22,16 +22,23 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class TableLogBufferFactoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
     private val systemClock = FakeSystemClock()
-    private val underTest = TableLogBufferFactory(dumpManager, systemClock)
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+    private val underTest =
+        TableLogBufferFactory(dumpManager, systemClock, mock(), testDispatcher, testScope)
 
     @Test
-    fun `create - always creates new instance`() {
+    fun create_alwaysCreatesNewInstance() {
         val b1 = underTest.create(NAME_1, SIZE)
         val b1_copy = underTest.create(NAME_1, SIZE)
         val b2 = underTest.create(NAME_2, SIZE)
@@ -43,7 +50,7 @@ class TableLogBufferFactoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getOrCreate - reuses instance`() {
+    fun getOrCreate_reusesInstance() {
         val b1 = underTest.getOrCreate(NAME_1, SIZE)
         val b1_copy = underTest.getOrCreate(NAME_1, SIZE)
         val b2 = underTest.getOrCreate(NAME_2, SIZE)

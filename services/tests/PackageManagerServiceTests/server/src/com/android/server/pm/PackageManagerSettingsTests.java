@@ -566,6 +566,22 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testWriteCorruptReadPackageRestrictions() {
+        final Settings settingsUnderTest = makeSettings();
+
+        populateDistractionFlags(settingsUnderTest);
+        settingsUnderTest.writePackageRestrictionsLPr(0, /*sync=*/true);
+
+        // Corrupt primary file.
+        writeCorruptedPackageRestrictions(0);
+
+        // now read and verify
+        populateDefaultSettings(settingsUnderTest);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsUnderTest);
+    }
+
+    @Test
     public void testReadWritePackageRestrictionsAsync() {
         final Settings settingsWrite = makeSettings();
         final Settings settingsRead = makeSettings();
@@ -1809,6 +1825,14 @@ public class PackageManagerSettingsTests {
                         + "    <default-apps />\n"
                         + "</package-restrictions>\n")
                         .getBytes());
+    }
+
+    private void writeCorruptedPackageRestrictions(final int userId) {
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/users/"
+                        + userId + "/package-restrictions.xml"),
+                ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<package-restrictions>\n"
+                        + "    <pkg name=\"" + PACKAGE_NAME_1 + "\" ").getBytes());
     }
 
     private static void writeStoppedPackagesXml() {

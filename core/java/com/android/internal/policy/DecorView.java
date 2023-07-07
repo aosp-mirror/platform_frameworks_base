@@ -233,6 +233,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private boolean mLastHasLeftStableInset = false;
     private int mLastWindowFlags = 0;
     private boolean mLastShouldAlwaysConsumeSystemBars = false;
+    private @InsetsType int mLastSuppressScrimTypes = 0;
 
     private int mRootScrollY = 0;
 
@@ -1110,8 +1111,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     : controller.getSystemBarsAppearance();
 
             if (insets != null) {
-                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
-                        getResources().getConfiguration().windowConfiguration.getWindowingMode());
+                mLastShouldAlwaysConsumeSystemBars = insets.shouldAlwaysConsumeSystemBars();
+
+                final boolean clearsCompatInsets =
+                        clearsCompatInsets(attrs.type, attrs.flags,
+                                getResources().getConfiguration().windowConfiguration
+                                        .getWindowingMode())
+                        && !mLastShouldAlwaysConsumeSystemBars;
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
                 final Insets systemInsets = clearsCompatInsets
@@ -1142,7 +1148,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 disallowAnimate |= (hasLeftStableInset != mLastHasLeftStableInset);
                 mLastHasLeftStableInset = hasLeftStableInset;
 
-                mLastShouldAlwaysConsumeSystemBars = insets.shouldAlwaysConsumeSystemBars();
+                mLastSuppressScrimTypes = insets.getSuppressScrimTypes();
             }
 
             boolean navBarToRightEdge = isNavBarToRightEdge(mLastBottomInset, mLastRightInset);
@@ -1378,7 +1384,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return calculateBarColor(mWindow.getAttributes().flags, FLAG_TRANSLUCENT_STATUS,
                 mSemiTransparentBarColor, mWindow.mStatusBarColor,
                 appearance, APPEARANCE_LIGHT_STATUS_BARS,
-                mWindow.mEnsureStatusBarContrastWhenTransparent);
+                mWindow.mEnsureStatusBarContrastWhenTransparent
+                        && (mLastSuppressScrimTypes & WindowInsets.Type.statusBars()) == 0);
     }
 
     private int calculateNavigationBarColor(@Appearance int appearance) {
@@ -1386,7 +1393,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 mSemiTransparentBarColor, mWindow.mNavigationBarColor,
                 appearance, APPEARANCE_LIGHT_NAVIGATION_BARS,
                 mWindow.mEnsureNavigationBarContrastWhenTransparent
-                        && getContext().getResources().getBoolean(R.bool.config_navBarNeedsScrim));
+                        && (mLastSuppressScrimTypes & WindowInsets.Type.navigationBars()) == 0);
     }
 
     public static int calculateBarColor(int flags, int translucentFlag, int semiTransparentBarColor,

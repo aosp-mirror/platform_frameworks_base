@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
@@ -80,6 +81,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: StatusBarUserChipViewModel
 
@@ -135,7 +137,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `config is false - chip is disabled`() {
+    fun configIsFalse_chipIsDisabled() {
         // the enabled bit is set at SystemUI startup, so recreate the view model here
         userRepository.isStatusBarUserChipEnabled = false
         underTest = viewModel()
@@ -144,7 +146,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `config is true - chip is enabled`() {
+    fun configIsTrue_chipIsEnabled() {
         // the enabled bit is set at SystemUI startup, so recreate the view model here
         userRepository.isStatusBarUserChipEnabled = true
         underTest = viewModel()
@@ -153,7 +155,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `should show chip criteria - single user`() =
+    fun shouldShowChipCriteria_singleUser() =
         testScope.runTest {
             userRepository.setUserInfos(listOf(USER_0))
             userRepository.setSelectedUserInfo(USER_0)
@@ -170,7 +172,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `should show chip criteria - multiple users`() =
+    fun shouldShowChipCriteria_multipleUsers() =
         testScope.runTest {
             setMultipleUsers()
 
@@ -184,7 +186,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `user chip name - shows selected user info`() =
+    fun userChipName_showsSelectedUserInfo() =
         testScope.runTest {
             setMultipleUsers()
 
@@ -204,7 +206,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `user chip avatar - shows selected user info`() =
+    fun userChipAvatar_showsSelectedUserInfo() =
         testScope.runTest {
             setMultipleUsers()
 
@@ -263,6 +265,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                             repository = FakeTelephonyRepository(),
                         ),
                     broadcastDispatcher = fakeBroadcastDispatcher,
+                    keyguardUpdateMonitor = keyguardUpdateMonitor,
                     backgroundDispatcher = testDispatcher,
                     activityManager = activityManager,
                     refreshUsersScheduler = refreshUsersScheduler,

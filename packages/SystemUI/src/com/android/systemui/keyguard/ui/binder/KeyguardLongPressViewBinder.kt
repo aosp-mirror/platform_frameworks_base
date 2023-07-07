@@ -34,7 +34,7 @@ object KeyguardLongPressViewBinder {
      * @param viewModel The view-model that models the UI state.
      * @param onSingleTap A callback to invoke when the system decides that there was a single tap.
      * @param falsingManager [FalsingManager] for making sure the long-press didn't just happen in
-     * the user's pocket.
+     *   the user's pocket.
      */
     @JvmStatic
     fun bind(
@@ -50,10 +50,7 @@ object KeyguardLongPressViewBinder {
                         return
                     }
 
-                    viewModel.onLongPress(
-                        x = x,
-                        y = y,
-                    )
+                    viewModel.onLongPress()
                 }
 
                 override fun onSingleTapDetected(view: View) {
@@ -70,23 +67,6 @@ object KeyguardLongPressViewBinder {
                 launch {
                     viewModel.isLongPressHandlingEnabled.collect { isEnabled ->
                         view.setLongPressHandlingEnabled(isEnabled)
-                    }
-                }
-
-                launch {
-                    var dismissMenu: (() -> Unit)? = null
-
-                    viewModel.menu.collect { menuOrNull ->
-                        if (menuOrNull != null) {
-                            dismissMenu =
-                                KeyguardLongPressPopupViewBinder.createAndShow(
-                                    container = view,
-                                    viewModel = menuOrNull,
-                                    onDismissed = menuOrNull.onDismissed,
-                                )
-                        } else {
-                            dismissMenu?.invoke()
-                        }
                     }
                 }
             }

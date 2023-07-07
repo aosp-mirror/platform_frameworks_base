@@ -62,16 +62,7 @@ public class UdfpsUtils {
      */
     public Point getTouchInNativeCoordinates(int idx, MotionEvent event,
             UdfpsOverlayParams udfpsOverlayParams) {
-        Point portraitTouch = new Point((int) event.getRawX(idx), (int) event.getRawY(idx));
-        int rot = udfpsOverlayParams.getRotation();
-        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-            RotationUtils.rotatePoint(
-                    portraitTouch,
-                    RotationUtils.deltaRotation(rot, Surface.ROTATION_0),
-                    udfpsOverlayParams.getLogicalDisplayWidth(),
-                    udfpsOverlayParams.getLogicalDisplayHeight()
-            );
-        }
+        Point portraitTouch = getPortraitTouch(idx, event, udfpsOverlayParams);
 
         // Scale the coordinates to native resolution.
         float scale = udfpsOverlayParams.getScaleFactor();
@@ -81,13 +72,25 @@ public class UdfpsUtils {
     }
 
     /**
+     * @param idx                The pointer identifier.
+     * @param event              The MotionEvent object containing full information about the event.
+     * @param udfpsOverlayParams The [UdfpsOverlayParams] used.
+     * @return Whether the touch event is within sensor area.
+     */
+    public boolean isWithinSensorArea(int idx, MotionEvent event,
+            UdfpsOverlayParams udfpsOverlayParams) {
+        Point portraitTouch = getPortraitTouch(idx, event, udfpsOverlayParams);
+        return udfpsOverlayParams.getSensorBounds().contains(portraitTouch.x, portraitTouch.y);
+    }
+
+    /**
      * This function computes the angle of touch relative to the sensor and maps the angle to a list
      * of help messages which are announced if accessibility is enabled.
      *
      * @return Whether the announcing string is null
      */
-    public String onTouchOutsideOfSensorArea(boolean touchExplorationEnabled,
-            Context context, int touchX, int touchY, UdfpsOverlayParams udfpsOverlayParams) {
+    public String onTouchOutsideOfSensorArea(boolean touchExplorationEnabled, Context context,
+            int scaledTouchX, int scaledTouchY, UdfpsOverlayParams udfpsOverlayParams) {
         if (!touchExplorationEnabled) {
             return null;
         }
@@ -106,8 +109,8 @@ public class UdfpsUtils {
         String theStr =
                 onTouchOutsideOfSensorAreaImpl(
                         touchHints,
-                        touchX,
-                        touchY,
+                        scaledTouchX,
+                        scaledTouchY,
                         scaledSensorX,
                         scaledSensorY,
                         udfpsOverlayParams.getRotation()
@@ -155,5 +158,23 @@ public class UdfpsUtils {
             index = (index + 3) % touchHints.length;
         }
         return touchHints[index];
+    }
+
+    /**
+     * Map the touch to portrait mode if the device is in landscape mode.
+     */
+    private Point getPortraitTouch(int idx, MotionEvent event,
+            UdfpsOverlayParams udfpsOverlayParams) {
+        Point portraitTouch = new Point((int) event.getRawX(idx), (int) event.getRawY(idx));
+        int rot = udfpsOverlayParams.getRotation();
+        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+            RotationUtils.rotatePoint(
+                    portraitTouch,
+                    RotationUtils.deltaRotation(rot, Surface.ROTATION_0),
+                    udfpsOverlayParams.getLogicalDisplayWidth(),
+                    udfpsOverlayParams.getLogicalDisplayHeight()
+            );
+        }
+        return portraitTouch;
     }
 }

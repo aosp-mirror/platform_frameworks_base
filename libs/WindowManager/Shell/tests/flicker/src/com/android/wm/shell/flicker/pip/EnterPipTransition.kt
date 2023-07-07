@@ -17,21 +17,20 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
+import android.tools.common.Rotation
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import org.junit.Test
 import org.junit.runners.Parameterized
 
 abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker) {
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup { pipApp.launchViaIntent(wmHelper) }
-            teardown { pipApp.exit(wmHelper) }
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntent(wmHelper)
         }
+    }
 
     /** Checks [pipApp] window remains visible throughout the animation */
     @Presubmit
@@ -43,13 +42,17 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
     /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
-    open fun pipAppLayerOrOverlayAlwaysVisible() {
+    open fun pipAppLayerAlwaysVisible() {
+        flicker.assertLayers { this.isVisible(pipApp) }
+    }
+
+    /** Checks the content overlay appears then disappears during the animation */
+    @Presubmit
+    @Test
+    open fun pipOverlayLayerAppearThenDisappear() {
+        val overlay = ComponentNameMatcher.PIP_CONTENT_OVERLAY
         flicker.assertLayers {
-            this.isVisible(pipApp)
-                .then()
-                .isVisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
-                .then()
-                .isVisible(pipApp)
+            this.notContains(overlay).then().contains(overlay).then().notContains(overlay)
         }
     }
 
@@ -59,7 +62,7 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
      */
     @Presubmit
     @Test
-    fun pipWindowRemainInsideVisibleBounds() {
+    open fun pipWindowRemainInsideVisibleBounds() {
         flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
@@ -130,7 +133,7 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

@@ -306,10 +306,6 @@ fun rememberModalBottomSheetState(
  * @param sheetContentColor The preferred content color provided by the bottom sheet to its
  * children. Defaults to the matching content color for [sheetBackgroundColor], or if that is not
  * a color from the theme, this will keep the same content color set above the bottom sheet.
- * @param scrimColor The color of the scrim that is applied to the rest of the screen when the
- * bottom sheet is visible. If the color passed is [Color.Unspecified], then a scrim will no
- * longer be applied and the bottom sheet will not block interaction with the rest of the screen
- * when visible.
  * @param content The content of rest of the screen.
  */
 @Composable
@@ -320,9 +316,8 @@ fun ModalBottomSheetLayout(
         rememberModalBottomSheetState(Hidden),
     sheetShape: Shape = MaterialTheme.shapes.large,
     sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
-    sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    sheetBackgroundColor: Color,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
-    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -332,7 +327,7 @@ fun ModalBottomSheetLayout(
         Box(Modifier.fillMaxSize()) {
             content()
             Scrim(
-                color = scrimColor,
+                color = ModalBottomSheetDefaults.scrimColor,
                 onDismiss = {
                     if (sheetState.confirmStateChange(Hidden)) {
                         scope.launch { sheetState.hide() }
@@ -451,7 +446,7 @@ private fun Modifier.bottomSheetSwipeable(
 }
 
 @Composable
-private fun Scrim(
+internal fun Scrim(
     color: Color,
     onDismiss: () -> Unit,
     visible: Boolean
@@ -459,7 +454,7 @@ private fun Scrim(
     if (color.isSpecified) {
         val alpha by animateFloatAsState(
             targetValue = if (visible) 1f else 0f,
-            animationSpec = TweenSpec()
+            animationSpec = TweenSpec(durationMillis = SwipeableDefaults.DefaultDurationMillis)
         )
         LocalConfiguration.current
         val resources = LocalContext.current.resources
@@ -505,5 +500,5 @@ object ModalBottomSheetDefaults {
      */
     val scrimColor: Color
         @Composable
-        get() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f)
+        get() = MaterialTheme.colorScheme.scrim.copy(alpha = .32f)
 }

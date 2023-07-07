@@ -199,13 +199,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     private boolean mStarted = false;
 
     /**
-     * Tracks whether we've notified listeners of the onAnimationStart() event. This can be
-     * complex to keep track of since we notify listeners at different times depending on
-     * startDelay and whether start() was called before end().
-     */
-    private boolean mStartListenersCalled = false;
-
-    /**
      * Flag that denotes whether the animation is set up and ready to go. Used to
      * set up animation that has not yet been started.
      */
@@ -1108,20 +1101,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
     }
 
-    private void notifyStartListeners(boolean isReversing) {
-        if (mListeners != null && !mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_START, isReversing);
-        }
-        mStartListenersCalled = true;
-    }
-
-    private void notifyEndListeners(boolean isReversing) {
-        if (mListeners != null && mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_END, isReversing);
-        }
-        mStartListenersCalled = false;
-    }
-
     /**
      * Start the animation playing. This version of start() takes a boolean flag that indicates
      * whether the animation should play in reverse. The flag is usually false, but may be set
@@ -1209,7 +1188,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         // Only cancel if the animation is actually running or has been started and is about
         // to run
         // Only notify listeners if the animator has actually started
-        if ((mStarted || mRunning) && mListeners != null) {
+        if ((mStarted || mRunning || mStartListenersCalled) && mListeners != null) {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
                 notifyStartListeners(mReversing);
@@ -1217,7 +1196,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             notifyListeners(AnimatorCaller.ON_CANCEL, false);
         }
         endAnimation();
-
     }
 
     @Override
@@ -1320,11 +1298,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             // If it's not yet running, then start listeners weren't called. Call them now.
             notifyStartListeners(mReversing);
         }
-        mRunning = false;
-        mStarted = false;
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
         mStartTime = -1;
+        mRunning = false;
+        mStarted = false;
         notifyEndListeners(mReversing);
         // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
         mReversing = false;
@@ -1439,21 +1417,19 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * will be called.
      */
     @Override
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {
         if (currentPlayTime < 0 || lastPlayTime < -1) {
             throw new UnsupportedOperationException("Error: Play time should never be negative.");
         }
 
         initAnimation();
         long duration = getTotalDuration();
-        if (notify) {
-            if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
-                notifyStartListeners(false);
-            } else if (lastPlayTime > duration
-                    || (lastPlayTime == duration && currentPlayTime < duration)
-            ) {
-                notifyStartListeners(true);
-            }
+        if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
+            notifyStartListeners(false);
+        } else if (lastPlayTime > duration
+                || (lastPlayTime == duration && currentPlayTime < duration)
+        ) {
+            notifyStartListeners(true);
         }
         if (duration >= 0) {
             lastPlayTime = Math.min(duration, lastPlayTime);
@@ -1470,7 +1446,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             iteration = Math.min(iteration, mRepeatCount);
             lastIteration = Math.min(lastIteration, mRepeatCount);
 
-            if (notify && iteration != lastIteration) {
+            if (iteration != lastIteration) {
                 notifyListeners(AnimatorCaller.ON_REPEAT, false);
             }
         }
@@ -1486,7 +1462,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     }
 
     @Override
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {
         boolean inReverse = currentPlayTime < lastPlayTime;
         boolean doSkip;
         if (currentPlayTime <= 0 && lastPlayTime > 0) {
@@ -1496,13 +1472,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             doSkip = duration >= 0 && currentPlayTime >= duration && lastPlayTime < duration;
         }
         if (doSkip) {
-            if (notify) {
-                notifyStartListeners(inReverse);
-            }
+            notifyStartListeners(inReverse);
             skipToEndValue(inReverse);
-            if (notify) {
-                notifyEndListeners(inReverse);
-            }
+            notifyEndListeners(inReverse);
         }
     }
 
@@ -1687,7 +1659,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         anim.mRunning = false;
         anim.mPaused = false;
         anim.mResumed = false;
-        anim.mStartListenersCalled = false;
         anim.mStartTime = -1;
         anim.mStartTimeCommitted = false;
         anim.mAnimationEndRequested = false;

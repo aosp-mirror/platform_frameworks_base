@@ -104,4 +104,9 @@ oneway interface IOverviewProxy {
       * Sent when the surface for navigation bar is created or changed
       */
      void onNavigationBarSurface(in SurfaceControl surface) = 26;
+
+     /**
+      * Sent when the task bar stash state is toggled.
+      */
+     void onTaskbarToggled() = 27;
 }

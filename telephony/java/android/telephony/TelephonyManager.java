@@ -3511,7 +3511,15 @@ public class TelephonyManager {
     public static final String ACTION_SECRET_CODE = "android.telephony.action.SECRET_CODE";
 
     /**
-     * @return true if a ICC card is present
+     * This API is used to check if there is an ICC card present in the device.
+     *
+     * An ICC card is a smart card that contains a subscriber identity module (SIM) and is used
+     * to identify and authenticate users to a mobile network.
+     *
+     * Note: In case of embedded SIM there is an ICC card always present irrespective
+     * of whether an active SIM profile is present or not so this API would always return true.
+     *
+     * @return true if a ICC card is present.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public boolean hasIccCard() {
@@ -10642,20 +10650,12 @@ public class TelephonyManager {
      * no reason to power it off. When any of the voters want to power it off, it will be turned
      * off. In case of emergency, the radio will be turned on even if there are some reasons for
      * powering it off, and these radio off votes will be cleared.
-     * <p>
-     * Each API call is for one reason. However, an app can call the API multiple times for multiple
-     * reasons. Multiple apps can vote for the same reason but the vote of one app does not affect
-     * the vote of another app.
-     * <p>
-     * Each app is responsible for its vote. A powering-off vote for a reason of an app will be
-     * maintained until it is cleared by calling {@link #clearRadioPowerOffForReason(int)} for that
-     * reason by the app, or an emergency call is made, or the device is rebooted. When an app
-     * comes backup from a crash, it needs to make sure if its vote is as expected. An app can use
-     * the API {@link #getRadioPowerOffReasons()} to check its votes. Votes won't be removed when
-     * an app crashes.
-     * <p>
-     * User setting for power state is persistent across device reboots. This applies to all users,
-     * callers must be careful to update the off reasons when the current user changes.
+     * Multiple apps can vote for the same reason and the last vote will take effect. Each app is
+     * responsible for its vote. A powering-off vote of a reason will be maintained until it is
+     * cleared by calling {@link clearRadioPowerOffForReason} for that reason, or an emergency call
+     * is made, or the device is rebooted. When an app comes backup from a crash, it needs to make
+     * sure if its vote is as expected. An app can use the API {@link getRadioPowerOffReasons} to
+     * check its vote.
      *
      * @param reason The reason for powering off radio.
      * @throws SecurityException if the caller does not have MODIFY_PHONE_STATE permission.
@@ -10712,10 +10712,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Get reasons for powering off radio of the calling app, as requested by
-     * {@link #requestRadioPowerOffForReason(int)}.
+     * Get reasons for powering off radio, as requested by {@link requestRadioPowerOffForReason}.
+     * If the reason set is empty, the radio is on in all cases.
      *
-     * @return Set of reasons for powering off radio of the calling app.
+     * @return Set of reasons for powering off radio.
      * @throws SecurityException if the caller does not have READ_PRIVILEGED_PHONE_STATE permission.
      * @throws IllegalStateException if the Telephony service is not currently available.
      *
@@ -13297,6 +13297,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Test API to verify carrier restriction status allow list i.e.
+     * packages/services/Telephony/assets/CarrierRestrictionOperatorDetails.json.
+     *
+     * @param pkgName : packaga name of the entry to verify
+     * @param carrierId : carrier Id of the entry
+     * @return {@code List<String>} : list of registered shaIds
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public List<String> getShaIdFromAllowList(String pkgName, int carrierId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getShaIdFromAllowList(pkgName, carrierId);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getShaIdFromAllowList: RemoteException = " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
      * Used to enable or disable carrier data by the system based on carrier signalling or
      * carrier privileged apps. Different from {@link #setDataEnabled(boolean)} which is linked to
      * user settings, carrier data on/off won't affect user settings but will bypass the
@@ -15140,14 +15163,6 @@ public class TelephonyManager {
     @TestApi
     public static final int HAL_SERVICE_IMS = 7;
 
-    /**
-     * HAL service type that supports the HAL APIs implementation of IRadioSatellite
-     * {@link RadioSatelliteProxy}
-     * @hide
-     */
-    @TestApi
-    public static final int HAL_SERVICE_SATELLITE = 8;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"HAL_SERVICE_"},
@@ -15160,7 +15175,6 @@ public class TelephonyManager {
                     HAL_SERVICE_SIM,
                     HAL_SERVICE_VOICE,
                     HAL_SERVICE_IMS,
-                    HAL_SERVICE_SATELLITE
             })
     public @interface HalService {}
 
@@ -17920,6 +17934,97 @@ public class TelephonyManager {
             Log.e(TAG, "Error in getSimStateForSlotIndex: " + e);
         }
         return TelephonyManager.SIM_STATE_UNKNOWN;
+    }
+
+    /**
+     * Captures parameters for collection of emergency
+     * call diagnostic data
+     * @hide
+     */
+    public static class EmergencyCallDiagnosticParams {
+
+       private boolean mCollectTelecomDumpSys;
+       private boolean mCollectTelephonyDumpsys;
+       private boolean mCollectLogcat;
+
+        //logcat lines with this time or greater are collected
+        //how much is collected is dependent on internal implementation.
+        //Time represented as milliseconds since January 1, 1970 UTC
+        private long mLogcatStartTimeMillis;
+
+
+        public boolean isTelecomDumpSysCollectionEnabled() {
+            return mCollectTelecomDumpSys;
+        }
+
+        public void setTelecomDumpSysCollection(boolean collectTelecomDumpSys) {
+            mCollectTelecomDumpSys = collectTelecomDumpSys;
+        }
+
+        public boolean isTelephonyDumpSysCollectionEnabled() {
+            return mCollectTelephonyDumpsys;
+        }
+
+        public void setTelephonyDumpSysCollection(boolean collectTelephonyDumpsys) {
+            mCollectTelephonyDumpsys = collectTelephonyDumpsys;
+        }
+
+        public boolean isLogcatCollectionEnabled() {
+            return mCollectLogcat;
+        }
+
+        public long getLogcatStartTime()
+        {
+            return mLogcatStartTimeMillis;
+        }
+
+        public void setLogcatCollection(boolean collectLogcat, long startTimeMillis) {
+            mCollectLogcat = collectLogcat;
+            if(mCollectLogcat)
+            {
+                mLogcatStartTimeMillis = startTimeMillis;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "EmergencyCallDiagnosticParams{" +
+                    "mCollectTelecomDumpSys=" + mCollectTelecomDumpSys +
+                    ", mCollectTelephonyDumpsys=" + mCollectTelephonyDumpsys +
+                    ", mCollectLogcat=" + mCollectLogcat +
+                    ", mLogcatStartTimeMillis=" + mLogcatStartTimeMillis +
+                    '}';
+        }
+    }
+
+    /**
+     * Request telephony to persist state for debugging emergency call failures.
+     *
+     * @param dropboxTag Tag to use when persisting data to dropbox service.
+     *
+     * @see params Parameters controlling what is collected
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void persistEmergencyCallDiagnosticData(@NonNull String dropboxTag,
+            @NonNull EmergencyCallDiagnosticParams params) {
+        try {
+            ITelephony telephony = ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
+            if (telephony != null) {
+                telephony.persistEmergencyCallDiagnosticData(dropboxTag,
+                        params.isLogcatCollectionEnabled(),
+                        params.getLogcatStartTime(),
+                        params.isTelecomDumpSysCollectionEnabled(),
+                        params.isTelephonyDumpSysCollectionEnabled());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while persistEmergencyCallDiagnosticData: " + e);
+        }
     }
 
     /**

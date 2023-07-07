@@ -26,7 +26,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -40,9 +39,11 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -53,13 +54,20 @@ import org.junit.Test
 @SmallTest
 class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
-    private val logFactory = TableLogBufferFactory(dumpManager, FakeSystemClock())
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)
+    private val logFactory =
+        TableLogBufferFactory(
+            dumpManager,
+            FakeSystemClock(),
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
 
     private lateinit var underTest: DemoMobileConnectionsRepository
     private lateinit var mobileDataSource: DemoModeMobileConnectionDataSource
@@ -90,15 +98,21 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `connectivity - defaults to connected and validated`() =
+    fun isDefault_defaultsToTrue() =
         testScope.runTest {
-            val connectivity = underTest.defaultMobileNetworkConnectivity.value
-            assertThat(connectivity.isConnected).isTrue()
-            assertThat(connectivity.isValidated).isTrue()
+            val isDefault = underTest.mobileIsDefault.value
+            assertThat(isDefault).isTrue()
         }
 
     @Test
-    fun `network event - create new subscription`() =
+    fun validated_defaultsToTrue() =
+        testScope.runTest {
+            val isValidated = underTest.defaultConnectionIsValidated.value
+            assertThat(isValidated).isTrue()
+        }
+
+    @Test
+    fun networkEvent_createNewSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -114,7 +128,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi carrier merged event - create new subscription`() =
+    fun wifiCarrierMergedEvent_createNewSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -130,7 +144,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network event - reuses subscription when same Id`() =
+    fun networkEvent_reusesSubscriptionWhenSameId() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -152,7 +166,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi carrier merged event - reuses subscription when same Id`() =
+    fun wifiCarrierMergedEvent_reusesSubscriptionWhenSameId() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -174,7 +188,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `multiple subscriptions`() =
+    fun multipleSubscriptions() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -188,7 +202,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile subscription and carrier merged subscription`() =
+    fun mobileSubscriptionAndCarrierMergedSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -202,7 +216,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `multiple mobile subscriptions and carrier merged subscription`() =
+    fun multipleMobileSubscriptionsAndCarrierMergedSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -217,7 +231,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - disables connection - subId specified - single conn`() =
+    fun mobileDisabledEvent_disablesConnection_subIdSpecified_singleConn() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -232,7 +246,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - disables connection - subId not specified - single conn`() =
+    fun mobileDisabledEvent_disablesConnection_subIdNotSpecified_singleConn() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -247,7 +261,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - disables connection - subId specified - multiple conn`() =
+    fun mobileDisabledEvent_disablesConnection_subIdSpecified_multipleConn() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -263,7 +277,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - subId not specified - multiple conn - ignores command`() =
+    fun mobileDisabledEvent_subIdNotSpecified_multipleConn_ignoresCommand() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -279,7 +293,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi network updates to disabled - carrier merged connection removed`() =
+    fun wifiNetworkUpdatesToDisabled_carrierMergedConnectionRemoved() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -296,7 +310,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi network updates to active - carrier merged connection removed`() =
+    fun wifiNetworkUpdatesToActive_carrierMergedConnectionRemoved() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -319,7 +333,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile sub updates to carrier merged - only one connection`() =
+    fun mobileSubUpdatesToCarrierMerged_onlyOneConnection() =
         testScope.runTest {
             var latestSubsList: List<SubscriptionModel>? = null
             var connections: List<DemoMobileConnectionRepository>? = null
@@ -345,7 +359,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile sub updates to carrier merged then back - has old mobile data`() =
+    fun mobileSubUpdatesToCarrierMergedThenBack_hasOldMobileData() =
         testScope.runTest {
             var latestSubsList: List<SubscriptionModel>? = null
             var connections: List<DemoMobileConnectionRepository>? = null
@@ -386,7 +400,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
 
     /** Regression test for b/261706421 */
     @Test
-    fun `multiple connections - remove all - does not throw`() =
+    fun multipleConnections_removeAll_doesNotThrow() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -404,7 +418,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `demo connection - single subscription`() =
+    fun demoConnection_singleSubscription() =
         testScope.runTest {
             var currentEvent: FakeNetworkEventModel = validMobileEvent(subId = 1)
             var connections: List<DemoMobileConnectionRepository>? = null
@@ -433,7 +447,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `demo connection - two connections - update second - no affect on first`() =
+    fun demoConnection_twoConnections_updateSecond_noAffectOnFirst() =
         testScope.runTest {
             var currentEvent1 = validMobileEvent(subId = 1)
             var connection1: DemoMobileConnectionRepository? = null
@@ -480,7 +494,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `demo connection - two connections - update carrier merged - no affect on first`() =
+    fun demoConnection_twoConnections_updateCarrierMerged_noAffectOnFirst() =
         testScope.runTest {
             var currentEvent1 = validMobileEvent(subId = 1)
             var connection1: DemoMobileConnectionRepository? = null
@@ -524,47 +538,65 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
-    private fun assertConnection(
+    private fun TestScope.startCollection(conn: DemoMobileConnectionRepository): Job {
+        val job = launch {
+            launch { conn.cdmaLevel.collect {} }
+            launch { conn.primaryLevel.collect {} }
+            launch { conn.dataActivityDirection.collect {} }
+            launch { conn.carrierNetworkChangeActive.collect {} }
+            launch { conn.isRoaming.collect {} }
+            launch { conn.networkName.collect {} }
+            launch { conn.isEmergencyOnly.collect {} }
+            launch { conn.dataConnectionState.collect {} }
+        }
+        return job
+    }
+
+    private fun TestScope.assertConnection(
         conn: DemoMobileConnectionRepository,
-        model: FakeNetworkEventModel
+        model: FakeNetworkEventModel,
     ) {
+        val job = startCollection(conn)
+        // Assert the fields using the `MutableStateFlow` so that we don't have to start up
+        // a collector for every field for every test
         when (model) {
             is FakeNetworkEventModel.Mobile -> {
-                val connectionInfo: MobileConnectionModel = conn.connectionInfo.value
                 assertThat(conn.subId).isEqualTo(model.subId)
-                assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection)
+                assertThat(conn.cdmaLevel.value).isEqualTo(model.level)
+                assertThat(conn.primaryLevel.value).isEqualTo(model.level)
+                assertThat(conn.dataActivityDirection.value)
                     .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
-                assertThat(connectionInfo.carrierNetworkChangeActive)
+                assertThat(conn.carrierNetworkChangeActive.value)
                     .isEqualTo(model.carrierNetworkChange)
-                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
+                assertThat(conn.isRoaming.value).isEqualTo(model.roaming)
                 assertThat(conn.networkName.value)
                     .isEqualTo(NetworkNameModel.IntentDerived(model.name))
 
                 // TODO(b/261029387) check these once we start handling them
-                assertThat(connectionInfo.isEmergencyOnly).isFalse()
-                assertThat(connectionInfo.isGsm).isFalse()
-                assertThat(connectionInfo.dataConnectionState)
-                    .isEqualTo(DataConnectionState.Connected)
+                assertThat(conn.isEmergencyOnly.value).isFalse()
+                assertThat(conn.isGsm.value).isFalse()
+                assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
             }
             else -> {}
         }
+
+        job.cancel()
     }
 
-    private fun assertCarrierMergedConnection(
+    private fun TestScope.assertCarrierMergedConnection(
         conn: DemoMobileConnectionRepository,
         model: FakeWifiEventModel.CarrierMerged,
     ) {
-        val connectionInfo: MobileConnectionModel = conn.connectionInfo.value
+        val job = startCollection(conn)
         assertThat(conn.subId).isEqualTo(model.subscriptionId)
-        assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
-        assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-        assertThat(connectionInfo.carrierNetworkChangeActive).isEqualTo(false)
-        assertThat(connectionInfo.isRoaming).isEqualTo(false)
-        assertThat(connectionInfo.isEmergencyOnly).isFalse()
-        assertThat(connectionInfo.isGsm).isFalse()
-        assertThat(connectionInfo.dataConnectionState).isEqualTo(DataConnectionState.Connected)
+        assertThat(conn.cdmaLevel.value).isEqualTo(model.level)
+        assertThat(conn.primaryLevel.value).isEqualTo(model.level)
+        assertThat(conn.carrierNetworkChangeActive.value).isEqualTo(false)
+        assertThat(conn.isRoaming.value).isEqualTo(false)
+        assertThat(conn.isEmergencyOnly.value).isFalse()
+        assertThat(conn.isGsm.value).isFalse()
+        assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
+        job.cancel()
     }
 }
 

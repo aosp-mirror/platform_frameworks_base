@@ -67,8 +67,8 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     private SparseIntArray mPendingUidStates = new SparseIntArray();
     private SparseIntArray mCapability = new SparseIntArray();
     private SparseIntArray mPendingCapability = new SparseIntArray();
-    private SparseBooleanArray mVisibleAppWidget = new SparseBooleanArray();
-    private SparseBooleanArray mPendingVisibleAppWidget = new SparseBooleanArray();
+    private SparseBooleanArray mAppWidgetVisible = new SparseBooleanArray();
+    private SparseBooleanArray mPendingAppWidgetVisible = new SparseBooleanArray();
     private SparseLongArray mPendingCommitTime = new SparseLongArray();
     private SparseBooleanArray mPendingGone = new SparseBooleanArray();
 
@@ -140,7 +140,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     private int evalModeInternal(int uid, int code, int uidState, int uidCapability) {
 
-        if (getUidVisibleAppWidget(uid) || mActivityManagerInternal.isPendingTopUid(uid)
+        if (getUidAppWidgetVisible(uid) || mActivityManagerInternal.isPendingTopUid(uid)
                 || mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid)) {
             return MODE_ALLOWED;
         }
@@ -205,7 +205,7 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         int numUids = uidPackageNames.size();
         for (int i = 0; i < numUids; i++) {
             int uid = uidPackageNames.keyAt(i);
-            mPendingVisibleAppWidget.put(uid, visible);
+            mPendingAppWidgetVisible.put(uid, visible);
 
             commitUidPendingState(uid);
         }
@@ -213,8 +213,6 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     @Override
     public void updateUidProcState(int uid, int procState, int capability) {
-        mEventLog.logUpdateUidProcState(uid, procState, capability);
-
         int uidState = processStateToUidState(procState);
 
         int prevUidState = mUidStates.get(uid, AppOpsManager.MIN_PRIORITY_UID_STATE);
@@ -226,6 +224,10 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
                 && (uidState != prevUidState || capability != prevCapability))
                 || (pendingStateCommitTime != 0
                 && (uidState != pendingUidState || capability != pendingCapability))) {
+
+            // If this process update results in a capability or uid state change, log it. It's
+            // not interesting otherwise.
+            mEventLog.logUpdateUidProcState(uid, procState, capability);
             mPendingUidStates.put(uid, uidState);
             mPendingCapability.put(uid, capability);
 
@@ -289,9 +291,9 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             ActivityManager.printCapabilitiesFull(pw, pendingCapability);
             pw.println();
         }
-        boolean appWidgetVisible = mVisibleAppWidget.get(uid, false);
+        boolean appWidgetVisible = mAppWidgetVisible.get(uid, false);
         // if no pendingAppWidgetVisible set to appWidgetVisible to suppress output
-        boolean pendingAppWidgetVisible = mPendingVisibleAppWidget.get(uid, appWidgetVisible);
+        boolean pendingAppWidgetVisible = mPendingAppWidgetVisible.get(uid, appWidgetVisible);
         pw.print("    appWidgetVisible=");
         pw.println(appWidgetVisible);
         if (appWidgetVisible != pendingAppWidgetVisible) {
@@ -327,26 +329,29 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     }
 
     private void commitUidPendingState(int uid) {
-        int pendingUidState = mPendingUidStates.get(uid, MIN_PRIORITY_UID_STATE);
-        int pendingCapability = mPendingCapability.get(uid, PROCESS_CAPABILITY_NONE);
-        boolean pendingVisibleAppWidget = mPendingVisibleAppWidget.get(uid, false);
+        int pendingUidState = mPendingUidStates.get(uid,
+                mUidStates.get(uid, MIN_PRIORITY_UID_STATE));
+        int pendingCapability = mPendingCapability.get(uid,
+                mCapability.get(uid, PROCESS_CAPABILITY_NONE));
+        boolean pendingAppWidgetVisible = mPendingAppWidgetVisible.get(uid,
+                mAppWidgetVisible.get(uid, false));
 
         int uidState = mUidStates.get(uid, MIN_PRIORITY_UID_STATE);
         int capability = mCapability.get(uid, PROCESS_CAPABILITY_NONE);
-        boolean visibleAppWidget = mVisibleAppWidget.get(uid, false);
+        boolean appWidgetVisible = mAppWidgetVisible.get(uid, false);
 
         if (uidState != pendingUidState
                 || capability != pendingCapability
-                || visibleAppWidget != pendingVisibleAppWidget) {
+                || appWidgetVisible != pendingAppWidgetVisible) {
             boolean foregroundChange = uidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
                     != pendingUidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
                     || capability != pendingCapability
-                    || visibleAppWidget != pendingVisibleAppWidget;
+                    || appWidgetVisible != pendingAppWidgetVisible;
 
             if (foregroundChange) {
                 // To save on memory usage, log only interesting changes.
                 mEventLog.logCommitUidState(uid, pendingUidState, pendingCapability,
-                        pendingVisibleAppWidget);
+                        pendingAppWidgetVisible, appWidgetVisible != pendingAppWidgetVisible);
             }
 
             for (int i = 0; i < mUidStateChangedCallbacks.size(); i++) {
@@ -362,17 +367,17 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         if (mPendingGone.get(uid, false)) {
             mUidStates.delete(uid);
             mCapability.delete(uid);
-            mVisibleAppWidget.delete(uid);
+            mAppWidgetVisible.delete(uid);
             mPendingGone.delete(uid);
         } else {
             mUidStates.put(uid, pendingUidState);
             mCapability.put(uid, pendingCapability);
-            mVisibleAppWidget.put(uid, pendingVisibleAppWidget);
+            mAppWidgetVisible.put(uid, pendingAppWidgetVisible);
         }
 
         mPendingUidStates.delete(uid);
         mPendingCapability.delete(uid);
-        mPendingVisibleAppWidget.delete(uid);
+        mPendingAppWidgetVisible.delete(uid);
         mPendingCommitTime.delete(uid);
     }
 
@@ -380,20 +385,21 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         return mCapability.get(uid, ActivityManager.PROCESS_CAPABILITY_NONE);
     }
 
-    private boolean getUidVisibleAppWidget(int uid) {
-        return mVisibleAppWidget.get(uid, false);
+    private boolean getUidAppWidgetVisible(int uid) {
+        return mAppWidgetVisible.get(uid, false);
     }
 
     private static class EventLog {
 
-        // These seems a bit too verbose and not as useful, turning off for now.
-        // DCE should be able to remove most associated code.
         // Memory usage: 16 * size bytes
-        private static final int UPDATE_UID_PROC_STATE_LOG_MAX_SIZE = 0;
+        private static final int UPDATE_UID_PROC_STATE_LOG_MAX_SIZE = 200;
         // Memory usage: 20 * size bytes
         private static final int COMMIT_UID_STATE_LOG_MAX_SIZE = 200;
         // Memory usage: 24 * size bytes
         private static final int EVAL_FOREGROUND_MODE_MAX_SIZE = 200;
+
+        private static final int APP_WIDGET_VISIBLE = 1 << 0;
+        private static final int APP_WIDGET_VISIBLE_CHANGED = 1 << 1;
 
         private final DelayableExecutor mExecutor;
         private final Thread mExecutorThread;
@@ -443,16 +449,18 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             mUpdateUidProcStateLogTimestamps[idx] = timestamp;
         }
 
-        void logCommitUidState(int uid, int uidState, int capability, boolean visible) {
+        void logCommitUidState(int uid, int uidState, int capability, boolean appWidgetVisible,
+                boolean appWidgetVisibleChanged) {
             if (COMMIT_UID_STATE_LOG_MAX_SIZE == 0) {
                 return;
             }
             mExecutor.execute(PooledLambda.obtainRunnable(EventLog::logCommitUidStateAsync,
-                    this, System.currentTimeMillis(), uid, uidState, capability, visible));
+                    this, System.currentTimeMillis(), uid, uidState, capability, appWidgetVisible,
+                    appWidgetVisibleChanged));
         }
 
         void logCommitUidStateAsync(long timestamp, int uid, int uidState, int capability,
-                boolean visible) {
+                boolean appWidgetVisible, boolean appWidgetVisibleChanged) {
             int idx = (mCommitUidStateLogHead + mCommitUidStateLogSize)
                     % COMMIT_UID_STATE_LOG_MAX_SIZE;
             if (mCommitUidStateLogSize == COMMIT_UID_STATE_LOG_MAX_SIZE) {
@@ -465,7 +473,13 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             mCommitUidStateLog[idx][0] = uid;
             mCommitUidStateLog[idx][1] = uidState;
             mCommitUidStateLog[idx][2] = capability;
-            mCommitUidStateLog[idx][3] = visible ? 1 : 0;
+            mCommitUidStateLog[idx][3] = 0;
+            if (appWidgetVisible) {
+                mCommitUidStateLog[idx][3] += APP_WIDGET_VISIBLE;
+            }
+            if (appWidgetVisibleChanged) {
+                mCommitUidStateLog[idx][3] += APP_WIDGET_VISIBLE_CHANGED;
+            }
             mCommitUidStateLogTimestamps[idx] = timestamp;
         }
 
@@ -567,7 +581,9 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             int uid = mCommitUidStateLog[idx][0];
             int uidState = mCommitUidStateLog[idx][1];
             int capability = mCommitUidStateLog[idx][2];
-            boolean visibleAppWidget = mCommitUidStateLog[idx][3] != 0;
+            boolean appWidgetVisible = (mCommitUidStateLog[idx][3] & APP_WIDGET_VISIBLE) != 0;
+            boolean appWidgetVisibleChanged =
+                    (mCommitUidStateLog[idx][3] & APP_WIDGET_VISIBLE_CHANGED) != 0;
 
             TimeUtils.dumpTime(pw, timestamp);
 
@@ -582,8 +598,12 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             pw.print(" capability=");
             pw.print(ActivityManager.getCapabilitiesSummary(capability) + " ");
 
-            pw.print(" visibleAppWidget=");
-            pw.print(visibleAppWidget);
+            pw.print(" appWidgetVisible=");
+            pw.print(appWidgetVisible);
+
+            if (appWidgetVisibleChanged) {
+                pw.print(" (changed)");
+            }
 
             pw.println();
         }

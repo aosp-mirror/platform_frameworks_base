@@ -124,7 +124,8 @@ public class InputMethodManagerServiceWindowGainedFocusTest
 
         switch (mSoftInputState) {
             case SOFT_INPUT_STATE_UNSPECIFIED:
-                boolean showSoftInput = mSoftInputAdjustment == SOFT_INPUT_ADJUST_RESIZE;
+                boolean showSoftInput =
+                        (mSoftInputAdjustment == SOFT_INPUT_ADJUST_RESIZE) || mIsLargeScreen;
                 verifyShowSoftInput(
                         showSoftInput /* setVisible */, showSoftInput /* showSoftInput */);
                 // Soft input was hidden by default, so it doesn't need to call
@@ -165,7 +166,8 @@ public class InputMethodManagerServiceWindowGainedFocusTest
 
         switch (mSoftInputState) {
             case SOFT_INPUT_STATE_UNSPECIFIED:
-                boolean hideSoftInput = mSoftInputAdjustment != SOFT_INPUT_ADJUST_RESIZE;
+                boolean hideSoftInput =
+                        (mSoftInputAdjustment != SOFT_INPUT_ADJUST_RESIZE) && !mIsLargeScreen;
                 verifyShowSoftInput(false /* setVisible */, false /* showSoftInput */);
                 // Soft input was hidden by default, so it doesn't need to call
                 // {@code IMS#hideSoftInput()}.

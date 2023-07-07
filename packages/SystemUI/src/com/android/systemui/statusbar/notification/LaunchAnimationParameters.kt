@@ -3,7 +3,7 @@ package com.android.systemui.statusbar.notification
 import android.util.MathUtils
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
 

@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.graphics.drawable.Icon;
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -29,7 +30,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link WalletCard} can represent anything that a user might carry in their wallet -- a credit
@@ -67,6 +69,7 @@ public final class WalletCard implements Parcelable {
     private final Icon mCardIcon;
     private final CharSequence mCardLabel;
     private final Icon mNonPaymentCardSecondaryImage;
+    private List<Location> mCardLocations;
 
     private WalletCard(Builder builder) {
         this.mCardId = builder.mCardId;
@@ -77,6 +80,7 @@ public final class WalletCard implements Parcelable {
         this.mCardIcon = builder.mCardIcon;
         this.mCardLabel = builder.mCardLabel;
         this.mNonPaymentCardSecondaryImage = builder.mNonPaymentCardSecondaryImage;
+        this.mCardLocations = builder.mCardLocations;
     }
 
     /**
@@ -106,7 +110,7 @@ public final class WalletCard implements Parcelable {
         writeIconIfNonNull(mCardIcon, dest, flags);
         TextUtils.writeToParcel(mCardLabel, dest, flags);
         writeIconIfNonNull(mNonPaymentCardSecondaryImage, dest, flags);
-
+        dest.writeTypedList(mCardLocations, flags);
     }
 
     /** Utility function called by writeToParcel
@@ -128,15 +132,20 @@ public final class WalletCard implements Parcelable {
         PendingIntent pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(source);
         Icon cardIcon = source.readByte() == 0 ? null : Icon.CREATOR.createFromParcel(source);
         CharSequence cardLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-        Icon nonPaymentCardSecondaryImage = source.readByte() == 0 ? null :
-                Icon.CREATOR.createFromParcel(source);
-        Builder builder = new Builder(cardId, cardType, cardImage, contentDesc, pendingIntent)
-                .setCardIcon(cardIcon)
-                .setCardLabel(cardLabel);
+        Icon nonPaymentCardSecondaryImage =
+                source.readByte() == 0 ? null : Icon.CREATOR.createFromParcel(source);
+        Builder builder =
+                new Builder(cardId, cardType, cardImage, contentDesc, pendingIntent)
+                        .setCardIcon(cardIcon)
+                        .setCardLabel(cardLabel);
+        if (cardType == CARD_TYPE_NON_PAYMENT) {
+            builder.setNonPaymentCardSecondaryImage(nonPaymentCardSecondaryImage);
+        }
+        List<Location> cardLocations = new ArrayList<>();
+        source.readTypedList(cardLocations, Location.CREATOR);
+        builder.setCardLocations(cardLocations);
 
-        return cardType == CARD_TYPE_NON_PAYMENT
-                ? builder.setNonPaymentCardSecondaryImage(nonPaymentCardSecondaryImage).build() :
-                 builder.build();
+        return builder.build();
     }
 
     @NonNull
@@ -226,11 +235,27 @@ public final class WalletCard implements Parcelable {
 
     /**
      * Visual representation of the card when it is tapped. May include additional information
-     *  unique to the card, such as a barcode or number. Only valid for CARD_TYPE_NON_PAYMENT.
+     * unique to the card, such as a barcode or number. Only valid for CARD_TYPE_NON_PAYMENT.
      */
     @Nullable
     public Icon getNonPaymentCardSecondaryImage() {
         return mNonPaymentCardSecondaryImage;
+    }
+
+    /** List of locations that this card might be useful at. */
+    @NonNull
+    public List<Location> getCardLocations() {
+        return mCardLocations;
+    }
+
+    /**
+     * Removes locations from card. Should be called if {@link
+     * PackageManager.FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS} is disabled.
+     *
+     * @hide
+     */
+    public void removeCardLocations() {
+        mCardLocations = new ArrayList<>();
     }
 
     /**
@@ -247,6 +272,7 @@ public final class WalletCard implements Parcelable {
         private Icon mCardIcon;
         private CharSequence mCardLabel;
         private Icon mNonPaymentCardSecondaryImage;
+        private List<Location> mCardLocations = new ArrayList<>();
 
         /**
          * @param cardId             The card id must be non-null and unique within the list of
@@ -333,14 +359,27 @@ public final class WalletCard implements Parcelable {
 
         /**
          * Visual representation of the card when it is tapped. May include additional information
-         *  unique to the card, such as a barcode or number. Only valid for CARD_TYPE_NON_PAYMENT.
+         * unique to the card, such as a barcode or number. Only valid for CARD_TYPE_NON_PAYMENT.
          */
         @NonNull
-        public Builder
-                setNonPaymentCardSecondaryImage(@Nullable Icon nonPaymentCardSecondaryImage) {
-            Preconditions.checkState(mCardType == CARD_TYPE_NON_PAYMENT,
+        public Builder setNonPaymentCardSecondaryImage(
+                @Nullable Icon nonPaymentCardSecondaryImage) {
+            Preconditions.checkState(
+                    mCardType == CARD_TYPE_NON_PAYMENT,
                     "This field can only be set on non-payment cards");
             mNonPaymentCardSecondaryImage = nonPaymentCardSecondaryImage;
+            return this;
+        }
+
+        /**
+         * Set of locations this card might be useful at. If {@link
+         * PackageManager.FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS} is enabled, the card might be
+         * shown to the user when a user is near one of these locations.
+         */
+        @NonNull
+        public Builder setCardLocations(@NonNull List<Location> cardLocations) {
+            Preconditions.checkCollectionElementsNotNull(cardLocations, "cardLocations");
+            mCardLocations = cardLocations;
             return this;
         }
 

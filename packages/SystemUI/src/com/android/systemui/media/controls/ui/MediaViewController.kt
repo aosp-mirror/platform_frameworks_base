@@ -61,38 +61,11 @@ constructor(
 
     companion object {
         @JvmField val GUTS_ANIMATION_DURATION = 500L
-        val controlIds =
-            setOf(
-                R.id.media_progress_bar,
-                R.id.actionNext,
-                R.id.actionPrev,
-                R.id.action0,
-                R.id.action1,
-                R.id.action2,
-                R.id.action3,
-                R.id.action4,
-                R.id.media_scrubbing_elapsed_time,
-                R.id.media_scrubbing_total_time
-            )
-
-        val detailIds =
-            setOf(
-                R.id.header_title,
-                R.id.header_artist,
-                R.id.media_explicit_indicator,
-                R.id.actionPlayPause,
-            )
-
-        val backgroundIds =
-            setOf(
-                R.id.album_art,
-                R.id.turbulence_noise_view,
-                R.id.touch_ripple_view,
-            )
     }
 
     /** A listener when the current dimensions of the player change */
     lateinit var sizeChangedListener: () -> Unit
+    lateinit var configurationChangeListener: () -> Unit
     private var firstRefresh: Boolean = true
     @VisibleForTesting private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
@@ -154,9 +127,11 @@ constructor(
             return transitionLayout?.translationY ?: 0.0f
         }
 
-    /** A callback for RTL config changes */
+    /** A callback for config changes */
     private val configurationListener =
         object : ConfigurationController.ConfigurationListener {
+            var lastOrientation = -1
+
             override fun onConfigChanged(newConfig: Configuration?) {
                 // Because the TransitionLayout is not always attached (and calculates/caches layout
                 // results regardless of attach state), we have to force the layoutDirection of the
@@ -167,6 +142,30 @@ constructor(
                 newConfig?.apply {
                     if (transitionLayout?.rawLayoutDirection != layoutDirection) {
                         transitionLayout?.layoutDirection = layoutDirection
+                        refreshState()
+                    }
+                    val newOrientation = newConfig.orientation
+                    if (lastOrientation != newOrientation) {
+                        // Layout dimensions are possibly changing, so we need to update them. (at
+                        // least on large screen devices)
+                        lastOrientation = newOrientation
+                        // Update the height of media controls for the expanded layout. it is needed
+                        // for large screen devices.
+                        val backgroundIds =
+                            if (type == TYPE.PLAYER) {
+                                MediaViewHolder.backgroundIds
+                            } else {
+                                setOf(RecommendationViewHolder.backgroundId)
+                            }
+                        backgroundIds.forEach { id ->
+                            expandedLayout.getConstraint(id).layout.mHeight =
+                                context.resources.getDimensionPixelSize(
+                                    R.dimen.qs_media_session_height_expanded
+                                )
+                        }
+                    }
+                    if (this@MediaViewController::configurationChangeListener.isInitialized) {
+                        configurationChangeListener.invoke()
                         refreshState()
                     }
                 }
@@ -195,13 +194,14 @@ constructor(
      * The expanded constraint set used to render a expanded player. If it is modified, make sure to
      * call [refreshState]
      */
-    val collapsedLayout = ConstraintSet()
-
+    var collapsedLayout = ConstraintSet()
+        @VisibleForTesting set
     /**
      * The expanded constraint set used to render a collapsed player. If it is modified, make sure
      * to call [refreshState]
      */
-    val expandedLayout = ConstraintSet()
+    var expandedLayout = ConstraintSet()
+        @VisibleForTesting set
 
     /** Whether the guts are visible for the associated player. */
     var isGutsVisible = false
@@ -306,19 +306,19 @@ constructor(
         squishedViewState.height = squishedHeight
         // We are not overriding the squishedViewStates height but only the children to avoid
         // them remeasuring the whole view. Instead it just remains as the original size
-        backgroundIds.forEach { id ->
+        MediaViewHolder.backgroundIds.forEach { id ->
             squishedViewState.widgetStates.get(id)?.let { state -> state.height = squishedHeight }
         }
 
         // media player
         calculateWidgetGroupAlphaForSquishiness(
-            controlIds,
+            MediaViewHolder.expandedBottomActionIds,
             squishedViewState.measureHeight.toFloat(),
             squishedViewState,
             squishFraction
         )
         calculateWidgetGroupAlphaForSquishiness(
-            detailIds,
+            MediaViewHolder.detailIds,
             squishedViewState.measureHeight.toFloat(),
             squishedViewState,
             squishFraction
@@ -348,14 +348,17 @@ constructor(
      * bottom of UMO reach the bottom of this group It will change to alpha 1.0 when the visible
      * bottom of UMO reach the top of the group below e.g.Album title, artist title and play-pause
      * button will change alpha together.
+     *
      * ```
      *     And their alpha becomes 1.0 when the visible bottom of UMO reach the top of controls,
      *     including progress bar, next button, previous button
      * ```
+     *
      * widgetGroupIds: a group of widgets have same state during UMO is squished,
      * ```
      *     e.g. Album title, artist title and play-pause button
      * ```
+     *
      * groupEndPosition: the height of UMO, when the height reaches this value,
      * ```
      *     widgets in this group should have 1.0 as alpha
@@ -363,6 +366,7 @@ constructor(
      *         visible when the height of UMO reaches the top of controls group
      *         (progress bar, previous button and next button)
      * ```
+     *
      * squishedViewState: hold the widgetState of each widget, which will be modified
      * squishFraction: the squishFraction of UMO
      */
@@ -479,7 +483,7 @@ constructor(
      */
     fun attach(transitionLayout: TransitionLayout, type: TYPE) =
         traceSection("MediaViewController#attach") {
-            updateMediaViewControllerType(type)
+            loadLayoutForType(type)
             logger.logMediaLocation("attach $type", currentStartLocation, currentEndLocation)
             this.transitionLayout = transitionLayout
             layoutController.attach(transitionLayout)
@@ -588,7 +592,11 @@ constructor(
                         tmpState
                     )
             }
-            logger.logMediaSize("setCurrentState", result.width, result.height)
+            logger.logMediaSize(
+                "setCurrentState (progress $transitionProgress)",
+                result.width,
+                result.height
+            )
             layoutController.setState(
                 result,
                 applyImmediately,
@@ -620,7 +628,7 @@ constructor(
                 result.height = result.measureHeight
                 result.width = result.measureWidth
                 // Make sure all background views are also resized such that their size is correct
-                backgroundIds.forEach { id ->
+                MediaViewHolder.backgroundIds.forEach { id ->
                     result.widgetStates.get(id)?.let { state ->
                         state.height = result.height
                         state.width = result.width
@@ -637,7 +645,7 @@ constructor(
         return result
     }
 
-    private fun updateMediaViewControllerType(type: TYPE) {
+    private fun loadLayoutForType(type: TYPE) {
         this.type = type
 
         // These XML resources contain ConstraintSets that will apply to this player type's layout
@@ -665,7 +673,7 @@ constructor(
      *
      * @param location Target
      * @param locationWhenHidden Location that will be used when the target is not
-     * [MediaHost.visible]
+     *   [MediaHost.visible]
      * @return State require for executing a transition, and also the respective [MediaHost].
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {

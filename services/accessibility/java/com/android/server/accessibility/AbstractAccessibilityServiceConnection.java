@@ -81,7 +81,6 @@ import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -103,7 +102,6 @@ import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.inputmethod.InputMethodManagerInternal;
-import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -142,7 +140,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     protected final SystemSupport mSystemSupport;
     protected final WindowManagerInternal mWindowManagerService;
     private final SystemActionPerformer mSystemActionPerformer;
-    private final AccessibilityWindowManager mA11yWindowManager;
+    final AccessibilityWindowManager mA11yWindowManager;
     private final DisplayManager mDisplayManager;
     private final PowerManager mPowerManager;
     private final IPlatformCompat mIPlatformCompat;
@@ -271,6 +269,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
          */
         void onClientChangeLocked(boolean serviceInfoChanged);
 
+        /**
+         * Called back to notify the system the proxy client for a device has changed.
+         *
+         * Changes include if the proxy is unregistered, if its service info list has changed, or if
+         * its focus appearance has changed.
+         */
+        void onProxyChanged(int deviceId);
+
         int getCurrentUserIdLocked();
 
         Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
@@ -314,8 +320,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
 
         void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc);
-
-        void setCurrentUserFocusAppearance(int strokeWidth, int color);
 
     }
 
@@ -1635,7 +1639,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return false;
         }
 
-        if (event.isAccessibilityDataPrivate()
+        if (event.isAccessibilityDataSensitive()
                 && (mFetchFlags & AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL) == 0) {
             return false;
         }
@@ -2006,15 +2010,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return accessibilityWindowId;
     }
 
-    private int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
+    int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
         if (windowId == AccessibilityWindowInfo.ANY_WINDOW_ID) {
             final int focusedWindowId = mA11yWindowManager.getFocusedWindowId(focusType);
             // If the caller is a proxy and the found window doesn't belong to a proxy display
             // (or vice versa), then return null. This doesn't work if there are multiple active
-            // proxys, but in the future this code shouldn't be needed if input and a11y focus are
+            // proxys, but in the future this code shouldn't be needed if input focus are
             // properly split. (so we will deal with the issues if we see them).
-            //TODO(254545943): Remove this when there is user and proxy separation of input and a11y
-            // focus
+            //TODO(254545943): Remove this when there is user and proxy separation of input focus
             if (!mA11yWindowManager.windowIdBelongsToDisplayType(focusedWindowId, mDisplayTypes)) {
                 return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             }
@@ -2076,7 +2079,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             IAccessibilityInteractionConnectionCallback callback, int fetchFlags,
             long interrogatingTid) {
         RemoteAccessibilityConnection connection;
-        IBinder activityToken = null;
+        IBinder windowToken = null;
         synchronized (mLock) {
             connection = mA11yWindowManager.getConnectionLocked(userId, resolvedWindowId);
             if (connection == null)  {
@@ -2085,9 +2088,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final boolean isA11yFocusAction = (action == ACTION_ACCESSIBILITY_FOCUS)
                     || (action == ACTION_CLEAR_ACCESSIBILITY_FOCUS);
             if (!isA11yFocusAction) {
-                final WindowInfo windowInfo =
-                        mA11yWindowManager.findWindowInfoByIdLocked(resolvedWindowId);
-                if (windowInfo != null) activityToken = windowInfo.activityToken;
+                windowToken = mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(
+                        userId, resolvedWindowId);
             }
             final AccessibilityWindowInfo a11yWindowInfo =
                     mA11yWindowManager.findA11yWindowInfoByIdLocked(resolvedWindowId);
@@ -2108,9 +2110,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (action == ACTION_CLICK || action == ACTION_LONG_CLICK) {
                 mA11yWindowManager.notifyOutsideTouch(userId, resolvedWindowId);
             }
-            if (activityToken != null) {
-                LocalServices.getService(ActivityTaskManagerInternal.class)
-                        .setFocusedActivity(activityToken);
+            if (windowToken != null) {
+                mWindowManagerService.requestWindowFocus(windowToken);
             }
             if (intConnTracingEnabled()) {
                 logTraceIntConn("performAccessibilityAction",
@@ -2546,6 +2547,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc)
             throws RemoteException {
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.setTrustedOverlay(sc, true).apply();
+        t.close();
         synchronized (mLock) {
             RemoteAccessibilityConnection connection =
                     mA11yWindowManager.getConnectionLocked(

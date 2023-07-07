@@ -19,11 +19,12 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.SystemClock
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import com.android.test.SurfaceViewBufferTestBase.Companion.ScalingMode
 import com.android.test.SurfaceViewBufferTestBase.Companion.Transform
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -103,7 +104,9 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
 
         // verify buffer size is reset to default buffer size
         LayersTraceSubject(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
-        LayersTraceSubject(trace).layer("SurfaceView", 2).doesNotExist()
+        Assert.assertThrows(AssertionError::class.java) {
+            LayersTraceSubject(trace).layer("SurfaceView", 2)
+        }
         LayersTraceSubject(trace).layer("SurfaceView", 3).hasBufferSize(bufferSize)
     }
 

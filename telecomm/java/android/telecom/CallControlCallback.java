@@ -44,9 +44,11 @@ public interface CallControlCallback {
      *
      * @param wasCompleted The {@link Consumer} to be completed. If the client can set the call
      *                     active on their end, the {@link Consumer#accept(Object)} should be
-     *                     called with {@link Boolean#TRUE}. Otherwise,
-     *                     {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#FALSE}.
+     *                     called with {@link Boolean#TRUE}.
+     *
+     *                     Otherwise, {@link Consumer#accept(Object)} should be called with
+     *                     {@link Boolean#FALSE}.  Telecom will effectively ignore the remote
+     *                     setActive request and the call will remain in whatever state it is in.
      */
     void onSetActive(@NonNull Consumer<Boolean> wasCompleted);
 
@@ -56,9 +58,11 @@ public interface CallControlCallback {
      *
      * @param wasCompleted The {@link Consumer} to be completed. If the client can set the call
      *                     inactive on their end, the {@link Consumer#accept(Object)} should be
-     *                     called with {@link Boolean#TRUE}. Otherwise,
-     *                     {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#FALSE}.
+     *                     called with {@link Boolean#TRUE}.
+     *
+     *                     Otherwise, {@link Consumer#accept(Object)} should be called with
+     *                     {@link Boolean#FALSE}.  Telecom will effectively ignore the remote
+     *                     setInactive request and the call will remain in whatever state it is in.
      */
     void onSetInactive(@NonNull Consumer<Boolean> wasCompleted);
 
@@ -68,31 +72,29 @@ public interface CallControlCallback {
      * @param videoState   see {@link android.telecom.CallAttributes.CallType} for valid states
      * @param wasCompleted The {@link Consumer} to be completed. If the client can answer the call
      *                     on their end, {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#TRUE}. Otherwise, {@link Consumer#accept(Object)} should
-     *                     be called with {@link Boolean#FALSE}.
+     *                     {@link Boolean#TRUE}.
+     *
+     *                     Otherwise,{@link Consumer#accept(Object)} should  be called with
+     *                     {@link Boolean#FALSE}. However, Telecom will still disconnect
+     *                     the call and remove it from tracking.
      */
     void onAnswer(@android.telecom.CallAttributes.CallType int videoState,
             @NonNull Consumer<Boolean> wasCompleted);
 
     /**
-     * Telecom is informing the client to reject the incoming call
-     *
-     * @param wasCompleted The {@link Consumer} to be completed. If the client can reject the
-     *                     incoming call, {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#TRUE}. Otherwise, {@link Consumer#accept(Object)}
-     *                     should  be called with {@link Boolean#FALSE}.
-     */
-    void onReject(@NonNull Consumer<Boolean> wasCompleted);
-
-    /**
      * Telecom is informing the client to disconnect the call
      *
-     * @param wasCompleted The {@link Consumer} to be completed. If the client can disconnect the
-     *                     call on their end, {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#TRUE}. Otherwise, {@link Consumer#accept(Object)}
-     *                     should  be called with {@link Boolean#FALSE}.
+     * @param disconnectCause represents the cause for disconnecting the call.
+     * @param wasCompleted    The {@link Consumer} to be completed. If the client can disconnect
+     *                        the call on their end, {@link Consumer#accept(Object)} should be
+     *                        called with {@link Boolean#TRUE}.
+     *
+     *                        Otherwise,{@link Consumer#accept(Object)} should  be called with
+     *                        {@link Boolean#FALSE}. However, Telecom will still disconnect
+     *                        the call and remove it from tracking.
      */
-    void onDisconnect(@NonNull Consumer<Boolean> wasCompleted);
+    void onDisconnect(@NonNull DisconnectCause disconnectCause,
+            @NonNull Consumer<Boolean> wasCompleted);
 
     /**
      * Telecom is informing the client to set the call in streaming.

@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
@@ -50,7 +51,8 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
                 .padding(
                     horizontal = SettingsDimension.itemPaddingStart,
                     vertical = SettingsDimension.itemPaddingVertical,
-                ),
+                )
+                .semantics(mergeDescendants = true) {},
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val app = packageInfo.applicationInfo
@@ -74,7 +76,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     private fun AppVersion() {
         if (packageInfo.versionName == null) return
         Spacer(modifier = Modifier.height(4.dp))
-        SettingsBody(packageInfo.versionName)
+        SettingsBody(packageInfo.versionNameBidiWrapped)
     }
 
     @Composable
@@ -82,9 +84,14 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
         if (packageInfo.versionName == null) return
         Divider()
         Box(modifier = Modifier.padding(SettingsDimension.itemPadding)) {
-            val versionName = BidiFormatter.getInstance().unicodeWrap(packageInfo.versionName)
-            SettingsBody(stringResource(R.string.version_text, versionName))
+            SettingsBody(stringResource(R.string.version_text, packageInfo.versionNameBidiWrapped))
         }
+    }
+
+    private companion object {
+        /** Wrapped the version name, so its directionality still keep same when RTL. */
+        val PackageInfo.versionNameBidiWrapped: String
+            get() = BidiFormatter.getInstance().unicodeWrap(versionName)
     }
 }
 
@@ -93,8 +100,8 @@ internal fun AppIcon(app: ApplicationInfo, size: Dp) {
     val appRepository = rememberAppRepository()
     Image(
         painter = rememberDrawablePainter(appRepository.produceIcon(app).value),
-        contentDescription = null,
-        modifier = Modifier.size(size)
+        contentDescription = appRepository.produceIconContentDescription(app).value,
+        modifier = Modifier.size(size),
     )
 }
 

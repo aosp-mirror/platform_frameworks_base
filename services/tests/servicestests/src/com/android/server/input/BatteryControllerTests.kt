@@ -19,8 +19,6 @@ package com.android.server.input
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.content.Context
-import android.content.ContextWrapper
 import android.hardware.BatteryState.STATUS_CHARGING
 import android.hardware.BatteryState.STATUS_DISCHARGING
 import android.hardware.BatteryState.STATUS_FULL
@@ -31,12 +29,14 @@ import android.hardware.input.IInputDeviceBatteryState
 import android.hardware.input.IInputDevicesChangedListener
 import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.os.Binder
 import android.os.IBinder
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
+import android.testing.TestableContext
 import android.view.InputDevice
-import androidx.test.InstrumentationRegistry
+import androidx.test.core.app.ApplicationProvider
 import com.android.server.input.BatteryController.BluetoothBatteryManager
 import com.android.server.input.BatteryController.BluetoothBatteryManager.BluetoothBatteryListener
 import com.android.server.input.BatteryController.POLLING_PERIOD_MILLIS
@@ -66,7 +66,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
@@ -197,17 +196,18 @@ class BatteryControllerTests {
     private lateinit var bluetoothBatteryManager: BluetoothBatteryManager
 
     private lateinit var batteryController: BatteryController
-    private lateinit var context: Context
+    private lateinit var context: TestableContext
     private lateinit var testLooper: TestLooper
     private lateinit var devicesChangedListener: IInputDevicesChangedListener
     private val deviceGenerationMap = mutableMapOf<Int /*deviceId*/, Int /*generation*/>()
 
     @Before
     fun setup() {
-        context = spy(ContextWrapper(InstrumentationRegistry.getContext()))
+        context = TestableContext(ApplicationProvider.getApplicationContext())
         testLooper = TestLooper()
-        val inputManager = InputManager.resetInstance(iInputManager)
-        `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
+        InputManagerGlobal.resetInstance(iInputManager)
+        val inputManager = InputManager(context)
+        context.addMockSystemService(InputManager::class.java, inputManager)
         `when`(iInputManager.inputDeviceIds).then {
             deviceGenerationMap.keys.toIntArray()
         }
@@ -256,7 +256,7 @@ class BatteryControllerTests {
 
     @After
     fun tearDown() {
-        InputManager.clearInstance()
+        InputManagerGlobal.clearInstance()
     }
 
     @Test

@@ -78,18 +78,6 @@ public class RecoverableKeyStoreDb {
         return new RecoverableKeyStoreDb(helper);
     }
 
-    /**
-     * A new instance, storing the database in the user directory of {@code context}.
-     *
-     * @hide
-     */
-    public static RecoverableKeyStoreDb newInstance(Context context, int version) {
-        RecoverableKeyStoreDbHelper helper = new RecoverableKeyStoreDbHelper(context, version);
-        helper.setWriteAheadLoggingEnabled(true);
-        helper.setIdleConnectionTimeout(IDLE_TIMEOUT_SECONDS);
-        return new RecoverableKeyStoreDb(helper);
-    }
-
     private RecoverableKeyStoreDb(RecoverableKeyStoreDbHelper keyStoreDbHelper) {
         this.mKeyStoreDbHelper = keyStoreDbHelper;
         this.mTestOnlyInsecureCertificateHelper = new TestOnlyInsecureCertificateHelper();

@@ -189,11 +189,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
      */
     private long[] mChildStartAndStopTimes;
 
-    /**
-     * Tracks whether we've notified listeners of the onAnimationStart() event.
-     */
-    private boolean mStartListenersCalled;
-
     // This is to work around a bug in b/34736819. This needs to be removed once app team
     // fixes their side.
     private AnimatorListenerAdapter mAnimationEndListener = new AnimatorListenerAdapter() {
@@ -424,7 +419,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
-        if (isStarted()) {
+        if (isStarted() || mStartListenersCalled) {
             notifyListeners(AnimatorCaller.ON_CANCEL, false);
             callOnPlayingSet(Animator::cancel);
             mPlayingSet.clear();
@@ -486,13 +481,13 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             return;
         }
         if (isStarted()) {
+            mStarted = false; // don't allow reentrancy
             // Iterate the animations that haven't finished or haven't started, and end them.
             if (mReversing) {
                 // Between start() and first frame, mLastEventId would be unset (i.e. -1)
                 mLastEventId = mLastEventId == -1 ? mEvents.size() : mLastEventId;
-                while (mLastEventId > 0) {
-                    mLastEventId = mLastEventId - 1;
-                    AnimationEvent event = mEvents.get(mLastEventId);
+                for (int eventId = mLastEventId - 1; eventId >= 0; eventId--) {
+                    AnimationEvent event = mEvents.get(eventId);
                     Animator anim = event.mNode.mAnimation;
                     if (mNodeMap.get(anim).mEnded) {
                         continue;
@@ -508,11 +503,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     }
                 }
             } else {
-                while (mLastEventId < mEvents.size() - 1) {
+                for (int eventId = mLastEventId + 1; eventId < mEvents.size(); eventId++) {
                     // Avoid potential reentrant loop caused by child animators manipulating
                     // AnimatorSet's lifecycle (i.e. not a recommended approach).
-                    mLastEventId = mLastEventId + 1;
-                    AnimationEvent event = mEvents.get(mLastEventId);
+                    AnimationEvent event = mEvents.get(eventId);
                     Animator anim = event.mNode.mAnimation;
                     if (mNodeMap.get(anim).mEnded) {
                         continue;
@@ -527,7 +521,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     }
                 }
             }
-            mPlayingSet.clear();
         }
         endAnimation();
     }
@@ -723,6 +716,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
+        if (inReverse == mReversing && selfPulse == mSelfPulse && mStarted) {
+            // It is already started
+            return;
+        }
         mStarted = true;
         mSelfPulse = selfPulse;
         mPaused = false;
@@ -754,20 +751,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             // onAnimationEnd() right away.
             end();
         }
-    }
-
-    private void notifyStartListeners(boolean inReverse) {
-        if (mListeners != null && !mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_START, inReverse);
-        }
-        mStartListenersCalled = true;
-    }
-
-    private void notifyEndListeners(boolean inReverse) {
-        if (mListeners != null && mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_END, inReverse);
-        }
-        mStartListenersCalled = false;
     }
 
     // Returns true if set is empty or contains nothing but animator sets with no start delay.
@@ -842,8 +825,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     private void animateBasedOnPlayTime(
             long currentPlayTime,
             long lastPlayTime,
-            boolean inReverse,
-            boolean notify
+            boolean inReverse
     ) {
         if (currentPlayTime < 0 || lastPlayTime < -1) {
             throw new UnsupportedOperationException("Error: Play time should never be negative.");
@@ -874,8 +856,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             while (index < endIndex) {
                 long playTime = startEndTimes[index];
                 if (lastPlayTime != playTime) {
-                    animateSkipToEnds(playTime, lastPlayTime, notify);
-                    animateValuesInRange(playTime, lastPlayTime, notify);
+                    animateSkipToEnds(playTime, lastPlayTime);
+                    animateValuesInRange(playTime, lastPlayTime);
                     lastPlayTime = playTime;
                 }
                 index++;
@@ -885,15 +867,15 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 index--;
                 long playTime = startEndTimes[index];
                 if (lastPlayTime != playTime) {
-                    animateSkipToEnds(playTime, lastPlayTime, notify);
-                    animateValuesInRange(playTime, lastPlayTime, notify);
+                    animateSkipToEnds(playTime, lastPlayTime);
+                    animateValuesInRange(playTime, lastPlayTime);
                     lastPlayTime = playTime;
                 }
             }
         }
         if (currentPlayTime != lastPlayTime) {
-            animateSkipToEnds(currentPlayTime, lastPlayTime, notify);
-            animateValuesInRange(currentPlayTime, lastPlayTime, notify);
+            animateSkipToEnds(currentPlayTime, lastPlayTime);
+            animateValuesInRange(currentPlayTime, lastPlayTime);
         }
     }
 
@@ -913,13 +895,11 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     @Override
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {
         initAnimation();
 
         if (lastPlayTime > currentPlayTime) {
-            if (notify) {
-                notifyStartListeners(true);
-            }
+            notifyStartListeners(true);
             for (int i = mEvents.size() - 1; i >= 0; i--) {
                 AnimationEvent event = mEvents.get(i);
                 Node node = event.mNode;
@@ -933,25 +913,25 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     if (currentPlayTime <= start && start < lastPlayTime) {
                         animator.animateSkipToEnds(
                                 0,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
+                        mPlayingSet.remove(node);
                     } else if (start <= currentPlayTime && currentPlayTime <= end) {
                         animator.animateSkipToEnds(
                                 currentPlayTime - node.mStartTime,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
+                        if (!mPlayingSet.contains(node)) {
+                            mPlayingSet.add(node);
+                        }
                     }
                 }
             }
-            if (currentPlayTime <= 0 && notify) {
+            if (currentPlayTime <= 0) {
                 notifyEndListeners(true);
             }
         } else {
-            if (notify) {
-                notifyStartListeners(false);
-            }
+            notifyStartListeners(false);
             int eventsSize = mEvents.size();
             for (int i = 0; i < eventsSize; i++) {
                 AnimationEvent event = mEvents.get(i);
@@ -966,39 +946,39 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     if (lastPlayTime < end && end <= currentPlayTime) {
                         animator.animateSkipToEnds(
                                 end - node.mStartTime,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
+                        mPlayingSet.remove(node);
                     } else if (start <= currentPlayTime && currentPlayTime <= end) {
                         animator.animateSkipToEnds(
                                 currentPlayTime - node.mStartTime,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
+                        if (!mPlayingSet.contains(node)) {
+                            mPlayingSet.add(node);
+                        }
                     }
                 }
             }
-            if (currentPlayTime >= getTotalDuration() && notify) {
+            if (currentPlayTime >= getTotalDuration()) {
                 notifyEndListeners(false);
             }
         }
     }
 
     @Override
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {
         initAnimation();
 
-        if (notify) {
-            if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
-                notifyStartListeners(false);
-            } else {
-                long duration = getTotalDuration();
-                if (duration >= 0
-                        && (lastPlayTime > duration || (lastPlayTime == duration
-                        && currentPlayTime < duration))
-                ) {
-                    notifyStartListeners(true);
-                }
+        if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
+            notifyStartListeners(false);
+        } else {
+            long duration = getTotalDuration();
+            if (duration >= 0
+                    && (lastPlayTime > duration || (lastPlayTime == duration
+                    && currentPlayTime < duration))
+            ) {
+                notifyStartListeners(true);
             }
         }
 
@@ -1019,8 +999,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 ) {
                     animator.animateValuesInRange(
                             currentPlayTime - node.mStartTime,
-                            Math.max(-1, lastPlayTime - node.mStartTime),
-                            notify
+                            Math.max(-1, lastPlayTime - node.mStartTime)
                     );
                 }
             }
@@ -1115,8 +1094,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 mSeekState.setPlayTime(0, mReversing);
             }
         }
-        animateBasedOnPlayTime(playTime, lastPlayTime, mReversing, true);
         mSeekState.setPlayTime(playTime, mReversing);
+        animateBasedOnPlayTime(playTime, lastPlayTime, mReversing);
     }
 
     /**
@@ -1149,16 +1128,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     private void initChildren() {
         if (!isInitialized()) {
             mChildrenInitialized = true;
-
-            // We have to initialize all the start values so that they are based on the previous
-            // values.
-            long[] times = ensureChildStartAndEndTimes();
-
-            long previousTime = -1;
-            for (long time : times) {
-                animateBasedOnPlayTime(time, previousTime, false, false);
-                previousTime = time;
-            }
+            skipToEndValue(false);
         }
     }
 
@@ -1494,11 +1464,11 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         anim.mPauseTime = -1;
         anim.mSeekState = new SeekState();
         anim.mSelfPulse = true;
+        anim.mStartListenersCalled = false;
         anim.mPlayingSet = new ArrayList<Node>();
         anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);
         anim.mEvents = new ArrayList<AnimationEvent>();
-        anim.mStartListenersCalled = false;
         anim.mAnimationEndListener = new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

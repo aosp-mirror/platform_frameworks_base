@@ -359,6 +359,51 @@ import java.util.concurrent.locks.ReentrantLock;
  codec to use a previously created {@linkplain #createPersistentInputSurface persistent input
  surface} by calling {@link #setInputSurface}.
 
+ <h4 id=EncoderProfiles><a name="EncoderProfiles"></a>Encoder Profiles</h4>
+ <p>
+ When using an encoder, it is recommended to set the desired codec {@link MediaFormat#KEY_PROFILE
+ profile} during {@link #configure configure()}. (This is only meaningful for
+ {@link MediaFormat#KEY_MIME media formats} for which profiles are defined.)
+ <p>
+ If a profile is not specified during {@code configure}, the encoder will choose a profile for the
+ session based on the available information. We will call this value the <i>default profile</i>.
+ The selection of the default profile is device specific and may not be deterministic
+ (could be ad hoc or even experimental). The encoder may choose a default profile that is not
+ suitable for the intended encoding session, which may result in the encoder ultimately rejecting
+ the session.
+ <p>
+ The encoder may reject the encoding session if the configured (or default if unspecified) profile
+ does not support the codec input (mainly the {@link MediaFormat#KEY_COLOR_FORMAT color format} for
+ video/image codecs, or the {@link MediaFormat#KEY_PCM_ENCODING sample encoding} and the {@link
+ MediaFormat#KEY_CHANNEL_COUNT number of channels} for audio codecs, but also possibly
+ {@link MediaFormat#KEY_WIDTH width}, {@link MediaFormat#KEY_HEIGHT height},
+ {@link MediaFormat#KEY_FRAME_RATE frame rate}, {@link MediaFormat#KEY_BIT_RATE bitrate} or
+ {@link MediaFormat#KEY_SAMPLE_RATE sample rate}.)
+ Alternatively, the encoder may choose to (but is not required to) convert the input to support the
+ selected (or default) profile - or adjust the chosen profile based on the presumed or detected
+ input format - to ensure a successful encoding session. <b>Note</b>: Converting the input to match
+ an incompatible profile will in most cases result in decreased codec performance.
+ <p>
+ To ensure backward compatibility, the following guarantees are provided by Android:
+ <ul>
+ <li>The default video encoder profile always supports 8-bit YUV 4:2:0 color format ({@link
+ CodecCapabilities#COLOR_FormatYUV420Flexible COLOR_FormatYUV420Flexible} and equivalent
+ {@link CodecCapabilities#colorFormats supported formats}) for both Surface and ByteBuffer modes.
+ <li>The default video encoder profile always supports the default 8-bit RGBA color format in
+ Surface mode even if no such formats are enumerated in the {@link CodecCapabilities#colorFormats
+ supported formats}.
+ </ul>
+ <p class=note>
+ <b>Note</b>: the accepted profile can be queried through the {@link #getOutputFormat output
+ format} of the encoder after {@code configure} to allow applications to set up their
+ codec input to a format supported by the encoder profile.
+ <p>
+ <b>Implication:</b>
+ <ul>
+ <li>Applications that want to encode 4:2:2, 4:4:4, 10+ bit or HDR video input <b>MUST</b> configure
+ a suitable profile for encoders.
+ </ul>
+
  <h4 id=CSD><a name="CSD"></a>Codec-specific Data</h4>
  <p>
  Some formats, notably AAC audio and MPEG4, H.264 and H.265 video formats require the actual data
@@ -3181,7 +3226,10 @@ final public class MediaCodec {
                 mValid = false;
                 mNativeContext = 0;
             }
-            sPool.offer(this);
+
+            if (!mInternal) {
+                sPool.offer(this);
+            }
         }
 
         private native void native_recycle();
@@ -3245,6 +3293,7 @@ final public class MediaCodec {
             mNativeContext = context;
             mMappable = isMappable;
             mValid = (context != 0);
+            mInternal = true;
         }
 
         private static final BlockingQueue<LinearBlock> sPool =
@@ -3255,6 +3304,7 @@ final public class MediaCodec {
         private boolean mMappable = false;
         private ByteBuffer mMapped = null;
         private long mNativeContext = 0;
+        private boolean mInternal = false;
     }
 
     /**
@@ -4883,8 +4933,12 @@ final public class MediaCodec {
          * Called when an output frame has rendered on the output surface.
          * <p>
          * <strong>Note:</strong> This callback is for informational purposes only: to get precise
-         * render timing samples, and can be significantly delayed and batched. Some frames may have
-         * been rendered even if there was no callback generated.
+         * render timing samples, and can be significantly delayed and batched. Starting with
+         * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, a callback will always
+         * be received for each rendered frame providing the MediaCodec is still in the executing
+         * state when the callback is dispatched. Prior to Android
+         * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, some frames may have been
+         * rendered even if there was no callback generated.
          *
          * @param codec the MediaCodec instance
          * @param presentationTimeUs the presentation time (media time) of the frame rendered.

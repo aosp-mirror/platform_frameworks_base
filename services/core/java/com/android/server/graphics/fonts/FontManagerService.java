@@ -239,7 +239,7 @@ public final class FontManagerService extends IFontManager.Stub {
         String[] certs = mContext.getResources().getStringArray(
                 R.array.config_fontManagerServiceCerts);
 
-        if (mDebugCertFilePath != null && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+        if (mDebugCertFilePath != null && Build.IS_DEBUGGABLE) {
             String[] tmp = new String[certs.length + 1];
             System.arraycopy(certs, 0, tmp, 0, certs.length);
             tmp[certs.length] = mDebugCertFilePath;
@@ -251,8 +251,8 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     /**
-     * Add debug certificate to the cert list. This must be called only on userdebug/eng
-     * build.
+     * Add debug certificate to the cert list. This must be called only on debuggable build.
+     *
      * @param debugCertPath a debug certificate file path
      */
     public void addDebugCertificate(@Nullable String debugCertPath) {

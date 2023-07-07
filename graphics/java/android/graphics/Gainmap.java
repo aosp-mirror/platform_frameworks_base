@@ -25,13 +25,11 @@ import libcore.util.NativeAllocationRegistry;
 
 /**
  * Gainmap represents a mechanism for augmenting an SDR image to produce an HDR one with variable
- * display adjustment capability.
- *
- * It is a combination of a set of metadata describing how to apply the gainmap, as well as either
- * a 1 (such as {@link android.graphics.Bitmap.Config#ALPHA_8} or 3
+ * display adjustment capability. It is a combination of a set of metadata describing how to apply
+ * the gainmap, as well as either a 1 (such as {@link android.graphics.Bitmap.Config#ALPHA_8} or 3
  * (such as {@link android.graphics.Bitmap.Config#ARGB_8888} with the alpha channel ignored)
  * channel Bitmap that represents the gainmap data itself.
- *
+ * <p>
  * When rendering to an {@link android.content.pm.ActivityInfo#COLOR_MODE_HDR} activity, the
  * hardware accelerated {@link Canvas} will automatically apply the gainmap when sufficient
  * HDR headroom is available.
@@ -45,7 +43,7 @@ import libcore.util.NativeAllocationRegistry;
  * image, often at a lower resolution (such as 1/4th), along with some metadata to describe
  * how to apply the gainmap. The gainmap image itself is then a greyscale image representing
  * the transformation to apply onto the base image to reconstruct an HDR rendition of it.
- *
+ * <p>
  * As such these "gainmap images" consist of 3 parts - a base {@link Bitmap} with a
  * {@link Bitmap#getGainmap()} that returns an instance of this class which in turn contains
  * the enhancement layer represented as another Bitmap, accessible via {@link #getGainmapContents()}
@@ -55,28 +53,30 @@ import libcore.util.NativeAllocationRegistry;
  * When doing custom rendering such as to an OpenGL ES or Vulkan context, the gainmap is not
  * automatically applied. In such situations, the following steps are appropriate to render the
  * gainmap in combination with the base image.
- *
+ * <p>
  * Suppose our display has HDR to SDR ratio of H, and we wish to display an image with gainmap on
  * this display. Let B be the pixel value from the base image in a color space that has the
  * primaries of the base image and a linear transfer function. Let G be the pixel value from the
  * gainmap. Let D be the output pixel in the same color space as B. The value of D is computed
  * as follows:
- *
+ * <p>
  * First, let W be a weight parameter determining how much the gainmap will be applied.
- *   W = clamp((log(H)               - log(displayRatioHdr)) /
- *             (log(displayRatioHdr) - log(displayRatioSdr), 0, 1)
+ * <pre class="prettyprint">
+ *   W = clamp((log(H)                      - log(minDisplayRatioForHdrTransition)) /
+ *             (log(displayRatioForFullHdr) - log(minDisplayRatioForHdrTransition), 0, 1)</pre>
  *
  * Next, let L be the gainmap value in log space. We compute this from the value G that was
  * sampled from the texture as follows:
- *   L = mix(log(gainmapRatioMin), log(gainmapRatioMax), pow(G, gainmapGamma))
- *
+ * <pre class="prettyprint">
+ *   L = mix(log(ratioMin), log(ratioMax), pow(G, gamma))</pre>
  * Finally, apply the gainmap to compute D, the displayed pixel. If the base image is SDR then
  * compute:
- *   D = (B + epsilonSdr) * exp(L * W) - epsilonHdr
- * If the base image is HDR then compute:
- *   D = (B + epsilonHdr) * exp(L * (W - 1)) - epsilonSdr
- *
- * In the above math, log() is a natural logarithm and exp() is natural exponentiation.
+ * <pre class="prettyprint">
+ *   D = (B + epsilonSdr) * exp(L * W) - epsilonHdr</pre>
+ * <p>
+ * In the above math, log() is a natural logarithm and exp() is natural exponentiation. The base
+ * for these functions cancels out and does not affect the result, so other bases may be used
+ * if preferred.
  */
 public final class Gainmap implements Parcelable {
 
@@ -122,6 +122,16 @@ public final class Gainmap implements Parcelable {
     }
 
     /**
+     * Creates a new gainmap using the provided gainmap as the metadata source and the provided
+     * bitmap as the replacement for the gainmapContents
+     * TODO: Make public, it's useful
+     * @hide
+     */
+    public Gainmap(@NonNull Gainmap gainmap, @NonNull Bitmap gainmapContents) {
+        this(gainmapContents, nCreateCopy(gainmap.mNativePtr));
+    }
+
+    /**
      * @return Returns the image data of the gainmap represented as a Bitmap. This is represented
      * as a Bitmap for broad API compatibility, however certain aspects of the Bitmap are ignored
      * such as {@link Bitmap#getColorSpace()} or {@link Bitmap#getGainmap()} as they are not
@@ -150,7 +160,6 @@ public final class Gainmap implements Parcelable {
     /**
      * Sets the gainmap ratio min. For single-plane gainmaps, r, g, and b should be the same.
      */
-    @NonNull
     public void setRatioMin(float r, float g, float b) {
         nSetRatioMin(mNativePtr, r, g, b);
     }
@@ -169,7 +178,6 @@ public final class Gainmap implements Parcelable {
     /**
      * Sets the gainmap ratio max. For single-plane gainmaps, r, g, and b should be the same.
      */
-    @NonNull
     public void setRatioMax(float r, float g, float b) {
         nSetRatioMax(mNativePtr, r, g, b);
     }
@@ -188,7 +196,6 @@ public final class Gainmap implements Parcelable {
     /**
      * Sets the gainmap gamma. For single-plane gainmaps, r, g, and b should be the same.
      */
-    @NonNull
     public void setGamma(float r, float g, float b) {
         nSetGamma(mNativePtr, r, g, b);
     }
@@ -208,7 +215,6 @@ public final class Gainmap implements Parcelable {
      * Sets the sdr epsilon which is used to avoid numerical instability.
      * For single-plane gainmaps, r, g, and b should be the same.
      */
-    @NonNull
     public void setEpsilonSdr(float r, float g, float b) {
         nSetEpsilonSdr(mNativePtr, r, g, b);
     }
@@ -228,7 +234,6 @@ public final class Gainmap implements Parcelable {
      * Sets the hdr epsilon which is used to avoid numerical instability.
      * For single-plane gainmaps, r, g, and b should be the same.
      */
-    @NonNull
     public void setEpsilonHdr(float r, float g, float b) {
         nSetEpsilonHdr(mNativePtr, r, g, b);
     }
@@ -248,8 +253,7 @@ public final class Gainmap implements Parcelable {
      * Sets the hdr/sdr ratio at which point the gainmap is fully applied.
      * @param max The hdr/sdr ratio at which the gainmap is fully applied. Must be >= 1.0f
      */
-    @NonNull
-    public void setDisplayRatioForFullHdr(float max) {
+    public void setDisplayRatioForFullHdr(@FloatRange(from = 1.0f) float max) {
         if (!Float.isFinite(max) || max < 1f) {
             throw new IllegalArgumentException(
                     "setDisplayRatioForFullHdr must be >= 1.0f, got = " + max);
@@ -269,7 +273,6 @@ public final class Gainmap implements Parcelable {
      * Sets the hdr/sdr ratio below which only the SDR image is displayed.
      * @param min The minimum hdr/sdr ratio at which to begin applying the gainmap. Must be >= 1.0f
      */
-    @NonNull
     public void setMinDisplayRatioForHdrTransition(@FloatRange(from = 1.0f) float min) {
         if (!Float.isFinite(min) || min < 1f) {
             throw new IllegalArgumentException(
@@ -332,6 +335,7 @@ public final class Gainmap implements Parcelable {
 
     private static native long nGetFinalizer();
     private static native long nCreateEmpty();
+    private static native long nCreateCopy(long source);
 
     private static native void nSetBitmap(long ptr, Bitmap bitmap);
 

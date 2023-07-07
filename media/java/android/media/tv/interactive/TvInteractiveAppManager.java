@@ -681,14 +681,14 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onAdBuffer(AdBuffer buffer, int seq) {
+            public void onAdBufferReady(AdBuffer buffer, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postAdBuffer(buffer);
+                    record.postAdBufferReady(buffer);
                 }
             }
         };
@@ -1420,7 +1420,7 @@ public final class TvInteractiveAppManager {
                 return;
             }
             try {
-                mService.notifyRecordingScheduled(mToken, recordingId, recordingId, mUserId);
+                mService.notifyRecordingScheduled(mToken, recordingId, requestId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1608,6 +1608,10 @@ public final class TvInteractiveAppManager {
                 mService.notifyAdBufferConsumed(mToken, buffer, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            } finally {
+                if (buffer != null) {
+                    buffer.getSharedMemory().close();
+                }
             }
         }
 
@@ -1751,7 +1755,7 @@ public final class TvInteractiveAppManager {
         /**
          * Notifies Interactive APP session when a new TV message is received.
          */
-        public void notifyTvMessage(String type, Bundle data) {
+        public void notifyTvMessage(int type, Bundle data) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
@@ -2245,12 +2249,12 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postAdBuffer(AdBuffer buffer) {
+        void postAdBufferReady(AdBuffer buffer) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mSession.getInputSession() != null) {
-                        mSession.getInputSession().notifyAdBuffer(buffer);
+                        mSession.getInputSession().notifyAdBufferReady(buffer);
                     }
                 }
             });

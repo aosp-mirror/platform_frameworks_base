@@ -38,6 +38,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -195,6 +196,9 @@ public class AccountManagerService
     private final IAccountAuthenticatorCache mAuthenticatorCache;
     private static final String PRE_N_DATABASE_NAME = "accounts.db";
     private static final Intent ACCOUNTS_CHANGED_INTENT;
+    private static final Bundle ACCOUNTS_CHANGED_OPTIONS = new BroadcastOptions()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .toBundle();
 
     private static final int SIGNATURE_CHECK_MISMATCH = 0;
     private static final int SIGNATURE_CHECK_MATCH = 1;
@@ -1075,7 +1079,8 @@ public class AccountManagerService
         Log.i(TAG, "the accountType= " + (accountType == null ? "" : accountType)
                 + " changed with useCase=" + useCase + " for userId=" + userId
                 + ", sending broadcast of " + ACCOUNTS_CHANGED_INTENT.getAction());
-        mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId));
+        mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId),
+                null /* receiverPermission */, ACCOUNTS_CHANGED_OPTIONS);
     }
 
     private void sendAccountRemovedBroadcast(
@@ -3013,7 +3018,7 @@ public class AccountManagerService
         final long identityToken = clearCallingIdentity();
         try {
             // Distill the caller's package signatures into a single digest.
-            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
+            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg, userId);
 
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
@@ -3177,12 +3182,12 @@ public class AccountManagerService
                 .write();
     }
 
-    private byte[] calculatePackageSignatureDigest(String callerPkg) {
+    private byte[] calculatePackageSignatureDigest(String callerPkg, int userId) {
         MessageDigest digester;
         try {
             digester = MessageDigest.getInstance("SHA-256");
-            PackageInfo pkgInfo = mPackageManager.getPackageInfo(
-                    callerPkg, PackageManager.GET_SIGNATURES);
+            PackageInfo pkgInfo = mPackageManager.getPackageInfoAsUser(
+                    callerPkg, PackageManager.GET_SIGNATURES, userId);
             for (Signature sig : pkgInfo.signatures) {
                 digester.update(sig.toByteArray());
             }
@@ -4940,10 +4945,6 @@ public class AccountManagerService
             if (intent.getClipData() == null) {
                 intent.setClipData(ClipData.newPlainText(null, null));
             }
-            intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
             final long bid = Binder.clearCallingIdentity();
             try {
                 PackageManager pm = mContext.getPackageManager();
@@ -4989,7 +4990,19 @@ public class AccountManagerService
             if (intent == null) {
                 return (simulateIntent == null);
             }
-            return intent.filterEquals(simulateIntent);
+            if (!intent.filterEquals(simulateIntent)) {
+                return false;
+            }
+
+            if (intent.getSelector() != simulateIntent.getSelector()) {
+                return false;
+            }
+
+            int prohibitedFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
+            return (simulateIntent.getFlags() & prohibitedFlags) == 0;
         }
 
         private boolean isExportedSystemActivity(ActivityInfo activityInfo) {
@@ -5073,7 +5086,6 @@ public class AccountManagerService
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mAuthenticator = null;
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
                 try {
@@ -5900,22 +5912,24 @@ public class AccountManagerService
     }
 
     private boolean canUserModifyAccountsForType(int userId, String accountType, int callingUid) {
-        // the managing app can always modify accounts
-        if (isProfileOwner(callingUid)) {
-            return true;
-        }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext
-                .getSystemService(Context.DEVICE_POLICY_SERVICE);
-        String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
-        if (typesArray == null) {
-            return true;
-        }
-        for (String forbiddenType : typesArray) {
-            if (forbiddenType.equals(accountType)) {
-                return false;
+        return Binder.withCleanCallingIdentity(() -> {
+            // the managing app can always modify accounts
+            if (isProfileOwner(callingUid)) {
+                return true;
             }
-        }
-        return true;
+            DevicePolicyManager dpm = (DevicePolicyManager) mContext
+                    .getSystemService(Context.DEVICE_POLICY_SERVICE);
+            String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
+            if (typesArray == null) {
+                return true;
+            }
+            for (String forbiddenType : typesArray) {
+                if (forbiddenType.equals(accountType)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     private boolean isProfileOwner(int uid) {

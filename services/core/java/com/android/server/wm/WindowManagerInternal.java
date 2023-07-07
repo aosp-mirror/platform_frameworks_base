@@ -30,6 +30,7 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Pair;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -370,6 +371,13 @@ public abstract class WindowManagerInternal {
     public abstract void requestTraversalFromDisplayManager();
 
     /**
+     * Called just before display manager has applied the device state to the displays
+     * @param deviceState device state as defined by
+     *        {@link android.hardware.devicestate.DeviceStateManager}
+     */
+    public abstract void onDisplayManagerReceivedDeviceState(int deviceState);
+
+    /**
      * Set by the accessibility layer to observe changes in the magnified region,
      * rotation, and other window transformations related to display magnification
      * as the window manager is responsible for doing the actual magnification
@@ -444,6 +452,24 @@ public abstract class WindowManagerInternal {
     public abstract IBinder getFocusedWindowTokenFromWindowStates();
 
     /**
+     * Moves the given display to the top.
+     */
+    public abstract void moveDisplayToTopIfAllowed(int displayId);
+
+    /**
+     * Request to move window input focus to the window with the provided window token.
+     *
+     * <p>
+     * It is necessary to move window input focus before certain actions on views in a window can
+     * be performed, such as opening an IME. Input normally requests to move focus on window touch
+     * so this method should not be necessary in most cases; only features that bypass normal touch
+     * behavior (like Accessibility actions) require this method.
+     * </p>
+     * @param windowToken The window token.
+     */
+    public abstract void requestWindowFocus(IBinder windowToken);
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
@@ -490,12 +516,13 @@ public abstract class WindowManagerInternal {
      * Invalidate all visible windows on a given display, and report back on the callback when all
      * windows have redrawn.
      *
-     * @param callback reporting callback to be called when all windows have redrawn.
+     * @param message The message will be sent when all windows have redrawn. Note that the message
+     *                must be obtained from handler, otherwise it will throw NPE.
      * @param timeout calls the callback anyway after the timeout.
      * @param displayId waits for the windows on the given display, INVALID_DISPLAY to wait for all
      *                  windows on all displays.
      */
-    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout, int displayId);
+    public abstract void waitForAllWindowsDrawn(Message message, long timeout, int displayId);
 
     /**
      * Overrides the display size.
@@ -740,7 +767,7 @@ public abstract class WindowManagerInternal {
     /**
      * Show IME on imeTargetWindow once IME has finished layout.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     * @param imeTargetWindowToken token of the (IME target) window which IME should be shown.
      * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
     public abstract void showImePostLayout(IBinder imeTargetWindowToken,
@@ -749,7 +776,7 @@ public abstract class WindowManagerInternal {
     /**
      * Hide IME using imeTargetWindow when requested.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
+     * @param imeTargetWindowToken token of the (IME target) window on which requests hiding IME.
      * @param displayId the id of the display the IME is on.
      * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
@@ -846,6 +873,16 @@ public abstract class WindowManagerInternal {
             this.imeSurfaceParentName = imeSurfaceParentName;
         }
     }
+
+    /**
+     * Sets by the {@link com.android.server.inputmethod.InputMethodManagerService} to monitor
+     * the visibility change of the IME targeted windows.
+     *
+     * @see ImeTargetChangeListener#onImeTargetOverlayVisibilityChanged
+     * @see ImeTargetChangeListener#onImeInputTargetVisibilityChanged
+     */
+    public abstract void setInputMethodTargetChangeListener(
+            @NonNull ImeTargetChangeListener listener);
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

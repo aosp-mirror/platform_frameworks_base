@@ -25,11 +25,23 @@ import com.android.systemui.shade.domain.model.ShadeModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 interface ShadeRepository {
     /** ShadeModel information regarding shade expansion events */
     val shadeModel: Flow<ShadeModel>
+
+    /** Amount qs has expanded. Quick Settings can be expanded without the full shade expansion. */
+    val qsExpansion: StateFlow<Float>
+
+    /** Amount shade has expanded with regard to the UDFPS location */
+    val udfpsTransitionToFullShadeProgress: StateFlow<Float>
+
+    fun setQsExpansion(qsExpansion: Float)
+    fun setUdfpsTransitionToFullShadeProgress(progress: Float)
 }
 
 /** Business logic for shade interactions */
@@ -55,12 +67,27 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
                         }
                     }
 
-                shadeExpansionStateManager.addExpansionListener(callback)
+                val currentState = shadeExpansionStateManager.addExpansionListener(callback)
+                callback.onPanelExpansionChanged(currentState)
                 trySendWithFailureLogging(ShadeModel(), TAG, "initial shade expansion info")
 
                 awaitClose { shadeExpansionStateManager.removeExpansionListener(callback) }
             }
             .distinctUntilChanged()
+
+    private val _qsExpansion = MutableStateFlow(0f)
+    override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
+
+    private var _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
+    override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
+        _udfpsTransitionToFullShadeProgress.asStateFlow()
+    override fun setQsExpansion(qsExpansion: Float) {
+        _qsExpansion.value = qsExpansion
+    }
+
+    override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {
+        _udfpsTransitionToFullShadeProgress.value = progress
+    }
 
     companion object {
         private const val TAG = "ShadeRepository"

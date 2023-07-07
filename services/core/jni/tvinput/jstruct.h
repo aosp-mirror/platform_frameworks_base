@@ -23,11 +23,20 @@ typedef struct {
     jmethodID deviceUnavailable;
     jmethodID streamConfigsChanged;
     jmethodID firstFrameCaptured;
+    jmethodID tvMessageReceived;
 } gTvInputHalClassInfoType;
 
 typedef struct {
     jclass clazz;
 } gTvStreamConfigClassInfoType;
+
+typedef struct {
+    jclass clazz;
+    jmethodID constructor;
+    jmethodID putByteArray;
+    jmethodID putString;
+    jmethodID putInt;
+} gBundleClassInfoType;
 
 typedef struct {
     jclass clazz;

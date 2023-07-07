@@ -231,6 +231,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         setExternalStatsSyncLocked(mExternalStatsSync);
     }
 
+    @Override
+    public void writeSyncLocked() {
+    }
+
     public static class DummyExternalStatsSync implements ExternalStatsSync {
         public int flags = 0;
 

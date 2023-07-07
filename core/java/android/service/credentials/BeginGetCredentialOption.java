@@ -17,7 +17,6 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,14 +28,8 @@ import com.android.internal.util.Preconditions;
  * A specific type of credential request to be sent to the provider during the query phase of
  * a get flow. This request contains limited parameters needed to populate a list of
  * {@link CredentialEntry} on the {@link BeginGetCredentialResponse}.
- *
- * <p>Any class that derives this class must only add extra field values to the {@code slice}
- * object passed into the constructor. Any other field will not be parceled through. If the
- * derived class has custom parceling implementation, this class will not be able to unpack
- * the parcel without having access to that implementation.
  */
-@SuppressLint("ParcelNotFinal")
-public class BeginGetCredentialOption implements Parcelable {
+public final class BeginGetCredentialOption implements Parcelable {
     private static final String BUNDLE_ID_KEY =
             "android.service.credentials.BeginGetCredentialOption.BUNDLE_ID_KEY";
     /**
@@ -116,12 +109,12 @@ public class BeginGetCredentialOption implements Parcelable {
      * @param id the unique id associated with this option
      * @param type               the requested credential type
      * @param candidateQueryData the request candidateQueryData
-     * @throws IllegalArgumentException If type is empty.
+     * @throws IllegalArgumentException If id or type is empty.
      */
     public BeginGetCredentialOption(
             @NonNull String id, @NonNull String type,
             @NonNull Bundle candidateQueryData) {
-        mId = id;
+        mId = Preconditions.checkStringNotEmpty(id, "id must not be empty");
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
         Bundle bundle = new Bundle();
         bundle.putAll(candidateQueryData);

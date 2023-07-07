@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pointer-icon xmlns:android="http://schemas.android.com/apk/res/android"
-    android:bitmap="@drawable/pointer_crosshair"
-    android:hotSpotX="12dp"
-    android:hotSpotY="12dp" />
+    android:bitmap="@drawable/pointer_handwriting"
+    android:hotSpotX="8.25dp"
+    android:hotSpotY="23.75dp" />

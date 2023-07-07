@@ -114,7 +114,11 @@ class AppListTest {
     ) {
         composeTestRule.setContent {
             AppListInput(
-                config = AppListConfig(userIds = listOf(USER_ID), showInstantApps = false),
+                config = AppListConfig(
+                    userIds = listOf(USER_ID),
+                    showInstantApps = false,
+                    matchAnyUserForAdmin = false,
+                ),
                 listModel = TestAppListModel(enableGrouping = enableGrouping),
                 state = AppListState(
                     showSystem = false.toState(),

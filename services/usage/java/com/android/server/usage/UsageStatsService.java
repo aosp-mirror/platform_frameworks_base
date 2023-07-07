@@ -46,6 +46,7 @@ import android.app.ActivityManager.ProcessState;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppLaunchEstimateInfo;
 import android.app.usage.AppStandbyInfo;
@@ -592,32 +593,16 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+    private final IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override
-        public void onUidIdle(int uid, boolean disabled) {
-            // Ignored
-        }
-
-        @Override
         public void onUidGone(int uid, boolean disabled) {
             onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0,
                     ActivityManager.PROCESS_CAPABILITY_NONE);
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-            // Ignored
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -2554,10 +2539,19 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public void reportChooserSelection(String packageName, int userId, String contentType,
-                                           String[] annotations, String action) {
+        public void reportChooserSelection(@NonNull String packageName, int userId,
+                @NonNull String contentType, String[] annotations, @NonNull String action) {
             if (packageName == null) {
-                Slog.w(TAG, "Event report user selecting a null package");
+                throw new IllegalArgumentException("Package selection must not be null.");
+            }
+            // A valid contentType and action must be provided for chooser selection events.
+            if (contentType == null || contentType.isBlank()
+                    || action == null || action.isBlank()) {
+                return;
+            }
+            // Verify if this package exists before reporting an event for it.
+            if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) < 0) {
+                Slog.w(TAG, "Event report user selecting an invalid package");
                 return;
             }
 
@@ -3126,6 +3120,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void setActiveAdminApps(Set<String> packageNames, int userId) {
             mAppStandby.setActiveAdminApps(packageNames, userId);
+        }
+
+        @Override
+        public void setAdminProtectedPackages(Set<String> packageNames, int userId) {
+            mAppStandby.setAdminProtectedPackages(packageNames, userId);
         }
 
         @Override

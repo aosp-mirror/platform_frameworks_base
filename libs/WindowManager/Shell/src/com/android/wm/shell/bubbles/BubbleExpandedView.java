@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -26,6 +27,7 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPAND
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -44,6 +46,7 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
@@ -52,6 +55,7 @@ import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,10 +70,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
-import com.android.wm.shell.TaskView;
-import com.android.wm.shell.TaskViewTaskController;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
+import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewTaskController;
 
 import java.io.PrintWriter;
 
@@ -213,9 +217,6 @@ public class BubbleExpandedView extends LinearLayout {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                     0 /* enterResId */, 0 /* exitResId */);
 
-            Rect launchBounds = new Rect();
-            mTaskView.getBoundsOnScreen(launchBounds);
-
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
             post(() -> {
@@ -224,8 +225,14 @@ public class BubbleExpandedView extends LinearLayout {
                             + getBubbleKey());
                 }
                 try {
+                    Rect launchBounds = new Rect();
+                    mTaskView.getBoundsOnScreen(launchBounds);
+
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
+                    options.setPendingIntentBackgroundActivityStartMode(
+                            MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
 
                     Intent fillInIntent = new Intent();
                     // Apply flags to make behaviour match documentLaunchMode=always.
@@ -233,12 +240,17 @@ public class BubbleExpandedView extends LinearLayout {
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
                     if (mBubble.isAppBubble()) {
-                        PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                        Context context =
+                                mContext.createContextAsUser(
+                                        mBubble.getUser(), Context.CONTEXT_RESTRICTED);
+                        PendingIntent pi = PendingIntent.getActivity(
+                                context,
+                                /* requestCode= */ 0,
                                 mBubble.getAppBubbleIntent()
                                         .addFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
                                         .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
-                                PendingIntent.FLAG_IMMUTABLE,
-                                null);
+                                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                                /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
                                 launchBounds);
                     } else if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
@@ -278,9 +290,9 @@ public class BubbleExpandedView extends LinearLayout {
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
-            if (Bubble.KEY_APP_BUBBLE.equals(getBubbleKey())) {
+            if (mBubble != null && mBubble.isAppBubble()) {
                 // Let the controller know sooner what the taskId is.
-                mController.setAppBubbleTaskId(mTaskId);
+                mController.setAppBubbleTaskId(mBubble.getKey(), mTaskId);
             }
 
             // With the task org, the taskAppeared callback will only happen once the task has
@@ -448,7 +460,9 @@ public class BubbleExpandedView extends LinearLayout {
         if (mManageButton != null) {
             int visibility = mManageButton.getVisibility();
             removeView(mManageButton);
-            mManageButton = (AlphaOptimizedButton) LayoutInflater.from(getContext()).inflate(
+            ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(),
+                    com.android.internal.R.style.Theme_DeviceDefault_DayNight);
+            mManageButton = (AlphaOptimizedButton) LayoutInflater.from(ctw).inflate(
                     R.layout.bubble_manage_button, this /* parent */, false /* attach */);
             addView(mManageButton);
             mManageButton.setVisibility(visibility);
@@ -469,13 +483,18 @@ public class BubbleExpandedView extends LinearLayout {
     void applyThemeAttrs() {
         final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
                 android.R.attr.dialogCornerRadius,
-                android.R.attr.colorBackgroundFloating});
+                com.android.internal.R.attr.materialColorSurfaceBright,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh});
         boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
                 mContext.getResources());
         mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;
         mBackgroundColorFloating = ta.getColor(1, Color.WHITE);
         mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
+        final int manageMenuBg = ta.getColor(2, Color.WHITE);
         ta.recycle();
+        if (mManageButton != null) {
+            mManageButton.getBackground().setColorFilter(manageMenuBg, PorterDuff.Mode.SRC_IN);
+        }
 
         if (mTaskView != null) {
             mTaskView.setCornerRadius(mCornerRadius);
@@ -1048,13 +1067,21 @@ public class BubbleExpandedView extends LinearLayout {
             Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
         }
         if (getTaskId() != INVALID_TASK_ID) {
-            try {
-                ActivityTaskManager.getService().removeTask(getTaskId());
-            } catch (RemoteException e) {
-                Log.w(TAG, e.getMessage());
+            // Ensure the task is removed from WM
+            if (ENABLE_SHELL_TRANSITIONS) {
+                if (mTaskView != null) {
+                    mTaskView.removeTask();
+                }
+            } else {
+                try {
+                    ActivityTaskManager.getService().removeTask(getTaskId());
+                } catch (RemoteException e) {
+                    Log.w(TAG, e.getMessage());
+                }
             }
         }
         if (mTaskView != null) {
+            // Release the surface & other task view related things
             mTaskView.release();
             removeView(mTaskView);
             mTaskView = null;

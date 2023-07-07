@@ -22,6 +22,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
@@ -827,7 +828,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
                         KeyEvent.FLAG_FROM_SYSTEM,
                         InputDevice.SOURCE_HDMI,
                         null);
-        InputManager.getInstance()
+        InputManagerGlobal.getInstance()
                 .injectInputEvent(keyEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         keyEvent.recycle();
     }
@@ -1011,17 +1012,22 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         action.start();
     }
 
-    void addAvcAudioStatusAction(int targetAddress) {
-        if (!hasAction(AbsoluteVolumeAudioStatusAction.class)) {
-            addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
-        }
+    @ServiceThreadOnly
+    void startNewAvbAudioStatusAction(int targetAddress) {
+        assertRunOnServiceThread();
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
+        addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
     }
 
-    void removeAvcAudioStatusAction() {
+    @ServiceThreadOnly
+    void removeAvbAudioStatusAction() {
+        assertRunOnServiceThread();
         removeAction(AbsoluteVolumeAudioStatusAction.class);
     }
 
-    void updateAvcVolume(int volumeIndex) {
+    @ServiceThreadOnly
+    void updateAvbVolume(int volumeIndex) {
+        assertRunOnServiceThread();
         for (AbsoluteVolumeAudioStatusAction action :
                 getActions(AbsoluteVolumeAudioStatusAction.class)) {
             action.updateVolume(volumeIndex);
@@ -1034,7 +1040,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
      * and send <Set Audio Volume Level> (to see if it gets a <Feature Abort> in response).
      */
     @ServiceThreadOnly
-    void queryAvcSupport(int targetAddress) {
+    void querySetAudioVolumeLevelSupport(int targetAddress) {
         assertRunOnServiceThread();
 
         // Send <Give Features> if using CEC 2.0 or above.
@@ -1053,7 +1059,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
                             @Override
                             public void onComplete(int result) {
                                 if (result == HdmiControlManager.RESULT_SUCCESS) {
-                                    getService().checkAndUpdateAbsoluteVolumeControlState();
+                                    getService().checkAndUpdateAbsoluteVolumeBehavior();
                                 }
                             }
                         }));

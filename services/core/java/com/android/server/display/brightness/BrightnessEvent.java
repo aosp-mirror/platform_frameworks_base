@@ -100,7 +100,7 @@ public final class BrightnessEvent {
      * A utility to reset the BrightnessEvent to default values
      */
     public void reset() {
-        mReason.set(null);
+        mReason = new BrightnessReason();
         mTime = SystemClock.uptimeMillis();
         mPhysicalDisplayId = "";
         // Lux values
@@ -142,8 +142,6 @@ public final class BrightnessEvent {
                 && Float.floatToRawIntBits(mLux) == Float.floatToRawIntBits(that.mLux)
                 && Float.floatToRawIntBits(mPreThresholdLux)
                 == Float.floatToRawIntBits(that.mPreThresholdLux)
-                && Float.floatToRawIntBits(mInitialBrightness)
-                == Float.floatToRawIntBits(that.mInitialBrightness)
                 && Float.floatToRawIntBits(mBrightness)
                 == Float.floatToRawIntBits(that.mBrightness)
                 && Float.floatToRawIntBits(mRecommendedBrightness)

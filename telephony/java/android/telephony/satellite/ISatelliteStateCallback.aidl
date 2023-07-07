@@ -22,13 +22,6 @@ package android.telephony.satellite;
  */
 oneway interface ISatelliteStateCallback {
     /**
-     * Indicates that the satellite has pending datagrams for the device to be pulled.
-     *
-     * @param count Number of pending datagrams.
-     */
-    void onPendingDatagramCount(in int count);
-
-    /**
      * Indicates that the satellite modem state has changed.
      *
      * @param state The current satellite modem state.

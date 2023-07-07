@@ -44,10 +44,13 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
@@ -109,6 +112,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationEntry mCurrentUserNotif;
     private NotificationEntry mSecondaryUserNotif;
     private NotificationEntry mWorkProfileNotif;
+    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setUp() {
@@ -290,7 +294,16 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUserSwitchedCallsOnUserSwitching() {
+        mFakeFeatureFlags.set(Flags.LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE, true);
+        mLockscreenUserManager.getUserTrackerCallbackForTest().onUserChanging(mSecondaryUser.id,
+                mContext);
+        verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
+    }
+
+    @Test
     public void testUserSwitchedCallsOnUserSwitched() {
+        mFakeFeatureFlags.set(Flags.LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE, false);
         mLockscreenUserManager.getUserTrackerCallbackForTest().onUserChanged(mSecondaryUser.id,
                 mContext);
         verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
@@ -354,7 +367,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mDeviceProvisionedController,
                     mKeyguardStateController,
                     mSettings,
-                    mock(DumpManager.class));
+                    mock(DumpManager.class),
+                    mock(LockPatternUtils.class),
+                    mFakeFeatureFlags);
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

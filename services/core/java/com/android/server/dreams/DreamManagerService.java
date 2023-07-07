@@ -84,6 +84,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * Service api for managing dreams.
@@ -124,7 +125,8 @@ public final class DreamManagerService extends SystemService {
     private final boolean mDreamsEnabledByDefaultConfig;
     private final boolean mDreamsActivatedOnChargeByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
-    private final boolean mKeepDreamingWhenUndockedDefault;
+    private final boolean mKeepDreamingWhenUnpluggingDefault;
+    private final boolean mDreamsDisabledByAmbientModeSuppressionConfig;
 
     private final CopyOnWriteArrayList<DreamManagerInternal.DreamManagerStateListener>
             mDreamManagerStateListeners = new CopyOnWriteArrayList<>();
@@ -236,8 +238,11 @@ public final class DreamManagerService extends SystemService {
         mDreamsActivatedOnDockByDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
         mSettingsObserver = new SettingsObserver(mHandler);
-        mKeepDreamingWhenUndockedDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
+        mKeepDreamingWhenUnpluggingDefault = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
+        mDreamsDisabledByAmbientModeSuppressionConfig = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
+
     }
 
     @Override
@@ -311,7 +316,7 @@ public final class DreamManagerService extends SystemService {
             pw.println("mIsDocked=" + mIsDocked);
             pw.println("mIsCharging=" + mIsCharging);
             pw.println("mWhenToDream=" + mWhenToDream);
-            pw.println("mKeepDreamingWhenUndockedDefault=" + mKeepDreamingWhenUndockedDefault);
+            pw.println("mKeepDreamingWhenUnpluggingDefault=" + mKeepDreamingWhenUnpluggingDefault);
             pw.println("getDozeComponent()=" + getDozeComponent());
             pw.println();
 
@@ -340,11 +345,25 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private void reportKeepDreamingWhenUndockedChanged(boolean keepDreaming) {
+    private void reportKeepDreamingWhenUnpluggingChanged(boolean keepDreaming) {
+        notifyDreamStateListeners(
+                listener -> listener.onKeepDreamingWhenUnpluggingChanged(keepDreaming));
+    }
+
+    private void reportDreamingStarted() {
+        notifyDreamStateListeners(listener -> listener.onDreamingStarted());
+    }
+
+    private void reportDreamingStopped() {
+        notifyDreamStateListeners(listener -> listener.onDreamingStopped());
+    }
+
+    private void notifyDreamStateListeners(
+            Consumer<DreamManagerInternal.DreamManagerStateListener> notifier) {
         mHandler.post(() -> {
             for (DreamManagerInternal.DreamManagerStateListener listener
                     : mDreamManagerStateListeners) {
-                listener.onKeepDreamingWhenUndockedChanged(keepDreaming);
+                notifier.accept(listener);
             }
         });
     }
@@ -388,6 +407,13 @@ public final class DreamManagerService extends SystemService {
             }
 
             if (!mUserManager.isUserUnlocked()) {
+                return false;
+            }
+
+            if (mDreamsDisabledByAmbientModeSuppressionConfig
+                    && mPowerManagerInternal.isAmbientDisplaySuppressed()) {
+                // Don't dream if Bedtime (or something else) is suppressing ambient.
+                Slog.i(TAG, "Can't start dreaming because ambient is suppressed.");
                 return false;
             }
 
@@ -600,8 +626,7 @@ public final class DreamManagerService extends SystemService {
             }
 
             mSystemDreamComponent = componentName;
-            reportKeepDreamingWhenUndockedChanged(shouldKeepDreamingWhenUndocked());
-
+            reportKeepDreamingWhenUnpluggingChanged(shouldKeepDreamingWhenUnplugging());
             // Switch dream if currently dreaming and not dozing.
             if (isDreamingInternal() && !isDozingInternal()) {
                 startDreamInternal(false /*doze*/, (mSystemDreamComponent == null ? "clear" : "set")
@@ -610,8 +635,8 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private boolean shouldKeepDreamingWhenUndocked() {
-        return mKeepDreamingWhenUndockedDefault && mSystemDreamComponent == null;
+    private boolean shouldKeepDreamingWhenUnplugging() {
+        return mKeepDreamingWhenUnpluggingDefault && mSystemDreamComponent == null;
     }
 
     private ComponentName getDefaultDreamComponentForUser(int userId) {
@@ -768,12 +793,23 @@ public final class DreamManagerService extends SystemService {
 
     private final DreamController.Listener mControllerListener = new DreamController.Listener() {
         @Override
+        public void onDreamStarted(Binder token) {
+            // Note that this event is distinct from DreamManagerService#startDreamLocked as it
+            // tracks the DreamService attach point from DreamController, closest to the broadcast
+            // of ACTION_DREAMING_STARTED.
+
+            reportDreamingStarted();
+        }
+
+        @Override
         public void onDreamStopped(Binder token) {
             synchronized (mLock) {
                 if (mCurrentDream != null && mCurrentDream.token == token) {
                     cleanupDreamLocked();
                 }
             }
+
+            reportDreamingStopped();
         }
     };
 
@@ -1057,7 +1093,7 @@ public final class DreamManagerService extends SystemService {
         public void registerDreamManagerStateListener(DreamManagerStateListener listener) {
             mDreamManagerStateListeners.add(listener);
             // Initialize the listener's state.
-            listener.onKeepDreamingWhenUndockedChanged(shouldKeepDreamingWhenUndocked());
+            listener.onKeepDreamingWhenUnpluggingChanged(shouldKeepDreamingWhenUnplugging());
         }
 
         @Override

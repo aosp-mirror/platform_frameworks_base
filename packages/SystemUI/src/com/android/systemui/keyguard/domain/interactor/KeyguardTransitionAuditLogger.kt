@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.plugins.log.LogLevel.VERBOSE
+import com.android.systemui.log.LogLevel.VERBOSE
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -61,7 +61,15 @@ constructor(
         }
 
         scope.launch {
-            keyguardInteractor.isDreaming.collect { logger.log(TAG, VERBOSE, "isDreaming", it) }
+            keyguardInteractor.isAbleToDream.collect {
+                logger.log(TAG, VERBOSE, "isAbleToDream", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded.collect {
+                logger.log(TAG, VERBOSE, "isOccluded", it)
+            }
         }
 
         scope.launch {

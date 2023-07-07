@@ -827,6 +827,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS = 1 << 4;
 
+    /**
+     * Whether AbiOverride was used when installing this application.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_CPU_OVERRIDE = 1 << 5;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
@@ -834,6 +840,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE,
             PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
             PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS,
+            PRIVATE_FLAG_EXT_CPU_OVERRIDE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}

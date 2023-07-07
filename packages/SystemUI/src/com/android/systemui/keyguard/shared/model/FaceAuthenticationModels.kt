@@ -18,7 +18,10 @@ package com.android.systemui.keyguard.shared.model
 
 import android.hardware.face.FaceManager
 
-/** Authentication status provided by [com.android.keyguard.faceauth.KeyguardFaceAuthManager] */
+/**
+ * Authentication status provided by
+ * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
+ */
 sealed class AuthenticationStatus
 
 /** Success authentication status. */
@@ -35,7 +38,8 @@ data class AcquiredAuthenticationStatus(val acquiredInfo: Int) : AuthenticationS
 object FailedAuthenticationStatus : AuthenticationStatus()
 
 /** Face authentication error message */
-data class ErrorAuthenticationStatus(val msgId: Int, val msg: String?) : AuthenticationStatus() {
+data class ErrorAuthenticationStatus(val msgId: Int, val msg: String? = null) :
+    AuthenticationStatus() {
     /**
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
      * authentication is locked out.
@@ -47,6 +51,11 @@ data class ErrorAuthenticationStatus(val msgId: Int, val msg: String?) : Authent
      * was cancelled before it completed.
      */
     fun isCancellationError() = msgId == FaceManager.FACE_ERROR_CANCELED
+
+    /** Method that checks if [msgId] is a hardware error. */
+    fun isHardwareError() =
+        msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE ||
+            msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
 }
 
 /** Face detection success message. */

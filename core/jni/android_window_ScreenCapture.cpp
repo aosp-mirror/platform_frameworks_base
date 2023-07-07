@@ -45,6 +45,8 @@ static struct {
     jfieldID allowProtected;
     jfieldID uid;
     jfieldID grayscale;
+    jmethodID getNativeExcludeLayers;
+    jfieldID hintForSeamlessTransition;
 } gCaptureArgsClassInfo;
 
 static struct {
@@ -56,7 +58,6 @@ static struct {
 
 static struct {
     jfieldID layer;
-    jfieldID excludeLayers;
     jfieldID childrenOnly;
 } gLayerCaptureArgsClassInfo;
 
@@ -69,23 +70,6 @@ static struct {
     jmethodID builder;
 } gScreenshotHardwareBufferClassInfo;
 
-enum JNamedColorSpace : jint {
-    // ColorSpace.Named.SRGB.ordinal() = 0;
-    SRGB = 0,
-
-    // ColorSpace.Named.DISPLAY_P3.ordinal() = 7;
-    DISPLAY_P3 = 7,
-};
-
-constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace) {
-    switch (dataspace) {
-        case ui::Dataspace::DISPLAY_P3:
-            return JNamedColorSpace::DISPLAY_P3;
-        default:
-            return JNamedColorSpace::SRGB;
-    }
-}
-
 static void checkAndClearException(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
         ALOGE("An exception was thrown by callback '%s'.", methodName);
@@ -97,38 +81,43 @@ class ScreenCaptureListenerWrapper : public gui::BnScreenCaptureListener {
 public:
     explicit ScreenCaptureListenerWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
-        mConsumerObject = env->NewGlobalRef(jobject);
-        LOG_ALWAYS_FATAL_IF(!mConsumerObject, "Failed to make global ref");
+        mConsumerWeak = env->NewWeakGlobalRef(jobject);
     }
 
     ~ScreenCaptureListenerWrapper() {
-        if (mConsumerObject) {
-            getenv()->DeleteGlobalRef(mConsumerObject);
-            mConsumerObject = nullptr;
+        if (mConsumerWeak) {
+            getenv()->DeleteWeakGlobalRef(mConsumerWeak);
+            mConsumerWeak = nullptr;
         }
     }
 
     binder::Status onScreenCaptureCompleted(
             const gui::ScreenCaptureResults& captureResults) override {
         JNIEnv* env = getenv();
+
+        ScopedLocalRef<jobject> consumer{env, env->NewLocalRef(mConsumerWeak)};
+        if (consumer == nullptr) {
+            ALOGE("ScreenCaptureListenerWrapper consumer not alive.");
+            return binder::Status::ok();
+        }
+
         if (!captureResults.fenceResult.ok() || captureResults.buffer == nullptr) {
-            env->CallVoidMethod(mConsumerObject, gConsumerClassInfo.accept, nullptr);
+            env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, nullptr);
             checkAndClearException(env, "accept");
             return binder::Status::ok();
         }
         captureResults.fenceResult.value()->waitForever(LOG_TAG);
         jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
                 env, captureResults.buffer->toAHardwareBuffer());
-        const jint namedColorSpace =
-                fromDataspaceToNamedColorSpaceValue(captureResults.capturedDataspace);
         jobject screenshotHardwareBuffer =
                 env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                             gScreenshotHardwareBufferClassInfo.builder,
-                                            jhardwareBuffer, namedColorSpace,
+                                            jhardwareBuffer,
+                                            static_cast<jint>(captureResults.capturedDataspace),
                                             captureResults.capturedSecureLayers,
                                             captureResults.capturedHdrLayers);
         checkAndClearException(env, "builder");
-        env->CallVoidMethod(mConsumerObject, gConsumerClassInfo.accept, screenshotHardwareBuffer);
+        env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, screenshotHardwareBuffer);
         checkAndClearException(env, "accept");
         env->DeleteLocalRef(jhardwareBuffer);
         env->DeleteLocalRef(screenshotHardwareBuffer);
@@ -136,7 +125,7 @@ public:
     }
 
 private:
-    jobject mConsumerObject;
+    jweak mConsumerWeak;
     JavaVM* mVm;
 
     JNIEnv* getenv() {
@@ -168,6 +157,26 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
     captureArgs.uid = env->GetLongField(captureArgsObject, gCaptureArgsClassInfo.uid);
     captureArgs.grayscale =
             env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.grayscale);
+
+    jlongArray excludeObjectArray = reinterpret_cast<jlongArray>(
+            env->CallObjectMethod(captureArgsObject, gCaptureArgsClassInfo.getNativeExcludeLayers));
+    if (excludeObjectArray != nullptr) {
+        ScopedLongArrayRO excludeArray(env, excludeObjectArray);
+        const jsize len = excludeArray.size();
+        captureArgs.excludeHandles.reserve(len);
+
+        for (jsize i = 0; i < len; i++) {
+            auto excludeObject = reinterpret_cast<SurfaceControl*>(excludeArray[i]);
+            if (excludeObject == nullptr) {
+                jniThrowNullPointerException(env, "Exclude layer is null");
+                return;
+            }
+            captureArgs.excludeHandles.emplace(excludeObject->getHandle());
+        }
+    }
+    captureArgs.hintForSeamlessTransition =
+            env->GetBooleanField(captureArgsObject,
+                                 gCaptureArgsClassInfo.hintForSeamlessTransition);
 }
 
 static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
@@ -207,6 +216,7 @@ static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureA
                                 jlong screenCaptureListenerObject) {
     LayerCaptureArgs captureArgs;
     getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
+
     SurfaceControl* layer = reinterpret_cast<SurfaceControl*>(
             env->GetLongField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.layer));
     if (layer == nullptr) {
@@ -216,23 +226,6 @@ static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureA
     captureArgs.layerHandle = layer->getHandle();
     captureArgs.childrenOnly =
             env->GetBooleanField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.childrenOnly);
-
-    jlongArray excludeObjectArray = reinterpret_cast<jlongArray>(
-            env->GetObjectField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.excludeLayers));
-    if (excludeObjectArray != nullptr) {
-        ScopedLongArrayRO excludeArray(env, excludeObjectArray);
-        const jsize len = excludeArray.size();
-        captureArgs.excludeHandles.reserve(len);
-
-        for (jsize i = 0; i < len; i++) {
-            auto excludeObject = reinterpret_cast<SurfaceControl*>(excludeArray[i]);
-            if (excludeObject == nullptr) {
-                jniThrowNullPointerException(env, "Exclude layer is null");
-                return BAD_VALUE;
-            }
-            captureArgs.excludeHandles.emplace(excludeObject->getHandle());
-        }
-    }
 
     sp<gui::IScreenCaptureListener> captureListener =
             reinterpret_cast<gui::IScreenCaptureListener*>(screenCaptureListenerObject);
@@ -317,6 +310,10 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
             GetFieldIDOrDie(env, captureArgsClazz, "mAllowProtected", "Z");
     gCaptureArgsClassInfo.uid = GetFieldIDOrDie(env, captureArgsClazz, "mUid", "J");
     gCaptureArgsClassInfo.grayscale = GetFieldIDOrDie(env, captureArgsClazz, "mGrayscale", "Z");
+    gCaptureArgsClassInfo.getNativeExcludeLayers =
+            GetMethodIDOrDie(env, captureArgsClazz, "getNativeExcludeLayers", "()[J");
+    gCaptureArgsClassInfo.hintForSeamlessTransition =
+            GetFieldIDOrDie(env, captureArgsClazz, "mHintForSeamlessTransition", "Z");
 
     jclass displayCaptureArgsClazz =
             FindClassOrDie(env, "android/window/ScreenCapture$DisplayCaptureArgs");
@@ -333,8 +330,6 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
             FindClassOrDie(env, "android/window/ScreenCapture$LayerCaptureArgs");
     gLayerCaptureArgsClassInfo.layer =
             GetFieldIDOrDie(env, layerCaptureArgsClazz, "mNativeLayer", "J");
-    gLayerCaptureArgsClassInfo.excludeLayers =
-            GetFieldIDOrDie(env, layerCaptureArgsClazz, "mNativeExcludeLayers", "[J");
     gLayerCaptureArgsClassInfo.childrenOnly =
             GetFieldIDOrDie(env, layerCaptureArgsClazz, "mChildrenOnly", "Z");
 

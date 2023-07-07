@@ -1,5 +1,6 @@
 #include "GraphicsJNI.h"
 #include "SkMaskFilter.h"
+#include "SkBlurMask.h"
 #include "SkBlurMaskFilter.h"
 #include "SkBlurTypes.h"
 #include "SkTableMaskFilter.h"
@@ -10,13 +11,6 @@ static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
     }
 }
 
-// From https://skia.googlesource.com/skia/+/d74c99a3cd5eef5f16b2eb226e6b45fe523c8552/src/core/SkBlurMask.cpp#28
-static constexpr float kBLUR_SIGMA_SCALE = 0.57735f;
-
-static float convertRadiusToSigma(float radius) {
-    return radius > 0 ? kBLUR_SIGMA_SCALE * radius + 0.5f : 0.0f;
-}
-
 class SkMaskFilterGlue {
 public:
     static void destructor(JNIEnv* env, jobject, jlong filterHandle) {
@@ -25,7 +19,7 @@ public:
     }
 
     static jlong createBlur(JNIEnv* env, jobject, jfloat radius, jint blurStyle) {
-        SkScalar sigma = convertRadiusToSigma(radius);
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
         SkMaskFilter* filter = SkMaskFilter::MakeBlur((SkBlurStyle)blurStyle, sigma).release();
         ThrowIAE_IfNull(env, filter);
         return reinterpret_cast<jlong>(filter);
@@ -40,7 +34,7 @@ public:
             direction[i] = values[i];
         }
 
-        SkScalar sigma = convertRadiusToSigma(radius);
+        SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
         SkMaskFilter* filter =  SkBlurMaskFilter::MakeEmboss(sigma,
                 direction, ambient, specular).release();
         ThrowIAE_IfNull(env, filter);

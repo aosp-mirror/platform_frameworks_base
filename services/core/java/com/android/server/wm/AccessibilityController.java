@@ -19,13 +19,14 @@ package com.android.server.wm;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CALLBACK;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK;
 import static android.os.Build.IS_USER;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
+import static com.android.internal.util.DumpUtils.dumpSparseArray;
+import static com.android.internal.util.DumpUtils.dumpSparseArrayValues;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_H;
@@ -85,7 +86,6 @@ import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.InsetsSource;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -544,15 +544,12 @@ final class AccessibilityController {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        for (int i = 0; i < mDisplayMagnifiers.size(); i++) {
-            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.valueAt(i);
-            if (displayMagnifier != null) {
-                displayMagnifier.dump(pw, prefix
-                        + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
-            }
-        }
-        pw.println(prefix
-                + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
+        dumpSparseArray(pw, prefix, mDisplayMagnifiers, "magnification display",
+                (index, key) -> pw.printf("%sDisplay #%d:", prefix + "  ", key),
+                dm -> dm.dump(pw, ""));
+        dumpSparseArrayValues(pw, prefix, mWindowsForAccessibilityObserver,
+                "windows for accessibility observer");
+        mAccessibilityWindowsPopulator.dump(pw, prefix);
     }
 
     void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {
@@ -704,8 +701,8 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + displayId);
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
-            if (magnifying) {
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
                 switch (transition) {
                     case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
@@ -729,8 +726,8 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "Window transition: " + WindowManager.transitTypeToString(type)
                         + " displayId: " + displayId);
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
-            if (magnifying) {
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
                 // All opening/closing situations.
                 switch (type) {
                     case WindowManager.TRANSIT_OPEN:
@@ -753,12 +750,12 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + windowState.getDisplayId());
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
             final int type = windowState.mAttrs.type;
             switch (transition) {
                 case WindowManagerPolicy.TRANSIT_ENTER:
                 case WindowManagerPolicy.TRANSIT_SHOW: {
-                    if (!magnifying) {
+                    if (!isMagnifierActivated) {
                         break;
                     }
                     switch (type) {

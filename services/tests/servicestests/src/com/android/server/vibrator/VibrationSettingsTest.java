@@ -618,13 +618,19 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withUidZero_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withUidZero_returnsFalseForUsagesInAllowlist() {
         long vibrateStartTime = 100;
         mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN);
 
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
+                USAGE_TOUCH,
+                USAGE_ACCESSIBILITY,
+                USAGE_PHYSICAL_EMULATION,
+                USAGE_HARDWARE_FEEDBACK
+        ));
+
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
-                    || usage == USAGE_PHYSICAL_EMULATION) {
+            if (expectedAllowedVibrations.contains(usage)) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
                         createCallerInfo(/* uid= */ 0, "", usage), vibrateStartTime));
             } else {
@@ -635,13 +641,19 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withSystemUid_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withSystemUid__returnsFalseForUsagesInAllowlist() {
         long vibrateStartTime = 100;
         mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD);
 
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
+                USAGE_TOUCH,
+                USAGE_ACCESSIBILITY,
+                USAGE_PHYSICAL_EMULATION,
+                USAGE_HARDWARE_FEEDBACK
+        ));
+
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
-                    || usage == USAGE_PHYSICAL_EMULATION) {
+            if (expectedAllowedVibrations.contains(usage)) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
                         createCallerInfo(Process.SYSTEM_UID, "", usage), vibrateStartTime));
             } else {
@@ -652,13 +664,19 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withSysUiPkg_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withSysUiPkg_returnsFalseForUsagesInAllowlist() {
         long vibrateStartTime = 100;
         mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_HDMI);
 
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
+                USAGE_TOUCH,
+                USAGE_ACCESSIBILITY,
+                USAGE_PHYSICAL_EMULATION,
+                USAGE_HARDWARE_FEEDBACK
+        ));
+
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
-                    || usage == USAGE_PHYSICAL_EMULATION) {
+            if (expectedAllowedVibrations.contains(usage)) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
                         createCallerInfo(UID, SYSUI_PACKAGE_NAME, usage), vibrateStartTime));
             } else {

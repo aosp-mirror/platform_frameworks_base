@@ -60,7 +60,6 @@ import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TAS
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -75,6 +74,7 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_COMPONENT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_UID;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_DEFAULT;
@@ -83,6 +83,7 @@ import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_SAW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
+import static com.android.server.wm.BackgroundActivityStartController.balCodeToString;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
@@ -103,6 +104,7 @@ import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -150,6 +152,9 @@ import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.StringJoiner;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -168,6 +173,12 @@ class ActivityStarter {
     private static final int INVALID_LAUNCH_MODE = -1;
 
     /**
+     * Avoid problematical apps from occupying system resources (e.g. the amount of surface) by
+     * launching too many activities in a task.
+     */
+    private static final long MAX_TASK_WEIGHT_FOR_ADDING_ACTIVITY = 300;
+
+    /**
      * Feature flag to protect PendingIntent being abused to start background activity.
      */
     @ChangeId
@@ -178,7 +189,7 @@ class ActivityStarter {
      * Feature flag for go/activity-security rules
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Disabled
     static final long ASM_RESTRICTIONS = 230590090L;
 
     private final ActivityTaskManagerService mService;
@@ -395,6 +406,8 @@ class ActivityStarter {
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
         BackgroundStartPrivileges backgroundStartPrivileges;
+
+        final StringBuilder logMessage = new StringBuilder();
 
         /**
          * The error callback token passed in {@link android.window.WindowContainerTransaction}
@@ -724,7 +737,14 @@ class ActivityStarter {
                 if (res != START_SUCCESS) {
                     return res;
                 }
-                res = executeRequest(mRequest);
+
+                try {
+                    res = executeRequest(mRequest);
+                } finally {
+                    mRequest.logMessage.append(" result code=").append(res);
+                    Slog.i(TAG, mRequest.logMessage.toString());
+                    mRequest.logMessage.setLength(0);
+                }
 
                 Binder.restoreCallingIdentity(origId);
 
@@ -923,8 +943,14 @@ class ActivityStarter {
                 ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
         final int launchMode = aInfo != null ? aInfo.launchMode : 0;
         if (err == ActivityManager.START_SUCCESS) {
-            Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
-                    + "} with " + launchModeToString(launchMode) + " from uid " + callingUid);
+            request.logMessage.append("START u").append(userId).append(" {")
+                    .append(intent.toShortString(true, true, true, false))
+                    .append("} with ").append(launchModeToString(launchMode))
+                    .append(" from uid ").append(callingUid);
+            if (callingUid != realCallingUid
+                    && realCallingUid != Request.DEFAULT_REAL_CALLING_UID) {
+                request.logMessage.append(" (realCallingUid=").append(realCallingUid).append(")");
+            }
         }
 
         ActivityRecord sourceRecord = null;
@@ -1093,6 +1119,11 @@ class ActivityStarter {
                                 request.backgroundStartPrivileges,
                                 intent,
                                 checkedOptions);
+                if (balCode != BAL_ALLOW_DEFAULT) {
+                    request.logMessage.append(" (").append(
+                                    BackgroundActivityStartController.balCodeToString(balCode))
+                            .append(")");
+                }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }
@@ -1437,9 +1468,8 @@ class ActivityStarter {
         // transition based on a sub-action.
         // Only do the create here (and defer requestStart) since startActivityInner might abort.
         final TransitionController transitionController = r.mTransitionController;
-        Transition newTransition = (!transitionController.isCollecting()
-                && transitionController.getTransitionPlayer() != null)
-                ? transitionController.createTransition(TRANSIT_OPEN) : null;
+        Transition newTransition = transitionController.isShellTransitionsEnabled()
+                ? transitionController.createAndStartCollecting(TRANSIT_OPEN) : null;
         RemoteTransition remoteTransition = r.takeRemoteTransition();
         try {
             mService.deferWindowLayout();
@@ -1543,8 +1573,10 @@ class ActivityStarter {
             // existence change.
             transitionController.collectExistenceChange(started);
         } else if (result == START_DELIVERED_TO_TOP && newTransition != null
-                // An activity has changed order/visibility so this isn't just deliver-to-top
-                && mMovedToTopActivity == null) {
+                // An activity has changed order/visibility or the task is occluded by a transient
+                // activity, so this isn't just deliver-to-top
+                && mMovedToTopActivity == null
+                && !transitionController.isTransientHide(startedActivityRootTask)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -1552,19 +1584,19 @@ class ActivityStarter {
             }
         }
         if (isTransientLaunch) {
-            if (forceTransientTransition && newTransition != null) {
-                newTransition.collect(mLastStartActivityRecord);
-                newTransition.collect(mPriorAboveTask);
+            if (forceTransientTransition) {
+                transitionController.collect(mLastStartActivityRecord);
+                transitionController.collect(mPriorAboveTask);
             }
             // `started` isn't guaranteed to be the actual relevant activity, so we must wait
             // until after we launched to identify the relevant activity.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
-            if (forceTransientTransition && newTransition != null) {
+            if (forceTransientTransition) {
                 final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
                 // update wallpaper target to TransientHide
                 dc.mWallpaperController.adjustWallpaperWindows();
                 // execute transition because there is no change
-                newTransition.setReady(dc, true /* ready */);
+                transitionController.setReady(dc, true /* ready */);
             }
         }
         if (!userLeaving) {
@@ -1575,6 +1607,8 @@ class ActivityStarter {
             transitionController.requestStartTransition(newTransition,
                     mTargetTask == null ? started.getTask() : mTargetTask,
                     remoteTransition, null /* displayChange */);
+        } else if (result == START_SUCCESS && mStartActivity.isState(RESUMED)) {
+            // Do nothing if the activity is started and is resumed directly.
         } else if (isStarted) {
             // Make the collecting transition wait until this request is ready.
             transitionController.setReady(started, false);
@@ -1643,6 +1677,18 @@ class ActivityStarter {
         }
 
         if (targetTask != null) {
+            if (targetTask.getTreeWeight() > MAX_TASK_WEIGHT_FOR_ADDING_ACTIVITY) {
+                Slog.e(TAG, "Remove " + targetTask + " because it has contained too many"
+                        + " activities or windows (abort starting " + r
+                        + " from uid=" + mCallingUid);
+                targetTask.removeImmediately("bulky-task");
+                return START_ABORTED;
+            }
+            // When running transient transition, the transient launch target should keep on top.
+            // So disallow the transient hide activity to move itself to front, e.g. trampoline.
+            if (!mAvoidMoveToFront && r.mTransitionController.isTransientHide(targetTask)) {
+                mAvoidMoveToFront = true;
+            }
             mPriorAboveTask = TaskDisplayArea.getRootTaskAbove(targetTask.getRootTask());
         }
 
@@ -1759,7 +1805,7 @@ class ActivityStarter {
                 // root-task to the will not update the focused root-task.  If starting the new
                 // activity now allows the task root-task to be focusable, then ensure that we
                 // now update the focused root-task accordingly.
-                if (mTargetRootTask.isTopActivityFocusable()
+                if (!mAvoidMoveToFront && mTargetRootTask.isTopActivityFocusable()
                         && !mRootWindowContainer.isTopDisplayFocusedRootTask(mTargetRootTask)) {
                     mTargetRootTask.moveToFront("startActivityInner");
                 }
@@ -1777,7 +1823,8 @@ class ActivityStarter {
         // If Activity's launching into PiP, move the mStartActivity immediately to pinned mode.
         // Note that mStartActivity and source should be in the same Task at this point.
         if (mOptions != null && mOptions.isLaunchIntoPip()
-                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()) {
+                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()
+                && balCode != BAL_BLOCK) {
             mRootWindowContainer.moveActivityToPinnedRootTask(mStartActivity,
                     sourceRecord, "launch-into-pip");
         }
@@ -1944,9 +1991,13 @@ class ActivityStarter {
             boolean passesAsmChecks = true;
             Task sourceTask = mSourceRecord.getTask();
 
-            // Don't allow launches into a new task if the current task is not foreground.
+            // Allow launching into a new task (or a task matching the launched activity's
+            // affinity) only if the current task is foreground or mutating its own task.
+            // The latter can happen eg. if caller uses NEW_TASK flag and the activity being
+            // launched matches affinity of source task.
             if (taskToFront) {
-                passesAsmChecks = sourceTask != null && sourceTask.isVisible();
+                passesAsmChecks = sourceTask != null
+                        && (sourceTask.isVisible() || sourceTask == targetTask);
             }
 
             if (passesAsmChecks) {
@@ -1967,8 +2018,7 @@ class ActivityStarter {
 
         // ASM rules have failed. Log why
         ActivityRecord targetTopActivity = targetTask == null ? null
-                : targetTask.getActivity(ar ->
-                        !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+                : targetTask.getActivity(ar -> !ar.finishing && !ar.isAlwaysOnTop());
 
         int action = newTask || mSourceRecord == null
                 ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_NEW_TASK
@@ -1999,7 +2049,7 @@ class ActivityStarter {
                 /* action */
                 action,
                 /* version */
-                4,
+                ActivitySecurityModelFeatureFlags.ASM_VERSION,
                 /* multi_window - we have our source not in the target task, but both are visible */
                 targetTask != null && mSourceRecord != null
                         && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible(),
@@ -2011,27 +2061,96 @@ class ActivityStarter {
                     .shouldRestrictActivitySwitch(mCallingUid)
                 && shouldBlockActivityStart;
 
+        String launchedFromPackageName = r.launchedFromPackage;
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
+            String toastText = ActivitySecurityModelFeatureFlags.DOC_LINK
+                    + (blockActivityStartAndFeatureEnabled ? " blocked " : " would block ")
+                    + getApplicationLabel(mService.mContext.getPackageManager(),
+                        launchedFromPackageName);
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                    "Activity start from " + r.launchedFromPackage
-                            + (blockActivityStartAndFeatureEnabled ? " " : " would be ")
-                            + "blocked by " + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                    Toast.LENGTH_SHORT).show());
+                    toastText, Toast.LENGTH_LONG).show());
+
+            logDebugInfoForActivitySecurity("Launch", r, targetTask, targetTopActivity,
+                    blockActivityStartAndFeatureEnabled, /* taskToFront */ taskToFront);
         }
 
-
         if (blockActivityStartAndFeatureEnabled) {
-            Slog.e(TAG, "Abort Launching r: " + r
+            Slog.e(TAG, "[ASM] Abort Launching r: " + r
                     + " as source: "
-                    + (mSourceRecord != null ? mSourceRecord : r.launchedFromPackage)
+                    + (mSourceRecord != null ? mSourceRecord : launchedFromPackageName)
                     + " is in background. New task: " + newTask
                     + ". Top activity: " + targetTopActivity
-                    + ". BAL Code: " + mBalCode);
+                    + ". BAL Code: " + balCodeToString(mBalCode));
 
             return false;
         }
 
         return true;
+    }
+
+    /** Only called when an activity launch may be blocked, which should happen very rarely */
+    private void logDebugInfoForActivitySecurity(String action, ActivityRecord r, Task targetTask,
+            ActivityRecord targetTopActivity, boolean blockActivityStartAndFeatureEnabled,
+            boolean taskToFront) {
+        final String prefix = "[ASM] ";
+        Function<ActivityRecord, String> recordToString = (ar) -> {
+            if (ar == null) {
+                return null;
+            }
+            return (ar == mSourceRecord ? " [source]=> "
+                    : ar == targetTopActivity ? " [ top  ]=> "
+                            : ar == r ? " [target]=> "
+                                    : "         => ")
+                    + ar
+                    + " :: visible=" + ar.isVisible()
+                    + ", finishing=" + ar.isFinishing()
+                    + ", alwaysOnTop=" + ar.isAlwaysOnTop()
+                    + ", taskFragment=" + ar.getTaskFragment();
+        };
+
+        StringJoiner joiner = new StringJoiner("\n");
+        joiner.add(prefix + "------ Activity Security " + action + " Debug Logging Start ------");
+        joiner.add(prefix + "Block Enabled: " + blockActivityStartAndFeatureEnabled);
+        joiner.add(prefix + "ASM Version: " + ActivitySecurityModelFeatureFlags.ASM_VERSION);
+
+        boolean targetTaskMatchesSourceTask = targetTask != null
+                && mSourceRecord != null && mSourceRecord.getTask() == targetTask;
+
+        if (mSourceRecord == null) {
+            joiner.add(prefix + "Source Package: " + r.launchedFromPackage);
+            String realCallingPackage = mService.mContext.getPackageManager().getNameForUid(
+                    mRealCallingUid);
+            joiner.add(prefix + "Real Calling Uid Package: " + realCallingPackage);
+        } else {
+            joiner.add(prefix + "Source Record: " + recordToString.apply(mSourceRecord));
+            if (targetTaskMatchesSourceTask) {
+                joiner.add(prefix + "Source/Target Task: " + mSourceRecord.getTask());
+                joiner.add(prefix + "Source/Target Task Stack: ");
+            } else {
+                joiner.add(prefix + "Source Task: " + mSourceRecord.getTask());
+                joiner.add(prefix + "Source Task Stack: ");
+            }
+            mSourceRecord.getTask().forAllActivities((Consumer<ActivityRecord>)
+                    ar -> joiner.add(prefix + recordToString.apply(ar)));
+        }
+
+        joiner.add(prefix + "Target Task Top: " + recordToString.apply(targetTopActivity));
+        if (!targetTaskMatchesSourceTask) {
+            joiner.add(prefix + "Target Task: " + targetTask);
+            if (targetTask != null) {
+                joiner.add(prefix + "Target Task Stack: ");
+                targetTask.forAllActivities((Consumer<ActivityRecord>)
+                        ar -> joiner.add(prefix + recordToString.apply(ar)));
+            }
+        }
+
+        joiner.add(prefix + "Target Record: " + recordToString.apply(r));
+        joiner.add(prefix + "Intent: " + mIntent);
+        joiner.add(prefix + "TaskToFront: " + taskToFront);
+        joiner.add(prefix + "BalCode: " + balCodeToString(mBalCode));
+
+        joiner.add(prefix + "------ Activity Security " + action + " Debug Logging End ------");
+        Slog.i(TAG, joiner.toString());
     }
 
     /**
@@ -2160,13 +2279,14 @@ class ActivityStarter {
      */
     private void clearTopIfNeeded(@NonNull Task targetTask, int callingUid, int realCallingUid,
             int startingUid, int launchFlags) {
-        if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != FLAG_ACTIVITY_NEW_TASK) {
-            // Launch is from the same task, so must be a top or privileged UID
+        if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != FLAG_ACTIVITY_NEW_TASK
+                || mBalCode == BAL_ALLOW_ALLOWLISTED_UID) {
+            // Launch is from the same task, (a top or privileged UID), or is directly privileged.
             return;
         }
 
-        Predicate<ActivityRecord> isLaunchingOrLaunched = ar -> !ar.finishing && (ar.isUid(
-                startingUid) || ar.isUid(callingUid) || ar.isUid(realCallingUid));
+        Predicate<ActivityRecord> isLaunchingOrLaunched = ar ->
+                ar.isUid(startingUid) || ar.isUid(callingUid) || ar.isUid(realCallingUid);
 
         // Return early if we know for sure we won't need to clear any activities by just checking
         // the top activity.
@@ -2202,7 +2322,10 @@ class ActivityStarter {
                             ? "Top activities cleared by "
                             : "Top activities would be cleared by ")
                             + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                    Toast.LENGTH_SHORT).show());
+                    Toast.LENGTH_LONG).show());
+
+            logDebugInfoForActivitySecurity("Clear Top", mStartActivity, targetTask, targetTaskTop,
+                    shouldBlockActivityStart, /* taskToFront */ true);
         }
     }
 
@@ -2427,6 +2550,7 @@ class ActivityStarter {
         mAvoidMoveToFront = false;
         mFrozeTaskList = false;
         mTransientLaunch = false;
+        mPriorAboveTask = null;
         mDisplayLockAndOccluded = false;
 
         mVoiceSession = null;
@@ -2788,6 +2912,9 @@ class ActivityStarter {
     private void setTargetRootTaskIfNeeded(ActivityRecord intentActivity) {
         intentActivity.getTaskFragment().clearLastPausedActivity();
         Task intentTask = intentActivity.getTask();
+        // The intent task might be reparented while in getOrCreateRootTask, caches the original
+        // root task to distinguish if it is moving to front or not.
+        final Task origRootTask = intentTask != null ? intentTask.getRootTask() : null;
 
         if (mTargetRootTask == null) {
             // Update launch target task when it is not indicated.
@@ -2804,9 +2931,9 @@ class ActivityStarter {
         // If the matching task is already in the adjacent task of the launch target. Adjust to use
         // the adjacent task as its launch target. So the existing task will be launched into the
         // closer one and won't be reparent redundantly.
-        final Task adjacentTargetTask = mTargetRootTask.getAdjacentTaskFragment() != null
-                ? mTargetRootTask.getAdjacentTaskFragment().asTask() : null;
-        if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)) {
+        final Task adjacentTargetTask = mTargetRootTask.getAdjacentTask();
+        if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)
+                && intentTask.isOnTop()) {
             mTargetRootTask = adjacentTargetTask;
         }
 
@@ -2821,7 +2948,8 @@ class ActivityStarter {
                     ? null : focusRootTask.topRunningNonDelayedActivityLocked(mNotTop);
             final Task topTask = curTop != null ? curTop.getTask() : null;
             differentTopTask = topTask != intentTask
-                    || (focusRootTask != null && topTask != focusRootTask.getTopMostTask());
+                    || (focusRootTask != null && topTask != focusRootTask.getTopMostTask())
+                    || (focusRootTask != null && focusRootTask != origRootTask);
         } else {
             // The existing task should always be different from those in other displays.
             differentTopTask = true;
@@ -2829,8 +2957,6 @@ class ActivityStarter {
 
         if (differentTopTask && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            // TODO(b/264487981): Consider using BackgroundActivityStartController to determine
-            //  whether to bring the launching activity to the front.
             if (mSourceRecord == null || inTopNonFinishingTask(mSourceRecord)) {
                 // We really do want to push this one into the user's face, right now.
                 if (mLaunchTaskBehind && mSourceRecord != null) {
@@ -2957,6 +3083,8 @@ class ActivityStarter {
             int embeddingCheckResult = canEmbedActivity(mInTaskFragment, mStartActivity, task);
             if (embeddingCheckResult == EMBEDDING_ALLOWED) {
                 newParent = mInTaskFragment;
+                mStartActivity.mRequestedLaunchingTaskFragmentToken =
+                        mInTaskFragment.getFragmentToken();
             } else {
                 // Start mStartActivity to task instead if it can't be embedded to mInTaskFragment.
                 sendCanNotEmbedActivityError(mInTaskFragment, embeddingCheckResult);

@@ -33,12 +33,19 @@ public interface BackAnimation {
      *
      * @param touchX the X touch position of the {@link MotionEvent}.
      * @param touchY the Y touch position of the {@link MotionEvent}.
+     * @param velocityX the X velocity computed from the {@link MotionEvent}.
+     * @param velocityY the Y velocity computed from the {@link MotionEvent}.
      * @param keyAction the original {@link KeyEvent#getAction()} when the event was dispatched to
      *               the process. This is forwarded separately because the input pipeline may mutate
      *               the {#event} action state later.
      * @param swipeEdge the edge from which the swipe begins.
      */
-    void onBackMotion(float touchX, float touchY, int keyAction,
+    void onBackMotion(
+            float touchX,
+            float touchY,
+            float velocityX,
+            float velocityY,
+            int keyAction,
             @BackEvent.SwipeEdge int swipeEdge);
 
     /**
@@ -47,9 +54,46 @@ public interface BackAnimation {
     void setTriggerBack(boolean triggerBack);
 
     /**
-     * Sets the threshold values that defining edge swipe behavior.
-     * @param triggerThreshold the min threshold to trigger back.
-     * @param progressThreshold the max threshold to keep progressing back animation.
+     * Sets the threshold values that define edge swipe behavior.<br>
+     * <br>
+     * <h1>How does {@code nonLinearFactor} work?</h1>
+     * <pre>
+     *     screen              screen              screen
+     *     width               width               width
+     *    |——————|            |————————————|      |————————————————————|
+     *           A     B                   A                   B  C    A
+     *  1 +——————+—————+    1 +————————————+    1 +————————————+———————+
+     *    |     /      |      |          —/|      |            | —————/|
+     *    |    /       |      |        —/  |      |           ——/      |
+     *    |   /        |      |      —/    |      |        ——/ |       |
+     *    |  /         |      |    —/      |      |     ——/    |       |
+     *    | /          |      |  —/        |      |  ——/       |       |
+     *    |/           |      |—/          |      |—/          |       |
+     *  0 +————————————+    0 +————————————+    0 +————————————+———————+
+     *                 B                   B                   B
+     * </pre>
+     * Three devices with different widths (smaller, equal, and wider) relative to the progress
+     * threshold are shown in the graphs.<br>
+     * - A is the width of the screen<br>
+     * - B is the progress threshold (horizontal swipe distance where progress is linear)<br>
+     * - C equals B + (A - B) * nonLinearFactor<br>
+     * <br>
+     * If A is less than or equal to B, {@code progress} for the swipe distance between:<br>
+     * - [0, A] will scale linearly between [0, 1].<br>
+     * If A is greater than B, {@code progress} for swipe distance between:<br>
+     * - [0, B] will scale linearly between [0, B / C]<br>
+     * - (B, A] will scale non-linearly and reach 1.
+     *
+     * @param linearDistance up to this distance progress continues linearly. B in the graph above.
+     * @param maxDistance distance at which the progress will be 1f. A in the graph above.
+     * @param nonLinearFactor This value is used to calculate the target if the screen is wider
+     *                        than the progress threshold.
      */
-    void setSwipeThresholds(float triggerThreshold, float progressThreshold);
+    void setSwipeThresholds(float linearDistance, float maxDistance, float nonLinearFactor);
+
+    /**
+     * Sets the system bar listener to control the system bar color.
+     * @param customizer the controller to control system bar color.
+     */
+    void setStatusBarCustomizer(StatusBarCustomizer customizer);
 }

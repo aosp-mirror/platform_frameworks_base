@@ -38,7 +38,9 @@ public final class WakelockController {
     public static final int WAKE_LOCK_STATE_CHANGED = 4;
     public static final int WAKE_LOCK_UNFINISHED_BUSINESS = 5;
 
-    private static final int WAKE_LOCK_MAX = WAKE_LOCK_UNFINISHED_BUSINESS;
+    @VisibleForTesting
+    static final int WAKE_LOCK_MAX = WAKE_LOCK_UNFINISHED_BUSINESS;
+
     private static final boolean DEBUG = false;
 
     @IntDef(flag = true, prefix = "WAKE_LOCK_", value = {
@@ -132,7 +134,7 @@ public final class WakelockController {
      * A utility to release all the wakelock acquired by the system
      */
     public void releaseAll() {
-        for (int i = WAKE_LOCK_PROXIMITY_POSITIVE; i < WAKE_LOCK_MAX; i++) {
+        for (int i = WAKE_LOCK_PROXIMITY_POSITIVE; i <= WAKE_LOCK_MAX; i++) {
             releaseWakelockInternal(i);
         }
     }

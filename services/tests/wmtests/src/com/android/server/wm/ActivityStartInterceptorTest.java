@@ -44,11 +44,13 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
@@ -248,9 +250,22 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testInterceptQuietProfile() {
-        // GIVEN that the user the activity is starting as is currently in quiet mode
+    public void testInterceptQuietProfile_keepProfilesRunningEnabled() {
+        // GIVEN that the user the activity is starting as is currently in quiet mode and
+        // profiles are kept running when in quiet mode.
         when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
+        when(mDevicePolicyManager.isKeepProfilesRunningEnabled()).thenReturn(true);
+
+        // THEN calling intercept returns false because package also has to be suspended.
+        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null,  null, 0, 0, null));
+    }
+
+    @Test
+    public void testInterceptQuietProfile_keepProfilesRunningDisabled() {
+        // GIVEN that the user the activity is starting as is currently in quiet mode and
+        // profiles are stopped when in quiet mode (pre-U behavior, no profile app suspension).
+        when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
+        when(mDevicePolicyManager.isKeepProfilesRunningEnabled()).thenReturn(false);
 
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null,  null, 0, 0, null));
@@ -261,10 +276,28 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testInterceptQuietProfileWhenPackageSuspended() {
+    public void testInterceptQuietProfileWhenPackageSuspended_keepProfilesRunningEnabled() {
+        // GIVEN that the user the activity is starting as is currently in quiet mode,
+        // the package is suspended and profiles are kept running while in quiet mode.
         suspendPackage("com.test.suspending.package");
-        // GIVEN that the user the activity is starting as is currently in quiet mode
         when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
+        when(mDevicePolicyManager.isKeepProfilesRunningEnabled()).thenReturn(true);
+
+        // THEN calling intercept returns true
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
+
+        // THEN the returned intent is the quiet mode intent
+        assertTrue(UnlaunchableAppActivity.createInQuietModeDialogIntent(TEST_USER_ID)
+                .filterEquals(mInterceptor.mIntent));
+    }
+
+    @Test
+    public void testInterceptQuietProfileWhenPackageSuspended_keepProfilesRunningDisabled() {
+        // GIVEN that the user the activity is starting as is currently in quiet mode,
+        // the package is suspended and profiles are stopped while in quiet mode.
+        suspendPackage("com.test.suspending.package");
+        when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
+        when(mDevicePolicyManager.isKeepProfilesRunningEnabled()).thenReturn(false);
 
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
@@ -445,11 +478,14 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testSandboxServiceInterceptionHappensToSandboxedActivityAction()
-            throws InterruptedException {
-
+    public void testSandboxServiceInterceptionHappensToIntentWithSandboxActivityAction() {
         ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
         mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
+
+        PackageManager packageManagerMock = mock(PackageManager.class);
+        String sandboxPackageNameMock = "com.sandbox.mock";
+        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
+        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
 
         Intent intent = new Intent().setAction(ACTION_START_SANDBOXED_ACTIVITY);
         mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
@@ -459,11 +495,66 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testSandboxServiceInterceptionNotCalledForNotSandboxedActivityAction() {
+    public void testSandboxServiceInterceptionHappensToIntentWithSandboxPackage() {
         ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
         mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
 
+        PackageManager packageManagerMock = mock(PackageManager.class);
+        String sandboxPackageNameMock = "com.sandbox.mock";
+        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
+        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
+
+        Intent intent = new Intent().setPackage(sandboxPackageNameMock);
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        verify(spyCallback, times(1)).onInterceptActivityLaunch(
+                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
+    }
+
+    @Test
+    public void testSandboxServiceInterceptionHappensToIntentWithComponentNameWithSandboxPackage() {
+        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
+        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
+
+        PackageManager packageManagerMock = mock(PackageManager.class);
+        String sandboxPackageNameMock = "com.sandbox.mock";
+        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
+        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
+
+        Intent intent = new Intent().setComponent(new ComponentName(sandboxPackageNameMock, ""));
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        verify(spyCallback, times(1)).onInterceptActivityLaunch(
+                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
+    }
+
+    @Test
+    public void testSandboxServiceInterceptionNotCalledWhenIntentNotRelatedToSandbox() {
+        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
+        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
+
+        PackageManager packageManagerMock = mock(PackageManager.class);
+        String sandboxPackageNameMock = "com.sandbox.mock";
+        when(mContext.getPackageManager()).thenReturn(packageManagerMock);
+        when(packageManagerMock.getSdkSandboxPackageName()).thenReturn(sandboxPackageNameMock);
+
+        // Intent: null
+        mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null);
+
+        // Action: null, Package: null, ComponentName: null
         Intent intent = new Intent();
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        // Wrong Action
+        intent = new Intent().setAction(Intent.ACTION_VIEW);
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        // Wrong Package
+        intent = new Intent().setPackage("Random");
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        // Wrong ComponentName's package
+        intent = new Intent().setComponent(new ComponentName("Random", ""));
         mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
 
         verify(spyCallback, never()).onInterceptActivityLaunch(

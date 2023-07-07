@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
+<!-- TODO(b/251476085): inline in biometric_prompt_layout after Biometric*Views are un-flagged -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
@@ -24,6 +24,7 @@
         android:singleLine="true"
         android:marqueeRepeatLimit="1"
         android:ellipsize="marquee"
+        android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Title"/>
 
     <TextView
@@ -34,6 +35,7 @@
         android:singleLine="true"
         android:marqueeRepeatLimit="1"
         android:ellipsize="marquee"
+        android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Subtitle"/>
 
     <TextView
@@ -53,13 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center">
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/biometric_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:contentDescription="@null"
-            android:scaleType="fitXY" />
+        <include layout="@layout/auth_biometric_icon"/>
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/biometric_icon_overlay"

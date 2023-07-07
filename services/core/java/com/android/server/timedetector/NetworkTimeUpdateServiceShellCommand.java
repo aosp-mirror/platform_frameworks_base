@@ -37,11 +37,6 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
     private static final String SHELL_COMMAND_SERVICE_NAME = "network_time_update_service";
 
     /**
-     * A shell command that clears the time signal received from the network.
-     */
-    private static final String SHELL_COMMAND_CLEAR_TIME = "clear_time";
-
-    /**
      * A shell command that forces the time signal to be refreshed from the network.
      */
     private static final String SHELL_COMMAND_FORCE_REFRESH = "force_refresh";
@@ -73,8 +68,6 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
-            case SHELL_COMMAND_CLEAR_TIME:
-                return runClearTime();
             case SHELL_COMMAND_FORCE_REFRESH:
                 return runForceRefresh();
             case SHELL_COMMAND_SET_SERVER_CONFIG:
@@ -85,11 +78,6 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
                 return handleDefaultCommands(cmd);
             }
         }
-    }
-
-    private int runClearTime() {
-        mNetworkTimeUpdateService.clearTimeForTests();
-        return 0;
     }
 
     private int runForceRefresh() {
@@ -147,8 +135,6 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
         pw.printf("Network Time Update Service (%s) commands:\n", SHELL_COMMAND_SERVICE_NAME);
         pw.printf("  help\n");
         pw.printf("    Print this help text.\n");
-        pw.printf("  %s\n", SHELL_COMMAND_CLEAR_TIME);
-        pw.printf("    Clears the latest time.\n");
         pw.printf("  %s\n", SHELL_COMMAND_FORCE_REFRESH);
         pw.printf("    Refreshes the latest time. Prints whether it was successful.\n");
         pw.printf("  %s\n", SHELL_COMMAND_SET_SERVER_CONFIG);

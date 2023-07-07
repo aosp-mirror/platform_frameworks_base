@@ -37,6 +37,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -160,6 +161,29 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnApplyWindowInsets_disappearAnimation_paddingNotSet() {
+        int paddingBottom = getContext().getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin);
+        int imeInsetAmount = paddingBottom + 1;
+        int systemBarInsetAmount = 0;
+        initMode(MODE_DEFAULT);
+
+        Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
+        Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
+
+        WindowInsets insets = new WindowInsets.Builder()
+                .setInsets(ime(), imeInset)
+                .setInsetsIgnoringVisibility(systemBars(), systemBarInset)
+                .build();
+
+        ensureViewFlipperIsMocked();
+        mKeyguardSecurityContainer.startDisappearAnimation(
+                KeyguardSecurityModel.SecurityMode.Password);
+        mKeyguardSecurityContainer.onApplyWindowInsets(insets);
+        assertThat(mKeyguardSecurityContainer.getPaddingBottom()).isNotEqualTo(imeInsetAmount);
+    }
+
+    @Test
     public void testDefaultViewMode() {
         initMode(MODE_ONE_HANDED);
         initMode(MODE_DEFAULT);
@@ -229,19 +253,16 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 getViewConstraint(mSecurityViewFlipper.getId());
         ConstraintSet.Constraint userSwitcherConstraint =
                 getViewConstraint(R.id.keyguard_bouncer_user_switcher);
-        assertThat(viewFlipperConstraint.layout.rightToRight).isEqualTo(PARENT_ID);
-        assertThat(viewFlipperConstraint.layout.leftToRight).isEqualTo(
+        assertThat(viewFlipperConstraint.layout.endToEnd).isEqualTo(PARENT_ID);
+        assertThat(viewFlipperConstraint.layout.startToEnd).isEqualTo(
                 R.id.keyguard_bouncer_user_switcher);
-        assertThat(userSwitcherConstraint.layout.leftToLeft).isEqualTo(PARENT_ID);
-        assertThat(userSwitcherConstraint.layout.rightToLeft).isEqualTo(
+        assertThat(userSwitcherConstraint.layout.startToStart).isEqualTo(PARENT_ID);
+        assertThat(userSwitcherConstraint.layout.endToStart).isEqualTo(
                 mSecurityViewFlipper.getId());
         assertThat(viewFlipperConstraint.layout.topToTop).isEqualTo(PARENT_ID);
         assertThat(viewFlipperConstraint.layout.bottomToBottom).isEqualTo(PARENT_ID);
         assertThat(userSwitcherConstraint.layout.topToTop).isEqualTo(PARENT_ID);
         assertThat(userSwitcherConstraint.layout.bottomToBottom).isEqualTo(PARENT_ID);
-        assertThat(userSwitcherConstraint.layout.bottomMargin).isEqualTo(
-                getContext().getResources().getDimensionPixelSize(
-                        R.dimen.bouncer_user_switcher_y_trans));
         assertThat(viewFlipperConstraint.layout.horizontalChainStyle).isEqualTo(CHAIN_SPREAD);
         assertThat(userSwitcherConstraint.layout.horizontalChainStyle).isEqualTo(CHAIN_SPREAD);
         assertThat(viewFlipperConstraint.layout.mHeight).isEqualTo(MATCH_CONSTRAINT);
@@ -356,7 +377,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
         ConstraintSet.Constraint viewFlipperConstraint = getViewConstraint(
                 mSecurityViewFlipper.getId());
-        assertThat(viewFlipperConstraint.layout.leftToLeft).isEqualTo(PARENT_ID);
+        assertThat(viewFlipperConstraint.layout.startToStart).isEqualTo(PARENT_ID);
     }
 
     @Test
@@ -374,6 +395,17 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.resetScale();
         assertThat(mKeyguardSecurityContainer.getScaleX()).isEqualTo(1);
         assertThat(mKeyguardSecurityContainer.getScaleY()).isEqualTo(1);
+    }
+
+    @Test
+    public void testDisappearAnimationPassword() {
+        ensureViewFlipperIsMocked();
+        KeyguardPasswordView keyguardPasswordView = mock(KeyguardPasswordView.class);
+        when(mSecurityViewFlipper.getSecurityView()).thenReturn(keyguardPasswordView);
+
+        mKeyguardSecurityContainer
+                .startDisappearAnimation(KeyguardSecurityModel.SecurityMode.Password);
+        verify(keyguardPasswordView).setDisappearAnimationListener(any());
     }
 
     private BackEvent createBackEvent(float touchX, float progress) {
@@ -446,4 +478,12 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 mUserSwitcherController, () -> {
                 }, mFalsingA11yDelegate);
     }
+
+    private void ensureViewFlipperIsMocked() {
+        mSecurityViewFlipper = mock(KeyguardSecurityViewFlipper.class);
+        KeyguardPasswordView keyguardPasswordView = mock(KeyguardPasswordView.class);
+        when(mSecurityViewFlipper.getSecurityView()).thenReturn(keyguardPasswordView);
+        mKeyguardSecurityContainer.mSecurityViewFlipper = mSecurityViewFlipper;
+    }
+
 }

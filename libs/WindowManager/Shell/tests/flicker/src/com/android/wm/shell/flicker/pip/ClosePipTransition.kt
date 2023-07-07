@@ -17,23 +17,21 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import android.tools.common.Rotation
+import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUNCHER
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher.Companion.LAUNCHER
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Test
 import org.junit.runners.Parameterized
 
 /** Base class for exiting pip (closing pip window) without returning to the app */
 abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            setup { this.setRotation(flicker.scenario.startRotation) }
-            teardown { this.setRotation(PlatformConsts.Rotation.ROTATION_0) }
-        }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        setup { this.setRotation(flicker.scenario.startRotation) }
+        teardown { this.setRotation(Rotation.ROTATION_0) }
+    }
 
     /**
      * Checks that [pipApp] window is pinned and visible at the start and then becomes unpinned and
@@ -43,25 +41,17 @@ abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker)
     @Presubmit
     @Test
     open fun pipWindowBecomesInvisible() {
-        if (isShellTransitionsEnabled) {
-            // When Shell transition is enabled, we change the windowing mode at start, but
-            // update the visibility after the transition is finished, so we can't check isNotPinned
-            // and isAppWindowInvisible in the same assertion block.
-            flicker.assertWm {
-                this.invoke("hasPipWindow") {
-                        it.isPinned(pipApp).isAppWindowVisible(pipApp).isAppWindowOnTop(pipApp)
-                    }
-                    .then()
-                    .invoke("!hasPipWindow") { it.isNotPinned(pipApp).isAppWindowNotOnTop(pipApp) }
-            }
-            flicker.assertWmEnd { isAppWindowInvisible(pipApp) }
-        } else {
-            flicker.assertWm {
-                this.invoke("hasPipWindow") { it.isPinned(pipApp).isAppWindowVisible(pipApp) }
-                    .then()
-                    .invoke("!hasPipWindow") { it.isNotPinned(pipApp).isAppWindowInvisible(pipApp) }
-            }
+        // When Shell transition is enabled, we change the windowing mode at start, but
+        // update the visibility after the transition is finished, so we can't check isNotPinned
+        // and isAppWindowInvisible in the same assertion block.
+        flicker.assertWm {
+            this.invoke("hasPipWindow") {
+                    it.isPinned(pipApp).isAppWindowVisible(pipApp).isAppWindowOnTop(pipApp)
+                }
+                .then()
+                .invoke("!hasPipWindow") { it.isNotPinned(pipApp).isAppWindowNotOnTop(pipApp) }
         }
+        flicker.assertWmEnd { isAppWindowInvisible(pipApp) }
     }
 
     /**
@@ -91,7 +81,7 @@ abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker)
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

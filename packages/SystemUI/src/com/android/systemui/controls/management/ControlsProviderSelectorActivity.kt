@@ -189,7 +189,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
                     authorizedPanelsRepository.addAuthorizedPanels(
                             setOf(serviceInfo.componentName.packageName)
                     )
-                    val selected = SelectedItem.PanelItem(appName, componentName)
+                    val selected = SelectedItem.PanelItem(appName, serviceInfo.componentName)
                     controlsController.setPreferredSelection(selected)
                     animateExitAndFinish()
                     openControlsOrigin()
@@ -211,10 +211,12 @@ open class ControlsProviderSelectorActivity @Inject constructor(
                     putExtra(ControlsFavoritingActivity.EXTRA_APP,
                             listingController.getAppLabel(it))
                     putExtra(Intent.EXTRA_COMPONENT_NAME, it)
-                    putExtra(ControlsFavoritingActivity.EXTRA_FROM_PROVIDER_SELECTOR, true)
+                    putExtra(
+                        ControlsFavoritingActivity.EXTRA_SOURCE,
+                        ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_PROVIDER_SELECTOR,
+                    )
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
-                animateExitAndFinish()
             }
         }
     }

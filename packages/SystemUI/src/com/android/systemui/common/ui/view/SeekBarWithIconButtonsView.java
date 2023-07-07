@@ -45,6 +45,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     private SeekBar mSeekbar;
 
     private SeekBarChangeListener mSeekBarListener = new SeekBarChangeListener();
+    private String[] mStateLabels = null;
 
     public SeekBarWithIconButtonsView(Context context) {
         this(context, null);
@@ -108,7 +109,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
         mSeekbar.setOnSeekBarChangeListener(mSeekBarListener);
 
-        mIconStart.setOnClickListener((view) -> {
+        mIconStartFrame.setOnClickListener((view) -> {
             final int progress = mSeekbar.getProgress();
             if (progress > 0) {
                 mSeekbar.setProgress(progress - 1);
@@ -116,7 +117,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
             }
         });
 
-        mIconEnd.setOnClickListener((view) -> {
+        mIconEndFrame.setOnClickListener((view) -> {
             final int progress = mSeekbar.getProgress();
             if (progress < mSeekbar.getMax()) {
                 mSeekbar.setProgress(progress + 1);
@@ -129,6 +130,30 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
         iconView.setEnabled(enabled);
         final ViewGroup iconFrame = (ViewGroup) iconView.getParent();
         iconFrame.setEnabled(enabled);
+    }
+
+    /**
+     * Stores the String array we would like to use for describing the state of seekbar progress
+     * and updates the state description with current progress.
+     *
+     * @param labels The state descriptions to be announced for each progress.
+     */
+    public void setProgressStateLabels(String[] labels) {
+        mStateLabels = labels;
+        if (mStateLabels != null) {
+            setSeekbarStateDescription();
+        }
+    }
+
+    /**
+     * Sets the state of seekbar based on current progress. The progress of seekbar is
+     * corresponding to the index of the string array. If the progress is larger than or equals
+     * to the length of the array, the state description is set to an empty string.
+     */
+    private void setSeekbarStateDescription() {
+        mSeekbar.setStateDescription(
+                (mSeekbar.getProgress() < mStateLabels.length)
+                        ? mStateLabels[mSeekbar.getProgress()] : "");
     }
 
     /**
@@ -173,6 +198,9 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (mStateLabels != null) {
+                setSeekbarStateDescription();
+            }
             if (mOnSeekBarChangeListener != null) {
                 mOnSeekBarChangeListener.onProgressChanged(seekBar, progress, fromUser);
             }

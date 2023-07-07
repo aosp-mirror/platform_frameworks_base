@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hearing Aids"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connected to Hearing Aids"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connected to LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connected to media audio"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Choose profile"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
     <string name="category_work" msgid="4014193632325996115">"Work"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Developer options"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Enable developer options"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Set options for app development"</string>
@@ -371,6 +372,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Show clip bounds, margins, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Force RTL layout direction"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Force screen layout direction to RTL for all locales"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Transparent navigation bar"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Make navigation bar background colour transparent by default"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Allow window-level blurs"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Force 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Enable 4x MSAA in OpenGL ES 2.0 apps"</string>
@@ -389,7 +392,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destroy every activity as soon as the user leaves it"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Background process limit"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Show background ANRs"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display App Not Responding dialogue for background apps"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display application not responding dialogue for background apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Show notification channel warnings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Force allow apps on external"</string>
@@ -517,6 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"More time."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Less time."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancel"</string>
+    <string name="next" msgid="2699398661093607009">"Next"</string>
+    <string name="back" msgid="5554327870352703710">"Back"</string>
+    <string name="save" msgid="3745809743277153149">"Save"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Done"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarms and reminders"</string>
@@ -539,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Just now"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"This phone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"This tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dock speaker"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"External device"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Connected device"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"This phone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Can\'t play on this device"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Upgrade account to switch"</string>
@@ -571,8 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customise with apps, wallpaper and so on. Users can also adjust device settings such as Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Give this user admin privileges?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"As an admin, they will be able to manage other users, modify device settings and factory reset the device."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Make this user an admin?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins have special privileges that other users don\'t. An admin can manage all users, update or reset this device, modify settings, see all installed apps and grant or revoke admin privileges for others."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Make admin"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure that the person is available to take the device and set up their space."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Set up profile now?"</string>
@@ -604,8 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"This will start a new guest session and delete all apps and data from the current session"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Exit guest mode?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"This will delete apps and data from the current guest session"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Give this user admin privileges"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Do not give user admin privileges"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Yes, make them an admin"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, don\'t make them an admin"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Exit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Save guest activity?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"You can save activity from the current session or delete all apps and data"</string>
@@ -679,4 +689,5 @@
     <item msgid="7728484337962740316">"Move right"</item>
     <item msgid="324200556467459329">"Move up"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

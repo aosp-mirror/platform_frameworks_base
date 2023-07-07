@@ -565,7 +565,6 @@ public class SplitControllerTest {
         assertNotNull(mSplitController.getActiveSplitForContainers(primaryContainer, container));
         assertTrue(primaryContainer.areLastRequestedBoundsEqual(null));
         assertTrue(container.areLastRequestedBoundsEqual(null));
-        assertEquals(container, mSplitController.getContainerWithActivity(secondaryActivity));
     }
 
     @Test
@@ -700,7 +699,7 @@ public class SplitControllerTest {
         final boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
-        assertFalse(result);
+        assertTrue(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(), any(),
                 any(), anyBoolean());
     }
@@ -734,7 +733,7 @@ public class SplitControllerTest {
         final boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
-        assertFalse(result);
+        assertTrue(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(), any(),
                 any(), anyBoolean());
     }
@@ -808,7 +807,7 @@ public class SplitControllerTest {
         final Activity launchedActivity = createMockActivity();
         primaryContainer.addPendingAppearedActivity(launchedActivity);
 
-        assertFalse(mSplitController.resolveActivityToContainer(mTransaction, launchedActivity,
+        assertTrue(mSplitController.resolveActivityToContainer(mTransaction, launchedActivity,
                 false /* isOnReparent */));
     }
 
@@ -944,7 +943,7 @@ public class SplitControllerTest {
         boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
-        assertFalse(result);
+        assertTrue(result);
         assertEquals(primaryContainer, mSplitController.getContainerWithActivity(mActivity));
 
 
@@ -1008,9 +1007,27 @@ public class SplitControllerTest {
 
         assertTrue(result);
         assertSplitPair(primaryActivity, mActivity, true /* matchParentBounds */);
-        assertEquals(mSplitController.getContainerWithActivity(secondaryActivity),
-                mSplitController.getContainerWithActivity(mActivity));
-        verify(mSplitPresenter, never()).createNewSplitContainer(any(), any(), any(), any());
+        assertTrue(mSplitController.getContainerWithActivity(mActivity)
+                .areLastRequestedBoundsEqual(new Rect()));
+    }
+
+    @Test
+    public void testFindActivityBelow() {
+        // Create a container with two activities
+        final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
+        final Activity pendingAppearedActivity = createMockActivity();
+        container.addPendingAppearedActivity(pendingAppearedActivity);
+
+        // Ensure the activity below matches
+        assertEquals(mActivity,
+                mSplitController.findActivityBelow(pendingAppearedActivity));
+
+        // Ensure that the activity look up won't search for the in-process activities and should
+        // IPC to WM core to get the activity below. It should be `null` for this mock test.
+        spyOn(container);
+        doReturn(true).when(container).hasCrossProcessActivities();
+        assertNotEquals(mActivity,
+                mSplitController.findActivityBelow(pendingAppearedActivity));
     }
 
     @Test
@@ -1196,7 +1213,7 @@ public class SplitControllerTest {
                 .build();
 
         assertTrue("Rules must have same presentation if tags are null and has same properties.",
-                SplitController.haveSamePresentation(splitRule1, splitRule2,
+                SplitController.areRulesSamePresentation(splitRule1, splitRule2,
                         new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
 
         splitRule2 = createSplitPairRuleBuilder(
@@ -1211,7 +1228,7 @@ public class SplitControllerTest {
 
         assertFalse("Rules must have different presentations if tags are not equal regardless"
                         + "of other properties",
-                SplitController.haveSamePresentation(splitRule1, splitRule2,
+                SplitController.areRulesSamePresentation(splitRule1, splitRule2,
                         new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
     }
 

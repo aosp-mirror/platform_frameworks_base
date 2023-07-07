@@ -18,9 +18,9 @@ package com.android.server.clipboard;
 
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
+import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -482,6 +482,51 @@ public class ClipboardService extends SystemService {
                     "Requires SET_CLIP_SOURCE permission");
             checkAndSetPrimaryClip(clip, callingPackage, attributionTag, userId, deviceId,
                     sourcePackage);
+        }
+
+        @Override
+        public boolean areClipboardAccessNotificationsEnabledForUser(int userId) {
+            int result = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("areClipboardAccessNotificationsEnable requires "
+                        + "permission MANAGE_CLIPBOARD_ACCESS_NOTIFICATION");
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                return Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                        Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS,
+                        getDefaultClipboardAccessNotificationsSetting(), userId) != 0;
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
+        @Override
+        public void setClipboardAccessNotificationsEnabledForUser(boolean enable, int userId) {
+            int result = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("areClipboardAccessNotificationsEnable requires "
+                        + "permission MANAGE_CLIPBOARD_ACCESS_NOTIFICATION");
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                ContentResolver resolver = getContext()
+                        .createContextAsUser(UserHandle.of(userId), 0).getContentResolver();
+                Settings.Secure.putInt(resolver,
+                        Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, (enable ? 1 : 0));
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
+        private int getDefaultClipboardAccessNotificationsSetting() {
+            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
+                    ClipboardManager.DEVICE_CONFIG_SHOW_ACCESS_NOTIFICATIONS,
+                    ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS) ? 1 : 0;
         }
 
         private void checkAndSetPrimaryClip(
@@ -1342,6 +1387,11 @@ public class ClipboardService extends SystemService {
         }
         if (mPm.checkPermission(Manifest.permission.SUPPRESS_CLIPBOARD_ACCESS_NOTIFICATION,
                 callingPackage) == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        // Don't notify if this access is coming from the privileged app which owns the device.
+        if (clipboard.deviceId != DEVICE_ID_DEFAULT && mVdmInternal.getDeviceOwnerUid(
+                clipboard.deviceId) == uid) {
             return;
         }
         // Don't notify if already notified for this uid and clip.

@@ -16,6 +16,10 @@
 
 package com.android.server.am;
 
+import android.annotation.UptimeMillisLong;
+import android.app.ActivityManagerInternal.OomAdjReason;
+import android.util.TimeUtils;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -51,7 +55,7 @@ final class ProcessCachedOptimizerRecord {
     /**
      * Last oom adjust change reason for this app.
      */
-    @GuardedBy("mProcLock") private @OomAdjuster.OomAdjReason int mLastOomAdjChangeReason;
+    @GuardedBy("mProcLock") private @OomAdjReason int mLastOomAdjChangeReason;
 
     /**
      * The most recent compaction action performed for this app.
@@ -71,6 +75,15 @@ final class ProcessCachedOptimizerRecord {
      */
     @GuardedBy("mProcLock")
     private boolean mFrozen;
+
+    /**
+     * If set to true it will make the (un)freeze decision sticky which means that the freezer
+     * decision will remain the same unless a freeze is forced via {@link #mForceFreezeOps}.
+     * This property is usually set to true when external user wants to maintain a (un)frozen state
+     * after being applied.
+     */
+    @GuardedBy("mProcLock")
+    private boolean mFreezeSticky;
 
     /**
      * Set to false after the process has been frozen.
@@ -108,6 +121,18 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     private boolean mPendingFreeze;
 
+    /**
+     * This is the soonest the process can be allowed to freeze, in uptime millis
+     */
+    @GuardedBy("mProcLock")
+    private @UptimeMillisLong long mEarliestFreezableTimeMillis;
+
+    /**
+     * This is the most recently used timeout for freezing the app in millis
+     */
+    @GuardedBy("mProcLock")
+    private long mLastUsedTimeout;
+
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
         return mLastCompactTime;
@@ -139,12 +164,12 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
-    void setLastOomAdjChangeReason(@OomAdjuster.OomAdjReason int reason) {
+    void setLastOomAdjChangeReason(@OomAdjReason int reason) {
         mLastOomAdjChangeReason = reason;
     }
 
     @GuardedBy("mProcLock")
-    @OomAdjuster.OomAdjReason
+    @OomAdjReason
     int getLastOomAdjChangeReason() {
         return mLastOomAdjChangeReason;
     }
@@ -192,6 +217,15 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setFrozen(boolean frozen) {
         mFrozen = frozen;
+    }
+    @GuardedBy("mProcLock")
+    void setFreezeSticky(boolean sticky) {
+        mFreezeSticky = sticky;
+    }
+
+    @GuardedBy("mProcLock")
+    boolean isFreezeSticky() {
+        return mFreezeSticky;
     }
 
     boolean skipPSSCollectionBecauseFrozen() {
@@ -244,6 +278,26 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
+    @UptimeMillisLong long getEarliestFreezableTime() {
+        return mEarliestFreezableTimeMillis;
+    }
+
+    @GuardedBy("mProcLock")
+    void setEarliestFreezableTime(@UptimeMillisLong long earliestFreezableTimeMillis) {
+        mEarliestFreezableTimeMillis = earliestFreezableTimeMillis;
+    }
+
+    @GuardedBy("mProcLock")
+    long getLastUsedTimeout() {
+        return mLastUsedTimeout;
+    }
+
+    @GuardedBy("mProcLock")
+    void setLastUsedTimeout(long lastUsedTimeout) {
+        mLastUsedTimeout = lastUsedTimeout;
+    }
+
+    @GuardedBy("mProcLock")
     boolean isFreezeExempt() {
         return mFreezeExempt;
     }
@@ -283,5 +337,8 @@ final class ProcessCachedOptimizerRecord {
         pw.print(prefix); pw.print("isFreezeExempt="); pw.print(mFreezeExempt);
         pw.print(" isPendingFreeze="); pw.print(mPendingFreeze);
         pw.print(" " + IS_FROZEN + "="); pw.println(mFrozen);
+        pw.print(prefix); pw.print("earliestFreezableTimeMs=");
+        TimeUtils.formatDuration(mEarliestFreezableTimeMillis, nowUptime, pw);
+        pw.println();
     }
 }

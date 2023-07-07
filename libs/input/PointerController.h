@@ -19,6 +19,7 @@
 
 #include <PointerControllerInterface.h>
 #include <gui/DisplayEventReceiver.h>
+#include <gui/WindowInfosUpdate.h>
 #include <input/DisplayViewport.h>
 #include <input/Input.h>
 #include <utils/BitSet.h>
@@ -50,21 +51,19 @@ public:
 
     ~PointerController() override;
 
-    virtual bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
-    virtual void move(float deltaX, float deltaY);
-    virtual void setButtonState(int32_t buttonState);
-    virtual int32_t getButtonState() const;
-    virtual void setPosition(float x, float y);
-    virtual void getPosition(float* outX, float* outY) const;
-    virtual int32_t getDisplayId() const;
-    virtual void fade(Transition transition);
-    virtual void unfade(Transition transition);
-    virtual void setDisplayViewport(const DisplayViewport& viewport);
+    std::optional<FloatRect> getBounds() const override;
+    void move(float deltaX, float deltaY) override;
+    void setPosition(float x, float y) override;
+    FloatPoint getPosition() const override;
+    int32_t getDisplayId() const override;
+    void fade(Transition transition) override;
+    void unfade(Transition transition) override;
+    void setDisplayViewport(const DisplayViewport& viewport) override;
 
-    virtual void setPresentation(Presentation presentation);
-    virtual void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                          BitSet32 spotIdBits, int32_t displayId);
-    virtual void clearSpots();
+    void setPresentation(Presentation presentation) override;
+    void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
+                  BitSet32 spotIdBits, int32_t displayId) override;
+    void clearSpots() override;
 
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
@@ -116,8 +115,7 @@ private:
     class DisplayInfoListener : public gui::WindowInfosListener {
     public:
         explicit DisplayInfoListener(PointerController* pc) : mPointerController(pc){};
-        void onWindowInfosChanged(const std::vector<android::gui::WindowInfo>&,
-                                  const std::vector<android::gui::DisplayInfo>&) override;
+        void onWindowInfosChanged(const gui::WindowInfosUpdate&) override;
         void onPointerControllerDestroyed();
 
         // This lock is also used by PointerController. See PointerController::getLock().

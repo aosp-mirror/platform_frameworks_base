@@ -17,11 +17,10 @@
 #include "Properties.h"
 
 #include "Debug.h"
-#include "log/log_main.h"
 #ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
 #endif
-#include "src/core/SkTraceEventCommon.h"
+#include "SkTraceEventCommon.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -91,6 +90,8 @@ bool Properties::isHighEndGfx = true;
 bool Properties::isLowRam = false;
 bool Properties::isSystemOrPersistent = false;
 
+float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
+
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
 DrawingEnabled Properties::drawingEnabled = DrawingEnabled::NotInitialized;
@@ -102,7 +103,7 @@ bool Properties::load() {
     debugOverdraw = false;
     std::string debugOverdrawProperty = base::GetProperty(PROPERTY_DEBUG_OVERDRAW, "");
     if (debugOverdrawProperty != "") {
-        INIT_LOGD("  Overdraw debug enabled: %s", debugOverdrawProperty);
+        INIT_LOGD("  Overdraw debug enabled: %s", debugOverdrawProperty.c_str());
         if (debugOverdrawProperty == "show") {
             debugOverdraw = true;
             overdrawColorSet = OverdrawColorSet::Default;
@@ -149,6 +150,11 @@ bool Properties::load() {
     if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
 
     enableWebViewOverlays = base::GetBoolProperty(PROPERTY_WEBVIEW_OVERLAYS_ENABLED, true);
+
+    auto hdrHeadroom = (float)atof(base::GetProperty(PROPERTY_8BIT_HDR_HEADROOM, "").c_str());
+    if (hdrHeadroom >= 1.f) {
+        maxHdrHeadroomOn8bit = std::min(hdrHeadroom, 100.f);
+    }
 
     // call isDrawingEnabled to force loading of the property
     isDrawingEnabled();
@@ -213,12 +219,15 @@ RenderPipelineType Properties::getRenderPipelineType() {
     return sRenderPipelineType;
 }
 
-void Properties::overrideRenderPipelineType(RenderPipelineType type, bool inUnitTest) {
+void Properties::overrideRenderPipelineType(RenderPipelineType type) {
     // If we're doing actual rendering then we can't change the renderer after it's been set.
-    // Unit tests can freely change this as often as it wants.
-    LOG_ALWAYS_FATAL_IF(sRenderPipelineType != RenderPipelineType::NotInitialized &&
-                                sRenderPipelineType != type && !inUnitTest,
-                        "Trying to change pipeline but it's already set.");
+    // Unit tests can freely change this as often as it wants, though, as there's no actual
+    // GL rendering happening
+    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
+        LOG_ALWAYS_FATAL_IF(sRenderPipelineType != type,
+                            "Trying to change pipeline but it's already set");
+        return;
+    }
     sRenderPipelineType = type;
 }
 

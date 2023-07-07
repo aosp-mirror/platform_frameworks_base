@@ -67,6 +67,7 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
+import android.util.FeatureFlagUtils;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.autofill.AutofillManagerInternal;
@@ -76,15 +77,19 @@ import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
+import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import junit.framework.Assert;
 
+import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockSettings;
@@ -114,6 +119,8 @@ class TestPhoneWindowManager {
     @Mock private Vibrator mVibrator;
     @Mock private PowerManager mPowerManager;
     @Mock private WindowManagerPolicy.WindowManagerFuncs mWindowManagerFuncsImpl;
+    @Mock private InputMethodManagerInternal mInputMethodManagerInternal;
+    @Mock private UserManagerInternal mUserManagerInternal;
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
 
@@ -182,8 +189,12 @@ class TestPhoneWindowManager {
                 () -> LocalServices.getService(eq(DisplayManagerInternal.class)));
         doReturn(mGestureLauncherService).when(
                 () -> LocalServices.getService(eq(GestureLauncherService.class)));
+        doReturn(mUserManagerInternal).when(
+                () -> LocalServices.getService(eq(UserManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(VrManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(AutofillManagerInternal.class)));
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
+        LocalServices.addService(InputMethodManagerInternal.class, mInputMethodManagerInternal);
 
         doReturn(mAppOpsManager).when(mContext).getSystemService(eq(AppOpsManager.class));
         doReturn(mDisplayManager).when(mContext).getSystemService(eq(DisplayManager.class));
@@ -196,9 +207,11 @@ class TestPhoneWindowManager {
                     .canonicalToCurrentPackageNames(any());
         } catch (PackageManager.NameNotFoundException ignored) { }
 
-        doReturn(mTelecomManager).when(mContext).getSystemService(eq(Context.TELECOM_SERVICE));
-        doReturn(mNotificationManager).when(mContext)
-                .getSystemService(eq(NotificationManager.class));
+        doReturn(false).when(mTelecomManager).isInCall();
+        doReturn(false).when(mTelecomManager).isRinging();
+        doReturn(mTelecomManager).when(mPhoneWindowManager).getTelecommService();
+        doNothing().when(mNotificationManager).silenceNotificationSound();
+        doReturn(mNotificationManager).when(mPhoneWindowManager).getNotificationService();
         doReturn(mVibrator).when(mContext).getSystemService(eq(Context.VIBRATOR_SERVICE));
 
         final PowerManager.WakeLock wakeLock = mock(PowerManager.WakeLock.class);
@@ -227,8 +240,9 @@ class TestPhoneWindowManager {
         doNothing().when(mPhoneWindowManager).updateSettings();
         doNothing().when(mPhoneWindowManager).screenTurningOn(anyInt(), any());
         doNothing().when(mPhoneWindowManager).screenTurnedOn(anyInt());
-        doNothing().when(mPhoneWindowManager).startedWakingUp(anyInt());
-        doNothing().when(mPhoneWindowManager).finishedWakingUp(anyInt());
+        doNothing().when(mPhoneWindowManager).startedWakingUp(anyInt(), anyInt());
+        doNothing().when(mPhoneWindowManager).finishedWakingUp(anyInt(), anyInt());
+        doNothing().when(mPhoneWindowManager).lockNow(any());
 
         mPhoneWindowManager.init(new TestInjector(mContext, mWindowManagerFuncsImpl));
         mPhoneWindowManager.systemReady();
@@ -242,6 +256,8 @@ class TestPhoneWindowManager {
 
     void tearDown() {
         mHandlerThread.quitSafely();
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
+        Mockito.reset(mPhoneWindowManager);
         mMockitoSession.finishMocking();
     }
 
@@ -283,6 +299,10 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideShortPressOnPower(int behavior) {
+        mPhoneWindowManager.mShortPressOnPowerBehavior = behavior;
+    }
+
      // Override assist perform function.
     void overrideLongPressOnPower(int behavior) {
         mPhoneWindowManager.mLongPressOnPowerBehavior = behavior;
@@ -305,14 +325,33 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideCanStartDreaming(boolean canDream) {
+        doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
+    }
+
     void overrideDisplayState(int state) {
         doReturn(state).when(mDisplay).getState();
+        doReturn(state == STATE_ON).when(mDisplayPolicy).isAwake();
         Mockito.reset(mPowerManager);
     }
 
     void overrideIncallPowerBehavior(int behavior) {
         mPhoneWindowManager.mIncallPowerBehavior = behavior;
         setPhoneCallIsInProgress();
+    }
+
+    void prepareBrightnessDecrease(float currentBrightness) {
+        doReturn(0.0f).when(mPowerManager)
+                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+        doReturn(1.0f).when(mPowerManager)
+                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+        doReturn(currentBrightness).when(mDisplayManager)
+                .getBrightness(0);
+    }
+
+    void verifyNewBrightness(float newBrightness) {
+        verify(mDisplayManager).setBrightness(Mockito.eq(0),
+                AdditionalMatchers.eq(newBrightness, 0.001f));
     }
 
     void setPhoneCallIsInProgress() {
@@ -322,12 +361,12 @@ class TestPhoneWindowManager {
         doReturn(true).when(mTelecomManager).endCall();
     }
 
-    void overrideExpandNotificationsPanel() {
+    void overrideTogglePanel() {
         // Can't directly mock on IStatusbarService, use spyOn and override the specific api.
         mPhoneWindowManager.getStatusBarService();
         spyOn(mPhoneWindowManager.mStatusBarService);
         try {
-            doNothing().when(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+            doNothing().when(mPhoneWindowManager.mStatusBarService).togglePanel();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -336,6 +375,10 @@ class TestPhoneWindowManager {
     void overrideStatusBarManagerInternal() {
         doReturn(mStatusBarManagerInternal).when(
                 () -> LocalServices.getService(eq(StatusBarManagerInternal.class)));
+    }
+
+    void overrideLaunchHome() {
+        doNothing().when(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
     }
 
     /**
@@ -366,6 +409,11 @@ class TestPhoneWindowManager {
         waitForIdle();
         verify(mAccessibilityShortcutController,
                 timeout(SHORTCUT_KEY_DELAY_MILLIS)).performAccessibilityShortcut();
+    }
+
+    void assertDreamRequest() {
+        waitForIdle();
+        verify(mDreamManagerInternal).requestDream();
     }
 
     void assertPowerSleep() {
@@ -417,7 +465,13 @@ class TestPhoneWindowManager {
 
     void assertSwitchKeyboardLayout(int direction) {
         waitForIdle();
-        verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
+            verify(mInputMethodManagerInternal).switchKeyboardLayout(eq(direction));
+            verify(mWindowManagerFuncsImpl, never()).switchKeyboardLayout(anyInt(), anyInt());
+        } else {
+            verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
+            verify(mInputMethodManagerInternal, never()).switchKeyboardLayout(anyInt());
+        }
     }
 
     void assertTakeBugreport() {
@@ -428,9 +482,9 @@ class TestPhoneWindowManager {
         Assert.assertTrue(intentCaptor.getValue().getAction() == Intent.ACTION_BUG_REPORT);
     }
 
-    void assertExpandNotification() throws RemoteException {
+    void assertTogglePanel() throws RemoteException {
         waitForIdle();
-        verify(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+        verify(mPhoneWindowManager.mStatusBarService).togglePanel();
     }
 
     void assertToggleShortcutsMenu() {
@@ -441,5 +495,23 @@ class TestPhoneWindowManager {
     void assertToggleCapsLock() {
         waitForIdle();
         verify(mInputManagerInternal).toggleCapsLock(anyInt());
+    }
+
+    void assertWillNotLockAfterAppTransitionFinished() {
+        Assert.assertFalse(mPhoneWindowManager.mLockAfterAppTransitionFinished);
+    }
+
+    void assertLockedAfterAppTransitionFinished() {
+        ArgumentCaptor<AppTransitionListener> transitionCaptor =
+                ArgumentCaptor.forClass(AppTransitionListener.class);
+        verify(mWindowManagerInternal).registerAppTransitionListener(
+                transitionCaptor.capture());
+        transitionCaptor.getValue().onAppTransitionFinishedLocked(any());
+        verify(mPhoneWindowManager).lockNow(null);
+    }
+
+    void assertGoToHomescreen() {
+        waitForIdle();
+        verify(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
     }
 }

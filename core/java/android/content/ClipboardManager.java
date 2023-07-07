@@ -85,7 +85,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      *
      * @hide
      */
-    public static final boolean DEVICE_CONFIG_DEFAULT_ALLOW_VIRTUALDEVICE_SILOS = false;
+    public static final boolean DEVICE_CONFIG_DEFAULT_ALLOW_VIRTUALDEVICE_SILOS = true;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -132,6 +132,39 @@ public class ClipboardManager extends android.text.ClipboardManager {
         mHandler = handler;
         mService = IClipboard.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.CLIPBOARD_SERVICE));
+    }
+
+    /**
+     * Determine if the Clipboard Access Notifications are enabled
+     *
+     * @return true if notifications are enabled, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION)
+    public boolean areClipboardAccessNotificationsEnabled() {
+        try {
+            return mService.areClipboardAccessNotificationsEnabledForUser(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     *
+     * Set the enable state of the Clipboard Access Notifications
+     * @param enable Whether to enable notifications
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION)
+    public void setClipboardAccessNotificationsEnabled(boolean enable) {
+        try {
+            mService.setClipboardAccessNotificationsEnabledForUser(enable, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

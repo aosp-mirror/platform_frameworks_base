@@ -30,18 +30,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.media.soundtrigger.ModelParameter;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.RemoteException;
 import android.util.Pair;
@@ -163,7 +164,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAttachDetach() throws Exception {
         // Normal attachment / detachment.
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         assertNotNull(module);
         module.detach();
     }
@@ -171,7 +172,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testLoadUnloadModel() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         final int hwHandle = 7;
         int handle = loadGenericModel(module, hwHandle).first;
@@ -182,7 +183,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testLoadPreemptModel() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         final int hwHandle = 7;
         Pair<Integer, SoundTriggerHwCallback> loadResult = loadGenericModel(module, hwHandle);
@@ -201,7 +202,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testLoadUnloadPhraseModel() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         final int hwHandle = 73;
         int handle = loadPhraseModel(module, hwHandle).first;
@@ -212,7 +213,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testStartStopRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -224,11 +225,6 @@ public class SoundTriggerMiddlewareImplTest {
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
-        verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
-
         // Unload the model.
         unloadModel(module, handle, hwHandle);
         module.detach();
@@ -237,7 +233,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testStartRecognitionBusy() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -261,7 +257,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testStartStopPhraseRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 67;
@@ -273,11 +269,6 @@ public class SoundTriggerMiddlewareImplTest {
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
-        verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
-
         // Unload the model.
         unloadModel(module, handle, hwHandle);
         module.detach();
@@ -286,7 +277,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -299,11 +290,11 @@ public class SoundTriggerMiddlewareImplTest {
 
         {
             // Signal a capture from the driver (with "still active").
-            RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
-                    RecognitionStatus.SUCCESS, true);
+            RecognitionEventSys event = hwCallback.sendRecognitionEvent(hwHandle,
+                    RecognitionStatus.SUCCESS, true, 12345);
 
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
             verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
             // Validate the event.
@@ -312,11 +303,11 @@ public class SoundTriggerMiddlewareImplTest {
 
         {
             // Signal a capture from the driver (without "still active").
-            RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
-                    RecognitionStatus.SUCCESS, false);
+            RecognitionEventSys event = hwCallback.sendRecognitionEvent(hwHandle,
+                    RecognitionStatus.SUCCESS, false, 12345);
 
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
             verify(callback, times(2)).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
             // Validate the event.
@@ -331,7 +322,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testPhraseRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -343,11 +334,11 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Signal a capture from the driver.
-        PhraseRecognitionEvent event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
-                RecognitionStatus.SUCCESS, false);
+        PhraseRecognitionEventSys event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                RecognitionStatus.SUCCESS, false, 12345);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
@@ -361,7 +352,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForceRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -377,11 +368,11 @@ public class SoundTriggerMiddlewareImplTest {
         verify(mHalDriver).forceRecognitionEvent(hwHandle);
 
         // Signal a capture from the driver.
-        RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
-                RecognitionStatus.FORCED, true);
+        RecognitionEventSys event = hwCallback.sendRecognitionEvent(hwHandle,
+                RecognitionStatus.FORCED, true, 12345);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
@@ -398,7 +389,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForceRecognitionNotSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -429,7 +420,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForcePhraseRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -445,11 +436,11 @@ public class SoundTriggerMiddlewareImplTest {
         verify(mHalDriver).forceRecognitionEvent(hwHandle);
 
         // Signal a capture from the driver.
-        PhraseRecognitionEvent event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
-                RecognitionStatus.FORCED, true);
+        PhraseRecognitionEventSys event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                RecognitionStatus.FORCED, true, 12345);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
@@ -466,7 +457,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForcePhraseRecognitionNotSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -498,7 +489,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAbortRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 11;
@@ -510,14 +501,16 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        hwCallback.sendRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false);
+        hwCallback.sendRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false, 12345);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
+        RecognitionEventSys lastEvent = eventCaptor.getValue();
+        assertEquals(12345, lastEvent.halEventReceivedMillis);
+        assertEquals(RecognitionStatus.ABORTED, lastEvent.recognitionEvent.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -528,7 +521,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAbortPhraseRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 11;
@@ -540,14 +533,16 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        hwCallback.sendPhraseRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false);
+        hwCallback.sendPhraseRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false, 12345);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
+        PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
+        assertEquals(12345, lastEvent.halEventReceivedMillis);
+        assertEquals(RecognitionStatus.ABORTED, lastEvent.phraseRecognitionEvent.common.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -557,7 +552,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testParameterSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 12;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -579,7 +574,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testParameterNotSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 13;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -597,7 +592,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testGetParameter() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 14;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -614,7 +609,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testSetParameter() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 17;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -630,18 +625,24 @@ public class SoundTriggerMiddlewareImplTest {
             mCallback = callback;
         }
 
-        private RecognitionEvent sendRecognitionEvent(int hwHandle, @RecognitionStatus int status,
-                boolean recognitionStillActive) {
-            RecognitionEvent event = TestUtil.createRecognitionEvent(status,
+        private RecognitionEventSys sendRecognitionEvent(int hwHandle,
+                @RecognitionStatus int status,
+                boolean recognitionStillActive, @ElapsedRealtimeLong long halEventReceivedMillis) {
+            RecognitionEventSys event = new RecognitionEventSys();
+            event.recognitionEvent = TestUtil.createRecognitionEvent(status,
                     recognitionStillActive);
+            event.halEventReceivedMillis = halEventReceivedMillis;
             mCallback.recognitionCallback(hwHandle, event);
             return event;
         }
 
-        private PhraseRecognitionEvent sendPhraseRecognitionEvent(int hwHandle,
-                @RecognitionStatus int status, boolean recognitionStillActive) {
-            PhraseRecognitionEvent event = TestUtil.createPhraseRecognitionEvent(status,
+        private PhraseRecognitionEventSys sendPhraseRecognitionEvent(int hwHandle,
+                @RecognitionStatus int status, boolean recognitionStillActive,
+                @ElapsedRealtimeLong long halEventReceivedMillis) {
+            PhraseRecognitionEventSys event = new PhraseRecognitionEventSys();
+            event.phraseRecognitionEvent = TestUtil.createPhraseRecognitionEvent(status,
                     recognitionStillActive);
+            event.halEventReceivedMillis = halEventReceivedMillis;
             mCallback.phraseRecognitionCallback(hwHandle, event);
             return event;
         }

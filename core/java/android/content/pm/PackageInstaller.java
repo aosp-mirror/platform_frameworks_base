@@ -444,6 +444,10 @@ public class PackageInstaller {
      * exist, it may be missing native code for the ABIs supported by the
      * device, or it requires a newer SDK version, etc.
      *
+     * Starting in {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, an app with only 32-bit native
+     * code can still be installed on a device that supports both 64-bit and 32-bit ABIs.
+     * However, a warning dialog will be displayed when the app is launched.
+     *
      * @see #EXTRA_STATUS_MESSAGE
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
@@ -616,6 +620,7 @@ public class PackageInstaller {
     /** {@hide} */
     public PackageInstaller(IPackageInstaller installer,
             String installerPackageName, String installerAttributionTag, int userId) {
+        Objects.requireNonNull(installer, "installer cannot be null");
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
         mAttributionTag = installerAttributionTag;
@@ -981,6 +986,15 @@ public class PackageInstaller {
      *
      * The result is returned by a callback because some constraints might take a long time
      * to evaluate.
+     *
+     * @param packageNames a list of package names to check the constraints for installation
+     * @param constraints the constraints for installation.
+     * @param executor the {@link Executor} on which to invoke the callback
+     * @param callback called when the {@link InstallConstraintsResult} is ready
+     *
+     * @throws SecurityException if the given packages' installer of record doesn't match the
+     *             caller's own package name or the installerPackageName set by the caller doesn't
+     *             match the caller's own package name.
      */
     public void checkInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
@@ -1008,6 +1022,8 @@ public class PackageInstaller {
      * Note: the device idle constraint might take a long time to evaluate. The system will
      * ensure the constraint is evaluated completely before handling timeout.
      *
+     * @param packageNames a list of package names to check the constraints for installation
+     * @param constraints the constraints for installation.
      * @param callback Called when the constraints are satisfied or after timeout.
      *                 Intents sent to this callback contain:
      *                 {@link Intent#EXTRA_PACKAGES} for the input package names,
@@ -1017,6 +1033,9 @@ public class PackageInstaller {
      *                      satisfied. Valid range is from 0 to one week. {@code 0} means the
      *                      callback will be invoked immediately no matter constraints are
      *                      satisfied or not.
+     * @throws SecurityException if the given packages' installer of record doesn't match the
+     *             caller's own package name or the installerPackageName set by the caller doesn't
+     *             match the caller's own package name.
      */
     public void waitForInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
@@ -1039,6 +1058,7 @@ public class PackageInstaller {
      * may be performed on the session. In the case of timeout, you may commit the
      * session again using this method or {@link Session#commit(IntentSender)} for retries.
      *
+     * @param sessionId the session ID to commit when all constraints are satisfied.
      * @param statusReceiver Called when the state of the session changes. Intents
      *                       sent to this receiver contain {@link #EXTRA_STATUS}.
      *                       Refer to the individual status codes on how to handle them.
@@ -1711,8 +1731,8 @@ public class PackageInstaller {
          * performed on the session. In case of device reboot or data loader transient failure
          * before the session has been finalized, you may commit the session again.
          * <p>
-         * If the installer is the device owner or the affiliated profile owner, there will be no
-         * user intervention.
+         * If the installer is the device owner, the affiliated profile owner, or has received
+         * user pre-approval of this session, there will be no user intervention.
          *
          * @param statusReceiver Called when the state of the session changes. Intents
          *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
@@ -1722,6 +1742,7 @@ public class PackageInstaller {
          *             {@link #openWrite(String, long, long)} are still open.
          *
          * @see android.app.admin.DevicePolicyManager
+         * @see #requestUserPreapproval
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
@@ -1987,14 +2008,22 @@ public class PackageInstaller {
          * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
          * permission, they can request the approval from users before
          * {@link Session#commit(IntentSender)} is called. This may require user intervention as
-         * well. The result of the request will be reported through the given callback.
+         * well. When user intervention is required, installers will receive a
+         * {@link #STATUS_PENDING_USER_ACTION} callback, and {@link #STATUS_SUCCESS} otherwise.
+         * In case that requesting user pre-approval is not available, installers will receive
+         * {@link #STATUS_FAILURE_BLOCKED} instead. Note that if the users decline the request,
+         * this session will be abandoned.
+         *
+         * If user intervention is required but never resolved, or requesting user
+         * pre-approval is not available, you may still call {@link Session#commit(IntentSender)}
+         * as the typical installation.
          *
          * @param details the adequate context to this session for requesting the approval from
          *                users prior to commit.
          * @param statusReceiver called when the state of the session changes.
-         *                       Intents sent to this receiver contain
-         *                       {@link #EXTRA_STATUS}. Refer to the individual
-         *                       status codes on how to handle them.
+         *                       Intents sent to this receiver contain {@link #EXTRA_STATUS}
+         *                       and the {@link #EXTRA_PRE_APPROVAL} would be {@code true}.
+         *                       Refer to the individual status codes on how to handle them.
          *
          * @throws IllegalArgumentException when {@link PreapprovalDetails} is {@code null}.
          * @throws IllegalArgumentException if {@link IntentSender} is {@code null}.
@@ -2003,6 +2032,7 @@ public class PackageInstaller {
          * @throws IllegalStateException if called again after this method has been called on
          *                               this session.
          * @throws SecurityException when the caller does not own this session.
+         * @throws SecurityException if called after the session has been committed or abandoned.
          */
         public void requestUserPreapproval(@NonNull PreapprovalDetails details,
                 @NonNull IntentSender statusReceiver) {
@@ -2062,6 +2092,25 @@ public class PackageInstaller {
         return new InstallInfo(result);
     }
 
+    /**
+     * Parse a single APK file passed as an FD to get install relevant information about
+     * the package wrapped in {@link InstallInfo}.
+     * @throws PackageParsingException if the package source file(s) provided is(are) not valid,
+     * or the parser isn't able to parse the supplied source(s).
+     * @hide
+     */
+    @NonNull
+    public InstallInfo readInstallInfo(@NonNull ParcelFileDescriptor pfd,
+            @Nullable String debugPathName, int flags) throws PackageParsingException {
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<PackageLite> result = ApkLiteParseUtils.parseMonolithicPackageLite(input,
+                pfd.getFileDescriptor(), debugPathName, flags);
+        if (result.isError()) {
+            throw new PackageParsingException(result.getErrorCode(), result.getErrorMessage());
+        }
+        return new InstallInfo(result);
+    }
+
     // (b/239722738) This class serves as a bridge between the PackageLite class, which
     // is a hidden class, and the consumers of this class. (e.g. InstallInstalling.java)
     // This is a part of an effort to remove dependency on hidden APIs and use SystemAPIs or
@@ -2114,6 +2163,21 @@ public class PackageInstaller {
          */
         public long calculateInstalledSize(@NonNull SessionParams params) throws IOException {
             return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride);
+        }
+
+        /**
+         * @param params {@link SessionParams} of the installation
+         * @param pfd of an APK opened for read
+         * @return Total disk space occupied by an application after installation.
+         * Includes the size of the raw APKs, possibly unpacked resources, raw dex metadata files,
+         * and all relevant native code.
+         * @throws IOException when size of native binaries cannot be calculated.
+         * @hide
+         */
+        public long calculateInstalledSize(@NonNull SessionParams params,
+                @NonNull ParcelFileDescriptor pfd) throws IOException {
+            return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride,
+                    pfd.getFileDescriptor());
         }
     }
 
@@ -2521,9 +2585,9 @@ public class PackageInstaller {
          * Sets the state of permissions for the package at installation.
          * <p/>
          * Granting any runtime permissions require the
-         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be
-         * held by the caller. Revoking runtime permissions is not allowed, even during app update
-         * sessions.
+         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS
+         * INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be held by the caller. Revoking runtime
+         * permissions is not allowed, even during app update sessions.
          * <p/>
          * Holders without the permission are allowed to change the following special permissions:
          * <p/>
@@ -2925,13 +2989,14 @@ public class PackageInstaller {
          *             <li>The {@link InstallSourceInfo#getUpdateOwnerPackageName() update owner}
          *             of an existing version of the app (in other words, this install session is
          *             an app update) if the update ownership enforcement is enabled.</li>
-         *             <li>The {@link InstallSourceInfo#getInstallingPackageName() installer of
-         *             record} of an existing version of the app (in other words, this install
+         *             <li>The
+         *             {@link InstallSourceInfo#getInstallingPackageName() installer of record}
+         *             of an existing version of the app (in other words, this install
          *             session is an app update) if the update ownership enforcement isn't
          *             enabled.</li>
          *             <li>Updating itself.</li>
          *         </ul>
-         *     </li>>
+         *     </li>
          *     <li>The installer declares the
          *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION
          *     UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
@@ -3536,6 +3601,18 @@ public class PackageInstaller {
          */
         public @Nullable Uri getReferrerUri() {
             return referrerUri;
+        }
+
+        /**
+         * @return the path to the validated base APK for this session, which may point at an
+         * APK inside the session (when the session defines the base), or it may
+         * point at the existing base APK (when adding splits to an existing app).
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+        public @Nullable String getResolvedBaseApkPath() {
+            return resolvedBaseCodePath;
         }
 
         /**

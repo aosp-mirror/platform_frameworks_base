@@ -60,6 +60,7 @@ public class TvPipCustomAction extends TvPipAction {
         }
         button.setImageIconAsync(mRemoteAction.getIcon(), mainHandler);
         button.setEnabled(isCloseAction() || mRemoteAction.isEnabled());
+        button.setIsCustomCloseAction(isCloseAction());
     }
 
     PendingIntent getPendingIntent() {
@@ -85,6 +86,7 @@ public class TvPipCustomAction extends TvPipAction {
         Bundle extras = new Bundle();
         extras.putCharSequence(Notification.EXTRA_PICTURE_CONTENT_DESCRIPTION,
                 mRemoteAction.getContentDescription());
+        extras.putBoolean(TvPipAction.EXTRA_IS_PIP_CUSTOM_ACTION, true);
         builder.addExtras(extras);
 
         builder.setSemanticAction(isCloseAction()

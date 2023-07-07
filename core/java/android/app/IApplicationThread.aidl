@@ -95,7 +95,7 @@ oneway interface IApplicationThread {
     void processInBackground();
     @UnsupportedAppUsage
     void scheduleBindService(IBinder token,
-            in Intent intent, boolean rebind, int processState);
+            in Intent intent, boolean rebind, int processState, long bindSeq);
     @UnsupportedAppUsage
     void scheduleUnbindService(IBinder token,
             in Intent intent);
@@ -172,4 +172,5 @@ oneway interface IApplicationThread {
             in TranslationSpec targetSpec, in List<AutofillId> viewIds,
             in UiTranslationSpec uiTranslationSpec);
     void scheduleTimeoutService(IBinder token, int startId);
+    void schedulePing(in RemoteCallback pong);
 }

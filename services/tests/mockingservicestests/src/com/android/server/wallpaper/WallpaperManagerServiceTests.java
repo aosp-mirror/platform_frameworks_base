@@ -17,8 +17,10 @@
 package com.android.server.wallpaper;
 
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
+import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.os.FileObserver.CLOSE_WRITE;
+import static android.os.UserHandle.MIN_SECONDARY_USER_ID;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -106,6 +108,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Tests for the {@link WallpaperManagerService} class.
@@ -262,6 +265,25 @@ public class WallpaperManagerServiceTests {
     }
 
     /**
+     * Tests that the fundamental fields are set by the main WallpaperData constructor
+     */
+    @Test
+    public void testWallpaperDataConstructor() {
+        final int testUserId = MIN_SECONDARY_USER_ID;
+        for (int which: List.of(FLAG_LOCK, FLAG_SYSTEM)) {
+            WallpaperData newWallpaperData = new WallpaperData(testUserId, which);
+            assertEquals(which, newWallpaperData.mWhich);
+            assertEquals(testUserId, newWallpaperData.userId);
+
+            WallpaperData wallpaperData = mService.getWallpaperSafeLocked(testUserId, which);
+            assertEquals(wallpaperData.cropFile.getAbsolutePath(),
+                    newWallpaperData.cropFile.getAbsolutePath());
+            assertEquals(wallpaperData.wallpaperFile.getAbsolutePath(),
+                    newWallpaperData.wallpaperFile.getAbsolutePath());
+        }
+    }
+
+    /**
      * Tests that internal basic data should be correct after boot up.
      */
     @Test
@@ -292,7 +314,8 @@ public class WallpaperManagerServiceTests {
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
 
-        mService.setWallpaperComponent(sImageWallpaperComponentName, FLAG_SYSTEM, testUserId);
+        mService.setWallpaperComponent(sImageWallpaperComponentName, sContext.getOpPackageName(),
+                FLAG_SYSTEM, testUserId);
         verifyLastWallpaperData(testUserId, sImageWallpaperComponentName);
         verifyCurrentSystemData(testUserId);
 
@@ -321,7 +344,8 @@ public class WallpaperManagerServiceTests {
 
         WallpaperManagerService.DisplayConnector connector =
                 mService.mLastWallpaper.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY);
-        mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent, sContext.getOpPackageName(),
+                FLAG_SYSTEM, testUserId);
 
         verify(connector.mEngine).dispatchWallpaperCommand(
                 eq(COMMAND_REAPPLY), anyInt(), anyInt(), anyInt(), any());
@@ -403,10 +427,7 @@ public class WallpaperManagerServiceTests {
             fail("exception occurred while writing system wallpaper attributes");
         }
 
-        WallpaperData shouldMatchSystem = new WallpaperData(systemWallpaperData.userId,
-                systemWallpaperData.wallpaperFile.getParentFile(),
-                systemWallpaperData.wallpaperFile.getAbsolutePath(),
-                systemWallpaperData.cropFile.getAbsolutePath());
+        WallpaperData shouldMatchSystem = new WallpaperData(0, FLAG_SYSTEM);
         try {
             TypedXmlPullParser parser = Xml.newBinaryPullParser();
             mService.mWallpaperDataParser.parseWallpaperAttributes(parser, shouldMatchSystem, true);
@@ -465,7 +486,8 @@ public class WallpaperManagerServiceTests {
     public void testGetAdjustedWallpaperColorsOnDimming() throws RemoteException {
         final int testUserId = USER_SYSTEM;
         mService.switchUser(testUserId, null);
-        mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent, sContext.getOpPackageName(),
+                FLAG_SYSTEM, testUserId);
         WallpaperData wallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM, testUserId);
 
         // Mock a wallpaper data with color hints that support dark text and dark theme

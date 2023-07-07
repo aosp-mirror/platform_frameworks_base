@@ -63,6 +63,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     private static final String TAG = "LockscreenWallpaper";
 
+    // TODO(b/253507223): temporary; remove this
+    private static final String DISABLED_ERROR_MESSAGE = "Methods from LockscreenWallpaper.java "
+            + "should not be called in this version. The lock screen wallpaper should be "
+            + "managed by the WallpaperManagerService and not by this class.";
+
     private final NotificationMediaManager mMediaManager;
     private final WallpaperManager mWallpaperManager;
     private final KeyguardUpdateMonitor mUpdateMonitor;
@@ -91,7 +96,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         mMediaManager = mediaManager;
         mH = mainHandler;
 
-        if (iWallpaperManager != null) {
+        if (iWallpaperManager != null && !mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
             // Service is disabled on some devices like Automotive
             try {
                 iWallpaperManager.setLockWallpaperCallback(this);
@@ -102,6 +107,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     public Bitmap getBitmap() {
+        assertLockscreenLiveWallpaperNotEnabled();
+
         if (mCached) {
             return mCache;
         }
@@ -122,9 +129,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     public LoaderResult loadBitmap(int currentUserId, UserHandle selectedUser) {
         // May be called on any thread - only use thread safe operations.
 
-        if (mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
-            return LoaderResult.success(null);
-        }
+        assertLockscreenLiveWallpaperNotEnabled();
+
 
         if (!mWallpaperManager.isWallpaperSupported()) {
             // When wallpaper is not supported, show the system wallpaper
@@ -164,6 +170,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     public void setCurrentUser(int user) {
+        assertLockscreenLiveWallpaperNotEnabled();
+
         if (user != mCurrentUserId) {
             if (mSelectedUser == null || user != mSelectedUser.getIdentifier()) {
                 mCached = false;
@@ -173,6 +181,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     public void setSelectedUser(UserHandle selectedUser) {
+        assertLockscreenLiveWallpaperNotEnabled();
+
         if (Objects.equals(selectedUser, mSelectedUser)) {
             return;
         }
@@ -182,16 +192,18 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     @Override
     public void onWallpaperChanged() {
+        assertLockscreenLiveWallpaperNotEnabled();
         // Called on Binder thread.
         postUpdateWallpaper();
     }
 
     @Override
     public void onWallpaperColorsChanged(WallpaperColors colors, int which, int userId) {
-
+        assertLockscreenLiveWallpaperNotEnabled();
     }
 
     private void postUpdateWallpaper() {
+        assertLockscreenLiveWallpaperNotEnabled();
         if (mH == null) {
             Log.wtfStack(TAG, "Trying to use LockscreenWallpaper before initialization.");
             return;
@@ -199,10 +211,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         mH.removeCallbacks(this);
         mH.post(this);
     }
-
     @Override
     public void run() {
         // Called in response to onWallpaperChanged on the main thread.
+
+        assertLockscreenLiveWallpaperNotEnabled();
 
         if (mLoader != null) {
             mLoader.cancel(false /* interrupt */);
@@ -231,6 +244,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 mLoader = null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    // TODO(b/273443374): remove
+    public boolean isLockscreenLiveWallpaperEnabled() {
+        return mWallpaperManager.isLockscreenLiveWallpaperEnabled();
     }
 
     @Override
@@ -351,6 +369,18 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 // DrawableWrapper already handles this for us.
                 return 0;
             }
+        }
+    }
+
+    /**
+     * Feature b/253507223 will adapt the logic to always use the
+     * WallpaperManagerService to render the lock screen wallpaper.
+     * Methods of this class should not be called at all if the project flag is enabled.
+     * TODO(b/253507223) temporary assertion; remove this
+     */
+    private void assertLockscreenLiveWallpaperNotEnabled() {
+        if (mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+            throw new IllegalStateException(DISABLED_ERROR_MESSAGE);
         }
     }
 }

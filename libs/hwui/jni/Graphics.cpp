@@ -579,17 +579,9 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
     LOG_ALWAYS_FATAL_IF(res == skcms_TFType_HLGinvish || res == skcms_TFType_Invalid);
 
     jobject params;
-    if (res == skcms_TFType_PQish || res == skcms_TFType_HLGish) {
-        params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
-                                transferParams.a, transferParams.b, transferParams.c,
-                                transferParams.d, transferParams.e, transferParams.f,
-                                transferParams.g, true);
-    } else {
-        params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
-                                transferParams.a, transferParams.b, transferParams.c,
-                                transferParams.d, transferParams.e, transferParams.f,
-                                transferParams.g, false);
-    }
+    params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
+                            transferParams.a, transferParams.b, transferParams.c, transferParams.d,
+                            transferParams.e, transferParams.f, transferParams.g);
 
     jfloatArray xyzArray = env->NewFloatArray(9);
     jfloat xyz[9] = {
@@ -628,13 +620,13 @@ bool HeapAllocator::allocPixelRef(SkBitmap* bitmap) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(
-        android::Bitmap* recycledBitmap, size_t recycledBytes)
-    : mRecycledBitmap(recycledBitmap)
-    , mRecycledBytes(recycledBytes)
-    , mSkiaBitmap(nullptr)
-    , mNeedsCopy(false)
-{}
+RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
+                                                                 bool mustMatchColorType)
+        : mRecycledBitmap(recycledBitmap)
+        , mRecycledBytes(recycledBitmap ? recycledBitmap->getAllocationByteCount() : 0)
+        , mSkiaBitmap(nullptr)
+        , mNeedsCopy(false)
+        , mMustMatchColorType(mustMatchColorType) {}
 
 RecyclingClippingPixelAllocator::~RecyclingClippingPixelAllocator() {}
 
@@ -645,10 +637,16 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     LOG_ALWAYS_FATAL_IF(!bitmap);
     mSkiaBitmap = bitmap;
 
-    // This behaves differently than the RecyclingPixelAllocator.  For backwards
-    // compatibility, the original color type of the recycled bitmap must be maintained.
-    if (mRecycledBitmap->info().colorType() != bitmap->colorType()) {
-        return false;
+    if (mMustMatchColorType) {
+        // This behaves differently than the RecyclingPixelAllocator.  For backwards
+        // compatibility, the original color type of the recycled bitmap must be maintained.
+        if (mRecycledBitmap->info().colorType() != bitmap->colorType()) {
+            ALOGW("recycled color type %d != bitmap color type %d",
+                  mRecycledBitmap->info().colorType(), bitmap->colorType());
+            return false;
+        }
+    } else {
+        mRecycledBitmap->reconfigure(mRecycledBitmap->info().makeColorType(bitmap->colorType()));
     }
 
     // The Skia bitmap specifies the width and height needed by the decoder.
@@ -703,7 +701,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
 void RecyclingClippingPixelAllocator::copyIfNecessary() {
     if (mNeedsCopy) {
         mRecycledBitmap->ref();
-        SkPixelRef* recycledPixels = mRecycledBitmap;
+        android::Bitmap* recycledPixels = mRecycledBitmap;
         void* dst = recycledPixels->pixels();
         const size_t dstRowBytes = mRecycledBitmap->rowBytes();
         const size_t bytesToCopy = std::min(mRecycledBitmap->info().minRowBytes(),
@@ -716,6 +714,8 @@ void RecyclingClippingPixelAllocator::copyIfNecessary() {
             dst = reinterpret_cast<void*>(
                     reinterpret_cast<uint8_t*>(dst) + dstRowBytes);
         }
+        recycledPixels->setAlphaType(mSkiaBitmap->alphaType());
+        recycledPixels->setColorSpace(mSkiaBitmap->refColorSpace());
         recycledPixels->notifyPixelsChanged();
         recycledPixels->unref();
     }
@@ -817,7 +817,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gTransferParameters_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
             "android/graphics/ColorSpace$Rgb$TransferParameters"));
     gTransferParameters_constructorMethodID =
-            GetMethodIDOrDie(env, gTransferParameters_class, "<init>", "(DDDDDDDZ)V");
+            GetMethodIDOrDie(env, gTransferParameters_class, "<init>", "(DDDDDDD)V");
 
     gFontMetrics_class = FindClassOrDie(env, "android/graphics/Paint$FontMetrics");
     gFontMetrics_class = MakeGlobalRefOrDie(env, gFontMetrics_class);

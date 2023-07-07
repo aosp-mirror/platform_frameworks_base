@@ -17,6 +17,12 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.PlatformConsts
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -24,10 +30,6 @@ import androidx.window.extensions.WindowExtensions
 import androidx.window.extensions.WindowExtensionsProvider
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.windowmanager.WindowManagerState.Companion.STATE_RESUMED
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeNotNull
 
 class ActivityEmbeddingAppHelper
@@ -52,8 +54,8 @@ constructor(
         launchButton.click()
         wmHelper
             .StateSyncBuilder()
-            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, STATE_RESUMED)
-            .withActivityState(MAIN_ACTIVITY_COMPONENT, STATE_RESUMED)
+            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
             .waitForAndVerify()
     }
 
@@ -71,8 +73,8 @@ constructor(
         launchButton.click()
         wmHelper
             .StateSyncBuilder()
-            .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, STATE_RESUMED)
-            .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, STATE_RESUMED)
+            .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, PlatformConsts.STATE_RESUMED)
             .waitForAndVerify()
     }
 

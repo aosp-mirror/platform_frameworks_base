@@ -293,8 +293,10 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 // with the same canvas transformation + clip into the target
                 // canvas then draw the layer on top
                 if (renderNode->hasHolePunches()) {
+                    canvas->save();
                     TransformCanvas transformCanvas(canvas, SkBlendMode::kDstOut);
                     displayList->draw(&transformCanvas);
+                    canvas->restore();
                 }
                 canvas->drawImageRect(snapshotImage, SkRect::Make(srcBounds),
                                       SkRect::Make(dstBounds), sampling, &paint,

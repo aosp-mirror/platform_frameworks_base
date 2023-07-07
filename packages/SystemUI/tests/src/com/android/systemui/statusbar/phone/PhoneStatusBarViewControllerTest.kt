@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone
 
 import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
@@ -26,26 +25,29 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Optional
 
@@ -53,9 +55,9 @@ import java.util.Optional
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var notificationPanelViewController: NotificationPanelViewController
+    private lateinit var shadeViewController: ShadeViewController
     @Mock
-    private lateinit var panelView: ViewGroup
+    private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
     @Mock
@@ -96,6 +98,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Test
     fun onViewAttachedAndDrawn_moveFromCenterAnimationEnabled_moveFromCenterAnimationInitialized() {
+        whenever(featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS))
+                .thenReturn(true)
         val view = createViewMock()
         val argumentCaptor = ArgumentCaptor.forClass(OnPreDrawListener::class.java)
         unfoldConfig.isEnabled = true
@@ -111,63 +115,77 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onViewAttachedAndDrawn_statusBarAnimationDisabled_animationNotInitialized() {
+        whenever(featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS))
+                .thenReturn(false)
+        val view = createViewMock()
+        unfoldConfig.isEnabled = true
+        // create the controller on main thread as it requires main looper
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+
+        verify(moveFromCenterAnimation, never()).onViewsReady(any())
+    }
+
+    @Test
     fun handleTouchEventFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(false)
         val returnVal = view.onTouchEvent(
                         MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         assertThat(returnVal).isFalse()
-        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
+        verify(shadeViewController, never()).handleExternalTouch(any())
     }
 
     @Test
     fun handleTouchEventFromStatusBar_viewNotEnabled_returnsTrueAndNoViewEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.notificationPanelViewController)
-                .thenReturn(notificationPanelViewController)
-        `when`(notificationPanelViewController.isViewEnabled).thenReturn(false)
+        `when`(centralSurfacesImpl.shadeViewController)
+                .thenReturn(shadeViewController)
+        `when`(shadeViewController.isViewEnabled).thenReturn(false)
         val returnVal = view.onTouchEvent(
                 MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         assertThat(returnVal).isTrue()
-        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
+        verify(shadeViewController, never()).handleExternalTouch(any())
     }
 
     @Test
     fun handleTouchEventFromStatusBar_viewNotEnabledButIsMoveEvent_viewReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.notificationPanelViewController)
-                .thenReturn(notificationPanelViewController)
-        `when`(notificationPanelViewController.isViewEnabled).thenReturn(false)
+        `when`(centralSurfacesImpl.shadeViewController)
+                .thenReturn(shadeViewController)
+        `when`(shadeViewController.isViewEnabled).thenReturn(false)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController).sendTouchEventToView(event)
+        verify(shadeViewController).handleExternalTouch(event)
     }
 
     @Test
     fun handleTouchEventFromStatusBar_panelAndViewEnabled_viewReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.notificationPanelViewController)
-                .thenReturn(notificationPanelViewController)
-        `when`(notificationPanelViewController.isViewEnabled).thenReturn(true)
+        `when`(centralSurfacesImpl.shadeViewController)
+                .thenReturn(shadeViewController)
+        `when`(shadeViewController.isViewEnabled).thenReturn(true)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController).sendTouchEventToView(event)
+        verify(shadeViewController).handleExternalTouch(event)
     }
 
     @Test
     fun handleTouchEventFromStatusBar_topEdgeTouch_viewNeverReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.notificationPanelViewController)
-                .thenReturn(notificationPanelViewController)
-        `when`(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+        `when`(centralSurfacesImpl.shadeViewController)
+                .thenReturn(shadeViewController)
+        `when`(shadeViewController.isFullyCollapsed).thenReturn(true)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
+        verify(shadeViewController, never()).handleExternalTouch(any())
     }
 
     private fun createViewMock(): PhoneStatusBarView {
@@ -182,6 +200,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         return PhoneStatusBarViewController.Factory(
             Optional.of(sysuiUnfoldComponent),
             Optional.of(progressProvider),
+            featureFlags,
             userChipViewModel,
             centralSurfacesImpl,
             shadeControllerImpl,

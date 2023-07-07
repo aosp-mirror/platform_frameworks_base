@@ -88,6 +88,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.testutils.StubTransaction;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.rules.TestRule;
@@ -545,7 +546,6 @@ public class SystemServicesTestRule implements TestRule {
             mDevEnableNonResizableMultiWindow = false;
             mMinPercentageMultiWindowSupportHeight = 0.3f;
             mMinPercentageMultiWindowSupportWidth = 0.5f;
-            mLargeScreenSmallestScreenWidthDp = 600;
             mSupportsNonResizableMultiWindow = 0;
             mRespectsActivityMinWidthHeightMultiWindow = 0;
             mForceResizableActivities = false;

@@ -16,10 +16,6 @@
 
 package com.android.systemui.screenrecord;
 
-import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.INTERNAL;
-import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
-import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC_AND_INTERNAL;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
@@ -40,9 +36,6 @@ public class ScreenRecordingAdapter extends ArrayAdapter<ScreenRecordingAudioSou
     private LinearLayout mSelectedMic;
     private LinearLayout mSelectedInternal;
     private LinearLayout mSelectedMicAndInternal;
-    private LinearLayout mMicOption;
-    private LinearLayout mMicAndInternalOption;
-    private LinearLayout mInternalOption;
 
     public ScreenRecordingAdapter(Context context, int resource,
             List<ScreenRecordingAudioSource> objects) {
@@ -54,28 +47,21 @@ public class ScreenRecordingAdapter extends ArrayAdapter<ScreenRecordingAudioSou
         mSelectedInternal = getSelected(R.string.screenrecord_device_audio_label);
         mSelectedMic = getSelected(R.string.screenrecord_mic_label);
         mSelectedMicAndInternal = getSelected(R.string.screenrecord_device_audio_and_mic_label);
-
-        mMicOption = getOption(R.string.screenrecord_mic_label, Resources.ID_NULL);
-        mMicOption.removeViewAt(1);
-
-        mMicAndInternalOption = getOption(
-                R.string.screenrecord_device_audio_and_mic_label, Resources.ID_NULL);
-        mMicAndInternalOption.removeViewAt(1);
-
-        mInternalOption = getOption(R.string.screenrecord_device_audio_label,
-                R.string.screenrecord_device_audio_description);
     }
 
     private LinearLayout getOption(int label, int description) {
-        LayoutInflater inflater = (LayoutInflater) getContext()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout layout = (LinearLayout) inflater
                 .inflate(R.layout.screen_record_dialog_audio_source, null, false);
         ((TextView) layout.findViewById(R.id.screen_recording_dialog_source_text))
                 .setText(label);
-        if (description != Resources.ID_NULL)
-            ((TextView) layout.findViewById(R.id.screen_recording_dialog_source_description))
-                    .setText(description);
+        TextView descriptionView = layout.findViewById(
+                R.id.screen_recording_dialog_source_description);
+        if (description != Resources.ID_NULL) {
+            descriptionView.setText(description);
+        } else {
+            descriptionView.setVisibility(View.GONE);
+        }
         return layout;
     }
 
@@ -92,11 +78,13 @@ public class ScreenRecordingAdapter extends ArrayAdapter<ScreenRecordingAudioSou
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         switch (getItem(position)) {
             case INTERNAL:
-                return mInternalOption;
+                return getOption(R.string.screenrecord_device_audio_label,
+                        R.string.screenrecord_device_audio_description);
             case MIC_AND_INTERNAL:
-                return mMicAndInternalOption;
+                return getOption(
+                        R.string.screenrecord_device_audio_and_mic_label, Resources.ID_NULL);
             case MIC:
-                return mMicOption;
+                return getOption(R.string.screenrecord_mic_label, Resources.ID_NULL);
             default:
                 return super.getDropDownView(position, convertView, parent);
         }

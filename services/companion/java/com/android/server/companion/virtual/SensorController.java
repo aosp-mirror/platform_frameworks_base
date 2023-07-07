@@ -22,8 +22,11 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.hardware.SensorDirectChannel;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -33,9 +36,9 @@ import com.android.server.LocalServices;
 import com.android.server.sensors.SensorManagerInternal;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Controls virtual sensors, including their lifecycle and sensor event dispatch. */
 public class SensorController {
@@ -47,21 +50,20 @@ public class SensorController {
     private static final int UNKNOWN_ERROR = (-2147483647 - 1); // INT32_MIN value
     private static final int BAD_VALUE = -22;
 
-    private final Object mLock;
+    private static AtomicInteger sNextDirectChannelHandle = new AtomicInteger(1);
+
+    private final Object mLock = new Object();
     private final int mVirtualDeviceId;
     @GuardedBy("mLock")
-    private final Map<IBinder, SensorDescriptor> mSensorDescriptors = new ArrayMap<>();
+    private final ArrayMap<IBinder, SensorDescriptor> mSensorDescriptors = new ArrayMap<>();
 
     @NonNull
     private final SensorManagerInternal.RuntimeSensorCallback mRuntimeSensorCallback;
     private final SensorManagerInternal mSensorManagerInternal;
     private final VirtualDeviceManagerInternal mVdmInternal;
 
-
-
-    public SensorController(@NonNull Object lock, int virtualDeviceId,
+    public SensorController(int virtualDeviceId,
             @Nullable IVirtualSensorCallback virtualSensorCallback) {
-        mLock = lock;
         mVirtualDeviceId = virtualDeviceId;
         mRuntimeSensorCallback = new RuntimeSensorCallbackWrapper(virtualSensorCallback);
         mSensorManagerInternal = LocalServices.getService(SensorManagerInternal.class);
@@ -70,15 +72,10 @@ public class SensorController {
 
     void close() {
         synchronized (mLock) {
-            final Iterator<Map.Entry<IBinder, SensorDescriptor>> iterator =
-                    mSensorDescriptors.entrySet().iterator();
-            if (iterator.hasNext()) {
-                final Map.Entry<IBinder, SensorDescriptor> entry = iterator.next();
-                final IBinder token = entry.getKey();
-                final SensorDescriptor sensorDescriptor = entry.getValue();
-                iterator.remove();
-                closeSensorDescriptorLocked(token, sensorDescriptor);
-            }
+            mSensorDescriptors.values().forEach(
+                    descriptor -> mSensorManagerInternal.removeRuntimeSensor(
+                            descriptor.getHandle()));
+            mSensorDescriptors.clear();
         }
     }
 
@@ -95,27 +92,21 @@ public class SensorController {
 
     private int createSensorInternal(IBinder sensorToken, VirtualSensorConfig config)
             throws SensorCreationException {
+        if (config.getType() <= 0) {
+            throw new SensorCreationException("Received an invalid virtual sensor type.");
+        }
         final int handle = mSensorManagerInternal.createRuntimeSensor(mVirtualDeviceId,
                 config.getType(), config.getName(),
-                config.getVendor() == null ? "" : config.getVendor(),
-                mRuntimeSensorCallback);
+                config.getVendor() == null ? "" : config.getVendor(), config.getMaximumRange(),
+                config.getResolution(), config.getPower(), config.getMinDelay(),
+                config.getMaxDelay(), config.getFlags(), mRuntimeSensorCallback);
         if (handle <= 0) {
             throw new SensorCreationException("Received an invalid virtual sensor handle.");
         }
 
-        // The handle is valid from here, so ensure that all failures clean it up.
-        final BinderDeathRecipient binderDeathRecipient;
-        try {
-            binderDeathRecipient = new BinderDeathRecipient(sensorToken);
-            sensorToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
-        } catch (RemoteException e) {
-            mSensorManagerInternal.removeRuntimeSensor(handle);
-            throw new SensorCreationException("Client died before sensor could be created.", e);
-        }
-
         synchronized (mLock) {
             SensorDescriptor sensorDescriptor = new SensorDescriptor(
-                    handle, config.getType(), config.getName(), binderDeathRecipient);
+                    handle, config.getType(), config.getName());
             mSensorDescriptors.put(sensorToken, sensorDescriptor);
         }
         return handle;
@@ -142,15 +133,8 @@ public class SensorController {
             if (sensorDescriptor == null) {
                 throw new IllegalArgumentException("Could not unregister sensor for given token");
             }
-            closeSensorDescriptorLocked(token, sensorDescriptor);
+            mSensorManagerInternal.removeRuntimeSensor(sensorDescriptor.getHandle());
         }
-    }
-
-    @GuardedBy("mLock")
-    private void closeSensorDescriptorLocked(IBinder token, SensorDescriptor sensorDescriptor) {
-        token.unlinkToDeath(sensorDescriptor.getDeathRecipient(), /* flags= */ 0);
-        final int handle = sensorDescriptor.getHandle();
-        mSensorManagerInternal.removeRuntimeSensor(handle);
     }
 
 
@@ -170,14 +154,14 @@ public class SensorController {
     void addSensorForTesting(IBinder deviceToken, int handle, int type, String name) {
         synchronized (mLock) {
             mSensorDescriptors.put(deviceToken,
-                    new SensorDescriptor(handle, type, name, () -> {}));
+                    new SensorDescriptor(handle, type, name));
         }
     }
 
     @VisibleForTesting
     Map<IBinder, SensorDescriptor> getSensorDescriptors() {
         synchronized (mLock) {
-            return mSensorDescriptors;
+            return new ArrayMap<>(mSensorDescriptors);
         }
     }
 
@@ -212,19 +196,77 @@ public class SensorController {
             }
             return OK;
         }
+
+        @Override
+        public int onDirectChannelCreated(ParcelFileDescriptor fd) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No sensor callback for virtual deviceId " + mVirtualDeviceId);
+                return BAD_VALUE;
+            } else if (fd == null) {
+                Slog.e(TAG, "Received invalid ParcelFileDescriptor");
+                return BAD_VALUE;
+            }
+            final int channelHandle = sNextDirectChannelHandle.getAndIncrement();
+            SharedMemory sharedMemory = SharedMemory.fromFileDescriptor(fd);
+            try {
+                mCallback.onDirectChannelCreated(channelHandle, sharedMemory);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+                return UNKNOWN_ERROR;
+            }
+            return channelHandle;
+        }
+
+        @Override
+        public void onDirectChannelDestroyed(int channelHandle) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No sensor callback for virtual deviceId " + mVirtualDeviceId);
+                return;
+            }
+            try {
+                mCallback.onDirectChannelDestroyed(channelHandle);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+            }
+        }
+
+        @Override
+        public int onDirectChannelConfigured(int channelHandle, int sensorHandle,
+                @SensorDirectChannel.RateLevel int rateLevel) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No runtime sensor callback configured.");
+                return BAD_VALUE;
+            }
+            VirtualSensor sensor = mVdmInternal.getVirtualSensor(mVirtualDeviceId, sensorHandle);
+            if (sensor == null) {
+                Slog.e(TAG, "No sensor found for deviceId=" + mVirtualDeviceId
+                        + " and sensor handle=" + sensorHandle);
+                return BAD_VALUE;
+            }
+            try {
+                mCallback.onDirectChannelConfigured(channelHandle, sensor, rateLevel, sensorHandle);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+                return UNKNOWN_ERROR;
+            }
+            if (rateLevel == SensorDirectChannel.RATE_STOP) {
+                return OK;
+            } else {
+                // Use the sensor handle as a report token, i.e. a unique identifier of the sensor.
+                return sensorHandle;
+            }
+        }
     }
 
     @VisibleForTesting
     static final class SensorDescriptor {
 
         private final int mHandle;
-        private final IBinder.DeathRecipient mDeathRecipient;
         private final int mType;
         private final String mName;
 
-        SensorDescriptor(int handle, int type, String name, IBinder.DeathRecipient deathRecipient) {
+        SensorDescriptor(int handle, int type, String name) {
             mHandle = handle;
-            mDeathRecipient = deathRecipient;
             mType = type;
             mName = name;
         }
@@ -236,26 +278,6 @@ public class SensorController {
         }
         public String getName() {
             return mName;
-        }
-        public IBinder.DeathRecipient getDeathRecipient() {
-            return mDeathRecipient;
-        }
-    }
-
-    private final class BinderDeathRecipient implements IBinder.DeathRecipient {
-        private final IBinder mSensorToken;
-
-        BinderDeathRecipient(IBinder sensorToken) {
-            mSensorToken = sensorToken;
-        }
-
-        @Override
-        public void binderDied() {
-            // All callers are expected to call {@link VirtualDevice#unregisterSensor} before
-            // quitting, which removes this death recipient. If this is invoked, the remote end
-            // died, or they disposed of the object without properly unregistering.
-            Slog.e(TAG, "Virtual sensor controller binder died");
-            unregisterSensor(mSensorToken);
         }
     }
 

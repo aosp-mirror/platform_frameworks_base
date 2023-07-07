@@ -40,6 +40,9 @@
         <attr name="ambientShadowOffsetX" />
         <attr name="ambientShadowOffsetY" />
         <attr name="ambientShadowAlpha" />
+        <attr name="removeTextDescent" format="boolean" />
+        <!-- padding to add back when removing text descent so it ensures text is not clipped -->
+        <attr name="textDescentExtraPadding" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="DoubleShadowTextView">

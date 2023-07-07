@@ -34,6 +34,7 @@ import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_CAMERA_SANDBOXED;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
@@ -42,6 +43,7 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -60,8 +62,6 @@ import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
 import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
-import static android.content.Intent.ACTION_PACKAGE_REMOVED;
-import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
@@ -159,10 +159,10 @@ import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedAttribution;
 import com.android.server.policy.AppOpsPolicy;
 
@@ -369,6 +369,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
     private @Nullable PackageManagerInternal mPackageManagerInternal;
 
+    /** Package Manager local. Access via {@link #getPackageManagerLocal()} */
+    private @Nullable PackageManagerLocal mPackageManagerLocal;
+
     /** User Manager internal. Access via {@link #getUserManagerInternal()} */
     private @Nullable UserManagerInternal mUserManagerInternal;
 
@@ -493,7 +496,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     final class UidState {
         public final int uid;
 
-        public ArrayMap<String, Ops> pkgOps;
+        @NonNull
+        public final ArrayMap<String, Ops> pkgOps = new ArrayMap<>();
 
         // true indicates there is an interested observer, false there isn't but it has such an op
         //TODO: Move foregroundOps and hasForegroundWatchers into the AppOpsServiceInterface.
@@ -506,12 +510,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         public void clear() {
             mAppOpsCheckingService.removeUid(uid);
-            if (pkgOps != null) {
-                for (String packageName : pkgOps.keySet()) {
-                    mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
-                }
+            for (int i = 0; i < pkgOps.size(); i++) {
+                String packageName = pkgOps.keyAt(i);
+                mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
             }
-            pkgOps = null;
         }
 
         // Functions for uid mode access and manipulation.
@@ -535,12 +537,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void evalForegroundOps() {
             foregroundOps = null;
             foregroundOps = mAppOpsCheckingService.evalForegroundUidOps(uid, foregroundOps);
-            if (pkgOps != null) {
-                for (int i = pkgOps.size() - 1; i >= 0; i--) {
-                    foregroundOps = mAppOpsCheckingService
-                            .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
-                                    UserHandle.getUserId(uid));
-                }
+            for (int i = pkgOps.size() - 1; i >= 0; i--) {
+                foregroundOps = mAppOpsCheckingService
+                        .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
+                                UserHandle.getUserId(uid));
             }
             hasForegroundWatchers = false;
             if (foregroundOps != null) {
@@ -960,7 +960,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         LocalManagerRegistry.addManager(AppOpsManagerLocal.class, new AppOpsManagerLocalImpl());
     }
 
-    /** Handler for work when packages are removed or updated */
+    /** Handler for work when packages are updated */
     private BroadcastReceiver mOnPackageUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -968,19 +968,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             String pkgName = intent.getData().getEncodedSchemeSpecificPart();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
-            if (action.equals(ACTION_PACKAGE_REMOVED) && !intent.hasExtra(EXTRA_REPLACING)) {
-                synchronized (AppOpsService.this) {
-                    UidState uidState = mUidStates.get(uid);
-                    if (uidState == null || uidState.pkgOps == null) {
-                        return;
-                    }
-                    mAppOpsCheckingService.removePackage(pkgName, UserHandle.getUserId(uid));
-                    Ops removedOps = uidState.pkgOps.remove(pkgName);
-                    if (removedOps != null) {
-                        scheduleFastWriteLocked();
-                    }
-                }
-            } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
+            if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
                 AndroidPackage pkg = getPackageManagerInternal().getPackage(pkgName);
                 if (pkg == null) {
                     return;
@@ -1007,7 +995,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 synchronized (AppOpsService.this) {
                     UidState uidState = mUidStates.get(uid);
-                    if (uidState == null || uidState.pkgOps == null) {
+                    if (uidState == null) {
                         return;
                     }
 
@@ -1055,21 +1043,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         mAppOpsCheckingService.systemReady();
         initializeUidStates();
 
-        getUserManagerInternal().addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserCreated(UserInfo user, Object token) {
-                        initializeUserUidStates(user.id);
-                    }
-
-                    // onUserRemoved handled by #removeUser
-                });
-
         mConstants.startMonitoring(mContext.getContentResolver());
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
 
         IntentFilter packageUpdateFilter = new IntentFilter();
-        packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         packageUpdateFilter.addDataScheme("package");
 
@@ -1090,9 +1067,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
 
                 ArrayMap<String, Ops> pkgs = uidState.pkgOps;
-                if (pkgs == null) {
-                    continue;
-                }
 
                 int numPkgs = pkgs.size();
                 for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
@@ -1113,6 +1087,52 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
+
+        getUserManagerInternal().addUserLifecycleListener(
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserCreated(UserInfo user, Object token) {
+                        initializeUserUidStates(user.id);
+                    }
+
+                    // onUserRemoved handled by #removeUser
+                });
+
+        getPackageManagerInternal().getPackageList(
+                new PackageManagerInternal.PackageListObserver() {
+                    @Override
+                    public void onPackageAdded(String packageName, int appId) {
+                        PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
+                                PackageManager.GET_PERMISSIONS, Process.myUid(),
+                                mContext.getUserId());
+                        boolean isSamplingTarget = isSamplingTarget(pi);
+                        int[] userIds = getUserManagerInternal().getUserIds();
+                        synchronized (AppOpsService.this) {
+                            if (isSamplingTarget) {
+                                mRarelyUsedPackages.add(packageName);
+                            }
+                            for (int i = 0; i < userIds.length; i++) {
+                                int uid = UserHandle.getUid(userIds[i], appId);
+                                UidState uidState = getUidStateLocked(uid, true);
+                                if (!uidState.pkgOps.containsKey(packageName)) {
+                                    uidState.pkgOps.put(packageName,
+                                            new Ops(packageName, uidState));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onPackageRemoved(String packageName, int appId) {
+                        int[] userIds = getUserManagerInternal().getUserIds();
+                        synchronized (AppOpsService.this) {
+                            for (int i = 0; i < userIds.length; i++) {
+                                int uid = UserHandle.getUid(userIds[i], appId);
+                                packageRemovedLocked(uid, packageName);
+                            }
+                        }
+                    }
+                });
 
         final IntentFilter packageSuspendFilter = new IntentFilter();
         packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
@@ -1142,25 +1162,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }, UserHandle.ALL, packageSuspendFilter, null, null);
-
-        final IntentFilter packageAddedFilter = new IntentFilter();
-        packageAddedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageAddedFilter.addDataScheme("package");
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final Uri data = intent.getData();
-
-                final String packageName = data.getSchemeSpecificPart();
-                PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
-                        PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
-                if (isSamplingTarget(pi)) {
-                    synchronized (AppOpsService.this) {
-                        mRarelyUsedPackages.add(packageName);
-                    }
-                }
-            }
-        }, packageAddedFilter);
 
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -1193,45 +1194,64 @@ public class AppOpsService extends IAppOpsService.Stub {
     /**
      * Initialize uid state objects for state contained in the checking service.
      */
-    private void initializeUidStates() {
+    @VisibleForTesting
+    void initializeUidStates() {
         UserManagerInternal umi = getUserManagerInternal();
-        int[] userIds = umi.getUserIds();
         synchronized (this) {
-            for (int i = 0; i < userIds.length; i++) {
-                int userId = userIds[i];
-                initializeUserUidStatesLocked(userId);
+            int[] userIds = umi.getUserIds();
+            try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                         getPackageManagerLocal().withUnfilteredSnapshot()) {
+                Map<String, PackageState> packageStates = snapshot.getPackageStates();
+                for (int i = 0; i < userIds.length; i++) {
+                    int userId = userIds[i];
+                    initializeUserUidStatesLocked(userId, packageStates);
+                }
             }
         }
     }
 
     private void initializeUserUidStates(int userId) {
         synchronized (this) {
-            initializeUserUidStatesLocked(userId);
+            try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                    getPackageManagerLocal().withUnfilteredSnapshot()) {
+                initializeUserUidStatesLocked(userId, snapshot.getPackageStates());
+            }
         }
     }
 
-    private void initializeUserUidStatesLocked(int userId) {
-        ArrayMap<String, ? extends PackageStateInternal> packageStates =
-                getPackageManagerInternal().getPackageStates();
-        for (int j = 0; j < packageStates.size(); j++) {
-            PackageStateInternal packageState = packageStates.valueAt(j);
-            int uid = UserHandle.getUid(userId, packageState.getAppId());
-            UidState uidState = getUidStateLocked(uid, true);
-            if (uidState.pkgOps == null) {
-                uidState.pkgOps = new ArrayMap<>();
-            }
-            String packageName = packageStates.keyAt(j);
-            Ops ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+    private void initializeUserUidStatesLocked(int userId, Map<String,
+            PackageState> packageStates) {
+        for (Map.Entry<String, PackageState> entry : packageStates.entrySet()) {
+            int appId = entry.getValue().getAppId();
+            String packageName = entry.getKey();
 
-            SparseIntArray packageModes =
-                    mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
-            for (int k = 0; k < packageModes.size(); k++) {
-                int code = packageModes.get(k);
+            initializePackageUidStateLocked(userId, appId, packageName);
+        }
+    }
+
+    /*
+      Be careful not to clear any existing data; only want to add objects that don't already exist.
+     */
+    private void initializePackageUidStateLocked(int userId, int appId, String packageName) {
+        int uid = UserHandle.getUid(userId, appId);
+        UidState uidState = getUidStateLocked(uid, true);
+        Ops ops = uidState.pkgOps.get(packageName);
+        if (ops == null) {
+            ops = new Ops(packageName, uidState);
+            uidState.pkgOps.put(packageName, ops);
+        }
+
+        SparseIntArray packageModes =
+                mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
+        for (int k = 0; k < packageModes.size(); k++) {
+            int code = packageModes.keyAt(k);
+
+            if (ops.indexOfKey(code) < 0) {
                 ops.put(code, new Op(uidState, packageName, code, uid));
             }
-            uidState.evalForegroundOps();
         }
+
+        uidState.evalForegroundOps();
     }
 
     /**
@@ -1246,46 +1266,43 @@ public class AppOpsService extends IAppOpsService.Stub {
         mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
     }
 
-    public void packageRemoved(int uid, String packageName) {
+    @VisibleForTesting
+    void packageRemoved(int uid, String packageName) {
         synchronized (this) {
-            UidState uidState = mUidStates.get(uid);
-            if (uidState == null) {
-                return;
-            }
+            packageRemovedLocked(uid, packageName);
+        }
+    }
 
-            Ops removedOps = null;
+    @GuardedBy("this")
+    private void packageRemovedLocked(int uid, String packageName) {
+        UidState uidState = mUidStates.get(uid);
+        if (uidState == null) {
+            return;
+        }
 
-            // Remove any package state if such.
-            if (uidState.pkgOps != null) {
-                removedOps = uidState.pkgOps.remove(packageName);
-                mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
-            }
+        Ops removedOps = null;
 
-            // If we just nuked the last package state check if the UID is valid.
-            if (removedOps != null && uidState.pkgOps.isEmpty()
-                    && getPackagesForUid(uid).length <= 0) {
-                uidState.clear();
-                mUidStates.remove(uid);
-            }
+        // Remove any package state if such.
+        removedOps = uidState.pkgOps.remove(packageName);
+        mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
 
-            if (removedOps != null) {
-                scheduleFastWriteLocked();
+        if (removedOps != null) {
+            scheduleFastWriteLocked();
 
-                final int numOps = removedOps.size();
-                for (int opNum = 0; opNum < numOps; opNum++) {
-                    final Op op = removedOps.valueAt(opNum);
+            final int numOps = removedOps.size();
+            for (int opNum = 0; opNum < numOps; opNum++) {
+                final Op op = removedOps.valueAt(opNum);
 
-                    final int numAttributions = op.mAttributions.size();
-                    for (int attributionNum = 0; attributionNum < numAttributions;
-                            attributionNum++) {
-                        AttributedOp attributedOp = op.mAttributions.valueAt(attributionNum);
+                final int numAttributions = op.mAttributions.size();
+                for (int attributionNum = 0; attributionNum < numAttributions;
+                        attributionNum++) {
+                    AttributedOp attributedOp = op.mAttributions.valueAt(attributionNum);
 
-                        while (attributedOp.isRunning()) {
-                            attributedOp.finished(attributedOp.mInProgressEvents.keyAt(0));
-                        }
-                        while (attributedOp.isPaused()) {
-                            attributedOp.finished(attributedOp.mPausedInProgressEvents.keyAt(0));
-                        }
+                    while (attributedOp.isRunning()) {
+                        attributedOp.finished(attributedOp.mInProgressEvents.keyAt(0));
+                    }
+                    while (attributedOp.isPaused()) {
+                        attributedOp.finished(attributedOp.mPausedInProgressEvents.keyAt(0));
                     }
                 }
             }
@@ -1322,7 +1339,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         mHandler.sendMessage(PooledLambda.obtainMessage(
                                 AppOpsService::notifyOpChangedForAllPkgsInUid,
                                 this, code, uidState.uid, true, null));
-                    } else if (uidState.pkgOps != null) {
+                    } else if (!uidState.pkgOps.isEmpty()) {
                         final ArraySet<OnOpModeChangedListener> listenerSet =
                                 mAppOpsCheckingService.getOpModeChangedListeners(code);
                         if (listenerSet != null) {
@@ -1351,7 +1368,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
 
-            if (uidState != null && uidState.pkgOps != null) {
+            if (uidState != null) {
                 int numPkgs = uidState.pkgOps.size();
                 for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
                     Ops ops = uidState.pkgOps.valueAt(pkgNum);
@@ -1481,7 +1498,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final int uidStateCount = mUidStates.size();
             for (int i = 0; i < uidStateCount; i++) {
                 UidState uidState = mUidStates.valueAt(i);
-                if (uidState.pkgOps == null || uidState.pkgOps.isEmpty()) {
+                if (uidState.pkgOps.isEmpty()) {
                     continue;
                 }
                 ArrayMap<String, Ops> packages = uidState.pkgOps;
@@ -1533,19 +1550,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void enforceGetAppOpsStatsPermissionIfNeeded(int uid, String packageName) {
-        final int callingUid = Binder.getCallingUid();
         // We get to access everything
-        if (callingUid == Process.myPid()) {
+        final int callingPid = Binder.getCallingPid();
+        if (callingPid == Process.myPid()) {
             return;
         }
         // Apps can access their own data
+        final int callingUid = Binder.getCallingUid();
         if (uid == callingUid && packageName != null
                 && checkPackage(uid, packageName) == MODE_ALLOWED) {
             return;
         }
         // Otherwise, you need a permission...
-        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
-                Binder.getCallingPid(), callingUid, null);
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS, callingPid,
+                callingUid, null);
     }
 
     /**
@@ -2106,7 +2124,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         final int code = opModes.keyAt(j);
                         if (AppOpsManager.opAllowsReset(code)) {
                             int previousMode = opModes.valueAt(j);
-                            uidState.setUidMode(code, AppOpsManager.opToDefaultMode(code));
+                            int newMode = isUidOpGrantedByRole(uidState.uid, code) ? MODE_ALLOWED :
+                                    AppOpsManager.opToDefaultMode(code);
+                            uidState.setUidMode(code, newMode);
                             for (String packageName : getPackagesForUid(uidState.uid)) {
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         previousMode,
@@ -2122,7 +2142,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
 
-                if (uidState.pkgOps == null) {
+                if (uidState.pkgOps.isEmpty()) {
                     continue;
                 }
 
@@ -2149,10 +2169,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                             deferResetOpToDpm(curOp.op, reqPackageName, reqUserId);
                             continue;
                         }
-                        if (AppOpsManager.opAllowsReset(curOp.op)
-                                && curOp.getMode() != AppOpsManager.opToDefaultMode(curOp.op)) {
+                        if (AppOpsManager.opAllowsReset(curOp.op)) {
                             int previousMode = curOp.getMode();
-                            curOp.setMode(AppOpsManager.opToDefaultMode(curOp.op));
+                            int newMode = isPackageOpGrantedByRole(packageName, uidState.uid,
+                                    curOp.op) ? MODE_ALLOWED : AppOpsManager.opToDefaultMode(
+                                    curOp.op);
+                            if (previousMode == newMode) {
+                                continue;
+                            }
+                            curOp.setMode(newMode);
                             changed = true;
                             uidChanged = true;
                             final int uid = curOp.uidState.uid;
@@ -2205,6 +2230,41 @@ public class AppOpsService extends IAppOpsService.Stub {
             ChangeRec change = allChanges.get(i);
             notifyOpChangedSync(change.op, change.uid, change.pkg,
                     AppOpsManager.opToDefaultMode(change.op), change.previous_mode);
+        }
+    }
+
+    private boolean isUidOpGrantedByRole(int uid, int code) {
+        if (!AppOpsManager.opIsUidAppOpPermission(code)) {
+            return false;
+        }
+        PackageManager packageManager = mContext.getPackageManager();
+        long token = Binder.clearCallingIdentity();
+        try {
+            // Permissions are managed by UIDs, but unfortunately a package name is required in API.
+            String packageName = ArrayUtils.firstOrNull(packageManager.getPackagesForUid(uid));
+            if (packageName == null) {
+                return false;
+            }
+            int permissionFlags = packageManager.getPermissionFlags(AppOpsManager.opToPermission(
+                    code), packageName, UserHandle.getUserHandleForUid(uid));
+            return (permissionFlags & PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE) != 0;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private boolean isPackageOpGrantedByRole(@NonNull String packageName, int uid, int code) {
+        if (!AppOpsManager.opIsPackageAppOpPermission(code)) {
+            return false;
+        }
+        PackageManager packageManager = mContext.getPackageManager();
+        long token = Binder.clearCallingIdentity();
+        try {
+            int permissionFlags = packageManager.getPermissionFlags(AppOpsManager.opToPermission(
+                    code), packageName, UserHandle.getUserHandleForUid(uid));
+            return (permissionFlags & PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE) != 0;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -2969,17 +3029,29 @@ public class AppOpsService extends IAppOpsService.Stub {
                     packageName);
         }
 
-        // As a special case for OP_RECORD_AUDIO_HOTWORD, which we use only for attribution
-        // purposes and not as a check, also make sure that the caller is allowed to access
-        // the data gated by OP_RECORD_AUDIO.
+        // As a special case for OP_RECORD_AUDIO_HOTWORD, OP_RECEIVE_AMBIENT_TRIGGER_AUDIO and
+        // OP_RECORD_AUDIO_SANDBOXED which we use only for attribution purposes and not as a check,
+        // also make sure that the caller is allowed to access the data gated by OP_RECORD_AUDIO.
         //
         // TODO: Revert this change before Android 12.
-        if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO) {
-            int result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+        int result = MODE_DEFAULT;
+        if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO
+                || code == OP_RECORD_AUDIO_SANDBOXED) {
+            result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+            // Check result
             if (result != AppOpsManager.MODE_ALLOWED) {
                 return new SyncNotedAppOp(result, code, attributionTag, packageName);
             }
         }
+        // As a special case for OP_CAMERA_SANDBOXED.
+        if (code == OP_CAMERA_SANDBOXED) {
+            result = checkOperation(OP_CAMERA, uid, packageName);
+            // Check result
+            if (result != AppOpsManager.MODE_ALLOWED) {
+                return new SyncNotedAppOp(result, code, attributionTag, packageName);
+            }
+        }
+
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
                 Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
@@ -3617,6 +3689,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
+     * @return {@link PackageManagerLocal}
+     */
+    private @NonNull PackageManagerLocal getPackageManagerLocal() {
+        if (mPackageManagerLocal == null) {
+            mPackageManagerLocal = LocalManagerRegistry.getManager(PackageManagerLocal.class);
+        }
+        if (mPackageManagerLocal == null) {
+            throw new IllegalStateException("PackageManagerLocal not loaded");
+        }
+
+        return mPackageManagerLocal;
+    }
+
+    /**
      * @return {@link UserManagerInternal}
      */
     private @NonNull UserManagerInternal getUserManagerInternal() {
@@ -3706,7 +3792,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         // Do not check if uid/packageName/attributionTag is already known.
         synchronized (this) {
             UidState uidState = mUidStates.get(uid);
-            if (uidState != null && uidState.pkgOps != null) {
+            if (uidState != null && !uidState.pkgOps.isEmpty()) {
                 Ops ops = uidState.pkgOps.get(packageName);
 
                 if (ops != null && (attributionTag == null || ops.knownAttributionTags.contains(
@@ -3840,13 +3926,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
-        }
-
-        if (uidState.pkgOps == null) {
-            if (!edit) {
-                return null;
-            }
-            uidState.pkgOps = new ArrayMap<>();
         }
 
         Ops ops = uidState.pkgOps.get(packageName);
@@ -4159,9 +4238,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        if (uidState.pkgOps == null) {
-            uidState.pkgOps = new ArrayMap<>();
-        }
         Ops ops = uidState.pkgOps.get(pkgName);
         if (ops == null) {
             ops = new Ops(pkgName, uidState);
@@ -5476,7 +5552,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void updateStartedOpModeForUidLocked(int code, boolean restricted, int uid) {
         UidState uidState = mUidStates.get(uid);
-        if (uidState == null || uidState.pkgOps == null) {
+        if (uidState == null) {
             return;
         }
 
@@ -5600,7 +5676,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
             UidState uidState = mUidStates.get(uid);
-            if (uidState == null || uidState.pkgOps == null) {
+            if (uidState == null) {
                 return;
             }
             Ops removedOps = uidState.pkgOps.remove(packageName);

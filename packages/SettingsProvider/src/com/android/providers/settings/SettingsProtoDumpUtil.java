@@ -120,6 +120,17 @@ class SettingsProtoDumpUtil {
             dumpProtoUserSettingsLocked(proto, SettingsServiceDumpProto.USER_SETTINGS,
                     settingsRegistry, UserHandle.of(users.keyAt(i)));
         }
+
+        // Generation registry
+        dumpProtoGenerationRegistryLocked(proto, SettingsServiceDumpProto.GENERATION_REGISTRY,
+                settingsRegistry);
+    }
+
+    private static void dumpProtoGenerationRegistryLocked(@NonNull ProtoOutputStream proto,
+            long fieldId, SettingsProvider.SettingsRegistry settingsRegistry) {
+        final long token = proto.start(fieldId);
+        settingsRegistry.getGenerationRegistry().dumpProto(proto);
+        proto.end(token);
     }
 
     /**
@@ -773,12 +784,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
-        dumpSetting(s, p,
-                Settings.Global.ANGLE_DEFERLIST,
-                GlobalSettingsProto.Gpu.ANGLE_DEFERLIST);
-        dumpSetting(s, p,
-                Settings.Global.ANGLE_DEFERLIST_MODE,
-                GlobalSettingsProto.Gpu.ANGLE_DEFERLIST_MODE);
         dumpSetting(s, p,
                 Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX,
                 GlobalSettingsProto.Gpu.SHOW_ANGLE_IN_USE_DIALOG);
@@ -1852,6 +1857,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
@@ -2764,6 +2772,9 @@ class SettingsProtoDumpUtil {
                 Settings.System.SHOW_TOUCHES,
                 SystemSettingsProto.DevOptions.SHOW_TOUCHES);
         dumpSetting(s, p,
+                Settings.System.SHOW_KEY_PRESSES,
+                SystemSettingsProto.DevOptions.SHOW_KEY_PRESSES);
+        dumpSetting(s, p,
                 Settings.System.POINTER_LOCATION,
                 SystemSettingsProto.DevOptions.POINTER_LOCATION);
         dumpSetting(s, p,
@@ -2832,6 +2843,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 SystemSettingsProto.Notification.VIBRATION_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.CAMERA_FLASH_NOTIFICATION,
+                SystemSettingsProto.Notification.CAMERA_FLASH_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_FLASH_NOTIFICATION,
+                SystemSettingsProto.Notification.SCREEN_FLASH_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_FLASH_NOTIFICATION_COLOR,
+                SystemSettingsProto.Notification.SCREEN_FLASH_NOTIFICATION_COLOR_GLOBAL);
         // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
         p.end(notificationToken);
 

@@ -43,6 +43,18 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_mode_2", false);
 
     /**
+     * Flag to indicate whether task resizing is veiled.
+     */
+    private static final boolean IS_VEILED_RESIZE_ENABLED = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_veiled_resizing", true);
+
+    /**
+     * Flag to indicate is moving task to another display is enabled.
+     */
+    public static final boolean IS_DISPLAY_CHANGE_ENABLED = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_change_display", false);
+
+    /**
      * Return {@code true} if desktop mode support is enabled
      */
     public static boolean isProto1Enabled() {
@@ -62,6 +74,13 @@ public class DesktopModeStatus {
      */
     public static boolean isAnyEnabled() {
         return isProto1Enabled() || isProto2Enabled();
+    }
+
+    /**
+     * Return {@code true} if veiled resizing is active. If false, fluid resizing is used.
+     */
+    public static boolean isVeiledResizeEnabled() {
+        return IS_VEILED_RESIZE_ENABLED;
     }
 
     /**

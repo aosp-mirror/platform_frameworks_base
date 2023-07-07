@@ -36,11 +36,13 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -164,8 +166,12 @@ public class FingerprintAuthenticationClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).authenticateWithContext(
-                eq(OP_ID), same(mOperationContextCaptor.getValue().toAidlContext()));
+
+        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
+        order.verify(mHal).authenticateWithContext(eq(OP_ID), same(aidlContext));
+        assertThat(aidlContext.authenticateReason.getFingerprintAuthenticateReason())
+                .isEqualTo(AuthenticateReason.Fingerprint.UNKNOWN);
+
         verify(mHal, never()).authenticate(anyLong());
     }
 
@@ -332,7 +338,7 @@ public class FingerprintAuthenticationClientTest {
         assertThat(opContext).isSameInstanceAs(
                 mOperationContextCaptor.getValue().toAidlContext());
         mContextInjector.getValue().accept(opContext);
-        verify(mHal).onContextChanged(eq(opContext));
+        verify(mHal).onContextChanged(same(opContext));
 
         client.stopHalOperation();
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
@@ -414,11 +420,16 @@ public class FingerprintAuthenticationClientTest {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final FingerprintAuthenticateOptions options = new FingerprintAuthenticateOptions.Builder()
+                .setOpPackageName("test-owner")
+                .setUserId(5)
+                .setSensorId(9)
+                .build();
         return new FingerprintAuthenticationClient(mContext, () -> aidl, mToken,
-                REQUEST_ID, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
-                false /* restricted */, "test-owner", 4 /* cookie */,
+                REQUEST_ID, mClientMonitorCallbackConverter, OP_ID,
+                false /* restricted */, options, 4 /* cookie */,
                 false /* requireConfirmation */,
-                9 /* sensorId */, mBiometricLogger, mBiometricContext,
+                mBiometricLogger, mBiometricContext,
                 true /* isStrongBiometric */,
                 null /* taskStackListener */, null /* lockoutCache */,
                 mUdfpsOverlayController, mSideFpsController, null, allowBackgroundAuthentication,

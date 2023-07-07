@@ -20,15 +20,15 @@ import android.app.Activity
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
-import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import org.junit.Assume
 import org.junit.Before
@@ -47,44 +47,44 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransition(flicker) {
-    private val startingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_0)
-    private val endingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_90)
+    private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
+    private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
 
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                // Launch the PiP activity fixed as landscape.
-                pipApp.launchViaIntent(
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions {
+            // Launch the activity back into fullscreen and ensure that it is now in landscape
+            pipApp.launchViaIntent(wmHelper)
+            // System bar may fade out during fixed rotation.
+            wmHelper
+                .StateSyncBuilder()
+                .withFullScreenApp(pipApp)
+                .withRotation(Rotation.ROTATION_90)
+                .withNavOrTaskBarVisible()
+                .withStatusBarVisible()
+                .waitForAndVerify()
+        }
+    }
+
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            // Launch the PiP activity fixed as landscape.
+            pipApp.launchViaIntent(
                     wmHelper,
                     stringExtras =
-                        mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
-                )
-                // Enter PiP.
-                broadcastActionTrigger.doAction(ActivityOptions.Pip.ACTION_ENTER_PIP)
-                // System bar may fade out during fixed rotation.
-                wmHelper
+                    mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
+            )
+            // Enter PiP.
+            broadcastActionTrigger.doAction(ActivityOptions.Pip.ACTION_ENTER_PIP)
+            // System bar may fade out during fixed rotation.
+            wmHelper
                     .StateSyncBuilder()
                     .withPipShown()
-                    .withRotation(PlatformConsts.Rotation.ROTATION_0)
+                    .withRotation(Rotation.ROTATION_0)
                     .withNavOrTaskBarVisible()
                     .withStatusBarVisible()
                     .waitForAndVerify()
-            }
-            teardown { pipApp.exit(wmHelper) }
-            transitions {
-                // Launch the activity back into fullscreen and ensure that it is now in landscape
-                pipApp.launchViaIntent(wmHelper)
-                // System bar may fade out during fixed rotation.
-                wmHelper
-                    .StateSyncBuilder()
-                    .withFullScreenApp(pipApp)
-                    .withRotation(PlatformConsts.Rotation.ROTATION_90)
-                    .withNavOrTaskBarVisible()
-                    .withStatusBarVisible()
-                    .waitForAndVerify()
-            }
         }
+    }
 
     /**
      * This test is not compatible with Tablets. When using [Activity.setRequestedOrientation] to
@@ -98,7 +98,7 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
     @Presubmit
     @Test
     fun displayEndsAt90Degrees() {
-        flicker.assertWmEnd { hasRotation(PlatformConsts.Rotation.ROTATION_90) }
+        flicker.assertWmEnd { hasRotation(Rotation.ROTATION_90) }
     }
 
     @Presubmit
@@ -151,7 +151,7 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

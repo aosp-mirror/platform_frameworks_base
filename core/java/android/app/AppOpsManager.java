@@ -25,6 +25,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -59,6 +60,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
@@ -1449,9 +1451,8 @@ public class AppOpsManager {
     public static final int OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             AppProtoEnums.APP_OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD;
 
-    /** @hide Access to wrist temperature sensors. */
-    public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
-            AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
+    // App op deprecated/removed.
+    private static final int OP_DEPRECATED_2 = AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -1460,9 +1461,169 @@ public class AppOpsManager {
      */
     public static final int OP_USE_FULL_SCREEN_INTENT = AppProtoEnums.APP_OP_USE_FULL_SCREEN_INTENT;
 
+    /**
+     * Hides camera indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_CAMERA_SANDBOXED =
+            AppProtoEnums.APP_OP_CAMERA_SANDBOXED;
+
+    /**
+     * Hides microphone indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_RECORD_AUDIO_SANDBOXED =
+            AppProtoEnums.APP_OP_RECORD_AUDIO_SANDBOXED;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 134;
+    public static final int _NUM_OP = 136;
+
+    /**
+     * All app ops represented as strings.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = { "OPSTR_" }, value = {
+            OPSTR_COARSE_LOCATION,
+            OPSTR_FINE_LOCATION,
+            OPSTR_MONITOR_LOCATION,
+            OPSTR_MONITOR_HIGH_POWER_LOCATION,
+            OPSTR_GET_USAGE_STATS,
+            OPSTR_ACTIVATE_VPN,
+            OPSTR_READ_CONTACTS,
+            OPSTR_WRITE_CONTACTS,
+            OPSTR_READ_CALL_LOG,
+            OPSTR_WRITE_CALL_LOG,
+            OPSTR_READ_CALENDAR,
+            OPSTR_WRITE_CALENDAR,
+            OPSTR_CALL_PHONE,
+            OPSTR_READ_SMS,
+            OPSTR_RECEIVE_SMS,
+            OPSTR_RECEIVE_MMS,
+            OPSTR_RECEIVE_WAP_PUSH,
+            OPSTR_SEND_SMS,
+            OPSTR_CAMERA,
+            OPSTR_RECORD_AUDIO,
+            OPSTR_READ_PHONE_STATE,
+            OPSTR_ADD_VOICEMAIL,
+            OPSTR_USE_SIP,
+            OPSTR_PROCESS_OUTGOING_CALLS,
+            OPSTR_USE_FINGERPRINT,
+            OPSTR_BODY_SENSORS,
+            OPSTR_READ_CELL_BROADCASTS,
+            OPSTR_MOCK_LOCATION,
+            OPSTR_READ_EXTERNAL_STORAGE,
+            OPSTR_WRITE_EXTERNAL_STORAGE,
+            OPSTR_SYSTEM_ALERT_WINDOW,
+            OPSTR_WRITE_SETTINGS,
+            OPSTR_GET_ACCOUNTS,
+            OPSTR_READ_PHONE_NUMBERS,
+            OPSTR_PICTURE_IN_PICTURE,
+            OPSTR_INSTANT_APP_START_FOREGROUND,
+            OPSTR_ANSWER_PHONE_CALLS,
+            OPSTR_ACCEPT_HANDOVER,
+            OPSTR_GPS,
+            OPSTR_VIBRATE,
+            OPSTR_WIFI_SCAN,
+            OPSTR_POST_NOTIFICATION,
+            OPSTR_NEIGHBORING_CELLS,
+            OPSTR_WRITE_SMS,
+            OPSTR_RECEIVE_EMERGENCY_BROADCAST,
+            OPSTR_READ_ICC_SMS,
+            OPSTR_WRITE_ICC_SMS,
+            OPSTR_ACCESS_NOTIFICATIONS,
+            OPSTR_PLAY_AUDIO,
+            OPSTR_READ_CLIPBOARD,
+            OPSTR_WRITE_CLIPBOARD,
+            OPSTR_TAKE_MEDIA_BUTTONS,
+            OPSTR_TAKE_AUDIO_FOCUS,
+            OPSTR_AUDIO_MASTER_VOLUME,
+            OPSTR_AUDIO_VOICE_VOLUME,
+            OPSTR_AUDIO_RING_VOLUME,
+            OPSTR_AUDIO_MEDIA_VOLUME,
+            OPSTR_AUDIO_ALARM_VOLUME,
+            OPSTR_AUDIO_NOTIFICATION_VOLUME,
+            OPSTR_AUDIO_BLUETOOTH_VOLUME,
+            OPSTR_WAKE_LOCK,
+            OPSTR_MUTE_MICROPHONE,
+            OPSTR_TOAST_WINDOW,
+            OPSTR_PROJECT_MEDIA,
+            OPSTR_WRITE_WALLPAPER,
+            OPSTR_ASSIST_STRUCTURE,
+            OPSTR_ASSIST_SCREENSHOT,
+            OPSTR_TURN_SCREEN_ON,
+            OPSTR_RUN_IN_BACKGROUND,
+            OPSTR_AUDIO_ACCESSIBILITY_VOLUME,
+            OPSTR_REQUEST_INSTALL_PACKAGES,
+            OPSTR_RUN_ANY_IN_BACKGROUND,
+            OPSTR_CHANGE_WIFI_STATE,
+            OPSTR_REQUEST_DELETE_PACKAGES,
+            OPSTR_BIND_ACCESSIBILITY_SERVICE,
+            OPSTR_MANAGE_IPSEC_TUNNELS,
+            OPSTR_START_FOREGROUND,
+            OPSTR_BLUETOOTH_SCAN,
+            OPSTR_BLUETOOTH_CONNECT,
+            OPSTR_BLUETOOTH_ADVERTISE,
+            OPSTR_USE_BIOMETRIC,
+            OPSTR_ACTIVITY_RECOGNITION,
+            OPSTR_SMS_FINANCIAL_TRANSACTIONS,
+            OPSTR_READ_MEDIA_AUDIO,
+            OPSTR_WRITE_MEDIA_AUDIO,
+            OPSTR_READ_MEDIA_VIDEO,
+            OPSTR_WRITE_MEDIA_VIDEO,
+            OPSTR_READ_MEDIA_IMAGES,
+            OPSTR_WRITE_MEDIA_IMAGES,
+            OPSTR_LEGACY_STORAGE,
+            OPSTR_ACCESS_MEDIA_LOCATION,
+            OPSTR_ACCESS_ACCESSIBILITY,
+            OPSTR_READ_DEVICE_IDENTIFIERS,
+            OPSTR_QUERY_ALL_PACKAGES,
+            OPSTR_MANAGE_EXTERNAL_STORAGE,
+            OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+            OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER,
+            OPSTR_INTERACT_ACROSS_PROFILES,
+            OPSTR_ACTIVATE_PLATFORM_VPN,
+            OPSTR_LOADER_USAGE_STATS,
+            OPSTR_MANAGE_ONGOING_CALLS,
+            OPSTR_NO_ISOLATED_STORAGE,
+            OPSTR_PHONE_CALL_MICROPHONE,
+            OPSTR_PHONE_CALL_CAMERA,
+            OPSTR_RECORD_AUDIO_HOTWORD,
+            OPSTR_MANAGE_CREDENTIALS,
+            OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
+            OPSTR_RECORD_AUDIO_OUTPUT,
+            OPSTR_SCHEDULE_EXACT_ALARM,
+            OPSTR_FINE_LOCATION_SOURCE,
+            OPSTR_COARSE_LOCATION_SOURCE,
+            OPSTR_MANAGE_MEDIA,
+            OPSTR_UWB_RANGING,
+            OPSTR_NEARBY_WIFI_DEVICES,
+            OPSTR_ACTIVITY_RECOGNITION_SOURCE,
+            OPSTR_RECORD_INCOMING_PHONE_AUDIO,
+            OPSTR_ESTABLISH_VPN_SERVICE,
+            OPSTR_ESTABLISH_VPN_MANAGER,
+            OPSTR_ACCESS_RESTRICTED_SETTINGS,
+            OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+            OPSTR_READ_MEDIA_VISUAL_USER_SELECTED,
+            OPSTR_READ_WRITE_HEALTH_DATA,
+            OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
+            OPSTR_RUN_USER_INITIATED_JOBS,
+            OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION,
+            OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+            OPSTR_FOREGROUND_SERVICE_SPECIAL_USE,
+            OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
+            OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
+            OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+            OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
+            OPSTR_USE_FULL_SCREEN_INTENT,
+            OPSTR_CAMERA_SANDBOXED,
+            OPSTR_RECORD_AUDIO_SANDBOXED
+    })
+    public @interface AppOpString {}
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1869,6 +2030,20 @@ public class AppOpsManager {
     public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
 
     /**
+     * Camera is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_CAMERA_SANDBOXED = "android:camera_sandboxed";
+
+    /**
+     * Audio is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_SANDBOXED = "android:record_audio_sandboxed";
+
+    /**
      * Allow apps to create the requests to manage the media files without user confirmation.
      *
      * @see android.Manifest.permission#MANAGE_MEDIA
@@ -2044,9 +2219,11 @@ public class AppOpsManager {
     public static final String OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             "android:capture_consentless_bugreport_on_userdebug_build";
 
-    /** Access to wrist temperature body sensors. */
-    public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
-            "android:body_sensors_wrist_temperature";
+    /**
+     * App op deprecated/removed.
+     * @hide
+     */
+    public static final String OPSTR_DEPRECATED_2 = "android:deprecated_2";
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -2073,8 +2250,7 @@ public class AppOpsManager {
     /** Whether noting for an appop should be collected */
     private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
 
-    private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
-            // RUNTIME PERMISSIONS
+    private static final int[] RUNTIME_PERMISSION_OPS = {
             // Contacts
             OP_READ_CONTACTS,
             OP_WRITE_CONTACTS,
@@ -2131,8 +2307,13 @@ public class AppOpsManager {
             OP_NEARBY_WIFI_DEVICES,
             // Notifications
             OP_POST_NOTIFICATION,
+    };
 
-            // APPOP PERMISSIONS
+    /**
+     * Ops for app op permissions that are setting the per-package mode for certain reasons. Most
+     * app op permissions should set the per-UID mode instead.
+     */
+    private static final int[] APP_OP_PERMISSION_PACKAGE_OPS = {
             OP_ACCESS_NOTIFICATIONS,
             OP_SYSTEM_ALERT_WINDOW,
             OP_WRITE_SETTINGS,
@@ -2141,9 +2322,16 @@ public class AppOpsManager {
             OP_SMS_FINANCIAL_TRANSACTIONS,
             OP_MANAGE_IPSEC_TUNNELS,
             OP_INSTANT_APP_START_FOREGROUND,
+            OP_LOADER_USAGE_STATS
+    };
+
+    /**
+     * Ops for app op permissions that are setting the per-UID mode for certain reasons. This should
+     * be preferred over the per-package mode for new app op permissions.
+     */
+    private static final int[] APP_OP_PERMISSION_UID_OPS = {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
-            OP_LOADER_USAGE_STATS,
             OP_MANAGE_ONGOING_CALLS,
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
@@ -2153,7 +2341,6 @@ public class AppOpsManager {
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OP_BODY_SENSORS_WRIST_TEMPERATURE,
             OP_USE_FULL_SCREEN_INTENT
     };
 
@@ -2361,7 +2548,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_TURN_SCREEN_ON, OPSTR_TURN_SCREEN_ON, "TURN_SCREEN_ON")
             .setPermission(Manifest.permission.TURN_SCREEN_ON)
-            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+            .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
         new AppOpInfo.Builder(OP_GET_ACCOUNTS, OPSTR_GET_ACCOUNTS, "GET_ACCOUNTS")
             .setPermission(Manifest.permission.GET_ACCOUNTS)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
@@ -2573,14 +2760,15 @@ public class AppOpsManager {
                 "CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD")
                 .setPermission(Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD)
                 .build(),
-        new AppOpInfo.Builder(OP_BODY_SENSORS_WRIST_TEMPERATURE,
-                OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
-                "BODY_SENSORS_WRIST_TEMPERATURE")
-                .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_2, OPSTR_DEPRECATED_2, "DEPRECATED_2")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
                 "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
-                .build()
+                .build(),
+        new AppOpInfo.Builder(OP_CAMERA_SANDBOXED, OPSTR_CAMERA_SANDBOXED,
+            "CAMERA_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO_SANDBOXED, OPSTR_RECORD_AUDIO_SANDBOXED,
+                "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -2633,7 +2821,17 @@ public class AppOpsManager {
                 sOpStrToOp.put(sAppOpInfos[i].name, i);
             }
         }
-        for (int op : RUNTIME_AND_APPOP_PERMISSIONS_OPS) {
+        for (int op : RUNTIME_PERMISSION_OPS) {
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
+            }
+        }
+        for (int op : APP_OP_PERMISSION_PACKAGE_OPS) {
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
+            }
+        }
+        for (int op : APP_OP_PERMISSION_UID_OPS) {
             if (sAppOpInfos[op].permission != null) {
                 sPermToOp.put(sAppOpInfos[op].permission, op);
             }
@@ -2800,6 +2998,22 @@ public class AppOpsManager {
      */
     public static boolean opAllowsReset(int op) {
         return !sAppOpInfos[op].disableReset;
+    }
+
+    /**
+     * Retrieve whether the op is a per-package op for an app op permission.
+     * @hide
+     */
+    public static boolean opIsPackageAppOpPermission(int op) {
+        return ArrayUtils.contains(APP_OP_PERMISSION_PACKAGE_OPS, op);
+    }
+
+    /**
+     * Retrieve whether the op is a per-package op for an app op permission.
+     * @hide
+     */
+    public static boolean opIsUidAppOpPermission(int op) {
+        return ArrayUtils.contains(APP_OP_PERMISSION_UID_OPS, op);
     }
 
     /**
@@ -6871,6 +7085,26 @@ public class AppOpsManager {
      */
     public interface OnOpChangedListener {
         public void onOpChanged(String op, String packageName);
+
+        /**
+         * Implementations can override this method to add handling logic for AppOp changes.
+         *
+         * Normally, listeners to AppOp changes work in the same User Space as the App whose Op
+         * has changed. However, in some case listeners can have a single instance responsible for
+         * multiple users. (For ex single Media Provider instance in user 0 is responsible for both
+         * cloned and user 0 spaces). For handling such cases correctly, listeners need to be
+         * passed userId in addition to PackageName and Op.
+
+         * The default impl is to fallback onto {@link #onOpChanged(String, String)
+         *
+         * @param op The Op that changed.
+         * @param packageName Package of the app whose Op changed.
+         * @param userId User Space of the app whose Op changed.
+         * @hide
+         */
+        default void onOpChanged(@NonNull String op, @NonNull String packageName,  int userId) {
+            onOpChanged(op, packageName);
+        }
     }
 
     /**
@@ -7056,10 +7290,16 @@ public class AppOpsManager {
         if (mContext != null) {
             final PackageManager pm = mContext.getPackageManager();
             try {
-                if (pm != null && pm.checkPermission(Manifest.permission.READ_DEVICE_CONFIG,
-                        mContext.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
-                    DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
-                            mContext.getMainExecutor(), properties -> {
+                if (Build.IS_ENG
+                        && pm != null
+                        && pm.checkPermission(
+                                        Manifest.permission.READ_DEVICE_CONFIG,
+                                        mContext.getPackageName())
+                                == PackageManager.PERMISSION_GRANTED) {
+                    DeviceConfig.addOnPropertiesChangedListener(
+                            DeviceConfig.NAMESPACE_PRIVACY,
+                            mContext.getMainExecutor(),
+                            properties -> {
                                 if (properties.getKeyset().contains(FULL_LOG)) {
                                     sFullLog = properties.getBoolean(FULL_LOG, false);
                                 }
@@ -7537,7 +7777,9 @@ public class AppOpsManager {
                             ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
                         }
                         if (sAppOpInfos[op].name != null) {
-                            callback.onOpChanged(sAppOpInfos[op].name, packageName);
+
+                            callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                    UserHandle.getUserId(uid));
                         }
                     }
                 };
@@ -7736,18 +7978,19 @@ public class AppOpsManager {
     }
 
     /**
-     * Start watching for noted app ops. An app op may be immediate or long running.
-     * Immediate ops are noted while long running ones are started and stopped. This
-     * method allows registering a listener to be notified when an app op is noted. If
-     * an op is being noted by any package you will get a callback. To change the
-     * watched ops for a registered callback you need to unregister and register it again.
+     * Start watching for noted app ops.
      *
-     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
-     * you can watch changes only for your UID.
+     * <p> Similar to {@link #startWatchingNoted(String[], Executor, OnOpNotedListener)}, but
+     * without an executor parameter.
      *
-     * @param ops The ops to watch.
-     * @param callback Where to report changes.
+     * <p> Note that the listener will be called on the main thread using
+     * {@link Context.getMainThread()}. To specify the execution thread, use
+     * {@link #startWatchingNoted(String[], Executor, OnOpNotedListener)}.
      *
+     * @param ops      the ops to watch
+     * @param listener listener to notify when an app op is noted
+     *
+     * @see #startWatchingNoted(String[], Executor, OnOpNotedListener)
      * @see #stopWatchingNoted(OnOpNotedListener)
      * @see #noteOp(String, int, String, String, String)
      *
@@ -7755,40 +7998,111 @@ public class AppOpsManager {
      */
     @SystemApi
     @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
-    public void startWatchingNoted(@NonNull String[] ops, @NonNull OnOpNotedListener callback) {
+    public void startWatchingNoted(@NonNull @AppOpString String[] ops,
+     @NonNull OnOpNotedListener listener) {
         final int[] intOps = new int[ops.length];
         for (int i = 0; i < ops.length; i++) {
             intOps[i] = strOpToOp(ops[i]);
         }
-        startWatchingNoted(intOps, callback);
+        startWatchingNoted(intOps, listener);
     }
 
     /**
-     * Start watching for noted app ops. An app op may be immediate or long running.
-     * Immediate ops are noted while long running ones are started and stopped. This
-     * method allows registering a listener to be notified when an app op is noted. If
-     * an op is being noted by any package you will get a callback. To change the
-     * watched ops for a registered callback you need to unregister and register it again.
+     * Start watching for noted app ops.
      *
-     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
-     * you can watch changes only for your UID.
+     * <p> An app op may be immediate or long-running. Immediate ops are noted while long-running
+     * ones are started and stopped.
      *
-     * This allows observing noted ops by their raw op codes instead of string op names.
+     * <p> This method allows registering a listener to be notified when an app op is noted. To
+     * change the watched ops for a registered callback you need to unregister and register it
+     * again.
      *
-     * @param ops The ops to watch.
-     * @param callback Where to report changes.
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission you can
+     * watch changes only for your UID.
+     *
+     * @param ops      the ops to watch
+     * @param executor the executor on which the listener will be notified
+     * @param listener listener to notify when an app op is noted
+     *
+     * @see #startWatchingNoted(String[], OnOpNotedListener)
+     * @see #stopWatchingNoted(OnOpNotedListener)
+     * @see #noteOp(String, int, String, String, String)
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
+    public void startWatchingNoted(@NonNull @AppOpString String[] ops,
+     @CallbackExecutor @NonNull Executor executor, @NonNull OnOpNotedListener listener) {
+        final int[] intOps = new int[ops.length];
+        for (int i = 0; i < ops.length; i++) {
+            intOps[i] = strOpToOp(ops[i]);
+        }
+        startWatchingNoted(intOps, executor, listener);
+    }
+
+    /**
+     * Start watching for noted app ops.
+     *
+     * <p> Similar to {@link #startWatchingNoted(int[], Executor, OnOpNotedListener)}, but without
+     * an executor parameter.
+     *
+     * <p> This method is also similar to {@link #startWatchingNoted(String[], OnOpNotedListener)},
+     * but allows observing noted ops by their raw op codes instead of string op names.
+     *
+     * <p> Note that the listener will be called on the main thread using
+     * {@link Context.getMainThread()}. To specify the execution thread, use
+     * {@link {@link #startWatchingNoted(String[], Executor, OnOpNotedListener)}.
+     *
+     * @param ops      the ops to watch
+     * @param listener listener to notify when an app op is noted
      *
      * @see #startWatchingActive(int[], OnOpActiveChangedListener)
      * @see #startWatchingStarted(int[], OnOpStartedListener)
+     * @see #startWatchingNoted(String[], OnOpNotedListener)
+     * @see #startWatchingNoted(int[], Executor, OnOpNotedListener)
+     *
+     * @hide
+     */
+    @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
+    public void startWatchingNoted(@NonNull int[] ops, @NonNull OnOpNotedListener listener) {
+        startWatchingNoted(ops, mContext.getMainExecutor(), listener);
+    }
+
+    /**
+     * Start watching for noted app ops.
+     *
+     * <p> This method is similar to
+     * {@link #startWatchingNoted(String[], Executor, OnOpNotedListener)}, but allows observing
+     * noted ops by their raw op codes instead of string op names.
+     *
+     * <p> An app op may be immediate or long-running. Immediate ops are noted while long-running
+     * ones are started and stopped.
+     *
+     * <p> This method allows registering a listener to be notified when an app op is noted. To
+     * change the watched ops for a registered callback you need to unregister and register it
+     * again.
+     *
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission you
+     * can watch changes only for your UID.
+     *
+     * @param ops      the ops to watch
+     * @param executor the executor on which the listener will be notified
+     * @param listener listener to notify when an app op is noted
+     *
+     * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #startWatchingStarted(int[], OnOpStartedListener)
+     * @see #startWatchingNoted(int[], Executor, OnOpNotedListener)
      * @see #startWatchingNoted(String[], OnOpNotedListener)
      *
      * @hide
      */
     @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
-    public void startWatchingNoted(@NonNull int[] ops, @NonNull OnOpNotedListener callback) {
+    public void startWatchingNoted(@NonNull int[] ops,
+     @CallbackExecutor @NonNull Executor executor, @NonNull OnOpNotedListener listener) {
         IAppOpsNotedCallback cb;
         synchronized (mNotedWatchers) {
-            cb = mNotedWatchers.get(callback);
+            cb = mNotedWatchers.get(listener);
             if (cb != null) {
                 return;
             }
@@ -7796,13 +8110,21 @@ public class AppOpsManager {
                 @Override
                 public void opNoted(int op, int uid, String packageName, String attributionTag,
                         int flags, int mode) {
-                    if (sAppOpInfos[op].name != null) {
-                        callback.onOpNoted(sAppOpInfos[op].name, uid, packageName, attributionTag,
-                                flags, mode);
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            if (sAppOpInfos[op].name != null) {
+                                listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
+                                        attributionTag,
+                                        flags, mode);
+                            }
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
                     }
                 }
             };
-            mNotedWatchers.put(callback, cb);
+            mNotedWatchers.put(listener, cb);
         }
         try {
             mService.startWatchingNoted(ops, cb);
@@ -8141,9 +8463,9 @@ public class AppOpsManager {
     public int noteProxyOp(int op, @Nullable String proxiedPackageName, int proxiedUid,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
-                        mContext.getAttributionSource().getToken())), message,
-                        /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, Process.INVALID_PID, proxiedPackageName,
+                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
+                        message, /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8228,8 +8550,9 @@ public class AppOpsManager {
             int proxiedUid, @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOpNoThrow(strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        proxiedPackageName, proxiedAttributionTag, mContext.getAttributionSource()
-                        .getToken())), message,/*skipProxyOperation*/ false);
+                        Process.INVALID_PID, proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8639,9 +8962,9 @@ public class AppOpsManager {
     public int startProxyOp(@NonNull String op, int proxiedUid, @NonNull String proxiedPackageName,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return startProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
-                        mContext.getAttributionSource().getToken())), message,
-                        /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, Process.INVALID_PID, proxiedPackageName,
+                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
+                        message, /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8687,7 +9010,7 @@ public class AppOpsManager {
             @Nullable String message) {
         return startProxyOpNoThrow(AppOpsManager.strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        proxiedPackageName, proxiedAttributionTag,
+                        Process.INVALID_PID, proxiedPackageName, proxiedAttributionTag,
                         mContext.getAttributionSource().getToken())), message,
                         /*skipProxyOperation*/ false);
     }
@@ -8836,8 +9159,8 @@ public class AppOpsManager {
             @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag) {
         IBinder token = mContext.getAttributionSource().getToken();
         finishProxyOp(token, op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName,  proxiedAttributionTag,
-                        token)), /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, Process.INVALID_PID, proxiedPackageName,
+                        proxiedAttributionTag, token)), /*skipProxyOperation*/ false);
     }
 
     /**

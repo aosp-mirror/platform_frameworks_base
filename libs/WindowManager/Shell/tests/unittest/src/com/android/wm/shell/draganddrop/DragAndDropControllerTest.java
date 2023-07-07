@@ -48,7 +48,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -72,6 +72,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Mock
     private ShellController mShellController;
     @Mock
+    private ShellCommandHandler mShellCommandHandler;
+    @Mock
     private DisplayController mDisplayController;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -82,7 +84,7 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Mock
     private ShellExecutor mMainExecutor;
     @Mock
-    private SplitScreenController mSplitScreenController;
+    private WindowManager mWindowManager;
 
     private DragAndDropController mController;
 
@@ -90,18 +92,14 @@ public class DragAndDropControllerTest extends ShellTestCase {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mController = new DragAndDropController(mContext, mShellInit, mShellController,
-                mDisplayController, mUiEventLogger, mIconProvider, mMainExecutor);
+                mShellCommandHandler, mDisplayController, mUiEventLogger, mIconProvider,
+                mMainExecutor);
         mController.onInit();
     }
 
     @Test
     public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
-    }
-
-    @Test
-    public void instantiateController_registerConfigChangeListener() {
-        verify(mShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test

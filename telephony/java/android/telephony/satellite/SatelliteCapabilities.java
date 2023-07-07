@@ -20,7 +20,10 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -33,31 +36,34 @@ public final class SatelliteCapabilities implements Parcelable {
     @NonNull @SatelliteManager.NTRadioTechnology private Set<Integer> mSupportedRadioTechnologies;
 
     /**
-     * Whether satellite modem is always on.
-     * This indicates the power impact of keeping it on is very minimal.
-     */
-    private boolean mIsAlwaysOn;
-
-    /**
      * Whether UE needs to point to a satellite to send and receive data.
      */
-    private boolean mNeedsPointingToSatellite;
+    private boolean mIsPointingRequired;
 
     /**
-     * Whether UE needs a separate SIM profile to communicate with the satellite network.
+     * The maximum number of bytes per datagram that can be sent over satellite.
      */
-    private boolean mNeedsSeparateSimProfile;
+    private int mMaxBytesPerOutgoingDatagram;
+
+    /**
+     * Antenna Position received from satellite modem which gives information about antenna
+     * direction to be used with satellite communication and suggested device hold positions.
+     * Map key: {@link SatelliteManager.DeviceHoldPosition} value: AntennaPosition
+     */
+    @NonNull
+    private Map<Integer, AntennaPosition> mAntennaPositionMap;
 
     /**
      * @hide
      */
-    public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies, boolean isAlwaysOn,
-            boolean needsPointingToSatellite, boolean needsSeparateSimProfile) {
+    public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies,
+            boolean isPointingRequired, int maxBytesPerOutgoingDatagram,
+            @NonNull Map<Integer, AntennaPosition> antennaPositionMap) {
         mSupportedRadioTechnologies = supportedRadioTechnologies == null
                 ? new HashSet<>() : supportedRadioTechnologies;
-        mIsAlwaysOn = isAlwaysOn;
-        mNeedsPointingToSatellite = needsPointingToSatellite;
-        mNeedsSeparateSimProfile = needsSeparateSimProfile;
+        mIsPointingRequired = isPointingRequired;
+        mMaxBytesPerOutgoingDatagram = maxBytesPerOutgoingDatagram;
+        mAntennaPositionMap = antennaPositionMap;
     }
 
     private SatelliteCapabilities(Parcel in) {
@@ -80,9 +86,19 @@ public final class SatelliteCapabilities implements Parcelable {
             out.writeInt(0);
         }
 
-        out.writeBoolean(mIsAlwaysOn);
-        out.writeBoolean(mNeedsPointingToSatellite);
-        out.writeBoolean(mNeedsSeparateSimProfile);
+        out.writeBoolean(mIsPointingRequired);
+        out.writeInt(mMaxBytesPerOutgoingDatagram);
+
+        if (mAntennaPositionMap != null && !mAntennaPositionMap.isEmpty()) {
+            int size = mAntennaPositionMap.size();
+            out.writeInt(size);
+            for (Map.Entry<Integer, AntennaPosition> entry : mAntennaPositionMap.entrySet()) {
+                out.writeInt(entry.getKey());
+                out.writeParcelable(entry.getValue(), flags);
+            }
+        } else {
+            out.writeInt(0);
+        }
     }
 
     @NonNull public static final Creator<SatelliteCapabilities> CREATOR = new Creator<>() {
@@ -111,17 +127,34 @@ public final class SatelliteCapabilities implements Parcelable {
             sb.append("none,");
         }
 
-        sb.append("isAlwaysOn:");
-        sb.append(mIsAlwaysOn);
+        sb.append("isPointingRequired:");
+        sb.append(mIsPointingRequired);
         sb.append(",");
 
-        sb.append("needsPointingToSatellite:");
-        sb.append(mNeedsPointingToSatellite);
+        sb.append("maxBytesPerOutgoingDatagram:");
+        sb.append(mMaxBytesPerOutgoingDatagram);
         sb.append(",");
 
-        sb.append("needsSeparateSimProfile:");
-        sb.append(mNeedsSeparateSimProfile);
+        sb.append("antennaPositionMap:");
+        sb.append(mAntennaPositionMap);
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SatelliteCapabilities that = (SatelliteCapabilities) o;
+        return Objects.equals(mSupportedRadioTechnologies, that.mSupportedRadioTechnologies)
+                && mIsPointingRequired == that.mIsPointingRequired
+                && mMaxBytesPerOutgoingDatagram == that.mMaxBytesPerOutgoingDatagram
+                && Objects.equals(mAntennaPositionMap, that.mAntennaPositionMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSupportedRadioTechnologies, mIsPointingRequired,
+                mMaxBytesPerOutgoingDatagram, mAntennaPositionMap);
     }
 
     /**
@@ -133,33 +166,32 @@ public final class SatelliteCapabilities implements Parcelable {
     }
 
     /**
-     * Get whether the satellite modem is always on.
-     * This indicates the power impact of keeping it on is very minimal.
-     *
-     * @return {@code true} if the satellite modem is always on and {@code false} otherwise.
-     */
-    public boolean isAlwaysOn() {
-        return mIsAlwaysOn;
-    }
-
-    /**
      * Get whether UE needs to point to a satellite to send and receive data.
      *
-     * @return {@code true} if UE needs to pointing to a satellite to send and receive data and
+     * @return {@code true} if UE needs to point to a satellite to send and receive data and
      *         {@code false} otherwise.
      */
-    public boolean needsPointingToSatellite() {
-        return mNeedsPointingToSatellite;
+    public boolean isPointingRequired() {
+        return mIsPointingRequired;
     }
 
     /**
-     * Get whether UE needs a separate SIM profile to communicate with the satellite network.
+     * The maximum number of bytes per datagram that can be sent over satellite.
      *
-     * @return {@code true} if UE needs a separate SIM profile to comunicate with the satellite
-     *         network and {@code false} otherwise.
+     * @return The maximum number of bytes per datagram that can be sent over satellite.
      */
-    public boolean needsSeparateSimProfile() {
-        return mNeedsSeparateSimProfile;
+    public int getMaxBytesPerOutgoingDatagram() {
+        return mMaxBytesPerOutgoingDatagram;
+    }
+
+    /**
+     * Antenna Position received from satellite modem which gives information about antenna
+     * direction to be used with satellite communication and suggested device hold positions.
+     * @return Map key: {@link SatelliteManager.DeviceHoldPosition} value: AntennaPosition
+     */
+    @NonNull
+    public Map<Integer, AntennaPosition> getAntennaPositionMap() {
+        return mAntennaPositionMap;
     }
 
     private void readFromParcel(Parcel in) {
@@ -171,8 +203,16 @@ public final class SatelliteCapabilities implements Parcelable {
             }
         }
 
-        mIsAlwaysOn = in.readBoolean();
-        mNeedsPointingToSatellite = in.readBoolean();
-        mNeedsSeparateSimProfile = in.readBoolean();
+        mIsPointingRequired = in.readBoolean();
+        mMaxBytesPerOutgoingDatagram = in.readInt();
+
+        mAntennaPositionMap = new HashMap<>();
+        int antennaPositionMapSize = in.readInt();
+        for (int i = 0; i < antennaPositionMapSize; i++) {
+            int key = in.readInt();
+            AntennaPosition antennaPosition = in.readParcelable(
+                    AntennaPosition.class.getClassLoader(), AntennaPosition.class);
+            mAntennaPositionMap.put(key, antennaPosition);
+        }
     }
 }

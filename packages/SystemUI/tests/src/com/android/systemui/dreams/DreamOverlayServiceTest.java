@@ -20,7 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,10 +48,10 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
+import com.android.systemui.complication.ComplicationLayoutEngine;
+import com.android.systemui.dreams.complication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.dreamcomplication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -62,6 +64,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -72,6 +75,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     private static final ComponentName LOW_LIGHT_COMPONENT = new ComponentName("package",
             "lowlight");
     private static final String DREAM_COMPONENT = "package/dream";
+    private static final String WINDOW_NAME = "test";
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
 
@@ -93,21 +97,20 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     WindowManagerImpl mWindowManager;
 
     @Mock
-    ComplicationComponent.Factory mComplicationComponentFactory;
+    com.android.systemui.complication.dagger.ComplicationComponent.Factory
+            mComplicationComponentFactory;
 
     @Mock
-    ComplicationComponent mComplicationComponent;
+    com.android.systemui.complication.dagger.ComplicationComponent mComplicationComponent;
 
     @Mock
     ComplicationLayoutEngine mComplicationVisibilityController;
 
     @Mock
-    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
-            mDreamComplicationComponentFactory;
+    ComplicationComponent.Factory mDreamComplicationComponentFactory;
 
     @Mock
-    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
-            mDreamComplicationComponent;
+    ComplicationComponent mDreamComplicationComponent;
 
     @Mock
     HideComplicationTouchHandler mHideComplicationTouchHandler;
@@ -189,7 +192,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mUiEventLogger,
                 mTouchInsetManager,
                 LOW_LIGHT_COMPONENT,
-                mDreamOverlayCallbackController);
+                mDreamOverlayCallbackController,
+                WINDOW_NAME);
     }
 
     public IDreamOverlayClient getClient() throws RemoteException {
@@ -231,6 +235,31 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mWindowManager).addView(any(), any());
     }
 
+    // Validates that {@link DreamOverlayService} properly handles the case where the dream's
+    // window is no longer valid by the time start is called.
+    @Test
+    public void testInvalidWindowAddStart() throws Exception {
+        final IDreamOverlayClient client = getClient();
+
+        doThrow(new WindowManager.BadTokenException()).when(mWindowManager).addView(any(), any());
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        verify(mWindowManager).addView(any(), any());
+
+        verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
+        verify(mStateController).setEntryAnimationsFinished(false);
+
+        verify(mStateController, never()).setOverlayActive(true);
+        verify(mUiEventLogger, never()).log(
+                DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
+
+        verify(mDreamOverlayCallbackController, never()).onStartDream();
+    }
+
     @Test
     public void testDreamOverlayContainerViewControllerInitialized() throws Exception {
         final IDreamOverlayClient client = getClient();
@@ -267,6 +296,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // Inform the overlay service of dream starting.
         client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 true /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
 
         assertThat(mService.shouldShowComplications()).isTrue();
     }
@@ -307,6 +337,48 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mStateController).setOverlayActive(false);
         verify(mStateController).setLowLightActive(false);
         verify(mStateController).setEntryAnimationsFinished(false);
+    }
+
+    @Test
+    public void testImmediateEndDream() throws Exception {
+        final IDreamOverlayClient client = getClient();
+
+        // Start the dream, but don't execute any Runnables put on the executor yet. We delay
+        // executing Runnables as the timing isn't guaranteed and we want to verify that the overlay
+        // starts and finishes in the proper order even if Runnables are delayed.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        // Immediately end the dream.
+        client.endDream();
+        // Run any scheduled Runnables.
+        mMainExecutor.runAllReady();
+
+        // The overlay starts then finishes.
+        InOrder inOrder = inOrder(mWindowManager);
+        inOrder.verify(mWindowManager).addView(mViewCaptor.capture(), any());
+        inOrder.verify(mWindowManager).removeView(mViewCaptor.getValue());
+    }
+
+    @Test
+    public void testEndDreamDuringStartDream() throws Exception {
+        final IDreamOverlayClient client = getClient();
+
+        // Schedule the endDream call in the middle of the startDream implementation, as any
+        // ordering is possible.
+        doAnswer(invocation -> {
+            client.endDream();
+            return null;
+        }).when(mStateController).setOverlayActive(true);
+
+        // Start the dream.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // The overlay starts then finishes.
+        InOrder inOrder = inOrder(mWindowManager);
+        inOrder.verify(mWindowManager).addView(mViewCaptor.capture(), any());
+        inOrder.verify(mWindowManager).removeView(mViewCaptor.getValue());
     }
 
     @Test
@@ -425,18 +497,14 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 true /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
-        final Runnable callback = mock(Runnable.class);
-        mService.onWakeUp(callback);
-        mMainExecutor.runAllReady();
-        verify(mDreamOverlayContainerViewController).wakeUp(callback, mMainExecutor);
+        mService.onWakeUp();
+        verify(mDreamOverlayContainerViewController).wakeUp();
         verify(mDreamOverlayCallbackController).onWakeUp();
     }
 
     @Test
     public void testWakeUpBeforeStartDoesNothing() {
-        final Runnable callback = mock(Runnable.class);
-        mService.onWakeUp(callback);
-        mMainExecutor.runAllReady();
-        verify(mDreamOverlayContainerViewController, never()).wakeUp(callback, mMainExecutor);
+        mService.onWakeUp();
+        verify(mDreamOverlayContainerViewController, never()).wakeUp();
     }
 }

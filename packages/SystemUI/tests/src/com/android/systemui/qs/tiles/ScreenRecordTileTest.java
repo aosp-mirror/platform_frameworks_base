@@ -43,13 +43,16 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +68,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     @Mock
     private RecordingController mController;
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock
@@ -82,6 +85,10 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private PanelInteractor mPanelInteractor;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -96,6 +103,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile = new ScreenRecordTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -107,10 +115,17 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mController,
                 mKeyguardDismissUtil,
                 mKeyguardStateController,
-                mDialogLaunchAnimator
+                mDialogLaunchAnimator,
+                mPanelInteractor
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 
@@ -139,7 +154,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         assertNotNull(onStartRecordingClicked.getValue());
         onStartRecordingClicked.getValue().run();
         verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
-        verify(mHost).collapsePanels();
+        verify(mPanelInteractor).collapsePanels();
     }
 
     // Test that the tile is active and labeled correctly when the controller is starting

@@ -74,6 +74,11 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
         currentRecording?.assertLastProgress(progress) ?: error("unfold not in progress.")
     }
 
+    fun clear() {
+        currentRecording = null
+        recordings.clear()
+    }
+
     class UnfoldTransitionRecording {
         private val progressHistory: MutableList<Float> = arrayListOf()
         private var finishingInvocations: Int = 0
@@ -126,7 +131,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
         }
 
         fun assertLastProgress(progress: Float) {
-            assertThat(progressHistory.last()).isEqualTo(progress)
+            waitForCondition { progress == progressHistory.lastOrNull() }
         }
     }
 

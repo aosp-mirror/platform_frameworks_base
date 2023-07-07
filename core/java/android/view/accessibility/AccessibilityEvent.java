@@ -56,7 +56,7 @@ import java.util.List;
  * accessibility service has not requested to retrieve the window content the event will
  * not contain reference to its source. <strong>Note: </strong> for events of type
  * {@link #TYPE_NOTIFICATION_STATE_CHANGED} the source is never available, and Views that set
- * {@link android.view.View#isAccessibilityDataPrivate()} may not populate all event properties on
+ * {@link android.view.View#isAccessibilityDataSensitive()} may not populate all event properties on
  * events sent from higher up in the view hierarchy.
  * </p>
  * <p>
@@ -1168,17 +1168,17 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * set to true.
      *
      * <p>
-     * Initial value matches the {@link android.view.View#isAccessibilityDataPrivate} property from
-     * the event's source node, if present, or false by default.
+     * Initial value matches the {@link android.view.View#isAccessibilityDataSensitive} property
+     * from the event's source node, if present, or false by default.
      * </p>
      *
      * @return True if the event should be delivered only to isAccessibilityTool services, false
      * otherwise.
-     * @see #setAccessibilityDataPrivate
+     * @see #setAccessibilityDataSensitive
      */
     @Override
-    public boolean isAccessibilityDataPrivate() {
-        return super.isAccessibilityDataPrivate();
+    public boolean isAccessibilityDataSensitive() {
+        return super.isAccessibilityDataSensitive();
     }
 
     /**
@@ -1193,13 +1193,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * no source) then this method must be called explicitly if you want non-default behavior.
      * </p>
      *
-     * @param accessibilityDataPrivate True if the event should be delivered only to
+     * @param accessibilityDataSensitive True if the event should be delivered only to
      *                                 isAccessibilityTool services, false otherwise.
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     @Override
-    public void setAccessibilityDataPrivate(boolean accessibilityDataPrivate) {
-        super.setAccessibilityDataPrivate(accessibilityDataPrivate);
+    public void setAccessibilityDataSensitive(boolean accessibilityDataSensitive) {
+        super.setAccessibilityDataSensitive(accessibilityDataSensitive);
     }
 
     /**

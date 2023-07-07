@@ -63,12 +63,6 @@ public final class TextToSpeechManagerService extends
         public void createSession(String engine,
                 ITextToSpeechSessionCallback sessionCallback) {
             synchronized (mLock) {
-                if (engine == null) {
-                    runSessionCallbackMethod(
-                            () -> sessionCallback.onError("Engine cannot be null"));
-                    return;
-                }
-
                 TextToSpeechManagerPerUserService perUserService = getServiceForUserLocked(
                         UserHandle.getCallingUserId());
                 if (perUserService != null) {

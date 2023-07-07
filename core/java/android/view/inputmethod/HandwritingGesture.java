@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
+import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.MotionEvent;
@@ -33,18 +34,20 @@ import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
 /**
- * Base class for Stylus handwriting gesture.
- *
+ * Base class for stylus handwriting gestures.
+ * <p>
  * During a stylus handwriting session, user can perform a stylus gesture operation like
  * {@link SelectGesture}, {@link DeleteGesture}, {@link InsertGesture} on an
- * area of text. IME is responsible for listening to Stylus {@link MotionEvent} using
+ * area of text. IME is responsible for listening to stylus {@link MotionEvent}s using
  * {@link InputMethodService#onStylusHandwritingMotionEvent} and interpret if it can translate to a
  * gesture operation.
- * While creating Gesture operations {@link SelectGesture}, {@link DeleteGesture},
- * , {@code Granularity} helps pick the correct granular level of text like word level
+ * <p>
+ * While creating gesture operations {@link SelectGesture} and {@link DeleteGesture},
+ * {@code Granularity} helps pick the correct granular level of text like word level
  * {@link #GRANULARITY_WORD}, or character level {@link #GRANULARITY_CHARACTER}.
  *
  * @see InputConnection#performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)
+ * @see InputConnection#previewHandwritingGesture(PreviewableHandwritingGesture, CancellationSignal)
  * @see InputMethodService#onStartStylusHandwriting()
  */
 public abstract class HandwritingGesture {

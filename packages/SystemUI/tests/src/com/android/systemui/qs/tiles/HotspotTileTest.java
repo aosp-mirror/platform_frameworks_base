@@ -37,12 +37,14 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,11 +62,13 @@ public class HotspotTileTest extends SysuiTestCase {
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private HotspotController mHotspotController;
     @Mock
     private DataSaverController mDataSaverController;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private HotspotTile mTile;
@@ -79,6 +83,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         mTile = new HotspotTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -91,6 +96,12 @@ public class HotspotTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

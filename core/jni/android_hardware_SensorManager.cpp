@@ -266,7 +266,8 @@ static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong s
 }
 
 static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
-        jlong size, jint channelType, jint fd, jobject hardwareBufferObj) {
+                                      jint deviceId, jlong size, jint channelType, jint fd,
+                                      jobject hardwareBufferObj) {
     const native_handle_t *nativeHandle = nullptr;
     NATIVE_HANDLE_DECLARE_STORAGE(ashmemHandle, 1, 0);
 
@@ -287,7 +288,7 @@ static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorMa
     }
 
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
-    return mgr->createDirectChannel(size, channelType, nativeHandle);
+    return mgr->createDirectChannel(deviceId, size, channelType, nativeHandle);
 }
 
 static void nativeDestroyDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
@@ -532,7 +533,7 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
 
         {"nativeIsDataInjectionEnabled", "(J)Z", (void *)nativeIsDataInjectionEnabled},
 
-        {"nativeCreateDirectChannel", "(JJIILandroid/hardware/HardwareBuffer;)I",
+        {"nativeCreateDirectChannel", "(JIJIILandroid/hardware/HardwareBuffer;)I",
          (void *)nativeCreateDirectChannel},
 
         {"nativeDestroyDirectChannel", "(JI)V", (void *)nativeDestroyDirectChannel},

@@ -549,6 +549,14 @@ public class BaseInputConnectionTest {
                                 .isEqualTo(new SurroundingText("456", 0, 3, -1)))
                 .isTrue();
 
+        verifyContentEquals(mBaseInputConnection.getTextBeforeCursor(Integer.MAX_VALUE, 0), "123");
+        verifyContentEquals(mBaseInputConnection.getTextAfterCursor(Integer.MAX_VALUE, 0), "789");
+        assertThat(
+                mBaseInputConnection
+                        .getSurroundingText(Integer.MAX_VALUE, Integer.MAX_VALUE, 0)
+                        .isEqualTo(new SurroundingText("123456789", 3, 6, -1)))
+                .isTrue();
+
         int cursorCapsMode =
                 TextUtils.getCapsMode(
                         "123456789",
@@ -616,6 +624,45 @@ public class BaseInputConnectionTest {
                         new SurroundingText(surroundTextString, 3, 6, -1), -1, -1, cursorCapsMode);
         verifyTextSnapshotContentEquals(mBaseInputConnection.takeSnapshot(), expectedTextSnapshot);
     }
+
+    @Test
+    public void testGetText_emptyText() {
+        // ""
+        prepareContent("", 0, 0, -1, -1);
+
+        verifyContentEquals(mBaseInputConnection.getTextBeforeCursor(1, 0), "");
+        verifyContentEquals(mBaseInputConnection.getTextAfterCursor(1, 0), "");
+        assertThat(mBaseInputConnection.getSelectedText(0)).isNull();
+
+        // This falls back to default implementation in {@code InputConnection}, which always return
+        // -1 for offset.
+        assertThat(
+                mBaseInputConnection
+                        .getSurroundingText(1, 1, 0)
+                        .isEqualTo(new SurroundingText("", 0, 0, -1)))
+                .isTrue();
+
+        verifyContentEquals(mBaseInputConnection.getTextBeforeCursor(0, 0), "");
+        verifyContentEquals(mBaseInputConnection.getTextAfterCursor(0, 0), "");
+        assertThat(mBaseInputConnection.getSelectedText(0)).isNull();
+        // This falls back to default implementation in {@code InputConnection}, which always return
+        // -1 for offset.
+        assertThat(
+                mBaseInputConnection
+                        .getSurroundingText(0, 0, 0)
+                        .isEqualTo(new SurroundingText("", 0, 0, -1)))
+                .isTrue();
+
+        verifyContentEquals(mBaseInputConnection.getTextBeforeCursor(Integer.MAX_VALUE, 0), "");
+        verifyContentEquals(mBaseInputConnection.getTextAfterCursor(Integer.MAX_VALUE, 0), "");
+        assertThat(mBaseInputConnection.getSelectedText(0)).isNull();
+        assertThat(
+                mBaseInputConnection
+                        .getSurroundingText(Integer.MAX_VALUE, Integer.MAX_VALUE, 0)
+                        .isEqualTo(new SurroundingText("", 0, 0, -1)))
+                .isTrue();
+    }
+
 
     @Test
     public void testReplaceText_toEditorWithoutSelectionAndComposing() {

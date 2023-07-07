@@ -32,6 +32,7 @@ import static java.lang.Math.abs;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 
+import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -40,10 +41,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PointF;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
@@ -127,6 +131,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @VisibleForTesting final FullScreenMagnificationController mFullScreenMagnificationController;
 
+    private final FullScreenMagnificationController.MagnificationInfoChangedCallback
+            mMagnificationInfoChangedCallback;
     @VisibleForTesting final DelegatingState mDelegatingState;
     @VisibleForTesting final DetectingState mDetectingState;
     @VisibleForTesting final PanningScalingState mPanningScalingState;
@@ -156,6 +162,40 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
         mFullScreenMagnificationController = fullScreenMagnificationController;
+        mMagnificationInfoChangedCallback =
+                new FullScreenMagnificationController.MagnificationInfoChangedCallback() {
+                    @Override
+                    public void onRequestMagnificationSpec(int displayId, int serviceId) {
+                        return;
+                    }
+
+                    @Override
+                    public void onFullScreenMagnificationActivationState(int displayId,
+                            boolean activated) {
+                        if (displayId != mDisplayId) {
+                            return;
+                        }
+
+                        if (!activated) {
+                            clearAndTransitionToStateDetecting();
+                        }
+                    }
+
+                    @Override
+                    public void onImeWindowVisibilityChanged(int displayId, boolean shown) {
+                        return;
+                    }
+
+                    @Override
+                    public void onFullScreenMagnificationChanged(int displayId,
+                            @NonNull Region region,
+                            @NonNull MagnificationConfig config) {
+                        return;
+                    }
+                };
+        mFullScreenMagnificationController.addInfoChangedCallback(
+                mMagnificationInfoChangedCallback);
+
         mPromptController = promptController;
 
         mDelegatingState = new DelegatingState();
@@ -215,6 +255,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
         mFullScreenMagnificationController.resetIfNeeded(
                 mDisplayId, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mFullScreenMagnificationController.removeInfoChangedCallback(
+                mMagnificationInfoChangedCallback);
         clearAndTransitionToStateDetecting();
     }
 
@@ -279,7 +321,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         return mTempPointerProperties;
     }
 
-    private void transitionTo(State state) {
+    @VisibleForTesting
+    void transitionTo(State state) {
         if (DEBUG_STATE_TRANSITIONS) {
             Slog.i(mLogTag,
                     (State.nameOf(mCurrentState) + " -> " + State.nameOf(state)
@@ -287,6 +330,9 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     .replace(getClass().getName(), ""));
         }
         mPreviousState = mCurrentState;
+        if (state == mPanningScalingState) {
+            mPanningScalingState.prepareForState();
+        }
         mCurrentState = state;
     }
 
@@ -317,18 +363,34 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     final class PanningScalingState extends SimpleOnGestureListener
             implements OnScaleGestureListener, State {
 
+        private final Context mContext;
         private final ScaleGestureDetector mScaleGestureDetector;
         private final GestureDetector mScrollGestureDetector;
         final float mScalingThreshold;
 
         float mInitialScaleFactor = -1;
-        boolean mScaling;
+        @VisibleForTesting boolean mScaling;
+
+        /**
+         * Whether it needs to detect the target scale passes
+         * {@link FullScreenMagnificationController#getPersistedScale} during panning scale.
+         */
+        @VisibleForTesting boolean mDetectingPassPersistedScale;
+
+        // The threshold for relative difference from given scale to persisted scale. If the
+        // difference >= threshold, we can start detecting if the scale passes the persisted
+        // scale during panning.
+        @VisibleForTesting static final float CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD = 0.2f;
+        // The threshold for relative difference from given scale to persisted scale. If the
+        // difference < threshold, we can decide that the scale passes the persisted scale.
+        @VisibleForTesting static final float PASSING_PERSISTED_SCALE_THRESHOLD = 0.01f;
 
         PanningScalingState(Context context) {
             final TypedValue scaleValue = new TypedValue();
             context.getResources().getValue(
                     R.dimen.config_screen_magnification_scaling_threshold,
                     scaleValue, false);
+            mContext = context;
             mScalingThreshold = scaleValue.getFloat();
             mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
             mScaleGestureDetector.setQuickScaleEnabled(false);
@@ -351,10 +413,57 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
         }
 
+
+        void prepareForState() {
+            checkShouldDetectPassPersistedScale();
+        }
+
+        private void checkShouldDetectPassPersistedScale() {
+            if (mDetectingPassPersistedScale) {
+                return;
+            }
+
+            final float currentScale =
+                    mFullScreenMagnificationController.getScale(mDisplayId);
+            final float persistedScale =
+                    mFullScreenMagnificationController.getPersistedScale(mDisplayId);
+
+            mDetectingPassPersistedScale =
+                    (abs(currentScale - persistedScale) / persistedScale)
+                            >= CHECK_DETECTING_PASS_PERSISTED_SCALE_THRESHOLD;
+        }
+
         public void persistScaleAndTransitionTo(State state) {
             mFullScreenMagnificationController.persistScale(mDisplayId);
             clear();
             transitionTo(state);
+        }
+
+        @VisibleForTesting
+        void setScaleAndClearIfNeeded(float scale, float pivotX, float pivotY) {
+            if (mDetectingPassPersistedScale) {
+                final float persistedScale =
+                        mFullScreenMagnificationController.getPersistedScale(mDisplayId);
+                // If the scale passes the persisted scale during panning, perform a vibration
+                // feedback to user. Also, call {@link clear} to create a buffer zone so that
+                // user needs to panning more than {@link mScalingThreshold} to change scale again.
+                if (abs(scale - persistedScale) / persistedScale
+                        < PASSING_PERSISTED_SCALE_THRESHOLD) {
+                    scale = persistedScale;
+                    final Vibrator vibrator = mContext.getSystemService(Vibrator.class);
+                    if (vibrator != null) {
+                        vibrator.vibrate(
+                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
+                    }
+                    clear();
+                }
+            }
+
+            if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
+            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+
+            checkShouldDetectPassPersistedScale();
         }
 
         @Override
@@ -402,11 +511,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 scale = targetScale;
             }
 
-            final float pivotX = detector.getFocusX();
-            final float pivotY = detector.getFocusY();
-            if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
-            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
-                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+            setScaleAndClearIfNeeded(scale, detector.getFocusX(), detector.getFocusY());
             return /* handled: */ true;
         }
 
@@ -424,6 +529,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         public void clear() {
             mInitialScaleFactor = -1;
             mScaling = false;
+            mDetectingPassPersistedScale = false;
         }
 
         @Override

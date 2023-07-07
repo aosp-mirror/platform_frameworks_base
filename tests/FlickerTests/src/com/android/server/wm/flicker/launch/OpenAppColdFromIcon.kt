@@ -16,14 +16,16 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.FlakyTest
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -38,6 +40,7 @@ import org.junit.runners.Parameterized
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] by clicking it's icon on all apps and wait animation to complete
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -52,7 +55,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
+open class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -61,7 +64,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
                 if (flicker.scenario.isTablet) {
                     tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 } else {
-                    tapl.setExpectedRotation(PlatformConsts.Rotation.ROTATION_0.value)
+                    tapl.setExpectedRotation(Rotation.ROTATION_0.value)
                 }
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
             }
@@ -75,6 +78,131 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
             teardown { testApp.exit(wmHelper) }
         }
 
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun focusChanges() {
+        super.focusChanges()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowReplacesLauncherAsTopWindow() {
+        super.appWindowReplacesLauncherAsTopWindow()
+    }
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowAsTopWindowAtEnd() {
+        super.appWindowAsTopWindowAtEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowBecomesTopWindow() {
+        super.appWindowBecomesTopWindow()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowBecomesVisible() {
+        super.appWindowBecomesVisible()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appWindowIsTopWindowAtEnd() {
+        super.appWindowIsTopWindowAtEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appLayerBecomesVisible() {
+        super.appLayerBecomesVisible()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun appLayerReplacesLauncher() {
+        super.appLayerReplacesLauncher()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun cujCompleted() {
+        super.cujCompleted()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() {
+        super.navBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() {
+        super.navBarLayerPositionAtStartAndEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun navBarWindowIsAlwaysVisible() {
+        super.navBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun navBarWindowIsVisibleAtStartAndEnd() {
+        super.navBarWindowIsVisibleAtStartAndEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() {
+        super.statusBarLayerPositionAtStartAndEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() {
+        super.statusBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {
+        super.taskBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() {
+        super.taskBarWindowIsAlwaysVisible()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @FlakyTest(bugId = 240916028)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+
     companion object {
         /**
          * Creates the test configurations.
@@ -85,10 +213,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            // TAPL fails on landscape mode b/240916028
-            return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_3BUTTON)
-            )
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

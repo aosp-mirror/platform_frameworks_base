@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -1672,57 +1673,62 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        synchronized (mRecords) {
-            String str = "notifyServiceStateForSubscriber: subId=" + subId + " phoneId=" + phoneId
-                    + " state=" + state;
-            if (VDBG) {
-                log(str);
-            }
-            mLocalLog.log(str);
-            // for service state updates, don't notify clients when subId is invalid. This prevents
-            // us from sending incorrect notifications like b/133140128
-            // In the future, we can remove this logic for every notification here and add a
-            // callback so listeners know when their PhoneStateListener's subId becomes invalid, but
-            // for now we use the simplest fix.
-            if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
-                mServiceState[phoneId] = state;
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mRecords) {
+                String str = "notifyServiceStateForSubscriber: subId=" + subId + " phoneId="
+                        + phoneId + " state=" + state;
+                if (VDBG) {
+                    log(str);
+                }
+                mLocalLog.log(str);
+                // for service state updates, don't notify clients when subId is invalid. This
+                // prevents us from sending incorrect notifications like b/133140128
+                // In the future, we can remove this logic for every notification here and add a
+                // callback so listeners know when their PhoneStateListener's subId becomes invalid,
+                // but for now we use the simplest fix.
+                if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
+                    mServiceState[phoneId] = state;
 
-                for (Record r : mRecords) {
-                    if (VDBG) {
-                        log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
-                                + " phoneId=" + phoneId + " state=" + state);
-                    }
-                    if (r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
-                            && idMatch(r, subId, phoneId)) {
+                    for (Record r : mRecords) {
+                        if (VDBG) {
+                            log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
+                                    + " phoneId=" + phoneId + " state=" + state);
+                        }
+                        if (r.matchTelephonyCallbackEvent(
+                                TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
+                                && idMatch(r, subId, phoneId)) {
 
-                        try {
-                            ServiceState stateToSend;
-                            if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                stateToSend = new ServiceState(state);
-                            } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                stateToSend = state.createLocationInfoSanitizedCopy(false);
-                            } else {
-                                stateToSend = state.createLocationInfoSanitizedCopy(true);
+                            try {
+                                ServiceState stateToSend;
+                                if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                    stateToSend = new ServiceState(state);
+                                } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                    stateToSend = state.createLocationInfoSanitizedCopy(false);
+                                } else {
+                                    stateToSend = state.createLocationInfoSanitizedCopy(true);
+                                }
+                                if (DBG) {
+                                    log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
+                                            + " subId=" + subId + " phoneId=" + phoneId
+                                            + " state=" + stateToSend);
+                                }
+                                r.callback.onServiceStateChanged(stateToSend);
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
                             }
-                            if (DBG) {
-                                log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
-                                        + " subId=" + subId + " phoneId=" + phoneId
-                                        + " state=" + stateToSend);
-                            }
-                            r.callback.onServiceStateChanged(stateToSend);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
                         }
                     }
+                } else {
+                    log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
+                            + " or subId=" + subId);
                 }
-            } else {
-                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
-                        + " or subId=" + subId);
+                handleRemoveListLocked();
             }
-            handleRemoveListLocked();
+            broadcastServiceStateChanged(state, phoneId, subId);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
         }
-        broadcastServiceStateChanged(state, phoneId, subId);
     }
 
     public void notifySimActivationStateChangedForPhoneId(int phoneId, int subId,
@@ -3508,13 +3514,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public static final String ACTION_SIGNAL_STRENGTH_CHANGED = "android.intent.action.SIG_STR";
 
     private void broadcastServiceStateChanged(ServiceState state, int phoneId, int subId) {
-        final long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneState(state.getState());
         } catch (RemoteException re) {
             // Can't do much
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
 
         // Send the broadcast exactly once to all possible disjoint sets of apps.
@@ -3531,29 +3534,44 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // - Sanitized ServiceState sent to all other apps with READ_PHONE_STATE
         // - Sanitized ServiceState sent to all other apps with READ_PRIVILEGED_PHONE_STATE but not
         //   READ_PHONE_STATE
-        if (Binder.withCleanCallingIdentity(() ->
-                LocationAccessPolicy.isLocationModeEnabled(mContext, mContext.getUserId()))) {
+        //
+        // Create a unique delivery group key for each variant for SERVICE_STATE broadcast so
+        // that a new broadcast only replaces the pending broadcasts of the same variant.
+        // In order to create a unique delivery group key, append tag of the form
+        // "I:Included-permissions[,E:Excluded-permissions][,lbp]"
+        // Note: Given that location-bypass-packages are static, we can just append "lbp" to the
+        // tag to create a unique delivery group but if location-bypass-packages become dynamic
+        // in the future, we would need to create a unique key for each group of
+        // location-bypass-packages.
+        if (LocationAccessPolicy.isLocationModeEnabled(mContext, mContext.getUserId())) {
             Intent fullIntent = createServiceStateIntent(state, subId, phoneId, false);
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     fullIntent,
                     new String[]{Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.ACCESS_FINE_LOCATION});
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RA"));
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     fullIntent,
                     new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
                             Manifest.permission.ACCESS_FINE_LOCATION},
-                    new String[]{Manifest.permission.READ_PHONE_STATE});
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    null,
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RPA,E:R"));
 
             Intent sanitizedIntent = createServiceStateIntent(state, subId, phoneId, true);
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     sanitizedIntent,
                     new String[]{Manifest.permission.READ_PHONE_STATE},
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    null,
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:R,E:A"));
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     sanitizedIntent,
                     new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
                     new String[]{Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.ACCESS_FINE_LOCATION});
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    null,
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RP,E:RA"));
         } else {
             String[] locationBypassPackages = Binder.withCleanCallingIdentity(() ->
                     LocationAccessPolicy.getLocationBypassPackages(mContext));
@@ -3562,11 +3580,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 fullIntent.setPackage(locationBypassPackage);
                 mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                         fullIntent,
-                        new String[]{Manifest.permission.READ_PHONE_STATE});
+                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                        createServiceStateBroadcastOptions(subId, phoneId, "I:R"));
                 mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                         fullIntent,
                         new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
-                        new String[]{Manifest.permission.READ_PHONE_STATE});
+                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                        null,
+                        createServiceStateBroadcastOptions(subId, phoneId, "I:RP,E:R"));
             }
 
             Intent sanitizedIntent = createServiceStateIntent(state, subId, phoneId, true);
@@ -3574,12 +3595,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     sanitizedIntent,
                     new String[]{Manifest.permission.READ_PHONE_STATE},
                     new String[]{/* no excluded permissions */},
-                    locationBypassPackages);
+                    locationBypassPackages,
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:R,lbp"));
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     sanitizedIntent,
                     new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
                     new String[]{Manifest.permission.READ_PHONE_STATE},
-                    locationBypassPackages);
+                    locationBypassPackages,
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RP,E:R,lbp"));
         }
     }
 
@@ -3599,6 +3622,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
         return intent;
+    }
+
+    private BroadcastOptions createServiceStateBroadcastOptions(int subId, int phoneId,
+            String tag) {
+        return new BroadcastOptions()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                // Use a combination of subId and phoneId as the key so that older broadcasts
+                // with same subId and phoneId will get discarded.
+                .setDeliveryGroupMatchingKey(Intent.ACTION_SERVICE_STATE,
+                        subId + "-" + phoneId + "-" + tag)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
     }
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,

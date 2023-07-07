@@ -52,6 +52,7 @@ public final class ConversionUtilsResultTest {
                 {Result.INVALID_STATE, RadioTuner.TUNER_RESULT_INVALID_STATE},
                 {Result.NOT_SUPPORTED, RadioTuner.TUNER_RESULT_NOT_SUPPORTED},
                 {Result.TIMEOUT, RadioTuner.TUNER_RESULT_TIMEOUT},
+                {Result.CANCELED, RadioTuner.TUNER_RESULT_CANCELED},
                 {Result.UNKNOWN_ERROR, RadioTuner.TUNER_RESULT_UNKNOWN_ERROR}
         });
     }

@@ -24,6 +24,7 @@
 #include <aidl/android/media/audio/common/AudioDevice.h>
 #include <aidlcommonsupport/NativeHandle.h>
 #include <android/binder_manager.h>
+#include <fmq/AidlMessageQueue.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
@@ -40,10 +41,16 @@
 #include "android_runtime/android_view_Surface.h"
 #include "tvinput/jstruct.h"
 
+using ::android::AidlMessageQueue;
+
+using ::aidl::android::hardware::common::fmq::MQDescriptor;
+using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
 using ::aidl::android::hardware::tv::input::BnTvInputCallback;
 using ::aidl::android::hardware::tv::input::CableConnectionStatus;
 using ::aidl::android::hardware::tv::input::TvInputEventType;
 using ::aidl::android::hardware::tv::input::TvInputType;
+using ::aidl::android::hardware::tv::input::TvMessageEvent;
+using ::aidl::android::hardware::tv::input::TvMessageEventType;
 
 using AidlAudioDevice = ::aidl::android::media::audio::common::AudioDevice;
 using AidlAudioDeviceAddress = ::aidl::android::media::audio::common::AudioDeviceAddress;
@@ -52,9 +59,16 @@ using AidlITvInput = ::aidl::android::hardware::tv::input::ITvInput;
 using AidlNativeHandle = ::aidl::android::hardware::common::NativeHandle;
 using AidlTvInputDeviceInfo = ::aidl::android::hardware::tv::input::TvInputDeviceInfo;
 using AidlTvInputEvent = ::aidl::android::hardware::tv::input::TvInputEvent;
+using AidlTvMessage = ::aidl::android::hardware::tv::input::TvMessage;
 using AidlTvMessageEvent = ::aidl::android::hardware::tv::input::TvMessageEvent;
+using AidlTvMessageEventType = ::aidl::android::hardware::tv::input::TvMessageEventType;
 using AidlTvStreamConfig = ::aidl::android::hardware::tv::input::TvStreamConfig;
 
+using AidlMessageQueueMap = std::unordered_map<
+        int,
+        std::unordered_map<int, std::shared_ptr<AidlMessageQueue<int8_t, SynchronizedReadWrite>>>>;
+
+extern gBundleClassInfoType gBundleClassInfo;
 extern gTvInputHalClassInfoType gTvInputHalClassInfo;
 extern gTvStreamConfigClassInfoType gTvStreamConfigClassInfo;
 extern gTvStreamConfigBuilderClassInfoType gTvStreamConfigBuilderClassInfo;
@@ -69,6 +83,7 @@ public:
     static JTvInputHal* createInstance(JNIEnv* env, jobject thiz, const sp<Looper>& looper);
 
     int addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface);
+    int setTvMessageEnabled(int deviceId, int streamId, int type, bool enabled);
     int removeStream(int deviceId, int streamId);
     const std::vector<AidlTvStreamConfig> getStreamConfigs(int deviceId);
 
@@ -117,6 +132,19 @@ private:
         TvInputDeviceInfoWrapper deviceInfo;
     };
 
+    class TvMessageEventWrapper {
+    public:
+        TvMessageEventWrapper() {}
+
+        static TvMessageEventWrapper createEventWrapper(
+                const AidlTvMessageEvent& aidlTvMessageEvent);
+
+        int streamId;
+        int deviceId;
+        std::vector<AidlTvMessage> messages;
+        AidlTvMessageEventType type;
+    };
+
     class NotifyHandler : public MessageHandler {
     public:
         NotifyHandler(JTvInputHal* hal, const TvInputEventWrapper& event);
@@ -125,6 +153,17 @@ private:
 
     private:
         TvInputEventWrapper mEvent;
+        JTvInputHal* mHal;
+    };
+
+    class NotifyTvMessageHandler : public MessageHandler {
+    public:
+        NotifyTvMessageHandler(JTvInputHal* hal, const TvMessageEventWrapper& event);
+
+        void handleMessage(const Message& message) override;
+
+    private:
+        TvMessageEventWrapper mEvent;
         JTvInputHal* mHal;
     };
 
@@ -150,6 +189,11 @@ private:
         ::ndk::ScopedAStatus openStream(int32_t in_deviceId, int32_t in_streamId,
                                         AidlNativeHandle* _aidl_return);
         ::ndk::ScopedAStatus closeStream(int32_t in_deviceId, int32_t in_streamId);
+        ::ndk::ScopedAStatus setTvMessageEnabled(int32_t deviceId, int32_t streamId,
+                                                 TvMessageEventType in_type, bool enabled);
+        ::ndk::ScopedAStatus getTvMessageQueueDesc(
+                MQDescriptor<int8_t, SynchronizedReadWrite>* out_queue, int32_t in_deviceId,
+                int32_t in_streamId);
 
     private:
         ::ndk::ScopedAStatus hidlSetCallback(const std::shared_ptr<TvInputCallback>& in_callback);
@@ -172,11 +216,14 @@ private:
     void onDeviceUnavailable(int deviceId);
     void onStreamConfigurationsChanged(int deviceId, int cableConnectionStatus);
     void onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded);
+    void onTvMessage(int deviceId, int streamId, AidlTvMessageEventType type,
+                     AidlTvMessage& message, signed char data[], int dataLength);
 
     Mutex mLock;
     Mutex mStreamLock;
     jweak mThiz;
     sp<Looper> mLooper;
+    AidlMessageQueueMap mQueueMap;
 
     KeyedVector<int, KeyedVector<int, Connection> > mConnections;
 

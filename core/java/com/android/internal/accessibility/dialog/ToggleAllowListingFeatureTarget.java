@@ -35,9 +35,10 @@ import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 class ToggleAllowListingFeatureTarget extends AccessibilityTarget {
 
     ToggleAllowListingFeatureTarget(Context context, @ShortcutType int shortcutType,
-            boolean isShortcutSwitched, String id, CharSequence label, Drawable icon, String key) {
-        super(context, shortcutType, AccessibilityFragmentType.TOGGLE,
-                isShortcutSwitched, id, label, icon, key);
+            boolean isShortcutSwitched, String id, int uid, CharSequence label, Drawable icon,
+            String key) {
+        super(context, shortcutType, AccessibilityFragmentType.TOGGLE, isShortcutSwitched, id,
+                uid, label, icon, key);
 
         final int statusResId = isFeatureEnabled()
                 ? R.string.accessibility_shortcut_menu_item_status_on

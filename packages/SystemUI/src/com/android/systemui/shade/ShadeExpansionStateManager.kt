@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import android.annotation.IntDef
+import android.os.Trace
+import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
@@ -47,15 +49,14 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     private var dragDownPxAmount: Float = 0f
 
     /**
-     * Adds a listener that will be notified when the panel expansion fraction has changed.
+     * Adds a listener that will be notified when the panel expansion fraction has changed and
+     * returns the current state in a ShadeExpansionChangeEvent for legacy purposes (b/23035507).
      *
-     * Listener will also be immediately notified with the current values.
+     * @see #addExpansionListener
      */
-    fun addExpansionListener(listener: ShadeExpansionListener) {
+    fun addExpansionListener(listener: ShadeExpansionListener): ShadeExpansionChangeEvent {
         expansionListeners.add(listener)
-        listener.onPanelExpansionChanged(
-            ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
-        )
+        return ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
     }
 
     /** Removes an expansion listener. */
@@ -107,7 +108,7 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
      *
      * @param fraction the fraction from the expansion in [0, 1]
      * @param expanded whether the panel is currently expanded; this is independent from the
-     * fraction as the panel also might be expanded if the fraction is 0.
+     *   fraction as the panel also might be expanded if the fraction is 0.
      * @param tracking whether we're currently tracking the user's gesture.
      */
     fun onPanelExpansionChanged(
@@ -152,6 +153,14 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
                 "${if (fullyOpened) " fullyOpened" else ""} " +
                 if (fullyClosed) " fullyClosed" else ""
         )
+
+        if (Trace.isTagEnabled(TRACE_TAG)) {
+            Trace.traceCounter(TRACE_TAG, "panel_expansion", (fraction * 100).toInt())
+            if (state != oldState) {
+                Trace.asyncTraceForTrackEnd(TRACE_TAG, TRACK_NAME, 0)
+                Trace.asyncTraceForTrackBegin(TRACE_TAG, TRACK_NAME, state.panelStateToString(), 0)
+            }
+        }
 
         val expansionChangeEvent =
             ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
@@ -210,6 +219,10 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     private fun debugLog(msg: String) {
         if (!DEBUG) return
         Log.v(TAG, msg)
+    }
+
+    companion object {
+        private const val TRACK_NAME = "ShadeExpansionState"
     }
 }
 

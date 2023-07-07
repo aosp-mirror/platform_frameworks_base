@@ -43,10 +43,10 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, AidlSession>
     FaceInternalCleanupClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, @NonNull BiometricLogger logger,
-            @NonNull BiometricContext biometricContext, @NonNull List<Face> enrolledList,
+            @NonNull BiometricContext biometricContext,
             @NonNull BiometricUtils<Face> utils, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, logger, biometricContext,
-                enrolledList, utils, authenticatorIds);
+                utils, authenticatorIds);
     }
 
     @Override

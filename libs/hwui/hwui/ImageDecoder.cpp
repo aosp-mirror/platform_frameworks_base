@@ -51,6 +51,9 @@ using namespace android;
 sk_sp<SkColorSpace> ImageDecoder::getDefaultColorSpace() const {
     const skcms_ICCProfile* encodedProfile = mCodec->getICCProfile();
     if (encodedProfile) {
+        if (encodedProfile->has_CICP) {
+            return mCodec->computeOutputColorSpace(kN32_SkColorType);
+        }
         // If the profile maps directly to an SkColorSpace, that SkColorSpace
         // will be returned. Otherwise, nullptr will be returned. In either
         // case, using this SkColorSpace results in doing no color correction.
@@ -498,7 +501,7 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     return result;
 }
 
-SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination) {
+SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination, bool isShared) {
     ATRACE_CALL();
     SkGainmapInfo gainmapInfo;
     std::unique_ptr<SkStream> gainmapStream;
@@ -553,9 +556,12 @@ SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination) {
         return SkCodec::kInternalError;
     }
 
-    // TODO: We don't currently parcel the gainmap, but if we should then also support
-    // the shared allocator
-    sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bm);
+    sk_sp<Bitmap> nativeBitmap;
+    if (isShared) {
+        nativeBitmap = Bitmap::allocateAshmemBitmap(&bm);
+    } else {
+        nativeBitmap = Bitmap::allocateHeapBitmap(&bm);
+    }
     if (!nativeBitmap) {
         ALOGE("OOM allocating Bitmap with dimensions %i x %i", bitmapInfo.width(),
               bitmapInfo.height());

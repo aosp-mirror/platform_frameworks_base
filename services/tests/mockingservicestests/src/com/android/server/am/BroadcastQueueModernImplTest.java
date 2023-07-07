@@ -16,10 +16,13 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_ALARM;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_FOREGROUND;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_INTERACTIVE;
@@ -39,6 +42,7 @@ import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
 import static com.android.server.am.BroadcastQueueTest.getUidForPackage;
 import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
 import static com.android.server.am.BroadcastQueueTest.withPriority;
+import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,15 +52,21 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
@@ -70,36 +80,35 @@ import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.DropBoxManager;
 import android.os.HandlerThread;
+import android.os.Process;
 import android.os.SystemClock;
+import android.os.TestLooperManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.ExtendedMockitoTestCase;
-import com.android.server.am.BroadcastQueueTest.SyncBarrier;
+import com.android.server.ExtendedMockitoRule;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @SmallTest
-@RunWith(MockitoJUnitRunner.class)
-public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
+public final class BroadcastQueueModernImplTest {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
     private static final int TEST_UID2 = android.os.Process.FIRST_APPLICATION_UID + 1;
 
@@ -112,52 +121,45 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     @Mock BroadcastProcessQueue mQueue4;
 
     HandlerThread mHandlerThread;
+    TestLooperManager mLooper;
 
     BroadcastConstants mConstants;
+    private BroadcastSkipPolicy mSkipPolicy;
     BroadcastQueueModernImpl mImpl;
 
     BroadcastProcessQueue mHead;
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(FrameworkStatsLog.class);
-    }
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(FrameworkStatsLog.class)
+            .build();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mHandlerThread = new HandlerThread(getClass().getSimpleName());
         mHandlerThread.start();
+
+        // Pause all event processing until a test chooses to resume
+        mLooper = Objects.requireNonNull(InstrumentationRegistry.getInstrumentation()
+                .acquireLooperManager(mHandlerThread.getLooper()));
 
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.DELAY_URGENT_MILLIS = -120_000;
         mConstants.DELAY_NORMAL_MILLIS = 10_000;
         mConstants.DELAY_CACHED_MILLIS = 120_000;
 
-        final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
-            public boolean shouldSkip(BroadcastRecord r, Object o) {
-                // Ignored
-                return false;
-            }
-            public String shouldSkipMessage(BroadcastRecord r, Object o) {
-                // Ignored
-                return null;
-            }
-            public boolean disallowBackgroundStart(BroadcastRecord r) {
-                // Ignored
-                return false;
-            }
-        };
+        mSkipPolicy = spy(new BroadcastSkipPolicy(mAms));
+        doReturn(null).when(mSkipPolicy).shouldSkipMessage(any(), any());
+        doReturn(false).when(mSkipPolicy).disallowBackgroundStart(any());
+
         final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
                 // Ignored
             }
         };
 
-
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-            mConstants, mConstants, emptySkipPolicy, emptyHistory);
+            mConstants, mConstants, mSkipPolicy, emptyHistory);
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
@@ -168,6 +170,17 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quit();
+    }
+
+    /**
+     * Un-pause our handler to process pending events, wait for our queue to go
+     * idle, and then re-pause the handler.
+     */
+    private void waitForIdle() throws Exception {
+        mLooper.release();
+        mImpl.waitForIdle(LOG_WRITER_INFO);
+        mLooper = Objects.requireNonNull(InstrumentationRegistry.getInstrumentation()
+                .acquireLooperManager(mHandlerThread.getLooper()));
     }
 
     private static void assertOrphan(BroadcastProcessQueue queue) {
@@ -236,13 +249,22 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
                 null, null, null, AppOpsManager.OP_NONE, options, receivers, null, resultTo,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
-                BackgroundStartPrivileges.NONE, false, null);
+                BackgroundStartPrivileges.NONE, false, null, PROCESS_STATE_UNKNOWN);
+    }
+
+    private void enqueueOrReplaceBroadcast(BroadcastProcessQueue queue,
+            BroadcastRecord record, int recordIndex) {
+        enqueueOrReplaceBroadcast(queue, record, recordIndex, 42_000_000L);
     }
 
     private void enqueueOrReplaceBroadcast(BroadcastProcessQueue queue,
             BroadcastRecord record, int recordIndex, long enqueueTime) {
-        queue.enqueueOrReplaceBroadcast(record, recordIndex, false);
+        queue.enqueueOrReplaceBroadcast(record, recordIndex, (r, i) -> {
+            throw new UnsupportedOperationException();
+        });
         record.enqueueTime = enqueueTime;
+        record.enqueueRealTime = enqueueTime;
+        record.enqueueClockTime = enqueueTime;
     }
 
     @Test
@@ -309,6 +331,20 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     }
 
     @Test
+    public void testRunnableList_sameRunnableAt() {
+        doReturn(2L).when(mQueue1).getRunnableAt();
+        doReturn(2L).when(mQueue2).getRunnableAt();
+        doReturn(2L).when(mQueue3).getRunnableAt();
+        doReturn(2L).when(mQueue4).getRunnableAt();
+
+        mHead = insertIntoRunnableList(mHead, mQueue1);
+        mHead = insertIntoRunnableList(mHead, mQueue2);
+        mHead = insertIntoRunnableList(mHead, mQueue3);
+        mHead = insertIntoRunnableList(mHead, mQueue4);
+        assertRunnableList(List.of(mQueue1, mQueue2, mQueue3, mQueue4), mHead);
+    }
+
+    @Test
     public void testProcessQueue_Complex() {
         BroadcastProcessQueue red = mImpl.getOrCreateProcessQueue(PACKAGE_RED, TEST_UID);
         BroadcastProcessQueue green = mImpl.getOrCreateProcessQueue(PACKAGE_GREEN, TEST_UID);
@@ -360,6 +396,33 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     }
 
     /**
+     * Queue with a "normal" and "deferrable" broadcast is runnable at different times depending
+     * on process cached state; when cached it's delayed indefinitely.
+     */
+    @Test
+    public void testRunnableAt_Normal_Deferrable() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastOptions options = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, options,
+                List.of(makeMockRegisteredReceiver()), false);
+        enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
+
+        queue.setProcessAndUidState(mProcess, false, false);
+        final long notCachedRunnableAt = queue.getRunnableAt();
+        queue.setProcessAndUidState(mProcess, false, true);
+        final long cachedRunnableAt = queue.getRunnableAt();
+        assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
+        assertFalse(queue.isRunnable());
+        assertEquals(BroadcastProcessQueue.REASON_CACHED_INFINITE_DEFER,
+                queue.getRunnableAtReason());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+    }
+
+    /**
      * Queue with a "normal" broadcast is runnable at different times depending
      * on process cached state; when cached it's delayed by some amount.
      */
@@ -369,16 +432,20 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
-                List.of(makeMockRegisteredReceiver()));
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
+        final BroadcastOptions options = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, options,
+                List.of(makeMockRegisteredReceiver()), false);
+        enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
-        queue.setProcessCached(false);
+        queue.setProcessAndUidState(mProcess, false, false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessCached(true);
+        queue.setProcessAndUidState(mProcess, false, true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
-        assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
+        assertTrue(queue.isRunnable());
+        assertEquals(BroadcastProcessQueue.REASON_CACHED, queue.getRunnableAtReason());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
     }
 
     /**
@@ -393,26 +460,26 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         // enqueue a bg-priority broadcast then a fg-priority one
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
         final BroadcastRecord timezoneRecord = makeBroadcastRecord(timezone);
-        queue.enqueueOrReplaceBroadcast(timezoneRecord, 0, false);
+        enqueueOrReplaceBroadcast(queue, timezoneRecord, 0);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
+        enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
         // verify that:
         // (a) the queue is immediately runnable by existence of a fg-priority broadcast
         // (b) the next one up is the fg-priority broadcast despite its later enqueue time
-        queue.setProcessCached(false);
+        queue.setProcessAndUidState(null, false, false);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
-        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
-        queue.setProcessCached(true);
+        queue.setProcessAndUidState(null, false, true);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
-        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
     }
 
@@ -429,13 +496,14 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, null,
                 List.of(withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
                         withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 0)), true);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1, false);
+        enqueueOrReplaceBroadcast(queue, airplaneRecord, 1);
 
         assertFalse(queue.isRunnable());
         assertEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
 
         // Bumping past barrier makes us now runnable
-        airplaneRecord.terminalCount++;
+        airplaneRecord.setDeliveryState(0, BroadcastRecord.DELIVERY_DELIVERED,
+                "testRunnableAt_Ordered");
         queue.invalidateRunnableAt();
         assertTrue(queue.isRunnable());
         assertNotEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
@@ -452,7 +520,7 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
                 List.of(makeMockRegisteredReceiver()));
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
+        enqueueOrReplaceBroadcast(queue, airplaneRecord, 0);
 
         mConstants.MAX_PENDING_BROADCASTS = 128;
         queue.invalidateRunnableAt();
@@ -465,6 +533,93 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
     }
 
+    @Test
+    public void testRunnableAt_uidForeground() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants, PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+
+        queue.setProcessAndUidState(mProcess, true, false);
+        assertThat(queue.getRunnableAt()).isLessThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_FOREGROUND, queue.getRunnableAtReason());
+
+        queue.setProcessAndUidState(mProcess, false, false);
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
+    @Test
+    public void testRunnableAt_processTop() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants, PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        doReturn(ActivityManager.PROCESS_STATE_TOP).when(mProcess).getSetProcState();
+        queue.setProcessAndUidState(mProcess, false, false);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isLessThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_TOP_PROCESS, queue.getRunnableAtReason());
+
+        doReturn(ActivityManager.PROCESS_STATE_SERVICE).when(mProcess).getSetProcState();
+        queue.setProcessAndUidState(mProcess, false, false);
+
+        // The new process state will only be taken into account the next time a broadcast
+        // is sent to the process.
+        enqueueOrReplaceBroadcast(queue, makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver())), 0);
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
+    @Test
+    public void testRunnableAt_persistentProc() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants, PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+
+        doReturn(true).when(mProcess).isPersistent();
+        queue.setProcessAndUidState(mProcess, false, false);
+        assertThat(queue.getRunnableAt()).isLessThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_PERSISTENT, queue.getRunnableAtReason());
+
+        doReturn(false).when(mProcess).isPersistent();
+        queue.setProcessAndUidState(mProcess, false, false);
+        assertThat(queue.getRunnableAt()).isGreaterThan(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_NORMAL, queue.getRunnableAtReason());
+    }
+
+    @Test
+    public void testRunnableAt_coreUid() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                "com.android.bluetooth", Process.BLUETOOTH_UID);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver()));
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertThat(queue.getRunnableAt()).isEqualTo(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_CORE_UID, queue.getRunnableAtReason());
+    }
+
     /**
      * Verify that a cached process that would normally be delayed becomes
      * immediately runnable when the given broadcast is enqueued.
@@ -472,17 +627,17 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     private void doRunnableAt_Cached(BroadcastRecord testRecord, int testRunnableAtReason) {
         final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setProcessCached(true);
+        queue.setProcessAndUidState(null, false, true);
 
         final BroadcastRecord lazyRecord = makeBroadcastRecord(
                 new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED),
                 List.of(makeMockRegisteredReceiver()));
 
-        queue.enqueueOrReplaceBroadcast(lazyRecord, 0, false);
+        enqueueOrReplaceBroadcast(queue, lazyRecord, 0);
         assertThat(queue.getRunnableAt()).isGreaterThan(lazyRecord.enqueueTime);
         assertThat(queue.getRunnableAtReason()).isNotEqualTo(testRunnableAtReason);
 
-        queue.enqueueOrReplaceBroadcast(testRecord, 0, false);
+        enqueueOrReplaceBroadcast(queue, testRecord, 0);
         assertThat(queue.getRunnableAt()).isAtMost(testRecord.enqueueTime);
         assertThat(queue.getRunnableAtReason()).isEqualTo(testRunnableAtReason);
     }
@@ -524,11 +679,13 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     }
 
     @Test
-    public void testRunnableAt_Cached_Prioritized() {
+    public void testRunnableAt_Cached_Prioritized_NonDeferrable() {
         final List receivers = List.of(
                 withPriority(makeManifestReceiver(PACKAGE_RED, PACKAGE_RED), 10),
                 withPriority(makeManifestReceiver(PACKAGE_GREEN, PACKAGE_GREEN), -10));
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+        final BroadcastOptions options = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
                 receivers, null, false), REASON_CONTAINS_PRIORITIZED);
     }
 
@@ -542,31 +699,31 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
-        queue.enqueueOrReplaceBroadcast(
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, false);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0, false);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, false);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, false);
-        queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0, false);
-        queue.enqueueOrReplaceBroadcast(
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0);
+        enqueueOrReplaceBroadcast(queue,
                 makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, false);
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
 
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_LOCKED_BOOT_COMPLETED, queue.getActive().intent.getAction());
 
         // To maximize test coverage, dump current state; we're not worried
         // about the actual output, just that we don't crash
-        queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED);
+        queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED, "Test-driven");
         queue.dumpLocked(SystemClock.uptimeMillis(),
-                new IndentingPrintWriter(new PrintWriter(new ByteArrayOutputStream())));
+                new IndentingPrintWriter(new PrintWriter(Writer.nullWriter())));
 
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
@@ -717,7 +874,7 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
 
         BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setPrioritizeEarliest(true);
+        queue.addPrioritizeEarliestRequest();
         long timeCounter = 100;
 
         enqueueOrReplaceBroadcast(queue,
@@ -762,40 +919,28 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         queue.makeActiveNextPending();
         assertEquals(AppWidgetManager.ACTION_APPWIDGET_UPDATE,
                 queue.getActive().intent.getAction());
-    }
 
-    /**
-     * Verify that sending a broadcast that removes any matching pending
-     * broadcasts is applied as expected.
-     */
-    @Test
-    public void testRemoveMatchingFilter() {
-        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
-        final BroadcastOptions optionsOn = BroadcastOptions.makeBasic();
-        optionsOn.setRemoveMatchingFilter(new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
-        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
-        final BroadcastOptions optionsOff = BroadcastOptions.makeBasic();
-        optionsOff.setRemoveMatchingFilter(new IntentFilter(Intent.ACTION_SCREEN_ON));
+        queue.removePrioritizeEarliestRequest();
 
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)),
+                0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
 
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
-
-        // While we're here, give our health check some test coverage
-        mImpl.checkHealthLocked();
-
-        // Marching through the queue we should only have one SCREEN_OFF
-        // broadcast, since that's the last state we dispatched
-        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
-                getUidForPackage(PACKAGE_GREEN));
+        // Once the request to prioritize earliest is removed, we should expect broadcasts
+        // to be dispatched in the order of foreground, normal and then offload.
         queue.makeActiveNextPending();
-        assertEquals(Intent.ACTION_SCREEN_OFF, queue.getActive().intent.getAction());
-        assertTrue(queue.isEmpty());
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_BOOT_COMPLETED, queue.getActive().intent.getAction());
     }
 
     /**
@@ -824,9 +969,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
         optionsAlarmVolumeChanged.setDeliveryGroupMatchingKey("audio",
                 String.valueOf(AudioManager.STREAM_ALARM));
-
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
 
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(musicVolumeChanged,
@@ -864,6 +1006,177 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 List.of(musicVolumeChanged, alarmVolumeChanged, timeTick));
     }
 
+    @Test
+    public void testDeliveryGroupPolicy_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+        final Object blueReceiver = makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        verifyPendingRecords(greenQueue, List.of(screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOn));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_ordered_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+        final Object blueReceiver = makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), true));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), true));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), true));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), true));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_resultTo_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+        final Object blueReceiver = makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE);
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), resultTo, false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), resultTo, false));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), resultTo, false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), resultTo, false));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
+
+        final BroadcastRecord screenOffRecord = makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), resultTo, false);
+        screenOffRecord.setDeliveryState(2, BroadcastRecord.DELIVERY_DEFERRED,
+                "testDeliveryGroupPolicy_resultTo_diffReceivers");
+        mImpl.enqueueBroadcastLocked(screenOffRecord);
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), resultTo, false));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOn));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_prioritized_diffReceivers() {
+        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
+        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
+        final BroadcastOptions screenOnOffOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey("screenOnOff", Intent.ACTION_SCREEN_ON);
+
+        final Object greenReceiver = withPriority(
+                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10);
+        final Object redReceiver = withPriority(
+                makeManifestReceiver(PACKAGE_RED, CLASS_RED), 5);
+        final Object blueReceiver = withPriority(
+                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE), 0);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        final BroadcastProcessQueue blueQueue = mImpl.getProcessQueue(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyPendingRecords(greenQueue, List.of(screenOff));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff));
+
+        assertTrue(greenQueue.isEmpty());
+        assertTrue(redQueue.isEmpty());
+        assertTrue(blueQueue.isEmpty());
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, screenOnOffOptions,
+                List.of(greenReceiver, redReceiver, blueReceiver), false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, screenOnOffOptions,
+                List.of(greenReceiver, blueReceiver), false));
+        verifyPendingRecords(greenQueue, List.of(screenOff, screenOn));
+        verifyPendingRecords(redQueue, List.of(screenOff));
+        verifyPendingRecords(blueQueue, List.of(screenOff, screenOn));
+    }
+
     /**
      * Verify that sending a broadcast with DELIVERY_GROUP_POLICY_MERGED works as expected.
      */
@@ -893,9 +1206,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         optionsPackageChangedForUid.setDeliveryGroupMatchingKey("package",
                 String.valueOf(TEST_UID2));
         optionsPackageChangedForUid.setDeliveryGroupExtrasMerger(extrasMerger);
-
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
 
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(packageChangedForUid,
                 optionsPackageChangedForUid));
@@ -944,9 +1254,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
         optionsAlarmVolumeChanged.setDeliveryGroupMatchingFilter(filterAlarmVolumeChanged);
 
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
-
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(musicVolumeChanged,
                 optionsMusicVolumeChanged));
@@ -993,9 +1300,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast3 = createDropboxBroadcast(
                 "TAG_A", now + 2000, 7);
 
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
-
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast1.first,
                 dropboxEntryBroadcast1.second));
         mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast2.first,
@@ -1011,6 +1315,69 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 "TAG_A", now + 2000, 10);
         verifyPendingRecords(queue, List.of(
                 dropboxEntryBroadcast2.first, expectedMergedBroadcast.first));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_merged_multipleReceivers() {
+        final long now = SystemClock.elapsedRealtime();
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast1 = createDropboxBroadcast(
+                "TAG_A", now, 2);
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast2 = createDropboxBroadcast(
+                "TAG_A", now + 1000, 4);
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast1.first,
+                dropboxEntryBroadcast1.second,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_RED, CLASS_RED)),
+                false));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast2.first,
+                dropboxEntryBroadcast2.second,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_RED, CLASS_RED)),
+                false));
+
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+
+        verifyPendingRecords(greenQueue,
+                List.of(dropboxEntryBroadcast1.first, dropboxEntryBroadcast2.first));
+        verifyPendingRecords(redQueue,
+                List.of(dropboxEntryBroadcast1.first, dropboxEntryBroadcast2.first));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_sameAction_differentMatchingCriteria() {
+        final Intent closeSystemDialogs1 = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        final BroadcastOptions optionsCloseSystemDialog1 = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+
+        final Intent closeSystemDialogs2 = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                .putExtra("reason", "testing");
+        final BroadcastOptions optionsCloseSystemDialog2 = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS, "testing");
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs1, optionsCloseSystemDialog1));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs2, optionsCloseSystemDialog2));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs1, optionsCloseSystemDialog1));
+        // Verify that only the older broadcast with no extras was removed.
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        verifyPendingRecords(queue, List.of(closeSystemDialogs2, closeSystemDialogs1));
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs2, optionsCloseSystemDialog2));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs1, optionsCloseSystemDialog1));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs2, optionsCloseSystemDialog2));
+        // Verify that only the older broadcast with no extras was removed.
+        verifyPendingRecords(queue, List.of(closeSystemDialogs1, closeSystemDialogs2));
     }
 
     private Pair<Intent, BroadcastOptions> createDropboxBroadcast(String tag, long timestampMs,
@@ -1040,9 +1407,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     public void testVerifyEnqueuedTime_withReplacePending() {
         final Intent userPresent = new Intent(Intent.ACTION_USER_PRESENT);
         userPresent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
 
         final BroadcastRecord userPresentRecord1 = makeBroadcastRecord(userPresent);
         final BroadcastRecord userPresentRecord2 = makeBroadcastRecord(userPresent);
@@ -1082,8 +1446,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW)
         ));
 
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
         mImpl.enqueueBroadcastLocked(record1);
         mImpl.enqueueBroadcastLocked(record2);
 
@@ -1105,12 +1467,9 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
         final BroadcastOptions optionsTimeTick = BroadcastOptions.makeBasic();
         optionsTimeTick.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
 
-        // Halt all processing so that we get a consistent view
-        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
-            mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
-            mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
-        }
-        mImpl.waitForIdle(null);
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        waitForIdle();
 
         // Verify that there is only one delivery event reported since one of the broadcasts
         // should have been skipped.
@@ -1118,7 +1477,80 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
                 eq(getUidForPackage(PACKAGE_GREEN)), anyInt(), eq(Intent.ACTION_TIME_TICK),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
-                anyLong(), anyLong(), anyLong(), anyInt()), times(1));
+                anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()),
+                times(1));
+    }
+
+    @Test
+    public void testGetPreferredSchedulingGroup() throws Exception {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        enqueueOrReplaceBroadcast(queue, makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver())), 0);
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+
+        // Make the foreground broadcast as active.
+        queue.makeActiveNextPending();
+        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+
+        queue.makeActiveIdle();
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueOrReplaceBroadcast(queue, makeBroadcastRecord(airplane,
+                List.of(makeMockRegisteredReceiver())), 0);
+
+        // Make the background broadcast as active.
+        queue.makeActiveNextPending();
+        assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
+
+        enqueueOrReplaceBroadcast(queue, makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver())), 0);
+        // Even though the active broadcast is not a foreground one, scheduling group will be
+        // DEFAULT since there is a foreground broadcast waiting to be delivered.
+        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+    }
+
+    @Test
+    public void testSkipPolicy_atEnqueueTime() throws Exception {
+        final Intent userPresent = new Intent(Intent.ACTION_USER_PRESENT);
+        final Object greenReceiver = makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN);
+        final Object redReceiver = makeManifestReceiver(PACKAGE_RED, CLASS_RED);
+
+        final BroadcastRecord userPresentRecord = makeBroadcastRecord(userPresent,
+                List.of(greenReceiver, redReceiver));
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick,
+                List.of(greenReceiver, redReceiver));
+
+        doAnswer(invocation -> {
+            final BroadcastRecord r = invocation.getArgument(0);
+            final Object o = invocation.getArgument(1);
+            if (userPresent.getAction().equals(r.intent.getAction())
+                    && isReceiverEquals(o, greenReceiver)) {
+                return "receiver skipped by test";
+            }
+            return null;
+        }).when(mSkipPolicy).shouldSkipMessage(any(BroadcastRecord.class), any());
+
+        mImpl.enqueueBroadcastLocked(userPresentRecord);
+        mImpl.enqueueBroadcastLocked(timeTickRecord);
+
+        final BroadcastProcessQueue greenQueue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        // There should be only one broadcast for green process as the other would have
+        // been skipped.
+        verifyPendingRecords(greenQueue, List.of(timeTick));
+        final BroadcastProcessQueue redQueue = mImpl.getProcessQueue(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED));
+        verifyPendingRecords(redQueue, List.of(userPresent, timeTick));
     }
 
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {
@@ -1133,6 +1565,11 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
             List<Intent> intents) {
         for (int i = 0; i < intents.size(); i++) {
             queue.makeActiveNextPending();
+
+            // While we're here, give our health check some test coverage
+            queue.assertHealthLocked();
+            queue.dumpLocked(0L, new IndentingPrintWriter(Writer.nullWriter()));
+
             final Intent actualIntent = queue.getActive().intent;
             final Intent expectedIntent = intents.get(i);
             final String errMsg = "actual=" + actualIntent + ", expected=" + expectedIntent

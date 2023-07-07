@@ -16,19 +16,16 @@
 
 package com.android.systemui.user;
 
-import android.app.Activity;
 import android.os.UserHandle;
 
+import com.android.settingslib.users.CreateUserDialogController;
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.systemui.user.data.repository.UserRepositoryModule;
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule;
 import com.android.systemui.user.ui.dialog.UserDialogModule;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 /**
  * Dagger module for User related classes.
@@ -49,11 +46,11 @@ public abstract class UserModule {
         return new EditUserInfoController(FILE_PROVIDER_AUTHORITY);
     }
 
-    /** Provides UserSwitcherActivity */
-    @Binds
-    @IntoMap
-    @ClassKey(UserSwitcherActivity.class)
-    public abstract Activity provideUserSwitcherActivity(UserSwitcherActivity activity);
+    /** Provides {@link CreateUserDialogController} */
+    @Provides
+    public static CreateUserDialogController provideCreateUserDialogController() {
+        return new CreateUserDialogController(FILE_PROVIDER_AUTHORITY);
+    }
 
     /**
      * Provides the {@link UserHandle} for the user associated with this System UI process.

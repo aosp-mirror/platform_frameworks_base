@@ -675,6 +675,8 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param requestId The ID of the request when
      *                  {@link TvInteractiveAppService.Session#requestStartRecording(String, Uri)}
      *                  is called. {@code null} if the recording is not triggered by a request.
+     *                  This ID should be created by the {@link TvInteractiveAppService} and
+     *                  can be any string.
      * @see TvInteractiveAppView#notifyRecordingStopped(String)
      */
     public void notifyRecordingStarted(@NonNull String recordingId, @Nullable String requestId) {
@@ -682,7 +684,7 @@ public class TvInteractiveAppView extends ViewGroup {
             Log.d(TAG, "notifyRecordingStarted");
         }
         if (mSession != null) {
-            mSession.notifyRecordingStarted(recordingId, recordingId);
+            mSession.notifyRecordingStarted(recordingId, requestId);
         }
     }
 
@@ -922,6 +924,8 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param requestId The ID of the request when
      *                  {@link TvInteractiveAppService.Session#requestScheduleRecording} is called.
      *                  {@code null} if the recording is not triggered by a request.
+     *                  This ID should be created by the {@link TvInteractiveAppService} and
+     *                  can be any string.
      */
     public void notifyRecordingScheduled(
             @NonNull String recordingId, @Nullable String requestId) {
@@ -940,9 +944,15 @@ public class TvInteractiveAppView extends ViewGroup {
      *
      * @param type The type of message received, such as
      * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
-     * @param data The raw data of the message
+     * @param data The raw data of the message. The bundle keys are:
+     *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+     *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+     *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+     *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+     *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+     *             how to parse this data.
      */
-    public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+    public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType int type,
             @NonNull Bundle data) {
         if (DEBUG) {
             Log.d(TAG, "notifyTvMessage type=" + type
@@ -1214,14 +1224,17 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#requestStartRecording(Uri)}
-         * is called.
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestStartRecording(String, Uri)} is called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
-         *                  {@link #notifyRecordingStarted(String, String)}
-         *                  for this request should be the same as the ID received here.
+         *                  {@link #notifyRecordingStarted(String, String)}  for this request is the
+         *                  same as the ID sent here. This should be defined by the
+         *                  TIAS and can be any string. Should this API be called with the
+         *                  same requestId twice, both requests should be handled regardless
+         *                  by the TV application.
          * @param programUri The URI of the program to record
          *
          */
@@ -1252,8 +1265,11 @@ public class TvInteractiveAppView extends ViewGroup {
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
-         *                  {@link #notifyRecordingScheduled(String, String)} for this request
-         *                  should be the same as the ID received here.
+         *                  {@link #notifyRecordingScheduled(String, String)} for this request is
+         *                  the same as the ID sent here. This should be defined by the
+         *                  TIAS and can be any string. Should this API be called with the
+         *                  same requestId twice, both requests should be handled regardless
+         *                  by the TV application.
          * @param inputId The ID of the TV input for the given channel.
          * @param channelUri The URI of a channel to be recorded.
          * @param programUri The URI of the TV program to be recorded.
@@ -1276,8 +1292,11 @@ public class TvInteractiveAppView extends ViewGroup {
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
-         *                  {@link #notifyRecordingScheduled(String, String)} for this request
-         *                  should be the same as the ID received here.
+         *                  {@link #notifyRecordingScheduled(String, String)} for this request is
+         *                  the same as the ID sent here. This should be defined by the
+         *                  TIAS and can be any string. Should this API be called with the
+         *                  same requestId twice, both requests should be handled regardless
+         *                  by the TV application.
          * @param inputId The ID of the TV input for the given channel.
          * @param channelUri The URI of a channel to be recorded.
          * @param startTime The start time of the recording in milliseconds since epoch.
@@ -1350,7 +1369,7 @@ public class TvInteractiveAppView extends ViewGroup {
          */
         public void onRequestTvRecordingInfoList(
                 @NonNull String iAppServiceId,
-                @NonNull @TvRecordingInfo.TvRecordingListType int type) {
+                @TvRecordingInfo.TvRecordingListType int type) {
         }
     }
 

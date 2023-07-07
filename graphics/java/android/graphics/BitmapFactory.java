@@ -482,7 +482,9 @@ public class BitmapFactory {
             if (opts == null || opts.inBitmap == null) {
                 return 0;
             }
-
+            // Clear out the gainmap since we don't attempt to reuse it and don't want to
+            // accidentally keep it on the re-used bitmap
+            opts.inBitmap.setGainmap(null);
             return opts.inBitmap.getNativeInstance();
         }
 

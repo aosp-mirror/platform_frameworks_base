@@ -531,8 +531,9 @@ public class IntentFilter implements Parcelable {
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
 
-    /** {@inheritDoc} */
-    public String toString() {
+    /** @hide */
+    public String toLongString() {
+        // Not implemented directly as toString() due to potential memory regression
         final StringBuilder sb = new StringBuilder();
         sb.append("IntentFilter {");
         sb.append(" pri=");
@@ -2206,7 +2207,6 @@ public class IntentFilter implements Parcelable {
      * @param extras The intent extras to match against.
      * @hide
      */
-    @SystemApi
     public final void setExtras(@NonNull PersistableBundle extras) {
         mExtras = extras;
     }
@@ -2218,9 +2218,7 @@ public class IntentFilter implements Parcelable {
      *         an empty {@link PersistableBundle} object if no extras were set.
      * @hide
      */
-    @SystemApi
-    @NonNull
-    public final PersistableBundle getExtras() {
+    public final @NonNull PersistableBundle getExtras() {
         return mExtras == null ? new PersistableBundle() : mExtras;
     }
 

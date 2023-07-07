@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,12 +38,13 @@ import org.junit.runners.Parameterized
  *     Click on the pip window
  *     Click on dismiss button and wait window disappear
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```
@@ -53,12 +54,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class ClosePipWithDismissButtonTest(flicker: FlickerTest) : ClosePipTransition(flicker) {
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
-            transitions { pipApp.closePipWindow(wmHelper) }
-        }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.closePipWindow(wmHelper) }
+    }
 
     /**
      * Checks that the focus changes between the pip menu window and the launcher when clicking the

@@ -37,6 +37,8 @@
     <dimen name="qs_media_rec_album_size">112dp</dimen>
     <dimen name="qs_media_rec_album_side_margin">16dp</dimen>
 
+    <dimen name="controls_panel_corner_radius">40dp</dimen>
+
     <dimen name="lockscreen_shade_max_over_scroll_amount">42dp</dimen>
 
     <!-- Roughly the same distance as media on LS to media on QS. We will translate by this value

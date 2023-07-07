@@ -986,11 +986,14 @@ public class PackageInfoUtils {
     }
 
     /** @see ApplicationInfo#privateFlagsExt */
-    public static int appInfoPrivateFlagsExt(int pkgWithoutStateFlags,
+    private static int appInfoPrivateFlagsExt(int pkgWithoutStateFlags,
                                              @Nullable PackageStateInternal pkgSetting) {
         // @formatter:off
-        // TODO: Add state specific flags
-        return pkgWithoutStateFlags;
+        int flags = pkgWithoutStateFlags;
+        if (pkgSetting != null) {
+            flags |= flag(pkgSetting.getCpuAbiOverride() != null, ApplicationInfo.PRIVATE_FLAG_EXT_CPU_OVERRIDE);
+        }
+        return flags;
         // @formatter:on
     }
 

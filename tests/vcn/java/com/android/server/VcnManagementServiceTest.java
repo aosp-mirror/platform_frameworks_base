@@ -17,7 +17,9 @@
 package com.android.server;
 
 import static android.net.ConnectivityManager.NetworkCallback;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_ENTERPRISE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -67,7 +69,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.TelephonyNetworkSpecifier;
 import android.net.Uri;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -117,6 +118,7 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnManagementServiceTest {
+    private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
     private static final String TEST_PACKAGE_NAME =
             VcnManagementServiceTest.class.getPackage().getName();
     private static final String TEST_PACKAGE_NAME_2 = "TEST_PKG_2";
@@ -128,6 +130,15 @@ public class VcnManagementServiceTest {
     private static final VcnConfig TEST_VCN_CONFIG;
     private static final VcnConfig TEST_VCN_CONFIG_PKG_2;
     private static final int TEST_UID = Process.FIRST_APPLICATION_UID;
+    private static final String TEST_IFACE_NAME = "TEST_IFACE";
+    private static final String TEST_IFACE_NAME_2 = "TEST_IFACE2";
+    private static final LinkProperties TEST_LP_1 = new LinkProperties();
+    private static final LinkProperties TEST_LP_2 = new LinkProperties();
+
+    static {
+        TEST_LP_1.setInterfaceName(TEST_IFACE_NAME);
+        TEST_LP_2.setInterfaceName(TEST_IFACE_NAME_2);
+    }
 
     static {
         final Context mockConfigContext = mock(Context.class);
@@ -167,6 +178,7 @@ public class VcnManagementServiceTest {
                     0 /* carrierId */,
                     0 /* profileClass */);
 
+    private final Context mMockContextWithoutAttributionTag = mock(Context.class);
     private final Context mMockContext = mock(Context.class);
     private final VcnManagementService.Dependencies mMockDeps =
             mock(VcnManagementService.Dependencies.class);
@@ -192,6 +204,10 @@ public class VcnManagementServiceTest {
     private final IBinder mMockIBinder = mock(IBinder.class);
 
     public VcnManagementServiceTest() throws Exception {
+        doReturn(mMockContext)
+                .when(mMockContextWithoutAttributionTag)
+                .createAttributionContext(CONTEXT_ATTRIBUTION_TAG);
+
         setupSystemService(
                 mMockContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
         setupSystemService(
@@ -239,7 +255,7 @@ public class VcnManagementServiceTest {
         doReturn(bundle).when(mConfigReadWriteHelper).readFromDisk();
 
         setupMockedCarrierPrivilege(true);
-        mVcnMgmtSvc = new VcnManagementService(mMockContext, mMockDeps);
+        mVcnMgmtSvc = new VcnManagementService(mMockContextWithoutAttributionTag, mMockDeps);
         setupActiveSubscription(TEST_UUID_1);
 
         doReturn(mMockIBinder).when(mMockPolicyListener).asBinder();
@@ -1034,8 +1050,7 @@ public class VcnManagementServiceTest {
         setupSubscriptionAndStartVcn(subId, subGrp, isVcnActive);
 
         return mVcnMgmtSvc.getUnderlyingNetworkPolicy(
-                getNetworkCapabilitiesBuilderForTransport(subId, transport).build(),
-                new LinkProperties());
+                getNetworkCapabilitiesBuilderForTransport(subId, transport).build(), TEST_LP_1);
     }
 
     private void checkGetRestrictedTransportsFromCarrierConfig(
@@ -1260,7 +1275,7 @@ public class VcnManagementServiceTest {
                 false /* expectRestricted */);
     }
 
-    private void setupTrackedCarrierWifiNetwork(NetworkCapabilities caps) {
+    private void setupTrackedNetwork(NetworkCapabilities caps, LinkProperties lp) {
         mVcnMgmtSvc.systemReady();
 
         final ArgumentCaptor<NetworkCallback> captor =
@@ -1269,7 +1284,10 @@ public class VcnManagementServiceTest {
                 .registerNetworkCallback(
                         eq(new NetworkRequest.Builder().clearCapabilities().build()),
                         captor.capture());
-        captor.getValue().onCapabilitiesChanged(mock(Network.class, CALLS_REAL_METHODS), caps);
+
+        Network mockNetwork = mock(Network.class, CALLS_REAL_METHODS);
+        captor.getValue().onCapabilitiesChanged(mockNetwork, caps);
+        captor.getValue().onLinkPropertiesChanged(mockNetwork, lp);
     }
 
     @Test
@@ -1279,7 +1297,7 @@ public class VcnManagementServiceTest {
                 getNetworkCapabilitiesBuilderForTransport(TEST_SUBSCRIPTION_ID, TRANSPORT_WIFI)
                         .removeCapability(NET_CAPABILITY_NOT_RESTRICTED)
                         .build();
-        setupTrackedCarrierWifiNetwork(existingNetworkCaps);
+        setupTrackedNetwork(existingNetworkCaps, TEST_LP_1);
 
         // Trigger test without VCN instance alive; expect restart due to change of NOT_RESTRICTED
         // immutable capability
@@ -1288,7 +1306,7 @@ public class VcnManagementServiceTest {
                         getNetworkCapabilitiesBuilderForTransport(
                                         TEST_SUBSCRIPTION_ID, TRANSPORT_WIFI)
                                 .build(),
-                        new LinkProperties());
+                        TEST_LP_1);
         assertTrue(policy.isTeardownRequested());
     }
 
@@ -1298,7 +1316,7 @@ public class VcnManagementServiceTest {
         final NetworkCapabilities existingNetworkCaps =
                 getNetworkCapabilitiesBuilderForTransport(TEST_SUBSCRIPTION_ID, TRANSPORT_WIFI)
                         .build();
-        setupTrackedCarrierWifiNetwork(existingNetworkCaps);
+        setupTrackedNetwork(existingNetworkCaps, TEST_LP_1);
 
         final VcnUnderlyingNetworkPolicy policy =
                 startVcnAndGetPolicyForTransport(
@@ -1315,7 +1333,7 @@ public class VcnManagementServiceTest {
                         .addCapability(NET_CAPABILITY_NOT_RESTRICTED)
                         .removeCapability(NET_CAPABILITY_IMS)
                         .build();
-        setupTrackedCarrierWifiNetwork(existingNetworkCaps);
+        setupTrackedNetwork(existingNetworkCaps, TEST_LP_1);
 
         final VcnUnderlyingNetworkPolicy policy =
                 mVcnMgmtSvc.getUnderlyingNetworkPolicy(
@@ -1336,7 +1354,7 @@ public class VcnManagementServiceTest {
                 new NetworkCapabilities.Builder()
                         .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                         .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
-                        .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID_2))
+                        .setSubscriptionIds(Collections.singleton(TEST_SUBSCRIPTION_ID_2))
                         .build();
 
         VcnUnderlyingNetworkPolicy policy =
@@ -1344,6 +1362,38 @@ public class VcnManagementServiceTest {
 
         assertFalse(policy.isTeardownRequested());
         assertEquals(nc, policy.getMergedNetworkCapabilities());
+    }
+
+    /**
+     * Checks that networks with similar capabilities do not clobber each other.
+     *
+     * <p>In previous iterations, the VcnMgmtSvc used capability-matching to check if a network
+     * undergoing policy checks were the same as an existing networks. However, this meant that if
+     * there were newly added capabilities that the VCN did not check, two networks differing only
+     * by that capability would restart each other constantly.
+     */
+    @Test
+    public void testGetUnderlyingNetworkPolicySimilarNetworks() throws Exception {
+        NetworkCapabilities nc1 =
+                new NetworkCapabilities.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
+                        .addCapability(NET_CAPABILITY_INTERNET)
+                        .setSubscriptionIds(Collections.singleton(TEST_SUBSCRIPTION_ID_2))
+                        .build();
+
+        NetworkCapabilities nc2 =
+                new NetworkCapabilities.Builder(nc1)
+                        .addCapability(NET_CAPABILITY_ENTERPRISE)
+                        .removeCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                        .build();
+
+        setupTrackedNetwork(nc1, TEST_LP_1);
+
+        VcnUnderlyingNetworkPolicy policy = mVcnMgmtSvc.getUnderlyingNetworkPolicy(nc2, TEST_LP_2);
+
+        assertFalse(policy.isTeardownRequested());
+        assertEquals(nc2, policy.getMergedNetworkCapabilities());
     }
 
     @Test(expected = SecurityException.class)

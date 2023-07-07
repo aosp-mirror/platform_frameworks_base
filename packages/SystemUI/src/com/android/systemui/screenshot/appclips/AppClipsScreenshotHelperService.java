@@ -20,11 +20,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.window.ScreenCapture.ScreenshotHardwareBuffer;
-import android.window.ScreenCapture.ScreenshotSync;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.screenshot.AppClipsActivity;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
@@ -55,9 +54,9 @@ public class AppClipsScreenshotHelperService extends Service {
                     return null;
                 }
 
-                ScreenshotSync screenshotSync =
+                SynchronousScreenCaptureListener screenshotSync =
                         mOptionalBubbles.get().getScreenshotExcludingBubble(displayId);
-                ScreenshotHardwareBuffer screenshotHardwareBuffer = screenshotSync.get();
+                ScreenshotHardwareBuffer screenshotHardwareBuffer = screenshotSync.getBuffer();
                 if (screenshotHardwareBuffer == null) {
                     return null;
                 }

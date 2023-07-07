@@ -16,8 +16,9 @@
 
 package com.android.internal.app;
 
-import android.media.permission.Identity;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.media.permission.Identity;
+import android.media.soundtrigger_middleware.ISoundTriggerInjection;
 import com.android.internal.app.ISoundTriggerSession;
 
 /**
@@ -73,5 +74,15 @@ interface ISoundTriggerService {
      * Get available underlying SoundTrigger modules to attach to.
      */
     List<SoundTrigger.ModuleProperties> listModuleProperties(in Identity originatorIdentity);
+
+    /**
+     * Attach an HAL injection interface.
+     */
+     void attachInjection(ISoundTriggerInjection injection);
+
+    /**
+     * Test API to override the phone call state.
+     */
+     void setInPhoneCallState(boolean isInPhoneCall);
 
 }

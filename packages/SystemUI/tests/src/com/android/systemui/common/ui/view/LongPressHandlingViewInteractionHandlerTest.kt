@@ -72,7 +72,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `long-press`() = runTest {
+    fun longPress() = runTest {
         val downX = 123
         val downY = 456
         dispatchTouchEvents(
@@ -91,7 +91,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `long-press but feature not enabled`() = runTest {
+    fun longPressButFeatureNotEnabled() = runTest {
         underTest.isLongPressHandlingEnabled = false
         dispatchTouchEvents(
             Down(
@@ -106,7 +106,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `long-press but view not attached`() = runTest {
+    fun longPressButViewNotAttached() = runTest {
         isAttachedToWindow = false
         dispatchTouchEvents(
             Down(
@@ -121,7 +121,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `dragged too far to be considered a long-press`() = runTest {
+    fun draggedTooFarToBeConsideredAlongPress() = runTest {
         dispatchTouchEvents(
             Down(
                 x = 123,
@@ -138,7 +138,7 @@ class LongPressHandlingViewInteractionHandlerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `held down too briefly to be considered a long-press`() = runTest {
+    fun heldDownTooBrieflyToBeConsideredAlongPress() = runTest {
         dispatchTouchEvents(
             Down(
                 x = 123,

@@ -108,6 +108,10 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         }
         if (!createdWindowDecor) {
             mSyncQueue.runInSync(t -> {
+                if (!leash.isValid()) {
+                    // Task vanished before sync completion
+                    return;
+                }
                 // Reset several properties back to fullscreen (PiP, for example, leaves all these
                 // properties in a bad state).
                 t.setWindowCrop(leash, null);
@@ -125,6 +129,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         final State state = mTasks.get(taskInfo.taskId);
         final Point oldPositionInParent = state.mTaskInfo.positionInParent;
+        boolean oldVisible = state.mTaskInfo.isVisible;
 
         if (mWindowDecorViewModelOptional.isPresent()) {
             mWindowDecorViewModelOptional.get().onTaskInfoChanged(taskInfo);
@@ -134,8 +139,18 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         updateRecentsForVisibleFullscreenTask(taskInfo);
 
         final Point positionInParent = state.mTaskInfo.positionInParent;
-        if (!oldPositionInParent.equals(state.mTaskInfo.positionInParent)) {
+        boolean positionInParentChanged = !oldPositionInParent.equals(positionInParent);
+        boolean becameVisible = !oldVisible && state.mTaskInfo.isVisible;
+
+        if (becameVisible || positionInParentChanged) {
             mSyncQueue.runInSync(t -> {
+                if (!state.mLeash.isValid()) {
+                    // Task vanished before sync completion
+                    return;
+                }
+                if (becameVisible) {
+                    t.show(state.mLeash);
+                }
                 t.setPosition(state.mLeash, positionInParent.x, positionInParent.y);
             });
         }

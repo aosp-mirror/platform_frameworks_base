@@ -33,6 +33,7 @@ import static android.view.Display.TYPE_INTERNAL;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_CAMERA_COMPAT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -41,6 +42,7 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
@@ -156,6 +158,11 @@ final class DisplayRotationCompatPolicy {
     @ScreenOrientation
     int getOrientation() {
         mLastReportedOrientation = getOrientationInternal();
+        if (mLastReportedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            rememberOverriddenOrientationIfNeeded();
+        } else {
+            restoreOverriddenOrientationIfNeeded();
+        }
         return mLastReportedOrientation;
     }
 
@@ -217,7 +224,7 @@ final class DisplayRotationCompatPolicy {
         try {
             activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(true);
             ProtoLog.v(WM_DEBUG_STATES,
-                    "Refershing activity for camera compatibility treatment, "
+                    "Refreshing activity for camera compatibility treatment, "
                             + "activityRecord=%s", activity);
             final ClientTransaction transaction = ClientTransaction.obtain(
                     activity.app.getThread(), activity.token);
@@ -239,7 +246,7 @@ final class DisplayRotationCompatPolicy {
     }
 
     /**
-     * Notifies that animation in {@link ScreenAnimationRotation} has finished.
+     * Notifies that animation in {@link ScreenRotationAnimation} has finished.
      *
      * <p>This class uses this signal as a trigger for notifying the user about forced rotation
      * reason with the {@link Toast}.
@@ -277,11 +284,42 @@ final class DisplayRotationCompatPolicy {
                 + " }";
     }
 
-    // Refreshing only when configuration changes after rotation.
+    private void restoreOverriddenOrientationIfNeeded() {
+        if (!isOrientationOverridden()) {
+            return;
+        }
+        if (mDisplayContent.getRotationReversionController().revertOverride(
+                REVERSION_TYPE_CAMERA_COMPAT)) {
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "Reverting orientation after camera compat force rotation");
+            // Reset last orientation source since we have reverted the orientation.
+            mDisplayContent.mLastOrientationSource = null;
+        }
+    }
+
+    private boolean isOrientationOverridden() {
+        return mDisplayContent.getRotationReversionController().isOverrideActive(
+                REVERSION_TYPE_CAMERA_COMPAT);
+    }
+
+    private void rememberOverriddenOrientationIfNeeded() {
+        if (!isOrientationOverridden()) {
+            mDisplayContent.getRotationReversionController().beforeOverrideApplied(
+                    REVERSION_TYPE_CAMERA_COMPAT);
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "Saving original orientation before camera compat, last orientation is %d",
+                    mDisplayContent.getLastOrientation());
+        }
+    }
+
+    // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
+    // treatment is enabled
     private boolean shouldRefreshActivity(ActivityRecord activity, Configuration newConfig,
             Configuration lastReportedConfig) {
-        return newConfig.windowConfiguration.getDisplayRotation()
-                        != lastReportedConfig.windowConfiguration.getDisplayRotation()
+        final boolean displayRotationChanged = (newConfig.windowConfiguration.getDisplayRotation()
+                != lastReportedConfig.windowConfiguration.getDisplayRotation());
+        return (displayRotationChanged
+                || activity.mLetterboxUiController.isCameraCompatSplitScreenAspectRatioAllowed())
                 && isTreatmentEnabledForActivity(activity)
                 && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat();
     }
@@ -359,12 +397,6 @@ final class DisplayRotationCompatPolicy {
                 CAMERA_OPENED_ROTATION_UPDATE_DELAY_MS);
     }
 
-    private void updateOrientationWithWmLock() {
-        synchronized (mWmService.mGlobalLock) {
-            mDisplayContent.updateOrientation();
-        }
-    }
-
     private void delayedUpdateOrientationWithWmLock(
             @NonNull String cameraId, @NonNull String packageName) {
         synchronized (this) {
@@ -375,25 +407,36 @@ final class DisplayRotationCompatPolicy {
             }
             mCameraIdPackageBiMap.put(packageName, cameraId);
         }
-        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                    /* considerKeyguardState= */ true);
-        if (topActivity == null || topActivity.getTask() == null) {
-            return;
-        }
-        // Checking whether an activity in fullscreen rather than the task as this camera compat
-        // treatment doesn't cover activity embedding.
-        if (topActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-            if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
-                topActivity.recomputeConfiguration();
+        synchronized (mWmService.mGlobalLock) {
+            ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                        /* considerKeyguardState= */ true);
+            if (topActivity == null || topActivity.getTask() == null) {
+                return;
             }
-            updateOrientationWithWmLock();
-            return;
-        }
-        // Checking that the whole app is in multi-window mode as we shouldn't show toast
-        // for the activity embedding case.
-        if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                && isTreatmentEnabledForActivity(topActivity, /* mustBeFullscreen */ false)) {
-            showToast(R.string.display_rotation_camera_compat_toast_in_split_screen);
+            // Checking whether an activity in fullscreen rather than the task as this camera
+            // compat treatment doesn't cover activity embedding.
+            if (topActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+                mDisplayContent.updateOrientation();
+                return;
+            }
+            // Checking that the whole app is in multi-window mode as we shouldn't show toast
+            // for the activity embedding case.
+            if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
+                    && isTreatmentEnabledForActivity(topActivity, /* mustBeFullscreen */ false)) {
+                final PackageManager packageManager = mWmService.mContext.getPackageManager();
+                try {
+                    showToast(
+                            R.string.display_rotation_camera_compat_toast_in_multi_window,
+                            (String) packageManager.getApplicationLabel(
+                                    packageManager.getApplicationInfo(packageName, /* flags */ 0)));
+                } catch (PackageManager.NameNotFoundException e) {
+                    ProtoLog.e(WM_DEBUG_ORIENTATION,
+                            "DisplayRotationCompatPolicy: Multi-window toast not shown as "
+                                    + "package '%s' cannot be found.",
+                            packageName);
+                }
+            }
         }
     }
 
@@ -401,6 +444,15 @@ final class DisplayRotationCompatPolicy {
     void showToast(@StringRes int stringRes) {
         UiThread.getHandler().post(
                 () -> Toast.makeText(mWmService.mContext, stringRes, Toast.LENGTH_LONG).show());
+    }
+
+    @VisibleForTesting
+    void showToast(@StringRes int stringRes, @NonNull String applicationLabel) {
+        UiThread.getHandler().post(
+                () -> Toast.makeText(
+                        mWmService.mContext,
+                        mWmService.mContext.getString(stringRes, applicationLabel),
+                        Toast.LENGTH_LONG).show());
     }
 
     private synchronized void notifyCameraClosed(@NonNull String cameraId) {
@@ -441,18 +493,18 @@ final class DisplayRotationCompatPolicy {
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d is notified that Camera %s is closed, updating rotation.",
                 mDisplayContent.mDisplayId, cameraId);
-        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                /* considerKeyguardState= */ true);
-        if (topActivity == null
-                // Checking whether an activity in fullscreen rather than the task as this camera
-                // compat treatment doesn't cover activity embedding.
-                || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
-            return;
+        synchronized (mWmService.mGlobalLock) {
+            ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                    /* considerKeyguardState= */ true);
+            if (topActivity == null
+                    // Checking whether an activity in fullscreen rather than the task as this
+                    // camera compat treatment doesn't cover activity embedding.
+                    || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+                return;
+            }
+            topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+            mDisplayContent.updateOrientation();
         }
-        if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
-            topActivity.recomputeConfiguration();
-        }
-        updateOrientationWithWmLock();
     }
 
     private boolean isActivityForCameraIdRefreshing(String cameraId) {

@@ -295,6 +295,7 @@ public class GnssManagerService {
         }
 
         ipw.println("Capabilities: " + mGnssNative.getCapabilities());
+        ipw.println("GNSS Hardware Model Name: " + getGnssHardwareModelName());
 
         if (mGnssStatusProvider.isSupported()) {
             ipw.println("Status Provider:");

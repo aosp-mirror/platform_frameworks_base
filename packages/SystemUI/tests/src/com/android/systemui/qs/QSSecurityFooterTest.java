@@ -587,14 +587,14 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(addLink(mContext.getString(R.string.monitoring_description_two_named_vpns,
                                  VPN_PACKAGE, VPN_PACKAGE_2)),
                 mFooterUtils.getVpnMessage(false, true, VPN_PACKAGE, VPN_PACKAGE_2));
-        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
-                                 VPN_PACKAGE)),
+        assertEquals(addLink(mContext.getString(
+                R.string.monitoring_description_managed_device_named_vpn, VPN_PACKAGE)),
                 mFooterUtils.getVpnMessage(true, false, VPN_PACKAGE, null));
         assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
                                  VPN_PACKAGE)),
                 mFooterUtils.getVpnMessage(false, false, VPN_PACKAGE, null));
-        assertEquals(addLink(mContext.getString(R.string.monitoring_description_named_vpn,
-                                 VPN_PACKAGE_2)),
+        assertEquals(addLink(mContext.getString(
+                R.string.monitoring_description_managed_device_named_vpn, VPN_PACKAGE_2)),
                 mFooterUtils.getVpnMessage(true, true, null, VPN_PACKAGE_2));
         assertEquals(addLink(mContext.getString(
                                  R.string.monitoring_description_managed_profile_named_vpn,

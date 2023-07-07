@@ -17,19 +17,16 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
+import android.tools.common.Rotation
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
-import org.junit.Assume.assumeFalse
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,28 +41,21 @@ import org.junit.runners.Parameterized
 open class MovePipOnImeVisibilityChangeTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val imeApp = ImeAppHelper(instrumentation)
 
-    @Before
-    open fun before() {
-        assumeFalse(isShellTransitionsEnabled)
-    }
-
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            setup {
-                imeApp.launchViaIntent(wmHelper)
-                setRotation(flicker.scenario.startRotation)
-            }
-            teardown { imeApp.exit(wmHelper) }
-            transitions {
-                // open the soft keyboard
-                imeApp.openIME(wmHelper)
-                createTag(TAG_IME_VISIBLE)
-
-                // then close it again
-                imeApp.closeIME(wmHelper)
-            }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        setup {
+            imeApp.launchViaIntent(wmHelper)
+            setRotation(flicker.scenario.startRotation)
         }
+        teardown { imeApp.exit(wmHelper) }
+        transitions {
+            // open the soft keyboard
+            imeApp.openIME(wmHelper)
+            createTag(TAG_IME_VISIBLE)
+
+            // then close it again
+            imeApp.closeIME(wmHelper)
+        }
+    }
 
     /** Ensure the pip window remains visible throughout any keyboard interactions */
     @Presubmit
@@ -91,7 +81,7 @@ open class MovePipOnImeVisibilityChangeTest(flicker: FlickerTest) : PipTransitio
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

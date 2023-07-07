@@ -88,6 +88,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private PipTransitionState mPipTransitionState;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipDisplayLayoutState mPipDisplayLayoutState;
 
     private ComponentName mComponent1;
     private ComponentName mComponent2;
@@ -97,15 +98,16 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
         mPipTransitionState = new PipTransitionState();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
                 mPipSizeSpecHandler);
         mMainExecutor = new TestShellExecutor();
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mMockSyncTransactionQueue,
-                mPipTransitionState, mPipBoundsState, mPipSizeSpecHandler,
+                mPipTransitionState, mPipBoundsState, mPipDisplayLayoutState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
                 mMockPipParamsChangedForwarder, mMockOptionalSplitScreen, mMockDisplayController,
@@ -259,9 +261,9 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         final DisplayInfo info = new DisplayInfo();
         DisplayLayout layout = new DisplayLayout(info,
                 mContext.getResources(), true, true);
-        mPipBoundsState.setDisplayLayout(layout);
-        mPipSizeSpecHandler.setDisplayLayout(layout);
-        mPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
+        mPipDisplayLayoutState.setDisplayLayout(layout);
+        doReturn(PipAnimationController.ANIM_TYPE_ALPHA).when(mMockPipAnimationController)
+                .takeOneShotEnterAnimationType();
         mPipTaskOrganizer.setSurfaceControlTransactionFactory(
                 MockSurfaceControlHelper::createMockSurfaceControlTransaction);
     }

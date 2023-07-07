@@ -16,7 +16,7 @@ class NormalizedTouchDataTest(val testCase: TestCase) : SysuiTestCase() {
     @Test
     fun isWithinSensor() {
         val touchData = TOUCH_DATA.copy(x = testCase.x.toFloat(), y = testCase.y.toFloat())
-        val actual = touchData.isWithinSensor(SENSOR)
+        val actual = touchData.isWithinBounds(SENSOR)
 
         assertThat(actual).isEqualTo(testCase.expected)
     }

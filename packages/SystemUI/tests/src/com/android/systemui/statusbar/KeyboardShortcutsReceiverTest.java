@@ -73,7 +73,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
                 .startMocking();
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
         mKeyboardShortcutsReceiver = spy(new KeyboardShortcutsReceiver(mFeatureFlags));
-        when(Utilities.isTablet(mContext)).thenReturn(true);
+        when(Utilities.isLargeScreen(mContext)).thenReturn(true);
 
         mKeyboardShortcutsReceiver.onReceive(mContext, mIntent);
 
@@ -90,7 +90,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
                 .startMocking();
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
         mKeyboardShortcutsReceiver = spy(new KeyboardShortcutsReceiver(mFeatureFlags));
-        when(Utilities.isTablet(mContext)).thenReturn(false);
+        when(Utilities.isLargeScreen(mContext)).thenReturn(false);
 
         mKeyboardShortcutsReceiver.onReceive(mContext, mIntent);
 
@@ -107,7 +107,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
                 .startMocking();
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, true);
         mKeyboardShortcutsReceiver = spy(new KeyboardShortcutsReceiver(mFeatureFlags));
-        when(Utilities.isTablet(mContext)).thenReturn(true);
+        when(Utilities.isLargeScreen(mContext)).thenReturn(true);
 
         mKeyboardShortcutsReceiver.onReceive(mContext, mIntent);
 
@@ -124,7 +124,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
                 .startMocking();
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, true);
         mKeyboardShortcutsReceiver = spy(new KeyboardShortcutsReceiver(mFeatureFlags));
-        when(Utilities.isTablet(mContext)).thenReturn(false);
+        when(Utilities.isLargeScreen(mContext)).thenReturn(false);
 
         mKeyboardShortcutsReceiver.onReceive(mContext, mIntent);
 

@@ -43,7 +43,7 @@ public final class CreateCredentialProviderData extends ProviderData implements 
             @NonNull String providerFlattenedComponentName, @NonNull List<Entry> saveEntries,
             @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
-        mSaveEntries = saveEntries;
+        mSaveEntries = new ArrayList<>(saveEntries);
         mRemoteEntry = remoteEntry;
     }
 

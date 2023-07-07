@@ -53,8 +53,6 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
     mLocked.resolvedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
 
     mLocked.resourcesLoaded = false;
-
-    mLocked.buttonState = 0;
 }
 
 MouseCursorController::~MouseCursorController() {
@@ -63,24 +61,23 @@ MouseCursorController::~MouseCursorController() {
     mLocked.pointerSprite.clear();
 }
 
-bool MouseCursorController::getBounds(float* outMinX, float* outMinY, float* outMaxX,
-                                      float* outMaxY) const {
+std::optional<FloatRect> MouseCursorController::getBounds() const {
     std::scoped_lock lock(mLock);
 
-    return getBoundsLocked(outMinX, outMinY, outMaxX, outMaxY);
+    return getBoundsLocked();
 }
 
-bool MouseCursorController::getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX,
-                                            float* outMaxY) const REQUIRES(mLock) {
+std::optional<FloatRect> MouseCursorController::getBoundsLocked() const REQUIRES(mLock) {
     if (!mLocked.viewport.isValid()) {
-        return false;
+        return {};
     }
 
-    *outMinX = mLocked.viewport.logicalLeft;
-    *outMinY = mLocked.viewport.logicalTop;
-    *outMaxX = mLocked.viewport.logicalRight - 1;
-    *outMaxY = mLocked.viewport.logicalBottom - 1;
-    return true;
+    return FloatRect{
+            static_cast<float>(mLocked.viewport.logicalLeft),
+            static_cast<float>(mLocked.viewport.logicalTop),
+            static_cast<float>(mLocked.viewport.logicalRight - 1),
+            static_cast<float>(mLocked.viewport.logicalBottom - 1),
+    };
 }
 
 void MouseCursorController::move(float deltaX, float deltaY) {
@@ -96,22 +93,6 @@ void MouseCursorController::move(float deltaX, float deltaY) {
     setPositionLocked(mLocked.pointerX + deltaX, mLocked.pointerY + deltaY);
 }
 
-void MouseCursorController::setButtonState(int32_t buttonState) {
-#if DEBUG_MOUSE_CURSOR_UPDATES
-    ALOGD("Set button state 0x%08x", buttonState);
-#endif
-    std::scoped_lock lock(mLock);
-
-    if (mLocked.buttonState != buttonState) {
-        mLocked.buttonState = buttonState;
-    }
-}
-
-int32_t MouseCursorController::getButtonState() const {
-    std::scoped_lock lock(mLock);
-    return mLocked.buttonState;
-}
-
 void MouseCursorController::setPosition(float x, float y) {
 #if DEBUG_MOUSE_CURSOR_UPDATES
     ALOGD("Set pointer position to x=%0.3f, y=%0.3f", x, y);
@@ -121,31 +102,19 @@ void MouseCursorController::setPosition(float x, float y) {
 }
 
 void MouseCursorController::setPositionLocked(float x, float y) REQUIRES(mLock) {
-    float minX, minY, maxX, maxY;
-    if (getBoundsLocked(&minX, &minY, &maxX, &maxY)) {
-        if (x <= minX) {
-            mLocked.pointerX = minX;
-        } else if (x >= maxX) {
-            mLocked.pointerX = maxX;
-        } else {
-            mLocked.pointerX = x;
-        }
-        if (y <= minY) {
-            mLocked.pointerY = minY;
-        } else if (y >= maxY) {
-            mLocked.pointerY = maxY;
-        } else {
-            mLocked.pointerY = y;
-        }
-        updatePointerLocked();
-    }
+    const auto bounds = getBoundsLocked();
+    if (!bounds) return;
+
+    mLocked.pointerX = std::max(bounds->left, std::min(bounds->right, x));
+    mLocked.pointerY = std::max(bounds->top, std::min(bounds->bottom, y));
+
+    updatePointerLocked();
 }
 
-void MouseCursorController::getPosition(float* outX, float* outY) const {
+FloatPoint MouseCursorController::getPosition() const {
     std::scoped_lock lock(mLock);
 
-    *outX = mLocked.pointerX;
-    *outY = mLocked.pointerY;
+    return {mLocked.pointerX, mLocked.pointerY};
 }
 
 int32_t MouseCursorController::getDisplayId() const {
@@ -235,10 +204,9 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
     // Reset cursor position to center if size or display changed.
     if (oldViewport.displayId != viewport.displayId || oldDisplayWidth != newDisplayWidth ||
         oldDisplayHeight != newDisplayHeight) {
-        float minX, minY, maxX, maxY;
-        if (getBoundsLocked(&minX, &minY, &maxX, &maxY)) {
-            mLocked.pointerX = (minX + maxX) * 0.5f;
-            mLocked.pointerY = (minY + maxY) * 0.5f;
+        if (const auto bounds = getBoundsLocked(); bounds) {
+            mLocked.pointerX = (bounds->left + bounds->right) * 0.5f;
+            mLocked.pointerY = (bounds->top + bounds->bottom) * 0.5f;
             // Reload icon resources for density may be changed.
             loadResourcesLocked(getAdditionalMouseResources);
         } else {

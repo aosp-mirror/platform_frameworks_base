@@ -41,7 +41,7 @@ public class UidObserver extends IUidObserver.Stub {
     }
 
     @Override
-    public void onUidProcAdjChanged(int uid) {
+    public void onUidProcAdjChanged(int uid, int adj) {
     }
 
     @Override

@@ -17,6 +17,7 @@
 
 package com.android.server.power;
 
+import android.app.ActivityManagerInternal;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
@@ -25,10 +26,12 @@ import android.app.admin.SecurityLog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.media.AudioAttributes;
+import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -51,7 +54,6 @@ import android.view.WindowManager;
 
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
-import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.File;
@@ -448,13 +450,6 @@ public final class ShutdownThread extends Thread {
                 new File(CHECK_POINTS_FILE_BASENAME));
         dumpCheckPointsThread.start();
 
-        BroadcastReceiver br = new BroadcastReceiver() {
-            @Override public void onReceive(Context context, Intent intent) {
-                // We don't allow apps to cancel this, so ignore the result.
-                actionDone();
-            }
-        };
-
         /*
          * Write a system property in case the system_server reboots before we
          * get to the actual hardware restart. If that happens, we'll retry at
@@ -490,8 +485,16 @@ public final class ShutdownThread extends Thread {
         mActionDone = false;
         Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND | Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendOrderedBroadcastAsUser(intent,
-                UserHandle.ALL, null, br, mHandler, 0, null, null);
+        final ActivityManagerInternal activityManagerInternal = LocalServices.getService(
+                ActivityManagerInternal.class);
+        activityManagerInternal.broadcastIntentWithCallback(intent,
+                new IIntentReceiver.Stub() {
+                    @Override
+                    public void performReceive(Intent intent, int resultCode, String data,
+                            Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                        mHandler.post(ShutdownThread.this::actionDone);
+                    }
+                }, null, UserHandle.USER_ALL, null, null, null);
 
         final long endTime = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
         synchronized (mActionDoneSync) {
@@ -700,17 +703,20 @@ public final class ShutdownThread extends Thread {
             // vibrate before shutting down
             Vibrator vibrator = new SystemVibrator(context);
             try {
-                vibrator.vibrate(SHUTDOWN_VIBRATE_MS, VIBRATION_ATTRIBUTES);
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(SHUTDOWN_VIBRATE_MS, VIBRATION_ATTRIBUTES);
+                    // vibrator is asynchronous so we need to wait to avoid shutting down too soon.
+                    try {
+                        Thread.sleep(SHUTDOWN_VIBRATE_MS);
+                    } catch (InterruptedException unused) {
+                        // this is not critical and does not require logging
+                    }
+                }
             } catch (Exception e) {
                 // Failure to vibrate shouldn't interrupt shutdown.  Just log it.
                 Log.w(TAG, "Failed to vibrate during shutdown.", e);
             }
 
-            // vibrator is asynchronous so we need to wait to avoid shutting down too soon.
-            try {
-                Thread.sleep(SHUTDOWN_VIBRATE_MS);
-            } catch (InterruptedException unused) {
-            }
         }
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
