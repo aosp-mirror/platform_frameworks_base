@@ -704,6 +704,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         if (mPipHandler != null) {
             mPipHandler.syncPipSurfaceState(info, startTransaction, finishTransaction);
         }
+        if (mSplitHandler != null && mSplitHandler.isSplitActive()) {
+            mSplitHandler.updateSurfaces(startTransaction);
+        }
         return mUnfoldHandler.startAnimation(
                 mixed.mTransition, info, startTransaction, finishTransaction, finishCB);
     }
