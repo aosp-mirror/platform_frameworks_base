@@ -78,7 +78,7 @@ class PackageMonitorCallbackHelper {
         extras.putInt(Intent.EXTRA_UID, uid);
         extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
         notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED, packageName, extras ,
-                userIds /* userIds */);
+                userIds /* userIds */, instantUserIds);
     }
 
     public void notifyResourcesChanged(boolean mediaStatus, boolean replacing,
@@ -91,11 +91,13 @@ class PackageMonitorCallbackHelper {
         }
         String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                 : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-        notifyPackageMonitor(action, null /* pkg */, extras, null /* userIds */);
+        notifyPackageMonitor(action, null /* pkg */, extras, null /* userIds */,
+                null /* instantUserIds */);
     }
 
     public void notifyPackageChanged(String packageName, boolean dontKillApp,
-            ArrayList<String> componentNames, int packageUid, String reason, int[] userIds) {
+            ArrayList<String> componentNames, int packageUid, String reason, int[] userIds,
+            int[] instantUserIds) {
         Bundle extras = new Bundle(4);
         extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentNames.get(0));
         String[] nameList = new String[componentNames.size()];
@@ -106,11 +108,12 @@ class PackageMonitorCallbackHelper {
         if (reason != null) {
             extras.putString(Intent.EXTRA_REASON, reason);
         }
-        notifyPackageMonitor(Intent.ACTION_PACKAGE_CHANGED, packageName, extras, userIds);
+        notifyPackageMonitor(Intent.ACTION_PACKAGE_CHANGED, packageName, extras, userIds,
+                instantUserIds);
     }
 
     public void notifyPackageMonitor(String action, String pkg, Bundle extras,
-            int[] userIds) {
+            int[] userIds, int[] instantUserIds) {
         if (!isAllowedCallbackAction(action)) {
             return;
         }
@@ -122,7 +125,12 @@ class PackageMonitorCallbackHelper {
             } else {
                 resolvedUserIds = userIds;
             }
-            doNotifyCallbacks(action, pkg, extras, resolvedUserIds);
+
+            if (ArrayUtils.isEmpty(instantUserIds)) {
+                doNotifyCallbacks(action, pkg, extras, resolvedUserIds);
+            } else {
+                doNotifyCallbacks(action, pkg, extras, instantUserIds);
+            }
         } catch (RemoteException e) {
             // do nothing
         }

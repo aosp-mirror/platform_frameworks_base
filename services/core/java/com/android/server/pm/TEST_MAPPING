@@ -88,6 +88,15 @@
           "include-filter": "android.uidmigration.cts"
         }
       ]
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "file_patterns": ["(/|^)PackageMonitorCallbackHelper\\.java"],
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.EphemeralTest#testGetSearchableInfo"
+        }
+      ]
     }
   ],
   "presubmit-large": [

@@ -2998,12 +2998,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // action. When the targetPkg is set, it sends the broadcast to specific app, e.g.
             // installer app or null for registered apps. The callback only need to send back to the
             // registered apps so we check the null condition here.
-            notifyPackageMonitor(action, pkg, extras, userIds);
+            notifyPackageMonitor(action, pkg, extras, userIds, instantUserIds);
         }
     }
 
-    void notifyPackageMonitor(String action, String pkg, Bundle extras, int[] userIds) {
-        mPackageMonitorCallbackHelper.notifyPackageMonitor(action, pkg, extras, userIds);
+    void notifyPackageMonitor(String action, String pkg, Bundle extras, int[] userIds,
+            int[] instantUserIds) {
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(action, pkg, extras, userIds,
+                instantUserIds);
     }
 
     void notifyResourcesChanged(boolean mediaStatus, boolean replacing,
@@ -4053,7 +4055,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
                 instantUserIds, broadcastAllowList));
         mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
-                packageUid, reason, userIds);
+                packageUid, reason, userIds, instantUserIds);
     }
 
     /**
