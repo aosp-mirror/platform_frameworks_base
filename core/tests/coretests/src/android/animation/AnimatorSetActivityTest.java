@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import android.util.Property;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
@@ -36,6 +37,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 public class AnimatorSetActivityTest {
@@ -611,6 +614,68 @@ public class AnimatorSetActivityTest {
             assertEquals(0, target2[0]);
             assertEquals(0, target3[0]);
         });
+    }
+
+    @Test
+    public void initAfterStartNotification() throws Throwable {
+        Property<int[], Integer> property = new Property<>(Integer.class, "firstValue") {
+            @Override
+            public Integer get(int[] target) {
+                throw new IllegalStateException("Shouldn't be called");
+            }
+
+            @Override
+            public void set(int[] target, Integer value) {
+                target[0] = value;
+            }
+        };
+        int[] target = new int[1];
+        ObjectAnimator animator1 = ObjectAnimator.ofInt(target, property, 0, 100);
+        ObjectAnimator animator2 = ObjectAnimator.ofInt(target, property, 0, 100);
+        ObjectAnimator animator3 = ObjectAnimator.ofInt(target, property, 0, 100);
+        animator1.setDuration(10);
+        animator2.setDuration(10);
+        animator3.setDuration(10);
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(animator1, animator2, animator3);
+        final int[] values = new int[4];
+        animator2.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                values[0] = target[0];
+                animator2.setIntValues(target[0], target[0] + 100);
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                values[1] = target[0];
+            }
+        });
+        animator3.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                values[2] = target[0];
+                animator3.setIntValues(target[0], target[0] + 100);
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                values[3] = target[0];
+            }
+        });
+        final CountDownLatch latch = new CountDownLatch(1);
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                latch.countDown();
+            }
+        });
+        mActivityRule.runOnUiThread(() -> set.start());
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+        assertEquals(100, values[0]);
+        assertEquals(200, values[1]);
+        assertEquals(200, values[2]);
+        assertEquals(300, values[3]);
     }
 
     /**
