@@ -2258,9 +2258,9 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>An activity can never receive a new intent in the resumed state. You can count on
      * {@link #onResume} being called after this method, though not necessarily immediately after
-     * the completion this callback. If the activity was resumed, it will be paused and new intent
-     * will be delivered, followed by {@link #onResume}. If the activity wasn't in the resumed
-     * state, then new intent can be delivered immediately, with {@link #onResume()} called
+     * the completion of this callback. If the activity was resumed, it will be paused and new
+     * intent will be delivered, followed by {@link #onResume}. If the activity wasn't in the
+     * resumed state, then new intent can be delivered immediately, with {@link #onResume()} called
      * sometime later when activity becomes active again.
      *
      * <p>Note that {@link #getIntent} still returns the original Intent.  You
