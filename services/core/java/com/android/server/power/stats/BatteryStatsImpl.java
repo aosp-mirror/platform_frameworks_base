@@ -4379,6 +4379,12 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteCurrentTimeChangedLocked(long currentTimeMs,
             long elapsedRealtimeMs, long uptimeMs) {
         mHistory.recordCurrentTimeChange(elapsedRealtimeMs, uptimeMs, currentTimeMs);
+        adjustStartClockTime(currentTimeMs);
+    }
+
+    private void adjustStartClockTime(long currentTimeMs) {
+        mStartClockTimeMs =
+                currentTimeMs - (mClock.elapsedRealtime() - (mRealtimeStartUs / 1000));
     }
 
     @GuardedBy("this")
@@ -7660,9 +7666,8 @@ public class BatteryStatsImpl extends BatteryStats {
             // the previous time was completely bogus.  So we are going to figure out a
             // new time based on how much time has elapsed since we started counting.
             mHistory.recordCurrentTimeChange(mClock.elapsedRealtime(), mClock.uptimeMillis(),
-                    currentTimeMs
-            );
-            return currentTimeMs - (mClock.elapsedRealtime() - (mRealtimeStartUs / 1000));
+                    currentTimeMs);
+            adjustStartClockTime(currentTimeMs);
         }
         return mStartClockTimeMs;
     }
@@ -11452,8 +11457,9 @@ public class BatteryStatsImpl extends BatteryStats {
      * Creates an iterator for battery stats history.
      */
     @Override
-    public BatteryStatsHistoryIterator iterateBatteryStatsHistory() {
-        return mHistory.copy().iterate();
+    public BatteryStatsHistoryIterator iterateBatteryStatsHistory(long startTimeMs,
+            long endTimeMs) {
+        return mHistory.copy().iterate(startTimeMs, endTimeMs);
     }
 
     @Override

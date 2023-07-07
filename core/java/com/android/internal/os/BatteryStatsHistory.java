@@ -41,7 +41,6 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ParseUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -82,7 +81,7 @@ public class BatteryStatsHistory {
     private static final int VERSION = 209;
 
     private static final String HISTORY_DIR = "battery-history";
-    private static final String FILE_SUFFIX = ".bin";
+    private static final String FILE_SUFFIX = ".bh";
     private static final int MIN_FREE_SPACE = 100 * 1024 * 1024;
 
     // Part of initial delta int that specifies the time delta.
@@ -147,10 +146,11 @@ public class BatteryStatsHistory {
      * The active history file that the history buffer is backed up into.
      */
     private AtomicFile mActiveFile;
+
     /**
-     * A list of history files with incremental indexes.
+     * A list of history files with increasing timestamps.
      */
-    private final List<Integer> mFileNumbers = new ArrayList<>();
+    private final List<BatteryHistoryFile> mHistoryFiles = new ArrayList<>();
 
     /**
      * A list of small history parcels, used when BatteryStatsImpl object is created from
@@ -198,11 +198,41 @@ public class BatteryStatsHistory {
     private long mTrackRunningHistoryElapsedRealtimeMs = 0;
     private long mTrackRunningHistoryUptimeMs = 0;
     private long mHistoryBaseTimeMs;
-    private ArraySet<PowerStats.Descriptor> mWrittenPowerStatsDescriptors = new ArraySet<>();
+    private final ArraySet<PowerStats.Descriptor> mWrittenPowerStatsDescriptors = new ArraySet<>();
     private byte mLastHistoryStepLevel = 0;
     private boolean mMutable = true;
     private final BatteryStatsHistory mWritableHistory;
     private boolean mCleanupEnabled = true;
+
+    private static class BatteryHistoryFile implements Comparable<BatteryHistoryFile> {
+        public final long monotonicTimeMs;
+        public final AtomicFile atomicFile;
+
+        private BatteryHistoryFile(File directory, long monotonicTimeMs) {
+            this.monotonicTimeMs = monotonicTimeMs;
+            atomicFile = new AtomicFile(new File(directory, monotonicTimeMs + FILE_SUFFIX));
+        }
+
+        @Override
+        public int compareTo(BatteryHistoryFile o) {
+            return Long.compare(monotonicTimeMs, o.monotonicTimeMs);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return monotonicTimeMs == ((BatteryHistoryFile) o).monotonicTimeMs;
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(monotonicTimeMs);
+        }
+
+        @Override
+        public String toString() {
+            return atomicFile.getBaseFile().toString();
+        }
+    }
 
     /**
      * A delegate responsible for computing additional details for a step in battery history.
@@ -313,30 +343,45 @@ public class BatteryStatsHistory {
             Slog.wtf(TAG, "HistoryDir does not exist:" + mHistoryDir.getPath());
         }
 
-        final Set<Integer> dedup = new ArraySet<>();
-        // scan directory, fill mFileNumbers and mActiveFile.
+        final List<File> toRemove = new ArrayList<>();
+        final Set<BatteryHistoryFile> dedup = new ArraySet<>();
         mHistoryDir.listFiles((dir, name) -> {
             final int b = name.lastIndexOf(FILE_SUFFIX);
             if (b <= 0) {
+                toRemove.add(new File(dir, name));
                 return false;
             }
-            final int c = ParseUtils.parseInt(name.substring(0, b), -1);
-            if (c != -1) {
-                dedup.add(c);
-                return true;
-            } else {
+            try {
+                long monotonicTime = Long.parseLong(name.substring(0, b));
+                dedup.add(new BatteryHistoryFile(mHistoryDir, monotonicTime));
+            } catch (NumberFormatException e) {
+                toRemove.add(new File(dir, name));
                 return false;
             }
+            return true;
         });
         if (!dedup.isEmpty()) {
-            mFileNumbers.addAll(dedup);
-            Collections.sort(mFileNumbers);
-            setActiveFile(mFileNumbers.get(mFileNumbers.size() - 1));
-        } else {
-            // No file found, default to have file 0.
-            mFileNumbers.add(0);
-            setActiveFile(0);
+            mHistoryFiles.addAll(dedup);
+            Collections.sort(mHistoryFiles);
+            setActiveFile(mHistoryFiles.get(mHistoryFiles.size() - 1));
+        } else if (mMutable) {
+            // No file found, default to have the initial file.
+            BatteryHistoryFile name = makeBatteryHistoryFile();
+            mHistoryFiles.add(name);
+            setActiveFile(name);
         }
+        if (!toRemove.isEmpty()) {
+            // Clear out legacy history files, which did not follow the X-Y.bin naming format.
+            BackgroundThread.getHandler().post(() -> {
+                for (File file : toRemove) {
+                    file.delete();
+                }
+            });
+        }
+    }
+
+    private BatteryHistoryFile makeBatteryHistoryFile() {
+        return new BatteryHistoryFile(mHistoryDir, mClock.elapsedRealtime() + mHistoryBaseTimeMs);
     }
 
     public BatteryStatsHistory(int maxHistoryFiles, int maxHistoryBufferSize,
@@ -434,25 +479,12 @@ public class BatteryStatsHistory {
 
     /**
      * Set the active file that mHistoryBuffer is backed up into.
-     *
-     * @param fileNumber the history file that mHistoryBuffer is backed up into.
      */
-    private void setActiveFile(int fileNumber) {
-        mActiveFile = getFile(fileNumber);
+    private void setActiveFile(BatteryHistoryFile file) {
+        mActiveFile = file.atomicFile;
         if (DEBUG) {
             Slog.d(TAG, "activeHistoryFile:" + mActiveFile.getBaseFile().getPath());
         }
-    }
-
-    /**
-     * Create history AtomicFile from file number.
-     *
-     * @param num file number.
-     * @return AtomicFile object.
-     */
-    private AtomicFile getFile(int num) {
-        return new AtomicFile(
-                new File(mHistoryDir, num + FILE_SUFFIX));
     }
 
     /**
@@ -465,21 +497,40 @@ public class BatteryStatsHistory {
             return;
         }
 
-        if (mFileNumbers.isEmpty()) {
+        if (mHistoryFiles.isEmpty()) {
             Slog.wtf(TAG, "mFileNumbers should never be empty");
             return;
         }
 
-        // The last number in mFileNumbers is the highest number. The next file number is highest
-        // number plus one.
-        final int next = mFileNumbers.get(mFileNumbers.size() - 1) + 1;
-        mFileNumbers.add(next);
+        final long start = SystemClock.uptimeMillis();
+        writeHistory();
+        if (DEBUG) {
+            Slog.d(TAG, "writeHistory took ms:" + (SystemClock.uptimeMillis() - start));
+        }
+
+        final BatteryHistoryFile next = makeBatteryHistoryFile();
+        mHistoryFiles.add(next);
         setActiveFile(next);
         try {
             mActiveFile.getBaseFile().createNewFile();
         } catch (IOException e) {
             Slog.e(TAG, "Could not create history file: " + mActiveFile.getBaseFile());
         }
+
+        mHistoryBuffer.setDataSize(0);
+        mHistoryBuffer.setDataPosition(0);
+        mHistoryBuffer.setDataCapacity(mMaxHistoryBufferSize / 2);
+        mHistoryBufferLastPos = -1;
+        mHistoryLastWritten.clear();
+        mHistoryLastLastWritten.clear();
+
+        // Mark every entry in the pool with a flag indicating that the tag
+        // has not yet been encountered while writing the current history buffer.
+        for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
+            entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
+        }
+
+        mWrittenPowerStatsDescriptors.clear();
 
         synchronized (this) {
             cleanupLocked();
@@ -502,17 +553,17 @@ public class BatteryStatsHistory {
 
         // if free disk space is less than 100MB, delete oldest history file.
         if (!hasFreeDiskSpace()) {
-            int oldest = mFileNumbers.remove(0);
-            getFile(oldest).delete();
+            BatteryHistoryFile oldest = mHistoryFiles.remove(0);
+            oldest.atomicFile.delete();
         }
 
         // if there are more history files than allowed, delete oldest history files.
         // mMaxHistoryFiles comes from Constants.MAX_HISTORY_FILES and can be updated by GService
         // config at run time.
-        while (mFileNumbers.size() > mMaxHistoryFiles) {
-            int oldest = mFileNumbers.get(0);
-            getFile(oldest).delete();
-            mFileNumbers.remove(0);
+        while (mHistoryFiles.size() > mMaxHistoryFiles) {
+            BatteryHistoryFile oldest = mHistoryFiles.get(0);
+            oldest.atomicFile.delete();
+            mHistoryFiles.remove(0);
         }
     }
 
@@ -532,12 +583,14 @@ public class BatteryStatsHistory {
      */
     public void reset() {
         if (DEBUG) Slog.i(TAG, "********** CLEARING HISTORY!");
-        for (Integer i : mFileNumbers) {
-            getFile(i).delete();
+        for (BatteryHistoryFile file : mHistoryFiles) {
+            file.atomicFile.delete();
         }
-        mFileNumbers.clear();
-        mFileNumbers.add(0);
-        setActiveFile(0);
+        mHistoryFiles.clear();
+
+        BatteryHistoryFile name = makeBatteryHistoryFile();
+        mHistoryFiles.add(name);
+        setActiveFile(name);
 
         initHistoryBuffer();
     }
@@ -545,9 +598,13 @@ public class BatteryStatsHistory {
     /**
      * Start iterating history files and history buffer.
      *
-     * @return always return true.
+     * @param startTimeMs monotonic time (the HistoryItem.time field) to start iterating from,
+     *                    inclusive
+     * @param endTimeMs monotonic time to stop iterating, exclusive.
+     *                  Pass 0 to indicate current time.
      */
-    public BatteryStatsHistoryIterator iterate() {
+    @NonNull
+    public BatteryStatsHistoryIterator iterate(long startTimeMs, long endTimeMs) {
         mCurrentFileIndex = 0;
         mCurrentParcel = null;
         mCurrentParcelEnd = 0;
@@ -558,7 +615,7 @@ public class BatteryStatsHistory {
                 mWritableHistory.setCleanupEnabledLocked(false);
             }
         }
-        return new BatteryStatsHistoryIterator(this);
+        return new BatteryStatsHistoryIterator(this, startTimeMs, endTimeMs);
     }
 
     /**
@@ -585,7 +642,7 @@ public class BatteryStatsHistory {
      * buffer
      */
     @Nullable
-    public Parcel getNextParcel() {
+    public Parcel getNextParcel(long startTimeMs, long endTimeMs) {
         // First iterate through all records in current parcel.
         if (mCurrentParcel != null) {
             if (mCurrentParcel.dataPosition() < mCurrentParcelEnd) {
@@ -601,13 +658,29 @@ public class BatteryStatsHistory {
             }
         }
 
-        // Try next available history file.
+        int firstFileIndex = 0;
         // skip the last file because its data is in history buffer.
-        while (mCurrentFileIndex < mFileNumbers.size() - 1) {
+        int lastFileIndex = mHistoryFiles.size() - 1;
+        for (int i = mHistoryFiles.size() - 1; i >= 0; i--) {
+            BatteryHistoryFile file = mHistoryFiles.get(i);
+            if (file.monotonicTimeMs >= endTimeMs) {
+                lastFileIndex = i;
+            }
+            if (file.monotonicTimeMs <= startTimeMs) {
+                firstFileIndex = i;
+                break;
+            }
+        }
+
+        if (mCurrentFileIndex < firstFileIndex) {
+            mCurrentFileIndex = firstFileIndex;
+        }
+
+        while (mCurrentFileIndex < lastFileIndex) {
             mCurrentParcel = null;
             mCurrentParcelEnd = 0;
             final Parcel p = Parcel.obtain();
-            AtomicFile file = getFile(mFileNumbers.get(mCurrentFileIndex++));
+            AtomicFile file = mHistoryFiles.get(mCurrentFileIndex++).atomicFile;
             if (readFileToParcel(p, file)) {
                 int bufSize = p.readInt();
                 int curPos = p.dataPosition();
@@ -764,9 +837,9 @@ public class BatteryStatsHistory {
 
     private void writeToParcel(Parcel out, boolean useBlobs) {
         final long start = SystemClock.uptimeMillis();
-        out.writeInt(mFileNumbers.size() - 1);
-        for (int i = 0; i < mFileNumbers.size() - 1; i++) {
-            AtomicFile file = getFile(mFileNumbers.get(i));
+        out.writeInt(mHistoryFiles.size() - 1);
+        for (int i = 0; i < mHistoryFiles.size() - 1; i++) {
+            AtomicFile file = mHistoryFiles.get(i).atomicFile;
             byte[] raw = new byte[0];
             try {
                 raw = file.readFully();
@@ -867,8 +940,12 @@ public class BatteryStatsHistory {
     }
 
     @VisibleForTesting
-    public List<Integer> getFilesNumbers() {
-        return mFileNumbers;
+    public List<String> getFilesNames() {
+        List<String> names = new ArrayList<>();
+        for (BatteryHistoryFile historyFile : mHistoryFiles) {
+            names.add(historyFile.atomicFile.getBaseFile().getName());
+        }
+        return names;
     }
 
     @VisibleForTesting
@@ -881,8 +958,8 @@ public class BatteryStatsHistory {
      */
     public int getHistoryUsedSize() {
         int ret = 0;
-        for (int i = 0; i < mFileNumbers.size() - 1; i++) {
-            ret += getFile(mFileNumbers.get(i)).getBaseFile().length();
+        for (int i = 0; i < mHistoryFiles.size() - 1; i++) {
+            ret += mHistoryFiles.get(i).atomicFile.getBaseFile().length();
         }
         ret += mHistoryBuffer.dataSize();
         if (mHistoryParcels != null) {
@@ -932,7 +1009,7 @@ public class BatteryStatsHistory {
      * Prepares to continue recording after restoring previous history from persistent storage.
      */
     public void continueRecordingHistory() {
-        if (mHistoryBuffer.dataPosition() <= 0 && mFileNumbers.size() <= 1) {
+        if (mHistoryBuffer.dataPosition() <= 0 && mHistoryFiles.size() <= 1) {
             return;
         }
 
@@ -1432,33 +1509,15 @@ public class BatteryStatsHistory {
                 mMaxHistoryBufferSize = 1024;
             }
 
-            //open a new history file.
-            final long start = SystemClock.uptimeMillis();
-            writeHistory();
-            if (DEBUG) {
-                Slog.d(TAG, "addHistoryBufferLocked writeHistory took ms:"
-                        + (SystemClock.uptimeMillis() - start));
-            }
-            startNextFile();
-            mHistoryBuffer.setDataSize(0);
-            mHistoryBuffer.setDataPosition(0);
-            mHistoryBuffer.setDataCapacity(mMaxHistoryBufferSize / 2);
-            mHistoryBufferLastPos = -1;
-            mHistoryLastWritten.clear();
-            mHistoryLastLastWritten.clear();
-
-            // Mark every entry in the pool with a flag indicating that the tag
-            // has not yet been encountered while writing the current history buffer.
-            for (Map.Entry<HistoryTag, Integer> entry : mHistoryTagPool.entrySet()) {
-                entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
-            }
-            mWrittenPowerStatsDescriptors.clear();
-
             // Make a copy of mHistoryCur.
             HistoryItem copy = new HistoryItem();
             copy.setTo(cur);
+
+            startNextFile();
+
             // startRecordingHistory will reset mHistoryCur.
             startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
+
             // Add the copy into history buffer.
             writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_UPDATE);
             return;

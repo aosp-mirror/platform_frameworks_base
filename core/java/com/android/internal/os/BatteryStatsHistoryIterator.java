@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -33,26 +34,32 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private static final boolean DEBUG = false;
     private static final String TAG = "BatteryStatsHistoryItr";
     private final BatteryStatsHistory mBatteryStatsHistory;
+    private final @CurrentTimeMillisLong long mStartTimeMs;
+    private final @CurrentTimeMillisLong long mEndTimeMs;
     private final BatteryStats.HistoryStepDetails mReadHistoryStepDetails =
             new BatteryStats.HistoryStepDetails();
     private final SparseArray<BatteryStats.HistoryTag> mHistoryTags = new SparseArray<>();
     private final PowerStats.DescriptorRegistry mDescriptorRegistry =
             new PowerStats.DescriptorRegistry();
-    private final BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
+    private BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
+    private boolean mNextItemReady;
 
-    public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history) {
+    public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history,
+            @CurrentTimeMillisLong long startTimeMs,
+            @CurrentTimeMillisLong long endTimeMs) {
         mBatteryStatsHistory = history;
+        mStartTimeMs = startTimeMs;
+        mEndTimeMs = (endTimeMs != 0) ? endTimeMs : Long.MAX_VALUE;
         mHistoryItem.clear();
     }
 
     @Override
     public boolean hasNext() {
-        Parcel p = mBatteryStatsHistory.getNextParcel();
-        if (p == null) {
-            close();
-            return false;
+        if (!mNextItemReady) {
+            advance();
         }
-        return true;
+
+        return mHistoryItem != null;
     }
 
     /**
@@ -61,25 +68,45 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
      */
     @Override
     public BatteryStats.HistoryItem next() {
-        Parcel p = mBatteryStatsHistory.getNextParcel();
-        if (p == null) {
-            close();
-            return null;
+        if (!mNextItemReady) {
+            advance();
+        }
+        mNextItemReady = false;
+        return mHistoryItem;
+    }
+
+    private void advance() {
+        while (true) {
+            Parcel p = mBatteryStatsHistory.getNextParcel(mStartTimeMs, mEndTimeMs);
+            if (p == null) {
+                break;
+            }
+
+            final long lastRealtimeMs = mHistoryItem.time;
+            final long lastWalltimeMs = mHistoryItem.currentTime;
+            try {
+                readHistoryDelta(p, mHistoryItem);
+            } catch (Throwable t) {
+                Slog.wtf(TAG, "Corrupted battery history", t);
+                break;
+            }
+            if (mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_CURRENT_TIME
+                    && mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_RESET
+                    && lastWalltimeMs != 0) {
+                mHistoryItem.currentTime = lastWalltimeMs + (mHistoryItem.time - lastRealtimeMs);
+            }
+            if (mEndTimeMs != 0 && mHistoryItem.currentTime >= mEndTimeMs) {
+                break;
+            }
+            if (mHistoryItem.currentTime >= mStartTimeMs) {
+                mNextItemReady = true;
+                return;
+            }
         }
 
-        final long lastRealtimeMs = mHistoryItem.time;
-        final long lastWalltimeMs = mHistoryItem.currentTime;
-        try {
-            readHistoryDelta(p, mHistoryItem);
-        } catch (Throwable t) {
-            Slog.wtf(TAG, "Corrupted battery history", t);
-            return null;
-        }
-        if (mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_CURRENT_TIME
-                && mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_RESET && lastWalltimeMs != 0) {
-            mHistoryItem.currentTime = lastWalltimeMs + (mHistoryItem.time - lastRealtimeMs);
-        }
-        return mHistoryItem;
+        mHistoryItem = null;
+        mNextItemReady = true;
+        close();
     }
 
     private void readHistoryDelta(Parcel src, BatteryStats.HistoryItem cur) {

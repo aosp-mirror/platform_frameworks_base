@@ -19,6 +19,7 @@ package android.os;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2416,8 +2417,14 @@ public abstract class BatteryStats {
      * Returns a BatteryStatsHistoryIterator. Battery history will continue being writable,
      * but the iterator will continue iterating over the snapshot taken at the time this method
      * is called.
+     *
+     * @param startTimeMs wall-clock time to start iterating from, inclusive
+     * @param endTimeMs wall-clock time to stop iterating, exclusive.
+     *                  Pass 0 to indicate current time.
      */
-    public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory();
+    public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory(
+            @CurrentTimeMillisLong long startTimeMs,
+            @CurrentTimeMillisLong long endTimeMs);
 
     /**
      * Returns the number of times the device has been started.
@@ -7462,7 +7469,7 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory()) {
+        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 try {
@@ -8385,7 +8392,7 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory()) {
+        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 lastTime = rec.time;
