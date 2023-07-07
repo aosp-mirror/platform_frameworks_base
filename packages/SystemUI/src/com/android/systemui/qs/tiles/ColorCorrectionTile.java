@@ -37,6 +37,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -48,12 +49,15 @@ import javax.inject.Inject;
 /** Quick settings tile: Color correction **/
 public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
 
+    public static final String TILE_SPEC = "color_correction";
+
     private final Icon mIcon = ResourceIcon.get(drawable.ic_qs_color_correction);
     private final SettingObserver mSetting;
 
     @Inject
     public ColorCorrectionTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -64,7 +68,7 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
             UserTracker userTracker,
             SecureSettings secureSettings
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
         mSetting = new SettingObserver(secureSettings, mHandler,

@@ -210,6 +210,9 @@ public final class AppHibernationService extends SystemService {
      * package manager from re-optimizing the APK.
      */
     private boolean isOatArtifactDeletionEnabled() {
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
         return mOatArtifactDeletionEnabled;
     }
 
@@ -872,6 +875,11 @@ public final class AppHibernationService extends SystemService {
                 @Nullable List<String> packageNames, int userId) {
             Set<String> pkgsSet = packageNames != null ? new ArraySet<>(packageNames) : null;
             return mService.getHibernationStatsForUser(pkgsSet, userId);
+        }
+
+        @Override
+        public boolean isOatArtifactDeletionEnabled() {
+            return mService.isOatArtifactDeletionEnabled();
         }
 
         @Override

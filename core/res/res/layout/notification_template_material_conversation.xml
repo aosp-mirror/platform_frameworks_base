@@ -89,45 +89,62 @@
         <include layout="@layout/notification_material_action_list" />
     </com.android.internal.widget.RemeasuringLinearLayout>
 
-    <!--This is dynamically placed between here and at the end of the layout. It starts here since
-        only FrameLayout layout params have gravity-->
+    <!--expand_button_a11y_container ensures talkback focus order is correct when view is expanded.
+    The -1px of marginTop and 1px of paddingTop make sure expand_button_a11y_container is prior to
+    its sibling view in accessibility focus order.
+    {see android.view.ViewGroup.addChildrenForAccessibility()}
+    expand_button_container will be moved under expand_button_and_content_container when collapsed,
+    this dynamic movement ensures message can flow under expand button when expanded-->
     <FrameLayout
-        android:id="@+id/expand_button_container"
-        android:layout_width="wrap_content"
+        android:id="@+id/expand_button_a11y_container"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="end|top"
         android:clipChildren="false"
-        android:clipToPadding="false">
-        <!--This layout makes sure that we can nicely center the expand content in the
-            collapsed layout while the parent makes sure that we're never laid out bigger
-            than the messaging content.-->
-        <LinearLayout
-            android:id="@+id/expand_button_touch_container"
+        android:clipToPadding="false"
+        android:layout_marginTop="-1px"
+        android:paddingTop="1px"
+        >
+        <!--expand_button_container is dynamically placed between here and at the end of the
+        layout. It starts here since only FrameLayout layout params have gravity-->
+        <FrameLayout
+            android:id="@+id/expand_button_container"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/conversation_expand_button_height"
-            android:orientation="horizontal"
+            android:layout_height="match_parent"
             android:layout_gravity="end|top"
-            android:paddingEnd="0dp"
-            android:clipToPadding="false"
             android:clipChildren="false"
-            >
-            <!-- Images -->
-            <com.android.internal.widget.MessagingLinearLayout
-                android:id="@+id/conversation_image_message_container"
-                android:forceHasOverlappingRendering="false"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="@dimen/conversation_image_start_margin"
-                android:spacing="0dp"
-                android:layout_gravity="center"
+            android:clipToPadding="false">
+            <!--expand_button_touch_container makes sure that we can nicely center the expand
+            content in the collapsed layout while the parent makes sure that we're never laid out
+            bigger than the messaging content.-->
+            <LinearLayout
+                android:id="@+id/expand_button_touch_container"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/conversation_expand_button_height"
+                android:orientation="horizontal"
+                android:layout_gravity="end|top"
+                android:paddingEnd="0dp"
                 android:clipToPadding="false"
                 android:clipChildren="false"
-                />
-            <include layout="@layout/notification_expand_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                />
-        </LinearLayout>
+                >
+                <!-- Images -->
+                <com.android.internal.widget.MessagingLinearLayout
+                    android:id="@+id/conversation_image_message_container"
+                    android:forceHasOverlappingRendering="false"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="@dimen/conversation_image_start_margin"
+                    android:spacing="0dp"
+                    android:layout_gravity="center"
+                    android:clipToPadding="false"
+                    android:clipChildren="false"
+                    />
+                <include layout="@layout/notification_expand_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    />
+            </LinearLayout>
+        </FrameLayout>
     </FrameLayout>
 </com.android.internal.widget.ConversationLayout>

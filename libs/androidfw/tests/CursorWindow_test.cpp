@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <utility>
 
 #include "androidfw/CursorWindow.h"
@@ -204,7 +205,7 @@ TEST(CursorWindowTest, Inflate) {
     ASSERT_EQ(w->allocRow(), OK);
 
     // Scratch buffer that will fit before inflation
-    void* buf = malloc(kHalfInlineSize);
+    char buf[kHalfInlineSize];
 
     // Store simple value
     ASSERT_EQ(w->putLong(0, 0, 0xcafe), OK);
@@ -285,7 +286,7 @@ TEST(CursorWindowTest, ParcelSmall) {
     ASSERT_EQ(w->allocRow(), OK);
 
     // Scratch buffer that will fit before inflation
-    void* buf = malloc(kHalfInlineSize);
+    char buf[kHalfInlineSize];
 
     // Store simple value
     ASSERT_EQ(w->putLong(0, 0, 0xcafe), OK);
@@ -346,7 +347,8 @@ TEST(CursorWindowTest, ParcelLarge) {
     ASSERT_EQ(w->putLong(0, 0, 0xcafe), OK);
 
     // Store object that forces inflation
-    void* buf = malloc(kGiantSize);
+    std::unique_ptr<char> bufPtr(new char[kGiantSize]);
+    void* buf = bufPtr.get();
     memset(buf, 42, kGiantSize);
     ASSERT_EQ(w->putBlob(0, 1, buf, kGiantSize), OK);
 

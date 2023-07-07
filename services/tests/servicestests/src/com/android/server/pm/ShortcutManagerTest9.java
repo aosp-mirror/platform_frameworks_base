@@ -150,7 +150,9 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
 
     public void testRequestPinAppWidget_withCallback() {
         final PendingIntent resultIntent =
-                PendingIntent.getActivity(getTestContext(), 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(getTestContext(), 0,
+                        new Intent().setPackage(getTestContext().getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
 
         checkRequestPinAppWidget(resultIntent);
     }

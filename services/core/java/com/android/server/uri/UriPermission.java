@@ -207,7 +207,9 @@ final class UriPermission {
             if (mReadOwners != null && includingOwners) {
                 ownedModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
                 for (UriPermissionOwner r : mReadOwners) {
-                    r.removeReadPermission(this);
+                    if (r != null) {
+                        r.removeReadPermission(this);
+                    }
                 }
                 mReadOwners = null;
             }

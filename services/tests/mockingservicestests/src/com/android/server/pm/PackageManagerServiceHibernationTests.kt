@@ -147,12 +147,12 @@ class PackageManagerServiceHibernationTests {
             TEST_PACKAGE_NAME,
             1L,
             rule.system().dataAppDirectory,
-            withPackage = { it.apply { isHasCode = true } })
+            withPackage = { it.apply { isDeclaredHavingCode = true } })
         rule.system().stageScanExistingPackage(
             TEST_PACKAGE_2_NAME,
             1L,
             rule.system().dataAppDirectory,
-            withPackage = { it.apply { isHasCode = true } })
+            withPackage = { it.apply { isDeclaredHavingCode = true } })
         val pm = createPackageManagerService()
         rule.system().validateFinalState()
         whenever(appHibernationManager.isHibernatingGlobally(TEST_PACKAGE_2_NAME)).thenReturn(true)
@@ -165,7 +165,6 @@ class PackageManagerServiceHibernationTests {
 
     private fun createPackageManagerService(): PackageManagerService {
         return PackageManagerService(rule.mocks().injector,
-            false /*coreOnly*/,
             false /*factoryTest*/,
             MockSystem.DEFAULT_VERSION_INFO.fingerprint,
             false /*isEngBuild*/,

@@ -16,9 +16,11 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
+import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -36,7 +38,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.wm.shell.TaskView
+import com.android.wm.shell.taskview.TaskView
 
 /**
  * A dialog that provides an {@link TaskView}, allowing the application to provide
@@ -44,13 +46,13 @@ import com.android.wm.shell.TaskView
  * The activity being launched is specified by {@link android.service.controls.Control#getAppIntent}.
  */
 class DetailDialog(
-    val activityContext: Context,
-    val broadcastSender: BroadcastSender,
-    val taskView: TaskView,
-    val pendingIntent: PendingIntent,
-    val cvh: ControlViewHolder,
-    val keyguardStateController: KeyguardStateController,
-    val activityStarter: ActivityStarter
+        val activityContext: Context,
+        val broadcastSender: BroadcastSender,
+        val taskView: TaskView,
+        val pendingIntent: PendingIntent,
+        val cvh: ControlViewHolder,
+        val keyguardStateController: KeyguardStateController,
+        val activityStarter: ActivityStarter
 ) : Dialog(
     activityContext,
     R.style.Theme_SystemUI_Dialog_Control_DetailPanel
@@ -96,7 +98,9 @@ class DetailDialog(
                 activityContext,
                 0 /* enterResId */,
                 0 /* exitResId */
-            )
+            ).setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            options.isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+
             taskView.startActivity(
                 pendingIntent,
                 fillInIntent,
@@ -156,7 +160,13 @@ class DetailDialog(
                     // Remove the task explicitly, since onRelease() callback will be executed after
                     // startActivity() below is called.
                     broadcastSender.closeSystemDialogs()
-                    pendingIntent.send()
+                    // not sent as interactive, lest the higher-importance activity launch
+                    // be impacted
+                    val options = ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle()
+                    pendingIntent.send(options)
                     false
                 }
                 if (keyguardStateController.isUnlocked()) {
@@ -212,6 +222,12 @@ class DetailDialog(
         if (!isShowing()) return
         taskView.release()
 
+        val isActivityFinishing =
+            (activityContext as? Activity)?.let { it.isFinishing || it.isDestroyed }
+        if (isActivityFinishing == true) {
+            // Don't dismiss the dialog if the activity is finishing, it will get removed
+            return
+        }
         super.dismiss()
     }
 }

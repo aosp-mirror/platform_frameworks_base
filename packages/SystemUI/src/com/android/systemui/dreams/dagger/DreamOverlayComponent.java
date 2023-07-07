@@ -16,25 +16,30 @@
 
 package com.android.systemui.dreams.dagger;
 
+import static com.android.systemui.dreams.dagger.DreamOverlayModule.DREAM_TOUCH_HANDLERS;
+
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import android.annotation.Nullable;
+
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.ViewModelStore;
 
+import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.dagger.ComplicationModule;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
+import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.util.Set;
+
+import javax.inject.Named;
+import javax.inject.Scope;
 
 /**
  * Dagger subcomponent for {@link DreamOverlayModule}.
@@ -42,15 +47,18 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {
         DreamTouchModule.class,
         DreamOverlayModule.class,
-        ComplicationModule.class,
 })
 @DreamOverlayComponent.DreamOverlayScope
 public interface DreamOverlayComponent {
     /** Simple factory for {@link DreamOverlayComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        DreamOverlayComponent create(@BindsInstance ViewModelStore store,
-                @BindsInstance Complication.Host host);
+        DreamOverlayComponent create(
+                @BindsInstance LifecycleOwner lifecycleOwner,
+                @BindsInstance ComplicationHostViewController complicationHostViewController,
+                @BindsInstance TouchInsetManager touchInsetManager,
+                @BindsInstance @Named(DREAM_TOUCH_HANDLERS) @Nullable
+                        Set<DreamTouchHandler> dreamTouchHandlers);
     }
 
     /** Scope annotation for singleton items within the {@link DreamOverlayComponent}. */
@@ -61,12 +69,6 @@ public interface DreamOverlayComponent {
 
     /** Builds a {@link DreamOverlayContainerViewController}. */
     DreamOverlayContainerViewController getDreamOverlayContainerViewController();
-
-    /** Builds a {@link androidx.lifecycle.LifecycleRegistry} */
-    LifecycleRegistry getLifecycleRegistry();
-
-    /** Builds a {@link androidx.lifecycle.LifecycleOwner} */
-    LifecycleOwner getLifecycleOwner();
 
     /** Builds a {@link DreamOverlayTouchMonitor} */
     DreamOverlayTouchMonitor getDreamOverlayTouchMonitor();

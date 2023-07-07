@@ -24,30 +24,45 @@ package {
 android_test_helper_app {
     name: "PackageManagerTestAppStub",
     manifest: "AndroidManifestVersion1.xml",
-    srcs: []
+    srcs: [],
 }
 
 android_test_helper_app {
     name: "PackageManagerTestAppVersion1",
-    manifest: "AndroidManifestVersion1.xml"
+    manifest: "AndroidManifestVersion1.xml",
+    srcs: [
+        "src/**/*.kt",
+    ],
 }
 
 android_test_helper_app {
     name: "PackageManagerTestAppVersion2",
-    manifest: "AndroidManifestVersion2.xml"
+    manifest: "AndroidManifestVersion2.xml",
+    srcs: [
+        "src/**/*.kt",
+    ],
 }
 
 android_test_helper_app {
     name: "PackageManagerTestAppVersion3",
-    manifest: "AndroidManifestVersion3.xml"
+    manifest: "AndroidManifestVersion3.xml",
+    srcs: [
+        "src/**/*.kt",
+    ],
 }
 
 android_test_helper_app {
     name: "PackageManagerTestAppVersion4",
-    manifest: "AndroidManifestVersion4.xml"
+    manifest: "AndroidManifestVersion4.xml",
+    srcs: [
+        "src/**/*.kt",
+    ],
 }
 
 android_test_helper_app {
     name: "PackageManagerTestAppOriginalOverride",
-    manifest: "AndroidManifestOriginalOverride.xml"
+    manifest: "AndroidManifestOriginalOverride.xml",
+    srcs: [
+        "src/**/*.kt",
+    ],
 }

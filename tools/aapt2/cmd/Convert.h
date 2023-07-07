@@ -34,14 +34,41 @@ class ConvertCommand : public Command {
     AddOptionalFlag("--output-format", android::base::StringPrintf("Format of the output. "
             "Accepted values are '%s' and '%s'. When not set, defaults to '%s'.",
         kOutputFormatProto, kOutputFormatBinary, kOutputFormatBinary), &output_format_);
-    AddOptionalSwitch("--enable-sparse-encoding",
+    AddOptionalSwitch(
+        "--enable-sparse-encoding",
         "Enables encoding sparse entries using a binary search tree.\n"
-        "This decreases APK size at the cost of resource retrieval performance.",
-         &table_flattener_options_.use_sparse_entries);
+        "This decreases APK size at the cost of resource retrieval performance.\n"
+        "Only applies sparse encoding to Android O+ resources or all resources if minSdk of "
+        "the APK is O+",
+        &enable_sparse_encoding_);
+    AddOptionalSwitch("--force-sparse-encoding",
+                      "Enables encoding sparse entries using a binary search tree.\n"
+                      "This decreases APK size at the cost of resource retrieval performance.\n"
+                      "Applies sparse encoding to all resources regardless of minSdk.",
+                      &force_sparse_encoding_);
     AddOptionalSwitch("--keep-raw-values",
         android::base::StringPrintf("Preserve raw attribute values in xml files when using the"
             " '%s' output format", kOutputFormatBinary),
         &xml_flattener_options_.keep_raw_values);
+    AddOptionalFlag("--resources-config-path",
+                    "Path to the resources.cfg file containing the list of resources and \n"
+                    "directives to each resource. \n"
+                    "Format: type/resource_name#[directive][,directive]",
+                    &resources_config_path_);
+    AddOptionalSwitch(
+        "--collapse-resource-names",
+        "Collapses resource names to a single value in the key string pool. Resources can \n"
+        "be exempted using the \"no_collapse\" directive in a file specified by "
+        "--resources-config-path.",
+        &table_flattener_options_.collapse_key_stringpool);
+    AddOptionalSwitch(
+        "--deduplicate-entry-values",
+        "Whether to deduplicate pairs of resource entry and value for simple resources.\n"
+        "This is recommended to be used together with '--collapse-resource-names' flag or for\n"
+        "APKs where resource names are manually collapsed. For such APKs this flag allows to\n"
+        "store the same resource value only once in resource table which decreases APK size.\n"
+        "Has no effect on APKs where resource names are kept.",
+        &table_flattener_options_.deduplicate_entry_values);
     AddOptionalSwitch("-v", "Enables verbose logging", &verbose_);
   }
 
@@ -56,6 +83,9 @@ class ConvertCommand : public Command {
   std::string output_path_;
   std::optional<std::string> output_format_;
   bool verbose_ = false;
+  bool enable_sparse_encoding_ = false;
+  bool force_sparse_encoding_ = false;
+  std::optional<std::string> resources_config_path_;
 };
 
 int Convert(IAaptContext* context, LoadedApk* input, IArchiveWriter* output_writer,

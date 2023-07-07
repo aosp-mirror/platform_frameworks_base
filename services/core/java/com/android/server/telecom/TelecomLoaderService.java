@@ -72,21 +72,19 @@ public class TelecomLoaderService extends SystemService {
                     final LegacyPermissionManagerInternal permissionManager =
                             LocalServices.getService(LegacyPermissionManagerInternal.class);
                     if (mDefaultSimCallManagerRequests != null) {
-                        if (mDefaultSimCallManagerRequests != null) {
-                            TelecomManager telecomManager =
+                        TelecomManager telecomManager =
                                 (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
-                            PhoneAccountHandle phoneAccount = telecomManager.getSimCallManager();
-                            if (phoneAccount != null) {
-                                final int requestCount = mDefaultSimCallManagerRequests.size();
-                                final String packageName =
+                        PhoneAccountHandle phoneAccount = telecomManager.getSimCallManager();
+                        if (phoneAccount != null) {
+                            final int requestCount = mDefaultSimCallManagerRequests.size();
+                            final String packageName =
                                     phoneAccount.getComponentName().getPackageName();
-                                for (int i = requestCount - 1; i >= 0; i--) {
-                                    final int userId = mDefaultSimCallManagerRequests.get(i);
-                                    mDefaultSimCallManagerRequests.remove(i);
-                                    permissionManager
-                                            .grantDefaultPermissionsToDefaultSimCallManager(
-                                                    packageName, userId);
-                                }
+                            for (int i = requestCount - 1; i >= 0; i--) {
+                                final int userId = mDefaultSimCallManagerRequests.get(i);
+                                mDefaultSimCallManagerRequests.remove(i);
+                                permissionManager
+                                        .grantDefaultPermissionsToDefaultSimCallManager(
+                                                packageName, userId);
                             }
                         }
                     }

@@ -54,6 +54,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.text.TextUtils;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Slog;
 import android.webkit.MimeTypeMap;
@@ -1294,19 +1295,110 @@ public final class FileUtils {
      * value, such as 256MB or 32GB. This avoids showing weird values like
      * "29.5GB" in UI.
      *
+     * Some storage devices are still using GiB (powers of 1024) over
+     * GB (powers of 1000) measurements and this method takes it into account.
+     *
+     * Round ranges:
+     * ...
+     * [256 GiB + 1; 512 GiB] -> 512 GB
+     * [512 GiB + 1; 1 TiB]   -> 1 TB
+     * [1 TiB + 1; 2 TiB]     -> 2 TB
+     * etc
+     *
      * @hide
      */
     public static long roundStorageSize(long size) {
         long val = 1;
-        long pow = 1;
-        while ((val * pow) < size) {
+        long kiloPow = 1;
+        long kibiPow = 1;
+        while ((val * kibiPow) < size) {
             val <<= 1;
             if (val > 512) {
                 val = 1;
-                pow *= 1000;
+                kibiPow *= 1024;
+                kiloPow *= 1000;
             }
         }
-        return val * pow;
+        return val * kiloPow;
+    }
+
+    private static long toBytes(long value, String unit) {
+        unit = unit.toUpperCase();
+
+        if ("B".equals(unit)) {
+            return value;
+        }
+
+        if ("K".equals(unit) || "KB".equals(unit)) {
+            return DataUnit.KILOBYTES.toBytes(value);
+        }
+
+        if ("M".equals(unit) || "MB".equals(unit)) {
+            return DataUnit.MEGABYTES.toBytes(value);
+        }
+
+        if ("G".equals(unit) || "GB".equals(unit)) {
+            return DataUnit.GIGABYTES.toBytes(value);
+        }
+
+        if ("KI".equals(unit) || "KIB".equals(unit)) {
+            return DataUnit.KIBIBYTES.toBytes(value);
+        }
+
+        if ("MI".equals(unit) || "MIB".equals(unit)) {
+            return DataUnit.MEBIBYTES.toBytes(value);
+        }
+
+        if ("GI".equals(unit) || "GIB".equals(unit)) {
+            return DataUnit.GIBIBYTES.toBytes(value);
+        }
+
+        return Long.MIN_VALUE;
+    }
+
+    /**
+     * @param fmtSize The string that contains the size to be parsed. The
+     *   expected format is:
+     *
+     *   <p>"^((\\s*[-+]?[0-9]+)\\s*(B|K|KB|M|MB|G|GB|Ki|KiB|Mi|MiB|Gi|GiB)\\s*)$"
+     *
+     *   <p>For example: 10Kb, 500GiB, 100mb. The unit is not case sensitive.
+     *
+     * @return the size in bytes. If {@code fmtSize} has invalid format, it
+     *   returns {@link Long#MIN_VALUE}.
+     * @hide
+     */
+    public static long parseSize(@Nullable String fmtSize) {
+        if (fmtSize == null || fmtSize.isBlank()) {
+            return Long.MIN_VALUE;
+        }
+
+        int sign = 1;
+        fmtSize = fmtSize.trim();
+        char first = fmtSize.charAt(0);
+        if (first == '-' ||  first == '+') {
+            if (first == '-') {
+                sign = -1;
+            }
+
+            fmtSize = fmtSize.substring(1);
+        }
+
+        int index = 0;
+        // Find the last index of the value in fmtSize.
+        while (index < fmtSize.length() && Character.isDigit(fmtSize.charAt(index))) {
+            index++;
+        }
+
+        // Check if number and units are present.
+        if (index == 0 || index == fmtSize.length()) {
+            return Long.MIN_VALUE;
+        }
+
+        long value = sign * Long.valueOf(fmtSize.substring(0, index));
+        String unit = fmtSize.substring(index).trim();
+
+        return toBytes(value, unit);
     }
 
     /**

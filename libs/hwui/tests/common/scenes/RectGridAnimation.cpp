@@ -16,6 +16,8 @@
 
 #include "TestSceneBase.h"
 
+#include <SkBlendMode.h>
+
 class RectGridAnimation;
 
 static TestScene::Registrar _RectGrid(TestScene::Info{

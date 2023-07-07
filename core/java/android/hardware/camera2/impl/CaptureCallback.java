@@ -66,6 +66,13 @@ public abstract class CaptureCallback {
             CaptureRequest request, long timestamp, long frameNumber);
 
     /**
+     * This method is called when the camera device has started reading out the output
+     * image for the request, at the beginning of the sensor image readout.
+     */
+    public abstract void onReadoutStarted(CameraDevice camera,
+            CaptureRequest request, long timestamp, long frameNumber);
+
+    /**
      * This method is called when some results from an image capture are
      * available.
      *

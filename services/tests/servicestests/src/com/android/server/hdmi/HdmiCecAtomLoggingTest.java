@@ -19,7 +19,6 @@ import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.PATH_RELATIONSHIP_ANCESTOR;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
@@ -55,7 +55,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 /**
@@ -68,7 +67,6 @@ public class HdmiCecAtomLoggingTest {
     private HdmiCecAtomWriter mHdmiCecAtomWriterSpy;
     private HdmiControlService mHdmiControlServiceSpy;
     private HdmiCecController mHdmiCecController;
-    private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
     private HdmiMhlControllerStub mHdmiMhlControllerStub;
     private FakeNativeWrapper mNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
@@ -77,7 +75,6 @@ public class HdmiCecAtomLoggingTest {
     private Context mContextSpy;
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress = 0x1110;
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private HdmiPortInfo[] mHdmiPortInfo;
 
     @Before
@@ -89,8 +86,11 @@ public class HdmiCecAtomLoggingTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()));
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy,
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
         doReturn(mHdmiCecAtomWriterSpy).when(mHdmiControlServiceSpy).getAtomWriter();
@@ -116,21 +116,21 @@ public class HdmiCecAtomLoggingTest {
         mHdmiCecNetwork = new HdmiCecNetwork(mHdmiControlServiceSpy,
                 mHdmiCecController, mHdmiMhlControllerStub);
         mHdmiControlServiceSpy.setHdmiCecNetwork(mHdmiCecNetwork);
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
-
-        mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlServiceSpy);
-        mHdmiCecLocalDevicePlayback.init();
-        mLocalDevices.add(mHdmiCecLocalDevicePlayback);
 
         mHdmiControlServiceSpy.initService();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
-        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mTestLooper.dispatchAll();

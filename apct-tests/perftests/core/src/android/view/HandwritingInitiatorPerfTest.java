@@ -59,9 +59,10 @@ public class HandwritingInitiatorPerfTest {
     public void setup() {
         final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mContext = mInstrumentation.getTargetContext();
-        ViewConfiguration viewConfiguration = ViewConfiguration.get(mContext);
+        final ViewConfiguration viewConfiguration = ViewConfiguration.get(mContext);
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
-        InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
+        final InputMethodManager inputMethodManager =
+                mContext.getSystemService(InputMethodManager.class);
         mHandwritingInitiator = new HandwritingInitiator(viewConfiguration, inputMethodManager);
     }
 

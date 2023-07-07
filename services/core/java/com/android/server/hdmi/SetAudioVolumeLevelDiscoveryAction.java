@@ -90,7 +90,7 @@ public class SetAudioVolumeLevelDiscoveryAction extends HdmiCecFeatureAction {
     }
 
     void handleTimerEvent(int state) {
-        if (updateAvcSupport(FEATURE_SUPPORTED)) {
+        if (updateSetAudioVolumeLevelSupport(FEATURE_SUPPORTED)) {
             finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
         } else {
             finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
@@ -104,7 +104,7 @@ public class SetAudioVolumeLevelDiscoveryAction extends HdmiCecFeatureAction {
      *
      * @return Whether support was successfully updated in the network.
      */
-    private boolean updateAvcSupport(
+    private boolean updateSetAudioVolumeLevelSupport(
             @DeviceFeatures.FeatureSupportStatus int setAudioVolumeLevelSupport) {
         HdmiCecNetwork network = localDevice().mService.getHdmiCecNetwork();
         HdmiDeviceInfo currentDeviceInfo = network.getCecDeviceInfo(mTargetAddress);

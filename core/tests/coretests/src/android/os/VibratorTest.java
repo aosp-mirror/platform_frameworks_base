@@ -21,12 +21,17 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -34,6 +39,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -46,6 +52,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -65,6 +72,7 @@ public class VibratorTest {
 
     private Context mContextSpy;
     private Vibrator mVibratorSpy;
+    private TestLooper mTestLooper;
 
     @Before
     public void setUp() {
@@ -73,6 +81,7 @@ public class VibratorTest {
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         mVibratorSpy = spy(new SystemVibrator(mContextSpy));
+        mTestLooper = new TestLooper();
     }
 
     @Test
@@ -237,10 +246,12 @@ public class VibratorTest {
     @Test
     public void getQFactorAndResonantFrequency_differentValues_returnsNaN() {
         VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(1f)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1, null))
                 .build();
         VibratorInfo secondVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(2f)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(2, 2, 2, null))
                 .build();
@@ -249,6 +260,7 @@ public class VibratorTest {
 
         assertTrue(Float.isNaN(info.getQFactor()));
         assertTrue(Float.isNaN(info.getResonantFrequencyHz()));
+        assertEmptyFrequencyProfileAndControl(info);
 
         // One vibrator with values undefined.
         VibratorInfo thirdVibrator = new VibratorInfo.Builder(/* id= */ 3).build();
@@ -257,16 +269,19 @@ public class VibratorTest {
 
         assertTrue(Float.isNaN(info.getQFactor()));
         assertTrue(Float.isNaN(info.getResonantFrequencyHz()));
+        assertEmptyFrequencyProfileAndControl(info);
     }
 
     @Test
     public void getQFactorAndResonantFrequency_sameValues_returnsValue() {
         VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(10f)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(
                         /* resonantFrequencyHz= */ 11, 10, 0.5f, null))
                 .build();
         VibratorInfo secondVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(10f)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(
                         /* resonantFrequencyHz= */ 11, 5, 1, null))
@@ -276,113 +291,131 @@ public class VibratorTest {
 
         assertEquals(10f, info.getQFactor(), TEST_TOLERANCE);
         assertEquals(11f, info.getResonantFrequencyHz(), TEST_TOLERANCE);
+
+        // No frequency range defined.
+        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
     }
 
     @Test
     public void getFrequencyProfile_noVibrator_returnsEmpty() {
         VibratorInfo info = new SystemVibrator.NoVibratorInfo();
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
     }
 
     @Test
     public void getFrequencyProfile_differentResonantFrequencyOrResolutionValues_returnsEmpty() {
         VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo differentResonantFrequency = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(2, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, differentResonantFrequency});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
 
         VibratorInfo differentFrequencyResolution = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 2,
                         new float[] { 0, 1 }))
                 .build();
         info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, differentFrequencyResolution});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
     }
 
     @Test
     public void getFrequencyProfile_missingValues_returnsEmpty() {
         VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo missingResonantFrequency = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(Float.NaN, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, missingResonantFrequency});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
 
         VibratorInfo missingMinFrequency = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, Float.NaN, 1,
                         new float[] { 0, 1 }))
                 .build();
         info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, missingMinFrequency});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
 
         VibratorInfo missingFrequencyResolution = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, Float.NaN,
                         new float[] { 0, 1 }))
                 .build();
         info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, missingFrequencyResolution});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
 
         VibratorInfo missingMaxAmplitudes = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1, null))
                 .build();
         info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, missingMaxAmplitudes});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
     }
 
     @Test
     public void getFrequencyProfile_unalignedMaxAmplitudes_returnsEmpty() {
         VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10, 0.5f,
                         new float[] { 0, 1, 1, 0 }))
                 .build();
         VibratorInfo unalignedMinFrequency = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.1f, 0.5f,
                         new float[] { 0, 1, 1, 0 }))
                 .build();
         VibratorInfo thirdVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
                         new float[] { 0, 1, 1, 0 }))
                 .build();
         VibratorInfo info = new SystemVibrator.MultiVibratorInfo(
                 new VibratorInfo[]{firstVibrator, unalignedMinFrequency, thirdVibrator});
 
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEmptyFrequencyProfileAndControl(info);
     }
 
     @Test
     public void getFrequencyProfile_alignedProfiles_returnsIntersection() {
         VibratorInfo firstVibrator = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10, 0.5f,
                         new float[] { 0.5f, 1, 1, 0.5f }))
                 .build();
         VibratorInfo secondVibrator = new VibratorInfo.Builder(/* id= */ 2)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
                         new float[] { 1, 1, 1 }))
                 .build();
         VibratorInfo thirdVibrator = new VibratorInfo.Builder(/* id= */ 3)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
                         new float[] { 0.8f, 1, 0.8f, 0.5f }))
                 .build();
@@ -392,6 +425,122 @@ public class VibratorTest {
         assertEquals(
                 new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f, new float[] { 0.8f, 1, 0.5f }),
                 info.getFrequencyProfile());
+        assertEquals(true, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
+
+        // Third vibrator without frequency control capability.
+        thirdVibrator = new VibratorInfo.Builder(/* id= */ 3)
+                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
+                        new float[] { 0.8f, 1, 0.8f, 0.5f }))
+                .build();
+        info = new SystemVibrator.MultiVibratorInfo(
+                new VibratorInfo[]{firstVibrator, secondVibrator, thirdVibrator});
+
+        assertEquals(
+                new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f, new float[] { 0.8f, 1, 0.5f }),
+                info.getFrequencyProfile());
+        assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
+    }
+
+    @Test
+    public void onVibratorStateChanged_noVibrator_registersNoListenerToVibratorManager() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[0]);
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+
+        // Never tries to register a listener to an individual vibrator.
+        assertFalse(multiVibratorListener.hasRegisteredListeners());
+        verify(mockVibratorManager, never()).getVibrator(anyInt());
+    }
+
+    @Test
+    public void onVibratorStateChanged_singleVibrator_forwardsAllCallbacks() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[] { 1 });
+        when(mockVibratorManager.getVibrator(anyInt())).thenReturn(NullVibrator.getInstance());
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+        assertTrue(multiVibratorListener.hasRegisteredListeners());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false);
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ true);
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false);
+
+        mTestLooper.dispatchAll();
+
+        InOrder inOrder = inOrder(mockListener);
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(true));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void onVibratorStateChanged_multipleVibrators_triggersOnlyWhenAllVibratorsInitialized() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[] { 1, 2 });
+        when(mockVibratorManager.getVibrator(anyInt())).thenReturn(NullVibrator.getInstance());
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+        assertTrue(multiVibratorListener.hasRegisteredListeners());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false);
+        mTestLooper.dispatchAll();
+        verify(mockListener, never()).onVibratorStateChanged(anyBoolean());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ false);
+        mTestLooper.dispatchAll();
+        verify(mockListener).onVibratorStateChanged(eq(false));
+        verifyNoMoreInteractions(mockListener);
+    }
+
+    @Test
+    public void onVibratorStateChanged_multipleVibrators_stateChangeIsDeduped() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[] { 1, 2 });
+        when(mockVibratorManager.getVibrator(anyInt())).thenReturn(NullVibrator.getInstance());
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+        assertTrue(multiVibratorListener.hasRegisteredListeners());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false); // none
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ false); // false
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ true);  // true
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ true);  // true
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false); // true
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ false); // false
+
+        mTestLooper.dispatchAll();
+
+        InOrder inOrder = inOrder(mockListener);
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(true));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
@@ -435,5 +584,213 @@ public class VibratorTest {
 
         VibrationAttributes vibrationAttributes = captor.getValue();
         assertEquals(new VibrationAttributes.Builder().build(), vibrationAttributes);
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_noAmplitudeControl_fractionalAmplitudes() {
+        Vibrator vibrator =
+                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                        .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                        .setSupportedEffects(VibrationEffect.EFFECT_THUD)
+                        .build());
+
+        // Have at least one fractional amplitude (amplitude not min (0) or max (255) or DEFAULT).
+        assertFalse(vibrator.areVibrationFeaturesSupported(waveformWithAmplitudes(10, 30)));
+        assertFalse(vibrator.areVibrationFeaturesSupported(waveformWithAmplitudes(10, 255)));
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 40)));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_noAmplitudeControl_nonFractionalAmplitudes() {
+        Vibrator vibrator =
+                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                        .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                        .setSupportedEffects(VibrationEffect.EFFECT_THUD)
+                        .build());
+
+        // All amplitudes are min, max, or default. Requires no amplitude control.
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                waveformWithAmplitudes(255, 0, VibrationEffect.DEFAULT_AMPLITUDE, 255)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createWaveform(
+                        /* timings= */ new long[] {1, 2, 3}, /* repeatIndex= */ -1)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 255)));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_withAmplitudeControl() {
+        Vibrator vibrator =
+                createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                        .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                        .build());
+
+        // All forms of amplitudes are valid when amplitude control is available.
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                waveformWithAmplitudes(255, 0, VibrationEffect.DEFAULT_AMPLITUDE, 255)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createWaveform(
+                        /* timings= */ new long[] {1, 2, 3}, /* repeatIndex= */ -1)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(waveformWithAmplitudes(10, 30, 50)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                waveformWithAmplitudes(7, 255, 0, 0, 60)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 255)));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.createOneShot(20, /* amplitude= */ 40)));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_primitiveCompositionsWithSupportedPrimitives() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build());
+
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose()));
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(
+                                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                                /* scale= */ 0.2f,
+                                /* delay= */ 200)
+                        .compose()));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_primitiveCompositionsWithUnupportedPrimitives() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build());
+
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .compose()));
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+                        .compose()));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_composedEffects_allComponentsSupported() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_POP)
+                .build());
+
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_POP))
+                        .compose()));
+
+        vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_POP, VibrationEffect.EFFECT_CLICK)
+                .build());
+
+        assertTrue(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .addEffect(VibrationEffect.createWaveform(
+                                // These timings are given either 0 or default amplitudes, which
+                                // do not require vibrator's amplitude control.
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_POP))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                        .compose()));
+    }
+
+    @Test
+    public void areVibrationFeaturesSupported_composedEffects_someComponentsUnupported() {
+        Vibrator vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_POP)
+                .build());
+
+        // Not supported due to the TICK primitive, which the vibrator has no support for.
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .compose()));
+        // Not supported due to the THUD effect, which the vibrator has no support for.
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_THUD))
+                        .compose()));
+
+        vibrator = createVibratorWithCustomInfo(new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD, 10)
+                .setSupportedEffects(VibrationEffect.EFFECT_POP)
+                .build());
+
+        // Not supported due to fractional amplitudes (amplitudes not min (0) or max (255) or
+        // DEFAULT), because the vibrator has no amplitude control.
+        assertFalse(vibrator.areVibrationFeaturesSupported(
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .addEffect(VibrationEffect.createWaveform(
+                                /* timings= */ new long[] {1, 2, 3},
+                                /* amplitudes= */ new int[] {10, 20, 255},
+                                /* repeatIndex= */ -1))
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_POP))
+                        .compose()));
+    }
+
+    /**
+     * Asserts that the frequency profile is empty, and therefore frequency control isn't supported.
+     */
+    void assertEmptyFrequencyProfileAndControl(VibratorInfo info) {
+        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
+    }
+
+    private Vibrator createVibratorWithCustomInfo(VibratorInfo info) {
+        return new SystemVibrator(mContextSpy) {
+            @Override
+            public VibratorInfo getInfo() {
+                return info;
+            }
+        };
+    }
+
+    private static VibrationEffect waveformWithAmplitudes(int...amplitudes) {
+        long[] timings = new long[amplitudes.length];
+        for (int i = 0; i < timings.length; i++) {
+            timings[i] = i * 2; // Arbitrary timings.
+        }
+        return VibrationEffect.createWaveform(timings, amplitudes, /* repeatIndex= */ -1);
     }
 }

@@ -18,6 +18,7 @@ package com.android.systemui.unfold
 
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
@@ -32,9 +33,11 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -59,14 +62,18 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
 
     private lateinit var unfoldLatencyTracker: UnfoldLatencyTracker
 
+    private val transitionProgressProvider = TestUnfoldTransitionProvider()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         unfoldLatencyTracker = UnfoldLatencyTracker(
             latencyTracker,
             deviceStateManager,
+            Optional.of(transitionProgressProvider),
             context.mainExecutor,
             context,
+            context.contentResolver,
             screenLifecycle
         ).apply { init() }
         deviceStates = FoldableTestUtils.findDeviceStates(context)
@@ -76,8 +83,11 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
     }
 
     @Test
-    fun unfold_eventPropagated() {
+    fun unfold_startedFolded_animationsDisabled_eventPropagatedOnScreenTurnedOnEvent() {
+        setAnimationsEnabled(false)
+        sendFoldEvent(folded = true)
         sendFoldEvent(folded = false)
+
         sendScreenTurnedOnEvent()
 
         verify(latencyTracker).onActionStart(any())
@@ -85,9 +95,72 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
     }
 
     @Test
-    fun fold_eventNotPropagated() {
+    fun unfold_startedFolded_animationsEnabledOnScreenTurnedOn_eventNotFinished() {
+        setAnimationsEnabled(true)
         sendFoldEvent(folded = true)
+        sendFoldEvent(folded = false)
+
+        sendScreenTurnedOnEvent()
+
+        verify(latencyTracker).onActionStart(any())
+        verify(latencyTracker, never()).onActionEnd(any())
+    }
+
+    @Test
+    fun unfold_firstFoldEventAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventNotPropagated() {
+        setAnimationsEnabled(true)
+        sendFoldEvent(folded = false)
+
+        sendScreenTurnedOnEvent()
+        transitionProgressProvider.onTransitionStarted()
+
+        verifyNoMoreInteractions(latencyTracker)
+    }
+
+    @Test
+    fun unfold_secondFoldEventAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventPropagated() {
+        setAnimationsEnabled(true)
+        sendFoldEvent(folded = true)
+        sendFoldEvent(folded = false)
+
+        sendScreenTurnedOnEvent()
+        transitionProgressProvider.onTransitionStarted()
+
+        verify(latencyTracker).onActionStart(any())
+        verify(latencyTracker).onActionEnd(any())
+    }
+
+    @Test
+    fun unfold_unfoldFoldUnfoldAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventPropagated() {
+        setAnimationsEnabled(true)
+        sendFoldEvent(folded = false)
+        sendFoldEvent(folded = true)
+        sendFoldEvent(folded = false)
+
+        sendScreenTurnedOnEvent()
+        transitionProgressProvider.onTransitionStarted()
+
+        verify(latencyTracker).onActionStart(any())
+        verify(latencyTracker).onActionEnd(any())
+    }
+
+    @Test
+    fun fold_animationsDisabled_screenTurnedOn_eventNotPropagated() {
+        setAnimationsEnabled(false)
+        sendFoldEvent(folded = true)
+
         sendScreenTurnedOnEvent() // outer display on.
+
+        verifyNoMoreInteractions(latencyTracker)
+    }
+
+    @Test
+    fun fold_animationsEnabled_screenTurnedOn_eventNotPropagated() {
+        setAnimationsEnabled(true)
+        sendFoldEvent(folded = true)
+
+        sendScreenTurnedOnEvent() // outer display on.
+        transitionProgressProvider.onTransitionStarted()
 
         verifyNoMoreInteractions(latencyTracker)
     }
@@ -106,5 +179,21 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
 
     private fun sendScreenTurnedOnEvent() {
         screenLifecycleCaptor.value.onScreenTurnedOn()
+    }
+
+    private fun setAnimationsEnabled(enabled: Boolean) {
+        val durationScale =
+            if (enabled) {
+                1f
+            } else {
+                0f
+            }
+
+        // It uses [TestableSettingsProvider] and it will be cleared after the test
+        Settings.Global.putString(
+            context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            durationScale.toString()
+        )
     }
 }

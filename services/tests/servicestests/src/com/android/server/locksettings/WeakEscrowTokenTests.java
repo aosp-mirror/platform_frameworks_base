@@ -40,6 +40,7 @@ import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,6 +49,11 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WeakEscrowTokenTests extends BaseLockSettingsServiceTests{
+
+    @Before
+    public void setUp() {
+        mService.initializeSyntheticPassword(PRIMARY_USER_ID);
+    }
 
     @Test
     public void testWeakTokenActivatedImmediatelyIfNoUserPassword()

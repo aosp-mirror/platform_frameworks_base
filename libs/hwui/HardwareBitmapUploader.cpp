@@ -22,8 +22,11 @@
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
 #include <GrDirectContext.h>
+#include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
+#include <SkImageInfo.h>
+#include <SkRefCnt.h>
 #include <gui/TraceUtils.h>
 #include <utils/GLUtils.h>
 #include <utils/NdkUtils.h>
@@ -38,6 +41,8 @@
 #include "utils/TimeUtils.h"
 
 namespace android::uirenderer {
+
+static constexpr auto kThreadTimeout = 60000_ms;
 
 class AHBUploader;
 // This helper uploader classes allows us to upload using either EGL or Vulkan using the same
@@ -77,7 +82,7 @@ public:
     }
 
     void postIdleTimeoutCheck() {
-        mUploadThread->queue().postDelayed(5000_ms, [this](){ this->idleTimeoutCheck(); });
+        mUploadThread->queue().postDelayed(kThreadTimeout, [this]() { this->idleTimeoutCheck(); });
     }
 
 protected:
@@ -94,7 +99,7 @@ private:
 
     bool shouldTimeOutLocked() {
         nsecs_t durationSince = systemTime() - mLastUpload;
-        return durationSince > 2000_ms;
+        return durationSince > kThreadTimeout;
     }
 
     void idleTimeoutCheck() {

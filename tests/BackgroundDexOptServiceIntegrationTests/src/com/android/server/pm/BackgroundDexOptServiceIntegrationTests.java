@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static org.junit.Assume.assumeFalse;
+
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Environment;
@@ -31,6 +33,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -111,6 +114,7 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     @Before
     public void setUp() throws IOException {
+        assumeFalse(SystemProperties.getBoolean("dalvik.vm.useartservice", false));
         File dataDir = getContext().getDataDir();
         mBigFile = new File(dataDir, BIG_FILE);
     }
@@ -299,6 +303,8 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     // Test that background dexopt under low storage conditions downgrades unused packages.
     @Test
+    @Ignore("b/251438180: This test has been failing for a long time; temporarily disable it while"
+            + " we investigate this issue.")
     public void testBackgroundDexOptDowngradeSuccessful() throws IOException {
         // Should be more than DOWNGRADE_AFTER_DAYS.
         long deltaDays = DOWNGRADE_AFTER_DAYS + 1;

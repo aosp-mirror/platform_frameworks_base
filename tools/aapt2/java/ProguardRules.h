@@ -22,12 +22,11 @@
 #include <set>
 #include <string>
 
-#include "androidfw/StringPiece.h"
-
 #include "Resource.h"
 #include "ResourceTable.h"
-#include "Source.h"
 #include "ValueVisitor.h"
+#include "androidfw/Source.h"
+#include "androidfw/StringPiece.h"
 #include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
@@ -37,7 +36,7 @@ namespace proguard {
 
 struct UsageLocation {
   ResourceName name;
-  Source source;
+  android::Source source;
 };
 
 struct NameAndSignature {

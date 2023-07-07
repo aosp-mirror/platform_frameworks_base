@@ -20,6 +20,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 
 import android.app.ActivityManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.content.Intent;
@@ -72,15 +73,16 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCallerOrSystemOrRoot();
 
         synchronized (mService.mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
+            int origCallingUid = Binder.getCallingUid();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
                 if (!mService.mTaskSupervisor.removeTaskById(mTaskId, false,
-                        REMOVE_FROM_RECENTS, "finish-and-remove-task")) {
+                        REMOVE_FROM_RECENTS, "finish-and-remove-task", origCallingUid)) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
             } finally {
-                Binder.restoreCallingIdentity(origId);
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
     }
@@ -98,7 +100,7 @@ class AppTaskImpl extends IAppTask.Stub {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
                 return mService.getRecentTasks().createRecentTaskInfo(task,
-                        false /* stripExtras */);
+                        false /* stripExtras */, true /* getTasksAllowed */);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -119,10 +121,20 @@ class AppTaskImpl extends IAppTask.Stub {
                 if (appThread != null) {
                     callerApp = mService.getProcessController(appThread);
                 }
-                final ActivityStarter starter = mService.getActivityStartController().obtainStarter(
-                        null /* intent */, "moveToFront");
-                if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                        callingPackage, -1, -1, callerApp, null, false, null, null)) {
+                final BackgroundActivityStartController balController =
+                        mService.getActivityStartController()
+                                .getBackgroundActivityLaunchController();
+                if (balController.shouldAbortBackgroundActivityStart(
+                        callingUid,
+                        callingPid,
+                        callingPackage,
+                        -1,
+                        -1,
+                        callerApp,
+                        null,
+                        BackgroundStartPrivileges.NONE,
+                        null,
+                        null)) {
                     if (!mService.isBackgroundActivityStartsEnabled()) {
                         return;
                     }

@@ -1,0 +1,35 @@
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <!-- Test Permission title. [DO NOT TRANSLATE] -->
+    <string name="test_permission_title" translatable="false">Test Permission</string>
+
+    <!-- Test Permission switch title. [DO NOT TRANSLATE] -->
+    <string name="test_permission_switch_title" translatable="false">Allow Test Permission</string>
+
+    <!-- Test Permission footer. [DO NOT TRANSLATE] -->
+    <string name="test_permission_footer" translatable="false">Test Permission is for testing.</string>
+
+    <!-- Test App Op Permission title. [DO NOT TRANSLATE] -->
+    <string name="test_app_op_permission_title" translatable="false">Test App Op Permission</string>
+
+    <!-- Test App Op Permission switch title. [DO NOT TRANSLATE] -->
+    <string name="test_app_op_permission_switch_title" translatable="false">Allow Test App Op Permission</string>
+
+    <!-- Test App Op Permission footer. [DO NOT TRANSLATE] -->
+    <string name="test_app_op_permission_footer" translatable="false">Test App Op Permission is for testing.</string>
+</resources>

@@ -24,12 +24,12 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.icu.text.DateFormatSymbols;
 import android.icu.text.DateTimePatternGenerator;
+import android.icu.util.ULocale;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
-import android.text.TextUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -170,7 +170,7 @@ public class DateFormat {
      * mean using 12-hour in some locales and, in this case, is duplicated as the 'a' field.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long DISALLOW_DUPLICATE_FIELD_IN_SKELETON = 170233598L;
 
     /**
@@ -265,11 +265,13 @@ public class DateFormat {
      * @return a string pattern suitable for use with {@link java.text.SimpleDateFormat}.
      */
     public static String getBestDateTimePattern(Locale locale, String skeleton) {
-        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(locale);
+        ULocale uLocale = ULocale.forLocale(locale);
+        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(uLocale);
         boolean allowDuplicateFields = !CompatChanges.isChangeEnabled(
                 DISALLOW_DUPLICATE_FIELD_IN_SKELETON);
-        return dtpg.getBestPattern(skeleton, DateTimePatternGenerator.MATCH_NO_OPTIONS,
+        String pattern = dtpg.getBestPattern(skeleton, DateTimePatternGenerator.MATCH_NO_OPTIONS,
                 allowDuplicateFields);
+        return getCompatibleEnglishPattern(uLocale, pattern);
     }
 
     /**
@@ -303,10 +305,11 @@ public class DateFormat {
      */
     @UnsupportedAppUsage
     public static String getTimeFormatString(Context context, int userHandle) {
-        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
-                context.getResources().getConfiguration().locale);
-        return is24HourFormat(context, userHandle) ? dtpg.getBestPattern("Hm")
+        ULocale uLocale = ULocale.forLocale(context.getResources().getConfiguration().locale);
+        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(uLocale);
+        String pattern = is24HourFormat(context, userHandle) ? dtpg.getBestPattern("Hm")
             : dtpg.getBestPattern("hm");
+        return getCompatibleEnglishPattern(uLocale, pattern);
     }
 
     /**
@@ -712,5 +715,22 @@ public class DateFormat {
      */
     public static DateFormatSymbols getIcuDateFormatSymbols(Locale locale) {
         return new DateFormatSymbols(android.icu.util.GregorianCalendar.class, locale);
+    }
+
+    /**
+     * See http://b/266731719. It mirrors the implementation in
+     * {@link libcore.icu.SimpleDateFormatData.DateTimeFormatStringGenerator#postProcessPattern}
+     */
+    private static String getCompatibleEnglishPattern(ULocale locale, String pattern) {
+        if (pattern == null || locale == null || !"en".equals(locale.getLanguage())) {
+            return pattern;
+        }
+
+        String region = locale.getCountry();
+        if (region != null && !region.isEmpty() && !"US".equals(region)) {
+            return pattern;
+        }
+
+        return pattern.replace('\u202f', ' ');
     }
 }

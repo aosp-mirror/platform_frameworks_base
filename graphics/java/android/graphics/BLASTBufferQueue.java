@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -31,9 +32,10 @@ public final class BLASTBufferQueue {
     private static native long nativeCreate(String name, boolean updateDestinationFrame);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
-    private static native void nativeSyncNextTransaction(long ptr,
+    private static native boolean nativeSyncNextTransaction(long ptr,
             Consumer<SurfaceControl.Transaction> callback, boolean acquireSingleBuffer);
     private static native void nativeStopContinuousSyncTransaction(long ptr);
+    private static native void nativeClearSyncTransaction(long ptr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
             int format);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
@@ -47,7 +49,7 @@ public final class BLASTBufferQueue {
             TransactionHangCallback callback);
 
     public interface TransactionHangCallback {
-        void onTransactionHang(boolean isGpuHang);
+        void onTransactionHang(String reason);
     }
 
     /** Create a new connection with the surface flinger. */
@@ -92,9 +94,9 @@ public final class BLASTBufferQueue {
      *                            acquired. If false, continue to acquire all buffers into the
      *                            transaction until stopContinuousSyncTransaction is called.
      */
-    public void syncNextTransaction(boolean acquireSingleBuffer,
-            Consumer<SurfaceControl.Transaction> callback) {
-        nativeSyncNextTransaction(mNativeObject, callback, acquireSingleBuffer);
+    public boolean syncNextTransaction(boolean acquireSingleBuffer,
+            @NonNull Consumer<SurfaceControl.Transaction> callback) {
+        return nativeSyncNextTransaction(mNativeObject, callback, acquireSingleBuffer);
     }
 
     /**
@@ -104,8 +106,8 @@ public final class BLASTBufferQueue {
      * @param callback The callback invoked when the buffer has been added to the transaction. The
      *                 callback will contain the transaction with the buffer.
      */
-    public void syncNextTransaction(Consumer<SurfaceControl.Transaction> callback) {
-        syncNextTransaction(true /* acquireSingleBuffer */, callback);
+    public boolean syncNextTransaction(@NonNull Consumer<SurfaceControl.Transaction> callback) {
+        return syncNextTransaction(true /* acquireSingleBuffer */, callback);
     }
 
     /**
@@ -115,6 +117,14 @@ public final class BLASTBufferQueue {
      */
     public void stopContinuousSyncTransaction() {
         nativeStopContinuousSyncTransaction(mNativeObject);
+    }
+
+    /**
+     * Tell BBQ to clear the sync transaction that was previously set. The callback will not be
+     * invoked when the next frame is acquired.
+     */
+    public void clearSyncTransaction() {
+        nativeClearSyncTransaction(mNativeObject);
     }
 
     /**

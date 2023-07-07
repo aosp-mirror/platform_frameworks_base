@@ -54,7 +54,7 @@ public class SyncActivityTooManyDeletes extends Activity
         }
 
         mNumDeletes = extras.getLong("numDeletes");
-        mAccount = (Account) extras.getParcelable("account");
+        mAccount = (Account) extras.getParcelable("account", android.accounts.Account.class);
         mAuthority = extras.getString("authority");
         mProvider = extras.getString("provider");
 

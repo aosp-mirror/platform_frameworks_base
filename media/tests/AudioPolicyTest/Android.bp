@@ -10,17 +10,16 @@ package {
 android_test {
     name: "audiopolicytest",
     srcs: ["**/*.java"],
-    libs: [
-        "android.test.runner",
-        "android.test.base",
-    ],
     static_libs: [
-        "mockito-target-minus-junit4",
+        "androidx.test.ext.junit",
         "androidx.test.rules",
-        "android-ex-camera2",
-        "testng",
+        "guava",
+        "guava-android-testlib",
+        "hamcrest-library",
+        "platform-test-annotations",
     ],
     platform_apis: true,
     certificate: "platform",
     resource_dirs: ["res"],
+    test_suites: ["device-tests"],
 }

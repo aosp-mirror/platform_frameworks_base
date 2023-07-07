@@ -21,6 +21,7 @@ import android.os.Message;
 import android.telephony.SubscriptionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.connectivity.NetworkController.EmergencyListener;
 
@@ -36,6 +37,7 @@ import javax.inject.Inject;
  * Implements network listeners and forwards the calls along onto other listeners but on
  * the current or specified Looper.
  */
+@SysUISingleton
 public class CallbackHandler extends Handler implements EmergencyListener, SignalCallback {
     private static final String TAG = "CallbackHandler";
     private static final int MSG_EMERGENCE_CHANGED           = 0;

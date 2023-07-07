@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<com.android.test.silkfx.hdr.GainmapImage xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/gainmap_image">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RadioGroup android:id="@+id/output_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+            <RadioButton android:id="@+id/output_sdr"
+                         android:layout_width="wrap_content"
+                         android:layout_weight="1"
+                         android:layout_height="wrap_content"
+                         android:text="SDR" />
+
+            <RadioButton android:id="@+id/output_gainmap"
+                         android:layout_width="wrap_content"
+                         android:layout_weight="1"
+                         android:layout_height="wrap_content"
+                         android:text="Gainmap" />
+
+            <RadioButton android:id="@+id/output_hdr"
+                         android:layout_width="wrap_content"
+                         android:layout_weight="1"
+                         android:layout_height="wrap_content"
+                         android:text="HDR" />
+
+            <RadioButton android:id="@+id/output_hdr_test"
+                         android:layout_width="wrap_content"
+                         android:layout_weight="1"
+                         android:layout_height="wrap_content"
+                         android:text="HDR (test)" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/image_selection"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/gainmap_metadata"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Gainmap Metadata..." />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/error_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</com.android.test.silkfx.hdr.GainmapImage>

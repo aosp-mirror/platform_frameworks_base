@@ -16,15 +16,15 @@
 
 #include "format/proto/ProtoDeserialize.h"
 
-#include "android-base/logging.h"
-#include "android-base/macros.h"
-#include "androidfw/ResourceTypes.h"
-#include "androidfw/Locale.h"
-
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "androidfw/Locale.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/Util.h"
 
 using ::android::ConfigDescription;
 using ::android::LocaleValue;
@@ -354,12 +354,13 @@ bool DeserializeConfigFromPb(const pb::Configuration& pb_config, ConfigDescripti
   out_config->screenWidth = static_cast<uint16_t>(pb_config.screen_width());
   out_config->screenHeight = static_cast<uint16_t>(pb_config.screen_height());
   out_config->sdkVersion = static_cast<uint16_t>(pb_config.sdk_version());
+  out_config->grammaticalInflection = pb_config.grammatical_gender();
   return true;
 }
 
 static void DeserializeSourceFromPb(const pb::Source& pb_source, const ResStringPool& src_pool,
-                                    Source* out_source) {
-  out_source->path = util::GetString(src_pool, pb_source.path_idx());
+                                    android::Source* out_source) {
+  out_source->path = android::util::GetString(src_pool, pb_source.path_idx());
   out_source->line = static_cast<size_t>(pb_source.position().line_number());
 }
 
@@ -429,8 +430,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
   ResourceTablePackage* pkg = out_table->FindOrCreatePackage(pb_package.package_name());
   for (const pb::Type& pb_type : pb_package.type()) {
-    const ResourceType* res_type = ParseResourceType(pb_type.name());
-    if (res_type == nullptr) {
+    auto res_type = ParseResourceNamedType(pb_type.name());
+    if (!res_type) {
       std::ostringstream error;
       error << "unknown type '" << pb_type.name() << "'";
       *out_error = error.str();
@@ -515,7 +516,7 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),
                        pb_entry.entry_id().id());
       if (resid.is_valid()) {
-        id_index[resid] = ResourceNameRef(pkg->name, type->type, entry->name);
+        id_index[resid] = ResourceNameRef(pkg->name, type->named_type, entry->name);
       }
 
       for (const pb::ConfigValue& pb_config_value : pb_entry.config_value()) {
@@ -560,6 +561,11 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, io::IFileCollecti
       *out_error = "invalid source pool";
       return false;
     }
+  }
+
+  for (const pb::DynamicRefTable& dynamic_ref : pb_table.dynamic_ref_table()) {
+    out_table->included_packages_.insert(
+        {dynamic_ref.package_id().id(), dynamic_ref.package_name()});
   }
 
   // Deserialize the overlayable groups of the table
@@ -680,7 +686,7 @@ static bool DeserializeMacroFromPb(const pb::MacroBody& pb_ref, Macro* out_ref,
   if (pb_ref.has_style_string()) {
     out_ref->style_string.str = pb_ref.style_string().str();
     for (const auto& span : pb_ref.style_string().spans()) {
-      out_ref->style_string.spans.emplace_back(Span{
+      out_ref->style_string.spans.emplace_back(android::Span{
           .name = span.name(), .first_char = span.start_index(), .last_char = span.end_index()});
     }
   }
@@ -705,7 +711,7 @@ template <typename T>
 static void DeserializeItemMetaDataFromPb(const T& pb_item, const android::ResStringPool& src_pool,
                                           Value* out_value) {
   if (pb_item.has_source()) {
-    Source source;
+    android::Source source;
     DeserializeSourceFromPb(pb_item.source(), src_pool, &source);
     out_value->SetSource(std::move(source));
   }
@@ -733,8 +739,8 @@ static size_t DeserializePluralEnumFromPb(const pb::Plural_Arity& arity) {
 std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
                                               const android::ResStringPool& src_pool,
                                               const ConfigDescription& config,
-                                              StringPool* value_pool, io::IFileCollection* files,
-                                              std::string* out_error) {
+                                              android::StringPool* value_pool,
+                                              io::IFileCollection* files, std::string* out_error) {
   std::unique_ptr<Value> value;
   if (pb_value.has_item()) {
     value = DeserializeItemFromPb(pb_value.item(), src_pool, config, value_pool, files, out_error);
@@ -774,7 +780,7 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
           }
 
           if (pb_style.has_parent_source()) {
-            Source parent_source;
+            android::Source parent_source;
             DeserializeSourceFromPb(pb_style.parent_source(), src_pool, &parent_source);
             style->parent.value().SetSource(std::move(parent_source));
           }
@@ -870,7 +876,8 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
 
 std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
                                             const android::ResStringPool& src_pool,
-                                            const ConfigDescription& config, StringPool* value_pool,
+                                            const ConfigDescription& config,
+                                            android::StringPool* value_pool,
                                             io::IFileCollection* files, std::string* out_error) {
   switch (pb_item.value_case()) {
     case pb::Item::kRef: {
@@ -960,29 +967,32 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
 
     case pb::Item::kStr: {
       return util::make_unique<String>(
-          value_pool->MakeRef(pb_item.str().value(), StringPool::Context(config)));
+          value_pool->MakeRef(pb_item.str().value(), android::StringPool::Context(config)));
     } break;
 
     case pb::Item::kRawStr: {
       return util::make_unique<RawString>(
-          value_pool->MakeRef(pb_item.raw_str().value(), StringPool::Context(config)));
+          value_pool->MakeRef(pb_item.raw_str().value(), android::StringPool::Context(config)));
     } break;
 
     case pb::Item::kStyledStr: {
       const pb::StyledString& pb_str = pb_item.styled_str();
-      StyleString style_str{pb_str.value()};
+      android::StyleString style_str{pb_str.value()};
       for (const pb::StyledString::Span& pb_span : pb_str.span()) {
-        style_str.spans.push_back(Span{pb_span.tag(), pb_span.first_char(), pb_span.last_char()});
+        style_str.spans.push_back(
+            android::Span{pb_span.tag(), pb_span.first_char(), pb_span.last_char()});
       }
       return util::make_unique<StyledString>(value_pool->MakeRef(
-          style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
+          style_str,
+          android::StringPool::Context(android::StringPool::Context::kNormalPriority, config)));
     } break;
 
     case pb::Item::kFile: {
       const pb::FileReference& pb_file = pb_item.file();
       std::unique_ptr<FileReference> file_ref =
           util::make_unique<FileReference>(value_pool->MakeRef(
-              pb_file.path(), StringPool::Context(StringPool::Context::kHighPriority, config)));
+              pb_file.path(),
+              android::StringPool::Context(android::StringPool::Context::kHighPriority, config)));
       file_ref->type = DeserializeFileReferenceTypeFromPb(pb_file.type());
       if (files != nullptr) {
         file_ref->file = files->FindFile(*file_ref->path);
@@ -1011,8 +1021,8 @@ std::unique_ptr<xml::XmlResource> DeserializeXmlResourceFromPb(const pb::XmlNode
   return resource;
 }
 
-bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, StringPool* value_pool,
-                          std::string* out_error) {
+bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el,
+                          android::StringPool* value_pool, std::string* out_error) {
   const pb::XmlElement& pb_el = pb_node.element();
   out_el->name = pb_el.name();
   out_el->namespace_uri = pb_el.namespace_uri();
@@ -1042,7 +1052,7 @@ bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, Stri
       if (attr.compiled_value == nullptr) {
         return {};
       }
-      attr.compiled_value->SetSource(Source().WithLine(pb_attr.source().line_number()));
+      attr.compiled_value->SetSource(android::Source().WithLine(pb_attr.source().line_number()));
     }
     out_el->attributes.push_back(std::move(attr));
   }

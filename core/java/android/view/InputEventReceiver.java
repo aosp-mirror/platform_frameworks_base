@@ -77,7 +77,7 @@ public abstract class InputEventReceiver {
         mInputChannel = inputChannel;
         mMessageQueue = looper.getQueue();
         mReceiverPtr = nativeInit(new WeakReference<InputEventReceiver>(this),
-                inputChannel, mMessageQueue);
+                mInputChannel, mMessageQueue);
 
         mCloseGuard.open("InputEventReceiver.dispose");
     }

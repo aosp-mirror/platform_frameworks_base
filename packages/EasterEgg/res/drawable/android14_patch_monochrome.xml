@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2023 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <group>
+    <clip-path
+        android:pathData="M0,0h108v108h-108z"/>
+    <group>
+      <clip-path
+          android:pathData="M22,22h64v64h-64z"/>
+      <path
+          android:pathData="M54,78C67.25,78 78,67.25 78,54C78,40.75 67.25,30 54,30C40.75,30 30,40.75 30,54C30,67.25 40.75,78 54,78Z"
+          android:strokeWidth="5"
+          android:fillColor="#00000000"
+          android:strokeColor="#000000"/>
+      <group>
+        <clip-path
+            android:pathData="M77.5,54C77.5,66.98 66.98,77.5 54,77.5C41.02,77.5 30.5,66.98 30.5,54C30.5,41.02 41.02,30.5 54,30.5C66.98,30.5 77.5,41.02 77.5,54Z"/>
+        <path
+            android:pathData="M61.5,46.06C56.7,47.89 51.4,47.89 46.61,46.06L44.04,50.51C43.49,51.46 42.28,51.79 41.33,51.24C40.39,50.69 40.06,49.48 40.61,48.53L43.06,44.28C37.97,41.03 34.54,35.56 34,29.19L33.88,27.74H74.22L74.1,29.19C73.57,35.56 70.14,41.03 65.04,44.28L67.51,48.56C68.03,49.49 67.71,50.66 66.8,51.21C65.87,51.77 64.65,51.47 64.08,50.54L64.07,50.51L61.5,46.06Z"
+            android:fillColor="#000000"/>
+      </group>
+      <path
+          android:pathData="M51.33,67.33h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M48.67,62h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M56.67,70h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M56.67,62h2.67v2.67h-2.67z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M67.33,62h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M59.33,51.33h2.67v2.67h-2.67z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M62,59.33h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M70,54h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M35.33,56.67h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M35.33,48.67h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M40.67,59.33h2.67v2.67h-2.67z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M46,51.33h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M43.33,67.33h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+      <path
+          android:pathData="M54,54h1.33v1.33h-1.33z"
+          android:fillColor="#000000"/>
+    </group>
+  </group>
+</vector>

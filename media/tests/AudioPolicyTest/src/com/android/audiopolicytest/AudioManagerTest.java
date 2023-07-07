@@ -16,28 +16,57 @@
 
 package com.android.audiopolicytest;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
+import static com.android.audiopolicytest.AudioVolumeTestUtil.DEFAULT_ATTRIBUTES;
+import static com.android.audiopolicytest.AudioVolumeTestUtil.incrementVolumeIndex;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.testng.Assert.assertThrows;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.common.primitives.Ints;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.List;
 
-public class AudioManagerTest extends AudioVolumesTestBase {
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class AudioManagerTest {
     private static final String TAG = "AudioManagerTest";
+
+    private AudioManager mAudioManager;
+
+    @Rule
+    public final AudioVolumesTestRule rule = new AudioVolumesTestRule();
+
+    @Before
+    public void setUp() {
+        mAudioManager = getApplicationContext().getSystemService(AudioManager.class);
+    }
 
     //-----------------------------------------------------------------
     // Test getAudioProductStrategies and validate strategies
     //-----------------------------------------------------------------
-    public void testGetAndValidateProductStrategies() throws Exception {
+    @Test
+    public void testGetAndValidateProductStrategies() {
         List<AudioProductStrategy> audioProductStrategies =
                 mAudioManager.getAudioProductStrategies();
         assertTrue(audioProductStrategies.size() > 0);
@@ -101,8 +130,8 @@ public class AudioManagerTest extends AudioVolumesTestBase {
     //-----------------------------------------------------------------
     // Test getAudioVolumeGroups and validate volume groups
     //-----------------------------------------------------------------
-
-    public void testGetAndValidateVolumeGroups() throws Exception {
+    @Test
+    public void testGetAndValidateVolumeGroups() {
         List<AudioVolumeGroup> audioVolumeGroups = mAudioManager.getAudioVolumeGroups();
         assertTrue(audioVolumeGroups.size() > 0);
 
@@ -118,7 +147,7 @@ public class AudioManagerTest extends AudioVolumesTestBase {
             // for each volume group attributes, find the matching product strategy and ensure
             // it is linked the considered volume group
             for (final AudioAttributes aa : avgAttributes) {
-                if (aa.equals(sDefaultAttributes)) {
+                if (aa.equals(DEFAULT_ATTRIBUTES)) {
                     // Some volume groups may not have valid attributes, used for internal
                     // volume management like patch/rerouting
                     // so bailing out strategy retrieval from attributes
@@ -180,6 +209,7 @@ public class AudioManagerTest extends AudioVolumesTestBase {
     //-----------------------------------------------------------------
     // Test Volume per Attributes setter/getters
     //-----------------------------------------------------------------
+    @Test
     public void testSetGetVolumePerAttributesWithInvalidAttributes() throws Exception {
         AudioAttributes nullAttributes = null;
 
@@ -197,7 +227,8 @@ public class AudioManagerTest extends AudioVolumesTestBase {
                         nullAttributes, 0 /*index*/, 0/*flags*/));
     }
 
-    public void testSetGetVolumePerAttributes() throws Exception {
+    @Test
+    public void testSetGetVolumePerAttributes() {
         for (int usage : AudioAttributes.SDK_USAGES) {
             if (usage == AudioAttributes.USAGE_UNKNOWN) {
                 continue;
@@ -248,12 +279,14 @@ public class AudioManagerTest extends AudioVolumesTestBase {
     //-----------------------------------------------------------------
     // Test register/unregister VolumeGroupCallback
     //-----------------------------------------------------------------
-    public void testVolumeGroupCallback() throws Exception {
+    @Test
+    public void testVolumeGroupCallback() {
         List<AudioVolumeGroup> audioVolumeGroups = mAudioManager.getAudioVolumeGroups();
         assertTrue(audioVolumeGroups.size() > 0);
 
         AudioVolumeGroupCallbackHelper vgCbReceiver = new AudioVolumeGroupCallbackHelper();
-        mAudioManager.registerVolumeGroupCallback(mContext.getMainExecutor(), vgCbReceiver);
+        mAudioManager.registerVolumeGroupCallback(getApplicationContext().getMainExecutor(),
+                vgCbReceiver);
 
         final List<Integer> publicStreams = Ints.asList(AudioManager.getPublicStreamTypes());
         try {
@@ -273,7 +306,7 @@ public class AudioManagerTest extends AudioVolumesTestBase {
 
                 // Set the volume per attributes (if valid) and wait the callback
                 for (final AudioAttributes aa : avgAttributes) {
-                    if (aa.equals(sDefaultAttributes)) {
+                    if (aa.equals(DEFAULT_ATTRIBUTES)) {
                         // Some volume groups may not have valid attributes, used for internal
                         // volume management like patch/rerouting
                         // so bailing out strategy retrieval from attributes

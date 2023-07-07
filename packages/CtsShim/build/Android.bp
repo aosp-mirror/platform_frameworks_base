@@ -43,6 +43,9 @@ android_app {
 
     compile_multilib: "both",
     jni_libs: ["libshim_jni"],
+    // Explicitly uncompress native libs rather than letting the build system doing it and destroy the
+    // v2/v3 signature.
+    use_embedded_native_libs: true,
 
     uses_libs: ["android.test.runner"],
 
@@ -124,6 +127,9 @@ android_app {
 
     compile_multilib: "both",
     jni_libs: ["libshim_jni"],
+    // Explicitly uncompress native libs rather than letting the build system doing it and destroy the
+    // v2/v3 signature.
+    use_embedded_native_libs: true,
 
     uses_libs: ["android.test.runner"],
 }
