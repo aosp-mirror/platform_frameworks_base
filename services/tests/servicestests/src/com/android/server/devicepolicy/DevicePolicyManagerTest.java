@@ -46,7 +46,6 @@ import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_ENTERPRISE_EAP
 import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_OPEN;
 import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_PERSONAL;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
-import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -5479,8 +5478,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         reset(mContext.spiedContext);
 
-        PasswordMetrics passwordMetricsNoSymbols = computeForPasswordOrPin(
-                "abcdXYZ5".getBytes(), /* isPin */ false);
+        PasswordMetrics passwordMetricsNoSymbols = metricsForPassword("abcdXYZ5");
 
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
@@ -5507,8 +5505,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(mContext.spiedContext);
         assertThat(dpm.isActivePasswordSufficient()).isFalse();
 
-        PasswordMetrics passwordMetricsWithSymbols = computeForPasswordOrPin(
-                "abcd.XY5".getBytes(), /* isPin */ false);
+        PasswordMetrics passwordMetricsWithSymbols = metricsForPassword("abcd.XY5");
 
         setActivePasswordState(passwordMetricsWithSymbols);
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
@@ -5564,7 +5561,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_MEDIUM);
 
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("184342".getBytes(), /* isPin */ true));
+                .thenReturn(metricsForPin("184342"));
 
         // Numeric password is compliant with current requirement (QUALITY_NUMERIC set explicitly
         // on the parent admin)
@@ -5685,7 +5682,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a work challenge and verify profile.isActivePasswordSufficient is now true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(managedProfileUserId))
-                .thenReturn(computeForPasswordOrPin("abcdXYZ5".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("abcdXYZ5"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5710,7 +5707,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a work challenge and verify profile.isActivePasswordSufficient is now true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(managedProfileUserId))
-                .thenReturn(computeForPasswordOrPin("5156".getBytes(), /* isPin */ true));
+                .thenReturn(metricsForPin("5156"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5735,7 +5732,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a device lockscreen and verify parent.isActivePasswordSufficient is now true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("acbdXYZ5".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("acbdXYZ5"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5758,7 +5755,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a device lockscreen and verify parent.isActivePasswordSufficient is now true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("1234".getBytes(), /* isPin */ true));
+                .thenReturn(metricsForPin("1234"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5783,7 +5780,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("abcdXYZ5".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("abcdXYZ5"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5806,7 +5803,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("51567548".getBytes(), /* isPin */ true));
+                .thenReturn(metricsForPin("51567548"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5831,7 +5828,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("abcdXYZ5".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("abcdXYZ5"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -5854,7 +5851,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Set a device lockscreen and verify {profile, parent}.isActivePasswordSufficient is true
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPasswordOrPin("5156".getBytes(), /* isPin */ true));
+                .thenReturn(metricsForPin("5156"));
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
         assertThat(parentDpm.isActivePasswordSufficient()).isTrue();
     }
@@ -6909,7 +6906,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(CALLER_USER_HANDLE);
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(CALLER_USER_HANDLE))
-                .thenReturn(computeForPasswordOrPin("asdf".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("asdf"));
 
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_MEDIUM);
     }
@@ -6929,10 +6926,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(CALLER_USER_HANDLE))
-                .thenReturn(computeForPasswordOrPin("asdf".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("asdf"));
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(parentUser.id))
-                .thenReturn(computeForPasswordOrPin("parentUser".getBytes(), /* isPin */ false));
+                .thenReturn(metricsForPassword("parentUser"));
 
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
     }
@@ -7654,15 +7651,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_NONE);
 
         reset(mContext.spiedContext);
-        PasswordMetrics passwordMetricsNoSymbols = computeForPasswordOrPin(
-                "1234".getBytes(), /* isPin */ true);
+        PasswordMetrics passwordMetricsNoSymbols = metricsForPin("1234");
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_LOW);
         assertThat(dpm.isActivePasswordSufficient()).isFalse();
 
         reset(mContext.spiedContext);
-        passwordMetricsNoSymbols = computeForPasswordOrPin(
-                "84125312943a".getBytes(), /* isPin */ false);
+        passwordMetricsNoSymbols = metricsForPassword("84125312943a");
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
         // using isActivePasswordSufficient
@@ -8836,5 +8831,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void assumeDeprecatedPasswordApisSupported() {
         assumeTrue("device doesn't support deprecated password APIs",
                 isDeprecatedPasswordApisSupported());
+    }
+
+    private static PasswordMetrics metricsForPassword(String password) {
+        return PasswordMetrics.computeForCredential(LockscreenCredential.createPassword(password));
+    }
+
+    private static PasswordMetrics metricsForPin(String pin) {
+        return PasswordMetrics.computeForCredential(LockscreenCredential.createPin(pin));
     }
 }
