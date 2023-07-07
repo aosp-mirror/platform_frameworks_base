@@ -92,11 +92,11 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Test
     public void testRemoveFinishingInvisibleActivityFromUnknown() {
-        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
         activity.finishing = true;
-        activity.mVisibleRequested = true;
-        activity.setVisibility(false, false);
+        activity.setVisibleRequested(true);
+        activity.setVisibility(false);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 

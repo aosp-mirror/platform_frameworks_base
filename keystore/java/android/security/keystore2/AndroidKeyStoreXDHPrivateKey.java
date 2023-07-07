@@ -22,16 +22,18 @@ import android.system.keystore2.Authorization;
 import android.system.keystore2.KeyDescriptor;
 
 import java.security.PrivateKey;
-import java.security.interfaces.EdECKey;
+import java.security.interfaces.XECPrivateKey;
 import java.security.spec.NamedParameterSpec;
+import java.util.Optional;
 
 /**
  * X25519 Private Key backed by Keystore.
- * instance of {@link PrivateKey} and {@link EdECKey}
+ * instance of {@link PrivateKey} and {@link XECPrivateKey}
  *
  * @hide
  */
-public class AndroidKeyStoreXDHPrivateKey extends AndroidKeyStorePrivateKey implements EdECKey {
+public class AndroidKeyStoreXDHPrivateKey extends AndroidKeyStorePrivateKey
+        implements XECPrivateKey {
     public AndroidKeyStoreXDHPrivateKey(
             @NonNull KeyDescriptor descriptor, long keyId,
             @NonNull Authorization[] authorizations,
@@ -43,5 +45,13 @@ public class AndroidKeyStoreXDHPrivateKey extends AndroidKeyStorePrivateKey impl
     @Override
     public NamedParameterSpec getParams() {
         return NamedParameterSpec.X25519;
+    }
+
+    @Override
+    public Optional<byte[]> getScalar() {
+        /* An empty Optional if the scalar cannot be extracted (e.g. if the provider is a hardware
+         * token and the private key is not allowed to leave the crypto boundary).
+         */
+        return Optional.empty();
     }
 }

@@ -35,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BlendMode;
 import android.graphics.PorterDuff;
+import android.graphics.RecordingCanvas;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -70,6 +71,7 @@ import java.util.Objects;
 
 public final class Icon implements Parcelable {
     private static final String TAG = "Icon";
+    private static final boolean DEBUG = false;
 
     /**
      * An icon that was created using {@link Icon#createWithBitmap(Bitmap)}.
@@ -361,15 +363,52 @@ public final class Icon implements Parcelable {
     }
 
     /**
+     * Resizes image if size too large for Canvas to draw
+     * @param bitmap Bitmap to be resized if size > {@link RecordingCanvas.MAX_BITMAP_SIZE}
+     * @return resized bitmap
+     */
+    private Bitmap fixMaxBitmapSize(Bitmap bitmap) {
+        if (bitmap != null && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
+            int bytesPerPixel = bitmap.getRowBytes() / bitmap.getWidth();
+            int maxNumPixels = RecordingCanvas.MAX_BITMAP_SIZE / bytesPerPixel;
+            float aspRatio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
+            int newHeight = (int) Math.sqrt(maxNumPixels / aspRatio);
+            int newWidth = (int) (newHeight * aspRatio);
+
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Image size too large: " + bitmap.getByteCount() + ". Resizing bitmap to: "
+                                + newWidth + " " + newHeight);
+            }
+
+            return scaleDownIfNecessary(bitmap, newWidth, newHeight);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Resizes BitmapDrawable if size too large for Canvas to draw
+     * @param drawable Drawable to be resized if size > {@link RecordingCanvas.MAX_BITMAP_SIZE}
+     * @return resized Drawable
+     */
+    private Drawable fixMaxBitmapSize(Resources res, Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap scaledBmp = fixMaxBitmapSize(((BitmapDrawable) drawable).getBitmap());
+            return new BitmapDrawable(res, scaledBmp);
+        }
+        return drawable;
+    }
+
+    /**
      * Do the heavy lifting of loading the drawable, but stop short of applying any tint.
      */
     private Drawable loadDrawableInner(Context context) {
         switch (mType) {
             case TYPE_BITMAP:
-                return new BitmapDrawable(context.getResources(), getBitmap());
+                return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(getBitmap()));
             case TYPE_ADAPTIVE_BITMAP:
                 return new AdaptiveIconDrawable(null,
-                    new BitmapDrawable(context.getResources(), getBitmap()));
+                    new BitmapDrawable(context.getResources(), fixMaxBitmapSize(getBitmap())));
             case TYPE_RESOURCE:
                 if (getResources() == null) {
                     // figure out where to load resources from
@@ -400,7 +439,8 @@ public final class Icon implements Parcelable {
                     }
                 }
                 try {
-                    return getResources().getDrawable(getResId(), context.getTheme());
+                    return fixMaxBitmapSize(getResources(),
+                            getResources().getDrawable(getResId(), context.getTheme()));
                 } catch (RuntimeException e) {
                     Log.e(TAG, String.format("Unable to load resource 0x%08x from pkg=%s",
                                     getResId(),
@@ -409,21 +449,21 @@ public final class Icon implements Parcelable {
                 }
                 break;
             case TYPE_DATA:
-                return new BitmapDrawable(context.getResources(),
-                    BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(), getDataLength())
-                );
+                return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(
+                        BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(),
+                                getDataLength())));
             case TYPE_URI:
                 InputStream is = getUriInputStream(context);
                 if (is != null) {
                     return new BitmapDrawable(context.getResources(),
-                            BitmapFactory.decodeStream(is));
+                            fixMaxBitmapSize(BitmapFactory.decodeStream(is)));
                 }
                 break;
             case TYPE_URI_ADAPTIVE_BITMAP:
                 is = getUriInputStream(context);
                 if (is != null) {
                     return new AdaptiveIconDrawable(null, new BitmapDrawable(context.getResources(),
-                            BitmapFactory.decodeStream(is)));
+                            fixMaxBitmapSize(BitmapFactory.decodeStream(is))));
                 }
                 break;
         }

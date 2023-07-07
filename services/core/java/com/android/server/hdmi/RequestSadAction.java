@@ -200,8 +200,14 @@ final class RequestSadAction extends HdmiCecFeatureAction {
     }
 
     private boolean isValidCodec(byte codec) {
-        return Constants.AUDIO_CODEC_NONE < (codec & 0xFF)
-                && (codec & 0xFF) <= Constants.AUDIO_CODEC_MAX;
+        // Bit 7 needs to be 0.
+        if ((codec & (1 << 7)) != 0) {
+            return false;
+        }
+        // Bit [6, 3] is the audio format code.
+        int audioFormatCode = (codec & Constants.AUDIO_FORMAT_MASK) >> 3;
+        return Constants.AUDIO_CODEC_NONE < audioFormatCode
+                && audioFormatCode <= Constants.AUDIO_CODEC_MAX;
     }
 
     private void updateResult(byte[] sad) {

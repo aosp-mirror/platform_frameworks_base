@@ -101,4 +101,9 @@ public class ForegroundColorSpan extends CharacterStyle
     public void updateDrawState(@NonNull TextPaint textPaint) {
         textPaint.setColor(mColor);
     }
+
+    @Override
+    public String toString() {
+        return "ForegroundColorSpan{color=#" + String.format("%08X", getForegroundColor()) + '}';
+    }
 }

@@ -21,6 +21,10 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +35,7 @@ import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 
@@ -98,6 +103,67 @@ public class RowContentBindStageTest extends SysuiTestCase {
 
         // THEN binder unbinds flags.
         verify(mBinder).unbindContent(eq(mEntry), any(), eq(flags));
+    }
+
+    class CountingWtfHandler implements Log.TerribleFailureHandler {
+        private Log.TerribleFailureHandler mOldHandler = null;
+        private int mWtfCount = 0;
+
+        public void register() {
+            mOldHandler = Log.setWtfHandler(this);
+        }
+
+        public void unregister() {
+            Log.setWtfHandler(mOldHandler);
+            mOldHandler = null;
+        }
+
+        @Override
+        public void onTerribleFailure(String tag, Log.TerribleFailure what, boolean system) {
+            mWtfCount++;
+        }
+
+        public int getWtfCount() {
+            return mWtfCount;
+        }
+    }
+
+    @Test
+    public void testGetStageParamsAfterCleanUp() {
+        // GIVEN an entry whose params have already been deleted.
+        RowContentBindParams originalParams = mRowContentBindStage.getStageParams(mEntry);
+        mRowContentBindStage.deleteStageParams(mEntry);
+
+        // WHEN a caller calls getStageParams.
+        CountingWtfHandler countingWtfHandler = new CountingWtfHandler();
+        countingWtfHandler.register();
+
+        RowContentBindParams blankParams = mRowContentBindStage.getStageParams(mEntry);
+
+        countingWtfHandler.unregister();
+
+        // THEN getStageParams logs a WTF and returns blank params created to avoid a crash.
+        assertEquals(1, countingWtfHandler.getWtfCount());
+        assertNotNull(blankParams);
+        assertNotSame(originalParams, blankParams);
+    }
+
+    @Test
+    public void testTryGetStageParamsAfterCleanUp() {
+        // GIVEN an entry whose params have already been deleted.
+        mRowContentBindStage.deleteStageParams(mEntry);
+
+        // WHEN a caller calls getStageParams.
+        CountingWtfHandler countingWtfHandler = new CountingWtfHandler();
+        countingWtfHandler.register();
+
+        RowContentBindParams nullParams = mRowContentBindStage.tryGetStageParams(mEntry);
+
+        countingWtfHandler.unregister();
+
+        // THEN getStageParams does NOT log a WTF and returns null to indicate missing params.
+        assertEquals(0, countingWtfHandler.getWtfCount());
+        assertNull(nullParams);
     }
 
     @Test

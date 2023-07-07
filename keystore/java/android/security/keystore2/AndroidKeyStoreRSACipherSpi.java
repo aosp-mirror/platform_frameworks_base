@@ -161,10 +161,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
      */
     abstract static class OAEPWithMGF1Padding extends AndroidKeyStoreRSACipherSpi {
 
-        private static final String MGF_ALGORITGM_MGF1 = "MGF1";
+        private static final String MGF_ALGORITHM_MGF1 = "MGF1";
 
         private int mKeymasterDigest = -1;
         private int mDigestOutputSizeBytes;
+        private int mKeymasterMgf1Digest = KeymasterDefs.KM_DIGEST_SHA1; // Default MGF1 digest
 
         OAEPWithMGF1Padding(int keymasterDigest) {
             super(KeymasterDefs.KM_PAD_RSA_OAEP);
@@ -189,10 +190,10 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                         + ". Only OAEPParameterSpec supported");
             }
             OAEPParameterSpec spec = (OAEPParameterSpec) params;
-            if (!MGF_ALGORITGM_MGF1.equalsIgnoreCase(spec.getMGFAlgorithm())) {
+            if (!MGF_ALGORITHM_MGF1.equalsIgnoreCase(spec.getMGFAlgorithm())) {
                 throw new InvalidAlgorithmParameterException(
                         "Unsupported MGF: " + spec.getMGFAlgorithm()
-                        + ". Only " + MGF_ALGORITGM_MGF1 + " supported");
+                        + ". Only " + MGF_ALGORITHM_MGF1 + " supported");
             }
             String jcaDigest = spec.getDigestAlgorithm();
             int keymasterDigest;
@@ -225,11 +226,6 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             }
             MGF1ParameterSpec mgfSpec = (MGF1ParameterSpec) mgfParams;
             String mgf1JcaDigest = mgfSpec.getDigestAlgorithm();
-            if (!KeyProperties.DIGEST_SHA1.equalsIgnoreCase(mgf1JcaDigest)) {
-                throw new InvalidAlgorithmParameterException(
-                        "Unsupported MGF1 digest: " + mgf1JcaDigest
-                        + ". Only " + KeyProperties.DIGEST_SHA1 + " supported");
-            }
             PSource pSource = spec.getPSource();
             if (!(pSource instanceof PSource.PSpecified)) {
                 throw new InvalidAlgorithmParameterException(
@@ -244,6 +240,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                         + ". Only pSpecifiedEmpty (PSource.PSpecified.DEFAULT) supported");
             }
             mKeymasterDigest = keymasterDigest;
+            mKeymasterMgf1Digest = KeyProperties.Digest.toKeymaster(mgf1JcaDigest);
             mDigestOutputSizeBytes =
                     (KeymasterUtils.getDigestOutputSizeBits(keymasterDigest) + 7) / 8;
         }
@@ -273,10 +270,10 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         protected final AlgorithmParameters engineGetParameters() {
             OAEPParameterSpec spec =
                     new OAEPParameterSpec(
-                            KeyProperties.Digest.fromKeymaster(mKeymasterDigest),
-                            MGF_ALGORITGM_MGF1,
-                            MGF1ParameterSpec.SHA1,
-                            PSource.PSpecified.DEFAULT);
+                        KeyProperties.Digest.fromKeymaster(mKeymasterDigest),
+                        MGF_ALGORITHM_MGF1,
+                        KeyProperties.Digest.fromKeymasterToMGF1ParameterSpec(mKeymasterMgf1Digest),
+                        PSource.PSpecified.DEFAULT);
             try {
                 AlgorithmParameters params = AlgorithmParameters.getInstance("OAEP");
                 params.init(spec);
@@ -291,13 +288,34 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             }
         }
 
+        private static boolean isMgfDigestTagPresentInKeyProperties(
+                Authorization[] keyCharacteristics) {
+            for (Authorization authorization : keyCharacteristics) {
+                if (authorization.keyParameter.tag == KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         @Override
         protected final void addAlgorithmSpecificParametersToBegin(
-                @NonNull List<KeyParameter> parameters) {
-            super.addAlgorithmSpecificParametersToBegin(parameters);
+                @NonNull List<KeyParameter> parameters, Authorization[] keyCharacteristics) {
+            super.addAlgorithmSpecificParametersToBegin(parameters, keyCharacteristics);
             parameters.add(KeyStore2ParameterUtils.makeEnum(
                     KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest
             ));
+            // Only add the KM_TAG_RSA_OAEP_MGF_DIGEST tag to begin() if the MGF Digest is
+            // present in the key properties. Keys generated prior to Android 14 did not have
+            // this tag (Keystore didn't add it) so specifying any MGF digest tag would cause
+            // a begin() operation (on an Android 14 device) to fail (with a key that was generated
+            // on Android 13 or below).
+            if (isMgfDigestTagPresentInKeyProperties(keyCharacteristics)) {
+                parameters.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, mKeymasterMgf1Digest
+                ));
+            }
         }
 
         @Override

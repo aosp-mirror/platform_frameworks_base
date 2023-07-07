@@ -41,11 +41,21 @@ public class AudioDescriptor implements Parcelable {
      * The Extended Display Identification Data (EDID) standard for a short audio descriptor.
      */
     public static final int STANDARD_EDID = 1;
+    /**
+     * The standard for a Speaker Allocation Data Block (SADB).
+     */
+    public static final int STANDARD_SADB = 2;
+    /**
+     * The standard for a Vendor-Specific Audio Data Block (VSADB).
+     */
+    public static final int STANDARD_VSADB = 3;
 
     /** @hide */
     @IntDef({
             STANDARD_NONE,
             STANDARD_EDID,
+            STANDARD_SADB,
+            STANDARD_VSADB,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDescriptorStandard {}

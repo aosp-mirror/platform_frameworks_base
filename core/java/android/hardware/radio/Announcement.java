@@ -85,9 +85,9 @@ public final class Announcement implements Parcelable {
     /** @hide */
     public Announcement(@NonNull ProgramSelector selector, @Type int type,
             @NonNull Map<String, String> vendorInfo) {
-        mSelector = Objects.requireNonNull(selector);
-        mType = Objects.requireNonNull(type);
-        mVendorInfo = Objects.requireNonNull(vendorInfo);
+        mSelector = Objects.requireNonNull(selector, "Program selector cannot be null");
+        mType = type;
+        mVendorInfo = Objects.requireNonNull(vendorInfo, "Vendor info cannot be null");
     }
 
     private Announcement(@NonNull Parcel in) {

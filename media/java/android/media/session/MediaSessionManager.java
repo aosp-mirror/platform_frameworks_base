@@ -107,7 +107,7 @@ public final class MediaSessionManager {
     private final Map<OnMediaKeyEventSessionChangedListener, Executor>
             mMediaKeyEventSessionChangedCallbacks = new HashMap<>();
     @GuardedBy("mLock")
-    private String mCurMediaKeyEventSessionPackage;
+    private String mCurMediaKeyEventSessionPackage = "";
     @GuardedBy("mLock")
     private MediaSession.Token mCurMediaKeyEventSession;
     @GuardedBy("mLock")
@@ -1169,7 +1169,7 @@ public final class MediaSessionManager {
          * @param flags flags containing extra action or information regarding the volume change
          */
         void onVolumeChanged(@NonNull MediaSession.Token sessionToken,
-                @AudioManager.Flags int flags);
+                @AudioManager.SystemVolumeFlags int flags);
 
         /**
          * Called when the default remote session is changed where the default remote session

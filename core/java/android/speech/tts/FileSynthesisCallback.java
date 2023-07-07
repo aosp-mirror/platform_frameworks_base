@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 
 /**
  * Speech synthesis request that writes the audio to a WAV file.
@@ -152,8 +153,8 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
     @Override
     public int audioAvailable(byte[] buffer, int offset, int length) {
         if (DBG) {
-            Log.d(TAG, "FileSynthesisRequest.audioAvailable(" + buffer + "," + offset
-                    + "," + length + ")");
+            Log.d(TAG, "FileSynthesisRequest.audioAvailable(" + Arrays.toString(buffer)
+                    + "," + offset + "," + length + ")");
         }
         FileChannel fileChannel = null;
         synchronized (mStateLock) {

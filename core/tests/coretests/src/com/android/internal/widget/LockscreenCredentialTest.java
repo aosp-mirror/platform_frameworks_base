@@ -223,14 +223,10 @@ public class LockscreenCredentialTest extends AndroidTestCase {
 
     public void testLegacyPasswordToHash() {
         String password = "1234";
-        LockscreenCredential credential = LockscreenCredential.createPassword(password);
         String salt = "6d5331dd120077a0";
         String expectedHash =
                 "2DD04348ADBF8F4CABD7F722DC2E2887FAD4B6020A0C3E02C831E09946F0554FDC13B155";
 
-        assertThat(
-                credential.legacyPasswordToHash(salt.getBytes()))
-                .isEqualTo(expectedHash);
         assertThat(
                 LockscreenCredential.legacyPasswordToHash(
                         password.getBytes(), salt.getBytes()))
@@ -239,10 +235,8 @@ public class LockscreenCredentialTest extends AndroidTestCase {
 
     public void testLegacyPasswordToHashInvalidInput() {
         String password = "1234";
-        LockscreenCredential credential = LockscreenCredential.createPassword(password);
         String salt = "6d5331dd120077a0";
 
-        assertThat(credential.legacyPasswordToHash(/* salt= */ null)).isNull();
         assertThat(LockscreenCredential.legacyPasswordToHash(
                 password.getBytes(), /* salt= */ null)).isNull();
 

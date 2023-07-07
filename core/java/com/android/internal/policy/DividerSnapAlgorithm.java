@@ -287,7 +287,6 @@ public class DividerSnapAlgorithm {
         int dividerMax = isHorizontalDivision
                 ? mDisplayHeight
                 : mDisplayWidth;
-        int navBarSize = isHorizontalDivision ? mInsets.bottom : mInsets.right;
         int startPos = -mDividerSize;
         if (dockedSide == DOCKED_RIGHT) {
             startPos += mInsets.left;
@@ -308,8 +307,7 @@ public class DividerSnapAlgorithm {
                 addMinimizedTarget(isHorizontalDivision, dockedSide);
                 break;
         }
-        mTargets.add(new SnapTarget(dividerMax - navBarSize, dividerMax,
-                SnapTarget.FLAG_DISMISS_END, 0.35f));
+        mTargets.add(new SnapTarget(dividerMax, dividerMax, SnapTarget.FLAG_DISMISS_END, 0.35f));
     }
 
     private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,

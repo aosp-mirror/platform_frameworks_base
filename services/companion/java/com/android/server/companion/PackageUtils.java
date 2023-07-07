@@ -30,6 +30,7 @@ import android.companion.CompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
@@ -39,10 +40,8 @@ import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.util.Slog;
 
-import com.android.internal.util.ArrayUtils;
-
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,25 +54,37 @@ final class PackageUtils {
     private static final String PROPERTY_PRIMARY_TAG =
             "android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE";
 
-    static @Nullable PackageInfo getPackageInfo(@NonNull Context context,
+    @Nullable
+    static PackageInfo getPackageInfo(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
         final PackageManager pm = context.getPackageManager();
         final PackageInfoFlags flags = PackageInfoFlags.of(GET_PERMISSIONS | GET_CONFIGURATIONS);
-        return Binder.withCleanCallingIdentity(() ->
-                pm.getPackageInfoAsUser(packageName, flags , userId));
+        return Binder.withCleanCallingIdentity(() -> {
+            try {
+                return pm.getPackageInfoAsUser(packageName, flags, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Package [" + packageName + "] is not found.");
+                return null;
+            }
+        });
     }
 
     static void enforceUsesCompanionDeviceFeature(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
-        final boolean requested = ArrayUtils.contains(
-                getPackageInfo(context, userId, packageName).reqFeatures,
-                FEATURE_COMPANION_DEVICE_SETUP);
+        String requiredFeature = FEATURE_COMPANION_DEVICE_SETUP;
 
-        if (requested) {
-            throw new IllegalStateException("Must declare uses-feature "
-                    + FEATURE_COMPANION_DEVICE_SETUP
-                    + " in manifest to use this API");
+        FeatureInfo[] requestedFeatures = getPackageInfo(context, userId, packageName).reqFeatures;
+        if (requestedFeatures != null) {
+            for (int i = 0; i < requestedFeatures.length; i++) {
+                if (requiredFeature.equals(requestedFeatures[i].name)) {
+                    return;
+                }
+            }
         }
+
+        throw new IllegalStateException("Must declare uses-feature "
+                + requiredFeature
+                + " in manifest to use this API");
     }
 
     /**
@@ -87,7 +98,8 @@ final class PackageUtils {
         final List<ResolveInfo> companionServices = pm.queryIntentServicesAsUser(
                 COMPANION_SERVICE_INTENT, ResolveInfoFlags.of(0), userId);
 
-        final Map<String, List<ComponentName>> packageNameToServiceInfoList = new HashMap<>();
+        final Map<String, List<ComponentName>> packageNameToServiceInfoList =
+                new HashMap<>(companionServices.size());
 
         for (ResolveInfo resolveInfo : companionServices) {
             final ServiceInfo service = resolveInfo.serviceInfo;
@@ -101,19 +113,19 @@ final class PackageUtils {
                 continue;
             }
 
-            // Use LinkedList, because we'll need to prepend "primary" services, while appending the
-            // other (non-primary) services to the list.
-            final LinkedList<ComponentName> services =
-                    (LinkedList<ComponentName>) packageNameToServiceInfoList.computeIfAbsent(
-                            service.packageName, it -> new LinkedList<>());
+            // We'll need to prepend "primary" services, while appending the other (non-primary)
+            // services to the list.
+            final ArrayList<ComponentName> services =
+                    (ArrayList<ComponentName>) packageNameToServiceInfoList.computeIfAbsent(
+                            service.packageName, it -> new ArrayList<>(1));
 
             final ComponentName componentName = service.getComponentName();
 
-            if (isPrimaryCompanionDeviceService(pm, componentName)) {
+            if (isPrimaryCompanionDeviceService(pm, componentName, userId)) {
                 // "Primary" service should be at the head of the list.
-                services.addFirst(componentName);
+                services.add(0, componentName);
             } else {
-                services.addLast(componentName);
+                services.add(componentName);
             }
         }
 
@@ -121,9 +133,10 @@ final class PackageUtils {
     }
 
     private static boolean isPrimaryCompanionDeviceService(@NonNull PackageManager pm,
-            @NonNull ComponentName componentName) {
+            @NonNull ComponentName componentName, @UserIdInt int userId) {
         try {
-            return pm.getProperty(PROPERTY_PRIMARY_TAG, componentName).getBoolean();
+            return pm.getPropertyAsUser(PROPERTY_PRIMARY_TAG, componentName.getPackageName(),
+                    componentName.getClassName(), userId).getBoolean();
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }

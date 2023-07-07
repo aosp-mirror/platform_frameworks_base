@@ -20,4 +20,7 @@
     <!-- Height of the background gradient behind the screenshot UI (taller in dark mode) -->
     <dimen name="screenshot_bg_protection_height">375dp</dimen>
 
+    <!-- Accessibility floating menu -->
+    <dimen name="accessibility_floating_menu_stroke_width">1dp</dimen>
+    <dimen name="accessibility_floating_menu_stroke_inset">-2dp</dimen>
 </resources>

@@ -34,11 +34,15 @@ public final class ParcelableUsbPort implements Parcelable {
     private final int mSupportedContaminantProtectionModes;
     private final boolean mSupportsEnableContaminantPresenceProtection;
     private final boolean mSupportsEnableContaminantPresenceDetection;
+    private final boolean mSupportsComplianceWarnings;
+    private final int mSupportedAltModesMask;
 
     private ParcelableUsbPort(@NonNull String id, int supportedModes,
             int supportedContaminantProtectionModes,
             boolean supportsEnableContaminantPresenceProtection,
-            boolean supportsEnableContaminantPresenceDetection) {
+            boolean supportsEnableContaminantPresenceDetection,
+            boolean supportsComplianceWarnings,
+            int supportedAltModesMask) {
         mId = id;
         mSupportedModes = supportedModes;
         mSupportedContaminantProtectionModes = supportedContaminantProtectionModes;
@@ -46,6 +50,9 @@ public final class ParcelableUsbPort implements Parcelable {
                 supportsEnableContaminantPresenceProtection;
         mSupportsEnableContaminantPresenceDetection =
                 supportsEnableContaminantPresenceDetection;
+        mSupportsComplianceWarnings =
+                supportsComplianceWarnings;
+        mSupportedAltModesMask = supportedAltModesMask;
     }
 
     /**
@@ -59,7 +66,9 @@ public final class ParcelableUsbPort implements Parcelable {
         return new ParcelableUsbPort(port.getId(), port.getSupportedModes(),
                 port.getSupportedContaminantProtectionModes(),
                 port.supportsEnableContaminantPresenceProtection(),
-                port.supportsEnableContaminantPresenceDetection());
+                port.supportsEnableContaminantPresenceDetection(),
+                port.supportsComplianceWarnings(),
+                port.getSupportedAltModesMask());
     }
 
     /**
@@ -72,7 +81,9 @@ public final class ParcelableUsbPort implements Parcelable {
     public @NonNull UsbPort getUsbPort(@NonNull UsbManager usbManager) {
         return new UsbPort(usbManager, mId, mSupportedModes, mSupportedContaminantProtectionModes,
                 mSupportsEnableContaminantPresenceProtection,
-                mSupportsEnableContaminantPresenceDetection);
+                mSupportsEnableContaminantPresenceDetection,
+                mSupportsComplianceWarnings,
+                mSupportedAltModesMask);
     }
 
     @Override
@@ -87,6 +98,8 @@ public final class ParcelableUsbPort implements Parcelable {
         dest.writeInt(mSupportedContaminantProtectionModes);
         dest.writeBoolean(mSupportsEnableContaminantPresenceProtection);
         dest.writeBoolean(mSupportsEnableContaminantPresenceDetection);
+        dest.writeBoolean(mSupportsComplianceWarnings);
+        dest.writeInt(mSupportedAltModesMask);
     }
 
     public static final @android.annotation.NonNull Creator<ParcelableUsbPort> CREATOR =
@@ -98,11 +111,15 @@ public final class ParcelableUsbPort implements Parcelable {
                     int supportedContaminantProtectionModes = in.readInt();
                     boolean supportsEnableContaminantPresenceProtection = in.readBoolean();
                     boolean supportsEnableContaminantPresenceDetection = in.readBoolean();
+                    boolean supportsComplianceWarnings = in.readBoolean();
+                    int supportedAltModesMask = in.readInt();
 
                     return new ParcelableUsbPort(id, supportedModes,
                             supportedContaminantProtectionModes,
                             supportsEnableContaminantPresenceProtection,
-                            supportsEnableContaminantPresenceDetection);
+                            supportsEnableContaminantPresenceDetection,
+                            supportsComplianceWarnings,
+                            supportedAltModesMask);
                 }
 
                 @Override

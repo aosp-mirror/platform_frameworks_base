@@ -36,20 +36,24 @@ class ResolverDataProvider {
 
     static private int USER_SOMEONE_ELSE = 10;
 
-    static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfo(int i) {
-        return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
-                createResolverIntent(i), createResolveInfo(i, UserHandle.USER_CURRENT));
-    }
-
-    static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfoWithOtherId(int i) {
-        return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
-                createResolverIntent(i), createResolveInfo(i, USER_SOMEONE_ELSE));
+    static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfo(int i,
+            UserHandle resolvedForUser) {
+        return new ResolverActivity.ResolvedComponentInfo(
+                createComponentName(i),
+                createResolverIntent(i),
+                createResolveInfo(i, UserHandle.USER_CURRENT, resolvedForUser));
     }
 
     static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfoWithOtherId(int i,
-            int userId) {
+            UserHandle resolvedForUser) {
         return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
-                createResolverIntent(i), createResolveInfo(i, userId));
+                createResolverIntent(i), createResolveInfo(i, USER_SOMEONE_ELSE, resolvedForUser));
+    }
+
+    static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfoWithOtherId(int i,
+            int userId, UserHandle resolvedForUser) {
+        return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
+                createResolverIntent(i), createResolveInfo(i, userId, resolvedForUser));
     }
 
     static ComponentName createComponentName(int i) {
@@ -57,10 +61,11 @@ class ResolverDataProvider {
         return new ComponentName("foo.bar." + name, name);
     }
 
-    static ResolveInfo createResolveInfo(int i, int userId) {
+    static ResolveInfo createResolveInfo(int i, int userId, UserHandle resolvedForUser) {
         final ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = createActivityInfo(i);
         resolveInfo.targetUserId = userId;
+        resolveInfo.userHandle = resolvedForUser;
         return resolveInfo;
     }
 

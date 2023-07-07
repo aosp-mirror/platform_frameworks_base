@@ -14,35 +14,31 @@
  * limitations under the License.
  */
 
-#include <dlfcn.h>
-#include <pthread.h>
-
-#include <chrono>
-#include <thread>
-
-#include <jni.h>
-#include <nativehelper/JNIHelp.h>
-
+#include <android-base/properties.h>
 #include <android/binder_manager.h>
 #include <android/binder_stability.h>
 #include <android/hidl/manager/1.2/IServiceManager.h>
 #include <binder/IServiceManager.h>
+#include <bionic/malloc.h>
+#include <bionic/reserved_signals.h>
+#include <dlfcn.h>
 #include <hidl/HidlTransportSupport.h>
 #include <incremental_service.h>
-
+#include <jni.h>
 #include <memtrackproxy/MemtrackProxy.h>
+#include <nativehelper/JNIHelp.h>
+#include <pthread.h>
 #include <schedulerservice/SchedulingPolicyService.h>
+#include <sensorserviceaidl/SensorManagerAidl.h>
 #include <sensorservicehidl/SensorManager.h>
 #include <stats/StatsAidl.h>
 #include <stats/StatsHal.h>
-
-#include <bionic/malloc.h>
-#include <bionic/reserved_signals.h>
-
-#include <android-base/properties.h>
+#include <utils/AndroidThreads.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
-#include <utils/AndroidThreads.h>
+
+#include <chrono>
+#include <thread>
 
 using namespace std::chrono_literals;
 
@@ -57,7 +53,9 @@ static void startStatsAidlService() {
     const std::string instance = std::string() + IStats::descriptor + "/default";
     const binder_exception_t err =
             AServiceManager_addService(statsService->asBinder().get(), instance.c_str());
-    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register AIDL %s: %d", instance.c_str(), err);
+    if (err != EX_NONE) {
+        ALOGW("Cannot register AIDL %s: %d", instance.c_str(), err);
+    }
 }
 
 static void startStatsHidlService() {
@@ -69,6 +67,42 @@ static void startStatsHidlService() {
     ALOGW_IF(err != android::OK, "Cannot register HIDL %s: %d", IStats::descriptor, err);
 }
 
+static void startSensorManagerAidlService(JNIEnv* env) {
+    using ::aidl::android::frameworks::sensorservice::ISensorManager;
+    using ::android::frameworks::sensorservice::implementation::SensorManagerAidl;
+
+    JavaVM* vm;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
+
+    std::shared_ptr<SensorManagerAidl> sensorService =
+            ndk::SharedRefBase::make<SensorManagerAidl>(vm);
+    const std::string instance = std::string() + ISensorManager::descriptor + "/default";
+    const binder_exception_t err =
+            AServiceManager_addService(sensorService->asBinder().get(), instance.c_str());
+    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register AIDL %s: %d", instance.c_str(), err);
+}
+
+static void startSensorManagerHidlService(JNIEnv* env) {
+    using ::android::frameworks::sensorservice::V1_0::ISensorManager;
+    using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
+    using ::android::hardware::configureRpcThreadpool;
+    using ::android::hidl::manager::V1_0::IServiceManager;
+
+    JavaVM* vm;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
+
+    android::sp<ISensorManager> sensorService = new SensorManager(vm);
+    if (IServiceManager::Transport::HWBINDER ==
+        android::hardware::defaultServiceManager1_2()->getTransport(ISensorManager::descriptor,
+                                                                    "default")) {
+        android::status_t err = sensorService->registerAsService();
+        LOG_ALWAYS_FATAL_IF(err != android::OK, "Cannot register %s: %d",
+                            ISensorManager::descriptor, err);
+    } else {
+        ALOGW("%s is deprecated. Skipping registration.", ISensorManager::descriptor);
+    }
+}
+
 } // namespace
 
 namespace android {
@@ -76,6 +110,12 @@ namespace android {
 static void android_server_SystemServer_startIStatsService(JNIEnv* /* env */, jobject /* clazz */) {
     startStatsHidlService();
     startStatsAidlService();
+}
+
+static void android_server_SystemServer_startISensorManagerService(JNIEnv* env,
+                                                                   jobject /* clazz */) {
+    startSensorManagerHidlService(env);
+    startSensorManagerAidlService(env);
 }
 
 static void android_server_SystemServer_startMemtrackProxyService(JNIEnv* env,
@@ -93,30 +133,19 @@ static void android_server_SystemServer_startMemtrackProxyService(JNIEnv* env,
     LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register %s: %d", memtrackProxyService, err);
 }
 
-static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /* clazz */) {
+static void android_server_SystemServer_startHidlServices(JNIEnv* /* env */, jobject /* clazz */) {
     using ::android::frameworks::schedulerservice::V1_0::ISchedulingPolicyService;
     using ::android::frameworks::schedulerservice::V1_0::implementation::SchedulingPolicyService;
-    using ::android::frameworks::sensorservice::V1_0::ISensorManager;
-    using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
     using ::android::hardware::configureRpcThreadpool;
     using ::android::hidl::manager::V1_0::IServiceManager;
 
-    status_t err;
-
     configureRpcThreadpool(5, false /* callerWillJoin */);
-
-    JavaVM *vm;
-    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
-
-    sp<ISensorManager> sensorService = new SensorManager(vm);
-    err = sensorService->registerAsService();
-    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
 
     sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
     if (IServiceManager::Transport::HWBINDER ==
         hardware::defaultServiceManager1_2()->getTransport(ISchedulingPolicyService::descriptor,
                                                            "default")) {
-        err = schedulingService->registerAsService("default");
+        status_t err = schedulingService->registerAsService("default");
         LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d",
                             ISchedulingPolicyService::descriptor, err);
     } else {
@@ -151,6 +180,8 @@ static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv*
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"startIStatsService", "()V", (void*)android_server_SystemServer_startIStatsService},
+        {"startISensorManagerService", "()V",
+         (void*)android_server_SystemServer_startISensorManagerService},
         {"startMemtrackProxyService", "()V",
          (void*)android_server_SystemServer_startMemtrackProxyService},
         {"startHidlServices", "()V", (void*)android_server_SystemServer_startHidlServices},

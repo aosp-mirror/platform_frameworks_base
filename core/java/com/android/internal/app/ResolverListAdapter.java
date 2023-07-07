@@ -21,7 +21,6 @@ import static android.content.Context.ACTIVITY_SERVICE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
@@ -58,7 +57,10 @@ import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ResolverListAdapter extends BaseAdapter {
     private static final String TAG = "ResolverListAdapter";
@@ -87,13 +89,18 @@ public class ResolverListAdapter extends BaseAdapter {
     private Runnable mPostListReadyRunnable;
     private final boolean mIsAudioCaptureDevice;
     private boolean mIsTabLoaded;
+    private final Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
+    private final Map<DisplayResolveInfo, LoadLabelTask> mLabelLoaders = new HashMap<>();
+    // Represents the UserSpace in which the Initial Intents should be resolved.
+    private final UserHandle mInitialIntentsUserSpace;
 
     public ResolverListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed,
             ResolverListController resolverListController,
             ResolverListCommunicator resolverListCommunicator,
-            boolean isAudioCaptureDevice) {
+            boolean isAudioCaptureDevice,
+            UserHandle initialIntentsUserSpace) {
         mContext = context;
         mIntents = payloadIntents;
         mInitialIntents = initialIntents;
@@ -107,6 +114,11 @@ public class ResolverListAdapter extends BaseAdapter {
         mIsAudioCaptureDevice = isAudioCaptureDevice;
         final ActivityManager am = (ActivityManager) mContext.getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
+        mInitialIntentsUserSpace = initialIntentsUserSpace;
+    }
+
+    public ResolverListController getResolverListController() {
+        return mResolverListController;
     }
 
     public void handlePackagesChanged() {
@@ -152,17 +164,17 @@ public class ResolverListAdapter extends BaseAdapter {
     /**
      * Returns the app share score of the given {@code componentName}.
      */
-    public float getScore(ComponentName componentName) {
-        return mResolverListController.getScore(componentName);
+    public float getScore(TargetInfo targetInfo) {
+        return mResolverListController.getScore(targetInfo);
     }
 
-    public void updateModel(ComponentName componentName) {
-        mResolverListController.updateModel(componentName);
+    public void updateModel(TargetInfo targetInfo) {
+        mResolverListController.updateModel(targetInfo);
     }
 
-    public void updateChooserCounts(String packageName, String action) {
+    public void updateChooserCounts(String packageName, String action, UserHandle userHandle) {
         mResolverListController.updateChooserCounts(
-                packageName, getUserHandle().getIdentifier(), action);
+                packageName, userHandle, action);
     }
 
     List<ResolvedComponentInfo> getUnfilteredResolveList() {
@@ -265,6 +277,7 @@ public class ResolverListAdapter extends BaseAdapter {
             return mResolverListController.getResolversForIntent(
                             /* shouldGetResolvedFilter= */ true,
                             mResolverListCommunicator.shouldGetActivityMetadata(),
+                            mResolverListCommunicator.shouldGetOnlyDefaultActivities(),
                             mIntents);
         }
     }
@@ -416,8 +429,9 @@ public class ResolverListAdapter extends BaseAdapter {
                     if (ii == null) {
                         continue;
                     }
-                    ActivityInfo ai = ii.resolveActivityInfo(
-                            mPm, 0);
+                    // Because of AIDL bug, resolveActivityInfo can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ActivityInfo ai = rii.resolveActivityInfo(mPm, 0);
                     if (ai == null) {
                         Log.w(TAG, "No activity found for " + ii);
                         continue;
@@ -439,6 +453,7 @@ public class ResolverListAdapter extends BaseAdapter {
                         ri.icon = 0;
                     }
 
+                    ri.userHandle = mInitialIntentsUserSpace;
                     addResolveInfo(new DisplayResolveInfo(ii, ri,
                             ri.loadLabel(mPm), null, ii, makePresentationGetter(ri)));
                 }
@@ -634,26 +649,48 @@ public class ResolverListAdapter extends BaseAdapter {
         if (info == null) {
             holder.icon.setImageDrawable(
                     mContext.getDrawable(R.drawable.resolver_icon_placeholder));
+            holder.bindLabel("", "", false);
             return;
         }
 
-        if (info instanceof DisplayResolveInfo
-                && !((DisplayResolveInfo) info).hasDisplayLabel()) {
-            getLoadLabelTask((DisplayResolveInfo) info, holder).execute();
-        } else {
-            holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
-        }
-
-        if (info instanceof DisplayResolveInfo
-                && !((DisplayResolveInfo) info).hasDisplayIcon()) {
-            new LoadIconTask((DisplayResolveInfo) info, holder).execute();
-        } else {
+        if (info instanceof DisplayResolveInfo) {
+            DisplayResolveInfo dri = (DisplayResolveInfo) info;
+            if (dri.hasDisplayLabel()) {
+                holder.bindLabel(
+                        dri.getDisplayLabel(),
+                        dri.getExtendedInfo(),
+                        alwaysShowSubLabel());
+            } else {
+                holder.bindLabel("", "", false);
+                loadLabel(dri);
+            }
             holder.bindIcon(info);
+            if (!dri.hasDisplayIcon()) {
+                loadIcon(dri);
+            }
         }
     }
 
-    protected LoadLabelTask getLoadLabelTask(DisplayResolveInfo info, ViewHolder holder) {
-        return new LoadLabelTask(info, holder);
+    protected final void loadIcon(DisplayResolveInfo info) {
+        LoadIconTask task = mIconLoaders.get(info);
+        if (task == null) {
+            task = new LoadIconTask((DisplayResolveInfo) info);
+            mIconLoaders.put(info, task);
+            task.execute();
+        }
+    }
+
+    private void loadLabel(DisplayResolveInfo info) {
+        LoadLabelTask task = mLabelLoaders.get(info);
+        if (task == null) {
+            task = createLoadLabelTask(info);
+            mLabelLoaders.put(info, task);
+            task.execute();
+        }
+    }
+
+    protected LoadLabelTask createLoadLabelTask(DisplayResolveInfo info) {
+        return new LoadLabelTask(info);
     }
 
     public void onDestroy() {
@@ -663,6 +700,16 @@ public class ResolverListAdapter extends BaseAdapter {
         }
         if (mResolverListController != null) {
             mResolverListController.destroy();
+        }
+        cancelTasks(mIconLoaders.values());
+        cancelTasks(mLabelLoaders.values());
+        mIconLoaders.clear();
+        mLabelLoaders.clear();
+    }
+
+    private <T extends AsyncTask> void cancelTasks(Collection<T> tasks) {
+        for (T task: tasks) {
+            task.cancel(false);
         }
     }
 
@@ -698,8 +745,10 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        // Load icons based on the current process. If in work profile icons should be badged.
-        return makePresentationGetter(ri).getIcon(getUserHandle());
+        // Load icons based on userHandle from ResolveInfo. If in work profile/clone profile, icons
+        // should be badged.
+        return makePresentationGetter(ri)
+                .getIcon(ResolverActivity.getResolveInfoUserHandle(ri, getUserHandle()));
     }
 
     void loadFilteredItemIconTaskAsync(@NonNull ImageView iconView) {
@@ -727,6 +776,7 @@ public class ResolverListAdapter extends BaseAdapter {
     protected List<ResolvedComponentInfo> getResolversForUser(UserHandle userHandle) {
         return mResolverListController.getResolversForIntentAsUser(true,
                 mResolverListCommunicator.shouldGetActivityMetadata(),
+                mResolverListCommunicator.shouldGetOnlyDefaultActivities(),
                 mIntents, userHandle);
     }
 
@@ -820,12 +870,23 @@ public class ResolverListAdapter extends BaseAdapter {
 
         boolean shouldGetActivityMetadata();
 
+        /**
+         * @return true to filter only apps that can handle
+         *     {@link android.content.Intent#CATEGORY_DEFAULT} intents
+         */
+        default boolean shouldGetOnlyDefaultActivities() { return true; };
+
         Intent getTargetIntent();
 
         void onHandlePackagesChanged(ResolverListAdapter listAdapter);
     }
 
-    static class ViewHolder {
+    /**
+     * A view holder keeps a reference to a list view and provides functionality for managing its
+     * state.
+     */
+    @VisibleForTesting
+    public static class ViewHolder {
         public View itemView;
         public Drawable defaultItemViewBackground;
 
@@ -833,7 +894,8 @@ public class ResolverListAdapter extends BaseAdapter {
         public TextView text2;
         public ImageView icon;
 
-        ViewHolder(View view) {
+        @VisibleForTesting
+        public ViewHolder(View view) {
             itemView = view;
             defaultItemViewBackground = view.getBackground();
             text = (TextView) view.findViewById(com.android.internal.R.id.text1);
@@ -874,11 +936,9 @@ public class ResolverListAdapter extends BaseAdapter {
 
     protected class LoadLabelTask extends AsyncTask<Void, Void, CharSequence[]> {
         private final DisplayResolveInfo mDisplayResolveInfo;
-        private final ViewHolder mHolder;
 
-        protected LoadLabelTask(DisplayResolveInfo dri, ViewHolder holder) {
+        protected LoadLabelTask(DisplayResolveInfo dri) {
             mDisplayResolveInfo = dri;
-            mHolder = holder;
         }
 
         @Override
@@ -916,21 +976,22 @@ public class ResolverListAdapter extends BaseAdapter {
 
         @Override
         protected void onPostExecute(CharSequence[] result) {
+            if (mDisplayResolveInfo.hasDisplayLabel()) {
+                return;
+            }
             mDisplayResolveInfo.setDisplayLabel(result[0]);
             mDisplayResolveInfo.setExtendedInfo(result[1]);
-            mHolder.bindLabel(result[0], result[1], alwaysShowSubLabel());
+            notifyDataSetChanged();
         }
     }
 
     class LoadIconTask extends AsyncTask<Void, Void, Drawable> {
         protected final DisplayResolveInfo mDisplayResolveInfo;
         private final ResolveInfo mResolveInfo;
-        private ViewHolder mHolder;
 
-        LoadIconTask(DisplayResolveInfo dri, ViewHolder holder) {
+        LoadIconTask(DisplayResolveInfo dri) {
             mDisplayResolveInfo = dri;
             mResolveInfo = dri.getResolveInfo();
-            mHolder = holder;
         }
 
         @Override
@@ -942,18 +1003,10 @@ public class ResolverListAdapter extends BaseAdapter {
         protected void onPostExecute(Drawable d) {
             if (getOtherProfile() == mDisplayResolveInfo) {
                 mResolverListCommunicator.updateProfileViewButton();
-            } else {
+            } else if (!mDisplayResolveInfo.hasDisplayIcon()) {
                 mDisplayResolveInfo.setDisplayIcon(d);
-                mHolder.bindIcon(mDisplayResolveInfo);
-                // Notify in case view is already bound to resolve the race conditions on
-                // low end devices
                 notifyDataSetChanged();
             }
-        }
-
-        public void setViewHolder(ViewHolder holder) {
-            mHolder = holder;
-            mHolder.bindIcon(mDisplayResolveInfo);
         }
     }
 

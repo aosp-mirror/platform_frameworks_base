@@ -20,12 +20,10 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.os.BuildCompat;
-import androidx.window.embedding.SplitController;
+import androidx.window.embedding.ActivityEmbeddingController;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
@@ -86,7 +84,7 @@ public final class ActivityEmbeddingUtils {
      * @param activity Activity that needs the check
      */
     public static boolean isActivityEmbedded(Activity activity) {
-        return SplitController.getInstance().isActivityEmbedded(activity);
+        return ActivityEmbeddingController.getInstance(activity).isActivityEmbedded(activity);
     }
 
     /**
@@ -105,15 +103,7 @@ public final class ActivityEmbeddingUtils {
             return false;
         }
 
-        final String shouldHideNavigateUpButton =
-                Settings.Global.getString(activity.getContentResolver(),
-                        "settings_hide_second_layer_page_navigate_up_button_in_two_pane");
-
-        if (TextUtils.isEmpty(shouldHideNavigateUpButton)
-                || Boolean.parseBoolean(shouldHideNavigateUpButton)) {
-            return isActivityEmbedded(activity);
-        }
-        return false;
+        return isActivityEmbedded(activity);
     }
 
     private ActivityEmbeddingUtils() {

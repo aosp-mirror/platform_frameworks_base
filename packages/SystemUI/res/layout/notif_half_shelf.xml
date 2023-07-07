@@ -76,7 +76,10 @@
                     android:layout_height="48dp"
                     android:layout_width="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:track="@drawable/settingslib_track_selector"
+                    android:thumb="@drawable/settingslib_thumb_selector"
+                    android:theme="@style/MainSwitch.Settingslib"/>
             </com.android.systemui.statusbar.notification.row.AppControlView>
 
             <!-- ChannelRows get added dynamically -->
@@ -101,7 +104,7 @@
                 android:minWidth="@dimen/notification_importance_toggle_size"
                 android:minHeight="@dimen/notification_importance_toggle_size"
                 android:maxWidth="200dp"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
+                style="@style/Widget.Dialog.Button"/>
             <TextView
                 android:id="@+id/done_button"
                 android:text="@string/inline_ok_button"
@@ -113,7 +116,7 @@
                 android:minWidth="@dimen/notification_importance_toggle_size"
                 android:minHeight="@dimen/notification_importance_toggle_size"
                 android:layout_alignParentEnd="true"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
+                style="@style/Widget.Dialog.Button"/>
         </RelativeLayout>
     </LinearLayout>
 </FrameLayout>

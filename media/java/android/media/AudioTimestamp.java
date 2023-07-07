@@ -16,10 +16,13 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import android.annotation.IntDef;
 
 /**
  * Structure that groups a position in frame units relative to an assumed audio stream,
@@ -33,8 +36,7 @@ import android.annotation.IntDef;
  * @see AudioTrack#getTimestamp AudioTrack.getTimestamp(AudioTimestamp)
  * @see AudioRecord#getTimestamp AudioRecord.getTimestamp(AudioTimestamp, int)
  */
-public final class AudioTimestamp
-{
+public final class AudioTimestamp implements Parcelable {
     /**
      * Clock monotonic or its equivalent on the system,
      * in the same units and timebase as {@link java.lang.System#nanoTime}.
@@ -86,4 +88,47 @@ public final class AudioTimestamp
      * with a timebase of {@link #TIMEBASE_MONOTONIC}.
      */
     public long nanoTime;
+
+    public AudioTimestamp() {
+    }
+
+    private AudioTimestamp(@NonNull Parcel in) {
+        framePosition = in.readLong();
+        nanoTime = in.readLong();
+    }
+
+    @Override
+    public String toString() {
+        return "AudioTimeStamp:"
+                + " framePos=" + framePosition
+                + " nanoTime=" + nanoTime;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeLong(framePosition);
+        dest.writeLong(nanoTime);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Creates an instance from a {@link Parcel}.
+     */
+    @NonNull
+    public static final Creator<AudioTimestamp> CREATOR = new Creator<>() {
+        @Override
+        public AudioTimestamp createFromParcel(@NonNull Parcel in) {
+            return new AudioTimestamp(in);
+        }
+
+        @Override
+        public AudioTimestamp[] newArray(int size) {
+            return new AudioTimestamp[size];
+        }
+    };
 }
+

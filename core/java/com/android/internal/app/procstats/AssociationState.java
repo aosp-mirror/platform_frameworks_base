@@ -59,6 +59,7 @@ public final class AssociationState {
     /**
      * The state of the source process of an association.
      */
+    @SuppressWarnings("ParcelableCreator")
     public static final class SourceState implements Parcelable {
         private @NonNull final ProcessStats mProcessStats;
         private @Nullable final AssociationState mAssociationState;
