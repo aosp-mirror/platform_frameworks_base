@@ -54,6 +54,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
@@ -95,6 +96,7 @@ import javax.inject.Inject;
 class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
     private final Context mContext;
+    private final int mDisplayId;
 
     private final Handler mMainThreadHandler;
     private final Executor mUiBgExecutor;
@@ -121,7 +123,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final MetricsLogger mMetricsLogger;
     private final StatusBarNotificationActivityStarterLogger mLogger;
 
-    private final CentralSurfaces mCentralSurfaces;
     private final NotificationPresenter mPresenter;
     private final ShadeViewController mShadeViewController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -136,6 +137,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     @Inject
     StatusBarNotificationActivityStarter(
             Context context,
+            @DisplayId int displayId,
             Handler mainThreadHandler,
             Executor uiBgExecutor,
             NotificationVisibilityProvider visibilityProvider,
@@ -158,7 +160,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             MetricsLogger metricsLogger,
             StatusBarNotificationActivityStarterLogger logger,
             OnUserInteractionCallback onUserInteractionCallback,
-            CentralSurfaces centralSurfaces,
             NotificationPresenter presenter,
             ShadeViewController shadeViewController,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -169,6 +170,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             FeatureFlags featureFlags,
             UserTracker userTracker) {
         mContext = context;
+        mDisplayId = displayId;
         mMainThreadHandler = mainThreadHandler;
         mUiBgExecutor = uiBgExecutor;
         mVisibilityProvider = visibilityProvider;
@@ -193,8 +195,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mMetricsLogger = metricsLogger;
         mLogger = logger;
         mOnUserInteractionCallback = onUserInteractionCallback;
-        // TODO: use KeyguardStateController#isOccluded to remove this dependency
-        mCentralSurfaces = centralSurfaces;
         mPresenter = presenter;
         mShadeViewController = shadeViewController;
         mActivityLaunchAnimator = activityLaunchAnimator;
@@ -456,11 +456,11 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                         long eventTime = row.getAndResetLastActionUpTime();
                         Bundle options = eventTime > 0
                                 ? getActivityOptions(
-                                mCentralSurfaces.getDisplayId(),
+                                mDisplayId,
                                 adapter,
                                 mKeyguardStateController.isShowing(),
                                 eventTime)
-                                : getActivityOptions(mCentralSurfaces.getDisplayId(), adapter);
+                                : getActivityOptions(mDisplayId, adapter);
                         int result = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, options);
                         mLogger.logSendPendingIntent(entry, intent, result);
@@ -495,7 +495,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                             (adapter) -> TaskStackBuilder.create(mContext)
                                     .addNextIntentWithParentStack(intent)
                                     .startActivities(getActivityOptions(
-                                            mCentralSurfaces.getDisplayId(),
+                                            mDisplayId,
                                             adapter),
                                             new UserHandle(UserHandle.getUserId(appUid))));
                 });
@@ -543,7 +543,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     mActivityLaunchAnimator.startIntentWithAnimation(animationController, animate,
                             intent.getPackage(),
                             (adapter) -> tsb.startActivities(
-                                    getActivityOptions(mCentralSurfaces.getDisplayId(), adapter),
+                                    getActivityOptions(mDisplayId, adapter),
                                     mUserTracker.getUserHandle()));
                 });
                 return true;

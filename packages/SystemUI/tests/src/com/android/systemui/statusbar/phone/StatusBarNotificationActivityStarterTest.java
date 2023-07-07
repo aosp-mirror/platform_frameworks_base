@@ -116,6 +116,8 @@ import java.util.Optional;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
+    private static final int DISPLAY_ID = 0;
+
     @Mock
     private AssistManager mAssistManager;
     @Mock
@@ -129,8 +131,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock
-    private CentralSurfaces mCentralSurfaces;
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
@@ -226,6 +226,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter =
                 new StatusBarNotificationActivityStarter(
                         getContext(),
+                        DISPLAY_ID,
                         mHandler,
                         mUiBgExecutor,
                         mVisibilityProvider,
@@ -248,7 +249,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(MetricsLogger.class),
                         mock(StatusBarNotificationActivityStarterLogger.class),
                         mOnUserInteractionCallback,
-                        mCentralSurfaces,
                         mock(NotificationPresenter.class),
                         mock(ShadeViewController.class),
                         mock(NotificationShadeWindowController.class),
