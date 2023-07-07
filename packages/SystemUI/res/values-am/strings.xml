@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ዩኤስቢ አንቃ"</string>
     <string name="learn_more" msgid="4690632085667273811">"የበለጠ ለመረዳት"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገፅ እይታ"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"መክፈትን አራዝም ተሰናክሏል"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock ተሰናክሏል"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ምስል ተልኳል"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገፅ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ቅጽበታዊ ገፅ እይታን ወደ የስራ መገለጫ በማስቀመጥ ላይ…"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"የኃይል ምናሌ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ገፅ <xliff:g id="ID_1">%1$d</xliff:g> ከ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ማያ ገፅ ቁልፍ"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"የእርስዎ ስልክ በመደበኛ ሁኔታ እየሠራ ነው።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"የእርስዎ ስልክ በጣም ግሎ ነበር፣ ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪዲዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትላልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"ስልኩ እየሞቀ ነው"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"አንዳንድ ባሕሪያት ስልኩ እየቀዘቀዘ እያለ ውስን ይሆናሉ።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"የእርስዎ ስልክ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም ስልክዎን መጠቀም ይችላሉ፣ ነገር ግን ሊንቀራፈፍ ይችላል።\n\nአንዴ ስልክዎ ከቀዘቀዘ በኋላ በመደበኝነት ያሄዳል።"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"መሣሪያዎን ይንቀሉ"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"መሣሪያዎ ከኃይል መሙያ ወደቡ አቅራቢያ እየሞቀ ነው። ከኃይል መሙያ ወይም ከዩኤስቢ ተጨማሪ መሣሪያ ጋር ከተገናኘ ይንቀሉት እና ገመዱ የሞቀ ሊሆን ስለሚችል ጥንቃቄ ያድርጉ።"</string>
