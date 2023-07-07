@@ -2970,14 +2970,6 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                     }
                     e->setNameIndex(keyStrings.add(e->getName(), true));
 
-                    // If this entry has no values for other configs,
-                    // and is the default config, then it is special.  Otherwise
-                    // we want to add it with the config info.
-                    ConfigDescription* valueConfig = NULL;
-                    if (N != 1 || config == nullConfig) {
-                        valueConfig = &config;
-                    }
-
                     status_t err = e->prepareFlatten(&valueStrings, this,
                             &configTypeName, &config);
                     if (err != NO_ERROR) {
@@ -3751,15 +3743,15 @@ ssize_t ResourceTable::Entry::flatten(Bundle* /* bundle */, const sp<AaptFile>& 
     size_t amt = 0;
     ResTable_entry header;
     memset(&header, 0, sizeof(header));
-    header.size = htods(sizeof(header));
+    header.full.size = htods(sizeof(header));
     const type ty = mType;
     if (ty == TYPE_BAG) {
-        header.flags |= htods(header.FLAG_COMPLEX);
+        header.full.flags |= htods(header.FLAG_COMPLEX);
     }
     if (isPublic) {
-        header.flags |= htods(header.FLAG_PUBLIC);
+        header.full.flags |= htods(header.FLAG_PUBLIC);
     }
-    header.key.index = htodl(mNameIndex);
+    header.full.key.index = htodl(mNameIndex);
     if (ty != TYPE_BAG) {
         status_t err = data->writeData(&header, sizeof(header));
         if (err != NO_ERROR) {

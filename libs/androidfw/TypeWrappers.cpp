@@ -59,7 +59,9 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
             + dtohl(type->header.size);
     const uint32_t* const entryIndices = reinterpret_cast<const uint32_t*>(
             reinterpret_cast<uintptr_t>(type) + dtohs(type->header.headerSize));
-    if (reinterpret_cast<uintptr_t>(entryIndices) + (sizeof(uint32_t) * entryCount) > containerEnd) {
+    const size_t indexSize = type->flags & ResTable_type::FLAG_OFFSET16 ?
+                                    sizeof(uint16_t) : sizeof(uint32_t);
+    if (reinterpret_cast<uintptr_t>(entryIndices) + (indexSize * entryCount) > containerEnd) {
         ALOGE("Type's entry indices extend beyond its boundaries");
         return NULL;
     }
@@ -73,6 +75,9 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
       }
 
       entryOffset = static_cast<uint32_t>(dtohs(ResTable_sparseTypeEntry{*iter}.offset)) * 4u;
+    } else if (type->flags & ResTable_type::FLAG_OFFSET16) {
+      auto entryIndices16 = reinterpret_cast<const uint16_t*>(entryIndices);
+      entryOffset = offset_from16(entryIndices16[mIndex]);
     } else {
       entryOffset = dtohl(entryIndices[mIndex]);
     }
@@ -91,11 +96,11 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
     if (reinterpret_cast<uintptr_t>(entry) > containerEnd - sizeof(*entry)) {
         ALOGE("Entry offset at index %u points outside the Type's boundaries", mIndex);
         return NULL;
-    } else if (reinterpret_cast<uintptr_t>(entry) + dtohs(entry->size) > containerEnd) {
+    } else if (reinterpret_cast<uintptr_t>(entry) + entry->size() > containerEnd) {
         ALOGE("Entry at index %u extends beyond Type's boundaries", mIndex);
         return NULL;
-    } else if (dtohs(entry->size) < sizeof(*entry)) {
-        ALOGE("Entry at index %u is too small (%u)", mIndex, dtohs(entry->size));
+    } else if (entry->size() < sizeof(*entry)) {
+        ALOGE("Entry at index %u is too small (%zu)", mIndex, entry->size());
         return NULL;
     }
     return entry;

@@ -500,7 +500,7 @@ public final class MediaMetadata implements Parcelable {
     public Rating getRating(@RatingKey String key) {
         Rating rating = null;
         try {
-            rating = mBundle.getParcelable(key);
+            rating = mBundle.getParcelable(key, android.media.Rating.class);
         } catch (Exception e) {
             // ignore, value was not a bitmap
             Log.w(TAG, "Failed to retrieve a key as Rating.", e);
@@ -518,7 +518,7 @@ public final class MediaMetadata implements Parcelable {
     public Bitmap getBitmap(@BitmapKey String key) {
         Bitmap bmp = null;
         try {
-            bmp = mBundle.getParcelable(key);
+            bmp = mBundle.getParcelable(key, android.graphics.Bitmap.class);
         } catch (Exception e) {
             // ignore, value was not a bitmap
             Log.w(TAG, "Failed to retrieve a key as Bitmap.", e);

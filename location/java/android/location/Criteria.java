@@ -27,11 +27,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A class indicating the application criteria for selecting a
- * location provider. Providers may be ordered according to accuracy,
- * power usage, ability to report altitude, speed, bearing, and monetary
- * cost.
+ * A class indicating the application criteria for selecting a location provider. Providers may be
+ * ordered according to accuracy, power usage, ability to report altitude, speed, bearing, and
+ * monetary cost.
+ *
+ * @deprecated Criteria based APIs are deprecated because they cannot fully capture the complexity
+ *             of location providers, and encourage bad development practices. Prefer to explicit
+ *             select the location provider of interest ({@link LocationManager#FUSED_PROVIDER},
+ *             {@link LocationManager#GPS_PROVIDER, etc}), rather than relying on Criteria.
  */
+@Deprecated
 public class Criteria implements Parcelable {
 
     /** @hide */

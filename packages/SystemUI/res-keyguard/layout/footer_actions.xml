@@ -16,85 +16,14 @@
 -->
 
 <!-- Action buttons for footer in QS/QQS, containing settings button, power off button etc -->
-<com.android.systemui.qs.FooterActionsView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/footer_actions_height"
     android:elevation="@dimen/qs_panel_elevation"
-    android:paddingTop="8dp"
+    android:paddingTop="@dimen/qs_footer_actions_top_padding"
     android:paddingBottom="@dimen/qs_footer_actions_bottom_padding"
     android:background="@drawable/qs_footer_actions_background"
-    android:gravity="center_vertical"
+    android:gravity="center_vertical|end"
     android:layout_gravity="bottom"
->
-
-    <LinearLayout
-        android:id="@+id/security_footers_container"
-        android:orientation="horizontal"
-        android:layout_height="@dimen/qs_footer_action_button_size"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-    />
-
-    <!-- Negative margin equal to -->
-    <LinearLayout
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"
-        android:layout_marginEnd="@dimen/qs_footer_action_inset_negative"
-        >
-
-        <com.android.systemui.statusbar.phone.MultiUserSwitch
-            android:id="@+id/multi_user_switch"
-            android:layout_width="@dimen/qs_footer_action_button_size"
-            android:layout_height="@dimen/qs_footer_action_button_size"
-            android:background="@drawable/qs_footer_action_circle"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/multi_user_avatar"
-                android:layout_width="@dimen/qs_footer_icon_size"
-                android:layout_height="@dimen/qs_footer_icon_size"
-                android:layout_gravity="center"
-                android:scaleType="centerInside" />
-        </com.android.systemui.statusbar.phone.MultiUserSwitch>
-
-        <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-            android:id="@+id/settings_button_container"
-            android:layout_width="@dimen/qs_footer_action_button_size"
-            android:layout_height="@dimen/qs_footer_action_button_size"
-            android:background="@drawable/qs_footer_action_circle"
-            android:clipChildren="false"
-            android:clipToPadding="false">
-
-            <com.android.systemui.statusbar.phone.SettingsButton
-                android:id="@+id/settings_button"
-                android:layout_width="@dimen/qs_footer_icon_size"
-                android:layout_height="@dimen/qs_footer_icon_size"
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:focusable="false"
-                android:clickable="false"
-                android:importantForAccessibility="yes"
-                android:contentDescription="@string/accessibility_quick_settings_settings"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_settings"
-                android:tint="?android:attr/textColorPrimary" />
-
-        </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
-
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:id="@+id/pm_lite"
-            android:layout_width="@dimen/qs_footer_action_button_size"
-            android:layout_height="@dimen/qs_footer_action_button_size"
-            android:background="@drawable/qs_footer_action_circle_color"
-            android:clickable="true"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:padding="@dimen/qs_footer_icon_padding"
-            android:src="@*android:drawable/ic_lock_power_off"
-            android:contentDescription="@string/accessibility_quick_settings_power_menu"
-            android:tint="?androidprv:attr/textColorOnAccent" />
-
-    </LinearLayout>
-</com.android.systemui.qs.FooterActionsView>
+/>

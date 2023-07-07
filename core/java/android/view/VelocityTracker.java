@@ -18,8 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
-import android.sysprop.InputProperties;
+import android.hardware.input.InputManagerGlobal;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
 
@@ -28,20 +27,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
 /**
- * Helper for tracking the velocity of touch events, for implementing
+ * Helper for tracking the velocity of motion events, for implementing
  * flinging and other such gestures.
  *
  * Use {@link #obtain} to retrieve a new instance of the class when you are going
  * to begin tracking.  Put the motion events you receive into it with
- * {@link #addMovement(MotionEvent)}.  When you want to determine the velocity call
- * {@link #computeCurrentVelocity(int)} and then call {@link #getXVelocity(int)}
- * and {@link #getYVelocity(int)} to retrieve the velocity for each pointer id.
+ * {@link #addMovement(MotionEvent)}.  When you want to determine the velocity, call
+ * {@link #computeCurrentVelocity(int)} and then call the velocity-getter methods like
+ * {@link #getXVelocity(int)}, {@link #getYVelocity(int)}, or {@link #getAxisVelocity(int, int)}
+ * to retrieve velocity for different axes and/or pointer IDs.
  */
 public final class VelocityTracker {
     private static final SynchronizedPool<VelocityTracker> sPool =
             new SynchronizedPool<VelocityTracker>(2);
 
     private static final int ACTIVE_POINTER_ID = -1;
+
+    /** @hide */
+    @IntDef(value = {
+            MotionEvent.AXIS_X,
+            MotionEvent.AXIS_Y,
+            MotionEvent.AXIS_SCROLL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VelocityTrackableMotionEventAxis {}
 
     /**
      * Velocity Tracker Strategy: Invalid.
@@ -180,9 +189,8 @@ public final class VelocityTracker {
     private static native void nativeClear(long ptr);
     private static native void nativeAddMovement(long ptr, MotionEvent event);
     private static native void nativeComputeCurrentVelocity(long ptr, int units, float maxVelocity);
-    private static native float nativeGetXVelocity(long ptr, int id);
-    private static native float nativeGetYVelocity(long ptr, int id);
-    private static native boolean nativeGetEstimator(long ptr, int id, Estimator outEstimator);
+    private static native float nativeGetVelocity(long ptr, int axis, int id);
+    private static native boolean nativeIsAxisSupported(int axis);
 
     static {
         // Strategy string and IDs mapping lookup.
@@ -278,8 +286,9 @@ public final class VelocityTracker {
     private VelocityTracker(@VelocityTrackerStrategy int strategy) {
         // If user has not selected a specific strategy
         if (strategy == VELOCITY_TRACKER_STRATEGY_DEFAULT) {
+            final String strategyProperty = InputManagerGlobal.getInstance()
+                    .getVelocityTrackerStrategy();
             // Check if user specified strategy by overriding system property.
-            String strategyProperty = InputProperties.velocitytracker_strategy().orElse(null);
             if (strategyProperty == null || strategyProperty.isEmpty()) {
                 mStrategy = strategy;
             } else {
@@ -302,6 +311,24 @@ public final class VelocityTracker {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * Checks whether a given velocity-trackable {@link MotionEvent} axis is supported for velocity
+     * tracking by this {@link VelocityTracker} instance (refer to
+     * {@link #getAxisVelocity(int, int)} for a list of potentially velocity-trackable axes).
+     *
+     * <p>Note that the value returned from this method will stay the same for a given instance, so
+     * a single check for axis support is enough per a {@link VelocityTracker} instance.
+     *
+     * @param axis The axis to check for velocity support.
+     * @return {@code true} if {@code axis} is supported for velocity tracking, or {@code false}
+     * otherwise.
+     * @see #getAxisVelocity(int, int)
+     * @see #getAxisVelocity(int)
+     */
+    public boolean isAxisSupported(@VelocityTrackableMotionEventAxis int axis) {
+        return nativeIsAxisSupported(axis);
     }
 
     /**
@@ -345,7 +372,9 @@ public final class VelocityTracker {
      * {@link #getYVelocity()}.
      *
      * @param units The units you would like the velocity in.  A value of 1
-     * provides pixels per millisecond, 1000 provides pixels per second, etc.
+     * provides units per millisecond, 1000 provides units per second, etc.
+     * Note that the units referred to here are the same units with which motion is reported. For
+     * axes X and Y, the units are pixels.
      * @param maxVelocity The maximum velocity that can be computed by this method.
      * This value must be declared in the same unit as the units parameter. This value
      * must be positive.
@@ -361,7 +390,7 @@ public final class VelocityTracker {
      * @return The previously computed X velocity.
      */
     public float getXVelocity() {
-        return nativeGetXVelocity(mPtr, ACTIVE_POINTER_ID);
+        return getXVelocity(ACTIVE_POINTER_ID);
     }
 
     /**
@@ -371,7 +400,7 @@ public final class VelocityTracker {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity() {
-        return nativeGetYVelocity(mPtr, ACTIVE_POINTER_ID);
+        return getYVelocity(ACTIVE_POINTER_ID);
     }
 
     /**
@@ -382,7 +411,7 @@ public final class VelocityTracker {
      * @return The previously computed X velocity.
      */
     public float getXVelocity(int id) {
-        return nativeGetXVelocity(mPtr, id);
+        return nativeGetVelocity(mPtr, MotionEvent.AXIS_X, id);
     }
 
     /**
@@ -393,114 +422,48 @@ public final class VelocityTracker {
      * @return The previously computed Y velocity.
      */
     public float getYVelocity(int id) {
-        return nativeGetYVelocity(mPtr, id);
+        return nativeGetVelocity(mPtr, MotionEvent.AXIS_Y, id);
     }
 
     /**
-     * Get an estimator for the movements of a pointer using past movements of the
-     * pointer to predict future movements.
+     * Retrieve the last computed velocity for a given motion axis. You must first call
+     * {@link #computeCurrentVelocity(int)} or {@link #computeCurrentVelocity(int, float)} before
+     * calling this function.
      *
-     * It is not necessary to call {@link #computeCurrentVelocity(int)} before calling
-     * this method.
+     * <p>In addition to {@link MotionEvent#AXIS_X} and {@link MotionEvent#AXIS_Y} which have been
+     * supported since the introduction of this class, the following axes can be candidates for this
+     * method:
+     * <ul>
+     *   <li> {@link MotionEvent#AXIS_SCROLL}: supported starting
+     *        {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     * </ul>
      *
+     * <p>Before accessing velocities of an axis using this method, check that your
+     * {@link VelocityTracker} instance supports the axis by using {@link #isAxisSupported(int)}.
+     *
+     * @param axis Which axis' velocity to return.
      * @param id Which pointer's velocity to return.
-     * @param outEstimator The estimator to populate.
-     * @return True if an estimator was obtained, false if there is no information
-     * available about the pointer.
-     *
-     * @hide For internal use only.  Not a final API.
+     * @return The previously computed velocity for {@code axis} for pointer ID of {@code id} if
+     * {@code axis} is supported for velocity tracking, or 0 if velocity tracking is not supported
+     * for the axis.
+     * @see #isAxisSupported(int)
      */
-    public boolean getEstimator(int id, Estimator outEstimator) {
-        if (outEstimator == null) {
-            throw new IllegalArgumentException("outEstimator must not be null");
-        }
-        return nativeGetEstimator(mPtr, id, outEstimator);
+    public float getAxisVelocity(@VelocityTrackableMotionEventAxis int axis, int id) {
+        return nativeGetVelocity(mPtr, axis, id);
     }
 
     /**
-     * An estimator for the movements of a pointer based on a polynomial model.
+     * Equivalent to calling {@link #getAxisVelocity(int, int)} for {@code axis} and the active
+     * pointer.
      *
-     * The last recorded position of the pointer is at time zero seconds.
-     * Past estimated positions are at negative times and future estimated positions
-     * are at positive times.
-     *
-     * First coefficient is position (in pixels), second is velocity (in pixels per second),
-     * third is acceleration (in pixels per second squared).
-     *
-     * @hide For internal use only.  Not a final API.
+     * @param axis Which axis' velocity to return.
+     * @return The previously computed velocity for {@code axis} for the active pointer if
+     * {@code axis} is supported for velocity tracking, or 0 if velocity tracking is not supported
+     * for the axis.
+     * @see #isAxisSupported(int)
+     * @see #getAxisVelocity(int, int)
      */
-    public static final class Estimator {
-        // Must match VelocityTracker::Estimator::MAX_DEGREE
-        private static final int MAX_DEGREE = 4;
-
-        /**
-         * Polynomial coefficients describing motion in X.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public final float[] xCoeff = new float[MAX_DEGREE + 1];
-
-        /**
-         * Polynomial coefficients describing motion in Y.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public final float[] yCoeff = new float[MAX_DEGREE + 1];
-
-        /**
-         * Polynomial degree, or zero if only position information is available.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public int degree;
-
-        /**
-         * Confidence (coefficient of determination), between 0 (no fit) and 1 (perfect fit).
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public float confidence;
-
-        /**
-         * Gets an estimate of the X position of the pointer at the specified time point.
-         * @param time The time point in seconds, 0 is the last recorded time.
-         * @return The estimated X coordinate.
-         */
-        public float estimateX(float time) {
-            return estimate(time, xCoeff);
-        }
-
-        /**
-         * Gets an estimate of the Y position of the pointer at the specified time point.
-         * @param time The time point in seconds, 0 is the last recorded time.
-         * @return The estimated Y coordinate.
-         */
-        public float estimateY(float time) {
-            return estimate(time, yCoeff);
-        }
-
-        /**
-         * Gets the X coefficient with the specified index.
-         * @param index The index of the coefficient to return.
-         * @return The X coefficient, or 0 if the index is greater than the degree.
-         */
-        public float getXCoeff(int index) {
-            return index <= degree ? xCoeff[index] : 0;
-        }
-
-        /**
-         * Gets the Y coefficient with the specified index.
-         * @param index The index of the coefficient to return.
-         * @return The Y coefficient, or 0 if the index is greater than the degree.
-         */
-        public float getYCoeff(int index) {
-            return index <= degree ? yCoeff[index] : 0;
-        }
-
-        private float estimate(float time, float[] c) {
-            float a = 0;
-            float scale = 1;
-            for (int i = 0; i <= degree; i++) {
-                a += c[i] * scale;
-                scale *= time;
-            }
-            return a;
-        }
+    public float getAxisVelocity(@VelocityTrackableMotionEventAxis int axis) {
+        return nativeGetVelocity(mPtr, axis, ACTIVE_POINTER_ID);
     }
 }

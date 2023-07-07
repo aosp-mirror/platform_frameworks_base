@@ -114,8 +114,8 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
 
         try {
             Bundle args = new Bundle();
-            boolean ok = mService.showSessionForActiveService(args, /* sourceFlags= */ 0, callback,
-                    /* activityToken= */ null);
+            boolean ok = mService.showSessionForActiveService(args, /* sourceFlags= */ 0,
+                     /* attributionTag= */ null, callback, /* activityToken= */ null);
 
             if (!ok) {
                 pw.println("showSessionForActiveService() returned false");

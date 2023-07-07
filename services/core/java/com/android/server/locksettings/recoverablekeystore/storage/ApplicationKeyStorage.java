@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings.recoverablekeystore.storage;
 
+import static android.security.keystore.recovery.RecoveryController.ERROR_KEY_NOT_FOUND;
 import static android.security.keystore.recovery.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
 
 import android.annotation.Nullable;
@@ -135,6 +136,11 @@ public class ApplicationKeyStorage {
         try {
             key = KeyStore2.getInstance().grant(key, uid, grantAccessVector);
         } catch (android.security.KeyStoreException e) {
+            if (e.getNumericErrorCode()
+                    == android.security.KeyStoreException.ERROR_KEY_DOES_NOT_EXIST) {
+                Log.e(TAG, "Failed to get grant for KeyStore key - key not found", e);
+                throw new ServiceSpecificException(ERROR_KEY_NOT_FOUND, e.getMessage());
+            }
             Log.e(TAG, "Failed to get grant for KeyStore key.", e);
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/KeyboardArea">
+
+    <View style="@style/KeyboardRow.Header"/>
+
+    <LinearLayout style="@style/KeyboardRow">
+        <TextView
+            android:id="@+id/key_pos_0_0"
+            android:text="q"
+            android:tag="KEYCODE_Q"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_1"
+            android:text="w"
+            android:tag="KEYCODE_W"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_2"
+            android:text="e"
+            android:tag="KEYCODE_E"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_3"
+            android:text="r"
+            android:tag="KEYCODE_R"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_4"
+            android:text="t"
+            android:tag="KEYCODE_T"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_5"
+            android:text="y"
+            android:tag="KEYCODE_Y"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_6"
+            android:text="u"
+            android:tag="KEYCODE_U"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_7"
+            android:text="i"
+            android:tag="KEYCODE_I"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_8"
+            android:text="o"
+            android:tag="KEYCODE_O"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_0_9"
+            android:text="p"
+            android:tag="KEYCODE_P"
+            style="@style/SoftKey"/>
+    </LinearLayout>
+
+    <LinearLayout style="@style/KeyboardRow">
+        <TextView
+            android:id="@+id/key_pos_1_0"
+            android:text="a"
+            android:tag="KEYCODE_A"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_1"
+            android:text="s"
+            android:tag="KEYCODE_S"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_2"
+            android:text="d"
+            android:tag="KEYCODE_D"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_3"
+            android:text="f"
+            android:tag="KEYCODE_F"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_4"
+            android:text="g"
+            android:tag="KEYCODE_G"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_5"
+            android:text="h"
+            android:tag="KEYCODE_H"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_6"
+            android:text="j"
+            android:tag="KEYCODE_J"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_7"
+            android:text="k"
+            android:tag="KEYCODE_K"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_1_8"
+            android:text="l"
+            android:tag="KEYCODE_L"
+            style="@style/SoftKey"/>
+    </LinearLayout>
+
+    <LinearLayout style="@style/KeyboardRow">
+        <TextView
+            android:id="@+id/key_pos_shift"
+            android:text="SHI"
+            android:tag="KEYCODE_SHIFT"
+            style="@style/SoftKey.Function"/>
+        <TextView
+            android:id="@+id/key_pos_2_0"
+            android:text="z"
+            android:tag="KEYCODE_Z"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_2_1"
+            android:text="x"
+            android:tag="KEYCODE_X"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_2_2"
+            style="@style/SoftKey"
+            android:text="c"
+            android:tag="KEYCODE_C"/>
+        <TextView
+            android:id="@+id/key_pos_2_3"
+            android:text="v"
+            android:tag="KEYCODE_V"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_2_4"
+            android:text="b"
+            android:tag="KEYCODE_B"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_2_5"
+            android:text="n"
+            android:tag="KEYCODE_N"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_2_6"
+            android:text="m"
+            android:tag="KEYCODE_M"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_del"
+            android:text="DEL"
+            android:tag="KEYCODE_DEL"
+            style="@style/SoftKey.Function"/>
+    </LinearLayout>
+
+    <LinearLayout style="@style/KeyboardRow">
+        <TextView
+            android:id="@+id/key_pos_symbol"
+            android:text="TAB"
+            android:tag="KEYCODE_TAB"
+            style="@style/SoftKey.Function"/>
+        <TextView
+            android:id="@+id/key_pos_comma"
+            android:text=","
+            android:tag="KEYCODE_COMMA"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_space"
+            android:text="SPACE"
+            android:tag="KEYCODE_SPACE"
+            style="@style/SoftKey.Space"/>
+        <TextView
+            android:id="@+id/key_pos_period"
+            android:text="."
+            android:tag="KEYCODE_PERIOD"
+            style="@style/SoftKey"/>
+        <TextView
+            android:id="@+id/key_pos_enter"
+            android:text="ENT"
+            android:tag="KEYCODE_ENTER"
+            style="@style/SoftKey.Function.Bottom"/>
+    </LinearLayout>
+</LinearLayout>

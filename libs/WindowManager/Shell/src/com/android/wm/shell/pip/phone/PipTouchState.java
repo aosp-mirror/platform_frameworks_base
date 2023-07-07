@@ -37,7 +37,7 @@ public class PipTouchState {
     private static final boolean DEBUG = false;
 
     @VisibleForTesting
-    public static final long DOUBLE_TAP_TIMEOUT = 200;
+    public static final long DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
     static final long HOVER_EXIT_TIMEOUT = 50;
 
     private final ShellExecutor mMainExecutor;
@@ -55,6 +55,9 @@ public class PipTouchState {
     private final PointF mLastDelta = new PointF();
     private final PointF mVelocity = new PointF();
     private boolean mAllowTouches = true;
+
+    // Set to false to block both PipTouchHandler and PipResizeGestureHandler's input processing
+    private boolean mAllowInputEvents = true;
     private boolean mIsUserInteracting = false;
     // Set to true only if the multiple taps occur within the double tap timeout
     private boolean mIsDoubleTap = false;
@@ -74,6 +77,20 @@ public class PipTouchState {
         mDoubleTapTimeoutCallback = doubleTapTimeoutCallback;
         mHoverExitTimeoutCallback = hoverExitTimeoutCallback;
         mMainExecutor = mainExecutor;
+    }
+
+    /**
+     * @return true if input processing is enabled for PiP in general.
+     */
+    public boolean getAllowInputEvents() {
+        return mAllowInputEvents;
+    }
+
+    /**
+     * @param allowInputEvents true to enable input processing for PiP in general.
+     */
+    public void setAllowInputEvents(boolean allowInputEvents) {
+        mAllowInputEvents = allowInputEvents;
     }
 
     /**
@@ -393,6 +410,7 @@ public class PipTouchState {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mAllowTouches=" + mAllowTouches);
+        pw.println(innerPrefix + "mAllowInputEvents=" + mAllowInputEvents);
         pw.println(innerPrefix + "mActivePointerId=" + mActivePointerId);
         pw.println(innerPrefix + "mLastTouchDisplayId=" + mLastTouchDisplayId);
         pw.println(innerPrefix + "mDownTouch=" + mDownTouch);

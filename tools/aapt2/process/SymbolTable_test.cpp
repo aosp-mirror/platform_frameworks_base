@@ -17,9 +17,9 @@
 #include "process/SymbolTable.h"
 
 #include "SdkConstants.h"
+#include "androidfw/BigBuffer.h"
 #include "format/binary/TableFlattener.h"
 #include "test/Test.h"
-#include "util/BigBuffer.h"
 
 using ::testing::Eq;
 using ::testing::IsNull;

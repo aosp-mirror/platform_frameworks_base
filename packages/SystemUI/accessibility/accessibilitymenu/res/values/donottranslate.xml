@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- empty string for shortcut label -->
+  <string name="empty_content"></string>
+
+  <string name="pref_large_buttons">pref_large_buttons</string>
+
+  <!-- key for Help&feedback settings [CHAR_LIMIT=NONE] -->
+  <string name="pref_help">pref_help</string>
+
+  <!-- url for help page -->
+  <string name="help_url">https://support.google.com/accessibility/android/answer/9078941</string>
+</resources>

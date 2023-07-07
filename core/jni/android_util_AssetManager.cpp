@@ -39,6 +39,7 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AttributeResolution.h"
 #include "androidfw/MutexGuard.h"
+#include <androidfw/ResourceTimer.h>
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 
@@ -93,6 +94,7 @@ static struct configuration_offsets_t {
   jfieldID mScreenWidthDpOffset;
   jfieldID mScreenHeightDpOffset;
   jfieldID mScreenLayoutOffset;
+  jfieldID mUiMode;
 } gConfigurationOffsets;
 
 static struct arraymap_offsets_t {
@@ -323,7 +325,7 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
                                    jint screen_width, jint screen_height,
                                    jint smallest_screen_width_dp, jint screen_width_dp,
                                    jint screen_height_dp, jint screen_layout, jint ui_mode,
-                                   jint color_mode, jint major_version) {
+                                   jint color_mode, jint grammatical_gender, jint major_version) {
   ATRACE_NAME("AssetManager::SetConfiguration");
 
   ResTable_config configuration;
@@ -344,6 +346,7 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   configuration.screenLayout = static_cast<uint8_t>(screen_layout);
   configuration.uiMode = static_cast<uint8_t>(ui_mode);
   configuration.colorMode = static_cast<uint8_t>(color_mode);
+  configuration.grammaticalInflection = static_cast<uint8_t>(grammatical_gender);
   configuration.sdkVersion = static_cast<uint16_t>(major_version);
 
   if (locale != nullptr) {
@@ -630,6 +633,7 @@ static jint NativeGetResourceValue(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
                                    jshort density, jobject typed_value,
                                    jboolean resolve_references) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ResourceTimer _timer(ResourceTimer::Counter::GetResourceValue);
   auto value = assetmanager->GetResource(static_cast<uint32_t>(resid), false /*may_be_bag*/,
                                          static_cast<uint16_t>(density));
   if (!value.has_value()) {
@@ -1027,10 +1031,11 @@ static jobject ConstructConfigurationObject(JNIEnv* env, const ResTable_config& 
   env->SetIntField(result, gConfigurationOffsets.mScreenWidthDpOffset, config.screenWidthDp);
   env->SetIntField(result, gConfigurationOffsets.mScreenHeightDpOffset, config.screenHeightDp);
   env->SetIntField(result, gConfigurationOffsets.mScreenLayoutOffset, config.screenLayout);
+  env->SetIntField(result, gConfigurationOffsets.mUiMode, config.uiMode);
   return result;
 }
 
-static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+static jobjectArray GetSizeAndUiModeConfigurations(JNIEnv* env, jlong ptr) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
   auto configurations = assetmanager->GetResourceConfigurations(true /*exclude_system*/,
                                                                 false /*exclude_mipmap*/);
@@ -1055,6 +1060,14 @@ static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, j
     env->DeleteLocalRef(java_configuration);
   }
   return array;
+}
+
+static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+  return GetSizeAndUiModeConfigurations(env, ptr);
+}
+
+static jobjectArray NativeGetSizeAndUiModeConfigurations(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+  return GetSizeAndUiModeConfigurations(env, ptr);
 }
 
 static jintArray NativeAttributeResolutionStack(
@@ -1232,6 +1245,7 @@ static jboolean NativeRetrieveAttributes(JNIEnv* env, jclass /*clazz*/, jlong pt
   }
 
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ResourceTimer _timer(ResourceTimer::Counter::RetrieveAttributes);
   ResXMLParser* xml_parser = reinterpret_cast<ResXMLParser*>(xml_parser_ptr);
   auto result =
           RetrieveAttributes(assetmanager.get(), xml_parser, reinterpret_cast<uint32_t*>(attrs),
@@ -1293,6 +1307,10 @@ static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong th
   } else {
     CHECK(style_count == 0) << "style_ids is null while style_count is non-zero";
   }
+  auto style_id_args_copy = std::vector<uint32_t>{style_id_args, style_id_args + style_count};
+  if (style_ids != nullptr) {
+      env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
+  }
 
   jboolean* force_args = nullptr;
   if (force != nullptr) {
@@ -1305,15 +1323,14 @@ static void NativeThemeRebase(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlong th
   } else {
     CHECK(style_count == 0) << "force is null while style_count is non-zero";
   }
-
-  auto theme = reinterpret_cast<Theme*>(theme_ptr);
-  theme->Rebase(&(*assetmanager), style_id_args, force_args, static_cast<size_t>(style_count));
-  if (style_ids != nullptr) {
-    env->ReleasePrimitiveArrayCritical(style_ids, style_id_args, JNI_ABORT);
-  }
+  auto force_args_copy = std::vector<jboolean>{force_args, force_args + style_count};
   if (force != nullptr) {
     env->ReleasePrimitiveArrayCritical(force, force_args, JNI_ABORT);
   }
+
+  auto theme = reinterpret_cast<Theme*>(theme_ptr);
+  theme->Rebase(&(*assetmanager), style_id_args_copy.data(), force_args_copy.data(),
+                static_cast<size_t>(style_count));
 }
 
 static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manager_ptr,
@@ -1442,7 +1459,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeCreate", "()J", (void*)NativeCreate},
     {"nativeDestroy", "(J)V", (void*)NativeDestroy},
     {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;Z)V", (void*)NativeSetApkAssets},
-    {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIII)V",
+    {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIIII)V",
      (void*)NativeSetConfiguration},
     {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
      (void*)NativeGetAssignedPackageIdentifiers},
@@ -1487,6 +1504,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeGetLocales", "(JZ)[Ljava/lang/String;", (void*)NativeGetLocales},
     {"nativeGetSizeConfigurations", "(J)[Landroid/content/res/Configuration;",
      (void*)NativeGetSizeConfigurations},
+    {"nativeGetSizeAndUiModeConfigurations", "(J)[Landroid/content/res/Configuration;",
+     (void*)NativeGetSizeAndUiModeConfigurations},
 
     // Style attribute related methods.
     {"nativeAttributeResolutionStack", "(JJIII)[I", (void*)NativeAttributeResolutionStack},
@@ -1565,6 +1584,7 @@ int register_android_content_AssetManager(JNIEnv* env) {
       GetFieldIDOrDie(env, configurationClass, "screenHeightDp", "I");
   gConfigurationOffsets.mScreenLayoutOffset =
           GetFieldIDOrDie(env, configurationClass, "screenLayout", "I");
+  gConfigurationOffsets.mUiMode = GetFieldIDOrDie(env, configurationClass, "uiMode", "I");
 
   jclass arrayMapClass = FindClassOrDie(env, "android/util/ArrayMap");
   gArrayMapOffsets.classObject = MakeGlobalRefOrDie(env, arrayMapClass);

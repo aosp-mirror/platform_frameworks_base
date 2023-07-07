@@ -21,8 +21,11 @@
 #include <SkAndroidCodec.h>
 #include <SkAnimatedImage.h>
 #include <SkColorFilter.h>
+#include <SkEncodedImageFormat.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
 #include <hwui/AnimatedImageDrawable.h>
 #include <hwui/ImageDecoder.h>
 #include <hwui/Canvas.h>
@@ -94,7 +97,7 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         bytesUsed += picture->approximateBytesUsed();
     }
 
-
+    SkEncodedImageFormat format = imageDecoder->mCodec->getEncodedFormat();
     sk_sp<SkAnimatedImage> animatedImg = SkAnimatedImage::Make(std::move(imageDecoder->mCodec),
                                                                info, subset,
                                                                std::move(picture));
@@ -105,8 +108,8 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
 
     bytesUsed += sizeof(animatedImg.get());
 
-    sk_sp<AnimatedImageDrawable> drawable(new AnimatedImageDrawable(std::move(animatedImg),
-                                                                    bytesUsed));
+    sk_sp<AnimatedImageDrawable> drawable(
+            new AnimatedImageDrawable(std::move(animatedImg), bytesUsed, format));
     return reinterpret_cast<jlong>(drawable.release());
 }
 

@@ -1,0 +1,2312 @@
+badging {
+  package {
+    package: "com.example.bundletool.minimal"
+    version_code: 1
+    version_name: "1.0"
+    platform_version_name: "12"
+    platform_version_code: "31"
+    compile_sdk_version: 31
+    compile_sdk_version_codename: "12"
+  }
+  application {
+    label: "minimal"
+    icon: "res/uF.xml"
+    density_icons {
+      key: 160
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 240
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 320
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 480
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 640
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 65534
+      value: "res/uF.xml"
+    }
+  }
+  uses_sdk {
+    min_sdk_version: 21
+    target_sdk_version: 31
+  }
+  supports_screen {
+    screens: NORMAL
+    screens: LARGE
+    screens: XLARGE
+    supports_any_densities: true
+    requires_smallest_width_dp: 240
+    compatible_width_limit_dp: 360
+    largest_width_limit_dp: 480
+  }
+  launchable_activity {
+    name: "com.example.bundletool.minimal.MainActivity"
+    label: "minimal"
+  }
+  compatible_screens {
+    screens {
+      size: 500
+      density: 240
+    }
+    screens {
+      size: 400
+      density: 160
+    }
+  }
+  architectures {
+    architectures: "x86_64"
+    alt_architectures: "x86"
+  }
+  supports_gl_texture {
+    name: "GL_OES_compressed_paletted_texture"
+  }
+  components {
+    main: true
+    other_receivers: true
+    other_services: true
+    provided_components: "app-widget"
+    provided_components: "device-admin"
+    provided_components: "ime"
+    provided_components: "wallpaper"
+    provided_components: "accessibility"
+    provided_components: "print-service"
+    provided_components: "payment"
+    provided_components: "search"
+    provided_components: "document-provider"
+    provided_components: "notification-listener"
+    provided_components: "dream"
+    provided_components: "camera"
+    provided_components: "camera-secure"
+  }
+  locales: "--_--"
+  densities: 160
+  densities: 240
+  densities: 320
+  densities: 480
+  densities: 640
+  densities: 65534
+  uses_configurations {
+    req_touch_screen: 3
+    req_keyboard_type: 2
+    req_hard_keyboard: -1
+    req_navigation: 3
+    req_five_way_nav: -1
+  }
+  feature_groups {
+    features {
+      name: "android.hardware.bluetooth"
+      required: true
+    }
+    features {
+      name: "android.hardware.camera"
+      required: true
+    }
+    features {
+      name: "android.hardware.faketouch"
+      implied_data {
+        reasons: "default feature for all apps"
+      }
+    }
+    features {
+      name: "android.hardware.telephony"
+      implied_data {
+        from_sdk_23_permission: true
+        reasons: "requested a telephony permission"
+      }
+    }
+  }
+  uses_permissions {
+    name: "android.permission.BIND_ACCESSIBILITY_SERVICE"
+    max_sdk_version: 24
+    required: true
+  }
+  uses_permissions {
+    name: "android.permission.RECEIVE_SMS"
+    sdk23_and_above: true
+  }
+  uses_permissions {
+    name: "android.permission.WRITE_EXTERNAL_STORAGE"
+    required: true
+  }
+  uses_permissions {
+    name: "android.permission.READ_EXTERNAL_STORAGE"
+    required: true
+    implied: true
+  }
+  permissions {
+    name: "minimal.FIRST_PERMISSION"
+  }
+  uses_libraries {
+    name: "mylib1"
+    required: true
+  }
+  uses_libraries {
+    name: "my_optional_lib"
+  }
+  uses_native_libraries {
+    name: "native1"
+    required: true
+  }
+  uses_native_libraries {
+    name: "optional"
+  }
+  metadata {
+    name: "android.nfc.cardemulation.host_apdu_service"
+    resource_string: "res/dU.xml"
+  }
+}
+resource_table {
+  source_pool {
+    data: "\001\000\034\000$\000\000\000\001\000\000\000\000\000\000\000\000\001\000\000 \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000"
+  }
+  package {
+    package_id {
+      id: 127
+    }
+    package_name: "com.example.bundletool.minimal"
+    type {
+      type_id {
+        id: 1
+      }
+      name: "color"
+      entry {
+        entry_id {
+        }
+        name: "black"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4278190080
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 1
+        }
+        name: "purple_200"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4290479868
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 2
+        }
+        name: "purple_500"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4284612846
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 3
+        }
+        name: "purple_700"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4281794739
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 4
+        }
+        name: "teal_200"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4278442693
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 5
+        }
+        name: "teal_700"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4278290310
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 6
+        }
+        name: "white"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                color_argb8_value: 4294967295
+              }
+            }
+          }
+        }
+      }
+    }
+    type {
+      type_id {
+        id: 2
+      }
+      name: "dimen"
+      entry {
+        entry_id {
+        }
+        name: "fab_margin"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              prim {
+                dimension_value: 4097
+              }
+            }
+          }
+        }
+      }
+    }
+    type {
+      type_id {
+        id: 3
+      }
+      name: "drawable"
+      entry {
+        entry_id {
+        }
+        name: "$ic_launcher_foreground__0"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+            density: 65534
+            sdk_version: 24
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/Za.xml"
+                type: BINARY_XML
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 1
+        }
+        name: "ic_launcher_background"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/3N.xml"
+                type: BINARY_XML
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 2
+        }
+        name: "ic_launcher_foreground"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+            density: 65534
+            sdk_version: 24
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/qm.xml"
+                type: BINARY_XML
+              }
+            }
+          }
+        }
+      }
+    }
+    type {
+      type_id {
+        id: 4
+      }
+      name: "mipmap"
+      entry {
+        entry_id {
+        }
+        name: "ic_launcher"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+            density: 160
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/u3.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 240
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/SD.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 320
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/jy.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 480
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/D2.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 640
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/CG.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 65534
+            sdk_version: 26
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/uF.xml"
+                type: BINARY_XML
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 1
+        }
+        name: "ic_launcher_round"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+            density: 160
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/7c.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 240
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/tf.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 320
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/1S.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 480
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/5Q.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 640
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/C9.png"
+                type: PNG
+              }
+            }
+          }
+        }
+        config_value {
+          config {
+            density: 65534
+            sdk_version: 26
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/oy.xml"
+                type: BINARY_XML
+              }
+            }
+          }
+        }
+      }
+    }
+    type {
+      type_id {
+        id: 5
+      }
+      name: "string"
+      entry {
+        entry_id {
+        }
+        name: "action_settings"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "Settings"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 1
+        }
+        name: "app_name"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "minimal"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 2
+        }
+        name: "first_fragment_label"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "First Fragment"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 3
+        }
+        name: "hello_first_fragment"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "Hello first fragment"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 4
+        }
+        name: "hello_second_fragment"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "Hello second fragment. Arg: %1$s"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 5
+        }
+        name: "next"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "Next"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 6
+        }
+        name: "previous"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "Previous"
+              }
+            }
+          }
+        }
+      }
+      entry {
+        entry_id {
+          id: 7
+        }
+        name: "second_fragment_label"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              str {
+                value: "Second Fragment"
+              }
+            }
+          }
+        }
+      }
+    }
+    type {
+      type_id {
+        id: 6
+      }
+      name: "xml"
+      entry {
+        entry_id {
+        }
+        name: "apduservice"
+        visibility {
+          source {
+          }
+        }
+        config_value {
+          config {
+          }
+          value {
+            source {
+            }
+            item {
+              file {
+                path: "res/dU.xml"
+                type: BINARY_XML
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  tool_fingerprint {
+    tool: "Android Asset Packaging Tool (aapt)"
+    version: "2.19-SOONG BUILD NUMBER PLACEHOLDER"
+  }
+}
+xml_files {
+  path: "res/oy.xml"
+  root {
+    element {
+      namespace_declaration {
+        prefix: "android"
+        uri: "http://schemas.android.com/apk/res/android"
+        source {
+          line_number: 2
+        }
+      }
+      name: "adaptive-icon"
+      child {
+        element {
+          name: "background"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "drawable"
+            source {
+            }
+            resource_id: 16843161
+            compiled_item {
+              ref {
+                id: 2130903041
+              }
+            }
+          }
+        }
+        source {
+          line_number: 3
+        }
+      }
+      child {
+        element {
+          name: "foreground"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "drawable"
+            source {
+            }
+            resource_id: 16843161
+            compiled_item {
+              ref {
+                id: 2130903042
+              }
+            }
+          }
+        }
+        source {
+          line_number: 4
+        }
+      }
+    }
+    source {
+      line_number: 2
+    }
+  }
+}
+xml_files {
+  path: "AndroidManifest.xml"
+  root {
+    element {
+      namespace_declaration {
+        prefix: "android"
+        uri: "http://schemas.android.com/apk/res/android"
+        source {
+          line_number: 2
+        }
+      }
+      name: "manifest"
+      attribute {
+        namespace_uri: "http://schemas.android.com/apk/res/android"
+        name: "versionCode"
+        source {
+        }
+        resource_id: 16843291
+        compiled_item {
+          prim {
+            int_decimal_value: 1
+          }
+        }
+      }
+      attribute {
+        namespace_uri: "http://schemas.android.com/apk/res/android"
+        name: "versionName"
+        value: "1.0"
+        resource_id: 16843292
+      }
+      attribute {
+        namespace_uri: "http://schemas.android.com/apk/res/android"
+        name: "compileSdkVersion"
+        source {
+        }
+        resource_id: 16844146
+        compiled_item {
+          prim {
+            int_decimal_value: 31
+          }
+        }
+      }
+      attribute {
+        namespace_uri: "http://schemas.android.com/apk/res/android"
+        name: "compileSdkVersionCodename"
+        value: "12"
+        resource_id: 16844147
+      }
+      attribute {
+        name: "package"
+        value: "com.example.bundletool.minimal"
+      }
+      attribute {
+        name: "platformBuildVersionCode"
+        source {
+        }
+        compiled_item {
+          prim {
+            int_decimal_value: 31
+          }
+        }
+      }
+      attribute {
+        name: "platformBuildVersionName"
+        source {
+        }
+        compiled_item {
+          prim {
+            int_decimal_value: 12
+          }
+        }
+      }
+      child {
+        element {
+          name: "uses-sdk"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "minSdkVersion"
+            source {
+            }
+            resource_id: 16843276
+            compiled_item {
+              prim {
+                int_decimal_value: 21
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "targetSdkVersion"
+            source {
+            }
+            resource_id: 16843376
+            compiled_item {
+              prim {
+                int_decimal_value: 31
+              }
+            }
+          }
+        }
+        source {
+          line_number: 7
+        }
+      }
+      child {
+        element {
+          name: "supports-screens"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "anyDensity"
+            source {
+            }
+            resource_id: 16843372
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "smallScreens"
+            source {
+            }
+            resource_id: 16843396
+            compiled_item {
+              prim {
+                boolean_value: false
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "normalScreens"
+            source {
+            }
+            resource_id: 16843397
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "largeScreens"
+            source {
+            }
+            resource_id: 16843398
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "requiresSmallestWidthDp"
+            source {
+            }
+            resource_id: 16843620
+            compiled_item {
+              prim {
+                int_decimal_value: 240
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "compatibleWidthLimitDp"
+            source {
+            }
+            resource_id: 16843621
+            compiled_item {
+              prim {
+                int_decimal_value: 360
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "largestWidthLimitDp"
+            source {
+            }
+            resource_id: 16843622
+            compiled_item {
+              prim {
+                int_decimal_value: 480
+              }
+            }
+          }
+        }
+        source {
+          line_number: 11
+        }
+      }
+      child {
+        element {
+          name: "uses-configuration"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "reqTouchScreen"
+            source {
+            }
+            resource_id: 16843303
+            compiled_item {
+              prim {
+                int_decimal_value: 3
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "reqKeyboardType"
+            source {
+            }
+            resource_id: 16843304
+            compiled_item {
+              prim {
+                int_decimal_value: 2
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "reqHardKeyboard"
+            source {
+            }
+            resource_id: 16843305
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "reqNavigation"
+            source {
+            }
+            resource_id: 16843306
+            compiled_item {
+              prim {
+                int_decimal_value: 3
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "reqFiveWayNav"
+            source {
+            }
+            resource_id: 16843314
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+        }
+        source {
+          line_number: 20
+        }
+      }
+      child {
+        element {
+          name: "supports-gl-texture"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "GL_OES_compressed_paletted_texture"
+            resource_id: 16842755
+          }
+        }
+        source {
+          line_number: 27
+        }
+      }
+      child {
+        element {
+          name: "permission"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "minimal.FIRST_PERMISSION"
+            resource_id: 16842755
+          }
+        }
+        source {
+          line_number: 29
+        }
+      }
+      child {
+        element {
+          name: "uses-feature"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "android.hardware.camera"
+            resource_id: 16842755
+          }
+        }
+        source {
+          line_number: 31
+        }
+      }
+      child {
+        element {
+          name: "uses-feature"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "android.hardware.bluetooth"
+            resource_id: 16842755
+          }
+        }
+        source {
+          line_number: 32
+        }
+      }
+      child {
+        element {
+          name: "uses-permission"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "android.permission.BIND_ACCESSIBILITY_SERVICE"
+            resource_id: 16842755
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "maxSdkVersion"
+            source {
+            }
+            resource_id: 16843377
+            compiled_item {
+              prim {
+                int_decimal_value: 24
+              }
+            }
+          }
+        }
+        source {
+          line_number: 34
+        }
+      }
+      child {
+        element {
+          name: "uses-permission-sdk-23"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "android.permission.RECEIVE_SMS"
+            resource_id: 16842755
+          }
+        }
+        source {
+          line_number: 38
+        }
+      }
+      child {
+        element {
+          name: "uses-permission"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "name"
+            value: "android.permission.WRITE_EXTERNAL_STORAGE"
+            resource_id: 16842755
+          }
+        }
+        source {
+          line_number: 40
+        }
+      }
+      child {
+        element {
+          name: "compatible-screens"
+          child {
+            element {
+              name: "screen"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "screenSize"
+                source {
+                }
+                resource_id: 16843466
+                compiled_item {
+                  prim {
+                    int_decimal_value: 500
+                  }
+                }
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "screenDensity"
+                source {
+                }
+                resource_id: 16843467
+                compiled_item {
+                  prim {
+                    int_decimal_value: 240
+                  }
+                }
+              }
+            }
+            source {
+              line_number: 43
+            }
+          }
+          child {
+            element {
+              name: "screen"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "screenSize"
+                source {
+                }
+                resource_id: 16843466
+                compiled_item {
+                  prim {
+                    int_decimal_value: 400
+                  }
+                }
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "screenDensity"
+                source {
+                }
+                resource_id: 16843467
+                compiled_item {
+                  prim {
+                    int_decimal_value: 160
+                  }
+                }
+              }
+            }
+            source {
+              line_number: 46
+            }
+          }
+        }
+        source {
+          line_number: 42
+        }
+      }
+      child {
+        element {
+          name: "application"
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "label"
+            source {
+            }
+            resource_id: 16842753
+            compiled_item {
+              ref {
+                id: 2131034113
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "icon"
+            source {
+            }
+            resource_id: 16842754
+            compiled_item {
+              ref {
+                id: 2130968576
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "allowBackup"
+            source {
+            }
+            resource_id: 16843392
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "supportsRtl"
+            source {
+            }
+            resource_id: 16843695
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "multiArch"
+            source {
+            }
+            resource_id: 16843918
+            compiled_item {
+              prim {
+                boolean_value: true
+              }
+            }
+          }
+          attribute {
+            namespace_uri: "http://schemas.android.com/apk/res/android"
+            name: "roundIcon"
+            source {
+            }
+            resource_id: 16844076
+            compiled_item {
+              ref {
+                id: 2130968577
+              }
+            }
+          }
+          child {
+            element {
+              name: "uses-library"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "mylib1"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "required"
+                source {
+                }
+                resource_id: 16843406
+                compiled_item {
+                  prim {
+                    boolean_value: true
+                  }
+                }
+              }
+            }
+            source {
+              line_number: 58
+            }
+          }
+          child {
+            element {
+              name: "uses-library"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "my_optional_lib"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "required"
+                source {
+                }
+                resource_id: 16843406
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+            }
+            source {
+              line_number: 61
+            }
+          }
+          child {
+            element {
+              name: "uses-native-library"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "native1"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "required"
+                source {
+                }
+                resource_id: 16843406
+                compiled_item {
+                  prim {
+                    boolean_value: true
+                  }
+                }
+              }
+            }
+            source {
+              line_number: 65
+            }
+          }
+          child {
+            element {
+              name: "uses-native-library"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "optional"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "required"
+                source {
+                }
+                resource_id: 16843406
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+            }
+            source {
+              line_number: 68
+            }
+          }
+          child {
+            element {
+              name: "activity"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "label"
+                source {
+                }
+                resource_id: 16842753
+                compiled_item {
+                  ref {
+                    id: 2131034113
+                  }
+                }
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.MainActivity"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.intent.action.MAIN"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 77
+                    }
+                  }
+                  child {
+                    element {
+                      name: "category"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.intent.category.LAUNCHER"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 79
+                    }
+                  }
+                }
+                source {
+                  line_number: 76
+                }
+              }
+            }
+            source {
+              line_number: 72
+            }
+          }
+          child {
+            element {
+              name: "activity"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "label"
+                source {
+                }
+                resource_id: 16842753
+                compiled_item {
+                  ref {
+                    id: 2131034113
+                  }
+                }
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.AnotherActivity"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.media.action.VIDEO_CAMERA"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 87
+                    }
+                  }
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.media.action.STILL_IMAGE_CAMERA_SECURE"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 88
+                    }
+                  }
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.intent.action.SEARCH"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 89
+                    }
+                  }
+                }
+                source {
+                  line_number: 86
+                }
+              }
+            }
+            source {
+              line_number: 82
+            }
+          }
+          child {
+            element {
+              name: "receiver"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.OneReceiver"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.appwidget.action.APPWIDGET_UPDATE"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 97
+                    }
+                  }
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.app.action.DEVICE_ADMIN_ENABLED"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 98
+                    }
+                  }
+                }
+                source {
+                  line_number: 96
+                }
+              }
+            }
+            source {
+              line_number: 93
+            }
+          }
+          child {
+            element {
+              name: "receiver"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.TwoReceiver"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.BIND_DEVICE_ADMIN"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.app.action.DEVICE_ADMIN_ENABLED"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 106
+                    }
+                  }
+                }
+                source {
+                  line_number: 105
+                }
+              }
+            }
+            source {
+              line_number: 101
+            }
+          }
+          child {
+            element {
+              name: "receiver"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.ThreeReceiver"
+                resource_id: 16842755
+              }
+            }
+            source {
+              line_number: 109
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.OneService"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.view.InputMethod"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 115
+                    }
+                  }
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.service.wallpaper.WallpaperService"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 116
+                    }
+                  }
+                }
+                source {
+                  line_number: 114
+                }
+              }
+            }
+            source {
+              line_number: 111
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.Services$TwoService"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.BIND_ACCESSIBILITY_SERVICE"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.accessibilityservice.AccessibilityService"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 124
+                    }
+                  }
+                }
+                source {
+                  line_number: 123
+                }
+              }
+            }
+            source {
+              line_number: 119
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.Services$ThreeService"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.BIND_PRINT_SERVICE"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.printservice.PrintService"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 132
+                    }
+                  }
+                }
+                source {
+                  line_number: 131
+                }
+              }
+            }
+            source {
+              line_number: 127
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.Services$FourService"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.BIND_NFC_SERVICE"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.nfc.cardemulation.action.HOST_APDU_SERVICE"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 140
+                    }
+                  }
+                }
+                source {
+                  line_number: 139
+                }
+              }
+              child {
+                element {
+                  name: "meta-data"
+                  attribute {
+                    namespace_uri: "http://schemas.android.com/apk/res/android"
+                    name: "name"
+                    value: "android.nfc.cardemulation.host_apdu_service"
+                    resource_id: 16842755
+                  }
+                  attribute {
+                    namespace_uri: "http://schemas.android.com/apk/res/android"
+                    name: "resource"
+                    source {
+                    }
+                    resource_id: 16842789
+                    compiled_item {
+                      ref {
+                        id: 2131099648
+                      }
+                    }
+                  }
+                }
+                source {
+                  line_number: 143
+                }
+              }
+            }
+            source {
+              line_number: 135
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.Services$FiveService"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.service.notification.NotificationListenerService"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 152
+                    }
+                  }
+                }
+                source {
+                  line_number: 151
+                }
+              }
+            }
+            source {
+              line_number: 147
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.Services$SixService"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.BIND_DREAM_SERVICE"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: false
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.service.dreams.DreamService"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 160
+                    }
+                  }
+                }
+                source {
+                  line_number: 159
+                }
+              }
+            }
+            source {
+              line_number: 155
+            }
+          }
+          child {
+            element {
+              name: "service"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.Services$SevenService"
+                resource_id: 16842755
+              }
+            }
+            source {
+              line_number: 163
+            }
+          }
+          child {
+            element {
+              name: "provider"
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "name"
+                value: "com.example.bundletool.minimal.OneProvider"
+                resource_id: 16842755
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "permission"
+                value: "android.permission.MANAGE_DOCUMENTS"
+                resource_id: 16842758
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "exported"
+                source {
+                }
+                resource_id: 16842768
+                compiled_item {
+                  prim {
+                    boolean_value: true
+                  }
+                }
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "authorities"
+                value: "A"
+                resource_id: 16842776
+              }
+              attribute {
+                namespace_uri: "http://schemas.android.com/apk/res/android"
+                name: "grantUriPermissions"
+                source {
+                }
+                resource_id: 16842779
+                compiled_item {
+                  prim {
+                    boolean_value: true
+                  }
+                }
+              }
+              child {
+                element {
+                  name: "intent-filter"
+                  child {
+                    element {
+                      name: "action"
+                      attribute {
+                        namespace_uri: "http://schemas.android.com/apk/res/android"
+                        name: "name"
+                        value: "android.content.action.DOCUMENTS_PROVIDER"
+                        resource_id: 16842755
+                      }
+                    }
+                    source {
+                      line_number: 172
+                    }
+                  }
+                }
+                source {
+                  line_number: 171
+                }
+              }
+            }
+            source {
+              line_number: 165
+            }
+          }
+        }
+        source {
+          line_number: 51
+        }
+      }
+    }
+    source {
+      line_number: 2
+    }
+  }
+}

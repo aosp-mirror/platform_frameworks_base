@@ -35,6 +35,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -92,6 +93,14 @@ class Alarm {
      * Caller had USE_EXACT_ALARM permission.
      */
     static final int EXACT_ALLOW_REASON_POLICY_PERMISSION = 3;
+    /**
+     * Caller used a listener alarm, which does not need permission to be exact.
+     */
+    static final int EXACT_ALLOW_REASON_LISTENER = 4;
+    /**
+     * Caller used a prioritized alarm, which does not need permission to be exact.
+     */
+    static final int EXACT_ALLOW_REASON_PRIORITIZED = 5;
 
     public final int type;
     /**
@@ -256,7 +265,7 @@ class Alarm {
         return sb.toString();
     }
 
-    private static String policyIndexToString(int index) {
+    static String policyIndexToString(int index) {
         switch (index) {
             case REQUESTER_POLICY_INDEX:
                 return "requester";
@@ -283,6 +292,10 @@ class Alarm {
                 return "permission";
             case EXACT_ALLOW_REASON_POLICY_PERMISSION:
                 return "policy_permission";
+            case EXACT_ALLOW_REASON_LISTENER:
+                return "listener";
+            case EXACT_ALLOW_REASON_PRIORITIZED:
+                return "prioritized";
             case EXACT_ALLOW_REASON_NOT_APPLICABLE:
                 return "N/A";
             default:
@@ -391,5 +404,33 @@ class Alarm {
         }
 
         proto.end(token);
+    }
+
+    /**
+     * Stores a snapshot of an alarm at any given time to be used for logging and diagnostics.
+     * This should intentionally avoid holding pointers to objects like {@link Alarm#operation}.
+     */
+    static class Snapshot {
+        final int mType;
+        final String mTag;
+        final long[] mPolicyWhenElapsed;
+
+        Snapshot(Alarm a) {
+            mType = a.type;
+            mTag = a.statsTag;
+            mPolicyWhenElapsed = Arrays.copyOf(a.mPolicyWhenElapsed, NUM_POLICIES);
+        }
+
+        void dump(IndentingPrintWriter pw, long nowElapsed) {
+            pw.print("type", typeToString(mType));
+            pw.print("tag", mTag);
+            pw.println();
+            pw.print("policyWhenElapsed:");
+            for (int i = 0; i < NUM_POLICIES; i++) {
+                pw.print(" " + policyIndexToString(i) + "=");
+                TimeUtils.formatDuration(mPolicyWhenElapsed[i], nowElapsed, pw);
+            }
+            pw.println();
+        }
     }
 }

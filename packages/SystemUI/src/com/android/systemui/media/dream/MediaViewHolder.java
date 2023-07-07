@@ -22,8 +22,8 @@ import static com.android.systemui.media.dream.dagger.MediaComplicationComponent
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.ComplicationLayoutParams;
+import com.android.systemui.complication.Complication;
+import com.android.systemui.complication.ComplicationLayoutParams;
 
 import javax.inject.Inject;
 import javax.inject.Named;

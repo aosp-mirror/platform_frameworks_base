@@ -29,7 +29,8 @@ public class AndroidNetIpSecIkeUpdater extends PackageSharedLibraryUpdater {
     private static final String LIBRARY_NAME = "android.net.ipsec.ike";
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         removeLibrary(parsedPackage, LIBRARY_NAME);
     }
 }

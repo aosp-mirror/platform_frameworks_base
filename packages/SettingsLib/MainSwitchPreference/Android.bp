@@ -26,5 +26,6 @@ android_library {
         "com.android.adservices",
         "com.android.cellbroadcast",
         "com.android.extservices",
+        "com.android.healthfitness",
     ],
 }

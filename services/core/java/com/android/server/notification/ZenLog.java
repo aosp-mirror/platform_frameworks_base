@@ -27,6 +27,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeDiff;
 import android.util.Log;
 import android.util.Slog;
 
@@ -66,18 +67,23 @@ public class ZenLog {
     private static final int TYPE_SET_NOTIFICATION_POLICY = 16;
     private static final int TYPE_SET_CONSOLIDATED_ZEN_POLICY = 17;
     private static final int TYPE_MATCHES_CALL_FILTER = 18;
+    private static final int TYPE_RECORD_CALLER = 19;
+    private static final int TYPE_CHECK_REPEAT_CALLER = 20;
+    private static final int TYPE_ALERT_ON_UPDATED_INTERCEPT = 21;
 
     private static int sNext;
     private static int sSize;
 
     public static void traceIntercepted(NotificationRecord record, String reason) {
-        if (record != null && record.isIntercepted()) return;  // already logged
         append(TYPE_INTERCEPTED, record.getKey() + "," + reason);
     }
 
     public static void traceNotIntercepted(NotificationRecord record, String reason) {
-        if (record != null && record.isUpdate) return;  // already logged
         append(TYPE_NOT_INTERCEPTED, record.getKey() + "," + reason);
+    }
+
+    public static void traceAlertOnUpdatedIntercept(NotificationRecord record) {
+        append(TYPE_ALERT_ON_UPDATED_INTERCEPT, record.getKey());
     }
 
     public static void traceSetRingerModeExternal(int ringerModeOld, int ringerModeNew,
@@ -141,13 +147,13 @@ public class ZenLog {
 
     public static void traceConfig(String reason, ZenModeConfig oldConfig,
             ZenModeConfig newConfig) {
-        ZenModeConfig.Diff diff = ZenModeConfig.diff(oldConfig, newConfig);
-        if (diff.isEmpty()) {
+        ZenModeDiff.ConfigDiff diff = new ZenModeDiff.ConfigDiff(oldConfig, newConfig);
+        if (diff == null || !diff.hasDiff()) {
             append(TYPE_CONFIG, reason + " no changes");
         } else {
             append(TYPE_CONFIG, reason
                     + ",\n" + (newConfig != null ? newConfig.toString() : null)
-                    + ",\n" + ZenModeConfig.diff(oldConfig, newConfig));
+                    + ",\n" + diff);
         }
     }
 
@@ -167,11 +173,28 @@ public class ZenLog {
             + hintsToString(newHints) + ",listeners=" + listenerCount);
     }
 
-    /*
+    /**
      * Trace calls to matchesCallFilter with the result of the call and the reason for the result.
      */
-    public static void traceMatchesCallFilter(boolean result, String reason) {
-        append(TYPE_MATCHES_CALL_FILTER, "result=" + result + ", reason=" + reason);
+    public static void traceMatchesCallFilter(boolean result, String reason, int callingUid) {
+        append(TYPE_MATCHES_CALL_FILTER, "result=" + result + ", reason=" + reason
+                + ", calling uid=" + callingUid);
+    }
+
+    /**
+     * Trace what information is available about an incoming call when it's recorded
+     */
+    public static void traceRecordCaller(boolean hasPhone, boolean hasUri) {
+        append(TYPE_RECORD_CALLER, "has phone number=" + hasPhone + ", has uri=" + hasUri);
+    }
+
+    /**
+     * Trace what information was provided about a caller when checking whether it is from a repeat
+     * caller
+     */
+    public static void traceCheckRepeatCaller(boolean found, boolean hasPhone, boolean hasUri) {
+        append(TYPE_CHECK_REPEAT_CALLER, "res=" + found + ", given phone number=" + hasPhone
+                + ", given uri=" + hasUri);
     }
 
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
@@ -198,6 +221,9 @@ public class ZenLog {
             case TYPE_SET_NOTIFICATION_POLICY: return "set_notification_policy";
             case TYPE_SET_CONSOLIDATED_ZEN_POLICY: return "set_consolidated_policy";
             case TYPE_MATCHES_CALL_FILTER: return "matches_call_filter";
+            case TYPE_RECORD_CALLER: return "record_caller";
+            case TYPE_CHECK_REPEAT_CALLER: return "check_repeat_caller";
+            case TYPE_ALERT_ON_UPDATED_INTERCEPT: return "alert_on_updated_intercept";
             default: return "unknown";
         }
     }

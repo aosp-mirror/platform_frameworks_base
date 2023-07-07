@@ -90,11 +90,10 @@ static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
     return res;
 }
 
-static inline jobject jniGetReferent(JNIEnv* env, jobject ref) {
-    jclass cls = FindClassOrDie(env, "java/lang/ref/Reference");
-    jmethodID get = GetMethodIDOrDie(env, cls, "get", "()Ljava/lang/Object;");
-    return env->CallObjectMethod(ref, get);
-}
+/**
+ * Returns the result of invoking java.lang.ref.Reference.get() on a Reference object.
+ */
+jobject GetReferent(JNIEnv* env, jobject ref);
 
 /**
  * Read the specified field from jobject, and convert to std::string.
@@ -133,6 +132,15 @@ static inline JNIEnv* GetOrAttachJNIEnvironment(JavaVM* jvm, jint version = JNI_
         static thread_local VmDetacher detacher(jvm);
     }
     return env;
+}
+
+static inline void DieIfException(JNIEnv* env, const char* message) {
+    if (env->ExceptionCheck()) {
+        jnihelp::ExpandableString summary;
+        jnihelp::ExpandableStringInitialize(&summary);
+        jnihelp::GetStackTraceOrSummary(env, nullptr, &summary);
+        LOG_ALWAYS_FATAL("%s\n%s", message, summary.data);
+    }
 }
 
 }  // namespace android

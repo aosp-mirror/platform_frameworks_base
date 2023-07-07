@@ -735,7 +735,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     protected boolean shouldRecordDetailedData() {
-        return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
+        return mRandom.nextInt(mPeriodicSamplingInterval) == 0;
     }
 
     /**

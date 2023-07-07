@@ -19,6 +19,7 @@ package com.android.internal.telecom;
 import android.app.PendingIntent;
 import android.os.Bundle;
 import android.telecom.CallAudioState;
+import android.telecom.CallEndpoint;
 import android.telecom.ParcelableCall;
 
 import com.android.internal.telecom.IInCallAdapter;
@@ -42,6 +43,12 @@ oneway interface IInCallService {
     void setPostDialWait(String callId, String remaining);
 
     void onCallAudioStateChanged(in CallAudioState callAudioState);
+
+    void onCallEndpointChanged(in CallEndpoint callEndpoint);
+
+    void onAvailableCallEndpointsChanged(in List<CallEndpoint> availableCallEndpoints);
+
+    void onMuteStateChanged(boolean isMuted);
 
     void bringToForeground(boolean showDialpad);
 

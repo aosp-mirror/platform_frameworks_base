@@ -192,6 +192,7 @@ public class WindowFrames {
     }
 
     String getInsetsChangedInfo() {
-        return "forceReportingResized=" + mLastForceReportingResized;
+        return "forceReportingResized=" + mLastForceReportingResized
+                + " insetsChanged=" + mInsetsChanged;
     }
 }

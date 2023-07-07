@@ -481,6 +481,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         int[] widgetIdsArray = {1};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
+        when(mUserManager.isUserUnlocked(any())).thenReturn(true);
+
         NotificationChannel channel =
                 new NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, IMPORTANCE_DEFAULT);
         channel.setConversationId(TEST_PARENT_CHANNEL_ID, TEST_CONVERSATION_ID);
@@ -489,8 +491,25 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, times(1)).updateAppWidget(anyInt(),
-                any());
+        verify(mAppWidgetManager, times(1)).updateAppWidget(anyInt(), any());
+    }
+
+    @Test
+    public void testOnNotificationChannelModified_userLocked() {
+        int[] widgetIdsArray = {1};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        when(mUserManager.isUserUnlocked(any())).thenReturn(false);
+
+        NotificationChannel channel =
+                new NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, IMPORTANCE_DEFAULT);
+        channel.setConversationId(TEST_PARENT_CHANNEL_ID, TEST_CONVERSATION_ID);
+
+        mNoMan.issueChannelModification(TEST_PACKAGE_A,
+                UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, never()).updateAppWidget(anyInt(), any());
     }
 
     @Test

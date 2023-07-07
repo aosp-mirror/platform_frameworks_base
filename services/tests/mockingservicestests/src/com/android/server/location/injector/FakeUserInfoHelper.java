@@ -34,14 +34,16 @@ public class FakeUserInfoHelper extends UserInfoHelper {
     public static final int DEFAULT_USERID = 0;
 
     private final IntArray mRunningUserIds;
+    private final IntArray mVisibleUserIds;
     private final SparseArray<IntArray> mProfiles;
 
     private int mCurrentUserId;
 
     public FakeUserInfoHelper() {
         mCurrentUserId = DEFAULT_USERID;
-        mRunningUserIds = IntArray.wrap(new int[]{DEFAULT_USERID});
+        mRunningUserIds = IntArray.wrap(new int[] {DEFAULT_USERID});
         mProfiles = new SparseArray<>();
+        mVisibleUserIds = IntArray.wrap(new int[] {DEFAULT_USERID});
     }
 
     public void startUser(int userId) {
@@ -65,6 +67,7 @@ public class FakeUserInfoHelper extends UserInfoHelper {
             mRunningUserIds.remove(idx);
         }
 
+        setUserInvisibleInternal(userId);
         dispatchOnUserStopped(userId);
     }
 
@@ -82,16 +85,39 @@ public class FakeUserInfoHelper extends UserInfoHelper {
         // ensure all profiles are started if they didn't exist before...
         for (int userId : currentProfileUserIds) {
             startUserInternal(userId, false);
+            setUserVisibleInternal(userId, true);
         }
 
         if (oldUserId != mCurrentUserId) {
             dispatchOnCurrentUserChanged(oldUserId, mCurrentUserId);
+            setUserVisibleInternal(mCurrentUserId, true);
         }
     }
 
-    @Override
-    public int[] getRunningUserIds() {
-        return mRunningUserIds.toArray();
+    private void setUserVisibleInternal(int userId, boolean alwaysDispatch) {
+        int idx = mVisibleUserIds.indexOf(userId);
+        if (idx < 0) {
+            mVisibleUserIds.add(userId);
+        } else if (!alwaysDispatch) {
+            return;
+        }
+        dispatchOnVisibleUserChanged(userId, true);
+    }
+
+    private void setUserInvisibleInternal(int userId) {
+        int idx = mVisibleUserIds.indexOf(userId);
+        if (idx >= 0) {
+            mVisibleUserIds.remove(userId);
+        }
+        dispatchOnVisibleUserChanged(userId, false);
+    }
+
+    public void setUserVisible(int userId, boolean visible) {
+        if (visible) {
+            setUserVisibleInternal(userId, true);
+        } else {
+            setUserInvisibleInternal(userId);
+        }
     }
 
     @Override
@@ -100,8 +126,18 @@ public class FakeUserInfoHelper extends UserInfoHelper {
     }
 
     @Override
+    public int[] getRunningUserIds() {
+        return mRunningUserIds.toArray();
+    }
+
+    @Override
     public int getCurrentUserId() {
         return mCurrentUserId;
+    }
+
+    @Override
+    public boolean isVisibleUserId(int userId) {
+        return mVisibleUserIds.indexOf(userId) >= 0;
     }
 
     @Override

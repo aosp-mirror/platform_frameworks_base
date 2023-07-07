@@ -161,7 +161,7 @@ public final class Ndef extends BasicTagTechnology {
         if (extras != null) {
             mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
             mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
-            mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG);
+            mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG, android.nfc.NdefMessage.class);
             mNdefType = extras.getInt(EXTRA_NDEF_TYPE);
         } else {
             throw new NullPointerException("NDEF tech extras are null.");
@@ -261,6 +261,7 @@ public final class Ndef extends BasicTagTechnology {
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message on the tag is malformed
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public NdefMessage getNdefMessage() throws IOException, FormatException {
         checkConnected();
@@ -301,6 +302,7 @@ public final class Ndef extends BasicTagTechnology {
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message to write is malformed
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public void writeNdefMessage(NdefMessage msg) throws IOException, FormatException {
         checkConnected();
@@ -339,6 +341,7 @@ public final class Ndef extends BasicTagTechnology {
      * <p>Does not cause any RF activity and does not block.
      *
      * @return true if it is possible to make this tag read-only
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public boolean canMakeReadOnly() {
         INfcTag tagService = mTag.getTagService();
@@ -370,6 +373,7 @@ public final class Ndef extends BasicTagTechnology {
      * @return true on success, false if it is not possible to make this tag read-only
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public boolean makeReadOnly() throws IOException {
         checkConnected();

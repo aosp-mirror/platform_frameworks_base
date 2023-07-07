@@ -32,7 +32,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.input.InputSensorInfo;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
@@ -70,12 +69,12 @@ public class BiometricLoggerTest {
     @Mock
     private BaseClientMonitor mClient;
 
-    private OperationContext mOpContext;
+    private OperationContextExt mOpContext;
     private BiometricLogger mLogger;
 
     @Before
     public void setUp() {
-        mOpContext = new OperationContext();
+        mOpContext = new OperationContextExt(false);
         mContext.addMockSystemService(SensorManager.class, mSensorManager);
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(
                 new Sensor(new InputSensorInfo("", "", 0, 0, Sensor.TYPE_LIGHT, 0, 0, 0, 0, 0, 0,
@@ -121,7 +120,7 @@ public class BiometricLoggerTest {
         verify(mSink).authenticate(eq(mOpContext),
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
                 anyLong(), anyInt(), eq(requireConfirmation),
-                eq(targetUserId), anyFloat());
+                eq(targetUserId), any());
     }
 
     @Test
@@ -232,7 +231,7 @@ public class BiometricLoggerTest {
     public void testALSCallback() {
         mLogger = createLogger();
         final CallbackWithProbe<Probe> callback =
-                mLogger.createALSCallback(true /* startWithClient */);
+                mLogger.getAmbientLightProbe(true /* startWithClient */);
 
         callback.onClientStarted(mClient);
         verify(mSensorManager).registerListener(any(), any(), anyInt());
@@ -242,10 +241,37 @@ public class BiometricLoggerTest {
     }
 
     @Test
+    public void testALSCallbackWhenLogsDisabled() {
+        mLogger = createLogger();
+        mLogger.disableMetrics();
+        final CallbackWithProbe<Probe> callback =
+                mLogger.getAmbientLightProbe(true /* startWithClient */);
+
+        callback.onClientStarted(mClient);
+        verify(mSensorManager, never()).registerListener(any(), any(), anyInt());
+
+        callback.onClientFinished(mClient, true /* success */);
+        verify(mSensorManager, never()).unregisterListener(any(SensorEventListener.class));
+    }
+
+    @Test
+    public void testALSCallbackWhenDisabledAfterStarting() {
+        mLogger = createLogger();
+        final CallbackWithProbe<Probe> callback =
+                mLogger.getAmbientLightProbe(true /* startWithClient */);
+
+        callback.onClientStarted(mClient);
+        verify(mSensorManager).registerListener(any(), any(), anyInt());
+
+        mLogger.disableMetrics();
+        verify(mSensorManager).unregisterListener(any(SensorEventListener.class));
+    }
+
+    @Test
     public void testALSCallbackDoesNotStart() {
         mLogger = createLogger();
         final CallbackWithProbe<Probe> callback =
-                mLogger.createALSCallback(false /* startWithClient */);
+                mLogger.getAmbientLightProbe(false /* startWithClient */);
 
         callback.onClientStarted(mClient);
         callback.onClientFinished(mClient, true /* success */);
@@ -256,7 +282,7 @@ public class BiometricLoggerTest {
     public void testALSCallbackDestroyed() {
         mLogger = createLogger();
         final CallbackWithProbe<Probe> callback =
-                mLogger.createALSCallback(true /* startWithClient */);
+                mLogger.getAmbientLightProbe(true /* startWithClient */);
 
         callback.onClientStarted(mClient);
         callback.onClientFinished(mClient, false /* success */);

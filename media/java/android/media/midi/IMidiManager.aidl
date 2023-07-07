@@ -60,4 +60,7 @@ interface IMidiManager
     // used by MIDI devices to report their status
     // the token is used by MidiService for death notification
     void setDeviceStatus(in IMidiDeviceServer server, in MidiDeviceStatus status);
+
+    // Updates the number of bytes sent and received
+    void updateTotalBytes(in IMidiDeviceServer server, int inputBytes, int outputBytes);
 }

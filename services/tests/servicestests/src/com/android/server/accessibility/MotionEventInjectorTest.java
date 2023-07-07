@@ -837,7 +837,7 @@ public class MotionEventInjectorTest {
 
             @Override
             public void describeTo(Description description) {
-                description.appendText("Contains points " + points);
+                description.appendText("Contains points " + Arrays.toString(points));
             }
         };
     }
