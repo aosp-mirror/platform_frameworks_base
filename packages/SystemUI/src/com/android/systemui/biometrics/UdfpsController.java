@@ -589,6 +589,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
                 // Pilfer if valid overlap, don't allow following events to reach keyguard
                 shouldPilfer = true;
+
+                // Touch is a valid UDFPS touch. Inform the falsing manager so that the touch
+                // isn't counted against the falsing algorithm as an accidental touch.
+                // We do this on the DOWN event instead of CANCEL/UP because the CANCEL/UP events
+                // get sent too late to this receiver (after the actual cancel/up motions occur),
+                // and therefore wouldn't end up being used as part of the falsing algo.
+                mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
                 break;
 
             case UP:
@@ -608,7 +615,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         data.getTime(),
                         data.getGestureStart(),
                         mStatusBarStateController.isDozing());
-                mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
                 break;
 
             case UNCHANGED:
