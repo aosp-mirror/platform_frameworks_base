@@ -853,6 +853,9 @@
     <!-- Permission required for accessing all content provider mime types -->
     <uses-permission android:name="android.permission.GET_ANY_PROVIDER_TYPE" />
 
+    <!-- Permission required for CTS-in-sandbox tests -->
+    <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_SDK_SANDBOX" />
+
     <!-- Permission required for CTS test - CtsWallpaperTestCases -->
     <uses-permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER" />
 

@@ -33,9 +33,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_SDK_SANDBOX_ORDER_ID;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
@@ -240,11 +238,6 @@ class ActivityStartInterceptor {
                 getInterceptorInfo(null /* clearOptionsAnimation */);
 
         for (int i = 0; i < callbacks.size(); i++) {
-            final int orderId = callbacks.keyAt(i);
-            if (!shouldInterceptActivityLaunch(orderId, interceptorInfo)) {
-                continue;
-            }
-
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
             final ActivityInterceptResult interceptResult = callback.onInterceptActivityLaunch(
                     interceptorInfo);
@@ -543,11 +536,6 @@ class ActivityStartInterceptor {
         ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo(
                 r::clearOptionsAnimationForSiblings);
         for (int i = 0; i < callbacks.size(); i++) {
-            final int orderId = callbacks.keyAt(i);
-            if (!shouldNotifyOnActivityLaunch(orderId, info)) {
-                continue;
-            }
-
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
             callback.onActivityLaunched(taskInfo, r.info, info);
         }
@@ -565,21 +553,4 @@ class ActivityStartInterceptor {
                 .build();
     }
 
-    private boolean shouldInterceptActivityLaunch(
-            @ActivityInterceptorCallback.OrderedId int orderId,
-            @NonNull ActivityInterceptorCallback.ActivityInterceptorInfo info) {
-        if (orderId == MAINLINE_SDK_SANDBOX_ORDER_ID) {
-            return info.getIntent() != null && info.getIntent().isSandboxActivity(mServiceContext);
-        }
-        return true;
-    }
-
-    private boolean shouldNotifyOnActivityLaunch(
-            @ActivityInterceptorCallback.OrderedId int orderId,
-            @NonNull ActivityInterceptorCallback.ActivityInterceptorInfo info) {
-        if (orderId == MAINLINE_SDK_SANDBOX_ORDER_ID) {
-            return info.getIntent() != null && info.getIntent().isSandboxActivity(mServiceContext);
-        }
-        return true;
-    }
 }
