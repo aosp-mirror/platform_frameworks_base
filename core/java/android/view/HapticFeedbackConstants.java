@@ -25,6 +25,13 @@ public class HapticFeedbackConstants {
     private HapticFeedbackConstants() {}
 
     /**
+     * No haptic feedback should be performed. Applications may use this value to indicate skipping
+     * a call to {@link View#performHapticFeedback} entirely, or else rely that it will immediately
+     * return {@code false}.
+     */
+    public static final int NO_HAPTICS = -1;
+
+    /**
      * The user has performed a long press on an object that is resulting
      * in an action being performed.
      */
@@ -143,6 +150,64 @@ public class HapticFeedbackConstants {
      * @hide
      */
     public static final int ROTARY_SCROLL_LIMIT = 20;
+
+    /**
+     * The user has toggled a switch or button into the on position.
+     */
+    public static final int TOGGLE_ON = 21;
+
+    /**
+     * The user has toggled a switch or button into the off position.
+     */
+    public static final int TOGGLE_OFF = 22;
+
+    /**
+     * The user is executing a swipe/drag-style gesture, such as pull-to-refresh, where the
+     * gesture action is “eligible” at a certain threshold of movement, and can be cancelled by
+     * moving back past the threshold. This constant indicates that the user's motion has just
+     * passed the threshold for the action to be activated on release.
+     *
+     * @see #GESTURE_THRESHOLD_DEACTIVATE
+     */
+    public static final int GESTURE_THRESHOLD_ACTIVATE = 23;
+
+    /**
+     * The user is executing a swipe/drag-style gesture, such as pull-to-refresh, where the
+     * gesture action is “eligible” at a certain threshold of movement, and can be cancelled by
+     * moving back past the threshold. This constant indicates that the user's motion has just
+     * re-crossed back "under" the threshold for the action to be activated, meaning the gesture is
+     * currently in a cancelled state.
+     *
+     * @see #GESTURE_THRESHOLD_ACTIVATE
+     */
+    public static final int GESTURE_THRESHOLD_DEACTIVATE = 24;
+
+    /**
+     * The user has started a drag-and-drop gesture. The drag target has just been "picked up".
+     */
+    public static final int DRAG_START = 25;
+
+    /**
+     * The user is switching between a series of potential choices, for example items in a list
+     * or discrete points on a slider.
+     *
+     * <p>See also {@link #SEGMENT_FREQUENT_TICK} for cases where density of choices is high, and
+     * the haptics should be lighter or suppressed for a better user experience.
+     */
+    public static final int SEGMENT_TICK = 26;
+
+    /**
+     * The user is switching between a series of many potential choices, for example minutes on a
+     * clock face, or individual percentages. This constant is expected to be very soft, so as
+     * not to be uncomfortable when performed a lot in quick succession. If the device can’t make
+     * a suitably soft vibration, then it may not make any vibration.
+     *
+     * <p>Some specializations of this constant exist for specific actions, notably
+     * {@link #CLOCK_TICK} and {@link #TEXT_HANDLE_MOVE}.
+     *
+     * <p>See also {@link #SEGMENT_TICK}.
+    */
+    public static final int SEGMENT_FREQUENT_TICK = 27;
 
     /**
      * The phone has booted with safe mode enabled.

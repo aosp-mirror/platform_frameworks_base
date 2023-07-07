@@ -17,6 +17,8 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
+#include <SkBlendMode.h>
+
 #include <cstdio>
 
 class ShapeAnimation;

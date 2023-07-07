@@ -16,11 +16,15 @@
 
 package com.android.settingslib.media;
 
-import static android.media.MediaRoute2Info.FEATURE_REMOTE_AUDIO_PLAYBACK;
-import static android.media.MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK;
-import static android.media.MediaRoute2Info.FEATURE_REMOTE_VIDEO_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTPHONE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET_DOCKED;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -40,8 +44,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-
-import java.util.ArrayList;
 
 @RunWith(RobolectricTestRunner.class)
 public class InfoMediaDeviceTest {
@@ -100,40 +102,51 @@ public class InfoMediaDeviceTest {
     public void getDrawableResId_returnCorrectResId() {
         when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_TV);
 
-        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
                 R.drawable.ic_media_display_device);
 
         when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
 
-        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
                 R.drawable.ic_media_speaker_device);
 
         when(mRouteInfo.getType()).thenReturn(TYPE_GROUP);
 
-        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_group_device);
-    }
-
-    @Test
-    public void getDrawableResIdByFeature_returnCorrectResId() {
-        final ArrayList<String> features = new ArrayList<>();
-        features.add(FEATURE_REMOTE_VIDEO_PLAYBACK);
-        when(mRouteInfo.getFeatures()).thenReturn(features);
-
-        assertThat(mInfoMediaDevice.getDrawableResIdByFeature()).isEqualTo(
-                R.drawable.ic_media_display_device);
-
-        features.clear();
-        features.add(FEATURE_REMOTE_AUDIO_PLAYBACK);
-        when(mRouteInfo.getFeatures()).thenReturn(features);
-
-        assertThat(mInfoMediaDevice.getDrawableResIdByFeature()).isEqualTo(
-                R.drawable.ic_media_speaker_device);
-
-        features.clear();
-        features.add(FEATURE_REMOTE_GROUP_PLAYBACK);
-        when(mRouteInfo.getFeatures()).thenReturn(features);
-
-        assertThat(mInfoMediaDevice.getDrawableResIdByFeature()).isEqualTo(
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
                 R.drawable.ic_media_group_device);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_TABLET);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
+                R.drawable.ic_media_tablet);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_TABLET_DOCKED);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
+                R.drawable.ic_dock_device);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_COMPUTER);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
+                R.drawable.ic_media_computer);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_GAME_CONSOLE);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
+                R.drawable.ic_media_game_console);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_CAR);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
+                R.drawable.ic_media_car);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_SMARTWATCH);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
+                R.drawable.ic_media_smartwatch);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_SMARTPHONE);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(R.drawable.ic_smartphone);
     }
 }

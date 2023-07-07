@@ -21,6 +21,7 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMatrix;
 import static com.android.server.wm.utils.CoordinateTransforms.transformLogicalToPhysicalCoordinates;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 import static com.android.server.wm.utils.CoordinateTransforms.transformToRotation;
@@ -183,6 +184,44 @@ public class CoordinateTransformsTest {
         transformToRotation(ROTATION_180, ROTATION_270, H, W, mMatrix2);
 
         assertEquals(mMatrix2, mMatrix);
+    }
+
+    @Test
+    public void rotate_0_bottomRight() {
+        computeRotationMatrix(ROTATION_0, W, H, mMatrix);
+        PointF newPoints = checkMappedPoints(W, H);
+        assertEquals(W, newPoints.x, 0);
+        assertEquals(H, newPoints.y, 0);
+    }
+
+    @Test
+    public void rotate_90_bottomRight() {
+        computeRotationMatrix(ROTATION_90, W, H, mMatrix);
+        PointF newPoints = checkMappedPoints(W, H);
+        assertEquals(0, newPoints.x, 0);
+        assertEquals(W, newPoints.y, 0);
+    }
+
+    @Test
+    public void rotate_180_bottomRight() {
+        computeRotationMatrix(ROTATION_180, W, H, mMatrix);
+        PointF newPoints = checkMappedPoints(W, H);
+        assertEquals(0, newPoints.x, 0);
+        assertEquals(0, newPoints.y, 0);
+    }
+
+    @Test
+    public void rotate_270_bottomRight() {
+        computeRotationMatrix(ROTATION_270, W, H, mMatrix);
+        PointF newPoints = checkMappedPoints(W, H);
+        assertEquals(H, newPoints.x, 0);
+        assertEquals(0, newPoints.y, 0);
+    }
+
+    private PointF checkMappedPoints(int x, int y) {
+        final float[] fs = new float[] {x, y};
+        mMatrix.mapPoints(fs);
+        return new PointF(fs[0], fs[1]);
     }
 
     private void assertMatricesAreInverses(Matrix matrix, Matrix matrix2) {

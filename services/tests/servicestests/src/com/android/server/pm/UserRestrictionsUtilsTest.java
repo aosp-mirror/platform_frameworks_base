@@ -20,7 +20,6 @@ import static com.android.server.devicepolicy.DpmTestUtils.assertRestrictions;
 import static com.android.server.devicepolicy.DpmTestUtils.newRestrictions;
 
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
@@ -77,30 +76,30 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
         assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_USER_SWITCH));
     }
 
-    public void testCanProfileOwnerChange() {
-        int user = UserHandle.USER_SYSTEM;
+    public void testCanProfileOwnerChange_mainUser() {
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_RECORD_AUDIO, user));
+                UserManager.DISALLOW_RECORD_AUDIO, true));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_WALLPAPER, user));
+                UserManager.DISALLOW_WALLPAPER, true));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_USER_SWITCH, user));
+                UserManager.DISALLOW_USER_SWITCH, true));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_ADD_USER, user));
+                UserManager.DISALLOW_ADD_USER, true));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_ADJUST_VOLUME, user));
+                UserManager.DISALLOW_ADJUST_VOLUME, true));
+    }
 
-        user = 10;
+    public void testCanProfileOwnerChange_notMainUser() {
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_RECORD_AUDIO, user));
+                UserManager.DISALLOW_RECORD_AUDIO, false));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_WALLPAPER, user));
+                UserManager.DISALLOW_WALLPAPER, false));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_ADD_USER, user));
+                UserManager.DISALLOW_ADD_USER, false));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_USER_SWITCH, user));
+                UserManager.DISALLOW_USER_SWITCH, false));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_ADJUST_VOLUME, user));
+                UserManager.DISALLOW_ADJUST_VOLUME, false));
     }
 
     public void testMoveRestriction() {

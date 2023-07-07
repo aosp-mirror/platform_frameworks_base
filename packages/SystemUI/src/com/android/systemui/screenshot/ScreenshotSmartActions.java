@@ -16,8 +16,6 @@
 
 package com.android.systemui.screenshot;
 
-import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
-
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
 import static com.android.systemui.screenshot.LogConfig.logTag;
 import static com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType;
@@ -25,17 +23,13 @@ import static com.android.systemui.screenshot.ScreenshotNotificationSmartActions
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
@@ -46,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Collects the static functions for retrieving and acting on smart actions.
@@ -53,11 +48,18 @@ import javax.inject.Inject;
 @SysUISingleton
 public class ScreenshotSmartActions {
     private static final String TAG = logTag(ScreenshotSmartActions.class);
+    private final Provider<ScreenshotNotificationSmartActionsProvider>
+            mScreenshotNotificationSmartActionsProviderProvider;
 
     @Inject
-    public ScreenshotSmartActions() {}
+    public ScreenshotSmartActions(
+            Provider<ScreenshotNotificationSmartActionsProvider>
+                    screenshotNotificationSmartActionsProviderProvider
+    ) {
+        mScreenshotNotificationSmartActionsProviderProvider =
+                screenshotNotificationSmartActionsProviderProvider;
+    }
 
-    @VisibleForTesting
     CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
             String screenshotId, Uri screenshotUri, Bitmap image,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
@@ -79,7 +81,7 @@ public class ScreenshotSmartActions {
         if (image.getConfig() != Bitmap.Config.HARDWARE) {
             if (DEBUG_ACTIONS) {
                 Log.d(TAG, String.format("Bitmap expected: Hardware, Bitmap found: %s. "
-                                + "Returning empty list.", image.getConfig()));
+                        + "Returning empty list.", image.getConfig()));
             }
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
@@ -108,7 +110,6 @@ public class ScreenshotSmartActions {
         return smartActionsFuture;
     }
 
-    @VisibleForTesting
     List<Notification.Action> getSmartActions(String screenshotId,
             CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
@@ -165,12 +166,11 @@ public class ScreenshotSmartActions {
         }
     }
 
-    void notifyScreenshotAction(Context context, String screenshotId, String action,
+    void notifyScreenshotAction(String screenshotId, String action,
             boolean isSmartAction, Intent intent) {
         try {
             ScreenshotNotificationSmartActionsProvider provider =
-                    SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
-                            context, THREAD_POOL_EXECUTOR, new Handler());
+                    mScreenshotNotificationSmartActionsProviderProvider.get();
             if (DEBUG_ACTIONS) {
                 Log.d(TAG, String.format("%s notifyAction: %s id=%s, isSmartAction=%b",
                         provider.getClass(), action, screenshotId, isSmartAction));

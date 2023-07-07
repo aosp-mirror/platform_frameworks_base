@@ -25,7 +25,6 @@ import static org.mockito.Mockito.spy;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -37,8 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,27 +55,21 @@ public class ArcInitiationActionFromAvrTest {
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
-    @Mock
-    private AudioManager mAudioManager;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
 
         HdmiControlService hdmiControlService =
                 new HdmiControlService(mContextSpy, Collections.emptyList(),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        audioFramework.getAudioManager(),
+                        audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isPowerStandby() {
                         return false;
                     }
 
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
-                    }
 
                     @Override
                     boolean isAddressAllocated() {
@@ -105,6 +96,7 @@ public class ArcInitiationActionFromAvrTest {
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
         hdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
+        hdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 hdmiControlService, mNativeWrapper, hdmiControlService.getAtomWriter());

@@ -35,6 +35,8 @@ public class Event {
     public static final String COMMAND_REGISTER = "register";
     public static final String COMMAND_DELAY = "delay";
     public static final String COMMAND_REPORT = "report";
+    public static final String COMMAND_SET_GET_REPORT_RESPONSE = "set_get_report_response";
+    public static final String COMMAND_SEND_SET_REPORT_REPLY = "send_set_report_reply";
 
     // These constants come from "include/uapi/linux/input.h" in the kernel
     enum Bus {
@@ -62,6 +64,7 @@ public class Event {
     private SparseArray<byte[]> mFeatureReports;
     private Map<ByteBuffer, byte[]> mOutputs;
     private int mDuration;
+    private Boolean mReply;
 
     public int getId() {
         return mId;
@@ -107,6 +110,10 @@ public class Event {
         return mDuration;
     }
 
+    public Boolean getReply() {
+        return mReply;
+    }
+
     public String toString() {
         return "Event{id=" + mId
             + ", command=" + String.valueOf(mCommand)
@@ -119,6 +126,7 @@ public class Event {
             + ", feature_reports=" + mFeatureReports.toString()
             + ", outputs=" + mOutputs.toString()
             + ", duration=" + mDuration
+            + ", success=" + mReply.toString()
             + "}";
     }
 
@@ -173,6 +181,10 @@ public class Event {
             mEvent.mDuration = duration;
         }
 
+        public void setReply(boolean success) {
+            mEvent.mReply = success;
+        }
+
         public Event build() {
             if (mEvent.mId == -1) {
                 throw new IllegalStateException("No event id");
@@ -182,6 +194,16 @@ public class Event {
             if (COMMAND_REGISTER.equals(mEvent.mCommand)) {
                 if (mEvent.mDescriptor == null) {
                     throw new IllegalStateException("Device registration is missing descriptor");
+                }
+            }
+            if (COMMAND_SET_GET_REPORT_RESPONSE.equals(mEvent.mCommand)) {
+                if (mEvent.mReport == null) {
+                    throw new IllegalStateException("Report command is missing response data");
+                }
+            }
+            if (COMMAND_SEND_SET_REPORT_REPLY.equals(mEvent.mCommand)) {
+                if (mEvent.mReply == null) {
+                    throw new IllegalStateException("Reply command is missing reply");
                 }
             } else if (COMMAND_DELAY.equals(mEvent.mCommand)) {
                 if (mEvent.mDuration <= 0) {
@@ -246,6 +268,9 @@ public class Event {
                             case "duration":
                                 eb.setDuration(readInt());
                                 break;
+                            case "success":
+                                eb.setReply(readBool());
+                                break;
                             default:
                                 mReader.skipValue();
                         }
@@ -290,6 +315,11 @@ public class Event {
         private int readInt() throws IOException {
             String val = mReader.nextString();
             return Integer.decode(val);
+        }
+
+        private boolean readBool() throws IOException {
+            String val = mReader.nextString();
+            return Boolean.parseBoolean(val);
         }
 
         private Bus readBus() throws IOException {

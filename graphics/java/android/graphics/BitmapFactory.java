@@ -161,11 +161,17 @@ public class BitmapFactory {
          * be thrown by the decode methods when setting a non-RGB color space
          * such as {@link ColorSpace.Named#CIE_LAB Lab}.</p>
          *
-         * <p class="note">The specified color space's transfer function must be
+         * <p class="note">
+         * Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * the specified color space's transfer function must be
          * an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. An
          * <code>IllegalArgumentException</code> will be thrown by the decode methods
          * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
-         * specified color space returns null.</p>
+         * specified color space returns null.
+         *
+         * Starting from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * non ICC parametric curve transfer function is allowed.
+         * E.g., {@link ColorSpace.Named#BT2020_HLG BT2020_HLG}.</p>
          *
          * <p>After decode, the bitmap's color space is stored in
          * {@link #outColorSpace}.</p>
@@ -458,7 +464,11 @@ public class BitmapFactory {
                     throw new IllegalArgumentException("The destination color space must use the " +
                             "RGB color model");
                 }
-                if (((ColorSpace.Rgb) opts.inPreferredColorSpace).getTransferParameters() == null) {
+                if (!opts.inPreferredColorSpace.equals(ColorSpace.get(ColorSpace.Named.BT2020_HLG))
+                        && !opts.inPreferredColorSpace.equals(
+                            ColorSpace.get(ColorSpace.Named.BT2020_PQ))
+                        && ((ColorSpace.Rgb) opts.inPreferredColorSpace)
+                            .getTransferParameters() == null) {
                     throw new IllegalArgumentException("The destination color space must use an " +
                             "ICC parametric transfer function");
                 }
@@ -472,7 +482,9 @@ public class BitmapFactory {
             if (opts == null || opts.inBitmap == null) {
                 return 0;
             }
-
+            // Clear out the gainmap since we don't attempt to reuse it and don't want to
+            // accidentally keep it on the re-used bitmap
+            opts.inBitmap.setGainmap(null);
             return opts.inBitmap.getNativeInstance();
         }
 

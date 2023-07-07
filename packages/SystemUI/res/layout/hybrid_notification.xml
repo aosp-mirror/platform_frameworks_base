@@ -20,19 +20,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="bottom|start"
-    style="?attr/hybridNotificationStyle">
+    android:paddingStart="@*android:dimen/notification_content_margin_start"
+    android:paddingEnd="12dp">
     <TextView
         android:id="@+id/notification_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        style="?attr/hybridNotificationTitleStyle"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+        android:paddingEnd="4dp"
     />
     <TextView
         android:id="@+id/notification_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        style="?attr/hybridNotificationTextStyle"
+        android:paddingEnd="4dp"
+        style="@*android:style/Widget.DeviceDefault.Notification.Text"
     />
 </com.android.systemui.statusbar.notification.row.HybridNotificationView>

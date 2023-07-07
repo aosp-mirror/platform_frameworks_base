@@ -102,11 +102,10 @@ public final class QosBearerSession implements Parcelable{
 
         QosBearerSession other = (QosBearerSession) o;
         return this.qosBearerSessionId == other.qosBearerSessionId
-                && this.qos.equals(other.qos)
+                && Objects.equals(this.qos, other.qos)
                 && this.qosBearerFilterList.size() == other.qosBearerFilterList.size()
                 && this.qosBearerFilterList.containsAll(other.qosBearerFilterList);
     }
-
 
     public static final @NonNull Parcelable.Creator<QosBearerSession> CREATOR =
             new Parcelable.Creator<QosBearerSession>() {

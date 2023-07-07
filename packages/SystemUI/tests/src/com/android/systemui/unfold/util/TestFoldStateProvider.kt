@@ -24,6 +24,8 @@ import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 class TestFoldStateProvider : FoldStateProvider {
 
     private val listeners: MutableList<FoldUpdatesListener> = arrayListOf()
+    val hasListeners: Boolean
+        get() = listeners.isNotEmpty()
 
     override fun start() {
     }
@@ -54,5 +56,9 @@ class TestFoldStateProvider : FoldStateProvider {
 
     fun sendHingeAngleUpdate(angle: Float) {
         listeners.forEach { it.onHingeAngleUpdate(angle) }
+    }
+
+    fun sendUnfoldedScreenAvailable() {
+        listeners.forEach { it.onUnfoldedScreenAvailable() }
     }
 }

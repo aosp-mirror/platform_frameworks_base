@@ -39,7 +39,6 @@ public class SharedPreferenceLoggerTest {
 
     private static final String TEST_TAG = "tag";
     private static final String TEST_KEY = "key";
-    private static final String TEST_TAGGED_KEY = TEST_TAG + "/" + TEST_KEY;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Context mContext;
@@ -65,10 +64,8 @@ public class SharedPreferenceLoggerTest {
         editor.putInt(TEST_KEY, 2);
         editor.putInt(TEST_KEY, 2);
 
-        verify(mMetricsFeature, times(6)).action(eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
-                eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(TEST_TAGGED_KEY),
+        verify(mMetricsFeature, times(6)).changed(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_KEY),
                 anyInt());
     }
 
@@ -82,15 +79,11 @@ public class SharedPreferenceLoggerTest {
         editor.putBoolean(TEST_KEY, false);
 
 
-        verify(mMetricsFeature).action(SettingsEnums.PAGE_UNKNOWN,
-                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
-                SettingsEnums.PAGE_UNKNOWN,
-                TEST_TAGGED_KEY,
+        verify(mMetricsFeature).changed(SettingsEnums.PAGE_UNKNOWN,
+                TEST_KEY,
                 1);
-        verify(mMetricsFeature, times(3)).action(SettingsEnums.PAGE_UNKNOWN,
-                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
-                SettingsEnums.PAGE_UNKNOWN,
-                TEST_TAGGED_KEY,
+        verify(mMetricsFeature, times(3)).changed(SettingsEnums.PAGE_UNKNOWN,
+                TEST_KEY,
                 0);
     }
 
@@ -103,10 +96,8 @@ public class SharedPreferenceLoggerTest {
         editor.putLong(TEST_KEY, 1);
         editor.putLong(TEST_KEY, 2);
 
-        verify(mMetricsFeature, times(4)).action(eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
-                eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(TEST_TAGGED_KEY),
+        verify(mMetricsFeature, times(4)).changed(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_KEY),
                 anyInt());
     }
 
@@ -117,10 +108,8 @@ public class SharedPreferenceLoggerTest {
         editor.putLong(TEST_KEY, 1);
         editor.putLong(TEST_KEY, veryBigNumber);
 
-        verify(mMetricsFeature).action(SettingsEnums.PAGE_UNKNOWN,
-                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
-                SettingsEnums.PAGE_UNKNOWN,
-                TEST_TAGGED_KEY,
+        verify(mMetricsFeature).changed(SettingsEnums.PAGE_UNKNOWN,
+                TEST_KEY,
                 Integer.MAX_VALUE);
     }
 
@@ -131,10 +120,8 @@ public class SharedPreferenceLoggerTest {
         editor.putLong(TEST_KEY, 1);
         editor.putLong(TEST_KEY, veryNegativeNumber);
 
-        verify(mMetricsFeature).action(SettingsEnums.PAGE_UNKNOWN,
-                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
-                SettingsEnums.PAGE_UNKNOWN,
-                TEST_TAGGED_KEY, Integer.MIN_VALUE);
+        verify(mMetricsFeature).changed(SettingsEnums.PAGE_UNKNOWN,
+                TEST_KEY, Integer.MIN_VALUE);
     }
 
     @Test
@@ -146,10 +133,8 @@ public class SharedPreferenceLoggerTest {
         editor.putFloat(TEST_KEY, 1);
         editor.putFloat(TEST_KEY, 2);
 
-        verify(mMetricsFeature, times(4)).action(eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
-                eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(TEST_TAGGED_KEY),
+        verify(mMetricsFeature, times(4)).changed(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_KEY),
                 anyInt());
     }
 
@@ -159,7 +144,7 @@ public class SharedPreferenceLoggerTest {
         verify(mMetricsFeature).action(SettingsEnums.PAGE_UNKNOWN,
                 ACTION_SETTINGS_PREFERENCE_CHANGE,
                 SettingsEnums.PAGE_UNKNOWN,
-                "tag/key:com.android.settings",
+                "key:com.android.settings",
                 0);
     }
 
@@ -170,10 +155,8 @@ public class SharedPreferenceLoggerTest {
         mSharedPrefLogger.logValue(TEST_KEY, "62");
         mSharedPrefLogger.logValue(TEST_KEY, "0");
 
-        verify(mMetricsFeature, times(3)).action(eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
-                eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(TEST_TAGGED_KEY),
+        verify(mMetricsFeature, times(3)).changed(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_KEY),
                 anyInt());
     }
 
@@ -185,10 +168,8 @@ public class SharedPreferenceLoggerTest {
         mSharedPrefLogger.logValue(TEST_KEY, "4.2");
         mSharedPrefLogger.logValue(TEST_KEY, "3.0");
 
-        verify(mMetricsFeature, times(0)).action(eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
-                eq(SettingsEnums.PAGE_UNKNOWN),
-                eq(TEST_TAGGED_KEY),
+        verify(mMetricsFeature, times(0)).changed(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_KEY),
                 anyInt());
     }
 }

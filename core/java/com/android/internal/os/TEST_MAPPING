@@ -39,8 +39,7 @@
       "name": "FrameworksServicesTests",
       "options": [
         { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
-        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
       ]
     },
     {
@@ -75,13 +74,11 @@
       "name": "FrameworksCoreTests",
       "options": [
         {
-          "include-filter": "com.android.internal.os.BstatsCpuTimesValidationTest"
+          "include-filter": "com.android.server.power.stats.BstatsCpuTimesValidationTest"
         }
       ],
       "file_patterns": [
-        "BatteryStatsImpl\\.java",
-        "KernelCpuUidFreqTimeReader\\.java",
-        "KernelSingleUidTimeReader\\.java"
+        "Kernel[^/]*\\.java"
       ]
     }
   ]

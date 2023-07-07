@@ -1,0 +1,5 @@
+# Default reviewers for this and subdirectories.
+shaoweishen@google.com
+
+#Android Media - For minor changes and renames only.
+aquilescanta@google.com #{LAST_RESORT_SUGGESTION}

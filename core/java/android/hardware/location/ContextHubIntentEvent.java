@@ -98,7 +98,7 @@ public class ContextHubIntentEvent {
         Objects.requireNonNull(intent, "Intent cannot be null");
 
         hasExtraOrThrow(intent, ContextHubManager.EXTRA_CONTEXT_HUB_INFO);
-        ContextHubInfo info = intent.getParcelableExtra(ContextHubManager.EXTRA_CONTEXT_HUB_INFO);
+        ContextHubInfo info = intent.getParcelableExtra(ContextHubManager.EXTRA_CONTEXT_HUB_INFO, android.hardware.location.ContextHubInfo.class);
         if (info == null) {
             throw new IllegalArgumentException("ContextHubInfo extra was null");
         }
@@ -117,7 +117,7 @@ public class ContextHubIntentEvent {
                 if (eventType == ContextHubManager.EVENT_NANOAPP_MESSAGE) {
                     hasExtraOrThrow(intent, ContextHubManager.EXTRA_MESSAGE);
                     NanoAppMessage message =
-                            intent.getParcelableExtra(ContextHubManager.EXTRA_MESSAGE);
+                            intent.getParcelableExtra(ContextHubManager.EXTRA_MESSAGE, android.hardware.location.NanoAppMessage.class);
                     if (message == null) {
                         throw new IllegalArgumentException("NanoAppMessage extra was null");
                     }

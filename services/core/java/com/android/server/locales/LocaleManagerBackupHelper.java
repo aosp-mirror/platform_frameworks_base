@@ -22,40 +22,47 @@ import static com.android.server.locales.LocaleManagerService.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.LocaleConfig;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Helper class for managing backup and restore of app-specific locales.
@@ -68,9 +75,14 @@ class LocaleManagerBackupHelper {
     private static final String PACKAGE_XML_TAG = "package";
     private static final String ATTR_PACKAGE_NAME = "name";
     private static final String ATTR_LOCALES = "locales";
-    private static final String ATTR_CREATION_TIME_MILLIS = "creationTimeMillis";
+    private static final String ATTR_DELEGATE_SELECTOR = "delegate_selector";
 
     private static final String SYSTEM_BACKUP_PACKAGE_KEY = "android";
+    /**
+     * The name of the xml file used to persist the target package name that sets per-app locales
+     * from the delegate selector.
+     */
+    private static final String LOCALES_FROM_DELEGATE_PREFS = "LocalesFromDelegatePrefs.xml";
     // Stage data would be deleted on reboot since it's stored in memory. So it's retained until
     // retention period OR next reboot, whichever happens earlier.
     private static final Duration STAGE_DATA_RETENTION_PERIOD = Duration.ofDays(3);
@@ -85,23 +97,28 @@ class LocaleManagerBackupHelper {
     // SparseArray because it is more memory-efficient than a HashMap.
     private final SparseArray<StagedData> mStagedData;
 
+    // SharedPreferences to store packages whose app-locale was set by a delegate, as opposed to
+    // the application setting the app-locale itself.
+    private final SharedPreferences mDelegateAppLocalePackages;
     private final BroadcastReceiver mUserMonitor;
 
     LocaleManagerBackupHelper(LocaleManagerService localeManagerService,
             PackageManager packageManager, HandlerThread broadcastHandlerThread) {
         this(localeManagerService.mContext, localeManagerService, packageManager, Clock.systemUTC(),
-                new SparseArray<>(), broadcastHandlerThread);
+                new SparseArray<>(), broadcastHandlerThread, null);
     }
 
     @VisibleForTesting LocaleManagerBackupHelper(Context context,
             LocaleManagerService localeManagerService,
             PackageManager packageManager, Clock clock, SparseArray<StagedData> stagedData,
-            HandlerThread broadcastHandlerThread) {
+            HandlerThread broadcastHandlerThread, SharedPreferences delegateAppLocalePackages) {
         mContext = context;
         mLocaleManagerService = localeManagerService;
         mPackageManager = packageManager;
         mClock = clock;
         mStagedData = stagedData;
+        mDelegateAppLocalePackages = delegateAppLocalePackages != null ? delegateAppLocalePackages
+                : createPersistedInfo();
 
         mUserMonitor = new UserMonitor();
         IntentFilter filter = new IntentFilter();
@@ -127,20 +144,29 @@ class LocaleManagerBackupHelper {
             cleanStagedDataForOldEntriesLocked();
         }
 
-        HashMap<String, String> pkgStates = new HashMap<>();
+        HashMap<String, LocalesInfo> pkgStates = new HashMap<>();
         for (ApplicationInfo appInfo : mPackageManager.getInstalledApplicationsAsUser(
                 PackageManager.ApplicationInfoFlags.of(0), userId)) {
             try {
                 LocaleList appLocales = mLocaleManagerService.getApplicationLocales(
                         appInfo.packageName,
                         userId);
-                // Backup locales only for apps which do have app-specific overrides.
+                // Backup locales and package names for per-app locales set from a delegate
+                // selector only for apps which do have app-specific overrides.
                 if (!appLocales.isEmpty()) {
                     if (DEBUG) {
                         Slog.d(TAG, "Add package=" + appInfo.packageName + " locales="
                                 + appLocales.toLanguageTags() + " to backup payload");
                     }
-                    pkgStates.put(appInfo.packageName, appLocales.toLanguageTags());
+                    boolean localeSetFromDelegate = false;
+                    if (mDelegateAppLocalePackages != null) {
+                        localeSetFromDelegate = mDelegateAppLocalePackages.getStringSet(
+                                Integer.toString(userId), Collections.<String>emptySet()).contains(
+                                appInfo.packageName);
+                    }
+                    LocalesInfo localesInfo = new LocalesInfo(appLocales.toLanguageTags(),
+                            localeSetFromDelegate);
+                    pkgStates.put(appInfo.packageName, localesInfo);
                 }
             } catch (RemoteException | IllegalArgumentException e) {
                 Slog.e(TAG, "Exception when getting locales for package: " + appInfo.packageName,
@@ -200,7 +226,7 @@ class LocaleManagerBackupHelper {
 
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(payload);
 
-        HashMap<String, String> pkgStates;
+        HashMap<String, LocalesInfo> pkgStates;
         try {
             // Parse the input blob into a list of BackupPackageState.
             final TypedXmlPullParser parser = Xml.newFastPullParser();
@@ -222,16 +248,17 @@ class LocaleManagerBackupHelper {
             StagedData stagedData = new StagedData(mClock.millis(), new HashMap<>());
 
             for (String pkgName : pkgStates.keySet()) {
-                String languageTags = pkgStates.get(pkgName);
+                LocalesInfo localesInfo = pkgStates.get(pkgName);
                 // Check if the application is already installed for the concerned user.
                 if (isPackageInstalledForUser(pkgName, userId)) {
                     // Don't apply the restore if the locales have already been set for the app.
-                    checkExistingLocalesAndApplyRestore(pkgName, languageTags, userId);
+                    checkExistingLocalesAndApplyRestore(pkgName, localesInfo, userId);
                 } else {
                     // Stage the data if the app isn't installed.
-                    stagedData.mPackageStates.put(pkgName, languageTags);
+                    stagedData.mPackageStates.put(pkgName, localesInfo);
                     if (DEBUG) {
-                        Slog.d(TAG, "Add locales=" + languageTags
+                        Slog.d(TAG, "Add locales=" + localesInfo.mLocales
+                                + " fromDelegate=" + localesInfo.mSetFromDelegate
                                 + " package=" + pkgName + " for lazy restore.");
                     }
                 }
@@ -273,12 +300,24 @@ class LocaleManagerBackupHelper {
 
     /**
      * <p><b>Note:</b> This is invoked by service's common monitor
+     * {@link LocaleManagerServicePackageMonitor#onPackageUpdateFinished} when a package is upgraded
+     * on device.
+     */
+    void onPackageUpdateFinished(String packageName, int uid) {
+        int userId = UserHandle.getUserId(uid);
+        cleanApplicationLocalesIfNeeded(packageName, userId);
+    }
+
+    /**
+     * <p><b>Note:</b> This is invoked by service's common monitor
      * {@link LocaleManagerServicePackageMonitor#onPackageDataCleared} when a package's data
      * is cleared.
      */
-    void onPackageDataCleared() {
+    void onPackageDataCleared(String packageName, int uid) {
         try {
             notifyBackupManager();
+            int userId = UserHandle.getUserId(uid);
+            removePackageFromPersistedInfo(packageName, userId);
         } catch (Exception e) {
             Slog.e(TAG, "Exception in onPackageDataCleared.", e);
         }
@@ -289,9 +328,11 @@ class LocaleManagerBackupHelper {
      * {@link LocaleManagerServicePackageMonitor#onPackageRemoved} when a package is removed
      * from device.
      */
-    void onPackageRemoved() {
+    void onPackageRemoved(String packageName, int uid) {
         try {
             notifyBackupManager();
+            int userId = UserHandle.getUserId(uid);
+            removePackageFromPersistedInfo(packageName, userId);
         } catch (Exception e) {
             Slog.e(TAG, "Exception in onPackageRemoved.", e);
         }
@@ -317,7 +358,12 @@ class LocaleManagerBackupHelper {
      * case, we want to keep the user settings and discard the restore.
      */
     private void checkExistingLocalesAndApplyRestore(@NonNull String pkgName,
-            @NonNull String languageTags, int userId) {
+            LocalesInfo localesInfo, int userId) {
+        if (localesInfo == null) {
+            Slog.w(TAG, "No locales info for " + pkgName);
+            return;
+        }
+
         try {
             LocaleList currLocales = mLocaleManagerService.getApplicationLocales(
                     pkgName,
@@ -325,16 +371,18 @@ class LocaleManagerBackupHelper {
             if (!currLocales.isEmpty()) {
                 return;
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Could not check for current locales before restoring", e);
         }
 
         // Restore the locale immediately
         try {
             mLocaleManagerService.setApplicationLocales(pkgName, userId,
-                    LocaleList.forLanguageTags(languageTags));
+                    LocaleList.forLanguageTags(localesInfo.mLocales), localesInfo.mSetFromDelegate,
+                    FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
             if (DEBUG) {
-                Slog.d(TAG, "Restored locales=" + languageTags + " for package=" + pkgName);
+                Slog.d(TAG, "Restored locales=" + localesInfo.mLocales + " fromDelegate="
+                        + localesInfo.mSetFromDelegate + " for package=" + pkgName);
             }
         } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Could not restore locales for " + pkgName, e);
@@ -348,18 +396,21 @@ class LocaleManagerBackupHelper {
     /**
      * Parses the backup data from the serialized xml input stream.
      */
-    private @NonNull HashMap<String, String> readFromXml(XmlPullParser parser)
+    private @NonNull HashMap<String, LocalesInfo> readFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
-        HashMap<String, String> packageStates = new HashMap<>();
+        HashMap<String, LocalesInfo> packageStates = new HashMap<>();
         int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
             if (parser.getName().equals(PACKAGE_XML_TAG)) {
                 String packageName = parser.getAttributeValue(/* namespace= */ null,
                         ATTR_PACKAGE_NAME);
                 String languageTags = parser.getAttributeValue(/* namespace= */ null, ATTR_LOCALES);
+                boolean delegateSelector = parser.getAttributeBoolean(/* namespace= */ null,
+                        ATTR_DELEGATE_SELECTOR);
 
                 if (!TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(languageTags)) {
-                    packageStates.put(packageName, languageTags);
+                    LocalesInfo localesInfo = new LocalesInfo(languageTags, delegateSelector);
+                    packageStates.put(packageName, localesInfo);
                 }
             }
         }
@@ -369,8 +420,8 @@ class LocaleManagerBackupHelper {
     /**
      * Converts the list of app backup data into a serialized xml stream.
      */
-    private static void writeToXml(OutputStream stream, @NonNull HashMap<String, String> pkgStates)
-            throws IOException {
+    private static void writeToXml(OutputStream stream,
+            @NonNull HashMap<String, LocalesInfo> pkgStates) throws IOException {
         if (pkgStates.isEmpty()) {
             // No need to write anything at all if pkgStates is empty.
             return;
@@ -384,7 +435,9 @@ class LocaleManagerBackupHelper {
         for (String pkg : pkgStates.keySet()) {
             out.startTag(/* namespace= */ null, PACKAGE_XML_TAG);
             out.attribute(/* namespace= */ null, ATTR_PACKAGE_NAME, pkg);
-            out.attribute(/* namespace= */ null, ATTR_LOCALES, pkgStates.get(pkg));
+            out.attribute(/* namespace= */ null, ATTR_LOCALES, pkgStates.get(pkg).mLocales);
+            out.attributeBoolean(/* namespace= */ null, ATTR_DELEGATE_SELECTOR,
+                    pkgStates.get(pkg).mSetFromDelegate);
             out.endTag(/*namespace= */ null, PACKAGE_XML_TAG);
         }
 
@@ -394,11 +447,21 @@ class LocaleManagerBackupHelper {
 
     static class StagedData {
         final long mCreationTimeMillis;
-        final HashMap<String, String> mPackageStates;
+        final HashMap<String, LocalesInfo> mPackageStates;
 
-        StagedData(long creationTimeMillis, HashMap<String, String> pkgStates) {
+        StagedData(long creationTimeMillis, HashMap<String, LocalesInfo> pkgStates) {
             mCreationTimeMillis = creationTimeMillis;
             mPackageStates = pkgStates;
+        }
+    }
+
+    static class LocalesInfo {
+        final String mLocales;
+        final boolean mSetFromDelegate;
+
+        LocalesInfo(String locales, boolean setFromDelegate) {
+            mLocales = locales;
+            mSetFromDelegate = setFromDelegate;
         }
     }
 
@@ -416,6 +479,7 @@ class LocaleManagerBackupHelper {
                     final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                     synchronized (mStagedDataLock) {
                         deleteStagedDataLocked(userId);
+                        removeProfileFromPersistedInfo(userId);
                     }
                 }
             } catch (Exception e) {
@@ -443,11 +507,11 @@ class LocaleManagerBackupHelper {
 
         StagedData stagedData = mStagedData.get(userId);
         for (String pkgName : stagedData.mPackageStates.keySet()) {
-            String languageTags = stagedData.mPackageStates.get(pkgName);
+            LocalesInfo localesInfo = stagedData.mPackageStates.get(pkgName);
 
             if (pkgName.equals(packageName)) {
 
-                checkExistingLocalesAndApplyRestore(pkgName, languageTags, userId);
+                checkExistingLocalesAndApplyRestore(pkgName, localesInfo, userId);
 
                 // Remove the restored entry from the staged data list.
                 stagedData.mPackageStates.remove(pkgName);
@@ -461,6 +525,150 @@ class LocaleManagerBackupHelper {
                 // contain at most one entry for the newly added package.
                 break;
             }
+        }
+    }
+
+    SharedPreferences createPersistedInfo() {
+        final File prefsFile = new File(
+                Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM),
+                LOCALES_FROM_DELEGATE_PREFS);
+        return mContext.createDeviceProtectedStorageContext().getSharedPreferences(prefsFile,
+                Context.MODE_PRIVATE);
+    }
+
+    public SharedPreferences getPersistedInfo() {
+        return mDelegateAppLocalePackages;
+    }
+
+    private void removePackageFromPersistedInfo(String packageName, @UserIdInt int userId) {
+        if (mDelegateAppLocalePackages == null) {
+            Slog.w(TAG, "Failed to persist data into the shared preference!");
+            return;
+        }
+
+        String key = Integer.toString(userId);
+        Set<String> packageNames = new ArraySet<>(
+                mDelegateAppLocalePackages.getStringSet(key, new ArraySet<>()));
+        if (packageNames.contains(packageName)) {
+            if (DEBUG) {
+                Slog.d(TAG, "remove " + packageName + " from persisted info");
+            }
+            packageNames.remove(packageName);
+            SharedPreferences.Editor editor = mDelegateAppLocalePackages.edit();
+            editor.putStringSet(key, packageNames);
+
+            // commit and log the result.
+            if (!editor.commit()) {
+                Slog.e(TAG, "Failed to commit data!");
+            }
+        }
+    }
+
+    private void removeProfileFromPersistedInfo(@UserIdInt int userId) {
+        String key = Integer.toString(userId);
+
+        if (mDelegateAppLocalePackages == null || !mDelegateAppLocalePackages.contains(key)) {
+            Slog.w(TAG, "The profile is not existed in the persisted info");
+            return;
+        }
+
+        if (!mDelegateAppLocalePackages.edit().remove(key).commit()) {
+            Slog.e(TAG, "Failed to commit data!");
+        }
+    }
+
+    /**
+     * Persists the package name of per-app locales set from a delegate selector.
+     *
+     * <p>This information is used when the user has set per-app locales for a specific application
+     * from the delegate selector, and then the LocaleConfig of that application is removed in the
+     * upgraded version, the per-app locales needs to be reset to system default locales to avoid
+     * the user being unable to change system locales setting.
+     */
+    void persistLocalesModificationInfo(@UserIdInt int userId, String packageName,
+            boolean fromDelegate, boolean emptyLocales) {
+        if (mDelegateAppLocalePackages == null) {
+            Slog.w(TAG, "Failed to persist data into the shared preference!");
+            return;
+        }
+
+        SharedPreferences.Editor editor = mDelegateAppLocalePackages.edit();
+        String user = Integer.toString(userId);
+        Set<String> packageNames = new ArraySet<>(
+                mDelegateAppLocalePackages.getStringSet(user, new ArraySet<>()));
+        if (fromDelegate && !emptyLocales) {
+            if (!packageNames.contains(packageName)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "persist package: " + packageName);
+                }
+                packageNames.add(packageName);
+                editor.putStringSet(user, packageNames);
+            }
+        } else {
+            // Remove the package name if per-app locales was not set from the delegate selector
+            // or they were set to empty.
+            if (packageNames.contains(packageName)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "remove package: " + packageName);
+                }
+                packageNames.remove(packageName);
+                editor.putStringSet(user, packageNames);
+            }
+        }
+
+        // commit and log the result.
+        if (!editor.commit()) {
+            Slog.e(TAG, "failed to commit locale setter info");
+        }
+    }
+
+    boolean areLocalesSetFromDelegate(@UserIdInt int userId, String packageName) {
+        if (mDelegateAppLocalePackages == null) {
+            Slog.w(TAG, "Failed to persist data into the shared preference!");
+            return false;
+        }
+
+        String user = Integer.toString(userId);
+        Set<String> packageNames = new ArraySet<>(
+                mDelegateAppLocalePackages.getStringSet(user, new ArraySet<>()));
+
+        return packageNames.contains(packageName);
+    }
+
+    /**
+     * When the user has set per-app locales for a specific application from a delegate selector,
+     * and then the LocaleConfig of that application is removed in the upgraded version, the per-app
+     * locales need to be removed or reset to system default locales to avoid the user being unable
+     * to change system locales setting.
+     */
+    private void cleanApplicationLocalesIfNeeded(String packageName, int userId) {
+        if (mDelegateAppLocalePackages == null) {
+            Slog.w(TAG, "Failed to persist data into the shared preference!");
+            return;
+        }
+
+        String user = Integer.toString(userId);
+        Set<String> packageNames = new ArraySet<>(
+                mDelegateAppLocalePackages.getStringSet(user, new ArraySet<>()));
+        try {
+            LocaleList appLocales = mLocaleManagerService.getApplicationLocales(packageName,
+                    userId);
+            if (appLocales.isEmpty() || !packageNames.contains(packageName)) {
+                return;
+            }
+        } catch (RemoteException | IllegalArgumentException e) {
+            Slog.e(TAG, "Exception when getting locales for " + packageName, e);
+            return;
+        }
+
+        try {
+            LocaleConfig localeConfig = new LocaleConfig(
+                    mContext.createPackageContextAsUser(packageName, 0, UserHandle.of(userId)));
+            mLocaleManagerService.removeUnsupportedAppLocales(packageName, userId, localeConfig,
+                    FrameworkStatsLog
+                            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APP_UPDATE_LOCALES_CHANGE);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Can not found the package name : " + packageName + " / " + e);
         }
     }
 }

@@ -17,71 +17,54 @@
 package android.content.om;
 
 import android.annotation.NonNull;
+import android.annotation.NonUiContext;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 
-import com.android.server.SystemConfig;
+import com.android.internal.content.om.OverlayManagerImpl;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
- * Updates OverlayManager state; gets information about installed overlay packages.
+ * OverlayManager gives apps the ability to create an {@link OverlayManagerTransaction} to
+ * maintain the overlays and list the registered fabricated runtime resources overlays(FRROs).
  *
- * <p>Users of this API must be actors of any overlays they desire to change the state of.</p>
+ * <p>OverlayManager returns the list of overlays to the app calling {@link
+ * #getOverlayInfosForTarget(String)}. The app starts an {@link OverlayManagerTransaction} to manage
+ * the overlays. The app can achieve the following by using {@link OverlayManagerTransaction}.
  *
- * <p>An actor is a package responsible for managing the state of overlays targeting overlayables
- * that specify the actor. For example, an actor may enable or disable an overlay or otherwise
- * change its state.</p>
- *
- * <p>Actors are specified as part of the overlayable definition.
- *
- * <pre>{@code
- * <overlayable name="OverlayableResourcesName" actor="overlay://namespace/actorName">
- * }</pre></p>
- *
- * <p>Actors are defined through {@link SystemConfig}. Only system packages can be used.
- * The namespace "android" is reserved for use by AOSP and any "android" definitions must
- * have an implementation on device that fulfill their intended functionality.</p>
- *
- * <pre>{@code
- * <named-actor
- *     namespace="namespace"
- *     name="actorName"
- *     package="com.example.pkg"
- *     />
- * }</pre></p>
- *
- * <p>An actor can manipulate a particular overlay if any of the following is true:
  * <ul>
- * <li>its UID is {@link Process#ROOT_UID}, {@link Process#SYSTEM_UID}</li>
- * <li>it is the target of the overlay package</li>
- * <li>it has the CHANGE_OVERLAY_PACKAGES permission and the target does not specify an actor</li>
- * <li>it is the actor specified by the overlayable</li>
- * </ul></p>
+ *   <li>register overlays
+ *   <li>unregister overlays
+ *   <li>execute multiple operations in one commitment by calling {@link
+ *       OverlayManagerTransaction#commit()}
+ * </ul>
  *
- * @hide
+ * @see OverlayManagerTransaction
  */
-@SystemApi
 @SystemService(Context.OVERLAY_SERVICE)
 public class OverlayManager {
 
     private final IOverlayManager mService;
     private final Context mContext;
+    private final OverlayManagerImpl mOverlayManagerImpl;
 
     /**
      * Pre R a {@link java.lang.SecurityException} would only be thrown by setEnabled APIs (e
-     * .g. {@link #setEnabled(String, boolean, UserHandle)}) for a permission error.
+     * .g. {@code #setEnabled(String, boolean, UserHandle)}) for a permission error.
      * Since R this no longer holds true, and {@link java.lang.SecurityException} can be
      * thrown for any number of reasons, none of which are exposed to the caller.
      *
@@ -94,20 +77,73 @@ public class OverlayManager {
     private static final long THROW_SECURITY_EXCEPTIONS = 147340954;
 
     /**
+     * Applications can use OverlayManager to create overlays to overlay on itself resources. The
+     * overlay target is itself and the work range is only in caller application.
+     *
+     * <p>In {@link android.content.Context#getSystemService(String)}, it crashes because of {@link
+     * java.lang.NullPointerException} if the parameter is OverlayManager. if the self-targeting is
+     * enabled, the caller application can get the OverlayManager instance to use self-targeting
+     * functionality.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long SELF_TARGETING_OVERLAY = 205919743;
+
+    /**
      * Creates a new instance.
+     *
+     * Updates OverlayManager state; gets information about installed overlay packages.
+     * <p>Users of this API must be actors of any overlays they desire to change the state of.
+     *
+     * <p>An actor is a package responsible for managing the state of overlays targeting
+     * overlayables that specify the actor. For example, an actor may enable or disable an overlay
+     * or otherwise change its state.
+     *
+     * <p>Actors are specified as part of the overlayable definition.
+     *
+     * <pre>{@code
+     * <overlayable name="OverlayableResourcesName" actor="overlay://namespace/actorName">
+     * }</pre></p>
+     *
+     * <p>Actors are defined through {@code com.android.server.SystemConfig}. Only system packages
+     * can be used. The namespace "android" is reserved for use by AOSP and any "android"
+     * definitions must have an implementation on device that fulfill their intended functionality.
+     *
+     * <pre>{@code
+     * <named-actor
+     *     namespace="namespace"
+     *     name="actorName"
+     *     package="com.example.pkg"
+     *     />
+     * }</pre></p>
+     *
+     * <p>An actor can manipulate a particular overlay if any of the following is true:
+     * <ul>
+     * <li>its UID is {@link android.os.Process#ROOT_UID}, {@link android.os.Process#SYSTEM_UID}
+     * </li>
+     * <li>it is the target of the overlay package</li>
+     * <li>it has the CHANGE_OVERLAY_PACKAGES permission and the target does not specify an actor
+     * </li>
+     * <li>it is the actor specified by the overlayable</li>
+     * </ul></p>
      *
      * @param context The current context in which to operate.
      * @param service The backing system service.
      *
      * @hide
      */
-    public OverlayManager(Context context, IOverlayManager service) {
+    @SuppressLint("ReferencesHidden")
+    public OverlayManager(@NonNull Context context, @Nullable IOverlayManager service) {
         mContext = context;
         mService = service;
+        mOverlayManagerImpl = new OverlayManagerImpl(context);
     }
 
     /** @hide */
-    public OverlayManager(Context context) {
+    @SuppressLint("ReferencesHidden")
+    public OverlayManager(@NonNull Context context) {
         this(context, IOverlayManager.Stub.asInterface(
             ServiceManager.getService(Context.OVERLAY_SERVICE)));
     }
@@ -117,7 +153,7 @@ public class OverlayManager {
      * target package and category are disabled.
      *
      * If a set of overlay packages share the same category, single call to this method is
-     * equivalent to multiple calls to {@link #setEnabled(String, boolean, UserHandle)}.
+     * equivalent to multiple calls to {@code #setEnabled(String, boolean, UserHandle)}.
      *
      * The caller must pass the actor requirements specified in the class comment.
      *
@@ -287,12 +323,38 @@ public class OverlayManager {
      *
      * @hide
      */
-    public void commit(@NonNull final OverlayManagerTransaction transaction) {
+    private void commitToSystemServer(@NonNull final OverlayManagerTransaction transaction) {
         try {
             mService.commit(transaction);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Commit the overlay manager transaction.
+     *
+     * <p>Applications can register overlays and unregister the registered overlays in an atomic
+     * operation via {@link OverlayManagerTransaction}.
+     *
+     * @see OverlayManagerTransaction
+     *
+     * @param transaction the series of overlay related requests to perform
+     * @throws Exception if not all the requests could be successfully
+     */
+    public void commit(@NonNull final OverlayManagerTransaction transaction) {
+        if (transaction.isSelfTargeting()
+                || mService == null
+                || mService.asBinder() == null) {
+            try {
+                commitSelfTarget(transaction);
+            } catch (PackageManager.NameNotFoundException | IOException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+
+        commitToSystemServer(transaction);
     }
 
     /**
@@ -317,6 +379,38 @@ public class OverlayManager {
             throw new IllegalStateException(e);
         } else {
             throw e;
+        }
+    }
+
+    /**
+     * Commit the self-targeting transaction to register or unregister overlays.
+     *
+     * <p>Applications can request OverlayManager to register overlays and unregister the registered
+     * overlays via {@link OverlayManagerTransaction}.
+     *
+     * @throws IOException if there is a file operation error.
+     * @throws PackageManager.NameNotFoundException if the package name is not found.
+     * @hide
+     */
+    @NonUiContext
+    void commitSelfTarget(@NonNull final OverlayManagerTransaction transaction)
+            throws PackageManager.NameNotFoundException, IOException {
+        synchronized (mOverlayManagerImpl) {
+            mOverlayManagerImpl.commit(transaction);
+        }
+    }
+
+    /**
+     * Get the related information of overlays for {@code targetPackageName}.
+     *
+     * @param targetPackageName the target package name
+     * @return a list of overlay information
+     */
+    @NonNull
+    @NonUiContext
+    public List<OverlayInfo> getOverlayInfosForTarget(@NonNull final String targetPackageName) {
+        synchronized (mOverlayManagerImpl) {
+            return mOverlayManagerImpl.getOverlayInfosForTarget(targetPackageName);
         }
     }
 }

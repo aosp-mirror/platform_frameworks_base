@@ -29,7 +29,8 @@
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="88dp"
+        android:layout_height="wrap_content"
+        android:minHeight="88dp"
         android:orientation="horizontal"
         >
 
@@ -41,6 +42,7 @@
             android:layout_marginStart="@dimen/conversation_content_start"
             android:orientation="vertical"
             android:minHeight="68dp"
+            android:paddingBottom="@dimen/notification_headerless_margin_twoline"
             >
 
             <include
@@ -49,7 +51,10 @@
                 android:layout_height="wrap_content"
                 />
 
-            <include layout="@layout/notification_template_text" />
+            <include layout="@layout/notification_template_text"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/notification_text_height"
+                />
 
         </LinearLayout>
 

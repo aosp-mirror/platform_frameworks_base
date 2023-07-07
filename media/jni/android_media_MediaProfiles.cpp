@@ -255,21 +255,21 @@ android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /
     jmethodID audioProfileConstructorMethodID =
         env->GetMethodID(audioProfileClazz, "<init>", "(IIIII)V");
 
-    jobjectArray videoCodecs = (jobjectArray)env->NewObjectArray(
-            cp->getVideoCodecs().size(), videoProfileClazz, nullptr);
+    jobjectArray videoCodecs = nullptr;
     {
-        int i = 0;
+        auto isAdvancedCodec = [](const MediaProfiles::VideoCodec *vc) -> bool {
+                                  return ((vc->getBitDepth() != 8
+                                        || vc->getChromaSubsampling() != CHROMA_SUBSAMPLING_YUV_420
+                                        || vc->getHdrFormat() != HDR_FORMAT_NONE));
+                              };
+        std::vector<jobject> codecVector;
         for (const MediaProfiles::VideoCodec *vc : cp->getVideoCodecs()) {
+            if (isAdvancedCodec(vc) && !static_cast<bool>(advanced)) {
+                continue;
+            }
             chroma_subsampling cs = vc->getChromaSubsampling();
             int bitDepth = vc->getBitDepth();
             hdr_format hdr = vc->getHdrFormat();
-
-            bool isAdvanced =
-                (bitDepth != 8 || cs != CHROMA_SUBSAMPLING_YUV_420 || hdr != HDR_FORMAT_NONE);
-            if (static_cast<bool>(advanced) && !isAdvanced) {
-                continue;
-            }
-
             jobject videoCodec = env->NewObject(videoProfileClazz,
                                                 videoProfileConstructorMethodID,
                                                 vc->getCodec(),
@@ -281,10 +281,17 @@ android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /
                                                 static_cast<int>(cs),
                                                 bitDepth,
                                                 static_cast<int>(hdr));
-            env->SetObjectArrayElement(videoCodecs, i++, videoCodec);
+
+            codecVector.push_back(videoCodec);
+        }
+        videoCodecs = (jobjectArray)env->NewObjectArray(codecVector.size(),
+                                                        videoProfileClazz, nullptr);
+
+        int i = 0;
+        for (jobject codecObj : codecVector) {
+             env->SetObjectArrayElement(videoCodecs, i++, codecObj);
         }
     }
-
     jobjectArray audioCodecs;
     if (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LIST_START
             && quality <= CAMCORDER_QUALITY_TIME_LAPSE_LIST_END) {

@@ -17,36 +17,32 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class NewTasksAppHelper @JvmOverloads constructor(
+class NewTasksAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-        ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-        .getInstance(instr)
-        .launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    launcherName: String = ActivityOptions.LaunchNewTask.LABEL,
+    component: ComponentNameMatcher = ActivityOptions.LaunchNewTask.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component) {
     fun openNewTask(device: UiDevice, wmHelper: WindowManagerStateHelper) {
-        val button = device.wait(
-            Until.findObject(By.res(getPackage(), "launch_new_task")),
-            FIND_TIMEOUT)
+        val button =
+            device.wait(Until.findObject(By.res(getPackage(), "launch_new_task")), FIND_TIMEOUT)
 
-        require(button != null) {
+        requireNotNull(button) {
             "Button not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)"
+                "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
-        wmHelper.waitForAppTransitionIdle()
-        wmHelper.waitForFullScreenApp(component)
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
 }

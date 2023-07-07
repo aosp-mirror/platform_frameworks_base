@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
+import static com.android.systemui.statusbar.phone.AutoTileManager.DEVICE_CONTROLS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
@@ -49,8 +51,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.external.CustomTile;
@@ -69,12 +72,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -98,7 +104,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     private static final int USER = 0;
 
-    @Mock private QSTileHost mQsTileHost;
+    @Mock private QSHost mQsHost;
     @Mock private AutoAddTracker mAutoAddTracker;
     @Mock private CastController mCastController;
     @Mock private HotspotController mHotspotController;
@@ -115,8 +121,10 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Spy private PackageManager mPackageManager;
     private final boolean mIsReduceBrightColorsAvailable = true;
 
-    private AutoTileManager mAutoTileManager;
+    private AutoTileManager mAutoTileManager; // under test
+
     private SecureSettings mSecureSettings;
+    private ManagedProfileController.Callback mManagedProfileCallback;
 
     @Before
     public void setUp() throws Exception {
@@ -136,7 +144,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 R.string.safety_quick_settings_tile_class, TEST_CUSTOM_SAFETY_CLASS);
 
         when(mAutoAddTrackerBuilder.build()).thenReturn(mAutoAddTracker);
-        when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
+        when(mQsHost.getUserContext()).thenReturn(mUserContext);
         when(mUserContext.getUser()).thenReturn(UserHandle.of(USER));
         mPackageManager = Mockito.spy(mContext.getPackageManager());
         when(mPackageManager.getPermissionControllerPackageName())
@@ -166,7 +174,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             WalletController walletController,
             SafetyController safetyController,
             @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
-        return new AutoTileManager(context, autoAddTrackerBuilder, mQsTileHost,
+        return new AutoTileManager(context, autoAddTrackerBuilder, mQsHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
                 mSecureSettings,
                 hotspotController,
@@ -303,7 +311,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         InOrder inOrderManagedProfile = inOrder(mManagedProfileController);
         inOrderManagedProfile.verify(mManagedProfileController).removeCallback(any());
-        inOrderManagedProfile.verify(mManagedProfileController, never()).addCallback(any());
+        inOrderManagedProfile.verify(mManagedProfileController).addCallback(any());
 
         if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             InOrder inOrderNightDisplay = inOrder(mNightDisplayListener);
@@ -351,7 +359,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             return;
         }
         mAutoTileManager.mNightDisplayCallback.onActivated(true);
-        verify(mQsTileHost).addTile("night");
+        verify(mQsHost).addTile("night");
     }
 
     @Test
@@ -360,7 +368,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             return;
         }
         mAutoTileManager.mNightDisplayCallback.onActivated(false);
-        verify(mQsTileHost, never()).addTile("night");
+        verify(mQsHost, never()).addTile("night");
     }
 
     @Test
@@ -370,7 +378,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         }
         mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_TWILIGHT);
-        verify(mQsTileHost).addTile("night");
+        verify(mQsHost).addTile("night");
     }
 
     @Test
@@ -380,7 +388,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         }
         mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
-        verify(mQsTileHost).addTile("night");
+        verify(mQsHost).addTile("night");
     }
 
     @Test
@@ -390,19 +398,19 @@ public class AutoTileManagerTest extends SysuiTestCase {
         }
         mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_DISABLED);
-        verify(mQsTileHost, never()).addTile("night");
+        verify(mQsHost, never()).addTile("night");
     }
 
     @Test
     public void reduceBrightColorsTileAdded_whenActivated() {
         mAutoTileManager.mReduceBrightColorsCallback.onActivated(true);
-        verify(mQsTileHost).addTile("reduce_brightness");
+        verify(mQsHost).addTile("reduce_brightness");
     }
 
     @Test
     public void reduceBrightColorsTileNotAdded_whenDeactivated() {
         mAutoTileManager.mReduceBrightColorsCallback.onActivated(false);
-        verify(mQsTileHost, never()).addTile("reduce_brightness");
+        verify(mQsHost, never()).addTile("reduce_brightness");
     }
 
     private static List<CastDevice> buildFakeCastDevice(boolean isCasting) {
@@ -415,28 +423,28 @@ public class AutoTileManagerTest extends SysuiTestCase {
     public void castTileAdded_whenDeviceIsCasting() {
         doReturn(buildFakeCastDevice(true)).when(mCastController).getCastDevices();
         mAutoTileManager.mCastCallback.onCastDevicesChanged();
-        verify(mQsTileHost).addTile("cast");
+        verify(mQsHost).addTile("cast");
     }
 
     @Test
     public void castTileNotAdded_whenDeviceIsNotCasting() {
         doReturn(buildFakeCastDevice(false)).when(mCastController).getCastDevices();
         mAutoTileManager.mCastCallback.onCastDevicesChanged();
-        verify(mQsTileHost, never()).addTile("cast");
+        verify(mQsHost, never()).addTile("cast");
     }
 
     @Test
     public void testSettingTileAdded_onChanged() {
         changeValue(TEST_SETTING, 1);
         verify(mAutoAddTracker).setTileAdded(TEST_SPEC);
-        verify(mQsTileHost).addTile(TEST_SPEC);
+        verify(mQsHost).addTile(TEST_SPEC);
     }
 
     @Test
     public void testSettingTileAddedComponentAtEnd_onChanged() {
         changeValue(TEST_SETTING_COMPONENT, 1);
         verify(mAutoAddTracker).setTileAdded(TEST_CUSTOM_SPEC);
-        verify(mQsTileHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT)
+        verify(mQsHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT)
             , /* end */ true);
     }
 
@@ -445,14 +453,14 @@ public class AutoTileManagerTest extends SysuiTestCase {
         changeValue(TEST_SETTING, 1);
         changeValue(TEST_SETTING, 2);
         verify(mAutoAddTracker).setTileAdded(TEST_SPEC);
-        verify(mQsTileHost).addTile(TEST_SPEC);
+        verify(mQsHost).addTile(TEST_SPEC);
     }
 
     @Test
     public void testSettingTileNotAdded_onChangedTo0() {
         changeValue(TEST_SETTING, 0);
         verify(mAutoAddTracker, never()).setTileAdded(TEST_SPEC);
-        verify(mQsTileHost, never()).addTile(TEST_SPEC);
+        verify(mQsHost, never()).addTile(TEST_SPEC);
     }
 
     @Test
@@ -461,27 +469,27 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         changeValue(TEST_SETTING, 1);
         verify(mAutoAddTracker, never()).setTileAdded(TEST_SPEC);
-        verify(mQsTileHost, never()).addTile(TEST_SPEC);
+        verify(mQsHost, never()).addTile(TEST_SPEC);
     }
 
     @Test
     public void testSafetyTileNotAdded_ifPreviouslyAdded() {
         ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
         mAutoTileManager.init();
-        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        verify(mQsHost, times(1)).addTile(safetyComponent, true);
         when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(true);
         mAutoTileManager.init();
-        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        verify(mQsHost, times(1)).addTile(safetyComponent, true);
     }
 
     @Test
     public void testSafetyTileAdded_onUserChange() {
         ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
         mAutoTileManager.init();
-        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        verify(mQsHost, times(1)).addTile(safetyComponent, true);
         when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(false);
         mAutoTileManager.changeUser(UserHandle.of(USER + 1));
-        verify(mQsTileHost, times(2)).addTile(safetyComponent, true);
+        verify(mQsHost, times(2)).addTile(safetyComponent, true);
     }
 
     @Test
@@ -490,18 +498,108 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mAutoTileManager.init();
         when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(true);
         mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(false);
-        verify(mQsTileHost, times(1)).removeTile(TEST_CUSTOM_SAFETY_SPEC);
+        verify(mQsHost, times(1)).removeTile(TEST_CUSTOM_SAFETY_SPEC);
     }
 
     @Test
     public void testSafetyTileAdded_onSafetyCenterEnable() {
         ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
         mAutoTileManager.init();
-        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        verify(mQsHost, times(1)).addTile(safetyComponent, true);
         mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(false);
         mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(true);
-        verify(mQsTileHost, times(2)).addTile(safetyComponent, true);
+        verify(mQsHost, times(2)).addTile(safetyComponent, true);
     }
+
+    @Test
+    public void managedProfileAdded_tileAdded() {
+        when(mAutoAddTracker.isAdded(eq("work"))).thenReturn(false);
+        when(mAutoAddTracker.getRestoredTilePosition(eq("work"))).thenReturn(2);
+        mAutoTileManager = createAutoTileManager(mContext);
+        Mockito.doAnswer((Answer<Object>) invocation -> {
+            mManagedProfileCallback = invocation.getArgument(0);
+            return null;
+        }).when(mManagedProfileController).addCallback(any());
+        mAutoTileManager.init();
+        when(mManagedProfileController.hasActiveProfile()).thenReturn(true);
+
+        mManagedProfileCallback.onManagedProfileChanged();
+
+        verify(mQsHost, times(1)).addTile(eq("work"), eq(2));
+        verify(mAutoAddTracker, times(1)).setTileAdded(eq("work"));
+    }
+
+    @Test
+    public void managedProfileRemoved_tileRemoved() {
+        when(mAutoAddTracker.isAdded(eq("work"))).thenReturn(true);
+        mAutoTileManager = createAutoTileManager(mContext);
+        Mockito.doAnswer((Answer<Object>) invocation -> {
+            mManagedProfileCallback = invocation.getArgument(0);
+            return null;
+        }).when(mManagedProfileController).addCallback(any());
+        mAutoTileManager.init();
+        when(mManagedProfileController.hasActiveProfile()).thenReturn(false);
+
+        mManagedProfileCallback.onManagedProfileChanged();
+
+        verify(mQsHost, times(1)).removeTile(eq("work"));
+        verify(mAutoAddTracker, times(1)).setTileRemoved(eq("work"));
+    }
+
+    @Test
+    public void testAddControlsTileIfNotPresent() {
+        String spec = DEVICE_CONTROLS;
+        when(mAutoAddTracker.isAdded(eq(spec))).thenReturn(false);
+        when(mQsHost.getTiles()).thenReturn(new ArrayList<>());
+
+        mAutoTileManager.init();
+        ArgumentCaptor<DeviceControlsController.Callback> captor =
+                ArgumentCaptor.forClass(DeviceControlsController.Callback.class);
+
+        verify(mDeviceControlsController).setCallback(captor.capture());
+
+        captor.getValue().onControlsUpdate(3);
+        verify(mQsHost).addTile(spec, 3);
+        verify(mAutoAddTracker).setTileAdded(spec);
+    }
+
+    @Test
+    public void testDontAddControlsTileIfPresent() {
+        String spec = DEVICE_CONTROLS;
+        when(mAutoAddTracker.isAdded(eq(spec))).thenReturn(false);
+        when(mQsHost.getTiles()).thenReturn(new ArrayList<>());
+
+        mAutoTileManager.init();
+        ArgumentCaptor<DeviceControlsController.Callback> captor =
+                ArgumentCaptor.forClass(DeviceControlsController.Callback.class);
+
+        verify(mDeviceControlsController).setCallback(captor.capture());
+
+        captor.getValue().removeControlsAutoTracker();
+        verify(mQsHost, never()).addTile(spec, 3);
+        verify(mAutoAddTracker, never()).setTileAdded(spec);
+        verify(mAutoAddTracker).setTileRemoved(spec);
+    }
+
+    @Test
+    public void testRemoveControlsTileFromTrackerWhenRequested() {
+        String spec = "controls";
+        when(mAutoAddTracker.isAdded(eq(spec))).thenReturn(true);
+        QSTile mockTile = mock(QSTile.class);
+        when(mockTile.getTileSpec()).thenReturn(spec);
+        when(mQsHost.getTiles()).thenReturn(List.of(mockTile));
+
+        mAutoTileManager.init();
+        ArgumentCaptor<DeviceControlsController.Callback> captor =
+                ArgumentCaptor.forClass(DeviceControlsController.Callback.class);
+
+        verify(mDeviceControlsController).setCallback(captor.capture());
+
+        captor.getValue().onControlsUpdate(3);
+        verify(mQsHost, never()).addTile(spec, 3);
+        verify(mAutoAddTracker, never()).setTileAdded(spec);
+    }
+
 
     @Test
     public void testEmptyArray_doesNotCrash() {

@@ -92,7 +92,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
 
         iconContainer.calculateIconXTranslations()
         assertEquals(10f, iconState.xTranslation)
-        assertFalse(iconContainer.hasOverflow())
+        assertFalse(iconContainer.areIconsOverflowing())
     }
 
     @Test
@@ -121,7 +121,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
         assertEquals(30f, iconContainer.getIconState(iconThree).xTranslation)
         assertEquals(40f, iconContainer.getIconState(iconFour).xTranslation)
 
-        assertFalse(iconContainer.hasOverflow())
+        assertFalse(iconContainer.areIconsOverflowing())
     }
 
     @Test
@@ -150,7 +150,107 @@ class NotificationIconContainerTest : SysuiTestCase() {
         assertEquals(10f, iconContainer.getIconState(iconOne).xTranslation)
         assertEquals(20f, iconContainer.getIconState(iconTwo).xTranslation)
         assertEquals(30f, iconContainer.getIconState(iconThree).xTranslation)
-        assertTrue(iconContainer.hasOverflow())
+        assertTrue(iconContainer.areIconsOverflowing())
+    }
+
+    @Test
+    fun shouldForceOverflow_appearingAboveSpeedBump_true() {
+        val forceOverflow = iconContainer.shouldForceOverflow(
+                /* i= */ 1,
+                /* speedBumpIndex= */ 0,
+                /* iconAppearAmount= */ 1f,
+                /* maxVisibleIcons= */ 5
+        )
+        assertTrue(forceOverflow);
+    }
+
+    @Test
+    fun shouldForceOverflow_moreThanMaxVisible_true() {
+        val forceOverflow = iconContainer.shouldForceOverflow(
+                /* i= */ 10,
+                /* speedBumpIndex= */ 11,
+                /* iconAppearAmount= */ 0f,
+                /* maxVisibleIcons= */ 5
+        )
+        assertTrue(forceOverflow);
+    }
+
+    @Test
+    fun shouldForceOverflow_belowSpeedBumpAndLessThanMaxVisible_false() {
+        val forceOverflow = iconContainer.shouldForceOverflow(
+                /* i= */ 0,
+                /* speedBumpIndex= */ 11,
+                /* iconAppearAmount= */ 0f,
+                /* maxVisibleIcons= */ 5
+        )
+        assertFalse(forceOverflow);
+    }
+
+    @Test
+    fun isOverflowing_lastChildXLessThanLayoutEnd_false() {
+        val isOverflowing = iconContainer.isOverflowing(
+                /* isLastChild= */ true,
+                /* translationX= */ 0f,
+                /* layoutEnd= */ 10f,
+                /* iconSize= */ 2f,
+        )
+        assertFalse(isOverflowing)
+    }
+
+
+    @Test
+    fun isOverflowing_lastChildXEqualToLayoutEnd_true() {
+        val isOverflowing = iconContainer.isOverflowing(
+                /* isLastChild= */ true,
+                /* translationX= */ 10f,
+                /* layoutEnd= */ 10f,
+                /* iconSize= */ 2f,
+        )
+        assertTrue(isOverflowing)
+    }
+
+    @Test
+    fun isOverflowing_lastChildXGreaterThanLayoutEnd_true() {
+        val isOverflowing = iconContainer.isOverflowing(
+                /* isLastChild= */ true,
+                /* translationX= */ 20f,
+                /* layoutEnd= */ 10f,
+                /* iconSize= */ 2f,
+        )
+        assertTrue(isOverflowing)
+    }
+
+    @Test
+    fun isOverflowing_notLastChildXLessThanDotX_false() {
+        val isOverflowing = iconContainer.isOverflowing(
+                /* isLastChild= */ false,
+                /* translationX= */ 0f,
+                /* layoutEnd= */ 10f,
+                /* iconSize= */ 2f,
+        )
+        assertFalse(isOverflowing)
+    }
+
+    @Test
+    fun isOverflowing_notLastChildXGreaterThanDotX_true() {
+        val isOverflowing = iconContainer.isOverflowing(
+                /* isLastChild= */ false,
+                /* translationX= */ 20f,
+                /* layoutEnd= */ 10f,
+                /* iconSize= */ 2f,
+        )
+        assertTrue(isOverflowing)
+    }
+
+    @Test
+    fun isOverflowing_notLastChildXEqualToDotX_true() {
+        val isOverflowing = iconContainer.isOverflowing(
+                /* isLastChild= */ false,
+                /* translationX= */ 8f,
+                /* layoutEnd= */ 10f,
+                /* iconSize= */ 2f,
+        )
+        assertTrue(isOverflowing)
     }
 
     private fun mockStatusBarIcon() : StatusBarIconView {

@@ -17,28 +17,60 @@
 package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
-import android.window.WindowContainerToken;
+import android.os.IBinder;
 
 /** {@hide} */
 interface IMediaProjection {
     void start(IMediaProjectionCallback callback);
     void stop();
+
     boolean canProjectAudio();
     boolean canProjectVideo();
     boolean canProjectSecureVideo();
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     int applyVirtualDisplayFlags(int flags);
+
     void registerCallback(IMediaProjectionCallback callback);
+
     void unregisterCallback(IMediaProjectionCallback callback);
 
     /**
-     * Returns the {@link android.window.WindowContainerToken} identifying the task to record, or
-     * {@code null} if there is none.
+     * Returns the {@link android.os.IBinder} identifying the task to record, or {@code null} if
+     * there is none.
      */
-    WindowContainerToken getTaskRecordingWindowContainerToken();
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    IBinder getLaunchCookie();
 
     /**
-     * Updates the {@link android.window.WindowContainerToken} identifying the task to record, or
-     * {@code null} if there is none.
+     * Updates the {@link android.os.IBinder} identifying the task to record, or {@code null} if
+     * there is none.
      */
-    void setTaskRecordingWindowContainerToken(in WindowContainerToken token);
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void setLaunchCookie(in IBinder launchCookie);
+
+    /**
+     * Returns {@code true} if this token is still valid. A token is valid as long as the token
+     * hasn't timed out before it was used, and the token is only used once.
+     *
+     * <p>If the {@link IMediaProjection} is not valid, then either throws an exception if the
+     * target SDK is at least {@code U}, or returns {@code false} for target SDK below {@code U}.
+     *
+     * @throws IllegalStateException If the caller's target SDK is at least {@code U} and the
+     * projection is not valid.
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    boolean isValid();
+
+    /**
+     * Sets that {@link MediaProjection#createVirtualDisplay} has been invoked with this token (it
+     * should only be called once).
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void notifyVirtualDisplayCreated(int displayId);
 }

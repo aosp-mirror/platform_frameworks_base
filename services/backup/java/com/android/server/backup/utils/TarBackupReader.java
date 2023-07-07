@@ -47,6 +47,7 @@ import android.app.backup.BackupAgent;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -384,13 +385,14 @@ public class TarBackupReader {
      * @param info - file metadata.
      * @param signatures - array of signatures parsed from backup file.
      * @param userId - ID of the user for which restore is performed.
+     * @param context - Context instance.
      * @return a restore policy constant.
      */
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
             boolean allowApks, FileMetadata info, Signature[] signatures,
-            PackageManagerInternal pmi, int userId) {
+            PackageManagerInternal pmi, int userId, Context context) {
         return chooseRestorePolicy(packageManager, allowApks, info, signatures, pmi, userId,
-                BackupEligibilityRules.forBackup(packageManager, pmi, userId));
+                BackupEligibilityRules.forBackup(packageManager, pmi, userId, context));
     }
 
     /**

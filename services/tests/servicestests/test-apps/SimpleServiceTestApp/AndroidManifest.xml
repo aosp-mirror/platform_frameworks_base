@@ -18,13 +18,17 @@
         package="com.android.servicestests.apps.simpleservicetestapp">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <application>
         <service android:name=".SimpleService"
                  android:exported="true" />
         <service android:name=".SimpleFgService"
-                 android:exported="true" />
+                 android:foregroundServiceType="specialUse"
+                 android:exported="true">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="test" />
+        </service>
         <service android:name=".SimpleIsolatedService"
                  android:isolatedProcess="true"
                  android:exported="true" />

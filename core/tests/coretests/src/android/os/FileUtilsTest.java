@@ -54,13 +54,14 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.os.FileUtils.MemoryPipe;
 import android.provider.DocumentsContract.Document;
+import android.util.DataUnit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import libcore.io.Streams;
-
 import com.google.android.collect.Sets;
+
+import libcore.io.Streams;
 
 import org.junit.After;
 import org.junit.Before;
@@ -477,6 +478,14 @@ public class FileUtilsTest {
         new File(mTarget, "test (1).jpg").createNewFile();
         assertNameEquals("test (2).jpg",
                 FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
+
+        assertNameEquals("test.mp3", FileUtils.buildUniqueFile(mTarget, "audio/mp3", "test.mp3"));
+        new File(mTarget, "test.mp3").createNewFile();
+        assertNameEquals("test (1).mp3",
+                FileUtils.buildUniqueFile(mTarget, "audio/mp3", "test.mp3"));
+        new File(mTarget, "test (1).mp3").createNewFile();
+        assertNameEquals("test (2).mp3",
+                FileUtils.buildUniqueFile(mTarget, "audio/mp3", "test.mp3"));
     }
 
     @Test
@@ -496,31 +505,95 @@ public class FileUtilsTest {
 
     @Test
     public void testRoundStorageSize() throws Exception {
-        final long M128 = 128000000L;
-        final long M256 = 256000000L;
-        final long M512 = 512000000L;
-        final long G1 = 1000000000L;
-        final long G2 = 2000000000L;
-        final long G16 = 16000000000L;
-        final long G32 = 32000000000L;
-        final long G64 = 64000000000L;
+        final long GB1 = DataUnit.GIGABYTES.toBytes(1);
+        final long GiB1 = DataUnit.GIBIBYTES.toBytes(1);
+        final long GB2 = DataUnit.GIGABYTES.toBytes(2);
+        final long GiB2 = DataUnit.GIBIBYTES.toBytes(2);
+        final long GiB128 = DataUnit.GIBIBYTES.toBytes(128);
+        final long GB256 = DataUnit.GIGABYTES.toBytes(256);
+        final long GiB256 = DataUnit.GIBIBYTES.toBytes(256);
+        final long GB512 = DataUnit.GIGABYTES.toBytes(512);
+        final long GiB512 = DataUnit.GIBIBYTES.toBytes(512);
+        final long TB1 = DataUnit.TERABYTES.toBytes(1);
+        final long TiB1 = DataUnit.TEBIBYTES.toBytes(1);
+        final long TB2 = DataUnit.TERABYTES.toBytes(2);
+        final long TiB2 = DataUnit.TEBIBYTES.toBytes(2);
+        final long TB4 = DataUnit.TERABYTES.toBytes(4);
+        final long TiB4 = DataUnit.TEBIBYTES.toBytes(4);
+        final long TB8 = DataUnit.TERABYTES.toBytes(8);
+        final long TiB8 = DataUnit.TEBIBYTES.toBytes(8);
 
-        assertEquals(M128, roundStorageSize(M128));
-        assertEquals(M256, roundStorageSize(M128 + 1));
-        assertEquals(M256, roundStorageSize(M256 - 1));
-        assertEquals(M256, roundStorageSize(M256));
-        assertEquals(M512, roundStorageSize(M256 + 1));
-        assertEquals(M512, roundStorageSize(M512 - 1));
-        assertEquals(M512, roundStorageSize(M512));
-        assertEquals(G1, roundStorageSize(M512 + 1));
-        assertEquals(G1, roundStorageSize(G1));
-        assertEquals(G2, roundStorageSize(G1 + 1));
+        assertEquals(GB1, roundStorageSize(GB1 - 1));
+        assertEquals(GB1, roundStorageSize(GB1));
+        assertEquals(GB1, roundStorageSize(GB1 + 1));
+        assertEquals(GB1, roundStorageSize(GiB1 - 1));
+        assertEquals(GB1, roundStorageSize(GiB1));
+        assertEquals(GB2, roundStorageSize(GiB1 + 1));
+        assertEquals(GB2, roundStorageSize(GiB2));
 
-        assertEquals(G16, roundStorageSize(G16));
-        assertEquals(G32, roundStorageSize(G16 + 1));
-        assertEquals(G32, roundStorageSize(G32 - 1));
-        assertEquals(G32, roundStorageSize(G32));
-        assertEquals(G64, roundStorageSize(G32 + 1));
+        assertEquals(GB256, roundStorageSize(GiB128 + 1));
+        assertEquals(GB256, roundStorageSize(GiB256));
+        assertEquals(GB512, roundStorageSize(GiB256 + 1));
+        assertEquals(GB512, roundStorageSize(GiB512));
+        assertEquals(TB1, roundStorageSize(GiB512 + 1));
+        assertEquals(TB1, roundStorageSize(TiB1));
+        assertEquals(TB2, roundStorageSize(TiB1 + 1));
+        assertEquals(TB2, roundStorageSize(TiB2));
+        assertEquals(TB4, roundStorageSize(TiB2 + 1));
+        assertEquals(TB4, roundStorageSize(TiB4));
+        assertEquals(TB8, roundStorageSize(TiB4 + 1));
+        assertEquals(TB8, roundStorageSize(TiB8));
+        assertEquals(TB1, roundStorageSize(1013077688320L)); // b/268571529
+    }
+
+    @Test
+    public void testParseSize() {
+        assertEquals(0L, FileUtils.parseSize("0MB"));
+        assertEquals(1_024L, FileUtils.parseSize("1024b"));
+        assertEquals(-1L, FileUtils.parseSize(" -1 b "));
+        assertEquals(0L, FileUtils.parseSize(" -0 gib "));
+        assertEquals(1_000L, FileUtils.parseSize("1K"));
+        assertEquals(1_000L, FileUtils.parseSize("1KB"));
+        assertEquals(10_000L, FileUtils.parseSize("10KB"));
+        assertEquals(100_000L, FileUtils.parseSize("100KB"));
+        assertEquals(1_000_000L, FileUtils.parseSize("1000KB"));
+        assertEquals(1_024_000L, FileUtils.parseSize("1000KiB"));
+        assertEquals(70_000_000L, FileUtils.parseSize("070M"));
+        assertEquals(70_000_000L, FileUtils.parseSize("070MB"));
+        assertEquals(73_400_320L, FileUtils.parseSize("70MiB"));
+        assertEquals(700_000_000L, FileUtils.parseSize("700000KB"));
+        assertEquals(200_000_000L, FileUtils.parseSize("+200MB"));
+        assertEquals(1_000_000_000L, FileUtils.parseSize("1000MB"));
+        assertEquals(1_000_000_000L, FileUtils.parseSize("+1000 mb"));
+        assertEquals(644_245_094_400L, FileUtils.parseSize("600GiB"));
+        assertEquals(999_000_000_000L, FileUtils.parseSize("999GB"));
+        assertEquals(999_000_000_000L, FileUtils.parseSize("999 gB"));
+        assertEquals(9_999_000_000_000L, FileUtils.parseSize("9999GB"));
+        assertEquals(9_000_000_000_000L, FileUtils.parseSize(" 9000 GB   "));
+        assertEquals(1_234_000_000_000L, FileUtils.parseSize(" 1234 GB  "));
+        assertEquals(1_234_567_890_000L, FileUtils.parseSize(" 1234567890 KB  "));
+    }
+
+    @Test
+    public void testParseSize_invalidArguments() {
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize(null));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("null"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize(""));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("     "));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("KB"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("123 dd"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("Invalid"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize(" ABC890 KB  "));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("-=+90 KB  "));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("123"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("--123"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("-KB"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("++123"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("+"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("+ 1 +"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("+--+ 1 +"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize("1GB+"));
+        assertEquals(Long.MIN_VALUE, FileUtils.parseSize(" + 1234567890 KB  "));
     }
 
     @Test
