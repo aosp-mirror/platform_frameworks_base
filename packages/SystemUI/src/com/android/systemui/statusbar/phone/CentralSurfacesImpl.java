@@ -3564,7 +3564,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             WallpaperInfo info = mWallpaperManager.getWallpaperInfoForUser(
                     mUserTracker.getUserId());
-            mWallpaperController.onWallpaperInfoUpdated(info);
         }
     };
 
