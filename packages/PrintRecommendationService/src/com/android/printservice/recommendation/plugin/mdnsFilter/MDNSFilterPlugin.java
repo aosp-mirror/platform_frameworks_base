@@ -37,9 +37,7 @@ import java.util.Set;
 public class MDNSFilterPlugin implements PrintServicePlugin {
 
     /** The mDNS service types supported */
-    private static final Set<String> PRINTER_SERVICE_TYPES = new HashSet<String>() {{
-        add("_ipp._tcp");
-    }};
+    private static final Set<String> PRINTER_SERVICE_TYPES = Set.of("_ipp._tcp");
 
     /**
      * The printer filter for {@link MDNSFilteredDiscovery} passing only mDNS results

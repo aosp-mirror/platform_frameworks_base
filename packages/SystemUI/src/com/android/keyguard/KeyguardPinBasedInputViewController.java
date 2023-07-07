@@ -27,6 +27,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
@@ -58,10 +59,11 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             LatencyTracker latencyTracker,
             LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
-            FalsingCollector falsingCollector) {
+            FalsingCollector falsingCollector,
+            FeatureFlags featureFlags) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController);
+                emergencyButtonController, featureFlags);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
@@ -71,13 +73,17 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void onViewAttached() {
         super.onViewAttached();
 
-        for (NumPadKey button: mView.getButtons()) {
+        boolean showAnimations = !mLockPatternUtils
+                .isPinEnhancedPrivacyEnabled(KeyguardUpdateMonitor.getCurrentUser());
+        mPasswordEntry.setShowPassword(showAnimations);
+        for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener((v, event) -> {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                     mFalsingCollector.avoidGesture();
                 }
                 return false;
             });
+            button.setAnimationEnabled(showAnimations);
         }
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
@@ -102,12 +108,9 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         View okButton = mView.findViewById(R.id.key_enter);
         if (okButton != null) {
             okButton.setOnTouchListener(mActionButtonTouchListener);
-            okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mPasswordEntry.isEnabled()) {
-                        verifyPasswordAndUnlock();
-                    }
+            okButton.setOnClickListener(v -> {
+                if (mPasswordEntry.isEnabled()) {
+                    verifyPasswordAndUnlock();
                 }
             });
             okButton.setOnHoverListener(mLiftToActivateListener);
@@ -118,7 +121,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void onViewDetached() {
         super.onViewDetached();
 
-        for (NumPadKey button: mView.getButtons()) {
+        for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener(null);
         }
     }
@@ -126,11 +129,17 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
+        // It's possible to reach a state here where mPasswordEntry believes it is focused
+        // but it is not actually focused. This state will prevent the view from gaining focus,
+        // as requestFocus will no-op since the focus flag is already set. By clearing focus first,
+        // it's guaranteed that the view has focus.
+        mPasswordEntry.clearFocus();
         mPasswordEntry.requestFocus();
     }
 
     @Override
     void resetState() {
+        mMessageAreaController.setMessage(getInitialMessageResId());
         mView.setPasswordEntryEnabled(true);
     }
 
@@ -138,5 +147,10 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void startErrorAnimation() {
         super.startErrorAnimation();
         mView.startErrorAnimation();
+    }
+
+    @Override
+    protected int getInitialMessageResId() {
+        return R.string.keyguard_enter_your_pin;
     }
 }

@@ -27,27 +27,27 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.statusbar.IAddTileResultCallback
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QSHost
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.function.Consumer
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -62,7 +62,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var tileRequestDialog: TileRequestDialog
     @Mock
-    private lateinit var qsTileHost: QSTileHost
+    private lateinit var qsHost: QSHost
     @Mock
     private lateinit var commandRegistry: CommandRegistry
     @Mock
@@ -82,10 +82,10 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         `when`(logger.newInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
 
         // Tile not present by default
-        `when`(qsTileHost.indexOf(anyString())).thenReturn(-1)
+        `when`(qsHost.indexOf(anyString())).thenReturn(-1)
 
         controller = TileServiceRequestController(
-                qsTileHost,
+                qsHost,
                 commandQueue,
                 commandRegistry,
                 logger
@@ -107,18 +107,18 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
 
     @Test
     fun tileAlreadyAdded_correctResult() {
-        `when`(qsTileHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
+        `when`(qsHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
 
         val callback = Callback()
         controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
 
         assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.TILE_ALREADY_ADDED)
-        verify(qsTileHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
+        verify(qsHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
     }
 
     @Test
     fun tileAlreadyAdded_logged() {
-        `when`(qsTileHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
+        `when`(qsHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
 
         controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon) {}
 
@@ -157,7 +157,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
 
         cancelListenerCaptor.value.onCancel(tileRequestDialog)
         assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.DISMISSED)
-        verify(qsTileHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
+        verify(qsHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
     }
 
     @Test
@@ -191,7 +191,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         clickListenerCaptor.value.onClick(tileRequestDialog, DialogInterface.BUTTON_POSITIVE)
 
         assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.ADD_TILE)
-        verify(qsTileHost).addTile(TEST_COMPONENT, /* end */ true)
+        verify(qsHost).addTile(TEST_COMPONENT, /* end */ true)
     }
 
     @Test
@@ -225,7 +225,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         clickListenerCaptor.value.onClick(tileRequestDialog, DialogInterface.BUTTON_NEGATIVE)
 
         assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.DONT_ADD_TILE)
-        verify(qsTileHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
+        verify(qsHost, never()).addTile(any(ComponentName::class.java), anyBoolean())
     }
 
     @Test
@@ -266,7 +266,7 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
 
     @Test
     fun commandQueueCallback_callbackCalled() {
-        `when`(qsTileHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
+        `when`(qsHost.indexOf(CustomTile.toSpec(TEST_COMPONENT))).thenReturn(2)
         val captor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue, atLeastOnce()).addCallback(capture(captor))
         val c = Callback()

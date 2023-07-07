@@ -61,4 +61,13 @@ public final class NewUserResponse {
     public @UserManager.UserOperationResult int getOperationResult() {
         return mOperationResult;
     }
+
+    @Override
+    public String toString() {
+        return "NewUserResponse{"
+                + "mUser="
+                + mUser
+                + ", mOperationResult=" + mOperationResult
+                + '}';
+    }
 }

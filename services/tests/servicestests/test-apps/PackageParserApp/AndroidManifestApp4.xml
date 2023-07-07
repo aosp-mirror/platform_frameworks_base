@@ -31,7 +31,8 @@
         <property android:name="android.cts.PROPERTY_STRING_VIA_RESOURCE" android:value="@string/string_property" />
 
 	    <activity android:name="com.android.servicestests.apps.packageparserapp.MyActivity"
-	              android:exported="true" >
+	              android:exported="true"
+	              android:requiredDisplayCategory="automotive">
 	        <property android:name="android.cts.PROPERTY_ACTIVITY" android:value="@integer/integer_property" />
 	        <property android:name="android.cts.PROPERTY_COMPONENT" android:value="@integer/integer_property" />
 	        <property android:name="android.cts.PROPERTY_STRING" android:value="koala activity" />

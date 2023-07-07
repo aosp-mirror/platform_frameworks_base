@@ -1667,7 +1667,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mWantRenderNotification = true;
                 mRequestRender = true;
                 mRenderComplete = false;
-                mFinishDrawingRunnable = finishDrawing;
+                final Runnable oldCallback = mFinishDrawingRunnable;
+                mFinishDrawingRunnable = () -> {
+                    if (oldCallback != null) {
+                        oldCallback.run();
+                    }
+                    if (finishDrawing != null) {
+                        finishDrawing.run();
+                    }
+                };
 
                 sGLThreadManager.notifyAll();
             }

@@ -2000,8 +2000,19 @@ public class WebView extends AbsoluteLayout
      * in order to facilitate debugging of web layouts and JavaScript
      * code running inside WebViews. Please refer to WebView documentation
      * for the debugging guide.
-     *
-     * The default is {@code false}.
+     * <p>
+     * In WebView 113.0.5656.0 and later, this is enabled automatically if the
+     * app is declared as
+     * <a href="https://developer.android.com/guide/topics/manifest/application-element#debug">
+     * {@code android:debuggable="true"}</a> in its manifest; otherwise, the
+     * default is {@code false}.
+     * <p>
+     * Enabling web contents debugging allows the state of any WebView in the
+     * app to be inspected and modified by the user via adb. This is a security
+     * liability and should not be enabled in production builds of apps unless
+     * this is an explicitly intended use of the app. More info on
+     * <a href="https://developer.android.com/topic/security/risks/android-debuggable">
+     * secure debug settings</a>.
      *
      * @param enabled whether to enable web contents debugging
      */

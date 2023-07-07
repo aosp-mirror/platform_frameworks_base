@@ -48,6 +48,10 @@ public final class FontStyle {
     private static final String TAG = "FontStyle";
 
     /**
+     * A default value when font weight is unspecified
+     */
+    public static final int FONT_WEIGHT_UNSPECIFIED = -1;
+    /**
      * A minimum weight value for the font
      */
     public static final int FONT_WEIGHT_MIN = 1;

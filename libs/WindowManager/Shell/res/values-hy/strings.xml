@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Կարգավորումներ"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Մտնել տրոհված էկրանի ռեժիմ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Ընտրացանկ"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"«Նկար նկարի մեջ» ռեժիմի ընտրացանկ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>-ը «Նկար նկարի մեջ» ռեժիմում է"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
     <string name="pip_play" msgid="3496151081459417097">"Նվագարկել"</string>
@@ -33,9 +34,11 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ցուցադրել"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում։"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Այս հավելվածը հնարավոր է բացել միայն մեկ պատուհանում։"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Հավելվածը կարող է չաշխատել լրացուցիչ էկրանի վրա"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Հավելվածը չի աջակցում գործարկումը լրացուցիչ էկրանների վրա"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Տրոհված էկրանի բաժանիչ"</string>
+    <string name="divider_title" msgid="5482989479865361192">"Տրոհված էկրանի բաժանիչ"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ձախ էկրանը՝ լիաէկրան"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Ձախ էկրանը՝ 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Ձախ էկրանը՝ 50%"</string>
@@ -46,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Վերևի էկրանը՝ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Վերևի էկրանը՝ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Ներքևի էկրանը՝ լիաէկրան"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Ինչպես օգտվել մեկ ձեռքի ռեժիմից"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Դուրս գալու համար մատը սահեցրեք էկրանի ներքևից վերև կամ հպեք հավելվածի վերևում որևէ տեղ։"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Գործարկել մեկ ձեռքի ռեժիմը"</string>
@@ -72,17 +83,28 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Պղպջակ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Կառավարել"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ամպիկը փակվեց։"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Հպեք՝ հավելվածը վերագործարկելու և լիաէկրան ռեժիմին անցնելու համար։"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Հպեք՝ հավելվածը վերագործարկելու և ավելի հարմար տեսք ընտրելու համար։"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Տեսախցիկի հետ կապված խնդիրնե՞ր կան։\nՀպեք՝ վերակարգավորելու համար։"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Չհաջողվե՞ց շտկել։\nՀպեք՝ փոփոխությունները չեղարկելու համար։"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Տեսախցիկի հետ կապված խնդիրներ չկա՞ն։ Փակելու համար հպեք։"</string>
-    <!-- no translation found for letterbox_education_dialog_title (6688664582871779215) -->
-    <skip />
-    <!-- no translation found for letterbox_education_dialog_subtext (4853542518367719562) -->
-    <skip />
-    <!-- no translation found for letterbox_education_screen_rotation_text (5085786687366339027) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (1068293354123934727) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Միաժամանակ կատարեք մի քանի առաջադրանք"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Քաշեք մյուս հավելվածի մեջ՝ էկրանի տրոհումն օգտագործելու համար"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Կրկնակի հպեք հավելվածի կողքին՝ այն տեղափոխելու համար"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Եղավ"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Ծավալեք՝ ավելին իմանալու համար։"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Վերագործարկե՞լ հավելվածը"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Դուք կարող եք վերագործարկել հավելվածը, որպեսզի այն ավելի լավ ցուցադրվի ձեր էկրանին, սակայն ձեր առաջընթացը և չպահված փոփոխությունները կկորեն"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Չեղարկել"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Վերագործարկել"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Այլևս ցույց չտալ"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Ծավալել"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Ծալել"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Փակել"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Հետ"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Նշիչ"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Լիաէկրան"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Համակարգչի ռեժիմ"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Տրոհված էկրան"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Ավելին"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Լողացող պատուհան"</string>
 </resources>

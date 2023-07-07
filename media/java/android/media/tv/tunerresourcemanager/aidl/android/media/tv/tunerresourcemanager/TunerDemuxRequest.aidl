@@ -23,4 +23,9 @@ package android.media.tv.tunerresourcemanager;
  */
 parcelable TunerDemuxRequest {
     int clientId;
+
+    /**
+     * Desired filter types (defined in {@link android.media.tv.tuner.filter.Filter})
+     */
+    int desiredFilterTypes;
 }

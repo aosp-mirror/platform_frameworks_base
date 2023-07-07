@@ -16,17 +16,23 @@
 
 #include "DumpManifest.h"
 
+#include <androidfw/ApkParsing.h>
+
 #include <algorithm>
+#include <array>
+#include <memory>
+#include <set>
+#include <string_view>
+#include <vector>
 
 #include "LoadedApk.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
+#include "androidfw/ConfigDescription.h"
 #include "io/File.h"
 #include "io/FileStream.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
-
-#include "androidfw/ConfigDescription.h"
 
 using ::android::base::StringPrintf;
 using ::android::ConfigDescription;
@@ -112,7 +118,101 @@ static xml::Attribute* FindAttribute(xml::Element *el, const std::string &packag
   return el->FindAttribute(package, name);
 }
 
+class Architectures {
+ public:
+  std::set<std::string> architectures;
+  std::set<std::string> alt_architectures;
+
+  void Print(text::Printer* printer) {
+    if (!architectures.empty()) {
+      printer->Print("native-code:");
+      for (auto& arch : architectures) {
+        printer->Print(StringPrintf(" '%s'", arch.data()));
+      }
+      printer->Print("\n");
+    }
+    if (!alt_architectures.empty()) {
+      printer->Print("alt-native-code:");
+      for (auto& arch : alt_architectures) {
+        printer->Print(StringPrintf(" '%s'", arch.data()));
+      }
+      printer->Print("\n");
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) {
+    auto out_architectures = out_badging->mutable_architectures();
+    for (auto& arch : architectures) {
+      out_architectures->add_architectures(arch);
+    }
+    for (auto& arch : alt_architectures) {
+      out_architectures->add_alt_architectures(arch);
+    }
+  }
+};
+
+const static std::array<std::string_view, 14> printable_components{"app-widget",
+                                                                   "device-admin",
+                                                                   "ime",
+                                                                   "wallpaper",
+                                                                   "accessibility",
+                                                                   "print-service",
+                                                                   "payment",
+                                                                   "search",
+                                                                   "document-provider",
+                                                                   "launcher",
+                                                                   "notification-listener",
+                                                                   "dream",
+                                                                   "camera",
+                                                                   "camera-secure"};
+
+class Components {
+ public:
+  std::set<std::string, std::less<>> discovered_components;
+  bool other_activities = false;
+  bool other_receivers = false;
+  bool other_services = false;
+
+  void Print(text::Printer* printer) {
+    for (auto& component : printable_components) {
+      if (discovered_components.find(component) != discovered_components.end()) {
+        printer->Print(StringPrintf("provides-component:'%s'\n", component.data()));
+      }
+    }
+    // Print presence of main activity
+    if (discovered_components.find("main") != discovered_components.end()) {
+      printer->Print("main\n");
+    }
+
+    if (other_activities) {
+      printer->Print("other-activities\n");
+    }
+    if (other_receivers) {
+      printer->Print("other-receivers\n");
+    }
+    if (other_services) {
+      printer->Print("other-services\n");
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) {
+    auto out_components = out_badging->mutable_components();
+    for (auto& component : printable_components) {
+      auto discovered = discovered_components.find(component);
+      if (discovered != discovered_components.end()) {
+        out_components->add_provided_components(*discovered);
+      }
+    }
+    out_components->set_main(discovered_components.find("main") != discovered_components.end());
+    out_components->set_other_activities(other_activities);
+    out_components->set_other_receivers(other_receivers);
+    out_components->set_other_services(other_services);
+  }
+};
+
 class CommonFeatureGroup;
+class FeatureGroup;
+class SupportsScreen;
 
 class ManifestExtractor {
  public:
@@ -125,10 +225,16 @@ class ManifestExtractor {
     Element() = default;
     virtual ~Element() = default;
 
-    static std::unique_ptr<Element> Inflate(ManifestExtractor* extractor, xml::Element* el);
+    static std::unique_ptr<Element> Inflate(ManifestExtractor* extractor, xml::Element* el,
+                                            const std::string& parent_tag);
 
     /** Writes out the extracted contents of the element. */
-    virtual void Print(text::Printer* printer) { }
+    virtual void Print(text::Printer* printer) {
+    }
+
+    /** Saves extracted information into Badging proto. */
+    virtual void ToProto(pb::Badging* out_badging) {
+    }
 
     /** Adds an element to the list of children of the element. */
     void AddChild(std::unique_ptr<Element>& child) { children_.push_back(std::move(child)); }
@@ -146,8 +252,13 @@ class ManifestExtractor {
     }
 
     /** Retrieves the extracted xml element tag. */
-    const std::string tag() const {
+    const std::string& tag() const {
       return tag_;
+    }
+
+    /** Whether this element has special Extract/Print/ToProto logic. */
+    bool is_featured() const {
+      return featured_;
     }
 
    protected:
@@ -291,6 +402,8 @@ class ManifestExtractor {
               return &(*intValue->value);
             } else if (RawString* rawValue = ValueCast<RawString>(value)) {
               return &(*rawValue->value);
+            } else if (StyledString* styledStrValue = ValueCast<StyledString>(value)) {
+              return &(styledStrValue->value->value);
             } else if (FileReference* strValue = ValueCast<FileReference>(value)) {
               return &(*strValue->path);
             }
@@ -321,6 +434,7 @@ class ManifestExtractor {
       ManifestExtractor* extractor_;
       std::vector<std::unique_ptr<Element>> children_;
       std::string tag_;
+      bool featured_ = false;
   };
 
   friend Element;
@@ -338,12 +452,19 @@ class ManifestExtractor {
     return config;
   }
 
-  bool Dump(text::Printer* printer, IDiagnostics* diag);
+  bool Extract(android::IDiagnostics* diag);
+  bool Dump(text::Printer* printer);
+  bool DumpProto(pb::Badging* out_badging);
 
   /** Recursively visit the xml element tree and return a processed badging element tree. */
-  std::unique_ptr<Element> Visit(xml::Element* element);
+  std::unique_ptr<Element> Visit(xml::Element* element, const std::string& parent_tag);
 
-    /** Raises the target sdk value if the min target is greater than the current target. */
+  /** Resets target SDK to 0. */
+  void ResetTargetSdk() {
+    target_sdk_ = 0;
+  }
+
+  /** Raises the target sdk value if the min target is greater than the current target. */
   void RaiseTargetSdk(int32_t min_target) {
     if (min_target > target_sdk_) {
       target_sdk_ = min_target;
@@ -354,7 +475,7 @@ class ManifestExtractor {
    * Retrieves the default feature group that features are added into when <uses-feature>
    * are not in a <feature-group> element.
    **/
-  CommonFeatureGroup* GetCommonFeatureGroup() {
+  CommonFeatureGroup* common_feature_group() {
     return commonFeatureGroup_.get();
   }
 
@@ -375,7 +496,7 @@ class ManifestExtractor {
   }
 
   /** Retrieves the current stack of parent during data extraction. */
-  const std::vector<Element*> parent_stack() const {
+  const std::vector<Element*>& parent_stack() const {
     return parent_stack_;
   }
 
@@ -387,11 +508,19 @@ class ManifestExtractor {
   DumpManifestOptions& options_;
 
  private:
+  std::unique_ptr<xml::XmlResource> doc_;
   std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_ = util::make_unique<CommonFeatureGroup>();
   std::map<std::string, ConfigDescription> locales_;
   std::map<uint16_t, ConfigDescription> densities_;
   std::vector<Element*> parent_stack_;
   int32_t target_sdk_ = 0;
+
+  std::unique_ptr<ManifestExtractor::Element> root_element_;
+  std::vector<std::unique_ptr<ManifestExtractor::Element>> implied_permissions_;
+  std::vector<FeatureGroup*> feature_groups_;
+  Components components_;
+  Architectures architectures_;
+  const SupportsScreen* supports_screen_;
 };
 
 template<typename T> T* ElementCast(ManifestExtractor::Element* element);
@@ -415,8 +544,9 @@ static ManifestExtractor::Element* FindElement(ManifestExtractor::Element* root,
   if (f(root)) {
     return root;
   }
-  for (auto& child : root->children()) {
-    if (auto b2 = FindElement(child.get(), f)) {
+  const auto& children = root->children();
+  for (auto it = children.rbegin(); it != children.rend(); ++it) {
+    if (auto b2 = FindElement(it->get(), f)) {
       return b2;
     }
   }
@@ -427,6 +557,7 @@ static ManifestExtractor::Element* FindElement(ManifestExtractor::Element* root,
 class Manifest : public ManifestExtractor::Element {
  public:
   Manifest() = default;
+  bool only_package_name;
   std::string package;
   int32_t versionCode;
   std::string versionName;
@@ -462,7 +593,54 @@ class Manifest : public ManifestExtractor::Element {
     installLocation = GetAttributeInteger(FindAttribute(manifest, INSTALL_LOCATION_ATTR));
   }
 
+  void ToProto(pb::Badging* out_badging) override {
+    auto out_package = out_badging->mutable_package();
+    out_package->set_package(package);
+    out_package->set_version_code(versionCode);
+    out_package->set_version_name(versionName);
+    if (compilesdkVersion) {
+      out_package->set_compile_sdk_version(*compilesdkVersion);
+    }
+    if (compilesdkVersionCodename) {
+      out_package->set_compile_sdk_version_codename(*compilesdkVersionCodename);
+    }
+    if (platformVersionName) {
+      out_package->set_platform_version_name(*platformVersionName);
+    } else if (platformVersionNameInt) {
+      out_package->set_platform_version_name(std::to_string(*platformVersionNameInt));
+    }
+    if (platformVersionCode) {
+      out_package->set_platform_version_code(*platformVersionCode);
+    } else if (platformVersionCodeInt) {
+      out_package->set_platform_version_code(std::to_string(*platformVersionCodeInt));
+    }
+
+    if (installLocation) {
+      switch (*installLocation) {
+        case 0:
+          out_package->set_install_location(pb::PackageInfo_InstallLocation_AUTO);
+          break;
+        case 1:
+          out_package->set_install_location(pb::PackageInfo_InstallLocation_INTERNAL_ONLY);
+          break;
+        case 2:
+          out_package->set_install_location(pb::PackageInfo_InstallLocation_PREFER_EXTERNAL);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   void Print(text::Printer* printer) override {
+    if (only_package_name) {
+      printer->Println(StringPrintf("package: %s", package.data()));
+    } else {
+      PrintFull(printer);
+    }
+  }
+
+  void PrintFull(text::Printer* printer) {
     printer->Print(StringPrintf("package: name='%s' ", package.data()));
     printer->Print(StringPrintf("versionCode='%s' ",
                                (versionCode > 0) ? std::to_string(versionCode).data() : ""));
@@ -598,6 +776,27 @@ class Application : public ManifestExtractor::Element {
       printer->Print("application-debuggable\n");
     }
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto application = out_badging->mutable_application();
+    application->set_label(android::ResTable::normalizeForOutput(label.data()));
+    application->set_icon(icon);
+    application->set_banner(banner);
+    application->set_test_only(test_only != 0);
+    application->set_game(is_game != 0);
+    application->set_debuggable(debuggable != 0);
+
+    auto out_locale_labels = application->mutable_locale_labels();
+    for (auto& p : locale_labels) {
+      if (!p.first.empty()) {
+        (*out_locale_labels)[p.first] = p.second;
+      }
+    }
+    auto out_density_icons = application->mutable_density_icons();
+    for (auto& p : density_icons) {
+      (*out_density_icons)[p.first] = p.second;
+    }
+  }
 };
 
 /** Represents <uses-sdk> elements. **/
@@ -616,6 +815,10 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     max_sdk = GetAttributeInteger(FindAttribute(element, MAX_SDK_VERSION_ATTR));
     target_sdk = GetAttributeInteger(FindAttribute(element, TARGET_SDK_VERSION_ATTR));
     target_sdk_name = GetAttributeString(FindAttribute(element, TARGET_SDK_VERSION_ATTR));
+
+    // Resets target SDK first. This is required if APK contains multiple <uses-sdk> elements,
+    // we only need to take the latest values.
+    extractor()->ResetTargetSdk();
 
     // Detect the target sdk of the element
     if  ((min_sdk_name && *min_sdk_name == "Donut")
@@ -645,6 +848,23 @@ class UsesSdkBadging : public ManifestExtractor::Element {
       printer->Print(StringPrintf("targetSdkVersion:'%d'\n", *target_sdk));
     } else if (target_sdk_name) {
       printer->Print(StringPrintf("targetSdkVersion:'%s'\n", target_sdk_name->data()));
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto out_sdks = out_badging->mutable_uses_sdk();
+    if (min_sdk) {
+      out_sdks->set_min_sdk_version(*min_sdk);
+    } else if (min_sdk_name) {
+      out_sdks->set_min_sdk_version_name(*min_sdk_name);
+    }
+    if (max_sdk) {
+      out_sdks->set_max_sdk_version(*max_sdk);
+    }
+    if (target_sdk) {
+      out_sdks->set_target_sdk_version(*target_sdk);
+    } else if (target_sdk_name) {
+      out_sdks->set_target_sdk_version_name(*target_sdk_name);
     }
   }
 };
@@ -691,6 +911,15 @@ class UsesConfiguarion : public ManifestExtractor::Element {
     }
     printer->Print("\n");
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto out_configuration = out_badging->add_uses_configurations();
+    out_configuration->set_req_touch_screen(req_touch_screen);
+    out_configuration->set_req_keyboard_type(req_keyboard_type);
+    out_configuration->set_req_hard_keyboard(req_hard_keyboard);
+    out_configuration->set_req_navigation(req_navigation);
+    out_configuration->set_req_five_way_nav(req_five_way_nav);
+  }
 };
 
 /** Represents <supports-screen> elements. **/
@@ -733,54 +962,24 @@ class SupportsScreen : public ManifestExtractor::Element {
     }
   }
 
-  void PrintScreens(text::Printer* printer, int32_t target_sdk) {
-    int32_t small_screen_temp = small_screen;
-    int32_t normal_screen_temp  = normal_screen;
-    int32_t large_screen_temp  = large_screen;
-    int32_t xlarge_screen_temp  = xlarge_screen;
-    int32_t any_density_temp  = any_density;
-
-    // Determine default values for any unspecified screen sizes,
-    // based on the target SDK of the package.  As of 4 (donut)
-    // the screen size support was introduced, so all default to
-    // enabled.
-    if (small_screen_temp  > 0) {
-      small_screen_temp = target_sdk >= SDK_DONUT ? -1 : 0;
-    }
-    if (normal_screen_temp  > 0) {
-      normal_screen_temp  = -1;
-    }
-    if (large_screen_temp  > 0) {
-      large_screen_temp = target_sdk >= SDK_DONUT ? -1 : 0;
-    }
-    if (xlarge_screen_temp  > 0) {
-      // Introduced in Gingerbread.
-      xlarge_screen_temp = target_sdk >= SDK_GINGERBREAD ? -1 : 0;
-    }
-    if (any_density_temp  > 0) {
-      any_density_temp = (target_sdk >= SDK_DONUT || requires_smallest_width_dp > 0 ||
-                          compatible_width_limit_dp > 0)
-                             ? -1
-                             : 0;
-    }
-
+  void PrintScreens(text::Printer* printer, int32_t target_sdk) const {
     // Print the formatted screen info
     printer->Print("supports-screens:");
-    if (small_screen_temp  != 0) {
+    if (IsSmallScreenSupported(target_sdk)) {
       printer->Print(" 'small'");
     }
-    if (normal_screen_temp  != 0) {
+    if (normal_screen != 0) {
       printer->Print(" 'normal'");
     }
-    if (large_screen_temp   != 0) {
+    if (IsLargeScreenSupported(target_sdk)) {
       printer->Print(" 'large'");
     }
-    if (xlarge_screen_temp  != 0) {
+    if (IsXLargeScreenSupported(target_sdk)) {
       printer->Print(" 'xlarge'");
     }
     printer->Print("\n");
     printer->Print(StringPrintf("supports-any-density: '%s'\n",
-                                (any_density_temp ) ? "true" : "false"));
+                                (IsAnyDensitySupported(target_sdk)) ? "true" : "false"));
     if (requires_smallest_width_dp > 0) {
       printer->Print(StringPrintf("requires-smallest-width:'%d'\n", requires_smallest_width_dp));
     }
@@ -790,6 +989,60 @@ class SupportsScreen : public ManifestExtractor::Element {
     if (largest_width_limit_dp > 0) {
       printer->Print(StringPrintf("largest-width-limit:'%d'\n", largest_width_limit_dp));
     }
+  }
+
+  void ToProtoScreens(pb::Badging* out_badging, int32_t target_sdk) const {
+    auto supports_screen = out_badging->mutable_supports_screen();
+    if (IsSmallScreenSupported(target_sdk)) {
+      supports_screen->add_screens(pb::SupportsScreen_ScreenType_SMALL);
+    }
+    if (normal_screen != 0) {
+      supports_screen->add_screens(pb::SupportsScreen_ScreenType_NORMAL);
+    }
+    if (IsLargeScreenSupported(target_sdk)) {
+      supports_screen->add_screens(pb::SupportsScreen_ScreenType_LARGE);
+    }
+    if (IsXLargeScreenSupported(target_sdk)) {
+      supports_screen->add_screens(pb::SupportsScreen_ScreenType_XLARGE);
+    }
+    supports_screen->set_supports_any_densities(IsAnyDensitySupported(target_sdk));
+    supports_screen->set_requires_smallest_width_dp(requires_smallest_width_dp);
+    supports_screen->set_compatible_width_limit_dp(compatible_width_limit_dp);
+    supports_screen->set_largest_width_limit_dp(largest_width_limit_dp);
+  }
+
+ private:
+  // Determine default values for any unspecified screen sizes,
+  // based on the target SDK of the package.  As of 4 (donut)
+  // the screen size support was introduced, so all default to
+  // enabled.
+  bool IsSmallScreenSupported(int32_t target_sdk) const {
+    if (small_screen > 0) {
+      return target_sdk >= SDK_DONUT;
+    }
+    return small_screen != 0;
+  }
+
+  bool IsLargeScreenSupported(int32_t target_sdk) const {
+    if (large_screen > 0) {
+      return target_sdk >= SDK_DONUT;
+    }
+    return large_screen != 0;
+  }
+
+  bool IsXLargeScreenSupported(int32_t target_sdk) const {
+    if (xlarge_screen > 0) {
+      return target_sdk >= SDK_GINGERBREAD;
+    }
+    return xlarge_screen != 0;
+  }
+
+  bool IsAnyDensitySupported(int32_t target_sdk) const {
+    if (any_density > 0) {
+      return target_sdk >= SDK_DONUT || requires_smallest_width_dp > 0 ||
+             compatible_width_limit_dp > 0;
+    }
+    return any_density != 0;
   }
 };
 
@@ -821,9 +1074,21 @@ class FeatureGroup : public ManifestExtractor::Element {
     }
   }
 
+  virtual void GroupToProto(pb::Badging* out_badging) {
+    auto feature_group = out_badging->add_feature_groups();
+    feature_group->set_label(label);
+    feature_group->set_open_gles_version(open_gles_version);
+    for (auto& feature : features_) {
+      auto out_feature = feature_group->add_features();
+      out_feature->set_name(feature.first);
+      out_feature->set_required(feature.second.required);
+      out_feature->set_version(feature.second.version);
+    }
+  }
+
   /** Adds a feature to the feature group. */
   void AddFeature(const std::string& name, bool required = true, int32_t version = -1) {
-    features_.insert(std::make_pair(name, Feature{ required, version }));
+    features_.insert_or_assign(name, Feature{required, version});
     if (required) {
       if (name == "android.hardware.camera.autofocus" ||
           name == "android.hardware.camera.flash") {
@@ -906,6 +1171,23 @@ class CommonFeatureGroup : public FeatureGroup {
           count++;
         }
         printer->Print("'\n");
+      }
+    }
+  }
+
+  virtual void GroupToProto(pb::Badging* out_badging) override {
+    FeatureGroup::GroupToProto(out_badging);
+    auto feature_group =
+        out_badging->mutable_feature_groups(out_badging->feature_groups_size() - 1);
+    for (auto& feature : implied_features_) {
+      if (features_.find(feature.first) == features_.end()) {
+        auto out_feature = feature_group->add_features();
+        out_feature->set_name(feature.first);
+        auto implied_data = out_feature->mutable_implied_data();
+        implied_data->set_from_sdk_23_permission(feature.second.implied_from_sdk_k23);
+        for (auto& reason : feature.second.reasons) {
+          implied_data->add_reasons(reason);
+        }
       }
     }
   }
@@ -1050,7 +1332,7 @@ class UsesFeature : public ManifestExtractor::Element {
     // common feature group
     FeatureGroup* feature_group = ElementCast<FeatureGroup>(extractor()->parent_stack()[0]);
     if (!feature_group) {
-      feature_group = extractor()->GetCommonFeatureGroup();
+      feature_group = extractor()->common_feature_group();
     } else {
       // All features in side of <feature-group> elements are required.
       required = true;
@@ -1068,12 +1350,14 @@ class UsesFeature : public ManifestExtractor::Element {
 class UsesPermission : public ManifestExtractor::Element {
  public:
   UsesPermission() = default;
+  bool implied;
   std::string name;
   std::vector<std::string> requiredFeatures;
   std::vector<std::string> requiredNotFeatures;
   int32_t required = true;
   int32_t maxSdkVersion = -1;
   int32_t usesPermissionFlags = 0;
+  std::string impliedReason;
 
   void Extract(xml::Element* element) override {
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
@@ -1094,7 +1378,7 @@ class UsesPermission : public ManifestExtractor::Element {
         FindAttribute(element, USES_PERMISSION_FLAGS_ATTR), 0);
 
     if (!name.empty()) {
-      CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
+      CommonFeatureGroup* common = extractor()->common_feature_group();
       common->addImpliedFeaturesForPermission(extractor()->target_sdk(), name, false);
     }
   }
@@ -1126,17 +1410,37 @@ class UsesPermission : public ManifestExtractor::Element {
         printer->Print("\n");
       }
     }
+    if (implied) {
+      printer->Print(StringPrintf("uses-implied-permission: name='%s'", name.data()));
+      if (maxSdkVersion >= 0) {
+        printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
+      }
+      if ((usesPermissionFlags & kNeverForLocation) != 0) {
+        printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
+      }
+      printer->Print(StringPrintf(" reason='%s'\n", impliedReason.data()));
+    }
   }
 
-  void PrintImplied(text::Printer* printer, const std::string& reason) {
-    printer->Print(StringPrintf("uses-implied-permission: name='%s'", name.data()));
-    if (maxSdkVersion >= 0) {
-      printer->Print(StringPrintf(" maxSdkVersion='%d'", maxSdkVersion));
+  void ToProto(pb::Badging* out_badging) override {
+    if (!name.empty()) {
+      auto permission = out_badging->add_uses_permissions();
+      permission->set_name(name);
+      if (maxSdkVersion > 0) {
+        permission->set_max_sdk_version(maxSdkVersion);
+      }
+      if ((usesPermissionFlags & kNeverForLocation) != 0) {
+        permission->mutable_permission_flags()->set_never_for_location(true);
+      }
+      for (auto& requiredFeature : requiredFeatures) {
+        permission->add_required_features(requiredFeature);
+      }
+      for (auto& requiredNotFeature : requiredNotFeatures) {
+        permission->add_required_not_features(requiredNotFeature);
+      }
+      permission->set_required(required != 0);
+      permission->set_implied(implied);
     }
-    if ((usesPermissionFlags & kNeverForLocation) != 0) {
-      printer->Print(StringPrintf(" usesPermissionFlags='neverForLocation'"));
-    }
-    printer->Print(StringPrintf(" reason='%s'\n", reason.data()));
   }
 };
 
@@ -1184,7 +1488,7 @@ class UsesPermissionSdk23 : public ManifestExtractor::Element {
     maxSdkVersion = GetAttributeInteger(FindAttribute(element, MAX_SDK_VERSION_ATTR));
 
     if (name) {
-      CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
+      CommonFeatureGroup* common = extractor()->common_feature_group();
       common->addImpliedFeaturesForPermission(extractor()->target_sdk(), *name, true);
     }
   }
@@ -1196,6 +1500,17 @@ class UsesPermissionSdk23 : public ManifestExtractor::Element {
         printer->Print(StringPrintf(" maxSdkVersion='%d'", *maxSdkVersion));
       }
       printer->Print("\n");
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (name) {
+      auto permission = out_badging->add_uses_permissions();
+      permission->set_sdk23_and_above(true);
+      permission->set_name(*name);
+      if (maxSdkVersion) {
+        permission->set_max_sdk_version(*maxSdkVersion);
+      }
     }
   }
 };
@@ -1213,6 +1528,12 @@ class Permission : public ManifestExtractor::Element {
   void Print(text::Printer* printer) override {
     if (extractor()->options_.only_permissions && !name.empty()) {
       printer->Print(StringPrintf("permission: %s\n", name.data()));
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (!name.empty()) {
+      out_badging->add_permissions()->set_name(name);
     }
   }
 };
@@ -1256,7 +1577,7 @@ class Activity : public ManifestExtractor::Element {
 
     auto orientation = GetAttributeInteger(FindAttribute(element, SCREEN_ORIENTATION_ATTR));
     if (orientation) {
-      CommonFeatureGroup* common = extractor()->GetCommonFeatureGroup();
+      CommonFeatureGroup* common = extractor()->common_feature_group();
       int orien = *orientation;
       if (orien == 0 || orien == 6 || orien == 8) {
         // Requests landscape, sensorLandscape, or reverseLandscape.
@@ -1293,6 +1614,22 @@ class Activity : public ManifestExtractor::Element {
       printer->Print(StringPrintf(" label='%s' icon='%s' banner='%s'\n",
                                   android::ResTable::normalizeForOutput(label.data()).c_str(),
                                   icon.data(), banner.data()));
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (has_main_action && has_launcher_category) {
+      auto activity = out_badging->mutable_launchable_activity();
+      activity->set_name(name);
+      activity->set_label(android::ResTable::normalizeForOutput(label.data()));
+      activity->set_icon(icon);
+    }
+    if (has_leanback_launcher_category) {
+      auto activity = out_badging->mutable_leanback_launchable_activity();
+      activity->set_name(name);
+      activity->set_label(android::ResTable::normalizeForOutput(label.data()));
+      activity->set_icon(icon);
+      activity->set_banner(banner);
     }
   }
 };
@@ -1382,17 +1719,22 @@ class UsesLibrary : public ManifestExtractor::Element {
   int required;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
   }
 
   void Print(text::Printer* printer) override {
     if (!name.empty()) {
       printer->Print(StringPrintf("uses-library%s:'%s'\n",
                                  (required == 0) ? "-not-required" : "", name.data()));
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (!name.empty()) {
+      auto uses_library = out_badging->add_uses_libraries();
+      uses_library->set_name(name);
+      uses_library->set_required(required != 0);
     }
   }
 };
@@ -1406,18 +1748,22 @@ class StaticLibrary : public ManifestExtractor::Element {
   int versionMajor;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
   }
 
   void Print(text::Printer* printer) override {
     printer->Print(StringPrintf(
       "static-library: name='%s' version='%d' versionMajor='%d'\n",
       name.data(), version, versionMajor));
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto static_library = out_badging->mutable_static_library();
+    static_library->set_name(name);
+    static_library->set_version(version);
+    static_library->set_version_major(versionMajor);
   }
 };
 
@@ -1431,13 +1777,10 @@ class UsesStaticLibrary : public ManifestExtractor::Element {
   std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    AddCertDigest(element);
   }
 
   void AddCertDigest(xml::Element* element) {
@@ -1459,6 +1802,16 @@ class UsesStaticLibrary : public ManifestExtractor::Element {
     }
     printer->Print("\n");
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto uses_static_library = out_badging->add_uses_static_libraries();
+    uses_static_library->set_name(name);
+    uses_static_library->set_version(version);
+    uses_static_library->set_version_major(versionMajor);
+    for (auto& cert : certDigests) {
+      uses_static_library->add_certificates(cert);
+    }
+  }
 };
 
 /** Represents <sdk-library> elements. **/
@@ -1469,16 +1822,19 @@ class SdkLibrary : public ManifestExtractor::Element {
   int versionMajor;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
   }
 
   void Print(text::Printer* printer) override {
     printer->Print(
         StringPrintf("sdk-library: name='%s' versionMajor='%d'\n", name.data(), versionMajor));
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto sdk_library = out_badging->mutable_sdk_library();
+    sdk_library->set_name(name);
+    sdk_library->set_version_major(versionMajor);
   }
 };
 
@@ -1491,12 +1847,9 @@ class UsesSdkLibrary : public ManifestExtractor::Element {
   std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    AddCertDigest(element);
   }
 
   void AddCertDigest(xml::Element* element) {
@@ -1517,6 +1870,15 @@ class UsesSdkLibrary : public ManifestExtractor::Element {
     }
     printer->Print("\n");
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto uses_sdk_library = out_badging->add_uses_sdk_libraries();
+    uses_sdk_library->set_name(name);
+    uses_sdk_library->set_version_major(versionMajor);
+    for (auto& cert : certDigests) {
+      uses_sdk_library->add_certificates(cert);
+    }
+  }
 };
 
 /** Represents <uses-native-library> elements. **/
@@ -1527,17 +1889,22 @@ class UsesNativeLibrary : public ManifestExtractor::Element {
   int required;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-      required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
-    }
+    name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+    required = GetAttributeIntegerDefault(FindAttribute(element, REQUIRED_ATTR), 1);
   }
 
   void Print(text::Printer* printer) override {
     if (!name.empty()) {
       printer->Print(StringPrintf("uses-native-library%s:'%s'\n",
                                  (required == 0) ? "-not-required" : "", name.data()));
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (!name.empty()) {
+      auto uses_native_library = out_badging->add_uses_native_libraries();
+      uses_native_library->set_name(name);
+      uses_native_library->set_required(required != 0);
     }
   }
 };
@@ -1565,19 +1932,37 @@ class MetaData : public ManifestExtractor::Element {
 
   void Print(text::Printer* printer) override {
     if (extractor()->options_.include_meta_data && !name.empty()) {
-      printer->Print(StringPrintf("meta-data: name='%s' ", name.data()));
+      printer->Print(StringPrintf("meta-data: name='%s'", name.data()));
       if (!value.empty()) {
-        printer->Print(StringPrintf("value='%s' ", value.data()));
+        printer->Print(StringPrintf(" value='%s'", value.data()));
       } else if (value_int) {
-        printer->Print(StringPrintf("value='%d' ", *value_int));
+        printer->Print(StringPrintf(" value='%d'", *value_int));
       } else {
         if (!resource.empty()) {
-          printer->Print(StringPrintf("resource='%s' ", resource.data()));
+          printer->Print(StringPrintf(" resource='%s'", resource.data()));
         } else if (resource_int) {
-          printer->Print(StringPrintf("resource='%d' ", *resource_int));
+          printer->Print(StringPrintf(" resource='%d'", *resource_int));
         }
       }
       printer->Print("\n");
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (!name.empty()) {
+      auto metadata = out_badging->add_metadata();
+      metadata->set_name(name);
+      if (!value.empty()) {
+        metadata->set_value_string(value);
+      } else if (value_int) {
+        metadata->set_value_int(*value_int);
+      } else {
+        if (!resource.empty()) {
+          metadata->set_resource_string(resource);
+        } else if (resource_int) {
+          metadata->set_resource_int(*resource_int);
+        }
+      }
     }
   }
 };
@@ -1599,10 +1984,11 @@ class Action : public ManifestExtractor::Element {
       if (ElementCast<Activity>(parent_stack[1])) {
         // Detects the presence of a particular type of activity.
         Activity* activity = ElementCast<Activity>(parent_stack[1]);
-        auto map = std::map<std::string, std::string>({
-            { "android.intent.action.MAIN" , "main" },
-            { "android.intent.action.VIDEO_CAMERA" , "camera" },
-            { "android.intent.action.STILL_IMAGE_CAMERA_SECURE" , "camera-secure" },
+        static const auto map = std::map<std::string, std::string>({
+            {"android.intent.action.MAIN", "main"},
+            {"android.media.action.VIDEO_CAMERA", "camera"},
+            {"android.media.action.STILL_IMAGE_CAMERA", "camera"},
+            {"android.media.action.STILL_IMAGE_CAMERA_SECURE", "camera-secure"},
         });
 
         auto entry = map.find(action);
@@ -1709,6 +2095,13 @@ class SupportsInput : public ManifestExtractor::Element {
       printer->Print("\n");
     }
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto supports_input = out_badging->mutable_supports_input();
+    for (auto& input : inputs) {
+      supports_input->add_inputs(input);
+    }
+  }
 };
 
 /** Represents <input-type> elements. **/
@@ -1727,6 +2120,33 @@ class InputType : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <install-constraints> elements. **/
+class InstallConstraints : public ManifestExtractor::Element {
+ public:
+  InstallConstraints() = default;
+  std::vector<std::string> fingerprint_prefixes;
+
+  void Extract(xml::Element* element) override {
+    for (xml::Element* child : element->GetChildElements()) {
+      if (child->name == "fingerprint-prefix") {
+        xml::Attribute* attr = child->FindAttribute(kAndroidNamespace, "value");
+        if (attr) {
+          fingerprint_prefixes.push_back(attr->value);
+        }
+      }
+    }
+  }
+
+  void Print(text::Printer* printer) override {
+    if (!fingerprint_prefixes.empty()) {
+      printer->Print(StringPrintf("install-constraints:\n"));
+      for (const auto& prefix : fingerprint_prefixes) {
+        printer->Print(StringPrintf("  fingerprint-prefix='%s'\n", prefix.c_str()));
+      }
+    }
+  }
+};
+
 /** Represents <original-package> elements. **/
 class OriginalPackage : public ManifestExtractor::Element {
  public:
@@ -1740,6 +2160,12 @@ class OriginalPackage : public ManifestExtractor::Element {
   void Print(text::Printer* printer) override {
     if (name) {
       printer->Print(StringPrintf("original-package:'%s'\n", name->data()));
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (name) {
+      out_badging->mutable_package()->set_original_package(*name);
     }
   }
 };
@@ -1780,6 +2206,21 @@ class Overlay : public ManifestExtractor::Element {
     }
     printer->Print("\n");
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto overlay = out_badging->mutable_overlay();
+    if (target_package) {
+      overlay->set_target_package(*target_package);
+    }
+    overlay->set_priority(priority);
+    overlay->set_static_(is_static);
+    if (required_property_name) {
+      overlay->set_required_property_name(*required_property_name);
+    }
+    if (required_property_value) {
+      overlay->set_required_property_value(*required_property_value);
+    }
+  }
 };
 
 /** * Represents <package-verifier> elements. **/
@@ -1800,6 +2241,14 @@ class PackageVerifier : public ManifestExtractor::Element {
                                  name->data(), public_key->data()));
     }
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    auto package_verifier = out_badging->mutable_package_verifier();
+    if (name && public_key) {
+      package_verifier->set_name(*name);
+      package_verifier->set_public_key(*public_key);
+    }
+  }
 };
 
 /** Represents <uses-package> elements. **/
@@ -1813,14 +2262,11 @@ class UsesPackage : public ManifestExtractor::Element {
   std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    auto parent_stack = extractor()->parent_stack();
-    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
-      packageType = GetAttributeString(FindAttribute(element, PACKAGE_TYPE_ATTR));
-      name = GetAttributeString(FindAttribute(element, NAME_ATTR));
-      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
-      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
-      AddCertDigest(element);
-    }
+    packageType = GetAttributeString(FindAttribute(element, PACKAGE_TYPE_ATTR));
+    name = GetAttributeString(FindAttribute(element, NAME_ATTR));
+    version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+    versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    AddCertDigest(element);
   }
 
   void AddCertDigest(xml::Element* element) {
@@ -1845,6 +2291,21 @@ class UsesPackage : public ManifestExtractor::Element {
         printer->Print("\n");
       } else {
         printer->Print(StringPrintf("uses-package:'%s'\n", name->data()));
+      }
+    }
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (name) {
+      auto uses_package = out_badging->add_uses_packages();
+      uses_package->set_name(*name);
+      if (packageType) {
+        uses_package->set_package_type(*packageType);
+        uses_package->set_version(version);
+        uses_package->set_version_major(versionMajor);
+        for (auto& cert : certDigests) {
+          uses_package->add_certificates(cert);
+        }
       }
     }
   }
@@ -1879,6 +2340,14 @@ class Screen : public ManifestExtractor::Element {
   void Extract(xml::Element* element) override {
     size = GetAttributeInteger(FindAttribute(element, SCREEN_SIZE_ATTR));
     density = GetAttributeInteger(FindAttribute(element, SCREEN_DENSITY_ATTR));
+  }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (size && density) {
+      auto screen = out_badging->mutable_compatible_screens()->add_screens();
+      screen->set_density(*density);
+      screen->set_size(*size);
+    }
   }
 };
 
@@ -1925,6 +2394,12 @@ class SupportsGlTexture : public ManifestExtractor::Element {
       printer->Print(StringPrintf("supports-gl-texture:'%s'\n", name->data()));
     }
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (name) {
+      out_badging->mutable_supports_gl_texture()->add_name(*name);
+    }
+  }
 };
 
 /** Represents <property> elements. **/
@@ -1960,6 +2435,24 @@ class Property : public ManifestExtractor::Element {
     }
     printer->Print("\n");
   }
+
+  void ToProto(pb::Badging* out_badging) override {
+    if (!name.empty()) {
+      auto property = out_badging->add_properties();
+      property->set_name(name);
+      if (!value.empty()) {
+        property->set_value_string(value);
+      } else if (value_int) {
+        property->set_value_int(*value_int);
+      } else {
+        if (!resource.empty()) {
+          property->set_resource_string(resource);
+        } else if (resource_int) {
+          property->set_resource_int(*resource_int);
+        }
+      }
+    }
+  }
 };
 
 /** Recursively prints the extracted badging element. */
@@ -1970,44 +2463,46 @@ static void Print(ManifestExtractor::Element* el, text::Printer* printer) {
   }
 }
 
-bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
+/** Recursively serializes extracted badging elements to proto. */
+static void ToProto(ManifestExtractor::Element* el, pb::Badging* out_badging) {
+  el->ToProto(out_badging);
+  for (auto& child : el->children()) {
+    ToProto(child.get(), out_badging);
+  }
+}
+
+bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
   // Load the manifest
-  std::unique_ptr<xml::XmlResource> doc = apk_->LoadXml("AndroidManifest.xml", diag);
-  if (doc == nullptr) {
-    diag->Error(DiagMessage() << "failed to find AndroidManifest.xml");
+  doc_ = apk_->LoadXml("AndroidManifest.xml", diag);
+  if (doc_ == nullptr) {
+    diag->Error(android::DiagMessage() << "failed to find AndroidManifest.xml");
     return false;
   }
 
-  xml::Element* element = doc->root.get();
+  xml::Element* element = doc_->root.get();
   if (element->name != "manifest") {
-    diag->Error(DiagMessage() << "manifest does not start with <manifest> tag");
+    diag->Error(android::DiagMessage() << "manifest does not start with <manifest> tag");
     return false;
   }
 
   // Print only the <uses-permission>, <uses-permission-sdk23>, and <permission> elements if
   // printing only permission elements is requested
   if (options_.only_permissions) {
-    std::unique_ptr<ManifestExtractor::Element> manifest_element =
-        ManifestExtractor::Element::Inflate(this, element);
+    root_element_ = ManifestExtractor::Element::Inflate(this, element, "");
 
-    if (auto manifest = ElementCast<Manifest>(manifest_element.get())) {
+    if (auto manifest = ElementCast<Manifest>(root_element_.get())) {
+      manifest->only_package_name = true;
+
       for (xml::Element* child : element->GetChildElements()) {
         if (child->name == "uses-permission" || child->name == "uses-permission-sdk-23"
             || child->name == "permission") {
           // Inflate the element and its descendants
-          auto permission_element = Visit(child);
+          auto permission_element = Visit(child, "manifest");
           manifest->AddChild(permission_element);
         }
       }
-
-      printer->Print(StringPrintf("package: %s\n", manifest->package.data()));
-      ForEachChild(manifest, [&printer](ManifestExtractor::Element* el) -> void {
-        el->Print(printer);
-      });
-
       return true;
     }
-
     return false;
   }
 
@@ -2041,26 +2536,23 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   }
 
   // Extract badging information
-  auto root = Visit(element);
+  root_element_ = Visit(element, "");
 
   // Filter out all "uses-sdk" tags besides the very last tag. The android runtime only uses the
   // attribute values from the last defined tag.
   std::vector<UsesSdkBadging*> filtered_uses_sdk_tags;
-  for (const auto& child : root->children()) {
+  for (const auto& child : root_element_->children()) {
     if (auto uses_sdk = ElementCast<UsesSdkBadging>(child.get())) {
       filtered_uses_sdk_tags.emplace_back(uses_sdk);
     }
   }
   if (filtered_uses_sdk_tags.size() >= 2U) {
     filtered_uses_sdk_tags.pop_back();
-    root->Filter([&](const ManifestExtractor::Element* e) {
+    root_element_->Filter([&](const ManifestExtractor::Element* e) {
       return std::find(filtered_uses_sdk_tags.begin(), filtered_uses_sdk_tags.end(), e) !=
              filtered_uses_sdk_tags.end();
     });
   }
-
-  // Print the elements in order seen
-  Print(root.get(), printer);
 
   /** Recursively checks the extracted elements for the specified permission. **/
   auto FindPermission = [&](ManifestExtractor::Element* root,
@@ -2073,30 +2565,30 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     });
   };
 
-  auto PrintPermission = [&printer](const std::string& name, const std::string& reason,
-                                    int32_t max_sdk_version) -> void {
+  auto AddImpliedPermission = [&](const std::string& name, const std::string& reason,
+                                  int32_t max_sdk_version) -> void {
     auto permission = util::make_unique<UsesPermission>();
     permission->name = name;
     permission->maxSdkVersion = max_sdk_version;
-    permission->Print(printer);
-    permission->PrintImplied(printer, reason);
+    permission->implied = true;
+    permission->impliedReason = reason;
+    implied_permissions_.push_back(std::move(permission));
   };
 
   // Implied permissions
   // Pre-1.6 implicitly granted permission compatibility logic
-  CommonFeatureGroup* common_feature_group = GetCommonFeatureGroup();
   bool insert_write_external = false;
   auto write_external_permission = ElementCast<UsesPermission>(
-      FindPermission(root.get(), "android.permission.WRITE_EXTERNAL_STORAGE"));
+      FindPermission(root_element_.get(), "android.permission.WRITE_EXTERNAL_STORAGE"));
 
   if (target_sdk() < SDK_DONUT) {
     if (!write_external_permission) {
-      PrintPermission("android.permission.WRITE_EXTERNAL_STORAGE", "targetSdkVersion < 4", -1);
+      AddImpliedPermission("android.permission.WRITE_EXTERNAL_STORAGE", "targetSdkVersion < 4", -1);
       insert_write_external = true;
     }
 
-    if (!FindPermission(root.get(), "android.permission.READ_PHONE_STATE")) {
-      PrintPermission("android.permission.READ_PHONE_STATE", "targetSdkVersion < 4", -1);
+    if (!FindPermission(root_element_.get(), "android.permission.READ_PHONE_STATE")) {
+      AddImpliedPermission("android.permission.READ_PHONE_STATE", "targetSdkVersion < 4", -1);
     }
   }
 
@@ -2104,62 +2596,60 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   // force them to always take READ_EXTERNAL_STORAGE as well.  We always
   // do this (regardless of target API version) because we can't have
   // an app with write permission but not read permission.
-  auto read_external = FindPermission(root.get(), "android.permission.READ_EXTERNAL_STORAGE");
+  auto read_external =
+      FindPermission(root_element_.get(), "android.permission.READ_EXTERNAL_STORAGE");
   if (!read_external && (insert_write_external || write_external_permission)) {
-    PrintPermission("android.permission.READ_EXTERNAL_STORAGE",
-                    "requested WRITE_EXTERNAL_STORAGE",
-                    (write_external_permission) ? write_external_permission->maxSdkVersion : -1);
+    AddImpliedPermission(
+        "android.permission.READ_EXTERNAL_STORAGE", "requested WRITE_EXTERNAL_STORAGE",
+        (write_external_permission) ? write_external_permission->maxSdkVersion : -1);
   }
 
   // Pre-JellyBean call log permission compatibility.
   if (target_sdk() < SDK_JELLY_BEAN) {
-    if (!FindPermission(root.get(), "android.permission.READ_CALL_LOG")
-        && FindPermission(root.get(), "android.permission.READ_CONTACTS")) {
-      PrintPermission("android.permission.READ_CALL_LOG",
-                      "targetSdkVersion < 16 and requested READ_CONTACTS", -1);
+    if (!FindPermission(root_element_.get(), "android.permission.READ_CALL_LOG") &&
+        FindPermission(root_element_.get(), "android.permission.READ_CONTACTS")) {
+      AddImpliedPermission("android.permission.READ_CALL_LOG",
+                           "targetSdkVersion < 16 and requested READ_CONTACTS", -1);
     }
 
-    if (!FindPermission(root.get(), "android.permission.WRITE_CALL_LOG")
-        && FindPermission(root.get(), "android.permission.WRITE_CONTACTS")) {
-      PrintPermission("android.permission.WRITE_CALL_LOG",
-                      "targetSdkVersion < 16 and requested WRITE_CONTACTS", -1);
+    if (!FindPermission(root_element_.get(), "android.permission.WRITE_CALL_LOG") &&
+        FindPermission(root_element_.get(), "android.permission.WRITE_CONTACTS")) {
+      AddImpliedPermission("android.permission.WRITE_CALL_LOG",
+                           "targetSdkVersion < 16 and requested WRITE_CONTACTS", -1);
     }
   }
 
   // If the app hasn't declared the touchscreen as a feature requirement (either
   // directly or implied, required or not), then the faketouch feature is implied.
-  if (!common_feature_group->HasFeature("android.hardware.touchscreen")) {
-    common_feature_group->addImpliedFeature("android.hardware.faketouch",
-                                            "default feature for all apps", false);
+  if (!common_feature_group()->HasFeature("android.hardware.touchscreen")) {
+    common_feature_group()->addImpliedFeature("android.hardware.faketouch",
+                                              "default feature for all apps", false);
   }
 
   // Only print the common feature group if no feature group is defined
   std::vector<FeatureGroup*> feature_groups;
-  ForEachChild(root.get(), [&feature_groups](ManifestExtractor::Element* el) -> void {
+  ForEachChild(root_element_.get(), [&feature_groups](ManifestExtractor::Element* el) -> void {
     if (auto feature_group = ElementCast<FeatureGroup>(el)) {
       feature_groups.push_back(feature_group);
     }
   });
 
   if (feature_groups.empty()) {
-    common_feature_group->PrintGroup(printer);
+    feature_groups_.push_back(common_feature_group());
   } else {
     // Merge the common feature group into the feature group
     for (auto& feature_group : feature_groups) {
-      feature_group->open_gles_version  = std::max(feature_group->open_gles_version,
-                                                   common_feature_group->open_gles_version);
-      feature_group->Merge(common_feature_group);
-      feature_group->PrintGroup(printer);
+      feature_group->Merge(common_feature_group());
+      feature_groups_.push_back(feature_group);
     }
   };
 
   // Collect the component types of the application
-  std::set<std::string> components;
-  ForEachChild(root.get(), [&components](ManifestExtractor::Element* el) -> void {
+  ForEachChild(root_element_.get(), [&](ManifestExtractor::Element* el) -> void {
     if (ElementCast<Action>(el)) {
       auto action = ElementCast<Action>(el);
       if (!action->component.empty()) {
-        components.insert(action->component);
+        components_.discovered_components.insert(action->component);
         return;
       }
     }
@@ -2167,15 +2657,14 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     if (ElementCast<Category>(el)) {
       auto category = ElementCast<Category>(el);
       if (!category->component.empty()) {
-        components.insert(category->component);
+        components_.discovered_components.insert(category->component);
         return;
       }
     }
   });
 
   // Check for the payment component
-  auto apk = apk_;
-  ForEachChild(root.get(), [&apk, &components, &diag](ManifestExtractor::Element* el) -> void {
+  ForEachChild(root_element_.get(), [this, &diag](ManifestExtractor::Element* el) -> void {
     if (auto service = ElementCast<Service>(el)) {
       auto host_apdu_action = ElementCast<Action>(FindElement(service,
         [&](ManifestExtractor::Element* el) -> bool {
@@ -2193,159 +2682,112 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
            return false;
       }));
 
-      ForEachChild(service, [&apk, &components, &diag, &host_apdu_action,
-          &offhost_apdu_action](ManifestExtractor::Element* el) -> void {
-        if (auto meta_data = ElementCast<MetaData>(el)) {
-          if ((meta_data->name == "android.nfc.cardemulation.host_apdu_service" && host_apdu_action)
-              || (meta_data->name == "android.nfc.cardemulation.off_host_apdu_service"
-                  && offhost_apdu_action)) {
+      ForEachChild(service,
+                   [this, &diag, &host_apdu_action,
+                    &offhost_apdu_action](ManifestExtractor::Element* el) -> void {
+                     if (auto meta_data = ElementCast<MetaData>(el)) {
+                       if ((meta_data->name == "android.nfc.cardemulation.host_apdu_service" &&
+                            host_apdu_action) ||
+                           (meta_data->name == "android.nfc.cardemulation.off_host_apdu_service" &&
+                            offhost_apdu_action)) {
+                         // Attempt to load the resource file
+                         if (meta_data->resource.empty()) {
+                           return;
+                         }
+                         auto resource = this->apk_->LoadXml(meta_data->resource, diag);
+                         if (!resource) {
+                           return;
+                         }
 
-            // Attempt to load the resource file
-            if (!meta_data->resource.empty()) {
-              return;
-            }
-            auto resource = apk->LoadXml(meta_data->resource, diag);
-            if (!resource) {
-              return;
-            }
-
-            // Look for the payment category on an <aid-group> element
-            auto& root = resource.get()->root;
-            if ((host_apdu_action && root->name == "host-apdu-service")
-                || (offhost_apdu_action && root->name == "offhost-apdu-service")) {
-
-              for (auto& child : root->GetChildElements()) {
-                if (child->name == "aid-group") {
-                  auto category = FindAttribute(child, CATEGORY_ATTR);
-                  if (category && category->value == "payment") {
-                    components.insert("payment");
-                    return;
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
+                         // Look for the payment category on an <aid-group> element
+                         auto& root = resource.get()->root;
+                         if ((host_apdu_action && root->name == "host-apdu-service") ||
+                             (offhost_apdu_action && root->name == "offhost-apdu-service")) {
+                           for (auto& child : root->GetChildElements()) {
+                             if (child->name == "aid-group") {
+                               auto category = FindAttribute(child, CATEGORY_ATTR);
+                               if (category && category->value == "payment") {
+                                 this->components_.discovered_components.insert("payment");
+                                 return;
+                               }
+                             }
+                           }
+                         }
+                       }
+                     }
+                   });
     }
   });
 
-  // Print the components types if they are present
-  auto PrintComponent = [&components, &printer](const std::string& component) -> void {
-    if (components.find(component) != components.end()) {
-      printer->Print(StringPrintf("provides-component:'%s'\n", component.data()));
-    }
-  };
-
-  PrintComponent("app-widget");
-  PrintComponent("device-admin");
-  PrintComponent("ime");
-  PrintComponent("wallpaper");
-  PrintComponent("accessibility");
-  PrintComponent("print-service");
-  PrintComponent("payment");
-  PrintComponent("search");
-  PrintComponent("document-provider");
-  PrintComponent("launcher");
-  PrintComponent("notification-listener");
-  PrintComponent("dream");
-  PrintComponent("camera");
-  PrintComponent("camera-secure");
-
-  // Print presence of main activity
-  if (components.find("main") != components.end()) {
-    printer->Print("main\n");
-  }
-
-  // Print presence of activities, recivers, and services with no special components
-  FindElement(root.get(), [&printer](ManifestExtractor::Element* el) -> bool {
+  // Print presence of activities, receivers, and services with no special components
+  FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
     if (auto activity = ElementCast<Activity>(el)) {
       if (!activity->has_component_) {
-        printer->Print("other-activities\n");
+        components_.other_activities = true;
         return true;
       }
     }
     return false;
   });
 
-  FindElement(root.get(), [&printer](ManifestExtractor::Element* el) -> bool {
+  FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
     if (auto receiver = ElementCast<Receiver>(el)) {
       if (!receiver->has_component) {
-        printer->Print("other-receivers\n");
+        components_.other_receivers = true;
         return true;
       }
     }
     return false;
   });
 
-  FindElement(root.get(), [&printer](ManifestExtractor::Element* el) -> bool {
+  FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
     if (auto service = ElementCast<Service>(el)) {
       if (!service->has_component) {
-        printer->Print("other-services\n");
+        components_.other_services = true;
         return true;
       }
     }
     return false;
   });
 
-  // Print the supported screens
-  SupportsScreen* screen = ElementCast<SupportsScreen>(FindElement(root.get(),
-      [&](ManifestExtractor::Element* el) -> bool {
-    return ElementCast<SupportsScreen>(el) != nullptr;
-  }));
+  // Gather the supported screens
+  const static SupportsScreen default_screens{};
+  SupportsScreen* screen = ElementCast<SupportsScreen>(
+      FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+        return ElementCast<SupportsScreen>(el) != nullptr;
+      }));
+  supports_screen_ = screen ? screen : &default_screens;
 
-  if (screen) {
-    screen->PrintScreens(printer, target_sdk_);
-  } else {
-    // Print the default supported screens
-    SupportsScreen default_screens;
-    default_screens.PrintScreens(printer, target_sdk_);
-  }
-
-  // Print all the unique locales of the apk
-  printer->Print("locales:");
-  for (auto& config : locales_) {
-    if (config.first.empty()) {
-      printer->Print(" '--_--'");
-    } else {
-      printer->Print(StringPrintf(" '%s'", config.first.data()));
-    }
-  }
-  printer->Print("\n");
-
-  // Print all the densities locales of the apk
-  printer->Print("densities:");
-  for (auto& config : densities_) {
-    printer->Print(StringPrintf(" '%d'", config.first));
-  }
-  printer->Print("\n");
-
-  // Print the supported architectures of the app
-  std::set<std::string> architectures;
+  bool has_renderscript_bitcode = false;
   auto it = apk_->GetFileCollection()->Iterator();
   while (it->HasNext()) {
-    auto file_path = it->Next()->GetSource().path;
+    if (it->Next()->GetSource().path.ends_with(".bc")) {
+      has_renderscript_bitcode = true;
+      break;
+    }
+  }
 
+  // Gather the supported architectures_ of the app
+  std::set<std::string> architectures_from_apk;
+  it = apk_->GetFileCollection()->Iterator();
+  while (it->HasNext()) {
+    auto file_path = it->Next()->GetSource().path.c_str();
 
-    size_t pos = file_path.find("lib/");
-    if (pos != std::string::npos) {
-      file_path = file_path.substr(pos + 4);
-      pos = file_path.find('/');
-      if (pos != std::string::npos) {
-        file_path = file_path.substr(0, pos);
-      }
-
-      architectures.insert(file_path);
+    const char* last_slash =
+        android::util::ValidLibraryPathLastSlash(file_path, has_renderscript_bitcode, false);
+    if (last_slash) {
+      architectures_from_apk.insert(std::string(file_path + APK_LIB_LEN, last_slash));
     }
   }
 
   // Determine if the application has multiArch supports
-  auto has_multi_arch = FindElement(root.get(), [&](ManifestExtractor::Element* el) -> bool {
-    if (auto application = ElementCast<Application>(el)) {
-      return application->has_multi_arch;
-    }
-    return false;
-  });
+  auto has_multi_arch =
+      FindElement(root_element_.get(), [&](ManifestExtractor::Element* el) -> bool {
+        if (auto application = ElementCast<Application>(el)) {
+          return application->has_multi_arch;
+        }
+        return false;
+      });
 
   bool output_alt_native_code = false;
   // A multiArch package is one that contains 64-bit and
@@ -2366,30 +2808,140 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     const std::string kIntel64 = "x86_64";
     const std::string kArm64 = "arm64-v8a";
 
-    auto arch = architectures.find(kIntel64);
-    if (arch == architectures.end()) {
-      arch = architectures.find(kArm64);
+    auto arch = architectures_from_apk.find(kIntel64);
+    if (arch == architectures_from_apk.end()) {
+      arch = architectures_from_apk.find(kArm64);
     }
 
-    if (arch != architectures.end()) {
-      printer->Print(StringPrintf("native-code: '%s'\n", arch->data()));
-      architectures.erase(arch);
+    if (arch != architectures_from_apk.end()) {
+      architectures_.architectures.insert(*arch);
+      architectures_from_apk.erase(arch);
       output_alt_native_code = true;
     }
   }
-
-  if (architectures.size() > 0) {
+  for (auto& arch : architectures_from_apk) {
     if (output_alt_native_code) {
-      printer->Print("alt-");
+      architectures_.alt_architectures.insert(arch);
+    } else {
+      architectures_.architectures.insert(arch);
     }
-    printer->Print("native-code:");
-    for (auto& arch : architectures) {
-      printer->Print(StringPrintf(" '%s'", arch.data()));
-    }
-    printer->Print("\n");
+  }
+  return true;
+}
+
+bool ManifestExtractor::Dump(text::Printer* printer) {
+  Print(root_element_.get(), printer);
+  if (options_.only_permissions) {
+    return true;
   }
 
+  for (auto& implied_permission : implied_permissions_) {
+    implied_permission->Print(printer);
+  }
+  for (auto& feature_group : feature_groups_) {
+    feature_group->PrintGroup(printer);
+  }
+  components_.Print(printer);
+  supports_screen_->PrintScreens(printer, target_sdk_);
+
+  // Print all the unique locales of the apk
+  printer->Print("locales:");
+  for (auto& config : locales_) {
+    if (config.first.empty()) {
+      printer->Print(" '--_--'");
+    } else {
+      printer->Print(StringPrintf(" '%s'", config.first.data()));
+    }
+  }
+  printer->Print("\n");
+
+  // Print all the densities locales of the apk
+  printer->Print("densities:");
+  for (auto& config : densities_) {
+    printer->Print(StringPrintf(" '%d'", config.first));
+  }
+  printer->Print("\n");
+
+  architectures_.Print(printer);
   return true;
+}
+
+bool ManifestExtractor::DumpProto(pb::Badging* out_badging) {
+  ToProto(root_element_.get(), out_badging);
+  for (auto& implied_permission : implied_permissions_) {
+    implied_permission->ToProto(out_badging);
+  }
+  for (auto& feature_group : feature_groups_) {
+    feature_group->GroupToProto(out_badging);
+  }
+  components_.ToProto(out_badging);
+  supports_screen_->ToProtoScreens(out_badging, target_sdk_);
+
+  for (auto& config : locales_) {
+    if (config.first.empty()) {
+      out_badging->add_locales("--_--");
+    } else {
+      out_badging->add_locales(config.first);
+    }
+  }
+  for (auto& config : densities_) {
+    out_badging->add_densities(config.first);
+  }
+
+  architectures_.ToProto(out_badging);
+  return true;
+}
+
+template <typename T>
+constexpr const char* GetExpectedTagForType() {
+  // This array does not appear at runtime, as GetExpectedTagForType function is used by compiler
+  // to inject proper 'expected_tag' into ElementCast.
+  std::array<std::pair<const char*, bool>, 38> tags = {
+      std::make_pair("action", std::is_same<Action, T>::value),
+      std::make_pair("activity", std::is_same<Activity, T>::value),
+      std::make_pair("additional-certificate", std::is_same<AdditionalCertificate, T>::value),
+      std::make_pair("application", std::is_same<Application, T>::value),
+      std::make_pair("category", std::is_same<Category, T>::value),
+      std::make_pair("compatible-screens", std::is_same<CompatibleScreens, T>::value),
+      std::make_pair("feature-group", std::is_same<FeatureGroup, T>::value),
+      std::make_pair("input-type", std::is_same<InputType, T>::value),
+      std::make_pair("install-constraints", std::is_same<InstallConstraints, T>::value),
+      std::make_pair("intent-filter", std::is_same<IntentFilter, T>::value),
+      std::make_pair("meta-data", std::is_same<MetaData, T>::value),
+      std::make_pair("manifest", std::is_same<Manifest, T>::value),
+      std::make_pair("original-package", std::is_same<OriginalPackage, T>::value),
+      std::make_pair("overlay", std::is_same<Overlay, T>::value),
+      std::make_pair("package-verifier", std::is_same<PackageVerifier, T>::value),
+      std::make_pair("permission", std::is_same<Permission, T>::value),
+      std::make_pair("property", std::is_same<Property, T>::value),
+      std::make_pair("provider", std::is_same<Provider, T>::value),
+      std::make_pair("receiver", std::is_same<Receiver, T>::value),
+      std::make_pair("required-feature", std::is_same<RequiredFeature, T>::value),
+      std::make_pair("required-not-feature", std::is_same<RequiredNotFeature, T>::value),
+      std::make_pair("screen", std::is_same<Screen, T>::value),
+      std::make_pair("service", std::is_same<Service, T>::value),
+      std::make_pair("sdk-library", std::is_same<SdkLibrary, T>::value),
+      std::make_pair("static-library", std::is_same<StaticLibrary, T>::value),
+      std::make_pair("supports-gl-texture", std::is_same<SupportsGlTexture, T>::value),
+      std::make_pair("supports-input", std::is_same<SupportsInput, T>::value),
+      std::make_pair("supports-screens", std::is_same<SupportsScreen, T>::value),
+      std::make_pair("uses-configuration", std::is_same<UsesConfiguarion, T>::value),
+      std::make_pair("uses-feature", std::is_same<UsesFeature, T>::value),
+      std::make_pair("uses-library", std::is_same<UsesLibrary, T>::value),
+      std::make_pair("uses-native-library", std::is_same<UsesNativeLibrary, T>::value),
+      std::make_pair("uses-package", std::is_same<UsesPackage, T>::value),
+      std::make_pair("uses-permission", std::is_same<UsesPermission, T>::value),
+      std::make_pair("uses-permission-sdk-23", std::is_same<UsesPermissionSdk23, T>::value),
+      std::make_pair("uses-sdk", std::is_same<UsesSdkBadging, T>::value),
+      std::make_pair("uses-sdk-library", std::is_same<UsesSdkLibrary, T>::value),
+      std::make_pair("uses-static-library", std::is_same<UsesStaticLibrary, T>::value),
+  };
+  for (const auto& pair : tags) {
+    if (pair.second) {
+      return pair.first;
+    }
+  }
+  return nullptr;
 }
 
 /**
@@ -2398,52 +2950,9 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
  **/
 template<typename T>
 T* ElementCast(ManifestExtractor::Element* element) {
-  if (element == nullptr) {
-    return nullptr;
-  }
-
-  const std::unordered_map<std::string, bool> kTagCheck = {
-      {"action", std::is_base_of<Action, T>::value},
-      {"activity", std::is_base_of<Activity, T>::value},
-      {"additional-certificate", std::is_base_of<AdditionalCertificate, T>::value},
-      {"application", std::is_base_of<Application, T>::value},
-      {"category", std::is_base_of<Category, T>::value},
-      {"compatible-screens", std::is_base_of<CompatibleScreens, T>::value},
-      {"feature-group", std::is_base_of<FeatureGroup, T>::value},
-      {"input-type", std::is_base_of<InputType, T>::value},
-      {"intent-filter", std::is_base_of<IntentFilter, T>::value},
-      {"meta-data", std::is_base_of<MetaData, T>::value},
-      {"manifest", std::is_base_of<Manifest, T>::value},
-      {"original-package", std::is_base_of<OriginalPackage, T>::value},
-      {"overlay", std::is_base_of<Overlay, T>::value},
-      {"package-verifier", std::is_base_of<PackageVerifier, T>::value},
-      {"permission", std::is_base_of<Permission, T>::value},
-      {"property", std::is_base_of<Property, T>::value},
-      {"provider", std::is_base_of<Provider, T>::value},
-      {"receiver", std::is_base_of<Receiver, T>::value},
-      {"required-feature", std::is_base_of<RequiredFeature, T>::value},
-      {"required-not-feature", std::is_base_of<RequiredNotFeature, T>::value},
-      {"screen", std::is_base_of<Screen, T>::value},
-      {"service", std::is_base_of<Service, T>::value},
-      {"sdk-library", std::is_base_of<SdkLibrary, T>::value},
-      {"static-library", std::is_base_of<StaticLibrary, T>::value},
-      {"supports-gl-texture", std::is_base_of<SupportsGlTexture, T>::value},
-      {"supports-input", std::is_base_of<SupportsInput, T>::value},
-      {"supports-screens", std::is_base_of<SupportsScreen, T>::value},
-      {"uses-configuration", std::is_base_of<UsesConfiguarion, T>::value},
-      {"uses-feature", std::is_base_of<UsesFeature, T>::value},
-      {"uses-library", std::is_base_of<UsesLibrary, T>::value},
-      {"uses-native-library", std::is_base_of<UsesNativeLibrary, T>::value},
-      {"uses-package", std::is_base_of<UsesPackage, T>::value},
-      {"uses-permission", std::is_base_of<UsesPermission, T>::value},
-      {"uses-permission-sdk-23", std::is_base_of<UsesPermissionSdk23, T>::value},
-      {"uses-sdk", std::is_base_of<UsesSdkBadging, T>::value},
-      {"uses-sdk-library", std::is_base_of<UsesSdkLibrary, T>::value},
-      {"uses-static-library", std::is_base_of<UsesStaticLibrary, T>::value},
-  };
-
-  auto check = kTagCheck.find(element->tag());
-  if (check != kTagCheck.end() && check->second) {
+  constexpr const char* expected_tag = GetExpectedTagForType<T>();
+  if (element != nullptr && expected_tag != nullptr && element->is_featured() &&
+      element->tag() == expected_tag) {
     return static_cast<T*>(element);
   }
   return nullptr;
@@ -2455,9 +2964,9 @@ std::unique_ptr<T> CreateType() {
 }
 
 std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
-    ManifestExtractor* extractor, xml::Element* el) {
-  const std::unordered_map<std::string,
-                           std::function<std::unique_ptr<ManifestExtractor::Element>()>>
+    ManifestExtractor* extractor, xml::Element* el, const std::string& parent_tag) {
+  static const std::unordered_map<std::string_view,
+                                  std::function<std::unique_ptr<ManifestExtractor::Element>()>>
       kTagCheck = {
           {"action", &CreateType<Action>},
           {"activity", &CreateType<Activity>},
@@ -2467,6 +2976,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"compatible-screens", &CreateType<CompatibleScreens>},
           {"feature-group", &CreateType<FeatureGroup>},
           {"input-type", &CreateType<InputType>},
+          {"install-constraints", &CreateType<InstallConstraints>},
           {"intent-filter", &CreateType<IntentFilter>},
           {"manifest", &CreateType<Manifest>},
           {"meta-data", &CreateType<MetaData>},
@@ -2497,12 +3007,71 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"uses-sdk-library", &CreateType<UsesSdkLibrary>},
           {"uses-static-library", &CreateType<UsesStaticLibrary>},
       };
-
+  static constexpr std::array<std::pair<std::string_view, std::string_view>, 53>
+      kValidChildParentTags = {
+          std::make_pair("action", "intent-filter"),
+          std::make_pair("activity", "application"),
+          std::make_pair("additional-certificate", "uses-package"),
+          std::make_pair("additional-certificate", "uses-static-library"),
+          std::make_pair("application", "manifest"),
+          std::make_pair("category", "intent-filter"),
+          std::make_pair("compatible-screens", "manifest"),
+          std::make_pair("feature-group", "manifest"),
+          std::make_pair("input-type", "supports-input"),
+          std::make_pair("intent-filter", "activity"),
+          std::make_pair("intent-filter", "activity-alias"),
+          std::make_pair("intent-filter", "service"),
+          std::make_pair("intent-filter", "receiver"),
+          std::make_pair("intent-filter", "provider"),
+          std::make_pair("manifest", ""),
+          std::make_pair("meta-data", "activity"),
+          std::make_pair("meta-data", "activity-alias"),
+          std::make_pair("meta-data", "application"),
+          std::make_pair("meta-data", "service"),
+          std::make_pair("meta-data", "receiver"),
+          std::make_pair("meta-data", "provider"),
+          std::make_pair("original-package", "manifest"),
+          std::make_pair("overlay", "manifest"),
+          std::make_pair("package-verifier", "manifest"),
+          std::make_pair("permission", "manifest"),
+          std::make_pair("property", "activity"),
+          std::make_pair("property", "activity-alias"),
+          std::make_pair("property", "application"),
+          std::make_pair("property", "service"),
+          std::make_pair("property", "receiver"),
+          std::make_pair("property", "provider"),
+          std::make_pair("provider", "application"),
+          std::make_pair("receiver", "application"),
+          std::make_pair("required-feature", "uses-permission"),
+          std::make_pair("required-not-feature", "uses-permission"),
+          std::make_pair("screen", "compatible-screens"),
+          std::make_pair("service", "application"),
+          std::make_pair("sdk-library", "application"),
+          std::make_pair("static-library", "application"),
+          std::make_pair("supports-gl-texture", "manifest"),
+          std::make_pair("supports-input", "manifest"),
+          std::make_pair("supports-screens", "manifest"),
+          std::make_pair("uses-configuration", "manifest"),
+          std::make_pair("uses-feature", "feature-group"),
+          std::make_pair("uses-feature", "manifest"),
+          std::make_pair("uses-library", "application"),
+          std::make_pair("uses-native-library", "application"),
+          std::make_pair("uses-package", "application"),
+          std::make_pair("uses-permission", "manifest"),
+          std::make_pair("uses-permission-sdk-23", "manifest"),
+          std::make_pair("uses-sdk", "manifest"),
+          std::make_pair("uses-sdk-library", "application"),
+          std::make_pair("uses-static-library", "application"),
+      };
+  bool is_valid_tag = std::find(kValidChildParentTags.begin(), kValidChildParentTags.end(),
+                                std::make_pair<std::string_view, std::string_view>(
+                                    el->name, parent_tag)) != kValidChildParentTags.end();
   // Attempt to map the xml tag to a element inflater
   std::unique_ptr<ManifestExtractor::Element> element;
   auto check = kTagCheck.find(el->name);
-  if (check != kTagCheck.end()) {
+  if (check != kTagCheck.end() && is_valid_tag) {
     element = check->second();
+    element->featured_ = true;
   } else {
     element = util::make_unique<ManifestExtractor::Element>();
   }
@@ -2513,13 +3082,14 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
   return element;
 }
 
-std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(xml::Element* el) {
-  auto element = ManifestExtractor::Element::Inflate(this, el);
+std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(
+    xml::Element* el, const std::string& parent_tag) {
+  auto element = ManifestExtractor::Element::Inflate(this, el, parent_tag);
   parent_stack_.insert(parent_stack_.begin(), element.get());
 
   // Process the element and recursively visit the children
   for (xml::Element* child : el->GetChildElements()) {
-    auto v = Visit(child);
+    auto v = Visit(child, el->name);
     element->AddChild(v);
   }
 
@@ -2527,11 +3097,23 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(xml::Elemen
   return element;
 }
 
-
 int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* printer,
-                 IDiagnostics* diag) {
+                 android::IDiagnostics* diag) {
   ManifestExtractor extractor(apk, options);
-  return extractor.Dump(printer, diag) ? 0 : 1;
+  if (!extractor.Extract(diag)) {
+    return 1;
+  }
+  return extractor.Dump(printer) ? 0 : 1;
+}
+
+int DumpBadgingProto(LoadedApk* apk, pb::Badging* out_badging, android::IDiagnostics* diag) {
+  DumpManifestOptions options{/* include_meta_data= */ true,
+                              /* only_permissions= */ false};
+  ManifestExtractor extractor(apk, options);
+  if (!extractor.Extract(diag)) {
+    return 1;
+  }
+  return extractor.DumpProto(out_badging) ? 0 : 1;
 }
 
 } // namespace aapt

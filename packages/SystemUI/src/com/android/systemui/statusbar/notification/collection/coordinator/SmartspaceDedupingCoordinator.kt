@@ -20,16 +20,15 @@ import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.TimeUnit.SECONDS
@@ -43,14 +42,10 @@ import javax.inject.Inject
  * In addition, notifications that have recently alerted aren't filtered. Tracking this in a way
  * that involves the fewest pipeline invalidations requires some unfortunately complex logic.
  */
-// This class is a singleton so that the same instance can be accessed by both the old and new
-// pipelines
 @CoordinatorScope
 class SmartspaceDedupingCoordinator @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val smartspaceController: LockscreenSmartspaceController,
-    private val notificationEntryManager: NotificationEntryManager,
-    private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
     private val notifPipeline: NotifPipeline,
     @Main private val executor: DelayableExecutor,
     private val clock: SystemClock
@@ -64,13 +59,6 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         pipeline.addCollectionListener(collectionListener)
         statusBarStateController.addCallback(statusBarStateListener)
         smartspaceController.addListener(this::onNewSmartspaceTargets)
-
-        if (!pipeline.isNewPipelineEnabled) {
-            // TODO (b/173126564): Remove this once the old pipeline is no longer necessary
-            notificationLockscreenUserManager.addKeyguardNotificationSuppressor { entry ->
-                isDupedWithSmartspaceContent(entry)
-            }
-        }
 
         recordStatusBarState(statusBarStateController.state)
     }
@@ -137,8 +125,7 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         }
 
         if (changed) {
-            filter.invalidateList()
-            notificationEntryManager.updateNotifications("Smartspace targets changed")
+            filter.invalidateList("onNewSmartspaceTargets")
         }
 
         trackedSmartspaceTargets = newMap
@@ -174,8 +161,7 @@ class SmartspaceDedupingCoordinator @Inject constructor(
             target.cancelTimeoutRunnable = executor.executeDelayed({
                 target.cancelTimeoutRunnable = null
                 target.shouldFilter = true
-                filter.invalidateList()
-                notificationEntryManager.updateNotifications("deduping timeout expired")
+                filter.invalidateList("updateAlertException: ${entry.logKey}")
             }, alertExceptionExpires - now)
         }
     }
@@ -191,7 +177,7 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         isOnLockscreen = newState == StatusBarState.KEYGUARD
 
         if (isOnLockscreen != wasOnLockscreen) {
-            filter.invalidateList()
+            filter.invalidateList("recordStatusBarState: " + StatusBarState.toString(newState))
             // No need to call notificationEntryManager.updateNotifications; something else already
             // does it for us when the keyguard state changes
         }

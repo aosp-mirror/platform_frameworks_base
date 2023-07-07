@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikasi dipasang."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Adakah anda ingin memasang aplikasi ini?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Adakah anda mahu mengemas kini apl ini?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Kemas kinikan apl ini daripada <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nApl ini biasanya menerima kemaskinian daripada <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Dengan membuat kemaskinian daripada sumber yang berbeza, anda mungkin menerima kemaskinian masa hadapan daripada sebarang sumber pada telefon anda. Fungsi apl mungkin berubah."</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikasi tidak dipasang."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakej ini telah disekat daripada dipasang."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Apl tidak dipasang kerana pakej bercanggah dengan pakej yang sedia ada."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Apl yang tidak diketahui tidak boleh dipasang oleh pengguna ini"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Pengguna ini tidak dibenarkan memasang apl"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Kemas kinikan juga"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Urus apl"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Kehabisan ruang"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak dapat dipasang. Kosongkan sebahagian ruang dan cuba lagi."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Gantikan apl ini dengan versi kilang? Semua data akan dialih keluar."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Gantikan apl ini dengan versi kilang? Semua data akan dialih keluar. Tindakan ini melibatkan semua pengguna peranti ini, termasuk mereka yang mempunyai profil kerja."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Simpan <xliff:g id="SIZE">%1$s</xliff:g> data apl."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Adakah anda mahu memadamkan apl ini?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Adakah anda mahu menyahpasang apl ini? Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> juga akan dipadamkan."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Penyahpasangan yang sedang berjalan"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Penyahpasangan yang gagal"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Menyahpasang…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Menyahpasang <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Nyahpasang selesai."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> dinyahpasang"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> dipadamkan"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Penyahpasangan tidak berjaya."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Tidak berjaya menyahpasang <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Memadamkan klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Tidak dapat menyahpasang apl pentadbir peranti yang aktif"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Tidak dapat menyahpasang apl pentadbir peranti yang aktif untuk <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Apl ini diperlukan untuk sesetengah pengguna atau profil dan telah dinyahpasang untuk yang lain"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Tidak diketahui"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Untuk keselamatan, tablet anda kini tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Untuk keselamatan, TV anda tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Untuk keselamatan anda, jam tangan anda tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Untuk keselamatan anda, telefon anda kini tidak dibenarkan memasang apl yang tidak diketahui daripada sumber ini buat masa ini. Anda boleh menukar pilihan ini dalam Tetapan."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefon dan data peribadi anda lebih mudah diserang oleh apl yang tidak diketahui. Dengan memasang apl ini, anda bersetuju bahawa anda bertanggungjawab atas sebarang kerosakan pada telefon anda atau kehilangan data yang mungkin disebabkan oleh penggunaan apl tersebut."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet dan data peribadi anda lebih mudah diserang oleh apl yang tidak diketahui. Dengan memasang apl ini, anda bersetuju bahawa anda bertanggungjawab atas sebarang kerosakan pada tablet anda atau kehilangan data yang mungkin disebabkan oleh penggunaan apl tersebut."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV dan data peribadi anda lebih mudah diserang oleh apl yang tidak diketahui. Dengan memasang apl ini, anda bersetuju bahawa anda bertanggungjawab atas sebarang kerosakan pada TV anda atau kehilangan data yang mungkin disebabkan oleh penggunaan apl tersebut."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Teruskan"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Tetapan"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Memasang/menyahpasang apl wear"</string>

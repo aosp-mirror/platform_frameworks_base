@@ -20,11 +20,15 @@ import android.annotation.SystemApi;
 import android.os.Handler;
 
 /**
- * Represents a request for handling an SSL error. Instances of this class are
- * created by the WebView and passed to
- * {@link WebViewClient#onReceivedSslError}. The host application must call
- * either {@link #proceed} or {@link #cancel} to set the WebView's response
- * to the request.
+ * Represents a request for handling an SSL error.
+ *
+ * <p>A {@link WebView} creates an instance of this class. The instance is
+ * passed to {@link WebViewClient#onReceivedSslError(WebView, SslErrorHandler,
+ * SslError)}.
+ *
+ * <p>The host application must call {@link #cancel()} or, contrary to secure
+ * web communication standards, {@link #proceed()} to provide the web view's
+ * response to the request.
  */
 public class SslErrorHandler extends Handler {
 
@@ -35,17 +39,29 @@ public class SslErrorHandler extends Handler {
     public SslErrorHandler() {}
 
     /**
-     * Proceed with the SSL certificate.
-     * <p>
-     * It is not recommended to proceed past SSL errors and this method should
-     * generally not be used; see {@link WebViewClient#onReceivedSslError} for
-     * more information.
+     * Instructs the {@code WebView} that encountered the SSL certificate error
+     * to ignore the error and continue communicating with the server.
+     *
+     * <p class="warning"><b>Warning:</b> When an SSL error occurs, the host
+     * application should always call {@link #cancel()} rather than
+     * {@code proceed()} because an invalid SSL certificate means the connection
+     * is not secure.
+     *
+     * @see WebViewClient#onReceivedSslError(WebView, SslErrorHandler,
+     * SslError)
      */
     public void proceed() {}
 
     /**
-     * Cancel this request and all pending requests for the WebView that had
-     * the error.
+     * Instructs the {@code WebView} that encountered the SSL certificate error
+     * to terminate communication with the server. Cancels the current server
+     * request and all pending requests for the {@code WebView}.
+     *
+     * <p>The host application must call this method to prevent a resource from
+     * loading when an SSL certificate is invalid.
+     *
+     * @see WebViewClient#onReceivedSslError(WebView, SslErrorHandler,
+     * SslError)
      */
     public void cancel() {}
 }

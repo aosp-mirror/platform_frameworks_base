@@ -98,7 +98,7 @@ class WakeupCallback : public BnSuspendCallback {
 public:
     binder::Status notifyWakeup(bool success,
                                 const std::vector<std::string>& wakeupReasons) override {
-        ALOGI("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
+        ALOGV("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
         bool reasonsCaptured = false;
         {
             std::unique_lock<std::mutex> reasonsLock(mReasonsMutex, std::defer_lock);

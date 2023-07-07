@@ -9,26 +9,27 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -51,7 +52,7 @@ class AlarmTileTest : SysuiTestCase() {
     @Mock
     private lateinit var nextAlarmController: NextAlarmController
     @Mock
-    private lateinit var uiEventLogger: UiEventLogger
+    private lateinit var uiEventLogger: QsEventLogger
     @Mock
     private lateinit var pendingIntent: PendingIntent
     @Captor
@@ -66,10 +67,10 @@ class AlarmTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         `when`(qsHost.context).thenReturn(mContext)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile = AlarmTile(
             qsHost,
+            uiEventLogger,
             testableLooper.looper,
             Handler(testableLooper.looper),
             FalsingManagerFake(),
@@ -85,6 +86,12 @@ class AlarmTileTest : SysuiTestCase() {
 
         verify(nextAlarmController).observe(eq(tile), capture(callbackCaptor))
         tile.refreshState()
+        testableLooper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
         testableLooper.processAllMessages()
     }
 

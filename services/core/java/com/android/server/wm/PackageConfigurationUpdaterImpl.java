@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.LocaleList;
 import android.util.ArraySet;
@@ -33,6 +34,8 @@ final class PackageConfigurationUpdaterImpl implements
     private final Optional<Integer> mPid;
     private Integer mNightMode;
     private LocaleList mLocales;
+    private @Configuration.GrammaticalGender
+    int mGrammaticalGender;
     private String mPackageName;
     private int mUserId;
     private ActivityTaskManagerService mAtm;
@@ -63,6 +66,15 @@ final class PackageConfigurationUpdaterImpl implements
             setLocales(LocaleList locales) {
         synchronized (this) {
             mLocales = locales;
+        }
+        return this;
+    }
+
+    @Override
+    public ActivityTaskManagerInternal.PackageConfigurationUpdater setGrammaticalGender(
+            @Configuration.GrammaticalGender int gender) {
+        synchronized (this) {
+            mGrammaticalGender = gender;
         }
         return this;
     }
@@ -112,12 +124,12 @@ final class PackageConfigurationUpdaterImpl implements
         for (int i = processes.size() - 1; i >= 0; i--) {
             final WindowProcessController wpc = processes.valueAt(i);
             if (wpc.mInfo.packageName.equals(packageName)) {
-                wpc.applyAppSpecificConfig(mNightMode, localesOverride);
+                wpc.applyAppSpecificConfig(mNightMode, localesOverride, mGrammaticalGender);
             }
             // Always inform individual activities about the update, since activities from other
             // packages may be sharing this process
             wpc.updateAppSpecificSettingsForAllActivitiesInPackage(packageName, mNightMode,
-                    localesOverride);
+                    localesOverride, mGrammaticalGender);
         }
     }
 
@@ -127,5 +139,10 @@ final class PackageConfigurationUpdaterImpl implements
 
     LocaleList getLocales() {
         return mLocales;
+    }
+
+    @Configuration.GrammaticalGender
+    Integer getGrammaticalGender() {
+        return mGrammaticalGender;
     }
 }

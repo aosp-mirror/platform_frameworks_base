@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"अ‍ॅप इंस्टॉल झाले."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"तुम्हाला हे ॲप इंस्टॉल करायचे आहे का?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"तुम्हाला हे ॲप अपडेट करायचे आहे का?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> वरून हे अ‍ॅप अपडेट करायचे आहे का?\n\nया अ‍ॅपला सामान्यतः <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> कडून अपडेट मिळतात. वेगवेगळ्या स्रोताकडून अपडेट करून, तुम्हाला तुमच्या फोनवरील कोणत्याही स्रोताकडून भविष्यातील अपडेट मिळू शकतात. अ‍ॅपची कार्यक्षमता बदलू शकते."</string>
     <string name="install_failed" msgid="5777824004474125469">"अ‍ॅप इंस्टॉल झाले नाही."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पॅकेज इंस्टॉल होण्यापासून ब्लॉक केले होते."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"पॅकेजचा विद्यमान पॅकेजशी विरोध असल्याने अ‍ॅप इंस्टॉल झाले नाही."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"या वापरकर्त्याद्वारे अज्ञात अ‍ॅप्स इंस्टॉल केली जाऊ शकत नाहीत"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"या वापरकर्त्याला अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही"</string>
     <string name="ok" msgid="7871959885003339302">"ओके"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"तरीही अपडेट करा"</string>
     <string name="manage_applications" msgid="5400164782453975580">"अ‍ॅप्स व्यवस्थापन"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"जागा संपली"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> इंस्टॉल केले जाऊ शकत नाही. काही जागा मोकळी करा आणि पुन्हा प्रयत्न करा."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"फॅक्टरी आवृत्तीसह हे अ‍ॅप बदलायचे का? सर्व डेटा काढला जाईल."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"फॅक्टरी आवृत्तीसह हे अ‍ॅप बदलायचे? सर्व डेटा काढला जाईल. हे कार्य प्रोफाइल असलेल्यांसह या डिव्हाइसच्या सर्व वापरकर्त्यांना प्रभावित करते."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ॲप डेटा पैकी <xliff:g id="SIZE">%1$s</xliff:g> ठेवा."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"तुम्हाला हे अ‍ॅप हटवायचे आहे का?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"तुम्हाला हे अ‍ॅप अनइंस्टॉल करायचे आहे का? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोनदेखील हटवले जाईल."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"अनइंस्टॉल रन होत आहेत"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"अनइंस्टॉल करता आले नाही"</string>
     <string name="uninstalling" msgid="8709566347688966845">"अनइंस्टॉल करत आहे…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल करत आहे…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"अनइंस्टॉल पूर्ण झाले."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल केले"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन हटवला आहे"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"अनइंस्टॉल करता आले नाही."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल करता आले नाही."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"क्लोन <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> हटवत आहे…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"अ‍ॅक्टिव्ह डिव्हाइस प्रशासक अ‍ॅप अनइंस्टॉल करू शकत नाही"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> साठी अ‍ॅक्टिव्ह डिव्हाइस प्रशासक अ‍ॅप अनइंस्टॉल करू शकत नाही"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"हे अ‍ॅप काही वापरकर्ते किंवा प्रोफाइलसाठी आवश्यक आहे आणि इतरांसाठी अनइंस्टॉल करण्यात आले"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"अज्ञात"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"तुमच्या सुरक्षिततेसाठी, तुमच्या टॅबलेटला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"तुमच्या सुरक्षिततेसाठी, तुमच्या टीव्हीला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"तुमच्या सुरक्षिततेसाठी, तुमच्या वॉचला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"तुमच्या सुरक्षेसाठी, तुमच्या फोनला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"तुमचा फोन आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्‍ही सहमती देता की ते वापरल्‍याने होणार्‍या तुमच्‍या फोनचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"तुमचा टॅबलेट आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्‍ही सहमती देता की ते वापरल्‍याने तुमच्‍या टॅबलेटचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"तुमचा टीव्‍ही आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्ही सहमती देता की ते वापरल्‍याने तुमच्‍या टीव्‍हीचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन केलेले"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"सुरू ठेवा"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"सेटिंग्ज"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear अ‍ॅप्स इंस्टॉल/अनइंस्टॉल करत आहे"</string>

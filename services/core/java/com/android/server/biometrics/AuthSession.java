@@ -19,8 +19,8 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
-import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
-import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR_BASE;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
@@ -42,14 +42,12 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -61,11 +59,12 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricFrameworkStatsLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -77,7 +76,7 @@ import java.util.function.Function;
  */
 public final class AuthSession implements IBinder.DeathRecipient {
     private static final String TAG = "BiometricService/AuthSession";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     /*
      * Defined in biometrics.proto
@@ -106,6 +105,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     private final Context mContext;
+    @NonNull private final BiometricContext mBiometricContext;
     private final IStatusBarService mStatusBarService;
     @VisibleForTesting final IBiometricSysuiReceiver mSysuiReceiver;
     private final KeyStore mKeyStore;
@@ -118,6 +118,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @VisibleForTesting final IBinder mToken;
     // Info to be shown on BiometricDialog when all cookies are returned.
     @VisibleForTesting final PromptInfo mPromptInfo;
+    @VisibleForTesting final BiometricFrameworkStatsLogger mBiometricFrameworkStatsLogger;
     private final long mRequestId;
     private final long mOperationId;
     private final int mUserId;
@@ -130,7 +131,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
     // The current state, which can be either idle, called, or started
     private @SessionState int mState = STATE_AUTH_IDLE;
-    private @BiometricMultiSensorMode int mMultiSensorMode;
     private int[] mSensors;
     // TODO(b/197265902): merge into state
     private boolean mCancelled;
@@ -148,6 +148,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private long mAuthenticatedTimeMs;
 
     AuthSession(@NonNull Context context,
+            @NonNull BiometricContext biometricContext,
             @NonNull IStatusBarService statusBarService,
             @NonNull IBiometricSysuiReceiver sysuiReceiver,
             @NonNull KeyStore keystore,
@@ -164,8 +165,35 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull PromptInfo promptInfo,
             boolean debugEnabled,
             @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
+        this(context, biometricContext, statusBarService, sysuiReceiver, keystore, random,
+                clientDeathReceiver, preAuthInfo, token, requestId, operationId, userId,
+                sensorReceiver, clientReceiver, opPackageName, promptInfo, debugEnabled,
+                fingerprintSensorProperties, BiometricFrameworkStatsLogger.getInstance());
+    }
+
+    @VisibleForTesting
+    AuthSession(@NonNull Context context,
+            @NonNull BiometricContext biometricContext,
+            @NonNull IStatusBarService statusBarService,
+            @NonNull IBiometricSysuiReceiver sysuiReceiver,
+            @NonNull KeyStore keystore,
+            @NonNull Random random,
+            @NonNull ClientDeathReceiver clientDeathReceiver,
+            @NonNull PreAuthInfo preAuthInfo,
+            @NonNull IBinder token,
+            long requestId,
+            long operationId,
+            int userId,
+            @NonNull IBiometricSensorReceiver sensorReceiver,
+            @NonNull IBiometricServiceReceiver clientReceiver,
+            @NonNull String opPackageName,
+            @NonNull PromptInfo promptInfo,
+            boolean debugEnabled,
+            @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties,
+            @NonNull BiometricFrameworkStatsLogger logger) {
         Slog.d(TAG, "Creating AuthSession with: " + preAuthInfo);
         mContext = context;
+        mBiometricContext = biometricContext;
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
         mKeyStore = keystore;
@@ -183,6 +211,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mDebugEnabled = debugEnabled;
         mFingerprintSensorProperties = fingerprintSensorProperties;
         mCancelled = false;
+        mBiometricFrameworkStatsLogger = logger;
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -249,7 +278,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             // SystemUI invokes that path.
             mState = STATE_SHOWING_DEVICE_CREDENTIAL;
             mSensors = new int[0];
-            mMultiSensorMode = BIOMETRIC_MULTI_SENSOR_DEFAULT;
 
             mStatusBarService.showAuthenticationDialog(
                     mPromptInfo,
@@ -260,8 +288,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mUserId,
                     mOperationId,
                     mOpPackageName,
-                    mRequestId,
-                    mMultiSensorMode);
+                    mRequestId);
         } else if (!mPreAuthInfo.eligibleSensors.isEmpty()) {
             // Some combination of biometric or biometric|credential is requested
             setSensorsToStateWaitingForCookie(false /* isTryAgain */);
@@ -304,8 +331,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     for (int i = 0; i < mPreAuthInfo.eligibleSensors.size(); i++) {
                         mSensors[i] = mPreAuthInfo.eligibleSensors.get(i).id;
                     }
-                    mMultiSensorMode = getMultiSensorModeForNewSession(
-                            mPreAuthInfo.eligibleSensors);
 
                     mStatusBarService.showAuthenticationDialog(mPromptInfo,
                             mSysuiReceiver,
@@ -315,8 +340,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mUserId,
                             mOperationId,
                             mOpPackageName,
-                            mRequestId,
-                            mMultiSensorMode);
+                            mRequestId);
                     mState = STATE_AUTH_STARTED;
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
@@ -432,7 +456,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mPromptInfo.setAuthenticators(authenticators);
 
                     mState = STATE_SHOWING_DEVICE_CREDENTIAL;
-                    mMultiSensorMode = BIOMETRIC_MULTI_SENSOR_DEFAULT;
                     mSensors = new int[0];
 
                     mStatusBarService.showAuthenticationDialog(
@@ -444,8 +467,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mUserId,
                             mOperationId,
                             mOpPackageName,
-                            mRequestId,
-                            mMultiSensorMode);
+                            mRequestId);
                 } else {
                     mClientReceiver.onError(modality, error, vendorCode);
                     return true;
@@ -515,6 +537,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         try {
             mStatusBarService.onBiometricHelp(sensorIdToModality(sensorId), message);
+            final int aAcquiredInfo = acquiredInfo == FINGERPRINT_ACQUIRED_VENDOR
+                    ? (vendorCode + FINGERPRINT_ACQUIRED_VENDOR_BASE) : acquiredInfo;
+            mClientReceiver.onAcquired(aAcquiredInfo, message);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -536,13 +561,30 @@ public final class AuthSession implements IBinder.DeathRecipient {
         }
     }
 
-    void onDialogAnimatedIn() {
+    void onDialogAnimatedIn(boolean startFingerprintNow) {
         if (mState != STATE_AUTH_STARTED) {
             Slog.e(TAG, "onDialogAnimatedIn, unexpected state: " + mState);
             return;
         }
 
         mState = STATE_AUTH_STARTED_UI_SHOWING;
+        if (startFingerprintNow) {
+            startAllPreparedFingerprintSensors();
+        } else {
+            Slog.d(TAG, "delaying fingerprint sensor start");
+        }
+    }
+
+    // call once anytime after onDialogAnimatedIn() to indicate it's appropriate to start the
+    // fingerprint sensor (i.e. face auth has failed or is not available)
+    void onStartFingerprint() {
+        if (mState != STATE_AUTH_STARTED
+                && mState != STATE_AUTH_STARTED_UI_SHOWING
+                && mState != STATE_AUTH_PAUSED
+                && mState != STATE_ERROR_PENDING_SYSUI) {
+            Slog.w(TAG, "onStartFingerprint, started from unexpected state: " + mState);
+        }
+
         startAllPreparedFingerprintSensors();
     }
 
@@ -694,10 +736,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
 
-            final OperationContext operationContext = new OperationContext();
-            operationContext.isCrypto = isCrypto();
-            BiometricFrameworkStatsLogger.getInstance().authenticate(
-                    operationContext,
+            mBiometricFrameworkStatsLogger.authenticate(
+                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                            isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_UNKNOWN,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
@@ -710,11 +751,17 @@ public final class AuthSession implements IBinder.DeathRecipient {
         } else {
             final long latency = System.currentTimeMillis() - mStartTimeMs;
 
-            int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
-                    ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
-                    : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
-                            ? BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED
-                            : 0;
+            int error = 0;
+            switch(reason) {
+                case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
+                    error = BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON;
+                    break;
+                case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
+                    error = BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED;
+                    break;
+                default:
+            }
+
             if (DEBUG) {
                 Slog.v(TAG, "Dismissed! Modality: " + statsModality()
                         + ", User: " + mUserId
@@ -726,18 +773,19 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            final OperationContext operationContext = new OperationContext();
-            operationContext.isCrypto = isCrypto();
-            BiometricFrameworkStatsLogger.getInstance().error(
-                    operationContext,
-                    statsModality(),
-                    BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mDebugEnabled,
-                    latency,
-                    error,
-                    0 /* vendorCode */,
-                    mUserId);
+            if (error != 0) {
+                mBiometricFrameworkStatsLogger.error(
+                        mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                                isCrypto()),
+                        statsModality(),
+                        BiometricsProtoEnums.ACTION_AUTHENTICATE,
+                        BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                        mDebugEnabled,
+                        latency,
+                        error,
+                        0 /* vendorCode */,
+                        mUserId);
+            }
         }
     }
 
@@ -910,25 +958,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             default:
                 return null;
         }
-    }
-
-    @BiometricMultiSensorMode
-    private static int getMultiSensorModeForNewSession(Collection<BiometricSensor> sensors) {
-        boolean hasFace = false;
-        boolean hasFingerprint = false;
-
-        for (BiometricSensor sensor: sensors) {
-            if (sensor.modality == TYPE_FACE) {
-                hasFace = true;
-            } else if (sensor.modality == TYPE_FINGERPRINT) {
-                hasFingerprint = true;
-            }
-        }
-
-        if (hasFace && hasFingerprint) {
-            return BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
-        }
-        return BIOMETRIC_MULTI_SENSOR_DEFAULT;
     }
 
     @Override

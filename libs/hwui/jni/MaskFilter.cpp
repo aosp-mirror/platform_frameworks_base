@@ -2,6 +2,7 @@
 #include "SkMaskFilter.h"
 #include "SkBlurMask.h"
 #include "SkBlurMaskFilter.h"
+#include "SkBlurTypes.h"
 #include "SkTableMaskFilter.h"
 
 static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {

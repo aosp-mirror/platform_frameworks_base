@@ -28,6 +28,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -41,7 +42,8 @@ import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
-import com.android.server.wm.TaskSnapshotLoader.PreRLegacySnapshotConfig;
+import com.android.server.wm.AppSnapshotLoader.PreRLegacySnapshotConfig;
+import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
@@ -51,7 +53,7 @@ import org.mockito.MockitoSession;
 import java.io.File;
 
 /**
- * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
+ * Test class for {@link TaskSnapshotPersister} and {@link AppSnapshotLoader}
  *
  * Build/Install/Run:
  * atest TaskSnapshotPersisterLoaderTest
@@ -72,7 +74,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testPersistAndLoadSnapshot() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final File[] files = new File[]{new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
                 new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
                 new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg")};
@@ -86,7 +88,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
         snapshot.getHardwareBuffer().close();
         mPersister.persistSnapshot(1, mTestUserId, snapshot);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         assertTrueForFiles(files, file -> !file.exists(),
                 " snapshot files must be removed by invalid buffer");
     }
@@ -95,7 +97,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     public void testTaskRemovedFromRecents() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
         mPersister.onTaskRemovedFromRecents(1, mTestUserId);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.proto").exists());
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.jpg").exists());
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg").exists());
@@ -113,7 +115,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.removeObsoleteFiles(new ArraySet<>(), new int[]{mTestUserId});
         mPersister.removeObsoleteFiles(new ArraySet<>(), new int[]{mTestUserId});
         mPersister.removeObsoleteFiles(new ArraySet<>(), new int[]{mTestUserId});
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         assertTrue(SystemClock.elapsedRealtime() - ms > 500);
     }
 
@@ -123,15 +125,15 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testPurging() {
         mPersister.persistSnapshot(100, mTestUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
-        mPersister.setPaused(true);
+        mSnapshotPersistQueue.waitForQueueEmpty();
+        mSnapshotPersistQueue.setPaused(true);
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
         mPersister.removeObsoleteFiles(new ArraySet<>(), new int[]{mTestUserId});
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(3, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
-        mPersister.setPaused(false);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.setPaused(false);
+        mSnapshotPersistQueue.waitForQueueEmpty();
 
         // Make sure 1,2 were purged but removeObsoleteFiles wasn't.
         final File[] existsFiles = new File[]{
@@ -147,8 +149,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
     @Test
     public void testGetTaskId() {
+        PersistInfoProvider persistInfoProvider = mock(PersistInfoProvider.class);
         RemoveObsoleteFilesQueueItem removeObsoleteFilesQueueItem =
-                mPersister.new RemoveObsoleteFilesQueueItem(new ArraySet<>(), new int[]{});
+                mPersister.new RemoveObsoleteFilesQueueItem(
+                        new ArraySet<>(), new int[]{}, persistInfoProvider);
         assertEquals(-1, removeObsoleteFilesQueueItem.getTaskId("blablablulp"));
         assertEquals(-1, removeObsoleteFilesQueueItem.getTaskId("nothing.err"));
         assertEquals(-1, removeObsoleteFilesQueueItem.getTaskId("/invalid/"));
@@ -311,7 +315,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertFalse(b.isRealSnapshot());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId,
                 false /* isLowResolution */);
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId,
@@ -334,7 +338,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(WINDOWING_MODE_PINNED, b.getWindowingMode());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId,
                 false /* isLowResolution */);
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId,
@@ -357,7 +361,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertFalse(b.isTranslucent());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId,
                 false /* isLowResolution */);
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId,
@@ -381,7 +385,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(lightBarFlags, b.getAppearance());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId,
                 false /* isLowResolution */);
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId,
@@ -402,7 +406,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 .build();
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId,
                 false /* isLowResolution */);
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId,
@@ -418,7 +422,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         final ArraySet<Integer> taskIds = new ArraySet<>();
         taskIds.add(1);
         mPersister.removeObsoleteFiles(taskIds, new int[]{mTestUserId});
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final File[] existsFiles = new File[]{
                 new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
                 new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
@@ -438,7 +442,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         taskIds.add(1);
         mPersister.removeObsoleteFiles(taskIds, new int[]{mTestUserId});
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final File[] existsFiles = new File[]{
                 new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
                 new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
@@ -456,7 +460,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 .build();
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(2, mTestUserId, a);
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId,
                 false /* isLowResolution */);
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId,

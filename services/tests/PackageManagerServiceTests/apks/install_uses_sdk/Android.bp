@@ -32,15 +32,9 @@ android_test_helper_app {
 }
 
 android_test_helper_app {
-    name: "FrameworksServicesTests_install_uses_sdk_r5",
+    name: "FrameworksServicesTests_install_uses_sdk_r10000",
     defaults: ["FrameworksServicesTests_apks_defaults"],
-    manifest: "AndroidManifest-r5.xml",
-}
-
-android_test_helper_app {
-    name: "FrameworksServicesTests_install_uses_sdk_r1000",
-    defaults: ["FrameworksServicesTests_apks_defaults"],
-    manifest: "AndroidManifest-r1000.xml",
+    manifest: "AndroidManifest-r10000.xml",
 }
 
 android_test_helper_app {
@@ -50,15 +44,9 @@ android_test_helper_app {
 }
 
 android_test_helper_app {
-    name: "FrameworksServicesTests_install_uses_sdk_r0_s1000",
+    name: "FrameworksServicesTests_install_uses_sdk_r0_s10000",
     defaults: ["FrameworksServicesTests_apks_defaults"],
-    manifest: "AndroidManifest-r0-s1000.xml",
-}
-
-android_test_helper_app {
-    name: "FrameworksServicesTests_install_uses_sdk_r0_s5",
-    defaults: ["FrameworksServicesTests_apks_defaults"],
-    manifest: "AndroidManifest-r0-s5.xml",
+    manifest: "AndroidManifest-r0-s10000.xml",
 }
 
 android_test_helper_app {

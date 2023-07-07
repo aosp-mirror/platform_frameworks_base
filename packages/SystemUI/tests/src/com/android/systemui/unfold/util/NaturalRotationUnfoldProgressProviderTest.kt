@@ -16,58 +16,49 @@
 package com.android.systemui.unfold.util
 
 import android.testing.AndroidTestingRunner
-import android.view.IRotationWatcher
-import android.view.IWindowManager
 import android.view.Surface
 import androidx.test.filters.SmallTest
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.systemui.util.mockito.any
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.RotationChangeProvider
+import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
+import com.android.systemui.util.mockito.capture
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
 
-    @Mock
-    lateinit var windowManager: IWindowManager
+    @Mock lateinit var rotationChangeProvider: RotationChangeProvider
 
-    @Mock
-    lateinit var sourceProvider: UnfoldTransitionProgressProvider
+    private val sourceProvider = TestUnfoldTransitionProvider()
 
-    @Mock
-    lateinit var transitionListener: TransitionProgressListener
+    @Mock lateinit var transitionListener: TransitionProgressListener
+
+    @Captor private lateinit var rotationListenerCaptor: ArgumentCaptor<RotationListener>
 
     lateinit var progressProvider: NaturalRotationUnfoldProgressProvider
-
-    private val sourceProviderListenerCaptor =
-        ArgumentCaptor.forClass(TransitionProgressListener::class.java)
-    private val rotationWatcherCaptor =
-        ArgumentCaptor.forClass(IRotationWatcher.Stub::class.java)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        progressProvider = NaturalRotationUnfoldProgressProvider(
-            context,
-            windowManager,
-            sourceProvider
-        )
+        progressProvider =
+            NaturalRotationUnfoldProgressProvider(context, rotationChangeProvider, sourceProvider)
 
         progressProvider.init()
 
-        verify(sourceProvider).addCallback(sourceProviderListenerCaptor.capture())
-        verify(windowManager).watchRotation(rotationWatcherCaptor.capture(), any())
+        verify(rotationChangeProvider).addCallback(capture(rotationListenerCaptor))
 
         progressProvider.addCallback(transitionListener)
     }
@@ -76,7 +67,7 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     fun testNaturalRotation0_sendTransitionStartedEvent_eventReceived() {
         onRotationChanged(Surface.ROTATION_0)
 
-        source.onTransitionStarted()
+        sourceProvider.onTransitionStarted()
 
         verify(transitionListener).onTransitionStarted()
     }
@@ -85,7 +76,7 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     fun testNaturalRotation0_sendTransitionProgressEvent_eventReceived() {
         onRotationChanged(Surface.ROTATION_0)
 
-        source.onTransitionProgress(0.5f)
+        sourceProvider.onTransitionProgress(0.5f)
 
         verify(transitionListener).onTransitionProgress(0.5f)
     }
@@ -94,7 +85,7 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     fun testNotNaturalRotation90_sendTransitionStartedEvent_eventNotReceived() {
         onRotationChanged(Surface.ROTATION_90)
 
-        source.onTransitionStarted()
+        sourceProvider.onTransitionStarted()
 
         verify(transitionListener, never()).onTransitionStarted()
     }
@@ -103,7 +94,7 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     fun testNaturalRotation90_sendTransitionProgressEvent_eventNotReceived() {
         onRotationChanged(Surface.ROTATION_90)
 
-        source.onTransitionProgress(0.5f)
+        sourceProvider.onTransitionProgress(0.5f)
 
         verify(transitionListener, never()).onTransitionProgress(0.5f)
     }
@@ -111,7 +102,7 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     @Test
     fun testRotationBecameUnnaturalDuringTransition_sendsTransitionFinishedEvent() {
         onRotationChanged(Surface.ROTATION_0)
-        source.onTransitionStarted()
+        sourceProvider.onTransitionStarted()
         clearInvocations(transitionListener)
 
         onRotationChanged(Surface.ROTATION_90)
@@ -122,7 +113,7 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     @Test
     fun testRotationBecameNaturalDuringTransition_sendsTransitionStartedEvent() {
         onRotationChanged(Surface.ROTATION_90)
-        source.onTransitionStarted()
+        sourceProvider.onTransitionStarted()
         clearInvocations(transitionListener)
 
         onRotationChanged(Surface.ROTATION_0)
@@ -131,9 +122,6 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     }
 
     private fun onRotationChanged(rotation: Int) {
-        rotationWatcherCaptor.value.onRotationChanged(rotation)
+        rotationListenerCaptor.value.onRotationChanged(rotation)
     }
-
-    private val source: TransitionProgressListener
-        get() = sourceProviderListenerCaptor.value
 }

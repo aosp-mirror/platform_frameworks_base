@@ -1,8 +1,9 @@
 #ifndef _ANDROID_GRAPHICS_BITMAP_FACTORY_H_
 #define _ANDROID_GRAPHICS_BITMAP_FACTORY_H_
 
+#include <SkEncodedImageFormat.h>
+
 #include "GraphicsJNI.h"
-#include "SkEncodedImageFormat.h"
 
 extern jclass gOptions_class;
 extern jfieldID gOptions_justBoundsFieldID;
@@ -25,6 +26,9 @@ extern jfieldID gOptions_bitmapFieldID;
 
 extern jclass gBitmapConfig_class;
 extern jmethodID gBitmapConfig_nativeToConfigMethodID;
+
+extern jclass gImageDecoder_class;
+extern jmethodID gImageDecoder_isP010SupportedForHEVCMethodID;
 
 jstring getMimeTypeAsJavaString(JNIEnv*, SkEncodedImageFormat);
 

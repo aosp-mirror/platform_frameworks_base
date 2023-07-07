@@ -337,17 +337,6 @@
     <issue
         id="Deprecated"
         message="`android:singleLine` is deprecated: Use `maxLines=&quot;1&quot;` instead"
-        errorLine1="        android:singleLine=&quot;true&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/layout/emergency_cryptkeeper_text.xml"
-            line="25"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="Deprecated"
-        message="`android:singleLine` is deprecated: Use `maxLines=&quot;1&quot;` instead"
         errorLine1="                android:singleLine=&quot;true&quot;"
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -88988,17 +88977,6 @@
         <location
             file="res/layout/car_navigation_bar_unprovisioned.xml"
             line="33"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
-        errorLine1="        android:paddingStart=&quot;6dp&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/layout/emergency_cryptkeeper_text.xml"
-            line="24"
             column="9"/>
     </issue>
 

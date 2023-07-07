@@ -317,7 +317,10 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
-     * This broadcast is only sent to registered receivers.
+     *
+     * <p>This broadcast is only sent to registered receivers and (starting from
+     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
+     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
      *
      * @hide
      */
@@ -337,7 +340,10 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of getNotificationPolicy() changes.
-     * This broadcast is only sent to registered receivers.
+     *
+     * <p>This broadcast is only sent to registered receivers and (starting from
+     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
+     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_CHANGED
@@ -345,7 +351,10 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
-     * This broadcast is only sent to registered receivers.
+     *
+     * <p>This broadcast is only sent to registered receivers and (starting from
+     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
+     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INTERRUPTION_FILTER_CHANGED
@@ -562,6 +571,12 @@ public class NotificationManager {
      */
     public static final int BUBBLE_PREFERENCE_SELECTED = 2;
 
+    /**
+     * Maximum length of the component name of a registered NotificationListenerService.
+     * @hide
+     */
+    public static int MAX_SERVICE_COMPONENT_NAME_LENGTH = 500;
+
     @UnsupportedAppUsage
     private static INotificationManager sService;
 
@@ -716,8 +731,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      *  <p>If the notification does not currently represent a
-     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
-     *  removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      *  {@link android.service.notification.NotificationListenerService notification listeners}
      *  will be informed so they can remove the notification from their UIs.</p>
      */
@@ -730,8 +746,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      *  <p>If the notification does not currently represent a
-     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
-     *  removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      *  {@link android.service.notification.NotificationListenerService notification listeners}
      *  will be informed so they can remove the notification from their UIs.</p>
      */
@@ -744,8 +761,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      * <p>If the notification does not currently represent a
-     * {@link Service#startForeground(int, Notification) foreground service}, it will be
-     * removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      * {@link android.service.notification.NotificationListenerService notification listeners}
      * will be informed so they can remove the notification from their UIs.</p>
      *
@@ -849,6 +867,24 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.canNotifyAsPackage(mContext.getPackageName(), pkg, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the calling app can send fullscreen intents.
+     * <p>From Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, apps may not have
+     * permission to use {@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}. If permission
+     * is denied, notification will show up as an expanded heads up notification on lockscreen.
+     * <p> To request access, add the {@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}
+     * permission to your manifest, and use
+     * {@link android.provider.Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT}.
+     */
+    public boolean canUseFullScreenIntent() {
+        INotificationManager service = getService();
+        try {
+            return service.canUseFullScreenIntent(mContext.getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1338,7 +1374,7 @@ public class NotificationManager {
     }
 
     /**
-     * Returns whether notifications from the calling package are blocked.
+     * Returns whether notifications from the calling package are enabled.
      */
     public boolean areNotificationsEnabled() {
         INotificationManager service = getService();
@@ -1545,32 +1581,6 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getAllowedAssistantAdjustments(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public void allowAssistantAdjustment(String capability) {
-        INotificationManager service = getService();
-        try {
-            service.allowAssistantAdjustment(capability);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public void disallowAssistantAdjustment(String capability) {
-        INotificationManager service = getService();
-        try {
-            service.disallowAssistantAdjustment(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

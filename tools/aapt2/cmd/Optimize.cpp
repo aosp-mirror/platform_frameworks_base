@@ -16,21 +16,24 @@
 
 #include "Optimize.h"
 
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
+#include <utility>
 #include <vector>
-
-#include "android-base/file.h"
-#include "android-base/stringprintf.h"
-
-#include "androidfw/ConfigDescription.h"
-#include "androidfw/ResourceTypes.h"
-#include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
+#include "android-base/file.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 #include "cmd/Util.h"
 #include "configuration/ConfigurationParser.h"
 #include "filter/AbiFilter.h"
@@ -39,9 +42,9 @@
 #include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "optimize/MultiApkGenerator.h"
+#include "optimize/Obfuscator.h"
 #include "optimize/ResourceDeduper.h"
 #include "optimize/ResourceFilter.h"
-#include "optimize/ResourcePathShortener.h"
 #include "optimize/VersionCollapser.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
@@ -69,7 +72,7 @@ class OptimizeContext : public IAaptContext {
     return PackageType::kApp;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
 
@@ -115,11 +118,11 @@ class OptimizeContext : public IAaptContext {
   }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
-
   StdErrDiagnostics diagnostics_;
   bool verbose_ = false;
   int sdk_version_ = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
 };
 
 class Optimizer {
@@ -130,12 +133,12 @@ class Optimizer {
 
   int Run(std::unique_ptr<LoadedApk> apk) {
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "Optimizing APK...");
+      context_->GetDiagnostics()->Note(android::DiagMessage() << "Optimizing APK...");
     }
     if (!options_.resources_exclude_list.empty()) {
       ResourceFilter filter(options_.resources_exclude_list);
       if (!filter.Consume(context_, apk->GetResourceTable())) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed filtering resources");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed filtering resources");
         return 1;
       }
     }
@@ -147,20 +150,30 @@ class Optimizer {
 
     ResourceDeduper deduper;
     if (!deduper.Consume(context_, apk->GetResourceTable())) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed deduping resources");
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed deduping resources");
       return 1;
     }
 
-    if (options_.shorten_resource_paths) {
-      ResourcePathShortener shortener(options_.table_flattener_options.shortened_path_map);
-      if (!shortener.Consume(context_, apk->GetResourceTable())) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed shortening resource paths");
+    Obfuscator obfuscator(options_);
+    if (obfuscator.IsEnabled()) {
+      if (!obfuscator.Consume(context_, apk->GetResourceTable())) {
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed shortening resource paths");
         return 1;
       }
+
+      if (options_.obfuscation_map_path &&
+          !obfuscator.WriteObfuscationMap(options_.obfuscation_map_path.value())) {
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed to write the obfuscation map to file");
+        return 1;
+      }
+
+      // TODO(b/246489170): keep the old option and format until transform to the new one
       if (options_.shortened_paths_map_path
           && !WriteShortenedPathsMap(options_.table_flattener_options.shortened_path_map,
                                       options_.shortened_paths_map_path.value())) {
-        context_->GetDiagnostics()->Error(DiagMessage()
+        context_->GetDiagnostics()->Error(android::DiagMessage()
                                           << "failed to write shortened resource paths to file");
         return 1;
       }
@@ -183,9 +196,10 @@ class Optimizer {
     auto split_constraints_iter = options_.split_constraints.begin();
     for (std::unique_ptr<ResourceTable>& split_table : splitter.splits()) {
       if (context_->IsVerbose()) {
-        context_->GetDiagnostics()->Note(
-            DiagMessage(*path_iter) << "generating split with configurations '"
-                                    << util::Joiner(split_constraints_iter->configs, ", ") << "'");
+        context_->GetDiagnostics()->Note(android::DiagMessage(*path_iter)
+                                         << "generating split with configurations '"
+                                         << util::Joiner(split_constraints_iter->configs, ", ")
+                                         << "'");
       }
 
       // Generate an AndroidManifest.xml for each split.
@@ -228,7 +242,7 @@ class Optimizer {
 
  private:
   bool WriteSplitApk(ResourceTable* table, xml::XmlResource* manifest, IArchiveWriter* writer) {
-    BigBuffer manifest_buffer(4096);
+    android::BigBuffer manifest_buffer(4096);
     XmlFlattener xml_flattener(&manifest_buffer, {});
     if (!xml_flattener.Consume(context_, manifest)) {
       return false;
@@ -254,8 +268,8 @@ class Optimizer {
             }
 
             if (file_ref->file == nullptr) {
-              ResourceNameRef name(pkg->name, type->type, entry->name);
-              context_->GetDiagnostics()->Warn(DiagMessage(file_ref->GetSource())
+              ResourceNameRef name(pkg->name, type->named_type, entry->name);
+              context_->GetDiagnostics()->Warn(android::DiagMessage(file_ref->GetSource())
                                                << "file for resource " << name << " with config '"
                                                << config_value->config << "' not found");
               continue;
@@ -276,7 +290,7 @@ class Optimizer {
       }
     }
 
-    BigBuffer table_buffer(4096);
+    android::BigBuffer table_buffer(4096);
     TableFlattener table_flattener(options_.table_flattener_options, &table_buffer);
     if (!table_flattener.Consume(context_, table)) {
       return false;
@@ -287,6 +301,7 @@ class Optimizer {
                                         ArchiveEntry::kAlign, writer);
   }
 
+  // TODO(b/246489170): keep the old option and format until transform to the new one
   bool WriteShortenedPathsMap(const std::map<std::string, std::string> &path_map,
                                const std::string &file_path) {
     std::stringstream ss;
@@ -300,51 +315,15 @@ class Optimizer {
   OptimizeContext* context_;
 };
 
-bool ParseConfig(const std::string& content, IAaptContext* context, OptimizeOptions* options) {
-  size_t line_no = 0;
-  for (StringPiece line : util::Tokenize(content, '\n')) {
-    line_no++;
-    line = util::TrimWhitespace(line);
-    if (line.empty()) {
-      continue;
-    }
-
-    auto split_line = util::Split(line, '#');
-    if (split_line.size() < 2) {
-      context->GetDiagnostics()->Error(DiagMessage(line) << "No # found in line");
-      return false;
-    }
-    StringPiece resource_string = split_line[0];
-    StringPiece directives = split_line[1];
-    ResourceNameRef resource_name;
-    if (!ResourceUtils::ParseResourceName(resource_string, &resource_name)) {
-      context->GetDiagnostics()->Error(DiagMessage(line) << "Malformed resource name");
-      return false;
-    }
-    if (!resource_name.package.empty()) {
-      context->GetDiagnostics()->Error(DiagMessage(line)
-                                       << "Package set for resource. Only use type/name");
-      return false;
-    }
-    for (StringPiece directive : util::Tokenize(directives, ',')) {
-      if (directive == "remove") {
-        options->resources_exclude_list.insert(resource_name.ToResourceName());
-      } else if (directive == "no_collapse" || directive == "no_obfuscate") {
-        options->table_flattener_options.name_collapse_exemptions.insert(
-            resource_name.ToResourceName());
-      }
-    }
-  }
-  return true;
-}
-
 bool ExtractConfig(const std::string& path, IAaptContext* context, OptimizeOptions* options) {
   std::string content;
   if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
-    context->GetDiagnostics()->Error(DiagMessage(path) << "failed reading config file");
+    context->GetDiagnostics()->Error(android::DiagMessage(path) << "failed reading config file");
     return false;
   }
-  return ParseConfig(content, context, options);
+  return ParseResourceConfig(content, context, options->resources_exclude_list,
+                             options->table_flattener_options.name_collapse_exemptions,
+                             options->table_flattener_options.path_shorten_exemptions);
 }
 
 bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
@@ -356,7 +335,7 @@ bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
 
   auto app_info = ExtractAppInfoFromBinaryManifest(*manifest, context->GetDiagnostics());
   if (!app_info) {
-    context->GetDiagnostics()->Error(DiagMessage()
+    context->GetDiagnostics()->Error(android::DiagMessage()
                                      << "failed to extract data from AndroidManifest.xml");
     return false;
   }
@@ -376,7 +355,7 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
   const std::string& apk_path = args[0];
   OptimizeContext context;
   context.SetVerbose(verbose_);
-  IDiagnostics* diag = context.GetDiagnostics();
+  android::IDiagnostics* diag = context.GetDiagnostics();
 
   if (config_path_) {
     std::string& path = config_path_.value();
@@ -384,12 +363,12 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
     if (for_path) {
       options_.apk_artifacts = for_path.value().WithDiagnostics(diag).Parse(apk_path);
       if (!options_.apk_artifacts) {
-        diag->Error(DiagMessage() << "Failed to parse the output artifact list");
+        diag->Error(android::DiagMessage() << "Failed to parse the output artifact list");
         return 1;
       }
 
     } else {
-      diag->Error(DiagMessage() << "Could not parse config file " << path);
+      diag->Error(android::DiagMessage() << "Could not parse config file " << path);
       return 1;
     }
 
@@ -402,8 +381,8 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
 
     if (!kept_artifacts_.empty()) {
       for (const std::string& artifact_str : kept_artifacts_) {
-        for (const StringPiece& artifact : util::Tokenize(artifact_str, ',')) {
-          options_.kept_artifacts.insert(artifact.to_string());
+        for (StringPiece artifact : util::Tokenize(artifact_str, ',')) {
+          options_.kept_artifacts.emplace(artifact);
         }
       }
     }
@@ -411,11 +390,13 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
     // Since we know that we are going to process the APK (not just print targets), make sure we
     // have somewhere to write them to.
     if (!options_.output_dir) {
-      diag->Error(DiagMessage() << "Output directory is required when using a configuration file");
+      diag->Error(android::DiagMessage()
+                  << "Output directory is required when using a configuration file");
       return 1;
     }
   } else if (print_only_) {
-    diag->Error(DiagMessage() << "Asked to print artifacts without providing a configurations");
+    diag->Error(android::DiagMessage()
+                << "Asked to print artifacts without providing a configurations");
     return 1;
   }
 
@@ -424,9 +405,16 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
+  if (options_.enable_sparse_encoding) {
+    options_.table_flattener_options.sparse_entries = SparseEntriesMode::Enabled;
+  }
+  if (options_.force_sparse_encoding) {
+    options_.table_flattener_options.sparse_entries = SparseEntriesMode::Forced;
+  }
+
   if (target_densities_) {
     // Parse the target screen densities.
-    for (const StringPiece& config_str : util::Tokenize(target_densities_.value(), ',')) {
+    for (StringPiece config_str : util::Tokenize(target_densities_.value(), ',')) {
       std::optional<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
       if (!target_density) {
         return 1;

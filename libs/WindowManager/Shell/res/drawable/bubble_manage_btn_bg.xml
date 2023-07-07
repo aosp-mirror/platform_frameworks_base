@@ -16,9 +16,10 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
     <solid
-        android:color="@android:color/system_neutral1_800"
+        android:color="?androidprv:attr/materialColorSurfaceContainerHigh"
         />
     <corners android:radius="20dp" />
 

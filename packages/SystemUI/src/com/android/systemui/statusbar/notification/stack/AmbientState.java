@@ -23,14 +23,17 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.util.MathUtils;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
@@ -42,7 +45,8 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 
 /**
- * A global state to track all input states for the algorithm.
+ * Global state to track all input states for
+ * {@link com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm}.
  */
 @SysUISingleton
 public class AmbientState implements Dumpable {
@@ -52,13 +56,14 @@ public class AmbientState implements Dumpable {
 
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
+    private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final FeatureFlags mFeatureFlags;
     /**
      *  Used to read bouncer states.
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
     private boolean mDimmed;
-    private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private boolean mDozing;
@@ -81,12 +86,18 @@ public class AmbientState implements Dumpable {
     private float mExpandingVelocity;
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
-    private boolean mPanelFullWidth;
+    private boolean mIsSmallScreen;
     private boolean mPulsing;
     private boolean mUnlockHintRunning;
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
+
+    /**
+     * The ExpandableNotificationRow that is pulsing, or the one that was pulsing
+     * when the device started to transition from AOD to LockScreen.
+     */
+    private ExpandableNotificationRow mPulsingRow;
 
     /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
     private float mFractionToShade;
@@ -137,7 +148,22 @@ public class AmbientState implements Dumpable {
      * True right after we swipe up on lockscreen and have not finished the fling down that follows.
      * False when we stop flinging or leave lockscreen.
      */
-    private boolean mNeedFlingAfterLockscreenSwipeUp = false;
+    private boolean mIsFlingRequiredAfterLockScreenSwipeUp = false;
+
+    /**
+     * Whether the shade is currently closing.
+     */
+    private boolean mIsClosing;
+
+    @VisibleForTesting
+    public boolean isFlingRequiredAfterLockScreenSwipeUp() {
+        return mIsFlingRequiredAfterLockScreenSwipeUp;
+    }
+
+    @VisibleForTesting
+    public void setFlingRequiredAfterLockScreenSwipeUp(boolean value) {
+        mIsFlingRequiredAfterLockScreenSwipeUp = value;
+    }
 
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
@@ -181,7 +207,7 @@ public class AmbientState implements Dumpable {
     public void setSwipingUp(boolean isSwipingUp) {
         if (!isSwipingUp && mIsSwipingUp) {
             // Just stopped swiping up.
-            mNeedFlingAfterLockscreenSwipeUp = true;
+            mIsFlingRequiredAfterLockScreenSwipeUp = true;
         }
         mIsSwipingUp = isSwipingUp;
     }
@@ -196,10 +222,10 @@ public class AmbientState implements Dumpable {
     /**
      * @param isFlinging Whether we are flinging the shade open or closed.
      */
-    public void setIsFlinging(boolean isFlinging) {
+    public void setFlinging(boolean isFlinging) {
         if (isOnKeyguard() && !isFlinging && mIsFlinging) {
             // Just stopped flinging.
-            mNeedFlingAfterLockscreenSwipeUp = false;
+            mIsFlingRequiredAfterLockScreenSwipeUp = false;
         }
         mIsFlinging = isFlinging;
     }
@@ -234,10 +260,14 @@ public class AmbientState implements Dumpable {
             @NonNull DumpManager dumpManager,
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
-            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            @NonNull FeatureFlags featureFlags) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mFeatureFlags = featureFlags;
         reload(context);
         dumpManager.registerDumpable(this);
     }
@@ -334,14 +364,6 @@ public class AmbientState implements Dumpable {
         mHideSensitive = hideSensitive;
     }
 
-    /**
-     * In dimmed mode, a child can be activated, which happens on the first tap of the double-tap
-     * interaction. This child is then scaled normally and its background is fully opaque.
-     */
-    public void setActivatedChild(ActivatableNotificationView activatedChild) {
-        mActivatedChild = activatedChild;
-    }
-
     public boolean isDimmed() {
         // While we are expanding from pulse, we want the notifications not to be dimmed, otherwise
         // you'd see the difference to the pulsing notification
@@ -354,10 +376,6 @@ public class AmbientState implements Dumpable {
 
     public boolean isHideSensitive() {
         return mHideSensitive;
-    }
-
-    public ActivatableNotificationView getActivatedChild() {
-        return mActivatedChild;
     }
 
     public void setOverScrollAmount(float amount, boolean onTop) {
@@ -508,7 +526,7 @@ public class AmbientState implements Dumpable {
 
     public void setStatusBarState(int statusBarState) {
         if (mStatusBarState != StatusBarState.KEYGUARD) {
-            mNeedFlingAfterLockscreenSwipeUp = false;
+            mIsFlingRequiredAfterLockScreenSwipeUp = false;
         }
         mStatusBarState = statusBarState;
     }
@@ -552,16 +570,29 @@ public class AmbientState implements Dumpable {
         return mPulsing && entry.isAlerting();
     }
 
+    public void setPulsingRow(ExpandableNotificationRow row) {
+        mPulsingRow = row;
+    }
+
+    /**
+     * @param row The row to check
+     * @return true if row is the pulsing row when the device started to transition from AOD to lock
+     * screen
+     */
+    public boolean isPulsingRow(ExpandableView row) {
+        return mPulsingRow == row;
+    }
+
     public boolean isPanelTracking() {
         return mPanelTracking;
     }
 
-    public boolean isPanelFullWidth() {
-        return mPanelFullWidth;
+    public boolean isSmallScreen() {
+        return mIsSmallScreen;
     }
 
-    public void setPanelFullWidth(boolean panelFullWidth) {
-        mPanelFullWidth = panelFullWidth;
+    public void setSmallScreen(boolean smallScreen) {
+        mIsSmallScreen = smallScreen;
     }
 
     public void setUnlockHintRunning(boolean unlockHintRunning) {
@@ -576,7 +607,7 @@ public class AmbientState implements Dumpable {
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
     public boolean isFlingingAfterSwipeUpOnLockscreen() {
-        return mIsFlinging && mNeedFlingAfterLockscreenSwipeUp;
+        return mIsFlinging && mIsFlingRequiredAfterLockScreenSwipeUp;
     }
 
     /**
@@ -701,7 +732,29 @@ public class AmbientState implements Dumpable {
      */
     public boolean isBouncerInTransit() {
         return mStatusBarKeyguardViewManager != null
-                && mStatusBarKeyguardViewManager.isBouncerInTransit();
+                && mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
+    }
+
+    /**
+     * @param isClosing Whether the shade is currently closing.
+     */
+    public void setIsClosing(boolean isClosing) {
+        mIsClosing = isClosing;
+    }
+
+    /**
+     * @return Whether the shade is currently closing.
+     */
+    public boolean isClosing() {
+        return mIsClosing;
+    }
+
+    public LargeScreenShadeInterpolator getLargeScreenShadeInterpolator() {
+        return mLargeScreenShadeInterpolator;
+    }
+
+    public FeatureFlags getFeatureFlags() {
+        return mFeatureFlags;
     }
 
     @Override
@@ -719,7 +772,7 @@ public class AmbientState implements Dumpable {
         pw.println("mDimmed=" + mDimmed);
         pw.println("mStatusBarState=" + mStatusBarState);
         pw.println("mExpansionChanging=" + mExpansionChanging);
-        pw.println("mPanelFullWidth=" + mPanelFullWidth);
+        pw.println("mPanelFullWidth=" + mIsSmallScreen);
         pw.println("mPulsing=" + mPulsing);
         pw.println("mPulseHeight=" + mPulseHeight);
         pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));
@@ -744,8 +797,10 @@ public class AmbientState implements Dumpable {
         pw.println("mIsSwipingUp=" + mIsSwipingUp);
         pw.println("mPanelTracking=" + mPanelTracking);
         pw.println("mIsFlinging=" + mIsFlinging);
-        pw.println("mNeedFlingAfterLockscreenSwipeUp=" + mNeedFlingAfterLockscreenSwipeUp);
+        pw.println("mIsFlingRequiredAfterLockScreenSwipeUp="
+                + mIsFlingRequiredAfterLockScreenSwipeUp);
         pw.println("mZDistanceBetweenElements=" + mZDistanceBetweenElements);
         pw.println("mBaseZHeight=" + mBaseZHeight);
+        pw.println("mIsClosing=" + mIsClosing);
     }
 }

@@ -657,6 +657,21 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             @Override
+            public void onReadoutStarted(CameraDevice camera,
+                    CaptureRequest request, long timestamp, long frameNumber) {
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onReadoutStarted(
+                                    CameraCaptureSessionImpl.this, request, timestamp,
+                                    frameNumber));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
+            }
+
+            @Override
             public void onCapturePartial(CameraDevice camera,
                     CaptureRequest request, android.hardware.camera2.CaptureResult result) {
                 if ((callback != null) && (executor != null)) {

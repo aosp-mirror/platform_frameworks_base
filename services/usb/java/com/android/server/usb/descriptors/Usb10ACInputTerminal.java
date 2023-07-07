@@ -22,7 +22,7 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
  * An audio class-specific Input Terminal interface.
  * see audio10.pdf section 4.3.2.1
  */
-public final class Usb10ACInputTerminal extends UsbACTerminal {
+public final class Usb10ACInputTerminal extends UsbACTerminal implements UsbAudioChannelCluster {
     private static final String TAG = "Usb10ACInputTerminal";
 
     private byte mNrChannels;       // 7:1 1 Channel (0x01)
@@ -36,14 +36,17 @@ public final class Usb10ACInputTerminal extends UsbACTerminal {
         super(length, type, subtype, subclass);
     }
 
-    public byte getNrChannels() {
+    @Override
+    public byte getChannelCount() {
         return mNrChannels;
     }
 
+    @Override
     public int getChannelConfig() {
         return mChannelConfig;
     }
 
+    @Override
     public byte getChannelNames() {
         return mChannelNames;
     }
@@ -69,9 +72,7 @@ public final class Usb10ACInputTerminal extends UsbACTerminal {
         super.report(canvas);
 
         canvas.openList();
-        canvas.writeListItem("Associated Terminal: "
-                + ReportCanvas.getHexString(getAssocTerminal()));
-        canvas.writeListItem("" + getNrChannels() + " Chans. Config: "
+        canvas.writeListItem("" + getChannelCount() + " Chans. Config: "
                 + ReportCanvas.getHexString(getChannelConfig()));
         canvas.closeList();
     }
