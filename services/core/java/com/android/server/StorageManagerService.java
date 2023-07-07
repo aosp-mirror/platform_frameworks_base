@@ -2069,7 +2069,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             };
             // TODO(b/149391976): Use different handler?
-            monitor.register(mContext, user, true, mHandler);
+            monitor.register(mContext, user, mHandler);
             mPackageMonitorsForUser.put(userId, monitor);
         } else {
             Slog.w(TAG, "PackageMonitor is already registered for: " + userId);
