@@ -3047,10 +3047,9 @@ public class Notification implements Parcelable
         // cannot look into the extras as there may be parcelables there that
         // the platform does not know how to handle. To go around that we have
         // an explicit list of the pending intents in the extras bundle.
-        final boolean collectPendingIntents = (allPendingIntents == null);
-        if (collectPendingIntents) {
-            PendingIntent.setOnMarshaledListener(
-                    (PendingIntent intent, Parcel out, int outFlags) -> {
+        PendingIntent.OnMarshaledListener addedListener = null;
+        if (allPendingIntents == null) {
+            addedListener = (PendingIntent intent, Parcel out, int outFlags) -> {
                 if (parcel == out) {
                     synchronized (this) {
                         if (allPendingIntents == null) {
@@ -3059,7 +3058,8 @@ public class Notification implements Parcelable
                         allPendingIntents.add(intent);
                     }
                 }
-            });
+            };
+            PendingIntent.addOnMarshaledListener(addedListener);
         }
         try {
             // IMPORTANT: Add marshaling code in writeToParcelImpl as we
@@ -3070,8 +3070,8 @@ public class Notification implements Parcelable
                 parcel.writeArraySet(allPendingIntents);
             }
         } finally {
-            if (collectPendingIntents) {
-                PendingIntent.setOnMarshaledListener(null);
+            if (addedListener != null) {
+                PendingIntent.removeOnMarshaledListener(addedListener);
             }
         }
     }
