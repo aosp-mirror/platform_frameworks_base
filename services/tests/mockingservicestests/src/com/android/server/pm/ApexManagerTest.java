@@ -474,15 +474,6 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testGetBackingApexFiles_flattenedApex() {
-        ApexManager flattenedApexManager = new ApexManager.ApexManagerFlattenedApex();
-        final File backingApexFile = flattenedApexManager.getBackingApexFile(
-                new File(mMockSystem.system().getApexDirectory(),
-                        "com.android.apex.cts.shim/app/CtsShim/CtsShim.apk"));
-        assertThat(backingApexFile).isNull();
-    }
-
-    @Test
     public void testActiveApexChanged() throws RemoteException {
         ApexInfo apex1 = createApexInfo(
                 "com.apex1", 37, true, true, new File("/data/apex/active/com.apex@37.apex"));
