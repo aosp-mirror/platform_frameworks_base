@@ -87,6 +87,7 @@ class InputManagerServiceTests {
     private lateinit var context: Context
     private lateinit var testLooper: TestLooper
     private lateinit var contentResolver: MockContentResolver
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     @Before
     fun setup() {
@@ -108,7 +109,7 @@ class InputManagerServiceTests {
                     localService = service!!
                 }
             })
-        InputManagerGlobal.resetInstance(service)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(service)
         val inputManager = InputManager(context)
         whenever(context.getSystemService(InputManager::class.java)).thenReturn(inputManager)
         whenever(context.getSystemService(Context.INPUT_SERVICE)).thenReturn(inputManager)
@@ -119,7 +120,9 @@ class InputManagerServiceTests {
 
     @After
     fun tearDown() {
-        InputManagerGlobal.clearInstance()
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     @Test

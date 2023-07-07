@@ -77,12 +77,13 @@ public class InputDeviceSensorManagerTest {
     private final Object mLock = new Object();
 
     @Mock private IInputManager mIInputManagerMock;
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
     @Before
     public void setUp() throws Exception {
         final Context context = spy(
                 new ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()));
-        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mInputManager = new InputManager(context);
         when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
@@ -103,7 +104,9 @@ public class InputDeviceSensorManagerTest {
 
     @After
     public void tearDown() {
-        InputManagerGlobal.clearInstance();
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
     }
 
     private class InputTestSensorEventListener implements SensorEventListener {

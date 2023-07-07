@@ -126,6 +126,7 @@ public class InputMethodManagerServiceTestBase {
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
     protected boolean mIsLargeScreen;
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
     @BeforeClass
     public static void setupClass() {
@@ -186,7 +187,7 @@ public class InputMethodManagerServiceTestBase {
 
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
-        InputManagerGlobal.resetInstance(mMockIInputManager);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mMockIInputManager);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);
@@ -261,6 +262,10 @@ public class InputMethodManagerServiceTestBase {
 
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
+        }
+
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
         }
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
     }

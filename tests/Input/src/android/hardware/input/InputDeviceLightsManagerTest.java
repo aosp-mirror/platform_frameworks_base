@@ -78,6 +78,7 @@ public class InputDeviceLightsManagerTest {
     private InputManager mInputManager;
 
     @Mock private IInputManager mIInputManagerMock;
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
     @Before
     public void setUp() throws Exception {
@@ -88,7 +89,7 @@ public class InputDeviceLightsManagerTest {
         when(mIInputManagerMock.getInputDevice(eq(DEVICE_ID))).thenReturn(
                 createInputDevice(DEVICE_ID));
 
-        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mInputManager = new InputManager(context);
         when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
@@ -115,7 +116,9 @@ public class InputDeviceLightsManagerTest {
 
     @After
     public void tearDown() {
-        InputManagerGlobal.clearInstance();
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
     }
 
     private InputDevice createInputDevice(int id) {

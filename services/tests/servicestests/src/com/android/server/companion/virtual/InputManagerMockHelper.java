@@ -46,6 +46,7 @@ class InputManagerMockHelper {
     private final TestableLooper mTestableLooper;
     private final InputController.NativeWrapper mNativeWrapperMock;
     private final IInputManager mIInputManagerMock;
+    private final InputManagerGlobal.TestSession mInputManagerGlobalSession;
     private final List<InputDevice> mDevices = new ArrayList<>();
     private IInputDevicesChangedListener mDevicesChangedListener;
 
@@ -77,7 +78,13 @@ class InputManagerMockHelper {
 
         // Set a new instance of InputManager for testing that uses the IInputManager mock as the
         // interface to the server.
-        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
+    }
+
+    public void tearDown() {
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
     }
 
     private long handleNativeOpenInputDevice(InvocationOnMock inv) {

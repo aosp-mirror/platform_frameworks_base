@@ -77,6 +77,7 @@ public class InputDeviceDelegateTest {
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
     private InputManager mInputManager;
     private InputDeviceDelegate mInputDeviceDelegate;
     private IInputDevicesChangedListener mIInputDevicesChangedListener;
@@ -84,7 +85,7 @@ public class InputDeviceDelegateTest {
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
-        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
 
         mInputManager = new InputManager(mContextSpy);
@@ -100,7 +101,9 @@ public class InputDeviceDelegateTest {
 
     @After
     public void tearDown() throws Exception {
-        InputManagerGlobal.clearInstance();
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
     }
 
     @Test
