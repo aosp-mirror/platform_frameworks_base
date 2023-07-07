@@ -1395,7 +1395,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona el método de entrada"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mientras el teclado físico está activo"</string>
-    <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
+    <string name="hardware" msgid="3611039921284836033">"Usar teclado en pantalla"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura teclados físicos"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Presiona para seleccionar el idioma y el diseño"</string>
@@ -2336,9 +2336,9 @@
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactivar"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Se configuró <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%s</xliff:g>. Presiona para cambiar esta opción."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g> y <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Presiona para cambiar esta opción."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> y <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiar esta opción."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> y <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiarlo."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Presiona para cambiar esta opción."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiar esta opción."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño de teclado establecido en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Presiona para cambiar esta opción."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Presiona para ver los teclados"</string>
 </resources>

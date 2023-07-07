@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ನಿರಾಕರಿಸಿ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ಇನ್‌ಪುಟ್‌‌ ವಿಧಾನವನ್ನು ಆರಿಸಿ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್ ಸಕ್ರಿಯವಾಗಿರುವಾಗ ಅದನ್ನು ಪರದೆಯ ಮೇಲಿರಿಸಿ"</string>
-    <string name="hardware" msgid="1800597768237606953">"ವರ್ಚುವಲ್ ಕೀಬೋರ್ಡ್ ತೋರಿಸಿ"</string>
+    <string name="hardware" msgid="3611039921284836033">"ಆನ್-ಸ್ಕ್ರೀನ್ ಕೀಬೋರ್ಡ್ ಬಳಸಿ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ಕಾನ್ಫಿಗರ್ ಮಾಡಿ"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ಭಾಷೆ ಮತ್ತು ವಿನ್ಯಾಸವನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
