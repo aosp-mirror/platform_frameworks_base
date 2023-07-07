@@ -634,7 +634,7 @@ public final class SuspendPackageHelper {
                         mPm.snapshotComputer(), callingUid, intentExtras),
                 options));
         mPm.notifyPackageMonitor(intent, null /* pkg */, extras, new int[]{userId},
-                null /* instantUserIds */);
+                null /* instantUserIds */, null /* broadcastAllowList */);
     }
 
     /**
