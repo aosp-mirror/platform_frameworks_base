@@ -32,15 +32,18 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
+import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -78,6 +81,9 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
   private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
   private lateinit var fakeFeatureFlags: FakeFeatureFlags
 
+  @Captor
+  lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -107,13 +113,33 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun tabletopPostureIsDetectedFromStart() {
+    fun onViewAttached_deviceHalfFolded_propagatedToPatternView() {
         overrideResource(R.dimen.half_opened_bouncer_height_ratio, 0.5f)
         whenever(mPostureController.devicePosture).thenReturn(DEVICE_POSTURE_HALF_OPENED)
 
         mKeyguardPatternViewController.onViewAttached()
 
         assertThat(getPatternTopGuideline()).isEqualTo(getExpectedTopGuideline())
+    }
+
+    @Test
+    fun onDevicePostureChanged_deviceOpened_propagatedToPatternView() {
+        overrideResource(R.dimen.half_opened_bouncer_height_ratio, 0.5f)
+        whenever(mPostureController.devicePosture)
+                .thenReturn(DEVICE_POSTURE_HALF_OPENED)
+
+        mKeyguardPatternViewController.onViewAttached()
+
+        // Verify view begins in posture state DEVICE_POSTURE_HALF_OPENED
+        assertThat(getPatternTopGuideline()).isEqualTo(getExpectedTopGuideline())
+
+        // Simulate posture change to state DEVICE_POSTURE_OPENED with callback
+        verify(mPostureController).addCallback(postureCallbackCaptor.capture())
+        val postureCallback: DevicePostureController.Callback = postureCallbackCaptor.value
+        postureCallback.onPostureChanged(DEVICE_POSTURE_OPENED)
+
+        // Verify view is now in posture state DEVICE_POSTURE_OPENED
+        assertThat(getPatternTopGuideline()).isNotEqualTo(getExpectedTopGuideline())
     }
 
     private fun getPatternTopGuideline(): Float {
