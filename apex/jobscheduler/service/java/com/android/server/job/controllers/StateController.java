@@ -26,6 +26,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.StateChangedListener;
@@ -84,8 +85,7 @@ public abstract class StateController {
     /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
-    public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate);
+    public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob);
 
     /**
      * Called when a new job is being created to reschedule an old failed job.
@@ -165,6 +165,15 @@ public abstract class StateController {
         return mService.areComponentsInPlaceLocked(jobStatus);
     }
 
+    protected void logDeviceWideConstraintStateToStatsd(int constraint, boolean satisfied) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.DEVICE_WIDE_JOB_CONSTRAINT_CHANGED,
+                JobStatus.getProtoConstraint(constraint),
+                satisfied
+                        ? FrameworkStatsLog.DEVICE_WIDE_JOB_CONSTRAINT_CHANGED__STATE__SATISFIED
+                        : FrameworkStatsLog.DEVICE_WIDE_JOB_CONSTRAINT_CHANGED__STATE__UNSATISFIED);
+    }
+
     public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate);
     public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
@@ -176,5 +185,12 @@ public abstract class StateController {
 
     /** Dump any internal constants the Controller may have. */
     public void dumpConstants(ProtoOutputStream proto) {
+    }
+
+    /**
+     * Standardize the output of userId-packageName combo.
+     */
+    static String packageToString(int userId, String packageName) {
+        return "<" + userId + ">" + packageName;
     }
 }

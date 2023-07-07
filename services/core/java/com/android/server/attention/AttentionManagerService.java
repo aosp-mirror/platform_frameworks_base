@@ -343,6 +343,9 @@ public class AttentionManagerService extends SystemService {
      *
      * Calling this multiple times for duplicate requests will be no-ops, returning true.
      *
+     * TODO(b/239130847): Maintain the proximity state in AttentionManagerService and change this
+     * to a polling API.
+     *
      * @return {@code true} if the framework was able to dispatch the request
      */
     @VisibleForTesting
@@ -665,8 +668,8 @@ public class AttentionManagerService extends SystemService {
             mIProximityUpdateCallback = new IProximityUpdateCallback.Stub() {
                 @Override
                 public void onProximityUpdate(double distance) {
+                    mCallbackInternal.onProximityUpdate(distance);
                     synchronized (mLock) {
-                        mCallbackInternal.onProximityUpdate(distance);
                         freeIfInactiveLocked();
                     }
                 }
@@ -853,9 +856,6 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     private void cancelAndUnbindLocked() {
         synchronized (mLock) {
-            if (mCurrentAttentionCheck == null && mCurrentProximityUpdate == null) {
-                return;
-            }
             if (mCurrentAttentionCheck != null) {
                 cancel();
             }
@@ -937,7 +937,7 @@ public class AttentionManagerService extends SystemService {
             }
         }
 
-        class TestableProximityUpdateCallbackInternal extends ProximityUpdateCallbackInternal {
+        class TestableProximityUpdateCallbackInternal implements ProximityUpdateCallbackInternal {
             private double mLastCallbackCode = PROXIMITY_UNKNOWN;
 
             @Override
@@ -1069,6 +1069,7 @@ public class AttentionManagerService extends SystemService {
         private void resetStates() {
             synchronized (mLock) {
                 mCurrentProximityUpdate = null;
+                cancelAndUnbindLocked();
             }
             mComponentName = resolveAttentionService(mContext);
         }

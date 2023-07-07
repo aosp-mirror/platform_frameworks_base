@@ -23,23 +23,32 @@ package {
 
 android_test {
     name: "BroadcastRadioTests",
+    srcs: ["src/**/*.java"],
     privileged: true,
     certificate: "platform",
     // TODO(b/13282254): uncomment when b/13282254 is fixed
     // sdk_version: "current"
     platform_apis: true,
-    static_libs: [
-        "compatibility-device-util-axt",
-        "androidx.test.rules",
-        "testng",
-        "services.core",
-    ],
-    libs: ["android.test.base"],
-    srcs: ["src/**/*.java"],
     dex_preopt: {
         enabled: false,
     },
     optimize: {
         enabled: false,
     },
+    static_libs: [
+        "services.core",
+        "androidx.test.rules",
+        "truth-prebuilt",
+        "testng",
+        "mockito-target-extended",
+    ],
+    libs: ["android.test.base"],
+    test_suites: [
+        "general-tests",
+    ],
+    // mockito-target-inline dependency
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
 }

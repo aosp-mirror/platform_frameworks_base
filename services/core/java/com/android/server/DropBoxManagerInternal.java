@@ -34,7 +34,15 @@ public abstract class DropBoxManagerInternal {
      * to dynamically generate the entry contents.
      */
     public interface EntrySource extends Closeable {
-        public @BytesLong long length();
         public void writeTo(@NonNull FileDescriptor fd) throws IOException;
+
+        public default @BytesLong long length() {
+            // By default, length is unknown
+            return 0;
+        }
+
+        public default void close() throws IOException {
+            // By default, no resources to close
+        }
     }
 }

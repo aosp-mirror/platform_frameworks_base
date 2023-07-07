@@ -35,12 +35,19 @@ public class ListenerRegistration<TListener> implements ListenerExecutor {
 
     private boolean mActive;
 
-    private volatile @Nullable TListener mListener;
+    @Nullable private volatile TListener mListener;
 
     protected ListenerRegistration(Executor executor, TListener listener) {
         mExecutor = Objects.requireNonNull(executor);
         mActive = false;
         mListener = Objects.requireNonNull(listener);
+    }
+
+    /**
+     * Returns a tag to use for logging. Should be overridden by subclasses.
+     */
+    protected String getTag() {
+        return "ListenerRegistration";
     }
 
     protected final Executor getExecutor() {
@@ -50,26 +57,36 @@ public class ListenerRegistration<TListener> implements ListenerExecutor {
     /**
      * May be overridden by subclasses. Invoked when registration occurs. Invoked while holding the
      * owning multiplexer's internal lock.
+     *
+     * <p>If overridden you must ensure the superclass method is invoked (usually as the first thing
+     * in the overridden method).
      */
     protected void onRegister(Object key) {}
 
     /**
      * May be overridden by subclasses. Invoked when unregistration occurs. Invoked while holding
      * the owning multiplexer's internal lock.
+     *
+     * <p>If overridden you must ensure the superclass method is invoked (usually as the last thing
+     * in the overridden method).
      */
     protected void onUnregister() {}
 
     /**
-     * May be overridden by subclasses. Invoked when this registration becomes active. If this
-     * returns a non-null operation, that operation will be invoked for the listener. Invoked
-     * while holding the owning multiplexer's internal lock.
+     * May be overridden by subclasses. Invoked when this registration becomes active. Invoked while
+     * holding the owning multiplexer's internal lock.
+     *
+     * <p>If overridden you must ensure the superclass method is invoked (usually as the first thing
+     * in the overridden method).
      */
     protected void onActive() {}
 
     /**
-     * May be overridden by subclasses. Invoked when registration becomes inactive. If this returns
-     * a non-null operation, that operation will be invoked for the listener. Invoked while holding
-     * the owning multiplexer's internal lock.
+     * May be overridden by subclasses. Invoked when registration becomes inactive. Invoked while
+     * holding the owning multiplexer's internal lock.
+     *
+     * <p>If overridden you must ensure the superclass method is invoked (usually as the last thing
+     * in the overridden method).
      */
     protected void onInactive() {}
 

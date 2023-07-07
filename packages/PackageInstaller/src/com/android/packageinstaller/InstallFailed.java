@@ -16,7 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -32,7 +31,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.android.internal.app.AlertActivity;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 
@@ -78,6 +77,8 @@ public class InstallFailed extends AlertActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setFinishOnTouchOutside(true);
 
         int statusCode = getIntent().getIntExtra(PackageInstaller.EXTRA_STATUS,
                 PackageInstaller.STATUS_FAILURE);

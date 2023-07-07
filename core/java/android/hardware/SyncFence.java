@@ -87,8 +87,8 @@ public final class SyncFence implements AutoCloseable, Parcelable {
     // is well worth making.
     private final Runnable mCloser;
 
-    private SyncFence(@NonNull ParcelFileDescriptor wrapped) {
-        mNativePtr = nCreate(wrapped.detachFd());
+    private SyncFence(int fileDescriptor) {
+        mNativePtr = nCreate(fileDescriptor);
         mCloser = sRegistry.registerNativeAllocation(this, mNativePtr);
     }
 
@@ -136,14 +136,26 @@ public final class SyncFence implements AutoCloseable, Parcelable {
     }
 
     /**
-     * Create a new SyncFence wrapped around another descriptor. By default, all method calls are
-     * delegated to the wrapped descriptor.
+     * Create a new SyncFence wrapped around another {@link ParcelFileDescriptor}. By default, all
+     * method calls are delegated to the wrapped descriptor. This takes ownership of the
+     * {@link ParcelFileDescriptor}.
      *
      * @param wrapped The descriptor to be wrapped.
      * @hide
      */
     public static @NonNull SyncFence create(@NonNull ParcelFileDescriptor wrapped) {
-        return new SyncFence(wrapped);
+        return new SyncFence(wrapped.detachFd());
+    }
+
+    /**
+     * Create a new SyncFence wrapped around another descriptor. The returned {@link SyncFence}
+     * instance takes ownership of the file descriptor.
+     *
+     * @param fileDescriptor The descriptor to be wrapped.
+     * @hide
+     */
+    public static @NonNull SyncFence adopt(int fileDescriptor) {
+        return new SyncFence(fileDescriptor);
     }
 
     /**

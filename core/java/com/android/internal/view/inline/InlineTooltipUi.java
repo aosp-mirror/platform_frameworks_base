@@ -15,7 +15,7 @@
  */
 package com.android.internal.view.inline;
 
-import static android.view.autofill.AutofillManager.DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY;
+import static android.view.autofill.AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY;
 import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
@@ -170,9 +170,9 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
 
             int delayTimeMs = mShowDelayConfigMs;
             try {
-                final float scale = Settings.Global.getFloat(
+                final float scale = WindowManager.fixScale(Settings.Global.getFloat(
                         anchor.getContext().getContentResolver(),
-                        Settings.Global.ANIMATOR_DURATION_SCALE);
+                        Settings.Global.ANIMATOR_DURATION_SCALE));
                 delayTimeMs *= scale;
             } catch (Settings.SettingNotFoundException e) {
                 // do nothing

@@ -18,7 +18,6 @@ package com.android.systemui.util.leak;
 
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -29,12 +28,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.SystemProperties;
-import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.settings.UserTracker;
 
 import com.google.android.collect.Lists;
 
@@ -62,13 +62,15 @@ public class LeakReporter {
     static final String LEAK_DUMP = "leak.dump";
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final LeakDetector mLeakDetector;
     private final String mLeakReportEmail;
 
     @Inject
-    public LeakReporter(Context context, LeakDetector leakDetector,
-            @Nullable @Named(LEAK_REPORT_EMAIL_NAME) String leakReportEmail) {
+    public LeakReporter(Context context, UserTracker userTracker, LeakDetector leakDetector,
+            @Named(LEAK_REPORT_EMAIL_NAME) String leakReportEmail) {
         mContext = context;
+        mUserTracker = userTracker;
         mLeakDetector = leakDetector;
         mLeakReportEmail = leakReportEmail;
     }
@@ -111,7 +113,7 @@ public class LeakReporter {
                             getIntent(hprofFile, dumpFile),
                             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                             null,
-                            UserHandle.CURRENT));
+                            mUserTracker.getUserHandle()));
             notiMan.notify(TAG, 0, builder.build());
         } catch (IOException e) {
             Log.e(TAG, "Couldn't dump heap for leak", e);
@@ -148,9 +150,8 @@ public class LeakReporter {
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
-        String leakReportEmail = mLeakReportEmail;
-        if (leakReportEmail != null) {
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { leakReportEmail });
+        if (!TextUtils.isEmpty(mLeakReportEmail)) {
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { mLeakReportEmail });
         }
 
         return intent;

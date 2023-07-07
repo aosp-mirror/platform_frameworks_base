@@ -58,8 +58,9 @@ oneway interface IUidObserver {
      * Report a proc oom adj change associated with a uid.
      *
      * @param uid The uid for which the state change is being reported.
+     * @param adj The minimum OOM adj among all processes with this uid.
      */
-    void onUidProcAdjChanged(int uid);
+    void onUidProcAdjChanged(int uid, int adj);
 
     // =============== End of transactions used on native side as well ============================
 

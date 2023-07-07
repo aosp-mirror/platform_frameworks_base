@@ -108,12 +108,6 @@
         <attr name="android:layout" />
     </declare-styleable>
 
-    <declare-styleable name="HybridNotificationTheme">
-        <attr name="hybridNotificationStyle" format="reference" />
-        <attr name="hybridNotificationTitleStyle" format="reference" />
-        <attr name="hybridNotificationTextStyle" format="reference" />
-    </declare-styleable>
-
     <declare-styleable name="PluginInflateContainer">
         <attr name="viewType" format="string" />
     </declare-styleable>
@@ -152,6 +146,7 @@
         <attr name="allCaps" format="boolean" />
         <attr name="showMissingSim" format="boolean" />
         <attr name="showAirplaneMode" format="boolean" />
+        <attr name="debugLocation" format="string" />
     </declare-styleable>
 
     <declare-styleable name="IlluminationDrawable">
@@ -192,6 +187,35 @@
 
     <declare-styleable name="DreamOverlayDotImageView">
         <attr name="dotColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="DelayableMarqueeTextView">
+        <attr name="marqueeDelay" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="AuthCredentialView">
+        <attr name="lockPatternStyle" format="reference" />
+        <attr name="lockPinPasswordStyle" format="reference" />
+        <attr name="containerStyle" format="reference" />
+        <attr name="headerStyle" format="reference" />
+        <attr name="headerIconStyle" format="reference" />
+        <attr name="titleTextAppearance" format="reference" />
+        <attr name="subTitleTextAppearance" format="reference" />
+        <attr name="descriptionTextAppearance" format="reference" />
+        <attr name="passwordTextAppearance" format="reference" />
+        <attr name="errorTextAppearance" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="LogAccessPermissionGrantDialog">
+        <attr name="permissionGrantButtonTopStyle" format="reference"/>
+        <attr name="permissionGrantButtonBottomStyle" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="SeekBarWithIconButtonsView_Layout">
+        <attr name="max" format="integer" />
+        <attr name="progress" format="integer" />
+        <attr name="iconStartContentDescription" format="reference" />
+        <attr name="iconEndContentDescription" format="reference" />
     </declare-styleable>
 </resources>
 

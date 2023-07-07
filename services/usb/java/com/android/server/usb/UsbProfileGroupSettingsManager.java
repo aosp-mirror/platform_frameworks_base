@@ -53,8 +53,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -62,6 +60,9 @@ import com.android.internal.annotations.Immutable;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.utils.EventLogger;
 
 import libcore.io.IoUtils;
 
@@ -130,7 +131,7 @@ class UsbProfileGroupSettingsManager {
     @GuardedBy("mLock")
     private boolean mIsWriteSettingsScheduled;
 
-    private static UsbDeviceLogger sEventLogger;
+    private static EventLogger sEventLogger;
 
     /**
      * A package of a user.
@@ -263,7 +264,7 @@ class UsbProfileGroupSettingsManager {
 
         mUsbHandlerManager = usbResolveActivityManager;
 
-        sEventLogger = new UsbDeviceLogger(DUMPSYS_LOG_BUFFER,
+        sEventLogger = new EventLogger(DUMPSYS_LOG_BUFFER,
                 "UsbProfileGroupSettingsManager activity");
     }
 
@@ -970,7 +971,7 @@ class UsbProfileGroupSettingsManager {
                     matches, mAccessoryPreferenceMap.get(new AccessoryFilter(accessory)));
         }
 
-        sEventLogger.log(new UsbDeviceLogger.StringEvent("accessoryAttached: " + intent));
+        sEventLogger.enqueue(new EventLogger.StringEvent("accessoryAttached: " + intent));
         resolveActivity(intent, matches, defaultActivity, null, accessory);
     }
 
@@ -1524,7 +1525,8 @@ class UsbProfileGroupSettingsManager {
             }
         }
 
-        sEventLogger.dump(dump, UsbProfileGroupSettingsManagerProto.INTENT);
+        sEventLogger.dump(new DualOutputStreamDumpSink(dump,
+                UsbProfileGroupSettingsManagerProto.INTENT));
         dump.end(token);
     }
 

@@ -62,15 +62,16 @@ import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.statusbar.policy.WalletControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
-
-import java.util.concurrent.Executor;
-
-import javax.inject.Named;
+import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepository;
+import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepositoryImpl;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
+import java.util.concurrent.Executor;
+
+import javax.inject.Named;
 
 /** Dagger Module for code in the statusbar.policy package. */
 @Module
@@ -81,6 +82,10 @@ public interface StatusBarPolicyModule {
     /** */
     @Binds
     BluetoothController provideBluetoothController(BluetoothControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    BluetoothRepository provideBluetoothRepository(BluetoothRepositoryImpl impl);
 
     /** */
     @Binds

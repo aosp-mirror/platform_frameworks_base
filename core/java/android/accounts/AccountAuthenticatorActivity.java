@@ -60,7 +60,7 @@ public class AccountAuthenticatorActivity extends Activity {
         super.onCreate(icicle);
 
         mAccountAuthenticatorResponse =
-                getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+                getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, android.accounts.AccountAuthenticatorResponse.class);
 
         if (mAccountAuthenticatorResponse != null) {
             mAccountAuthenticatorResponse.onRequestContinued();

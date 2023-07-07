@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 

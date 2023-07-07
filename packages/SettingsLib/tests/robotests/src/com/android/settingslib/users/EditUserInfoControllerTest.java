@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -37,9 +37,9 @@ import android.widget.ImageView;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.settingslib.R;
+import com.android.settingslib.RestrictedLockUtils;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RunWith(RobolectricTestRunner.class)
-@Ignore
 public class EditUserInfoControllerTest {
     private static final int MAX_USER_NAME_LENGTH = 100;
 
@@ -87,6 +86,11 @@ public class EditUserInfoControllerTest {
         }
 
         @Override
+        RestrictedLockUtils.EnforcedAdmin getChangePhotoAdminRestriction(Context context) {
+            return null;
+        }
+
+        @Override
         boolean isChangePhotoRestrictedByBase(Context context) {
             return mPhotoRestrictedByBase;
         }
@@ -98,7 +102,7 @@ public class EditUserInfoControllerTest {
         mActivity = spy(ActivityController.of(new FragmentActivity()).get());
         mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
         mController = new TestEditUserInfoController();
-        mPhotoRestrictedByBase = true;
+        mPhotoRestrictedByBase = false;
     }
 
     @Test
@@ -143,7 +147,7 @@ public class EditUserInfoControllerTest {
         dialog.show();
         dialog.cancel();
 
-        verifyZeroInteractions(successCallback);
+        verifyNoInteractions(successCallback);
         verify(cancelCallback, times(1))
                 .run();
     }
@@ -159,7 +163,7 @@ public class EditUserInfoControllerTest {
         dialog.show();
         dialog.getButton(Dialog.BUTTON_NEGATIVE).performClick();
 
-        verifyZeroInteractions(successCallback);
+        verifyNoInteractions(successCallback);
         verify(cancelCallback, times(1))
                 .run();
     }
@@ -180,7 +184,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", oldUserIcon);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -198,7 +202,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", null);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -219,7 +223,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept(expectedNewName, mCurrentIcon);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -238,7 +242,7 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", newPhoto);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -257,12 +261,12 @@ public class EditUserInfoControllerTest {
 
         verify(successCallback, times(1))
                 .accept("test", newPhoto);
-        verifyZeroInteractions(cancelCallback);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
     public void createDialog_canNotChangePhoto_nullPhotoController() {
-        mPhotoRestrictedByBase = false;
+        mPhotoRestrictedByBase = true;
 
         mController.createDialog(mActivity, mActivityStarter, mCurrentIcon,
                 "test", "title", null, null);

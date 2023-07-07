@@ -100,56 +100,60 @@ void CompileApkAssetsLayouts(const std::unique_ptr<android::ApkAssets>& assets,
       dex_file.MakeClass(StringPrintf("%s.CompiledView", package_name.c_str()))};
   std::vector<dex::MethodBuilder> methods;
 
-  assets->GetAssetsProvider()->ForEachFile("res/", [&](const android::StringPiece& s,
-                                                       android::FileType) {
-    if (s == "layout") {
-      auto path = StringPrintf("res/%s/", s.to_string().c_str());
-      assets->GetAssetsProvider()->ForEachFile(path, [&](const android::StringPiece& layout_file,
-                                                         android::FileType) {
-        auto layout_path = StringPrintf("%s%s", path.c_str(), layout_file.to_string().c_str());
-        android::ApkAssetsCookie cookie = android::kInvalidCookie;
-        auto asset = resources.OpenNonAsset(layout_path, android::Asset::ACCESS_RANDOM, &cookie);
-        CHECK(asset);
-        CHECK(android::kInvalidCookie != cookie);
-        const auto dynamic_ref_table = resources.GetDynamicRefTableForCookie(cookie);
-        CHECK(nullptr != dynamic_ref_table);
-        android::ResXMLTree xml_tree{dynamic_ref_table};
-        xml_tree.setTo(asset->getBuffer(/*wordAligned=*/true),
-                       asset->getLength(),
-                       /*copy_data=*/true);
-        android::ResXMLParser parser{xml_tree};
-        parser.restart();
-        if (CanCompileLayout(&parser)) {
-          parser.restart();
-          const std::string layout_name = startop::util::FindLayoutNameFromFilename(layout_path);
-          ResXmlVisitorAdapter adapter{&parser};
-          switch (target) {
-            case CompilationTarget::kDex: {
-              methods.push_back(compiled_view.CreateMethod(
-                  layout_name,
-                  dex::Prototype{dex::TypeDescriptor::FromClassname("android.view.View"),
-                                 dex::TypeDescriptor::FromClassname("android.content.Context"),
-                                 dex::TypeDescriptor::Int()}));
-              DexViewBuilder builder(&methods.back());
-              builder.Start();
-              LayoutCompilerVisitor visitor{&builder};
-              adapter.Accept(&visitor);
-              builder.Finish();
-              methods.back().Encode();
-              break;
-            }
-            case CompilationTarget::kJavaLanguage: {
-              JavaLangViewBuilder builder{package_name, layout_name, target_out};
-              builder.Start();
-              LayoutCompilerVisitor visitor{&builder};
-              adapter.Accept(&visitor);
-              builder.Finish();
-              break;
-            }
-          }
-        }
-      });
-    }
+  assets->GetAssetsProvider()->ForEachFile("res/", [&](android::StringPiece s, android::FileType) {
+      if (s == "layout") {
+          auto path = StringPrintf("res/%.*s/", (int)s.size(), s.data());
+          assets->GetAssetsProvider()
+                  ->ForEachFile(path, [&](android::StringPiece layout_file, android::FileType) {
+                      auto layout_path = StringPrintf("%s%.*s", path.c_str(),
+                                                      (int)layout_file.size(), layout_file.data());
+                      android::ApkAssetsCookie cookie = android::kInvalidCookie;
+                      auto asset = resources.OpenNonAsset(layout_path,
+                                                          android::Asset::ACCESS_RANDOM, &cookie);
+                      CHECK(asset);
+                      CHECK(android::kInvalidCookie != cookie);
+                      const auto dynamic_ref_table = resources.GetDynamicRefTableForCookie(cookie);
+                      CHECK(nullptr != dynamic_ref_table);
+                      android::ResXMLTree xml_tree{dynamic_ref_table};
+                      xml_tree.setTo(asset->getBuffer(/*wordAligned=*/true), asset->getLength(),
+                                     /*copy_data=*/true);
+                      android::ResXMLParser parser{xml_tree};
+                      parser.restart();
+                      if (CanCompileLayout(&parser)) {
+                          parser.restart();
+                          const std::string layout_name =
+                                  startop::util::FindLayoutNameFromFilename(layout_path);
+                          ResXmlVisitorAdapter adapter{&parser};
+                          switch (target) {
+                              case CompilationTarget::kDex: {
+                                  methods.push_back(compiled_view.CreateMethod(
+                                          layout_name,
+                                          dex::Prototype{dex::TypeDescriptor::FromClassname(
+                                                                 "android.view.View"),
+                                                         dex::TypeDescriptor::FromClassname(
+                                                                 "android.content.Context"),
+                                                         dex::TypeDescriptor::Int()}));
+                                  DexViewBuilder builder(&methods.back());
+                                  builder.Start();
+                                  LayoutCompilerVisitor visitor{&builder};
+                                  adapter.Accept(&visitor);
+                                  builder.Finish();
+                                  methods.back().Encode();
+                                  break;
+                              }
+                              case CompilationTarget::kJavaLanguage: {
+                                  JavaLangViewBuilder builder{package_name, layout_name,
+                                                              target_out};
+                                  builder.Start();
+                                  LayoutCompilerVisitor visitor{&builder};
+                                  adapter.Accept(&visitor);
+                                  builder.Finish();
+                                  break;
+                              }
+                          }
+                      }
+                  });
+      }
   });
 
   if (target == CompilationTarget::kDex) {

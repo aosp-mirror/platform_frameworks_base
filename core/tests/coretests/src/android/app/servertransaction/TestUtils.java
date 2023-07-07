@@ -23,7 +23,6 @@ import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -96,7 +95,7 @@ class TestUtils {
         private ActivityInfo mInfo;
         private Configuration mCurConfig;
         private Configuration mOverrideConfig;
-        private CompatibilityInfo mCompatInfo;
+        private int mDeviceId;
         private String mReferrer;
         private IVoiceInteractor mVoiceInteractor;
         private int mProcState;
@@ -137,8 +136,8 @@ class TestUtils {
             return this;
         }
 
-        LaunchActivityItemBuilder setCompatInfo(CompatibilityInfo compatInfo) {
-            mCompatInfo = compatInfo;
+        LaunchActivityItemBuilder setDeviceId(int deviceId) {
+            mDeviceId = deviceId;
             return this;
         }
 
@@ -214,7 +213,7 @@ class TestUtils {
 
         LaunchActivityItem build() {
             return LaunchActivityItem.obtain(mIntent, mIdent, mInfo,
-                    mCurConfig, mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor,
+                    mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
                     null /* activityClientController */, mShareableActivityToken,

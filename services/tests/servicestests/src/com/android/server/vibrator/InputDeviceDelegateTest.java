@@ -34,6 +34,7 @@ import android.content.ContextWrapper;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.Process;
@@ -76,16 +77,19 @@ public class InputDeviceDelegateTest {
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
+    private InputManager mInputManager;
     private InputDeviceDelegate mInputDeviceDelegate;
     private IInputDevicesChangedListener mIInputDevicesChangedListener;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
-        InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
 
-        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
+        mInputManager = new InputManager(mContextSpy);
+        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE)))
+                .thenReturn(mInputManager);
         doAnswer(invocation -> mIInputDevicesChangedListener = invocation.getArgument(0))
                 .when(mIInputManagerMock).registerInputDevicesChangedListener(any());
 
@@ -96,7 +100,7 @@ public class InputDeviceDelegateTest {
 
     @After
     public void tearDown() throws Exception {
-        InputManager.clearInstance();
+        InputManagerGlobal.clearInstance();
     }
 
     @Test
@@ -263,7 +267,8 @@ public class InputDeviceDelegateTest {
     public void vibrateIfAvailable_withNoInputDevice_returnsFalse() {
         assertFalse(mInputDeviceDelegate.isAvailable());
         assertFalse(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                SYNCED_EFFECT));
     }
 
     @Test
@@ -277,7 +282,8 @@ public class InputDeviceDelegateTest {
         mInputDeviceDelegate.updateInputDeviceVibrators(/* vibrateInputDevices= */ true);
 
         assertTrue(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                SYNCED_EFFECT));
         verify(mIInputManagerMock).vibrateCombined(eq(1), same(SYNCED_EFFECT), any());
         verify(mIInputManagerMock).vibrateCombined(eq(2), same(SYNCED_EFFECT), any());
     }
@@ -312,7 +318,7 @@ public class InputDeviceDelegateTest {
             deviceIdsAndGenerations[i + 1] = 2; // update by increasing it's generation to 2.
         }
         // Force initialization of mIInputDevicesChangedListener, if it still haven't
-        InputManager.getInstance().getInputDeviceIds();
+        InputManagerGlobal.getInstance().getInputDeviceIds();
         mIInputDevicesChangedListener.onInputDevicesChanged(deviceIdsAndGenerations);
         // Makes sure all callbacks from InputDeviceDelegate are executed.
         mTestLooper.dispatchAll();
@@ -327,9 +333,11 @@ public class InputDeviceDelegateTest {
     }
 
     private InputDevice createInputDevice(int id, boolean hasVibrator) {
-        return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, hasVibrator, false, false, false /* hasSensor */, false /* hasBattery */);
-
-
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("name")
+                .setDescriptor("descriptor")
+                .setHasVibrator(hasVibrator)
+                .build();
     }
 }

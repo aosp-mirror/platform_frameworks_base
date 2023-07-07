@@ -235,60 +235,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
             return;
         }
 
-        long homeVersion = 0;
-        ArrayList<byte[]> homeSigHashes = null;
-        PackageInfo homeInfo = null;
-        String homeInstaller = null;
-        ComponentName home = getPreferredHomeComponent();
-        if (home != null) {
-            try {
-                homeInfo = mPackageManager.getPackageInfoAsUser(home.getPackageName(),
-                        PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
-                homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
-                homeVersion = homeInfo.getLongVersionCode();
-                SigningInfo signingInfo = homeInfo.signingInfo;
-                if (signingInfo == null) {
-                    Slog.e(TAG, "Home app has no signing information");
-                } else {
-                    // retrieve the newest sigs to back up
-                    // TODO (b/73988180) use entire signing history in case of rollbacks
-                    Signature[] homeInfoSignatures = signingInfo.getApkContentsSigners();
-                    homeSigHashes = BackupUtils.hashSignatureArray(homeInfoSignatures);
-                }
-            } catch (NameNotFoundException e) {
-                Slog.w(TAG, "Can't access preferred home info");
-                // proceed as though there were no preferred home set
-                home = null;
-            }
-        }
-
         try {
-            // We need to push a new preferred-home-app record if:
-            //    1. the version of the home app has changed since our last backup;
-            //    2. the home app [or absence] we now use differs from the prior state,
-            // OR 3. it looks like we use the same home app + version as before, but
-            //       the signatures don't match so we treat them as different apps.
-            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-            final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
-                    || !Objects.equals(home, mStoredHomeComponent)
-                    || (home != null
-                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo, pmi));
-            if (needHomeBackup) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Home preference changed; backing up new state " + home);
-                }
-                if (home != null) {
-                    outputBuffer.reset();
-                    outputBufferStream.writeUTF(home.flattenToString());
-                    outputBufferStream.writeLong(homeVersion);
-                    outputBufferStream.writeUTF(homeInstaller != null ? homeInstaller : "" );
-                    writeSignatureHashArray(outputBufferStream, homeSigHashes);
-                    writeEntity(data, DEFAULT_HOME_KEY, outputBuffer.toByteArray());
-                } else {
-                    data.writeEntityHeader(DEFAULT_HOME_KEY, -1);
-                }
-            }
-
             /*
              * Global metadata:
              *
@@ -403,7 +350,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         }
 
         // Finally, write the new state blob -- just the list of all apps we handled
-        writeStateFile(mAllPackages, home, homeVersion, homeSigHashes, newState);
+        writeStateFile(mAllPackages, newState);
     }
 
     private static void writeEntity(BackupDataOutput data, String key, byte[] bytes)
@@ -623,8 +570,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
     }
 
     // Util: write out our new backup state file
-    private void writeStateFile(List<PackageInfo> pkgs, ComponentName preferredHome,
-            long homeVersion, ArrayList<byte[]> homeSigHashes, ParcelFileDescriptor stateFile) {
+    private void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
         FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
         BufferedOutputStream outbuf = new BufferedOutputStream(outstream);
         DataOutputStream out = new DataOutputStream(outbuf);
@@ -634,14 +580,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // state file version header
             out.writeUTF(STATE_FILE_HEADER);
             out.writeInt(STATE_FILE_VERSION);
-
-            // If we remembered a preferred home app, record that
-            if (preferredHome != null) {
-                out.writeUTF(DEFAULT_HOME_KEY);
-                out.writeUTF(preferredHome.flattenToString());
-                out.writeLong(homeVersion);
-                writeSignatureHashArray(out, homeSigHashes);
-            }
 
             // Conclude with the metadata block
             out.writeUTF(GLOBAL_METADATA_KEY);
@@ -789,6 +727,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
                                 + Build.VERSION.INCREMENTAL + ")");
                     }
                 } else if (key.equals(DEFAULT_HOME_KEY)) {
+                    // Default home app data is no longer backed up by this agent. This code is
+                    // kept to handle restore of old backups that still contain home app data.
                     String cn = inputBufferStream.readUTF();
                     mRestoredHome = ComponentName.unflattenFromString(cn);
                     mRestoredHomeVersion = inputBufferStream.readLong();

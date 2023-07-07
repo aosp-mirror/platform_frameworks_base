@@ -114,6 +114,8 @@ public final class NotificationRecord {
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
+    // has the intercept value been set explicitly? we only want to log it if new or changed
+    private boolean mInterceptSet;
 
     // is this notification hidden since the app pkg is suspended?
     private boolean mHidden;
@@ -210,6 +212,8 @@ public final class NotificationRecord {
     // Whether this notification record should have an update logged the next time notifications
     // are sorted.
     private boolean mPendingLogUpdate = false;
+    private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
+    private boolean mSensitiveContent = false;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -499,7 +503,10 @@ public final class NotificationRecord {
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + getImportanceExplanation());
+        pw.println(prefix + "mProposedImportance="
+                + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
+        pw.println(prefix + "mSensitiveContent=" + mSensitiveContent);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
@@ -538,6 +545,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mAdjustments=" + mAdjustments);
         pw.println(prefix + "shortcut=" + notification.getShortcutId()
                 + " found valid? " + (mShortcutInfo != null));
+        pw.println(prefix + "mUserVisOverride=" + getPackageVisibilityOverride());
     }
 
     private void dumpNotification(PrintWriter pw, String prefix, Notification notification,
@@ -567,6 +575,7 @@ public final class NotificationRecord {
         } else {
             pw.println("null");
         }
+        pw.println(prefix + "vis=" + notification.visibility);
         pw.println(prefix + "contentView=" + formatRemoteViews(notification.contentView));
         pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
         pw.println(prefix + "headsUpContentView="
@@ -682,7 +691,7 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
-                                    Adjustment.KEY_SNOOZE_CRITERIA);
+                                    Adjustment.KEY_SNOOZE_CRITERIA, android.service.notification.SnoozeCriterion.class);
                     setSnoozeCriteria(snoozeCriterionList);
                     EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
                             snoozeCriterionList.toString());
@@ -708,7 +717,7 @@ public final class NotificationRecord {
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
-                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, android.app.Notification.Action.class));
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_CONTEXTUAL_ACTIONS,
                             getSystemGeneratedSmartActions().toString());
@@ -737,6 +746,18 @@ public final class NotificationRecord {
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_NOT_CONVERSATION,
                             Boolean.toString(mIsNotConversationOverride));
+                }
+                if (signals.containsKey(Adjustment.KEY_IMPORTANCE_PROPOSAL)) {
+                    mProposedImportance = signals.getInt(Adjustment.KEY_IMPORTANCE_PROPOSAL);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_IMPORTANCE_PROPOSAL,
+                            Integer.toString(mProposedImportance));
+                }
+                if (signals.containsKey(Adjustment.KEY_SENSITIVE_CONTENT)) {
+                    mSensitiveContent = signals.getBoolean(Adjustment.KEY_SENSITIVE_CONTENT);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_SENSITIVE_CONTENT,
+                            Boolean.toString(mSensitiveContent));
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -870,6 +891,17 @@ public final class NotificationRecord {
         return stats.naturalImportance;
     }
 
+    public int getProposedImportance() {
+        return mProposedImportance;
+    }
+
+    /**
+     * @return true if the notification contains sensitive content detected by the assistant.
+     */
+    public boolean hasSensitiveContent() {
+        return mSensitiveContent;
+    }
+
     public float getRankingScore() {
         return mRankingScore;
     }
@@ -901,6 +933,7 @@ public final class NotificationRecord {
 
     public boolean setIntercepted(boolean intercept) {
         mIntercept = intercept;
+        mInterceptSet = true;
         return mIntercept;
     }
 
@@ -919,6 +952,10 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public boolean hasInterceptBeenSet() {
+        return mInterceptSet;
     }
 
     public boolean isNewEnoughForAlerting(long now) {

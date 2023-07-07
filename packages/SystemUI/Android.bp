@@ -31,6 +31,52 @@ license {
     ],
 }
 
+// Opt-in configuration for code depending on Jetpack Compose.
+soong_config_module_type {
+    name: "systemui_compose_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["SYSTEMUI_USE_COMPOSE"],
+    properties: [
+        "srcs",
+        "static_libs",
+    ],
+}
+
+systemui_compose_java_defaults {
+    name: "SystemUI_compose_defaults",
+    soong_config_variables: {
+        SYSTEMUI_USE_COMPOSE: {
+            // Because files in compose/features/ depend on SystemUI
+            // code, we compile those files when compiling SystemUI-core.
+            // We also compile the ComposeFacade in
+            // compose/facade/enabled/.
+            srcs: [
+                "compose/features/src/**/*.kt",
+                "compose/facade/enabled/src/**/*.kt",
+            ],
+
+            // The dependencies needed by SystemUIComposeFeatures,
+            // except for SystemUI-core.
+            // Copied from compose/features/Android.bp.
+            static_libs: [
+                "PlatformComposeCore",
+
+                "androidx.compose.runtime_runtime",
+                "androidx.compose.material3_material3",
+                "androidx.activity_activity-compose",
+            ],
+
+            // By default, Compose is disabled and we compile the ComposeFacade
+            // in compose/facade/disabled/.
+            conditions_default: {
+                srcs: ["compose/facade/disabled/src/**/*.kt"],
+                static_libs: [],
+            },
+        },
+    },
+}
+
 java_library {
     name: "SystemUI-proto",
 
@@ -66,8 +112,29 @@ filegroup {
     ],
 }
 
+//Create a library to expose SystemUI's resources to other modules.
+android_library {
+    name: "SystemUI-res",
+    resource_dirs: [
+        "res-product",
+        "res-keyguard",
+        "res",
+    ],
+    static_libs: [
+        "SystemUISharedLib",
+        "SettingsLib",
+        "androidx.leanback_leanback",
+        "androidx.slice_slice-core",
+        "androidx.slice_slice-view",
+    ],
+    manifest: "AndroidManifest-res.xml",
+}
+
 android_library {
     name: "SystemUI-core",
+    defaults: [
+        "SystemUI_compose_defaults",
+    ],
     srcs: [
         "src/**/*.kt",
         "src/**/*.java",
@@ -89,10 +156,14 @@ android_library {
         "WifiTrackerLib",
         "WindowManager-Shell",
         "SystemUIAnimationLib",
+        "SystemUICommon",
+        "SystemUICustomizationLib",
+        "SystemUILogLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUI-statsd",
         "SettingsLib",
+        "androidx.core_core-ktx",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
@@ -109,6 +180,7 @@ android_library {
         "androidx.arch.core_core-runtime",
         "androidx.lifecycle_lifecycle-common-java8",
         "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
@@ -120,11 +192,15 @@ android_library {
         "SystemUI-proto",
         "monet",
         "dagger2",
+        "jsr305",
         "jsr330",
         "lottie",
+        "LowLightDreamLib",
+        "motion_tool_lib",
     ],
     manifest: "AndroidManifest.xml",
 
+    javacflags: ["-Adagger.fastInit=enabled"],
     kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler"],
@@ -143,23 +219,77 @@ filegroup {
 filegroup {
     name: "SystemUI-tests-utils",
     srcs: [
-        "tests/src/com/android/systemui/SysuiBaseFragmentTest.java",
-        "tests/src/com/android/systemui/SysuiTestCase.java",
-        "tests/src/com/android/systemui/TestableDependency.java",
-        "tests/src/com/android/systemui/classifier/FalsingManagerFake.java",
-        "tests/src/com/android/systemui/statusbar/notification/collection/NotificationEntryBuilder.java",
-        "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
-        "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
-        "tests/src/com/android/systemui/SysuiTestableContext.java",
-        "tests/src/com/android/systemui/util/**/*Fake.java",
-        "tests/src/com/android/systemui/utils/leaks/BaseLeakChecker.java",
-        "tests/src/com/android/systemui/utils/leaks/LeakCheckedTest.java",
-        "tests/src/com/android/systemui/**/Fake*.java",
-        "tests/src/com/android/systemui/**/Fake*.kt",
+        "tests/utils/src/**/*.java",
+        "tests/utils/src/**/*.kt",
     ],
-    exclude_srcs: [
-        "tests/src/com/android/systemui/**/*Test.java",
-        "tests/src/com/android/systemui/**/*Test.kt",
+    path: "tests/utils/src",
+}
+
+filegroup {
+    name: "SystemUI-tests-robolectric-pilots",
+    srcs: [
+        /* Keyguard converted tests */
+        // data
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/CameraQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/DoNotDisturbQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FlashlightQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/HomeControlsKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLegacySettingSyncerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLocalUserSelectionManagerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceRemoteUserSelectionManagerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/MuteQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/QrCodeScannerKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/QuickAccessWalletKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/VideoCameraQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/BiometricSettingsRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/DeviceEntryFaceAuthRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/DeviceEntryFingerprintAuthRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/DevicePostureRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/KeyguardQuickAffordanceRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/KeyguardRepositoryImplTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/LightRevealScrimRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/TrustRepositoryTest.kt",
+        // domain
+        "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardLongPressInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/LightRevealScrimInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerCallbackInteractorTest.kt",
+        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
+        // ui
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/GoneToDreamingTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
+        "tests/src/com/android/systemui/keyguard/ui/viewmodel/PrimaryBouncerToGoneTransitionViewModelTest.kt",
+        // Keyguard helper
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FakeKeyguardQuickAffordanceConfig.kt",
+        "tests/src/com/android/systemui/dock/DockManagerFake.java",
+        "tests/src/com/android/systemui/dump/LogBufferHelper.kt",
+        "tests/src/com/android/systemui/statusbar/phone/FakeKeyguardStateController.java",
+        "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
+
+        /* Biometric converted tests */
+        "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",
+        "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintAndFaceViewTest.kt",
+        "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintViewTest.kt",
+        "tests/src/com/android/systemui/biometrics/AuthControllerTest.java",
+        "tests/src/com/android/systemui/biometrics/BiometricDisplayListenerTest.java",
+        "tests/src/com/android/systemui/biometrics/FaceHelpMessageDeferralTest.kt",
+        "tests/src/com/android/systemui/biometrics/SideFpsControllerTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsControllerOverlayTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsControllerTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsDialogMeasureAdapterTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsDisplayModeTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerBaseTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerWithCoroutinesTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsShellTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsViewTest.kt",
     ],
     path: "tests/src",
 }
@@ -169,36 +299,27 @@ java_library {
     srcs: [
         "src/com/android/systemui/util/concurrency/DelayableExecutor.java",
         "src/com/android/systemui/util/time/SystemClock.java",
-        "tests/src/com/android/systemui/util/concurrency/FakeExecutor.java",
-        "tests/src/com/android/systemui/util/time/FakeSystemClock.java",
+        "tests/utils/src/com/android/systemui/util/concurrency/FakeExecutor.java",
+        "tests/utils/src/com/android/systemui/util/time/FakeSystemClock.java",
     ],
     jarjar_rules: ":jarjar-rules-shared",
 }
 
 android_library {
-    name: "SystemUI-tests",
+    name: "SystemUI-tests-base",
     manifest: "tests/AndroidManifest-base.xml",
-    additional_manifests: ["tests/AndroidManifest.xml"],
-
     resource_dirs: [
         "tests/res",
         "res-product",
         "res-keyguard",
         "res",
     ],
-    srcs: [
-        "tests/src/**/*.kt",
-        "tests/src/**/*.java",
-        "src/**/*.kt",
-        "src/**/*.java",
-        "src/**/I*.aidl",
-        ":ReleaseJavaFiles",
-    ],
     static_libs: [
         "WifiTrackerLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
+        "SystemUICustomizationLib",
         "SystemUI-statsd",
         "SettingsLib",
         "androidx.viewpager2_viewpager2",
@@ -217,29 +338,60 @@ android_library {
         "androidx.arch.core_core-runtime",
         "androidx.lifecycle_lifecycle-common-java8",
         "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
+        "kotlinx_coroutines_test",
+        "kotlin-reflect",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",
         "hamcrest-library",
         "androidx.test.rules",
-        "androidx.test.uiautomator",
-        "mockito-target-extended-minus-junit4",
         "testables",
         "truth-prebuilt",
         "monet",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
+        "LowLightDreamLib",
+        "motion_tool_lib",
+        "androidx.core_core-animation-testing-nodeps",
+        "androidx.compose.ui_ui",
+    ],
+}
+
+android_library {
+    name: "SystemUI-tests",
+    defaults: [
+        "SystemUI_compose_defaults",
+    ],
+    manifest: "tests/AndroidManifest-base.xml",
+    additional_manifests: ["tests/AndroidManifest.xml"],
+    srcs: [
+        "tests/src/**/*.kt",
+        "tests/src/**/*.java",
+        "src/**/*.kt",
+        "src/**/*.java",
+        "src/**/I*.aidl",
+        ":ReleaseJavaFiles",
+        ":SystemUI-tests-utils",
+    ],
+    static_libs: [
+        "SystemUI-tests-base",
+        "androidx.test.uiautomator_uiautomator",
+        "mockito-target-extended-minus-junit4",
+        "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
     ],
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
@@ -247,13 +399,78 @@ android_library {
         "com.android.systemui",
     ],
     plugins: ["dagger2-compiler"],
+    lint: {
+        test: true,
+        extra_check_modules: ["SystemUILintChecker"],
+    },
 }
 
-// Opt-in config for optimizing the SystemUI target using R8.
-// Enabled via `export SYSTEMUI_OPTIMIZE_JAVA=true`, or explicitly in Make via
-// the `SOONG_CONFIG_ANDROID_SYSTEMUI_OPTIMIZE_JAVA` variable.
-// TODO(b/203472868): Enable optimizations by default after stabilizing and
-// building out retrace infrastructure.
+android_app {
+    name: "SystemUIRobo-stub",
+    defaults: [
+        "platform_app_defaults",
+        "SystemUI_optimized_defaults",
+        "SystemUI_compose_defaults",
+    ],
+    manifest: "tests/AndroidManifest-base.xml",
+
+    srcs: [
+        "src/**/*.kt",
+        "src/**/*.java",
+        "src/**/I*.aidl",
+        ":ReleaseJavaFiles",
+    ],
+    static_libs: [
+        "SystemUI-tests-base",
+    ],
+    aaptflags: [
+        "--extra-packages",
+        "com.android.systemui",
+    ],
+    dont_merge_manifests: true,
+    platform_apis: true,
+    system_ext_specific: true,
+    certificate: "platform",
+    privileged: true,
+    resource_dirs: [],
+    kotlincflags: ["-Xjvm-default=all"],
+    optimize: {
+        shrink_resources: false,
+        proguard_flags_files: ["proguard.flags"],
+    },
+
+    plugins: ["dagger2-compiler"],
+}
+
+android_robolectric_test {
+    name: "SystemUiRoboTests",
+    srcs: [
+        "tests/robolectric/src/**/*.kt",
+        "tests/robolectric/src/**/*.java",
+        ":SystemUI-tests-utils",
+        ":SystemUI-tests-robolectric-pilots",
+    ],
+    static_libs: [
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
+        "inline-mockito-robolectric-prebuilt",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "truth-prebuilt",
+    ],
+
+    upstream: true,
+
+    instrumentation_for: "SystemUIRobo-stub",
+    java_resource_dirs: ["tests/robolectric/config"],
+}
+
+// Opt-out config for optimizing the SystemUI target using R8.
+// Disabled via `export SYSTEMUI_OPTIMIZE_JAVA=false`, or explicitly in Make via
+// `SYSTEMUI_OPTIMIZE_JAVA := false`.
 soong_config_module_type {
     name: "systemui_optimized_java_defaults",
     module_type: "java_defaults",
@@ -263,18 +480,19 @@ soong_config_module_type {
 }
 
 systemui_optimized_java_defaults {
-    name: "SystemUI_app_defaults",
+    name: "SystemUI_optimized_defaults",
     soong_config_variables: {
         SYSTEMUI_OPTIMIZE_JAVA: {
             optimize: {
                 enabled: true,
                 optimize: true,
                 shrink: true,
-                proguard_flags_files: ["proguard.flags"],
+                shrink_resources: true,
+                proguard_compatibility: false,
             },
             conditions_default: {
                 optimize: {
-                    proguard_flags_files: ["proguard.flags"],
+                    proguard_compatibility: false,
                 },
             },
         },
@@ -285,7 +503,7 @@ android_app {
     name: "SystemUI",
     defaults: [
         "platform_app_defaults",
-        "SystemUI_app_defaults",
+        "SystemUI_optimized_defaults",
     ],
     static_libs: [
         "SystemUI-core",
@@ -300,7 +518,11 @@ android_app {
     kotlincflags: ["-Xjvm-default=enable"],
 
     dxflags: ["--multi-dex"],
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
     required: [
         "privapp_whitelist_com.android.systemui",
+        "wmshell.protolog.json.gz",
     ],
 }

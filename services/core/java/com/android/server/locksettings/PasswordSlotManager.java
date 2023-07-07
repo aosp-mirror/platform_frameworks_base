@@ -43,7 +43,7 @@ import java.util.Set;
  * If a /metadata partition does not exist, GSIs are not supported, and PasswordSlotManager will
  * simply not persist the slot mapping.
  */
-public class PasswordSlotManager {
+class PasswordSlotManager {
     private static final String TAG = "PasswordSlotManager";
 
     private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
@@ -72,8 +72,6 @@ public class PasswordSlotManager {
 
     /**
      * Notify the manager of which slots are definitively in use by the current OS image.
-     *
-     * @throws RuntimeException
      */
     public void refreshActiveSlots(Set<Integer> activeSlots) throws RuntimeException {
         if (mSlotMap == null) {
@@ -103,8 +101,6 @@ public class PasswordSlotManager {
 
     /**
      * Mark the given slot as in use by the current OS image.
-     *
-     * @throws RuntimeException
      */
     public void markSlotInUse(int slot) throws RuntimeException {
         ensureSlotMapLoaded();
@@ -117,8 +113,6 @@ public class PasswordSlotManager {
 
     /**
      * Mark the given slot as no longer in use by the current OS image.
-     *
-     * @throws RuntimeException
      */
     public void markSlotDeleted(int slot) throws RuntimeException {
         ensureSlotMapLoaded();

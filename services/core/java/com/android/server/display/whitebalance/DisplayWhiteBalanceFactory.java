@@ -95,6 +95,8 @@ public class DisplayWhiteBalanceFactory {
         final float[] strongDisplayColorTemperatures = getFloatArray(resources,
                 com.android.internal.R.array
                 .config_displayWhiteBalanceStrongDisplayColorTemperatures);
+        final boolean lightModeAllowed = resources.getBoolean(
+                com.android.internal.R.bool.config_displayWhiteBalanceLightModeAllowed);
         final DisplayWhiteBalanceController controller = new DisplayWhiteBalanceController(
                 brightnessSensor, brightnessFilter, colorTemperatureSensor, colorTemperatureFilter,
                 throttler, displayWhiteBalanceLowLightAmbientBrightnesses,
@@ -102,7 +104,7 @@ public class DisplayWhiteBalanceFactory {
                 displayWhiteBalanceHighLightAmbientBrightnesses,
                 displayWhiteBalanceHighLightAmbientBiases, highLightAmbientColorTemperature,
                 ambientColorTemperatures, displayColorTemperatures, strongAmbientColorTemperatures,
-                strongDisplayColorTemperatures);
+                strongDisplayColorTemperatures, lightModeAllowed);
         brightnessSensor.setCallbacks(controller);
         colorTemperatureSensor.setCallbacks(controller);
         return controller;

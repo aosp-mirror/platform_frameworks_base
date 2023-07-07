@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Ứng dụng đã được cài đặt."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bạn có muốn cài đặt ứng dụng này không?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bạn có muốn cập nhật ứng dụng này không?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Cập nhật ứng dụng này của <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nỨng dụng này thường nhận thông tin cập nhật từ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Khi cập nhật từ một nguồn khác, trong tương lai, bạn có thể nhận thông tin cập nhật từ nguồn bất kỳ trên điện thoại của bạn. Chức năng ứng dụng có thể thay đổi."</string>
     <string name="install_failed" msgid="5777824004474125469">"Ứng dụng chưa được cài đặt."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Đã chặn cài đặt gói."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Chưa cài đặt được ứng dụng do gói xung đột với một gói hiện có."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Người dùng này không thể cài đặt ứng dụng không xác định"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Người dùng này không được phép cài đặt ứng dụng"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Vẫn cập nhật"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Quản lý ứng dụng"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Hết dung lượng"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Không thể cài đặt <xliff:g id="APP_NAME">%1$s</xliff:g>. Hãy giải phóng dung lượng và thử lại."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Thay thế ứng dụng này bằng phiên bản gốc? Tất cả dữ liệu sẽ bị xóa."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Thay thế ứng dụng này bằng phiên bản gốc? Tất cả dữ liệu sẽ bị xóa. Điều này ảnh hưởng đến tất cả người dùng thiết bị này, bao gồm cả những người có hồ sơ công việc."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Giữ lại <xliff:g id="SIZE">%1$s</xliff:g> dữ liệu ứng dụng."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Bạn có muốn xoá ứng dụng này không?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Bạn có muốn gỡ cài đặt ứng dụng này không? Bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> cũng sẽ bị xoá."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Các quá trình gỡ cài đặt đang chạy"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Gỡ cài đặt không thành công"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Đang gỡ cài đặt..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Đang gỡ cài đặt <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Đã gỡ cài đặt xong."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Đã gỡ cài đặt <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Đã xoá bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Gỡ cài đặt không thành công."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Gỡ cài đặt <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> không thành công."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Đang xoá bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Không thể gỡ cài đặt ứng dụng quản trị thiết bị đang hoạt động"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Không thể gỡ cài đặt ứng dụng quản trị thiết bị đang hoạt động cho <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ứng dụng này bắt buộc với một số người dùng hoặc hồ sơ và được gỡ cài đặt cho người khác"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Không xác định"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Để bảo mật, máy tính bảng của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Để bảo mật, TV của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Để bảo mật cho bạn, đồng hồ của bạn hiện không được phép cài đặt những ứng dụng không xác định qua nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Để bảo mật, điện thoại của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Điện thoại và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với điện thoại của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Máy tính bảng và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với máy tính bảng của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với TV của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tiếp tục"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Cài đặt"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Cài đặt/gỡ cài đặt ứng dụng Wear"</string>

@@ -93,6 +93,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -126,6 +127,8 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -960,7 +963,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkSignatures(String pkg1, String pkg2) {
         try {
-            return mPM.checkSignatures(pkg1, pkg2);
+            return mPM.checkSignatures(pkg1, pkg2, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1221,6 +1224,31 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    @NonNull
+    public PersistableBundle getAppMetadata(@NonNull String packageName)
+            throws NameNotFoundException {
+        PersistableBundle appMetadata = null;
+        ParcelFileDescriptor pfd = null;
+        try {
+            pfd = mPM.getAppMetadataFd(packageName, getUserId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (pfd != null) {
+            try (InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+                appMetadata = PersistableBundle.readFromStream(inputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return appMetadata != null ? appMetadata : new PersistableBundle();
     }
 
     @SuppressWarnings("unchecked")
@@ -1695,8 +1723,8 @@ public class ApplicationPackageManager extends PackageManager {
         ComponentName className, int flags)
             throws NameNotFoundException {
         try {
-            InstrumentationInfo ii = mPM.getInstrumentationInfo(
-                className, flags);
+            InstrumentationInfo ii = mPM.getInstrumentationInfoAsUser(
+                    className, flags, getUserId());
             if (ii != null) {
                 return ii;
             }
@@ -1713,7 +1741,7 @@ public class ApplicationPackageManager extends PackageManager {
         String targetPackage, int flags) {
         try {
             ParceledListSlice<InstrumentationInfo> parceledList =
-                    mPM.queryInstrumentation(targetPackage, flags);
+                    mPM.queryInstrumentationAsUser(targetPackage, flags, getUserId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -2533,7 +2561,7 @@ public class ApplicationPackageManager extends PackageManager {
     public InstallSourceInfo getInstallSourceInfo(String packageName) throws NameNotFoundException {
         final InstallSourceInfo installSourceInfo;
         try {
-            installSourceInfo = mPM.getInstallSourceInfo(packageName);
+            installSourceInfo = mPM.getInstallSourceInfo(packageName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3024,7 +3052,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.setComponentEnabledSetting(componentName, enabled
                     ? COMPONENT_ENABLED_STATE_DEFAULT
                     : COMPONENT_ENABLED_STATE_DISABLED,
-                    DONT_KILL_APP, getUserId());
+                    DONT_KILL_APP, getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3047,7 +3075,8 @@ public class ApplicationPackageManager extends PackageManager {
     public void setComponentEnabledSetting(ComponentName componentName,
                                            int newState, int flags) {
         try {
-            mPM.setComponentEnabledSetting(componentName, newState, flags, getUserId());
+            mPM.setComponentEnabledSetting(componentName, newState, flags, getUserId(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3056,7 +3085,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void setComponentEnabledSettings(List<ComponentEnabledSetting> settings) {
         try {
-            mPM.setComponentEnabledSettings(settings, getUserId());
+            mPM.setComponentEnabledSettings(settings, getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3247,6 +3276,20 @@ public class ApplicationPackageManager extends PackageManager {
             int flags) {
         try {
             mPM.addCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
+                    sourceUserId, targetUserId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean removeCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
+            int targetUserId, int flags) {
+        try {
+            return mPM.removeCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
                     sourceUserId, targetUserId, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3657,15 +3700,6 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getContentCaptureServicePackageName() {
-        try {
-            return mPM.getContentCaptureServicePackageName();
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
-    @Override
     public boolean isPackageStateProtected(String packageName, int userId) {
         try {
             return mPM.isPackageStateProtected(packageName, userId);
@@ -3716,15 +3750,7 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(propertyName);
-        try {
-            final Property property = mPM.getProperty(propertyName, packageName, null);
-            if (property == null) {
-                throw new NameNotFoundException();
-            }
-            return property;
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+        return getPropertyAsUser(propertyName, packageName, null /* className */, getUserId());
     }
 
     @Override
@@ -3732,9 +3758,18 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         Objects.requireNonNull(component);
         Objects.requireNonNull(propertyName);
+        return getPropertyAsUser(propertyName,
+                component.getPackageName(), component.getClassName(), getUserId());
+    }
+
+    @Override
+    public Property getPropertyAsUser(@NonNull String propertyName, @NonNull String packageName,
+            @Nullable String className, int userId) throws NameNotFoundException {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(propertyName);
         try {
-            final Property property = mPM.getProperty(
-                    propertyName, component.getPackageName(), component.getClassName());
+            final Property property = mPM.getPropertyAsUser(propertyName,
+                    packageName, className, userId);
             if (property == null) {
                 throw new NameNotFoundException();
             }
@@ -3824,8 +3859,17 @@ public class ApplicationPackageManager extends PackageManager {
             @NonNull String targetPackageName) throws NameNotFoundException {
         Objects.requireNonNull(sourcePackageName);
         Objects.requireNonNull(targetPackageName);
+        return canPackageQuery(sourcePackageName, new String[]{targetPackageName})[0];
+    }
+
+    @Override
+    @NonNull
+    public boolean[] canPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String[] targetPackageNames) throws NameNotFoundException {
+        Objects.requireNonNull(sourcePackageName);
+        Objects.requireNonNull(targetPackageNames);
         try {
-            return mPM.canPackageQuery(sourcePackageName, targetPackageName, getUserId());
+            return mPM.canPackageQuery(sourcePackageName, targetPackageNames, getUserId());
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
             throw new RuntimeException(e);
@@ -3840,6 +3884,31 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.makeUidVisible(recipientUid, visibleUid);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public boolean canUserUninstall(String packageName, UserHandle user) {
+        try {
+            return mPM.getBlockUninstallForUser(packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public boolean shouldShowNewAppInstalledNotification() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED, 0) == 1;
+    }
+
+    @Override
+    public void relinquishUpdateOwnership(String targetPackage) {
+        Objects.requireNonNull(targetPackage);
+        try {
+            mPM.relinquishUpdateOwnership(targetPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

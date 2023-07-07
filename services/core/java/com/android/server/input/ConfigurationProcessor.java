@@ -18,11 +18,11 @@ package com.android.server.input;
 
 import android.text.TextUtils;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 
 import java.io.InputStream;
 import java.util.ArrayList;

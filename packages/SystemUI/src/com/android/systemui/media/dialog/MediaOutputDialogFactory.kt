@@ -16,17 +16,22 @@
 
 package com.android.systemui.media.dialog
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.media.AudioManager
 import android.media.session.MediaSessionManager
 import android.os.PowerExemptionManager
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import java.util.Optional
 import javax.inject.Inject
@@ -45,9 +50,13 @@ class MediaOutputDialogFactory @Inject constructor(
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
     private val audioManager: AudioManager,
-    private val powerExemptionManager: PowerExemptionManager
+    private val powerExemptionManager: PowerExemptionManager,
+    private val keyGuardManager: KeyguardManager,
+    private val featureFlags: FeatureFlags,
+    private val userTracker: UserTracker
 ) {
     companion object {
+        private const val INTERACTION_JANK_TAG = "media_output"
         var mediaOutputDialog: MediaOutputDialog? = null
     }
 
@@ -60,14 +69,21 @@ class MediaOutputDialogFactory @Inject constructor(
             context, packageName,
             mediaSessionManager, lbm, starter, notifCollection,
             dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
-            powerExemptionManager)
+            powerExemptionManager, keyGuardManager, featureFlags, userTracker)
         val dialog =
-            MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller, uiEventLogger)
+            MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller,
+                    dialogLaunchAnimator, uiEventLogger)
         mediaOutputDialog = dialog
 
         // Show the dialog.
         if (view != null) {
-            dialogLaunchAnimator.showFromView(dialog, view)
+            dialogLaunchAnimator.showFromView(
+                dialog, view,
+                cuj = DialogCuj(
+                    InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                    INTERACTION_JANK_TAG
+                )
+            )
         } else {
             dialog.show()
         }

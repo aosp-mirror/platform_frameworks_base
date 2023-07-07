@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.RegistrationManager;
+import android.telephony.ims.SipDetails;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
@@ -42,6 +43,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -64,7 +66,8 @@ public class ImsRegistrationImplBase {
                     REGISTRATION_TECH_LTE,
                     REGISTRATION_TECH_IWLAN,
                     REGISTRATION_TECH_CROSS_SIM,
-                    REGISTRATION_TECH_NR
+                    REGISTRATION_TECH_NR,
+                    REGISTRATION_TECH_3G
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsRegistrationTech {}
@@ -92,10 +95,15 @@ public class ImsRegistrationImplBase {
     public static final int REGISTRATION_TECH_NR = 3;
 
     /**
+     * This ImsService is registered to IMS via 3G.
+     */
+    public static final int REGISTRATION_TECH_3G = 4;
+
+    /**
      * This is used to check the upper range of registration tech
      * @hide
      */
-    public static final int REGISTRATION_TECH_MAX = REGISTRATION_TECH_NR + 1;
+    public static final int REGISTRATION_TECH_MAX = REGISTRATION_TECH_3G + 1;
 
     // Registration states, used to notify new ImsRegistrationImplBase#Callbacks of the current
     // state.
@@ -103,6 +111,73 @@ public class ImsRegistrationImplBase {
     // with NOT_REGISTERED in the case where the ImsService has not updated the registration state
     // yet.
     private static final int REGISTRATION_STATE_UNKNOWN = -1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = {"REASON_"},
+        value = {
+            REASON_UNKNOWN,
+            REASON_SIM_REMOVED,
+            REASON_SIM_REFRESH,
+            REASON_ALLOWED_NETWORK_TYPES_CHANGED,
+            REASON_NON_IMS_CAPABLE_NETWORK,
+            REASON_RADIO_POWER_OFF,
+            REASON_HANDOVER_FAILED,
+            REASON_VOPS_NOT_SUPPORTED,
+        })
+    public @interface ImsDeregistrationReason{}
+
+    /**
+     * Unspecified reason.
+     * @hide
+     */
+    public static final int REASON_UNKNOWN = 0;
+
+    /**
+     * Since SIM is removed, the credentials for IMS service is also removed.
+     * @hide
+     */
+    public static final int REASON_SIM_REMOVED = 1;
+
+    /**
+     * Detach from the network shall be performed due to the SIM refresh. IMS service should be
+     * deregistered before that procedure.
+     * @hide
+     */
+    public static final int REASON_SIM_REFRESH = 2;
+
+    /**
+     * The allowed network types have changed, resulting in a network type
+     * that does not support IMS.
+     * @hide
+     */
+    public static final int REASON_ALLOWED_NETWORK_TYPES_CHANGED = 3;
+
+   /**
+     * The device camped on a network that does not support IMS.
+     * @hide
+     */
+    public static final int REASON_NON_IMS_CAPABLE_NETWORK = 4;
+
+    /**
+     * IMS service should be deregistered from the network before turning off the radio.
+     * @hide
+     */
+    public static final int REASON_RADIO_POWER_OFF = 5;
+
+    /**
+     * Since the handover is failed or not allowed, the data service for IMS shall be
+     * disconnected.
+     * @hide
+     */
+    public static final int REASON_HANDOVER_FAILED = 6;
+
+    /**
+     * The network is changed to a network that does not support voice over IMS.
+     * @hide
+     */
+    public static final int REASON_VOPS_NOT_SUPPORTED = 7;
 
     private Executor mExecutor;
 
@@ -182,6 +257,12 @@ public class ImsRegistrationImplBase {
                     .triggerSipDelegateDeregistration(), "triggerSipDelegateDeregistration");
         }
 
+        @Override
+        public void triggerDeregistration(@ImsDeregistrationReason int reason) {
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .triggerDeregistration(reason), "triggerDeregistration");
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -228,6 +309,9 @@ public class ImsRegistrationImplBase {
     private int mRegistrationState = REGISTRATION_STATE_UNKNOWN;
     // Locked on mLock, create unspecified disconnect cause.
     private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
+    // Locked on mLock
+    private int mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+    private int mLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
 
     // We hold onto the uris each time they change so that we can send it to a callback when its
     // first added.
@@ -242,11 +326,19 @@ public class ImsRegistrationImplBase {
     }
 
     private void addRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
+        // This is purposefully not synchronized with broadcastToCallbacksLocked because the
+        // list of callbacks to notify is copied over from the original list modified here. I also
+        // do not want to risk introducing a deadlock by using the same mCallbacks Object to
+        // synchronize on outgoing and incoming operations.
         mCallbacks.register(c);
         updateNewCallbackWithState(c);
     }
 
     private void removeRegistrationCallback(IImsRegistrationCallback c) {
+        // This is purposefully not synchronized with broadcastToCallbacksLocked because the
+        // list of callbacks to notify is copied over from the original list modified here. I also
+        // do not want to risk introducing a deadlock by using the same mCallbacks Object to
+        // synchronize on outgoing and incoming operations.
         mCallbacks.unregister(c);
     }
 
@@ -303,6 +395,19 @@ public class ImsRegistrationImplBase {
         // Stub implementation, ImsService should implement this
     }
 
+    /**
+     * Requests IMS stack to perform graceful IMS deregistration before radio performing
+     * network detach in the events of SIM remove, refresh or and so on. The radio waits for
+     * the IMS deregistration, which will be notified by telephony via
+     * {@link android.hardware.radio.ims.IRadioIms#updateImsRegistrationInfo()},
+     * or a certain timeout interval to start the network detach procedure.
+     *
+     * @param reason the reason why the deregistration is triggered.
+     * @hide
+     */
+    public void triggerDeregistration(@ImsDeregistrationReason int reason) {
+        // Stub Implementation, can be overridden by ImsService
+    }
 
     /**
      * Notify the framework that the device is connected to the IMS network.
@@ -324,7 +429,7 @@ public class ImsRegistrationImplBase {
     @SystemApi
     public final void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
         updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onRegistered(attributes);
             } catch (RemoteException e) {
@@ -353,7 +458,7 @@ public class ImsRegistrationImplBase {
     @SystemApi
     public final void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
         updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onRegistering(attributes);
             } catch (RemoteException e) {
@@ -381,12 +486,101 @@ public class ImsRegistrationImplBase {
      */
     @SystemApi
     public final void onDeregistered(ImsReasonInfo info) {
-        updateToDisconnectedState(info);
+        // Default impl to keep backwards compatibility with old implementations
+        onDeregistered(info, RegistrationManager.SUGGESTED_ACTION_NONE, REGISTRATION_TECH_NONE);
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Prior to calling {@link #onDeregistered(ImsReasonInfo,int)}, you should ensure that any
+     * changes to {@link android.telephony.ims.feature.ImsFeature} capability availability is sent
+     * to the framework.  For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If you do not report capability changes impacted by
+     * de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param suggestedAction the expected behavior of radio protocol stack.
+     * @param imsRadioTech the network type on which IMS registration has failed.
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationTech int imsRadioTech) {
+        updateToDisconnectedState(info, suggestedAction, imsRadioTech);
         // ImsReasonInfo should never be null.
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
-                c.onDeregistered(reasonInfo);
+                c.onDeregistered(reasonInfo, suggestedAction, imsRadioTech);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
+            }
+        });
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Before calling {@link #onDeregistered(ImsReasonInfo, SipDetails)}, ImsService should
+     * ensure that any changes to {@link android.telephony.ims.feature.ImsFeature} capability
+     * availability is sent to the framework.
+     * For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If ImsService do not report capability changes impacted
+     * by de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param details the {@link SipDetails} related to disconnected Ims registration
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+            @NonNull SipDetails details) {
+        onDeregistered(info, RegistrationManager.SUGGESTED_ACTION_NONE, REGISTRATION_TECH_NONE,
+                details);
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Before calling {@link #onDeregistered(ImsReasonInfo, SipDetails)}, ImsService should
+     * ensure that any changes to {@link android.telephony.ims.feature.ImsFeature} capability
+     * availability is sent to the framework.
+     * For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If ImsService do not report capability changes impacted
+     * by de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param suggestedAction the expected behavior of radio protocol stack.
+     * @param details the {@link SipDetails} related to disconnected Ims registration
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationTech int imsRadioTech, @NonNull SipDetails details) {
+        updateToDisconnectedState(info, suggestedAction, imsRadioTech);
+        // ImsReasonInfo should never be null.
+        final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
+        broadcastToCallbacksLocked((c) -> {
+            try {
+                c.onDeregisteredWithDetails(reasonInfo, suggestedAction, imsRadioTech, details);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }
@@ -406,7 +600,7 @@ public class ImsRegistrationImplBase {
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onTechnologyChangeFailed(imsRadioTech, reasonInfo);
             } catch (RemoteException e) {
@@ -429,7 +623,20 @@ public class ImsRegistrationImplBase {
             mUris = ArrayUtils.cloneOrNull(uris);
             mUrisSet = true;
         }
-        mCallbacks.broadcastAction((c) -> onSubscriberAssociatedUriChanged(c, uris));
+        broadcastToCallbacksLocked((c) -> onSubscriberAssociatedUriChanged(c, uris));
+    }
+
+    /**
+     * Broadcast the specified operation in a synchronized manner so that multiple threads do not
+     * try to call broadcast at the same time, which will generate an error.
+     * @param c The Consumer lambda method containing the callback to call.
+     */
+    private void broadcastToCallbacksLocked(Consumer<IImsRegistrationCallback> c) {
+        // One broadcast can happen at a time, so synchronize threads so only one
+        // beginBroadcast/endBroadcast happens at a time.
+        synchronized (mCallbacks) {
+            mCallbacks.broadcastAction(c);
+        }
     }
 
     private void onSubscriberAssociatedUriChanged(IImsRegistrationCallback callback, Uri[] uris) {
@@ -445,10 +652,14 @@ public class ImsRegistrationImplBase {
             mRegistrationAttributes = attributes;
             mRegistrationState = newState;
             mLastDisconnectCause = null;
+            mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+            mLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
         }
     }
 
-    private void updateToDisconnectedState(ImsReasonInfo info) {
+    private void updateToDisconnectedState(ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationTech int imsRadioTech) {
         synchronized (mLock) {
             //We don't want to send this info over if we are disconnected
             mUrisSet = false;
@@ -458,6 +669,8 @@ public class ImsRegistrationImplBase {
                     RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
             if (info != null) {
                 mLastDisconnectCause = info;
+                mLastDisconnectSuggestedAction = suggestedAction;
+                mLastDisconnectRadioTech = imsRadioTech;
             } else {
                 Log.w(LOG_TAG, "updateToDisconnectedState: no ImsReasonInfo provided.");
                 mLastDisconnectCause = new ImsReasonInfo();
@@ -474,18 +687,22 @@ public class ImsRegistrationImplBase {
         int state;
         ImsRegistrationAttributes attributes;
         ImsReasonInfo disconnectInfo;
+        int suggestedAction;
+        int imsDisconnectRadioTech;
         boolean urisSet;
         Uri[] uris;
         synchronized (mLock) {
             state = mRegistrationState;
             attributes = mRegistrationAttributes;
             disconnectInfo = mLastDisconnectCause;
+            suggestedAction = mLastDisconnectSuggestedAction;
+            imsDisconnectRadioTech = mLastDisconnectRadioTech;
             urisSet = mUrisSet;
             uris = mUris;
         }
         switch (state) {
             case RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED: {
-                c.onDeregistered(disconnectInfo);
+                c.onDeregistered(disconnectInfo, suggestedAction, imsDisconnectRadioTech);
                 break;
             }
             case RegistrationManager.REGISTRATION_STATE_REGISTERING: {
@@ -515,6 +732,18 @@ public class ImsRegistrationImplBase {
     public final void setDefaultExecutor(@NonNull Executor executor) {
         if (mExecutor == null) {
             mExecutor = executor;
+        }
+    }
+
+    /**
+     * Clear the cached data when the subscription is no longer valid
+     * such as when a sim is removed.
+     * @hide
+     */
+    public final void clearRegistrationCache() {
+        synchronized (mLock) {
+            mUris = null;
+            mUrisSet = false;
         }
     }
 }
