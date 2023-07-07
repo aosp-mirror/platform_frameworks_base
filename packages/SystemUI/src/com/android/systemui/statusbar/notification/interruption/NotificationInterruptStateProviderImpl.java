@@ -582,10 +582,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     }
 
     private boolean shouldSuppressHeadsUpWhenAwakeForOldWhen(NotificationEntry entry, boolean log) {
-        if (!mFlags.isNoHunForOldWhenEnabled()) {
-            return false;
-        }
-
         final Notification notification = entry.getSbn().getNotification();
         if (notification == null) {
             return false;
