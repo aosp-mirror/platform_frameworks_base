@@ -21,6 +21,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.telephony.CellLocation;
 
+import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.telephony.Rlog;
+
 /**
  * Represents the cell location on a CDMA phone.
  *
@@ -197,8 +200,8 @@ public class CdmaCellLocation extends CellLocation {
     @Override
     public String toString() {
         return "[" + this.mBaseStationId + ","
-                   + this.mBaseStationLatitude + ","
-                   + this.mBaseStationLongitude + ","
+                   + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, this.mBaseStationLatitude) + ","
+                   + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, this.mBaseStationLongitude) + ","
                    + this.mSystemId + ","
                    + this.mNetworkId + "]";
     }

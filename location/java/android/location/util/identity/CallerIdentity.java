@@ -124,15 +124,22 @@ public final class CallerIdentity {
                 packageName, attributionTag, listenerId);
     }
 
+    // in some tests these constants are loaded too early leading to an "incorrect" view of the
+    // current pid and uid. load lazily to prevent this problem in tests.
+    private static class Loader {
+        private static final int MY_UID = Process.myUid();
+        private static final int MY_PID = Process.myPid();
+    }
+
     private final int mUid;
 
     private final int mPid;
 
     private final String mPackageName;
 
-    private final @Nullable String mAttributionTag;
+    @Nullable private final String mAttributionTag;
 
-    private final @Nullable String mListenerId;
+    @Nullable private final String mListenerId;
 
     private CallerIdentity(int uid, int pid, String packageName,
             @Nullable String attributionTag, @Nullable String listenerId) {
@@ -179,6 +186,24 @@ public final class CallerIdentity {
     /** Returns true if this represents a system server identity. */
     public boolean isSystemServer() {
         return mUid == Process.SYSTEM_UID;
+    }
+
+    /** Returns true if this identity represents the same user this code is running in. */
+    public boolean isMyUser() {
+        return UserHandle.getUserId(mUid) == UserHandle.getUserId(Loader.MY_UID);
+    }
+
+    /** Returns true if this identity represents the same uid this code is running in. */
+    public boolean isMyUid() {
+        return mUid == Loader.MY_UID;
+    }
+
+    /**
+     * Returns true if this identity represents the same process this code is running in. Returns
+     * false if the identity process is unknown.
+     */
+    public boolean isMyProcess() {
+        return mPid == Loader.MY_PID;
     }
 
     /**

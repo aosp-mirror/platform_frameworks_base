@@ -179,7 +179,7 @@ void FrameInfoVisualizer::initializeRects(const int baseline, const int width) {
 void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex end) {
     int fast_i = (mNumFastRects - 1) * 4;
     int janky_i = (mNumJankyRects - 1) * 4;
-    ;
+
     for (size_t fi = 0; fi < mFrameSource.size(); fi++) {
         if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
             continue;

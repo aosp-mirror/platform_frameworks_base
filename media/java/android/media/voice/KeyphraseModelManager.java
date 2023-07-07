@@ -21,7 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Slog;
@@ -150,6 +152,25 @@ public final class KeyphraseModelManager {
             if (status != SoundTrigger.STATUS_OK) {
                 throw new ServiceSpecificException(status);
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Override the persistent enrolled model database with an in-memory
+     * fake for testing purposes.
+     *
+     * @param enabled - {@code true} if the model enrollment database should be overridden with an
+     * in-memory fake. {@code false} if the real, persistent model enrollment database should be
+     * used.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+    @TestApi
+    public void setModelDatabaseForTestEnabled(boolean enabled) {
+        try {
+            mVoiceInteractionManagerService.setModelDatabaseForTestEnabled(enabled, new Binder());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

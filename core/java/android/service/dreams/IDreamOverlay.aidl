@@ -16,8 +16,7 @@
 
 package android.service.dreams;
 
-import android.service.dreams.IDreamOverlayCallback;
-import android.view.WindowManager.LayoutParams;
+import android.service.dreams.IDreamOverlayClientCallback;
 
 /**
 * {@link IDreamOverlay} provides a way for a component to annotate a dream with additional view
@@ -28,10 +27,7 @@ import android.view.WindowManager.LayoutParams;
 */
 interface IDreamOverlay {
     /**
-    * @param params The {@link LayoutParams} for the associated DreamWindow, including the window
-                    token of the Dream Activity.
-    * @param callback The {@link IDreamOverlayCallback} for requesting actions such as exiting the
-    *                 dream.
+    * Retrieves a client the caller can use to interact with the dream overlay.
     */
-    void startDream(in LayoutParams params, in IDreamOverlayCallback callback);
+    void getClient(in IDreamOverlayClientCallback callback);
 }

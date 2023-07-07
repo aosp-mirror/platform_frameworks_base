@@ -34,7 +34,9 @@
     <color name="bottom_sheet_button_text_color_focused">#DB202124</color>
     <color name="bottom_sheet_button_text_color_unfocused">#B5E8EAED</color>
 
-    <color name="privacy_circle">#5BB974</color> <!-- g400 -->
+    <color name="privacy_mic_cam_chip">#5BB974</color> <!-- g400 -->
+    <color name="privacy_media_projection_chip">#C9CCD0</color>
     <color name="privacy_icon_tint">#30302A</color>
     <color name="privacy_chip_dot_bg_tint">#66000000</color>
+    <color name="cast_connected_fill">#FF0000</color>
 </resources>

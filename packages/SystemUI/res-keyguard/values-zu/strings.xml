@@ -21,26 +21,30 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Faka iPHINIKHODI yakho"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Faka i-PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Faka iphethini yakho"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Dweba iphethini"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Faka iphasiwedi yakho"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Faka iphasiwedi"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ikhadi elingavumelekile."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Kushajiwe"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Iyashaja ngaphandle kwentambo"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Idokhu Yokushaja"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Iyashaja"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Iyashaja"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ishaja kaningi"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ishaja kancane"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ukushaja kukhawulelwe okwesikhashana"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ukushaja kuthuthukisiwe ukuze kuvikelwe ibhethri"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • • Inkinga ngesisekeli sokushaja"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Chofoza Menyu ukuvula."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Inethiwekhi ivaliwe"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Alikho ikhadi le-SIM."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Faka ikhadi le-SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Ikhadi le-SIM alitholakali noma alifundeki. Sicela ufake ikhadi le-SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Ikhadi le-SIM elingasetshenzisiwe."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Ikhadi le-SIM lakho likhutshazwe unomphela.\n Xhumana nomhlinzeki wakho wokuxhumana okungenazintambo ukuze uthole enye i-SIM khadi."</string>
-    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"Ikhadi le-SIM livaliwe."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"Ikhadi le-SIM livalwe nge-PUK."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"Ivula ikhadi le-SIM..."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ayikho i-SIM"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"engeza i-SIM"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"I-SIM ayitholakali noma ayifundeki. engeza i-SIM"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"I-SIM engasebenziseki."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"I-SIM yakho iyekiswe ukusebenza unomphela.\n Xhumana nomhlinzeki wakho wesevisi ngokungenazintambo ukuze uthole enye i-SIM."</string>
+    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"I-SIM ikhiyiwe."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"I-SIM ikhiyiwe nge-PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Ivula i-SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"Indawo yephinikhodi"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Iphasiwedi yedivayisi"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Indawo yephinikhodi ye-SIM"</string>
@@ -51,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"I-eSIM ayikwakhi ukukhutshazwa ngenxa yephutha."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Faka"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Iphethini engalungile"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Iphethini engalungile. Zama futhi."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Iphasiwedi engalungile"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Iphasiwedi engalungile. Zama futhi."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Iphinikhodi engalungile"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"I-PIN okungeyona. Zama futhi."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Noma vula ngezigxivizo zeminwe"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Isigxivizo somunwe asaziwa"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Ubuso abaziwa"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Zama futhi noma faka iphinikhodi"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Zama futhi noma faka iphasiwedi"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Zama futhi noma dweba iphethini"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Iphinikhodi iyadingeka ngemva kwemizamo eminingi kakhulu"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Iphasiwedi iyadingeka ngemva kwemizamo eminingi kakhulu"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Iphethini iyadingeka ngemva kwemizamo eminingi kakhulu"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Vula ngephethini noma izigxivizo zeminwe"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Vula ngephasiwedi noma ngezigxivizo zeminwe"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Vula ngephethini noma isigxivizo somunwe"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Ngokuphepha okungeziwe, idivayisi ikhiyiwe ngenqubomgomo yomsebenzi"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Iphinikhodi iyadingeka ngemva kokukhiya"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Iphasiwedi iyadingeka ngemuva kokukhiya"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Iphethini iyadingeka ngemva kokukhiya"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Isibuyekezo sizongena phakathi namahora okungasebenzi"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Ukuphepha okwengeziwe kuyadingeka. Iphinikhodi ayisetshenziswanga isikhathi eside."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Ukuphepha okwengeziwe kuyadingeka. Iphasiwedi ayisetshenziswanga isikhathi eside."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Ukuphepha okwengeziwe kuyadingeka. Iphethini ayisetshenziswanga isikhathi eside."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Ukuphepha okwengeziwe kuyadingeka. Idivayisi ayizange ivulwe isikhathi eside."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Ayikwazi ukuvula ngobuso. Imizamo eminingi kakhulu."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Ayikwazi ukuvula ngesigxivizo somunwe. Imizamo eminingi kakhulu."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Umenzeli othembekile akatholakali"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Imizamo eminingi kakhulu Ngephinikhodi engalungile"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Imizamo eminingi kakhulu enephethini engalungile"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Imizamo eminingi kakhulu enephasiwedi engalungile"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Zama futhi kumzuzwana ongu-#.}one{Zama futhi kumizuzwana engu-#.}other{Zama futhi kumizuzwana engu-#.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Faka i-PIN ye-SIM"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Faka i-PIN ye-SIM ye-\"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
@@ -61,45 +95,40 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"I-SIM ye-\"<xliff:g id="CARRIER">%1$s</xliff:g>\" manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Xhumana nenkampani yenethiwekhi ukuze uthole imininingwane."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Faka iphinikhodi oyithandayo"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Qinisekisa iphinikhodi oyithandayo"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Ivula ikhadi le-SIM..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Ivula i-SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Thayipha i-PIN enezinombolo ezingu-4 kuya kwezingu-8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Ikhodi ye-PUK kufanele ibe yizinombolo ezingu-8 noma eziningi."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Ubhale iphinikhodi ykho ngendlela engafanele izikhathi ezingu-<xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nZama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Ubhale iphasiwedi yakho ngendlela engafanele <xliff:g id="NUMBER_0">%1$d</xliff:g> izikhathi. \n\nZama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Udwebe iphathini yakho yokuvula ngendlela engafanele-<xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Zama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Ikhodi yephinikhodi ye-SIM engalungile manje kumele uxhumane nenkampini yenethiwekhi yakho ukuvula idivayisi yakho."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="one">Ikhodi engalungile yephinikhodi ye-SIM, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele.</item>
-      <item quantity="other">Ikhodi engalungile yephinikhodi ye-SIM, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele.</item>
-    </plurals>
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Ikhodi engalungile Yephinikhodi ye-SIM, unomzamo ongu-# osele ngaphambi kokuba uxhumane nenkampani yakho yenethiwekhi ukuvula idivayisi yakho.}one{Ikhodi engalungile Yephinikhodi ye-SIM, unemizamo engu-# esele. }other{Ikhodi engalungile Yephinikhodi ye-SIM, unemizamo engu-# esele. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"I-SIM ayisebenziseki. Xhumana nemkampini yenethiwekhi yakho."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="one">Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasasebenziseki unaphakade.</item>
-      <item quantity="other">Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasasebenziseki unaphakade.</item>
-    </plurals>
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-# esele ngaphambi kokuba i-SIM ibe engasasebenziseki unomphela.}one{Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-# esele ngaphambi kokuthi i-SIM ibe engasasebenziseki unomphela.}other{Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-# esele ngaphambi kokuthi i-SIM ibe engasasebenziseki unomphela.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Umsebenzi wephinikhodi ye-SIM wehlulekile!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Umsebenzi we-PUK ye-SIM wehlulekile!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Shintsha indlela yokufaka"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Imodi yendiza"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Iphethini iyadingeka ngemuva kokuqala kabusha kwedivayisi"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Iphinikhodi iyadingeka ngemuva kokuqala kabusha kwedivayisi"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Iphasiwedi iyadingeka ngemuva kokuqala kabusha kwedivayisi"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Kudingeka iphethini  ngokuvikeleka okungeziwe"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Kudingeka iphinikhodi ngokuvikeleka okungeziwe"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Iphasiwedi idingelwa ukuvikela okungeziwe"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Iphethini iyadingeka ngemva kokuthi idivayisi iqale kabusha"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Iphinikhodi iyadingeka ngemva kokuthi idivayisi iqale kabusha"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Iphasiwedi iyadingeka ngemuva kokuthi idivayisi iqale kabusha"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Ukuze uthole ukuvikeleka okwengeziwe, sebenzisa iphetheni esikhundleni salokho"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Ukuze uthole ukuvikeleka okwengeziwe, sebenzisa i-PIN esikhundleni salokho"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Ukuze uthole ukuvikeleka okwengeziwe, sebenzisa iphasiwedi esikhundleni salokho"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Idivayisi ikhiywe ngumlawuli"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Idivayisi ikhiywe ngokwenza"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Akwaziwa"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Ukuze usebenzise Ukuvula ngobuso, vula "<b>"Ukufinyelela kwekhamera"</b>" kokuthi Amasethingi &gt; Ubumfihlo"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="one">Faka i-PIN ye-SIM, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele.</item>
-      <item quantity="other">Faka i-PIN ye-SIM, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele.</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="one">I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-<xliff:g id="_NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasebenziseki unaphakade. Xhumana nenkampani yenethiwekhi ngemininingwane.</item>
-      <item quantity="other">I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-<xliff:g id="_NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasebenziseki unaphakade. Xhumana nenkampani yenethiwekhi ngemininingwane.</item>
-    </plurals>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Ukuze usebenzise Ukuvula Ngobuso, vula ukufinyelela kwekhamera Kumasethingi"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Faka Iphinikhodi ye-SIM. Unemizamo engu-# esele ngaphambi kokuthi uxhumane nenkampani yakho yenethiwekhi ukuze uvule idivayisi yakho.}one{Faka Iphinikhodi ye-SIM Unemizamo engu-# esele.}other{Faka Iphinikhodi ye-SIM Unemizamo engu-# esele.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unomzamo ongu-# osele ngaphambi kokuthi i-SIM ingasasebenziseki unomphela. Xhumana nenkampani yenethiwekhi ngemininingwane.}one{I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-# esele ngaphambi kokuthi i-SIM ingasasebenziseki unomphela. Xhumana nenkampani yenethiwekhi ngemininingwane.}other{I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-# esele ngaphambi kokuthi i-SIM ingasasebenziseki unomphela. Xhumana nenkampani yenethiwekhi ngemininingwane.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Okuzenzekelayo"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Ibhamuza"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"I-Analog"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Vula idivayisi yakho ukuze uqhubeke"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Faka Iphinikhodi ukuze ufake isibuyekezo kamuva"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Faka iphasiwedi ukuze ufake isibuyekezo kamuva"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Dweba iphethini ukuze ufake isibuyekezo kamuva"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Idivayisi ibuyekeziwe. Faka Iphinikhodi ukuze uqhubeke."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Idivayisi ibuyekeziwe. Faka iphasiwedi ukuze uqhubeke."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Idivayisi ibuyekeziwe. Dweba iphethini ukuze uqhubeke."</string>
 </resources>

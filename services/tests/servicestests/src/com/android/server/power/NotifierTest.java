@@ -34,7 +34,10 @@ import android.hardware.SensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.BatteryStats;
 import android.os.Handler;
+import android.os.IWakeLockCallback;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
@@ -45,12 +48,12 @@ import android.testing.TestableContext;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySavingStats;
+import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -217,6 +220,34 @@ public class NotifierTest {
 
         // THEN the charging animation never gets called
         verify(mStatusBarManagerInternal, never()).showChargingAnimation(anyInt());
+    }
+
+    @Test
+    public void testOnWakeLockListener_RemoteException_NoRethrow() {
+        createNotifier();
+
+        IWakeLockCallback exceptingCallback = new IWakeLockCallback.Stub() {
+            @Override public void onStateChanged(boolean enabled) throws RemoteException {
+                throw new RemoteException("Just testing");
+            }
+        };
+
+        final int uid = 1234;
+        final int pid = 5678;
+        mNotifier.onWakeLockReleased(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+        mNotifier.onWakeLockAcquired(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback);
+        mNotifier.onWakeLockChanging(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* workSource= */ null, /* historyTag= */ null,
+                exceptingCallback,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakelockTag",
+                "my.package.name", uid, pid, /* newWorkSource= */ null, /* newHistoryTag= */ null,
+                exceptingCallback);
+        mTestLooper.dispatchAll();
+        // If we didn't throw, we're good!
     }
 
     private final PowerManagerService.Injector mInjector = new PowerManagerService.Injector() {

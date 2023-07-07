@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#include "mocks/MockSprite.h"
-#include "mocks/MockSpriteController.h"
-
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
 
 #include <atomic>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <thread>
+
+#include "input/Input.h"
+#include "mocks/MockSprite.h"
+#include "mocks/MockSpriteController.h"
 
 namespace android {
 
@@ -34,12 +35,12 @@ enum TestCursorType {
     CURSOR_TYPE_ANCHOR,
     CURSOR_TYPE_ADDITIONAL,
     CURSOR_TYPE_ADDITIONAL_ANIM,
+    CURSOR_TYPE_STYLUS,
     CURSOR_TYPE_CUSTOM = -1,
 };
 
 using ::testing::AllOf;
 using ::testing::Field;
-using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::Test;
@@ -52,11 +53,14 @@ class MockPointerControllerPolicyInterface : public PointerControllerPolicyInter
 public:
     virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId) override;
     virtual void loadPointerResources(PointerResources* outResources, int32_t displayId) override;
-    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-            std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) override;
-    virtual int32_t getDefaultPointerIconId() override;
-    virtual int32_t getCustomPointerIconId() override;
-    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos) override;
+    virtual void loadAdditionalMouseResources(
+            std::map<PointerIconStyle, SpriteIcon>* outResources,
+            std::map<PointerIconStyle, PointerAnimation>* outAnimationResources,
+            int32_t displayId) override;
+    virtual PointerIconStyle getDefaultPointerIconId() override;
+    virtual PointerIconStyle getDefaultStylusIconId() override;
+    virtual PointerIconStyle getCustomPointerIconId() override;
+    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) override;
 
     bool allResourcesAreLoaded();
     bool noResourcesAreLoaded();
@@ -85,34 +89,42 @@ void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources
 }
 
 void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
-        std::map<int32_t, SpriteIcon>* outResources,
-        std::map<int32_t, PointerAnimation>* outAnimationResources,
-        int32_t) {
+        std::map<PointerIconStyle, SpriteIcon>* outResources,
+        std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, int32_t) {
     SpriteIcon icon;
     PointerAnimation anim;
 
     // CURSOR_TYPE_ADDITIONAL doesn't have animation resource.
     int32_t cursorType = CURSOR_TYPE_ADDITIONAL;
     loadPointerIconForType(&icon, cursorType);
-    (*outResources)[cursorType] = icon;
+    (*outResources)[static_cast<PointerIconStyle>(cursorType)] = icon;
 
     // CURSOR_TYPE_ADDITIONAL_ANIM has animation resource.
     cursorType = CURSOR_TYPE_ADDITIONAL_ANIM;
     loadPointerIconForType(&icon, cursorType);
     anim.animationFrames.push_back(icon);
     anim.durationPerFrame = 10;
-    (*outResources)[cursorType] = icon;
-    (*outAnimationResources)[cursorType] = anim;
+    (*outResources)[static_cast<PointerIconStyle>(cursorType)] = icon;
+    (*outAnimationResources)[static_cast<PointerIconStyle>(cursorType)] = anim;
+
+    // CURSOR_TYPE_STYLUS doesn't have animation resource.
+    cursorType = CURSOR_TYPE_STYLUS;
+    loadPointerIconForType(&icon, cursorType);
+    (*outResources)[static_cast<PointerIconStyle>(cursorType)] = icon;
 
     additionalMouseResourcesLoaded = true;
 }
 
-int32_t MockPointerControllerPolicyInterface::getDefaultPointerIconId() {
-    return CURSOR_TYPE_DEFAULT;
+PointerIconStyle MockPointerControllerPolicyInterface::getDefaultPointerIconId() {
+    return static_cast<PointerIconStyle>(CURSOR_TYPE_DEFAULT);
 }
 
-int32_t MockPointerControllerPolicyInterface::getCustomPointerIconId() {
-    return CURSOR_TYPE_CUSTOM;
+PointerIconStyle MockPointerControllerPolicyInterface::getDefaultStylusIconId() {
+    return static_cast<PointerIconStyle>(CURSOR_TYPE_STYLUS);
+}
+
+PointerIconStyle MockPointerControllerPolicyInterface::getCustomPointerIconId() {
+    return static_cast<PointerIconStyle>(CURSOR_TYPE_CUSTOM);
 }
 
 bool MockPointerControllerPolicyInterface::allResourcesAreLoaded() {
@@ -124,15 +136,15 @@ bool MockPointerControllerPolicyInterface::noResourcesAreLoaded() {
 }
 
 void MockPointerControllerPolicyInterface::loadPointerIconForType(SpriteIcon* icon, int32_t type) {
-    icon->style = type;
+    icon->style = static_cast<PointerIconStyle>(type);
     std::pair<float, float> hotSpot = getHotSpotCoordinatesForType(type);
     icon->hotSpotX = hotSpot.first;
     icon->hotSpotY = hotSpot.second;
 }
 
 void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t displayId,
-                                                                     float /*xPos*/,
-                                                                     float /*yPos*/) {
+                                                                     const FloatPoint& /*position*/
+) {
     latestPointerDisplayId = displayId;
 }
 
@@ -205,11 +217,26 @@ TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
     std::pair<float, float> hotspot = getHotSpotCoordinatesForType(CURSOR_TYPE_DEFAULT);
     EXPECT_CALL(*mPointerSprite, setVisible(true));
     EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
-    EXPECT_CALL(*mPointerSprite, setIcon(
-            AllOf(
-                    Field(&SpriteIcon::style, CURSOR_TYPE_DEFAULT),
-                    Field(&SpriteIcon::hotSpotX, hotspot.first),
-                    Field(&SpriteIcon::hotSpotY, hotspot.second))));
+    EXPECT_CALL(*mPointerSprite,
+                setIcon(AllOf(Field(&SpriteIcon::style,
+                                    static_cast<PointerIconStyle>(CURSOR_TYPE_DEFAULT)),
+                              Field(&SpriteIcon::hotSpotX, hotspot.first),
+                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
+    mPointerController->reloadPointerResources();
+}
+
+TEST_F(PointerControllerTest, useStylusTypeForStylusHover) {
+    ensureDisplayViewportIsSet();
+    mPointerController->setPresentation(PointerController::Presentation::STYLUS_HOVER);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
+    std::pair<float, float> hotspot = getHotSpotCoordinatesForType(CURSOR_TYPE_STYLUS);
+    EXPECT_CALL(*mPointerSprite, setVisible(true));
+    EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
+    EXPECT_CALL(*mPointerSprite,
+                setIcon(AllOf(Field(&SpriteIcon::style,
+                                    static_cast<PointerIconStyle>(CURSOR_TYPE_STYLUS)),
+                              Field(&SpriteIcon::hotSpotX, hotspot.first),
+                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
     mPointerController->reloadPointerResources();
 }
 
@@ -222,12 +249,11 @@ TEST_F(PointerControllerTest, updatePointerIcon) {
     std::pair<float, float> hotspot = getHotSpotCoordinatesForType(type);
     EXPECT_CALL(*mPointerSprite, setVisible(true));
     EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
-    EXPECT_CALL(*mPointerSprite, setIcon(
-            AllOf(
-                    Field(&SpriteIcon::style, type),
-                    Field(&SpriteIcon::hotSpotX, hotspot.first),
-                    Field(&SpriteIcon::hotSpotY, hotspot.second))));
-    mPointerController->updatePointerIcon(type);
+    EXPECT_CALL(*mPointerSprite,
+                setIcon(AllOf(Field(&SpriteIcon::style, static_cast<PointerIconStyle>(type)),
+                              Field(&SpriteIcon::hotSpotX, hotspot.first),
+                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
+    mPointerController->updatePointerIcon(static_cast<PointerIconStyle>(type));
 }
 
 TEST_F(PointerControllerTest, setCustomPointerIcon) {
@@ -239,17 +265,16 @@ TEST_F(PointerControllerTest, setCustomPointerIcon) {
     float hotSpotY = 20;
 
     SpriteIcon icon;
-    icon.style = style;
+    icon.style = static_cast<PointerIconStyle>(style);
     icon.hotSpotX = hotSpotX;
     icon.hotSpotY = hotSpotY;
 
     EXPECT_CALL(*mPointerSprite, setVisible(true));
     EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
-    EXPECT_CALL(*mPointerSprite, setIcon(
-            AllOf(
-                    Field(&SpriteIcon::style, style),
-                    Field(&SpriteIcon::hotSpotX, hotSpotX),
-                    Field(&SpriteIcon::hotSpotY, hotSpotY))));
+    EXPECT_CALL(*mPointerSprite,
+                setIcon(AllOf(Field(&SpriteIcon::style, static_cast<PointerIconStyle>(style)),
+                              Field(&SpriteIcon::hotSpotX, hotSpotX),
+                              Field(&SpriteIcon::hotSpotY, hotSpotY))));
     mPointerController->setCustomPointerIcon(icon);
 }
 
@@ -318,7 +343,7 @@ TEST_F(PointerControllerWindowInfoListenerTest,
         localListenerCopy = registeredListener;
     }
     EXPECT_EQ(nullptr, registeredListener) << "WindowInfosListener was not unregistered";
-    localListenerCopy->onWindowInfosChanged({}, {});
+    localListenerCopy->onWindowInfosChanged({{}, {}, 0, 0});
 }
 
 }  // namespace android

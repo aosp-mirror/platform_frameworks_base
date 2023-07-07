@@ -27,14 +27,18 @@ public class IncrementalStatesInfo implements Parcelable {
     private boolean mIsLoading;
     private float mProgress;
 
-    public IncrementalStatesInfo(boolean isLoading, float progress) {
+    private long mLoadingCompletedTime;
+
+    public IncrementalStatesInfo(boolean isLoading, float progress, long loadingCompletedTime) {
         mIsLoading = isLoading;
         mProgress = progress;
+        mLoadingCompletedTime = loadingCompletedTime;
     }
 
     private IncrementalStatesInfo(Parcel source) {
         mIsLoading = source.readBoolean();
         mProgress = source.readFloat();
+        mLoadingCompletedTime = source.readLong();
     }
 
     public boolean isLoading() {
@@ -43,6 +47,10 @@ public class IncrementalStatesInfo implements Parcelable {
 
     public float getProgress() {
         return mProgress;
+    }
+
+    public long getLoadingCompletedTime() {
+        return mLoadingCompletedTime;
     }
 
     @Override
@@ -54,6 +62,7 @@ public class IncrementalStatesInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBoolean(mIsLoading);
         dest.writeFloat(mProgress);
+        dest.writeLong(mLoadingCompletedTime);
     }
 
     public static final @android.annotation.NonNull Creator<IncrementalStatesInfo> CREATOR =

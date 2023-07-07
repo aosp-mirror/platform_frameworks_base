@@ -52,24 +52,22 @@ struct Target {
 
     int testPassCount;
     int testFailCount;
+    int testIgnoreCount;
     int unknownFailureCount; // unknown failure == "Process crashed", etc.
-    bool actionsWithNoTests;
 
     Target(bool b, bool i, bool t, const string& p);
 };
 
 Target::Target(bool b, bool i, bool t, const string& p)
-    :build(b),
-     install(i),
-     test(t),
-     pattern(p),
-     testActionCount(0),
-     testPassCount(0),
-     testFailCount(0),
-     unknownFailureCount(0),
-     actionsWithNoTests(false)
-{
-}
+      : build(b),
+        install(i),
+        test(t),
+        pattern(p),
+        testActionCount(0),
+        testPassCount(0),
+        testFailCount(0),
+        testIgnoreCount(0),
+        unknownFailureCount(0) {}
 
 /**
  * Command line options.
@@ -188,13 +186,12 @@ struct TestAction {
 
     // The number of tests that failed
     int failCount;
+
+    // The number of tests that were ignored (because of @Ignore)
+    int ignoreCount;
 };
 
-TestAction::TestAction()
-    :passCount(0),
-     failCount(0)
-{
-}
+TestAction::TestAction() : passCount(0), failCount(0), ignoreCount(0) {}
 
 /**
  * Record for an activity that is going to be launched.
@@ -278,7 +275,7 @@ TestResults::OnTestStatus(TestStatus& status)
                 line << " of " << testCount;
             }
         }
-        line << ": " << m_currentAction->target->name << ':' << className << "\\#" << testName;
+        line << ": " << m_currentAction->target->name << ':' << className << "#" << testName;
         print_one_line("%s", line.str().c_str());
     } else if ((resultCode == -1) || (resultCode == -2)) {
         // test failed
@@ -286,9 +283,9 @@ TestResults::OnTestStatus(TestStatus& status)
         // all as "failures".
         m_currentAction->failCount++;
         m_currentAction->target->testFailCount++;
-        printf("%s\n%sFailed: %s:%s\\#%s%s\n", g_escapeClearLine, g_escapeRedBold,
-                m_currentAction->target->name.c_str(), className.c_str(),
-                testName.c_str(), g_escapeEndColor);
+        printf("%s\n%sFailed: %s:%s#%s%s\n", g_escapeClearLine, g_escapeRedBold,
+               m_currentAction->target->name.c_str(), className.c_str(), testName.c_str(),
+               g_escapeEndColor);
 
         bool stackFound;
         string stack = get_bundle_string(results, &stackFound, "stack", NULL);
@@ -300,6 +297,13 @@ TestResults::OnTestStatus(TestStatus& status)
         } else if (stackFound) {
             printf("%s\n", stack.c_str());
         }
+    } else if (resultCode == -3) {
+        // test ignored
+        m_currentAction->ignoreCount++;
+        m_currentAction->target->testIgnoreCount++;
+        printf("%s\n%sIgnored: %s:%s#%s%s\n", g_escapeClearLine, g_escapeYellowBold,
+               m_currentAction->target->name.c_str(), className.c_str(), testName.c_str(),
+               g_escapeEndColor);
     }
 }
 
@@ -403,11 +407,14 @@ print_usage(FILE* out) {
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs all the\n");
     fprintf(out, "      tests in the ProtoOutputStreamBoolTest class.\n");
     fprintf(out, "\n");
-    fprintf(out, "    bit CtsProtoTestCases:.ProtoOutputStreamBoolTest\\#testWrite\n");
+    fprintf(out, "    bit CtsProtoTestCases:.ProtoOutputStreamBoolTest#testWrite\n");
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs the testWrite\n");
     fprintf(out, "      test method on that class.\n");
     fprintf(out, "\n");
-    fprintf(out, "    bit CtsProtoTestCases:.ProtoOutputStreamBoolTest\\#testWrite,.ProtoOutputStreamBoolTest\\#testRepeated\n");
+    fprintf(out,
+            "    bit "
+            "CtsProtoTestCases:.ProtoOutputStreamBoolTest#testWrite,.ProtoOutputStreamBoolTest#"
+            "testRepeated\n");
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs the testWrite\n");
     fprintf(out, "      and testRepeated test methods on that class.\n");
     fprintf(out, "\n");
@@ -450,6 +457,35 @@ print_usage(FILE* out) {
     fprintf(out, "\n");
 }
 
+/**
+ * Prints a possibly color-coded summary of test results. Example output:
+ *
+ *     "34 passed, 0 failed, 1 ignored\n"
+ */
+static void print_results(int passed, int failed, int ignored) {
+    char const* nothing = "";
+    char const* cp = nothing;
+    char const* cf = nothing;
+    char const* ci = nothing;
+
+    if (failed > 0) {
+        cf = g_escapeRedBold;
+    } else if (passed > 0 || ignored > 0) {
+        cp = passed > 0 ? g_escapeGreenBold : nothing;
+        ci = ignored > 0 ? g_escapeYellowBold : nothing;
+    } else {
+        cp = g_escapeYellowBold;
+        cf = g_escapeYellowBold;
+    }
+
+    if (ignored > 0) {
+        printf("%s%d passed%s, %s%d failed%s, %s%d ignored%s\n", cp, passed, g_escapeEndColor, cf,
+               failed, g_escapeEndColor, ci, ignored, g_escapeEndColor);
+    } else {
+        printf("%s%d passed%s, %s%d failed%s\n", cp, passed, g_escapeEndColor, cf, failed,
+               g_escapeEndColor);
+    }
+}
 
 /**
  * Sets the appropriate flag* variables. If there is a problem with the
@@ -812,7 +848,7 @@ run_phases(vector<Target*> targets, const Options& options)
 
             // Stop & Sync
             if (!options.noRestart) {
-                err = run_adb("shell", "stop", NULL);
+                err = run_adb("exec-out", "stop", NULL);
                 check_error(err);
             }
             err = run_adb("remount", NULL);
@@ -831,9 +867,9 @@ run_phases(vector<Target*> targets, const Options& options)
                 } else {
                     print_status("Restarting the runtime");
 
-                    err = run_adb("shell", "setprop", "sys.boot_completed", "0", NULL);
+                    err = run_adb("exec-out", "setprop", "sys.boot_completed", "0", NULL);
                     check_error(err);
-                    err = run_adb("shell", "start", NULL);
+                    err = run_adb("exec-out", "start", NULL);
                     check_error(err);
                 }
 
@@ -846,7 +882,7 @@ run_phases(vector<Target*> targets, const Options& options)
                     sleep(2);
                 }
                 sleep(1);
-                err = run_adb("shell", "wm", "dismiss-keyguard", NULL);
+                err = run_adb("exec-out", "wm", "dismiss-keyguard", NULL);
                 check_error(err);
             }
         }
@@ -863,7 +899,7 @@ run_phases(vector<Target*> targets, const Options& options)
                 continue;
             }
             // TODO: if (!apk.file.fileInfo.exists || apk.file.HasChanged())
-            err = run_adb("shell", "mkdir", "-p", dir.c_str(), NULL);
+            err = run_adb("exec-out", "mkdir", "-p", dir.c_str(), NULL);
             check_error(err);
             err = run_adb("push", pushed.file.filename.c_str(), pushed.dest.c_str(), NULL);
             check_error(err);
@@ -945,9 +981,9 @@ run_phases(vector<Target*> targets, const Options& options)
                         }
                     }
                     if (runAll) {
-                        err = run_adb("shell", installedPath.c_str(), NULL);
+                        err = run_adb("exec-out", installedPath.c_str(), NULL);
                     } else {
-                        err = run_adb("shell", installedPath.c_str(), filterArg.c_str(), NULL);
+                        err = run_adb("exec-out", installedPath.c_str(), filterArg.c_str(), NULL);
                     }
                     if (err == 0) {
                         target->testPassCount++;
@@ -1035,22 +1071,10 @@ run_phases(vector<Target*> targets, const Options& options)
             err = run_instrumentation_test(action.packageName, action.runner, action.className,
                     &testResults);
             check_error(err);
-            if (action.passCount == 0 && action.failCount == 0) {
-                action.target->actionsWithNoTests = true;
-            }
             int total = action.passCount + action.failCount;
             printf("%sRan %d test%s for %s. ", g_escapeClearLine,
                     total, total > 1 ? "s" : "", action.target->name.c_str());
-            if (action.passCount == 0 && action.failCount == 0) {
-                printf("%s%d passed, %d failed%s\n", g_escapeYellowBold, action.passCount,
-                        action.failCount, g_escapeEndColor);
-            } else if (action.failCount >  0) {
-                printf("%d passed, %s%d failed%s\n", action.passCount, g_escapeRedBold,
-                        action.failCount, g_escapeEndColor);
-            } else {
-                printf("%s%d passed%s, %d failed\n", g_escapeGreenBold, action.passCount,
-                        g_escapeEndColor, action.failCount);
-            }
+            print_results(action.passCount, action.failCount, action.ignoreCount);
             if (!testResults.IsSuccess()) {
                 printf("\n%sTest didn't finish successfully: %s%s\n", g_escapeRedBold,
                         testResults.GetErrorMessage().c_str(), g_escapeEndColor);
@@ -1073,7 +1097,7 @@ run_phases(vector<Target*> targets, const Options& options)
 
         const ActivityAction& action = activityActions[0];
         string componentName = action.packageName + "/" + action.className;
-        err = run_adb("shell", "am", "start", componentName.c_str(), NULL);
+        err = run_adb("exec-out", "am", "start", componentName.c_str(), NULL);
         check_error(err);
     }
 
@@ -1147,17 +1171,11 @@ run_phases(vector<Target*> targets, const Options& options)
                     printf("     %sUnknown failure, see above message.%s\n",
                             g_escapeRedBold, g_escapeEndColor);
                     hasErrors = true;
-                } else if (target->actionsWithNoTests) {
-                    printf("     %s%d passed, %d failed%s\n", g_escapeYellowBold,
-                            target->testPassCount, target->testFailCount, g_escapeEndColor);
-                    hasErrors = true;
-                } else if (target->testFailCount > 0) {
-                    printf("     %d passed, %s%d failed%s\n", target->testPassCount,
-                            g_escapeRedBold, target->testFailCount, g_escapeEndColor);
-                    hasErrors = true;
                 } else {
-                    printf("     %s%d passed%s, %d failed\n", g_escapeGreenBold,
-                            target->testPassCount, g_escapeEndColor, target->testFailCount);
+                    printf("   %s%s     ", target->name.c_str(),
+                           padding.c_str() + target->name.length());
+                    print_results(target->testPassCount, target->testFailCount,
+                                  target->testIgnoreCount);
                 }
             }
         }

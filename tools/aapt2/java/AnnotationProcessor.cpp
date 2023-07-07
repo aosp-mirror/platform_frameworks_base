@@ -30,7 +30,7 @@ using ::android::StringPiece;
 
 namespace aapt {
 
-StringPiece AnnotationProcessor::ExtractFirstSentence(const StringPiece& comment) {
+StringPiece AnnotationProcessor::ExtractFirstSentence(StringPiece comment) {
   Utf8Iterator iter(comment);
   while (iter.HasNext()) {
     const char32_t codepoint = iter.Next();
@@ -62,7 +62,7 @@ static std::array<AnnotationRule, 2> sAnnotationRules = {{
 }};
 
 void AnnotationProcessor::AppendCommentLine(std::string comment) {
-  static const std::string sDeprecated = "@deprecated";
+  static constexpr std::string_view sDeprecated = "@deprecated";
 
   // Treat deprecated specially, since we don't remove it from the source comment.
   if (comment.find(sDeprecated) != std::string::npos) {
@@ -74,7 +74,7 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
     if (idx != std::string::npos) {
       // Captures all parameters associated with the specified annotation rule
       // by matching the first pair of parantheses after the rule.
-      std::regex re(rule.doc_str.to_string() + "\\s*\\((.+)\\)");
+      std::regex re(std::string(rule.doc_str) += "\\s*\\((.+)\\)");
       std::smatch match_result;
       const bool is_match = std::regex_search(comment, match_result, re);
       // We currently only capture and preserve parameters for SystemApi.
@@ -97,7 +97,7 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
 
   // If there was trimming to do, copy the string.
   if (trimmed.size() != comment.size()) {
-    comment = trimmed.to_string();
+    comment = std::string(trimmed);
   }
 
   if (!has_comments_) {
@@ -107,12 +107,12 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
   comment_ << "\n * " << std::move(comment);
 }
 
-void AnnotationProcessor::AppendComment(const StringPiece& comment) {
+void AnnotationProcessor::AppendComment(StringPiece comment) {
   // We need to process line by line to clean-up whitespace and append prefixes.
   for (StringPiece line : util::Tokenize(comment, '\n')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      AppendCommentLine(line.to_string());
+      AppendCommentLine(std::string(line));
     }
   }
 }
@@ -126,7 +126,7 @@ void AnnotationProcessor::AppendNewLine() {
 void AnnotationProcessor::Print(Printer* printer, bool strip_api_annotations) const {
   if (has_comments_) {
     std::string result = comment_.str();
-    for (const StringPiece& line : util::Tokenize(result, '\n')) {
+    for (StringPiece line : util::Tokenize(result, '\n')) {
       printer->Println(line);
     }
     printer->Println(" */");

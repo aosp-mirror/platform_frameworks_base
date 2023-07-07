@@ -63,6 +63,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -80,7 +81,8 @@ import java.util.List;
 public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
     private static final Object sLock = new Object();
-    private static KeyboardShortcuts sInstance;
+    @VisibleForTesting static KeyboardShortcuts sInstance;
+    private WindowManager mWindowManager;
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
@@ -94,7 +96,7 @@ public final class KeyboardShortcuts {
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final Context mContext;
+    @VisibleForTesting Context mContext;
     private final IPackageManager mPackageManager;
     private final OnClickListener mDialogCloseListener = new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int id) {
@@ -123,20 +125,26 @@ public final class KeyboardShortcuts {
                 }
             };
 
-    private Dialog mKeyboardShortcutsDialog;
+    @VisibleForTesting Dialog mKeyboardShortcutsDialog;
     private KeyCharacterMap mKeyCharacterMap;
     private KeyCharacterMap mBackupKeyCharacterMap;
 
-    private KeyboardShortcuts(Context context) {
+    @VisibleForTesting
+    KeyboardShortcuts(Context context, WindowManager windowManager) {
         this.mContext = new ContextThemeWrapper(
                 context, android.R.style.Theme_DeviceDefault_Settings);
         this.mPackageManager = AppGlobals.getPackageManager();
+        if (windowManager != null) {
+            this.mWindowManager = windowManager;
+        } else {
+            this.mWindowManager = mContext.getSystemService(WindowManager.class);
+        }
         loadResources(context);
     }
 
     private static KeyboardShortcuts getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new KeyboardShortcuts(context);
+            sInstance = new KeyboardShortcuts(context, null);
         }
         return sInstance;
     }
@@ -348,7 +356,7 @@ public final class KeyboardShortcuts {
      * Keyboard with its default map.
      */
     private void retrieveKeyCharacterMap(int deviceId) {
-        final InputManager inputManager = InputManager.getInstance();
+        final InputManager inputManager = mContext.getSystemService(InputManager.class);
         mBackupKeyCharacterMap = inputManager.getInputDevice(-1).getKeyCharacterMap();
         if (deviceId != -1) {
             final InputDevice inputDevice = inputManager.getInputDevice(deviceId);
@@ -371,10 +379,10 @@ public final class KeyboardShortcuts {
         mKeyCharacterMap = mBackupKeyCharacterMap;
     }
 
-    private void showKeyboardShortcuts(int deviceId) {
+    @VisibleForTesting
+    void showKeyboardShortcuts(int deviceId) {
         retrieveKeyCharacterMap(deviceId);
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm.requestAppKeyboardShortcuts(new KeyboardShortcutsReceiver() {
+        mWindowManager.requestAppKeyboardShortcuts(new KeyboardShortcutsReceiver() {
             @Override
             public void onKeyboardShortcutsReceived(
                     final List<KeyboardShortcutGroup> result) {

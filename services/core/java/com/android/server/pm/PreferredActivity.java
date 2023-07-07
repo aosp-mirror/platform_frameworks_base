@@ -19,10 +19,10 @@ package com.android.server.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.util.Log;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.utils.SnapshotCache;
 
 import org.xmlpull.v1.XmlPullParserException;

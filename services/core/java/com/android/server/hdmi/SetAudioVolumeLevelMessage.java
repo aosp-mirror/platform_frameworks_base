@@ -88,7 +88,7 @@ public class SetAudioVolumeLevelMessage extends HdmiCecMessage {
      */
     public static int validateAddress(int source, int destination) {
         return HdmiCecMessageValidator.validateAddress(source, destination,
-                HdmiCecMessageValidator.DEST_DIRECT);
+                HdmiCecMessageValidator.ADDR_NOT_UNREGISTERED, HdmiCecMessageValidator.ADDR_DIRECT);
     }
 
     /**

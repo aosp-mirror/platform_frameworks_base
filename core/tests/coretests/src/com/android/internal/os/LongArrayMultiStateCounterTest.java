@@ -18,6 +18,8 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
@@ -148,5 +150,44 @@ public class LongArrayMultiStateCounterTest {
         counter.getCounts(container, state);
         container.getValues(counts);
         assertThat(counts).isEqualTo(expected);
+    }
+
+    @Test
+    public void createFromBadParcel() {
+        // Check we don't crash the runtime if the Parcel data is bad (b/243434675).
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(2);
+        parcel.setDataPosition(0);
+        assertThrows(RuntimeException.class,
+                () -> LongArrayMultiStateCounter.CREATOR.createFromParcel(parcel));
+    }
+
+    @Test
+    public void combineValues() {
+        long[] values = new long[] {0, 1, 2, 3, 42};
+        LongArrayMultiStateCounter.LongArrayContainer container =
+                new LongArrayMultiStateCounter.LongArrayContainer(values.length);
+        container.setValues(values);
+
+        long[] out = new long[3];
+        int[] indexes = {2, 1, 1, 0, 0};
+        boolean nonZero = container.combineValues(out, indexes);
+        assertThat(nonZero).isTrue();
+        assertThat(out).isEqualTo(new long[]{45, 3, 0});
+
+        // All zeros
+        container.setValues(new long[]{0, 0, 0, 0, 0});
+        nonZero = container.combineValues(out, indexes);
+        assertThat(nonZero).isFalse();
+        assertThat(out).isEqualTo(new long[]{0, 0, 0});
+
+        // Index out of range
+        IndexOutOfBoundsException e1 = assertThrows(
+                IndexOutOfBoundsException.class,
+                () -> container.combineValues(out, new int[]{0, 1, -1, 0, 0}));
+        assertThat(e1.getMessage()).isEqualTo("Index -1 is out of bounds: [0, 2]");
+        IndexOutOfBoundsException e2 = assertThrows(IndexOutOfBoundsException.class,
+                () -> container.combineValues(out, new int[]{0, 1, 4, 0, 0}));
+        assertThat(e2.getMessage()).isEqualTo("Index 4 is out of bounds: [0, 2]");
     }
 }

@@ -23,8 +23,10 @@ import android.hardware.tv.tuner.DemuxRecordScIndexType;
 import android.hardware.tv.tuner.DemuxScAvcIndex;
 import android.hardware.tv.tuner.DemuxScHevcIndex;
 import android.hardware.tv.tuner.DemuxScIndex;
+import android.hardware.tv.tuner.DemuxScVvcIndex;
 import android.hardware.tv.tuner.DemuxTsIndex;
 import android.media.tv.tuner.TunerUtils;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -138,7 +140,8 @@ public class RecordSettings extends Settings {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "INDEX_TYPE_", value =
-            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC, INDEX_TYPE_SC_AVC})
+            {INDEX_TYPE_NONE, INDEX_TYPE_SC, INDEX_TYPE_SC_HEVC, INDEX_TYPE_SC_AVC,
+             INDEX_TYPE_SC_VVC})
     public @interface ScIndexType {}
 
     /**
@@ -157,6 +160,10 @@ public class RecordSettings extends Settings {
      * Start Code index for AVC.
      */
     public static final int INDEX_TYPE_SC_AVC = DemuxRecordScIndexType.SC_AVC;
+    /**
+     * Start Code index for VVC.
+     */
+    public static final int INDEX_TYPE_SC_VVC = DemuxRecordScIndexType.SC_VVC;
 
     /**
      * Indexes can be tagged by Start Code in PES (Packetized Elementary Stream)
@@ -253,6 +260,46 @@ public class RecordSettings extends Settings {
     public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA = DemuxScHevcIndex.SLICE_TRAIL_CRA;
 
     /**
+     * Indexes can be tagged by NAL unit group in VVC according to ISO/IEC 23090-3.
+     *
+     * @hide
+     */
+    @IntDef(value = {SC_VVC_INDEX_SLICE_IDR_W_RADL, SC_VVC_INDEX_SLICE_IDR_N_LP,
+            SC_VVC_INDEX_SLICE_CRA, SC_VVC_INDEX_SLICE_GDR, SC_VVC_INDEX_VPS, SC_VVC_INDEX_SPS,
+            SC_VVC_INDEX_AUD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScVvcIndex{}
+
+    /**
+     * SC VVC index SLICE_IDR_W_RADL (nal_unit_type=IDR_W_RADL) for random access key frame.
+     */
+    public static final int SC_VVC_INDEX_SLICE_IDR_W_RADL = DemuxScVvcIndex.SLICE_IDR_W_RADL;
+    /**
+     * SC VVC index SLICE_IDR_N_LP (nal_unit_type=IDR_N_LP) for random access key frame.
+     */
+    public static final int SC_VVC_INDEX_SLICE_IDR_N_LP = DemuxScVvcIndex.SLICE_IDR_N_LP;
+    /**
+     * SC VVC index SLICE_CRA (nal_unit_type=CRA_NUT) for random access key frame.
+     */
+    public static final int SC_VVC_INDEX_SLICE_CRA = DemuxScVvcIndex.SLICE_CRA;
+    /**
+     * SC VVC index SLICE_GDR (nal_unit_type=GDR_NUT) for random access point.
+     */
+    public static final int SC_VVC_INDEX_SLICE_GDR = DemuxScVvcIndex.SLICE_GDR;
+    /**
+     * Optional SC VVC index VPS (nal_unit_type=VPS_NUT) for sequence level info.
+     */
+    public static final int SC_VVC_INDEX_VPS = DemuxScVvcIndex.VPS;
+    /**
+     * SC VVC index SPS (nal_unit_type=SPS_NUT) for sequence level info.
+     */
+    public static final int SC_VVC_INDEX_SPS = DemuxScVvcIndex.SPS;
+    /**
+     * SC VVC index AUD (nal_unit_type=AUD_NUT) for AU (frame) boundary.
+     */
+    public static final int SC_VVC_INDEX_AUD = DemuxScVvcIndex.AUD;
+
+    /**
      * @hide
      */
     @IntDef(prefix = "SC_",
@@ -261,6 +308,11 @@ public class RecordSettings extends Settings {
                 SC_INDEX_P_FRAME,
                 SC_INDEX_B_FRAME,
                 SC_INDEX_SEQUENCE,
+                SC_INDEX_I_SLICE,
+                SC_INDEX_P_SLICE,
+                SC_INDEX_B_SLICE,
+                SC_INDEX_SI_SLICE,
+                SC_INDEX_SP_SLICE,
                 SC_HEVC_INDEX_SPS,
                 SC_HEVC_INDEX_AUD,
                 SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
@@ -269,6 +321,13 @@ public class RecordSettings extends Settings {
                 SC_HEVC_INDEX_SLICE_IDR_W_RADL,
                 SC_HEVC_INDEX_SLICE_IDR_N_LP,
                 SC_HEVC_INDEX_SLICE_TRAIL_CRA,
+                SC_VVC_INDEX_SLICE_IDR_W_RADL,
+                SC_VVC_INDEX_SLICE_IDR_N_LP,
+                SC_VVC_INDEX_SLICE_CRA,
+                SC_VVC_INDEX_SLICE_GDR,
+                SC_VVC_INDEX_VPS,
+                SC_VVC_INDEX_SPS,
+                SC_VVC_INDEX_AUD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScIndexMask {}

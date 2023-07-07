@@ -49,14 +49,15 @@ public class TestableSettingsProvider extends MockContentProvider {
     }
 
     void clearValuesAndCheck(Context context) {
-        int userId = UserHandle.myUserId();
-        mValues.put(key("global", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
-        mValues.put(key("secure", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
-        mValues.put(key("system", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
-
+        // Ensure we swapped over to use TestableSettingsProvider
         Settings.Global.clearProviderForTest();
         Settings.Secure.clearProviderForTest();
         Settings.System.clearProviderForTest();
+
+        // putString will eventually invoking the mocked call() method and update mValues
+        Settings.Global.putString(context.getContentResolver(), MY_UNIQUE_KEY, MY_UNIQUE_KEY);
+        Settings.Secure.putString(context.getContentResolver(), MY_UNIQUE_KEY, MY_UNIQUE_KEY);
+        Settings.System.putString(context.getContentResolver(), MY_UNIQUE_KEY, MY_UNIQUE_KEY);
         // Verify that if any test is using TestableContext, they all have the correct settings
         // provider.
         assertEquals("Incorrect settings provider, test using incorrect Context?", MY_UNIQUE_KEY,
@@ -71,7 +72,11 @@ public class TestableSettingsProvider extends MockContentProvider {
 
     public Bundle call(String method, String arg, Bundle extras) {
         // Methods are "GET_system", "GET_global", "PUT_secure", etc.
-        final int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, UserHandle.myUserId());
+        int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, UserHandle.USER_CURRENT);
+        if (userId == UserHandle.USER_CURRENT || userId == UserHandle.USER_CURRENT_OR_SELF) {
+            userId = UserHandle.myUserId();
+        }
+
         final String[] commands = method.split("_", 2);
         final String op = commands[0];
         final String table = commands[1];

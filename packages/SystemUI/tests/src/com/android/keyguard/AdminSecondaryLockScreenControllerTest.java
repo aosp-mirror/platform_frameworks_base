@@ -41,9 +41,11 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -83,6 +85,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mKeyguardSecurityContainer = spy(new KeyguardSecurityContainer(mContext));
+        mKeyguardSecurityContainer.setId(View.generateViewId());
         ViewUtils.attachView(mKeyguardSecurityContainer);
 
         mTestableLooper = TestableLooper.get(this);
@@ -190,7 +193,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
 
     private void verifyViewDismissed(SurfaceView v) throws Exception {
         verify(mKeyguardSecurityContainer).removeView(v);
-        verify(mKeyguardCallback).dismiss(true, TARGET_USER_ID, true);
+        verify(mKeyguardCallback).dismiss(true, TARGET_USER_ID, true, SecurityMode.Invalid);
         assertThat(mContext.isBound(mComponentName)).isFalse();
     }
 }

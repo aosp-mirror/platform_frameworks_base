@@ -38,7 +38,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.policy.PhoneWindow;
 
@@ -219,6 +218,7 @@ public class MediaController extends FrameLayout {
         p.width = mAnchor.getWidth();
         p.x = anchorPos[0] + (mAnchor.getWidth() - p.width) / 2;
         p.y = anchorPos[1] + mAnchor.getHeight() - mDecor.getMeasuredHeight();
+        p.token = mAnchor.getWindowToken();
     }
 
     // This is called whenever mAnchor's layout bound changes
@@ -748,8 +748,7 @@ public class MediaController extends FrameLayout {
         }
         ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
         if (viewRootImpl != null
-                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
-                viewRootImpl.mContext)) {
+                && viewRootImpl.getOnBackInvokedDispatcher().isOnBackInvokedCallbackEnabled()) {
             viewRootImpl.getOnBackInvokedDispatcher()
                     .unregisterOnBackInvokedCallback(mBackCallback);
         }
@@ -763,8 +762,7 @@ public class MediaController extends FrameLayout {
 
         ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
         if (viewRootImpl != null
-                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
-                viewRootImpl.mContext)) {
+                && viewRootImpl.getOnBackInvokedDispatcher().isOnBackInvokedCallbackEnabled()) {
             viewRootImpl.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
             mBackCallbackRegistered = true;

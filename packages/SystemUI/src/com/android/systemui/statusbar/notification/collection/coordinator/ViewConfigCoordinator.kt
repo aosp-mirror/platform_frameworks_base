@@ -16,15 +16,18 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.util.Log
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingMessage
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 /**
@@ -38,24 +41,50 @@ class ViewConfigCoordinator @Inject internal constructor(
     private val mLockscreenUserManager: NotificationLockscreenUserManager,
     private val mGutsManager: NotificationGutsManager,
     private val mKeyguardUpdateMonitor: KeyguardUpdateMonitor
-) : Coordinator, UserChangedListener, ConfigurationController.ConfigurationListener {
+) : Coordinator, ConfigurationController.ConfigurationListener {
 
+    private var mIsSwitchingUser = false
     private var mReinflateNotificationsOnUserSwitched = false
     private var mDispatchUiModeChangeOnUserSwitched = false
     private var mPipeline: NotifPipeline? = null
 
-    override fun attach(pipeline: NotifPipeline) {
-        mPipeline = pipeline
-        if (pipeline.isNewPipelineEnabled) {
-            mLockscreenUserManager.addUserChangedListener(this)
-            mConfigurationController.addCallback(this)
+    private val mKeyguardUpdateCallback = object : KeyguardUpdateMonitorCallback() {
+        override fun onUserSwitching(userId: Int) {
+            log { "ViewConfigCoordinator.onUserSwitching(userId=$userId)" }
+            mIsSwitchingUser = true
+        }
+
+        override fun onUserSwitchComplete(userId: Int) {
+            log { "ViewConfigCoordinator.onUserSwitchComplete(userId=$userId)" }
+            mIsSwitchingUser = false
+            applyChangesOnUserSwitched()
         }
     }
 
+    private val mUserChangedListener = object : UserChangedListener {
+        override fun onUserChanged(userId: Int) {
+            log { "ViewConfigCoordinator.onUserChanged(userId=$userId)" }
+            applyChangesOnUserSwitched()
+        }
+    }
+
+    override fun attach(pipeline: NotifPipeline) {
+        mPipeline = pipeline
+        mLockscreenUserManager.addUserChangedListener(mUserChangedListener)
+        mConfigurationController.addCallback(this)
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback)
+    }
+
     override fun onDensityOrFontScaleChanged() {
+        log {
+            val keyguardIsSwitchingUser = mKeyguardUpdateMonitor.isSwitchingUser
+            "ViewConfigCoordinator.onDensityOrFontScaleChanged()" +
+                    " isSwitchingUser=$mIsSwitchingUser" +
+                    " keyguardUpdateMonitor.isSwitchingUser=$keyguardIsSwitchingUser"
+        }
         MessagingMessage.dropCache()
         MessagingGroup.dropCache()
-        if (!mKeyguardUpdateMonitor.isSwitchingUser) {
+        if (!mIsSwitchingUser) {
             updateNotificationsOnDensityOrFontScaleChanged()
         } else {
             mReinflateNotificationsOnUserSwitched = true
@@ -63,7 +92,13 @@ class ViewConfigCoordinator @Inject internal constructor(
     }
 
     override fun onUiModeChanged() {
-        if (!mKeyguardUpdateMonitor.isSwitchingUser) {
+        log {
+            val keyguardIsSwitchingUser = mKeyguardUpdateMonitor.isSwitchingUser
+            "ViewConfigCoordinator.onUiModeChanged()" +
+                    " isSwitchingUser=$mIsSwitchingUser" +
+                    " keyguardUpdateMonitor.isSwitchingUser=$keyguardIsSwitchingUser"
+        }
+        if (!mIsSwitchingUser) {
             updateNotificationsOnUiModeChanged()
         } else {
             mDispatchUiModeChangeOnUserSwitched = true
@@ -74,7 +109,7 @@ class ViewConfigCoordinator @Inject internal constructor(
         onDensityOrFontScaleChanged()
     }
 
-    override fun onUserChanged(userId: Int) {
+    private fun applyChangesOnUserSwitched() {
         if (mReinflateNotificationsOnUserSwitched) {
             updateNotificationsOnDensityOrFontScaleChanged()
             mReinflateNotificationsOnUserSwitched = false
@@ -86,9 +121,9 @@ class ViewConfigCoordinator @Inject internal constructor(
     }
 
     private fun updateNotificationsOnUiModeChanged() {
+        log { "ViewConfigCoordinator.updateNotificationsOnUiModeChanged()" }
         mPipeline?.allNotifs?.forEach { entry ->
-            val row = entry.row
-            row?.onUiModeChanged()
+            entry.row?.onUiModeChanged()
         }
     }
 
@@ -100,5 +135,14 @@ class ViewConfigCoordinator @Inject internal constructor(
                 mGutsManager.onDensityOrFontScaleChanged(entry)
             }
         }
+    }
+
+    private inline fun log(message: () -> String) {
+        if (DEBUG) Log.d(TAG, message())
+    }
+
+    companion object {
+        private const val TAG = "ViewConfigCoordinator"
+        private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
     }
 }

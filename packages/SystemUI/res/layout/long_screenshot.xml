@@ -16,9 +16,9 @@
   -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="?android:colorBackgroundFloating"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -32,7 +32,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="@dimen/long_screenshot_action_bar_top_margin"
         android:background="@drawable/overlay_button_background"
-        android:textColor="?android:textColorSecondary"
+        android:backgroundTint="?androidprv:attr/materialColorPrimary"
+        android:textColor="?androidprv:attr/materialColorOnPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/preview" />
@@ -45,8 +46,9 @@
         android:text="@android:string/cancel"
         android:layout_marginStart="6dp"
         android:layout_marginTop="@dimen/long_screenshot_action_bar_top_margin"
-        android:background="@drawable/overlay_button_background"
-        android:textColor="?android:textColorSecondary"
+        android:background="@drawable/overlay_button_outline"
+        android:backgroundTint="?androidprv:attr/materialColorPrimary"
+        android:textColor="?androidprv:attr/materialColorOnSurface"
         app:layout_constraintStart_toEndOf="@id/save"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/preview"
@@ -55,7 +57,7 @@
     <ImageButton
         android:id="@+id/share"
         style="@android:style/Widget.Material.Button.Borderless"
-        android:tint="?android:textColorPrimary"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="8dp"
@@ -112,10 +114,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:handleThickness="@dimen/screenshot_crop_handle_thickness"
-        app:handleColor="?android:attr/colorAccent"
-        app:scrimColor="?android:colorBackgroundFloating"
+        app:handleColor="?androidprv:attr/materialColorSecondary"
+        app:scrimColor="?androidprv:attr/materialColorSurfaceContainer"
         app:scrimAlpha="128"
-        app:containerBackgroundColor="?android:colorBackgroundFloating"
+        app:containerBackgroundColor="?androidprv:attr/materialColorSurfaceContainer"
         tools:background="?android:colorBackground"
         tools:minHeight="100dp"
         tools:minWidth="100dp" />
@@ -129,12 +131,11 @@
         app:layout_constraintTop_toTopOf="@id/preview"
         app:layout_constraintLeft_toLeftOf="parent"
         app:handleThickness="@dimen/screenshot_crop_handle_thickness"
-        app:handleColor="?android:attr/colorAccent"
-        app:scrimColor="?android:colorBackgroundFloating"
+        app:handleColor="?androidprv:attr/materialColorSecondary"
+        app:scrimColor="?androidprv:attr/materialColorSurfaceContainer"
         app:scrimAlpha="128"
         app:borderThickness="4dp"
-        app:borderColor="#fff"
-        />
+        app:borderColor="?androidprv:attr/materialColorSurfaceBright" />
 
     <ImageButton
         android:id="@+id/edit"
@@ -146,12 +147,11 @@
         android:background="@drawable/screenshot_edit_background"
         android:src="@drawable/ic_screenshot_edit"
         android:contentDescription="@string/screenshot_edit_label"
-        android:tint="?android:textColorSecondary"
+        android:tint="?androidprv:attr/materialColorOnSecondaryFixed"
         android:padding="16dp"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-    />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <ImageView
         android:id="@+id/transition"
@@ -160,7 +160,6 @@
         app:layout_constraintTop_toTopOf="@id/preview"
         app:layout_constraintLeft_toLeftOf="parent"
         android:scaleType="centerCrop"
-        android:visibility="invisible"
-        />
+        android:visibility="invisible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

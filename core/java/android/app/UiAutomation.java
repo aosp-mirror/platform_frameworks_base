@@ -16,7 +16,10 @@
 
 package android.app;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.accessibilityservice.AccessibilityGestureEvent;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -29,6 +32,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -44,7 +48,9 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -58,6 +64,7 @@ import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
+import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -66,8 +73,10 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.io.IoUtils;
@@ -76,7 +85,6 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -110,10 +118,11 @@ public final class UiAutomation {
     private static final String LOG_TAG = UiAutomation.class.getSimpleName();
 
     private static final boolean DEBUG = false;
+    private static final boolean VERBOSE = false;
 
     private static final int CONNECTION_ID_UNDEFINED = -1;
 
-    private static final long CONNECT_TIMEOUT_MILLIS = 60000;
+    private static final long CONNECT_TIMEOUT_MILLIS = 5000;
 
     /** Rotation constant: Unfreeze rotation (rotating the device changes its rotation state). */
     public static final int ROTATION_UNFREEZE = -2;
@@ -173,6 +182,15 @@ public final class UiAutomation {
     public static final int FLAG_DONT_USE_ACCESSIBILITY = 0x00000002;
 
     /**
+     * UiAutomation sets {@link AccessibilityServiceInfo#isAccessibilityTool()} true by default.
+     * This flag provides the option to set this field false for tests exercising that property.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_NOT_ACCESSIBILITY_TOOL = 0x00000004;
+
+    /**
      * Returned by {@link #getAdoptedShellPermissions} to indicate that all permissions have been
      * adopted using {@link #adoptShellPermissionIdentity}.
      *
@@ -189,6 +207,8 @@ public final class UiAutomation {
     private final Handler mLocalCallbackHandler;
 
     private final IUiAutomationConnection mUiAutomationConnection;
+
+    private final int mDisplayId;
 
     private HandlerThread mRemoteCallbackThread;
 
@@ -249,24 +269,49 @@ public final class UiAutomation {
 
     /**
      * Creates a new instance that will handle callbacks from the accessibility
+     * layer on the thread of the provided context main looper and perform requests for privileged
+     * operations on the provided connection, and filtering display-related features to the display
+     * associated with the context (or the user running the test, on devices that
+     * {@link UserManager#isVisibleBackgroundUsersSupported() support visible background users}).
+     *
+     * @param context the context associated with the automation
+     * @param connection The connection for performing privileged operations.
+     *
+     * @hide
+     */
+    public UiAutomation(Context context, IUiAutomationConnection connection) {
+        this(getDisplayId(context), context.getMainLooper(), connection);
+    }
+
+    /**
+     * Creates a new instance that will handle callbacks from the accessibility
      * layer on the thread of the provided looper and perform requests for privileged
      * operations on the provided connection.
      *
      * @param looper The looper on which to execute accessibility callbacks.
      * @param connection The connection for performing privileged operations.
      *
+     * @deprecated use {@link #UiAutomation(Context, IUiAutomationConnection)} instead
+     *
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UiAutomation(Looper looper, IUiAutomationConnection connection) {
-        if (looper == null) {
-            throw new IllegalArgumentException("Looper cannot be null!");
-        }
-        if (connection == null) {
-            throw new IllegalArgumentException("Connection cannot be null!");
-        }
+        this(DEFAULT_DISPLAY, looper, connection);
+        Log.w(LOG_TAG, "Created with deprecatead constructor, assumes DEFAULT_DISPLAY");
+    }
+
+    private UiAutomation(int displayId, Looper looper, IUiAutomationConnection connection) {
+        Preconditions.checkArgument(looper != null, "Looper cannot be null!");
+        Preconditions.checkArgument(connection != null, "Connection cannot be null!");
+
         mLocalCallbackHandler = new Handler(looper);
         mUiAutomationConnection = connection;
+        mDisplayId = displayId;
+
+        Log.i(LOG_TAG, "Initialized for user " + Process.myUserHandle().getIdentifier()
+                + " on display " + mDisplayId);
     }
 
     /**
@@ -311,11 +356,18 @@ public final class UiAutomation {
      * @hide
      */
     public void connectWithTimeout(int flags, long timeoutMillis) throws TimeoutException {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "connectWithTimeout: user=" + Process.myUserHandle().getIdentifier()
+                    + ", flags=" + DebugUtils.flagsToString(UiAutomation.class, "FLAG_", flags)
+                    + ", timeout=" + timeoutMillis + "ms");
+        }
         synchronized (mLock) {
             throwIfConnectedLocked();
             if (mConnectionState == ConnectionState.CONNECTING) {
+                if (DEBUG) Log.d(LOG_TAG, "already connecting");
                 return;
             }
+            if (DEBUG) Log.d(LOG_TAG, "setting state to CONNECTING");
             mConnectionState = ConnectionState.CONNECTING;
             mRemoteCallbackThread = new HandlerThread("UiAutomation");
             mRemoteCallbackThread.start();
@@ -331,6 +383,7 @@ public final class UiAutomation {
             // If UiAutomation is not allowed to use the accessibility subsystem, the
             // connection state should keep disconnected and not to start the client connection.
             if (!useAccessibility()) {
+                if (DEBUG) Log.d(LOG_TAG, "setting state to DISCONNECTED");
                 mConnectionState = ConnectionState.DISCONNECTED;
                 return;
             }
@@ -347,6 +400,7 @@ public final class UiAutomation {
                 final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                 final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
                 if (remainingTimeMillis <= 0) {
+                    if (DEBUG) Log.d(LOG_TAG, "setting state to FAILED");
                     mConnectionState = ConnectionState.FAILED;
                     throw new TimeoutException("Timeout while connecting " + this);
                 }
@@ -457,6 +511,48 @@ public final class UiAutomation {
     }
 
     /**
+     * Clears the accessibility cache.
+     *
+     * @return {@code true} if the cache was cleared
+     * @see AccessibilityService#clearCache()
+     */
+    public boolean clearCache() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        final AccessibilityCache cache = AccessibilityInteractionClient.getCache(connectionId);
+        if (cache == null) {
+            return false;
+        }
+        cache.clear();
+        return true;
+    }
+
+    /**
+     * Checks if {@code node} is in the accessibility cache.
+     *
+     * @param node the node to check.
+     * @return {@code true} if {@code node} is in the cache.
+     * @hide
+     * @see AccessibilityService#isNodeInCache(AccessibilityNodeInfo)
+     */
+    @TestApi
+    public boolean isNodeInCache(@NonNull AccessibilityNodeInfo node) {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        final AccessibilityCache cache = AccessibilityInteractionClient.getCache(connectionId);
+        if (cache == null) {
+            return false;
+        }
+        return cache.isNodeInCache(node);
+    }
+
+    /**
      * Adopt the permission identity of the shell UID for all permissions. This allows
      * you to call APIs protected permissions which normal apps cannot hold but are
      * granted to the shell UID. If you already adopted all shell permissions by calling
@@ -475,7 +571,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), null);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -500,7 +596,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), permissions);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -516,7 +612,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.dropShellPermissionIdentity();
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing dropping shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -534,8 +630,7 @@ public final class UiAutomation {
             final List<String> permissions = mUiAutomationConnection.getAdoptedShellPermissions();
             return permissions == null ? ALL_PERMISSIONS : new ArraySet<>(permissions);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting adopted shell permissions", re);
-            return Collections.emptySet();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -657,8 +752,14 @@ public final class UiAutomation {
     }
 
     /**
-     * Gets the windows on the screen of the default display. This method returns only the windows
-     * that a sighted user can interact with, as opposed to all windows.
+     * Gets the windows on the screen associated with the {@link UiAutomation} context (usually the
+     * {@link android.view.Display#DEFAULT_DISPLAY default display).
+     *
+     * <p>
+     * This method returns only the windows that a sighted user can interact with, as opposed to
+     * all windows.
+
+     * <p>
      * For example, if there is a modal dialog shown and the user cannot touch
      * anything behind it, then only the modal window will be reported
      * (assuming it is the top one). For convenience the returned windows
@@ -668,21 +769,23 @@ public final class UiAutomation {
      * <strong>Note:</strong> In order to access the windows you have to opt-in
      * to retrieve the interactive windows by setting the
      * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
-     * </p>
      *
      * @return The windows if there are windows such, otherwise an empty list.
      * @throws IllegalStateException If the connection to the accessibility subsystem is not
      *            established.
      */
     public List<AccessibilityWindowInfo> getWindows() {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "getWindows(): returning windows for display " + mDisplayId);
+        }
         final int connectionId;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
             connectionId = mConnectionId;
         }
         // Calling out without a lock held.
-        return AccessibilityInteractionClient.getInstance()
-                .getWindows(connectionId);
+        return AccessibilityInteractionClient.getInstance().getWindowsOnDisplay(connectionId,
+                mDisplayId);
     }
 
     /**
@@ -781,6 +884,24 @@ public final class UiAutomation {
             Log.e(LOG_TAG, "Error while injecting input event!", re);
         }
         return false;
+    }
+
+    /**
+     * Injects an arbitrary {@link InputEvent} to the accessibility input filter, for use in testing
+     * the accessibility input filter.
+     *
+     * Events injected to the input subsystem using the standard {@link #injectInputEvent} method
+     * skip the accessibility input filter to avoid feedback loops.
+     *
+     * @hide
+     */
+    @TestApi
+    public void injectInputEventToInputFilter(@NonNull InputEvent event) {
+        try {
+            mUiAutomationConnection.injectInputEventToInputFilter(event);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while injecting input event to input filter", re);
+        }
     }
 
     /**
@@ -1032,8 +1153,10 @@ public final class UiAutomation {
      * @return The screenshot bitmap on success, null otherwise.
      */
     public Bitmap takeScreenshot() {
-        Display display = DisplayManagerGlobal.getInstance()
-                .getRealDisplay(Display.DEFAULT_DISPLAY);
+        if (DEBUG) {
+            Log.d(LOG_TAG, "Taking screenshot of display " + mDisplayId);
+        }
+        Display display = DisplayManagerGlobal.getInstance().getRealDisplay(mDisplayId);
         Point displaySize = new Point();
         display.getRealSize(displaySize);
 
@@ -1046,10 +1169,12 @@ public final class UiAutomation {
             screenShot = mUiAutomationConnection.takeScreenshot(
                     new Rect(0, 0, displaySize.x, displaySize.y));
             if (screenShot == null) {
+                Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
+                        + mDisplayId);
                 return null;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while taking screenshot!", re);
+            Log.e(LOG_TAG, "Error while taking screenshot of display " + mDisplayId, re);
             return null;
         }
 
@@ -1068,10 +1193,7 @@ public final class UiAutomation {
      * @param window Window to take a screenshot of
      *
      * @return The screenshot bitmap on success, null otherwise.
-     *
-     * @hide
      */
-    @TestApi
     @Nullable
     public Bitmap takeScreenshot(@NonNull Window window) {
         if (window == null) {
@@ -1301,7 +1423,8 @@ public final class UiAutomation {
             UserHandle userHandle) {
         try {
             if (DEBUG) {
-                Log.i(LOG_TAG, "Granting runtime permission");
+                Log.i(LOG_TAG, "Granting runtime permission (" + permission + ") to package "
+                        + packageName + " on user " + userHandle);
             }
             // Calling out without a lock held.
             mUiAutomationConnection.grantRuntimePermission(packageName,
@@ -1425,13 +1548,18 @@ public final class UiAutomation {
      *
      * @param command The command to execute.
      * @return File descriptors (out, in, err) to the standard output/input/error streams.
-     *
-     * @hide
      */
-    @TestApi
     @SuppressLint("ArrayReturn") // For consistency with other APIs
     public @NonNull ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String command) {
         return executeShellCommandInternal(command, true /* includeStderr */);
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public int getDisplayId() {
+        return mDisplayId;
     }
 
     private ParcelFileDescriptor[] executeShellCommandInternal(
@@ -1489,6 +1617,7 @@ public final class UiAutomation {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UiAutomation@").append(Integer.toHexString(hashCode()));
         stringBuilder.append("[id=").append(mConnectionId);
+        stringBuilder.append(", displayId=").append(mDisplayId);
         stringBuilder.append(", flags=").append(mFlags);
         stringBuilder.append("]");
         return stringBuilder.toString();
@@ -1526,10 +1655,59 @@ public final class UiAutomation {
         return (mFlags & UiAutomation.FLAG_DONT_USE_ACCESSIBILITY) == 0;
     }
 
+    /**
+     * Gets the display id associated with the UiAutomation context.
+     *
+     * <p><b>NOTE: </b> must be a static method because it's called from a constructor to call
+     * another one.
+     */
+    private static int getDisplayId(Context context) {
+        Preconditions.checkArgument(context != null, "Context cannot be null!");
+
+        UserManager userManager = context.getSystemService(UserManager.class);
+        // TODO(b/255426725): given that this is a temporary solution until a11y supports multiple
+        // users, the display is only set on devices that support that
+        if (!userManager.isVisibleBackgroundUsersSupported()) {
+            return DEFAULT_DISPLAY;
+        }
+
+        int displayId = context.getDisplayId();
+        if (displayId == Display.INVALID_DISPLAY) {
+            // Shouldn't happen, but we better handle it
+            Log.e(LOG_TAG, "UiAutomation created UI context with invalid display id, assuming it's"
+                    + " running in the display assigned to the user");
+            return getMainDisplayIdAssignedToUser(context, userManager);
+        }
+
+        if (displayId != DEFAULT_DISPLAY) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "getDisplayId(): returning context's display (" + displayId + ")");
+            }
+            // Context is explicitly setting the display, so we respect that...
+            return displayId;
+        }
+        // ...otherwise, we need to get the display the test's user is running on
+        int userDisplayId = getMainDisplayIdAssignedToUser(context, userManager);
+        if (DEBUG) {
+            Log.d(LOG_TAG, "getDisplayId(): returning user's display (" + userDisplayId + ")");
+        }
+        return userDisplayId;
+    }
+
+    private static int getMainDisplayIdAssignedToUser(Context context, UserManager userManager) {
+        if (!userManager.isUserVisible()) {
+            // Should also not happen, but ...
+            Log.e(LOG_TAG, "User (" + context.getUserId() + ") is not visible, using "
+                    + "DEFAULT_DISPLAY");
+            return DEFAULT_DISPLAY;
+        }
+        return userManager.getMainDisplayIdAssignedToUser();
+    }
+
     private class IAccessibilityServiceClientImpl extends IAccessibilityServiceClientWrapper {
 
         public IAccessibilityServiceClientImpl(Looper looper, int generationId) {
-            super(null, looper, new Callbacks() {
+            super(/* context= */ null, looper, new Callbacks() {
                 private final int mGenerationId = generationId;
 
                 /**
@@ -1543,10 +1721,22 @@ public final class UiAutomation {
 
                 @Override
                 public void init(int connectionId, IBinder windowToken) {
+                    if (DEBUG) {
+                        Log.d(LOG_TAG, "init(): connectionId=" + connectionId + ", windowToken="
+                                + windowToken + ", user=" + Process.myUserHandle()
+                                + ", UiAutomation.mDisplay=" + UiAutomation.this.mDisplayId
+                                + ", mGenerationId=" + mGenerationId
+                                + ", UiAutomation.mGenerationId="
+                                + UiAutomation.this.mGenerationId);
+                    }
                     synchronized (mLock) {
                         if (isGenerationChangedLocked()) {
+                            if (DEBUG) {
+                                Log.d(LOG_TAG, "init(): returning because generation id changed");
+                            }
                             return;
                         }
+                        if (DEBUG) Log.d(LOG_TAG, "setting state to CONNECTED");
                         mConnectionState = ConnectionState.CONNECTED;
                         mConnectionId = connectionId;
                         mLock.notifyAll();
@@ -1599,12 +1789,25 @@ public final class UiAutomation {
 
                 @Override
                 public void onAccessibilityEvent(AccessibilityEvent event) {
+                    if (VERBOSE) {
+                        Log.v(LOG_TAG, "onAccessibilityEvent(" + Process.myUserHandle() + "): "
+                                + event);
+                    }
+
                     final OnAccessibilityEventListener listener;
                     synchronized (mLock) {
                         if (isGenerationChangedLocked()) {
+                            if (VERBOSE) {
+                                Log.v(LOG_TAG, "onAccessibilityEvent(): returning because "
+                                        + "generation id changed (from "
+                                        + UiAutomation.this.mGenerationId + " to "
+                                        + mGenerationId + ")");
+                            }
                             return;
                         }
-                        mLastEventTimeMillis = event.getEventTime();
+                        // It is not guaranteed that the accessibility framework sends events by the
+                        // order of event timestamp.
+                        mLastEventTimeMillis = Math.max(mLastEventTimeMillis, event.getEventTime());
                         if (mWaitingForEventDelivery) {
                             mEventQueue.add(AccessibilityEvent.obtain(event));
                         }

@@ -22,11 +22,12 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.security.FileIntegrity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -180,6 +181,12 @@ abstract class ShortcutPackageItem {
 
             os.flush();
             file.finishWrite(os);
+
+            try {
+                FileIntegrity.setUpFsVerity(path);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to verity-protect " + path, e);
+            }
         } catch (XmlPullParserException | IOException e) {
             Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
             file.failWrite(os);

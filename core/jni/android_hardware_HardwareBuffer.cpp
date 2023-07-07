@@ -163,7 +163,7 @@ static jint android_hardware_HardwareBuffer_getLayers(JNIEnv* env,
 static jlong android_hardware_HardwareBuffer_getUsage(JNIEnv* env,
     jobject clazz, jlong nativeObject) {
     GraphicBuffer* buffer = GraphicBufferWrapper_to_GraphicBuffer(nativeObject);
-    return AHardwareBuffer_convertFromGrallocUsageBits(buffer->getUsage());
+    return static_cast<jlong>(AHardwareBuffer_convertFromGrallocUsageBits(buffer->getUsage()));
 }
 
 static jlong android_hardware_HardwareBuffer_estimateSize(jlong nativeObject) {
@@ -177,7 +177,12 @@ static jlong android_hardware_HardwareBuffer_estimateSize(jlong nativeObject) {
 
     const uint32_t bufferStride =
             buffer->getStride() > 0 ? buffer->getStride() : buffer->getWidth();
-    return static_cast<jlong>(buffer->getHeight() * bufferStride * bpp);
+    return static_cast<jlong>(static_cast<uint64_t>(buffer->getHeight() * bufferStride * bpp));
+}
+
+static jlong android_hardware_HardwareBuffer_getId(jlong nativeObject) {
+    GraphicBuffer* buffer = GraphicBufferWrapper_to_GraphicBuffer(nativeObject);
+    return static_cast<jlong>(buffer->getId());
 }
 
 // ----------------------------------------------------------------------------
@@ -218,16 +223,6 @@ AHardwareBuffer* android_hardware_HardwareBuffer_getNativeHardwareBuffer(
                 env->GetLongField(hardwareBufferObj, gHardwareBufferClassInfo.mNativeObject));
         return AHardwareBuffer_from_GraphicBuffer(buffer);
 
-    } else {
-        return nullptr;
-    }
-}
-
-GraphicBuffer* android_hardware_HardwareBuffer_getNativeGraphicBuffer(
-        JNIEnv* env, jobject hardwareBufferObj) {
-    if (env->IsInstanceOf(hardwareBufferObj, gHardwareBufferClassInfo.clazz)) {
-        return GraphicBufferWrapper_to_GraphicBuffer(
-                env->GetLongField(hardwareBufferObj, gHardwareBufferClassInfo.mNativeObject));
     } else {
         return nullptr;
     }
@@ -295,6 +290,7 @@ static const JNINativeMethod gMethods[] = {
 
     // --------------- @CriticalNative ----------------------
     { "nEstimateSize", "(J)J",  (void*) android_hardware_HardwareBuffer_estimateSize },
+    { "nGetId", "(J)J",  (void*) android_hardware_HardwareBuffer_getId },
 };
 // clang-format on
 

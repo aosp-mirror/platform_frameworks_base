@@ -18,14 +18,11 @@ package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.media.MediaRoute2Info
 import android.util.Log
-import android.view.View
 import androidx.annotation.StringRes
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
-import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.common.shared.model.Text
 
 /**
  * A class enumerating all the possible states of the media tap-to-transfer chip on the sender
@@ -34,18 +31,18 @@ import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
  * @property stateInt the integer from [StatusBarManager] corresponding with this state.
  * @property stringResId the res ID of the string that should be displayed in the chip. Null if the
  *   state should not have the chip be displayed.
- * @property isMidTransfer true if the state represents that a transfer is currently ongoing.
- * @property isTransferFailure true if the state represents that the transfer has failed.
- * @property timeout the amount of time this chip should display on the screen before it times out
- *   and disappears.
+ * @property transferStatus the transfer status that the chip state represents.
+ * @property endItem the item that should be displayed in the end section of the chip.
+ * @property timeoutLength how long the chip should display on the screen before it times out and
+ *   disappears.
  */
 enum class ChipStateSender(
     @StatusBarManager.MediaTransferSenderState val stateInt: Int,
     val uiEvent: UiEventLogger.UiEventEnum,
     @StringRes val stringResId: Int?,
-    val isMidTransfer: Boolean = false,
-    val isTransferFailure: Boolean = false,
-    val timeout: Long = DEFAULT_TIMEOUT_MILLIS
+    val transferStatus: TransferStatus,
+    val endItem: SenderEndItem?,
+    val timeoutLength: TimeoutLength = TimeoutLength.DEFAULT,
 ) {
     /**
      * A state representing that the two devices are close but not close enough to *start* a cast to
@@ -56,7 +53,17 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_START_CAST,
         R.string.media_move_closer_to_start_cast,
-    ),
+        transferStatus = TransferStatus.NOT_STARTED,
+        endItem = null,
+        // Give this view more time in case the loading view takes a bit to come in. (We don't want
+        // this view to disappear and then the loading view to appear quickly afterwards.)
+        timeoutLength = TimeoutLength.LONG,
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+        }
+    },
 
     /**
      * A state representing that the two devices are close but not close enough to *end* a cast
@@ -68,7 +75,15 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_END_CAST,
         R.string.media_move_closer_to_end_cast,
-    ),
+        transferStatus = TransferStatus.NOT_STARTED,
+        endItem = null,
+        timeoutLength = TimeoutLength.LONG,
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+        }
+    },
 
     /**
      * A state representing that a transfer to the receiver device has been initiated (but not
@@ -78,9 +93,18 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_TRIGGERED,
         R.string.media_transfer_playing_different_device,
-        isMidTransfer = true,
-        timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
-    ),
+        transferStatus = TransferStatus.IN_PROGRESS,
+        endItem = SenderEndItem.Loading,
+        // Give this view more time in case the succeeded/failed view takes a bit to come in. (We
+        // don't want this view to disappear and then the next view to appear quickly afterwards.)
+        timeoutLength = TimeoutLength.LONG,
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_RECEIVER_SUCCEEDED ||
+                    nextState == TRANSFER_TO_RECEIVER_FAILED
+        }
+    },
 
     /**
      * A state representing that a transfer from the receiver device and back to this device (the
@@ -90,9 +114,16 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
         R.string.media_transfer_playing_this_device,
-        isMidTransfer = true,
-        timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
-    ),
+        transferStatus = TransferStatus.IN_PROGRESS,
+        endItem = SenderEndItem.Loading,
+        timeoutLength = TimeoutLength.LONG,
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            return nextState == FAR_FROM_RECEIVER ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_SUCCEEDED ||
+                    nextState == TRANSFER_TO_THIS_DEVICE_FAILED
+        }
+    },
 
     /**
      * A state representing that a transfer to the receiver device has been successfully completed.
@@ -100,32 +131,19 @@ enum class ChipStateSender(
     TRANSFER_TO_RECEIVER_SUCCEEDED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED,
-        R.string.media_transfer_playing_different_device
+        R.string.media_transfer_playing_different_device,
+        transferStatus = TransferStatus.SUCCEEDED,
+        endItem = SenderEndItem.UndoButton(
+            uiEventOnClick =
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED,
+            newState =
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED
+        ),
     ) {
-        override fun undoClickListener(
-            controllerSender: MediaTttChipControllerSender,
-            routeInfo: MediaRoute2Info,
-            undoCallback: IUndoMediaTransferCallback?,
-            uiEventLogger: MediaTttSenderUiEventLogger
-        ): View.OnClickListener? {
-            if (undoCallback == null) {
-                return null
-            }
-            return View.OnClickListener {
-                uiEventLogger.logUndoClicked(
-                    MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED
-                )
-                undoCallback.onUndoTriggered()
-                // The external service should eventually send us a TransferToThisDeviceTriggered
-                // state, but that may take too long to go through the binder and the user may be
-                // confused ast o why the UI hasn't changed yet. So, we immediately change the UI
-                // here.
-                controllerSender.displayChip(
-                    ChipSenderInfo(
-                        TRANSFER_TO_THIS_DEVICE_TRIGGERED, routeInfo, undoCallback
-                    )
-                )
-            }
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            // Since _SUCCEEDED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -135,32 +153,19 @@ enum class ChipStateSender(
     TRANSFER_TO_THIS_DEVICE_SUCCEEDED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
-        R.string.media_transfer_playing_this_device
+        R.string.media_transfer_playing_this_device,
+        transferStatus = TransferStatus.SUCCEEDED,
+        endItem = SenderEndItem.UndoButton(
+            uiEventOnClick =
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED,
+            newState =
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED
+        ),
     ) {
-        override fun undoClickListener(
-            controllerSender: MediaTttChipControllerSender,
-            routeInfo: MediaRoute2Info,
-            undoCallback: IUndoMediaTransferCallback?,
-            uiEventLogger: MediaTttSenderUiEventLogger
-        ): View.OnClickListener? {
-            if (undoCallback == null) {
-                return null
-            }
-            return View.OnClickListener {
-                uiEventLogger.logUndoClicked(
-                    MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED
-                )
-                undoCallback.onUndoTriggered()
-                // The external service should eventually send us a TransferToReceiverTriggered
-                // state, but that may take too long to go through the binder and the user may be
-                // confused as to why the UI hasn't changed yet. So, we immediately change the UI
-                // here.
-                controllerSender.displayChip(
-                    ChipSenderInfo(
-                        TRANSFER_TO_RECEIVER_TRIGGERED, routeInfo, undoCallback
-                    )
-                )
-            }
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            // Since _SUCCEEDED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -169,51 +174,79 @@ enum class ChipStateSender(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED,
         R.string.media_transfer_failed,
-        isTransferFailure = true
-    ),
+        transferStatus = TransferStatus.FAILED,
+        endItem = SenderEndItem.Error,
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            // Since _FAILED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
+        }
+    },
 
     /** A state representing that a transfer back to this device has failed. */
     TRANSFER_TO_THIS_DEVICE_FAILED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED,
         R.string.media_transfer_failed,
-        isTransferFailure = true
-    ),
+        transferStatus = TransferStatus.FAILED,
+        endItem = SenderEndItem.Error,
+    ) {
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            // Since _FAILED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
+        }
+    },
 
     /** A state representing that this device is far away from any receiver device. */
     FAR_FROM_RECEIVER(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
         MediaTttSenderUiEvents.MEDIA_TTT_SENDER_FAR_FROM_RECEIVER,
-        stringResId = null
-    );
+        stringResId = null,
+        transferStatus = TransferStatus.TOO_FAR,
+        // We shouldn't be displaying the chipbar anyway
+        endItem = null,
+    ) {
+        override fun getChipTextString(context: Context, otherDeviceName: String): Text {
+            // TODO(b/245610654): Better way to handle this.
+            throw IllegalArgumentException("FAR_FROM_RECEIVER should never be displayed, " +
+                "so its string should never be fetched")
+        }
+
+        override fun isValidNextState(nextState: ChipStateSender): Boolean {
+            // When far away, we can go to any state that represents the start of a transfer
+            // sequence.
+            return stateIsStartOfSequence(nextState)
+        }
+    };
 
     /**
      * Returns a fully-formed string with the text that the chip should display.
      *
+     * Throws an NPE if [stringResId] is null.
+     *
      * @param otherDeviceName the name of the other device involved in the transfer.
      */
-    fun getChipTextString(context: Context, otherDeviceName: String): String? {
-        if (stringResId == null) {
-            return null
-        }
-        return context.getString(stringResId, otherDeviceName)
+    open fun getChipTextString(context: Context, otherDeviceName: String): Text {
+        return Text.Loaded(context.getString(stringResId!!, otherDeviceName))
     }
 
     /**
-     * Returns a click listener for the undo button on the chip. Returns null if this chip state
-     * doesn't have an undo button.
+     * Returns true if moving from this state to [nextState] is a valid transition.
      *
-     * @param controllerSender passed as a parameter in case we want to display a new chip state
-     *   when undo is clicked.
-     * @param undoCallback if present, the callback that should be called when the user clicks the
-     *   undo button. The undo button will only be shown if this is non-null.
+     * In general, we expect a media transfer go to through a sequence of states:
+     * For push-to-receiver:
+     *   - ALMOST_CLOSE_TO_START_CAST => TRANSFER_TO_RECEIVER_TRIGGERED =>
+     *     TRANSFER_TO_RECEIVER_(SUCCEEDED|FAILED)
+     *   - ALMOST_CLOSE_TO_END_CAST => TRANSFER_TO_THIS_DEVICE_TRIGGERED =>
+     *     TRANSFER_TO_THIS_DEVICE_(SUCCEEDED|FAILED)
+     *
+     * This method should validate that the states go through approximately that sequence.
+     *
+     * See b/221265848 for more details.
      */
-    open fun undoClickListener(
-        controllerSender: MediaTttChipControllerSender,
-        routeInfo: MediaRoute2Info,
-        undoCallback: IUndoMediaTransferCallback?,
-        uiEventLogger: MediaTttSenderUiEventLogger
-    ): View.OnClickListener? = null
+    abstract fun isValidNextState(nextState: ChipStateSender): Boolean
 
     companion object {
         /**
@@ -237,12 +270,76 @@ enum class ChipStateSender(
          */
         @StatusBarManager.MediaTransferSenderState
         fun getSenderStateIdFromName(name: String): Int = valueOf(name).stateInt
+
+        /**
+         * Validates the transition from a chip state to another.
+         *
+         * @param currentState is the current state of the chip.
+         * @param desiredState is the desired state of the chip.
+         * @return true if the transition from [currentState] to [desiredState] is valid, and false
+         * otherwise.
+         */
+        fun isValidStateTransition(
+                currentState: ChipStateSender?,
+                desiredState: ChipStateSender,
+        ): Boolean {
+            // Far from receiver is the default state.
+            if (currentState == null) {
+                return FAR_FROM_RECEIVER.isValidNextState(desiredState)
+            }
+
+            // No change in state is valid.
+            if (currentState == desiredState) {
+                return true
+            }
+
+            return currentState.isValidNextState(desiredState)
+        }
+
+        /**
+         * Returns true if [state] represents a state at the beginning of a sequence and false
+         * otherwise.
+         */
+        private fun stateIsStartOfSequence(state: ChipStateSender): Boolean {
+            return state == FAR_FROM_RECEIVER ||
+                state.transferStatus == TransferStatus.NOT_STARTED ||
+                // It's possible to skip the NOT_STARTED phase and go immediately into the
+                // IN_PROGRESS phase.
+                state.transferStatus == TransferStatus.IN_PROGRESS
+        }
     }
 }
 
-// Give the Transfer*Triggered states a longer timeout since those states represent an active
-// process and we should keep the user informed about it as long as possible (but don't allow it to
-// continue indefinitely).
-private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 15000L
+/** Represents the item that should be displayed in the end section of the chip. */
+sealed class SenderEndItem {
+    /** A loading icon should be displayed. */
+    object Loading : SenderEndItem()
+
+    /** An error icon should be displayed. */
+    object Error : SenderEndItem()
+
+    /**
+     * An undo button should be displayed.
+     *
+     * @property uiEventOnClick the UI event to log when this button is clicked.
+     * @property newState the state that should immediately be transitioned to.
+     */
+    data class UndoButton(
+        val uiEventOnClick: UiEventLogger.UiEventEnum,
+        @StatusBarManager.MediaTransferSenderState val newState: Int,
+    ) : SenderEndItem()
+}
+
+/** Represents how long the chip should be visible before it times out. */
+enum class TimeoutLength {
+    /** A default timeout used for temporary displays at the top of the screen. */
+    DEFAULT,
+    /**
+     * A longer timeout. Should be used when the status is pending (e.g. loading), so that the user
+     * remains informed about the process for longer and so that the UI has more time to resolve the
+     * pending state before disappearing.
+     */
+    LONG,
+}
 
 private const val TAG = "ChipStateSender"

@@ -241,4 +241,4 @@ public abstract class BaseSurfaceHolder implements SurfaceHolder {
         mSurfaceFrame.right = width;
         mSurfaceFrame.bottom = height;
     }
-};
+}
