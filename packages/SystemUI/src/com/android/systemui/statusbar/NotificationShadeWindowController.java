@@ -112,9 +112,6 @@ public interface NotificationShadeWindowController extends RemoteInputController
     /** Sets the state of whether heads up is showing or not. */
     default void setHeadsUpShowing(boolean showing) {}
 
-    /** Sets whether the wallpaper supports ambient mode or not. */
-    default void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {}
-
     /** Gets whether the wallpaper is showing or not. */
     default boolean isShowingWallpaper() {
         return false;

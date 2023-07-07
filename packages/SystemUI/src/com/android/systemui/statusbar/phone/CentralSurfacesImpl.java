@@ -3565,14 +3565,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             WallpaperInfo info = mWallpaperManager.getWallpaperInfoForUser(
                     mUserTracker.getUserId());
             mWallpaperController.onWallpaperInfoUpdated(info);
-
-            final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
-            // If WallpaperInfo is null, it must be ImageWallpaper.
-            final boolean supportsAmbientMode = deviceSupportsAodWallpaper
-                    && (info != null && info.supportsAmbientMode());
-
-            mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
         }
     };
 
