@@ -41,8 +41,6 @@ import androidx.annotation.ColorRes;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.R;
 
-import com.android.settingslib.testutils.OverpoweredReflectionHelper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -504,18 +502,14 @@ public class BannerMessagePreferenceTest {
     private void assumeAndroidR() {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 30);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "CODENAME", "R");
-        OverpoweredReflectionHelper
-                .setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", false);
+        ReflectionHelpers.setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", false);
         // Reset view holder to use correct layout.
     }
-
-
 
     private void assumeAndroidS() {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 31);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "CODENAME", "S");
-        OverpoweredReflectionHelper
-                .setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", true);
+        ReflectionHelpers.setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", true);
         // Re-inflate view to update layout.
         setUpViewHolder();
     }
