@@ -25,11 +25,9 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_AWAKE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
@@ -173,8 +171,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mInputFocusTransferStarted;
     private float mInputFocusTransferStartY;
     private long mInputFocusTransferStartMillis;
-    private float mWindowCornerRadius;
-    private boolean mSupportsRoundedCornersOnWindows;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
 
     @VisibleForTesting
@@ -454,8 +450,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
             Bundle params = new Bundle();
             params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
-            params.putFloat(KEY_EXTRA_WINDOW_CORNER_RADIUS, mWindowCornerRadius);
-            params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
             params.putBinder(KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
                     mSysuiUnlockAnimationController.asBinder());
             mUnfoldTransitionProgressForwarder.ifPresent(
@@ -588,9 +582,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
-        mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
-        mSupportsRoundedCornersOnWindows = ScreenDecorationsUtils
-                .supportsRoundedCornersOnWindows(mContext.getResources());
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
         mUiEventLogger = uiEventLogger;
@@ -1084,8 +1075,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  mInputFocusTransferStarted="); pw.println(mInputFocusTransferStarted);
         pw.print("  mInputFocusTransferStartY="); pw.println(mInputFocusTransferStartY);
         pw.print("  mInputFocusTransferStartMillis="); pw.println(mInputFocusTransferStartMillis);
-        pw.print("  mWindowCornerRadius="); pw.println(mWindowCornerRadius);
-        pw.print("  mSupportsRoundedCornersOnWindows="); pw.println(mSupportsRoundedCornersOnWindows);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
         pw.print("  mNavigationBarSurface="); pw.println(mNavigationBarSurface);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
