@@ -1245,7 +1245,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Przygotowuję aplikację <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uruchamianie aplikacji."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Kończenie uruchamiania."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kontynuować konfigurowanie?"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Konfigurować dalej?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Naciśnięto przycisk zasilania — zwykle powoduje to wyłączenie ekranu.\n\nKlikaj delikatnie podczas konfigurowania odcisku palca."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Wyłącz ekran"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Konfiguruj dalej"</string>

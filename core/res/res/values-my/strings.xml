@@ -227,7 +227,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"ပြန်လည်စတင်နေ…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"စက်ရုံထုတ်အခြေအနေပြန်ယူခြင်း"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"ပြန်လည်စတင်နေ…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"စက်ပိတ်ပါမည်"</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"စက်ပိတ်နေသည်…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"သင့်တက်ဘလက်အား စက်ပိတ်ပါမည်"</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"သင့် Android TV စက်ပစ္စည်း ပိတ်သွားပါမည်။"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"သင်၏ ကြည့်ရှုမှု ပိတ်ပစ်မည်။"</string>
