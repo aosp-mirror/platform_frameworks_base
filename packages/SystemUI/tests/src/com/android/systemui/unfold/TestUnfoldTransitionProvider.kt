@@ -4,7 +4,7 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
 
 class TestUnfoldTransitionProvider : UnfoldTransitionProgressProvider, TransitionProgressListener {
 
-    private val listeners = arrayListOf<TransitionProgressListener>()
+    private val listeners = mutableListOf<TransitionProgressListener>()
 
     override fun destroy() {
         listeners.clear()
@@ -24,6 +24,10 @@ class TestUnfoldTransitionProvider : UnfoldTransitionProgressProvider, Transitio
 
     override fun onTransitionFinished() {
         listeners.forEach { it.onTransitionFinished() }
+    }
+
+    override fun onTransitionFinishing() {
+        listeners.forEach { it.onTransitionFinishing() }
     }
 
     override fun onTransitionProgress(progress: Float) {

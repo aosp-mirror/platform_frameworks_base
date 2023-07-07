@@ -50,6 +50,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -72,10 +73,12 @@ public class SecurityControllerTest extends SysuiTestCase {
     private final DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
     private final IKeyChainService.Stub mKeyChainService = mock(IKeyChainService.Stub.class);
     private final UserManager mUserManager = mock(UserManager.class);
+    private final UserTracker mUserTracker = mock(UserTracker.class);
     private final BroadcastDispatcher mBroadcastDispatcher = mock(BroadcastDispatcher.class);
     private final Handler mHandler = mock(Handler.class);
     private SecurityControllerImpl mSecurityController;
     private ConnectivityManager mConnectivityManager = mock(ConnectivityManager.class);
+    private FakeExecutor mMainExecutor;
     private FakeExecutor mBgExecutor;
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -102,11 +105,14 @@ public class SecurityControllerTest extends SysuiTestCase {
         ArgumentCaptor<BroadcastReceiver> brCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
+        mMainExecutor = new FakeExecutor(new FakeSystemClock());
         mBgExecutor = new FakeExecutor(new FakeSystemClock());
         mSecurityController = new SecurityControllerImpl(
                 mContext,
+                mUserTracker,
                 mHandler,
                 mBroadcastDispatcher,
+                mMainExecutor,
                 mBgExecutor,
                 Mockito.mock(DumpManager.class));
 
@@ -143,11 +149,12 @@ public class SecurityControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetDeviceOwnerType() {
+    public void testIsFinancedDevice() {
+        when(mDevicePolicyManager.isFinancedDevice()).thenReturn(true);
+        // TODO(b/259908270): remove
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
-        assertEquals(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT),
-                DEVICE_OWNER_TYPE_FINANCED);
+        assertEquals(mSecurityController.isFinancedDevice(), true);
     }
 
     @Test

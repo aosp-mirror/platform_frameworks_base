@@ -15,17 +15,21 @@
  */
 
 #include "VkFunctorDrawable.h"
-#include <private/hwui/DrawVkInfo.h>
 
 #include <GrBackendDrawableInfo.h>
 #include <SkAndroidFrameworkUtils.h>
 #include <SkImage.h>
 #include <SkM44.h>
 #include <gui/TraceUtils.h>
+#include <private/hwui/DrawVkInfo.h>
 #include <utils/Color.h>
 #include <utils/Trace.h>
 #include <vk/GrVkTypes.h>
+
 #include <thread>
+
+#include "effects/GainmapRenderer.h"
+#include "renderthread/CanvasContext.h"
 #include "renderthread/RenderThread.h"
 #include "renderthread/VulkanManager.h"
 #include "thread/ThreadBase.h"
@@ -73,6 +77,8 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
             .clip_right = mClip.fRight,
             .clip_bottom = mClip.fBottom,
             .is_layer = !vulkan_info.fFromSwapchainOrAndroidWindow,
+            .currentHdrSdrRatio = getTargetHdrSdrRatio(mImageInfo.colorSpace()),
+            .shouldDither = renderthread::CanvasContext::shouldDither(),
     };
     mat4.getColMajor(&params.transform[0]);
     params.secondary_command_buffer = vulkan_info.fSecondaryCommandBuffer;

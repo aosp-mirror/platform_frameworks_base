@@ -19,26 +19,27 @@ package com.google.android.test.handwritingime;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.view.inputmethod.CursorAnchorInfo;
 
 class InkView extends View {
-    private static final long FINISH_TIMEOUT = 2500;
+    private static final long FINISH_TIMEOUT = 1500;
     private final HandwritingIme.HandwritingFinisher mHwCanceller;
     private final HandwritingIme.StylusConsumer mConsumer;
-    private final int mTopInset;
-    private Paint mPaint;
-    private Path  mPath;
+    private final Paint mPaint;
+    private final Path mPath;
     private float mX, mY;
     private static final float STYLUS_MOVE_TOLERANCE = 1;
     private Runnable mFinishRunnable;
+
+    private CursorAnchorInfo mCursorAnchorInfo;
+    private int mBoundsInfoMode;
 
     InkView(Context context, HandwritingIme.HandwritingFinisher hwController,
             HandwritingIme.StylusConsumer consumer) {
@@ -59,12 +60,8 @@ class InkView extends View {
 
         WindowManager wm = context.getSystemService(WindowManager.class);
         WindowMetrics metrics =  wm.getCurrentWindowMetrics();
-        Insets insets = metrics.getWindowInsets()
-                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
         setLayoutParams(new ViewGroup.LayoutParams(
-                metrics.getBounds().width() - insets.left - insets.right,
-                metrics.getBounds().height() - insets.top - insets.bottom));
-        mTopInset = insets.top;
+                metrics.getBounds().width(), metrics.getBounds().height()));
     }
 
     @Override
@@ -73,17 +70,16 @@ class InkView extends View {
 
         canvas.drawPath(mPath, mPaint);
         canvas.drawARGB(20, 255, 50, 50);
+        BoundsInfoDrawHelper.draw(canvas, this, mBoundsInfoMode, mCursorAnchorInfo);
     }
 
     private void stylusStart(float x, float y) {
-        y = y - mTopInset;
         mPath.moveTo(x, y);
         mX = x;
         mY = y;
     }
 
     private void stylusMove(float x, float y) {
-        y = y - mTopInset;
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (mPath.isEmpty()) {
@@ -165,4 +161,15 @@ class InkView extends View {
         return mFinishRunnable;
     }
 
+    void setCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
+        mCursorAnchorInfo = cursorAnchorInfo;
+        invalidate();
+    }
+
+    void setBoundsInfoMode(int boundsInfoMode) {
+        if (boundsInfoMode != mBoundsInfoMode) {
+            invalidate();
+        }
+        mBoundsInfoMode = boundsInfoMode;
+    }
 }

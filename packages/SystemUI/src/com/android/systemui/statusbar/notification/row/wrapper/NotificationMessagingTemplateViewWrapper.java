@@ -17,9 +17,13 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import android.content.Context;
+import android.graphics.drawable.AnimatedImageDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.widget.MessagingGroup;
+import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.systemui.R;
@@ -126,5 +130,41 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
             return mMinHeightWithActions;
         }
         return super.getMinLayoutHeight();
+    }
+
+    /**
+     * Starts or stops the animations in any drawables contained in this Messaging Notification.
+     *
+     * @param running Whether the animations should be set to run.
+     */
+    @Override
+    public void setAnimationsRunning(boolean running) {
+        if (mMessagingLayout == null) {
+            return;
+        }
+
+        for (MessagingGroup group : mMessagingLayout.getMessagingGroups()) {
+            for (int i = 0; i < group.getMessageContainer().getChildCount(); i++) {
+                View view = group.getMessageContainer().getChildAt(i);
+                // We only need to set animations in MessagingImageMessages.
+                if (!(view instanceof MessagingImageMessage)) {
+                    continue;
+                }
+                MessagingImageMessage imageMessage =
+                        (com.android.internal.widget.MessagingImageMessage) view;
+
+                // If the drawable isn't an AnimatedImageDrawable, we can't set it to animate.
+                Drawable d = imageMessage.getDrawable();
+                if (!(d instanceof AnimatedImageDrawable)) {
+                    continue;
+                }
+                AnimatedImageDrawable animatedImageDrawable = (AnimatedImageDrawable) d;
+                if (running) {
+                    animatedImageDrawable.start();
+                } else {
+                    animatedImageDrawable.stop();
+                }
+            }
+        }
     }
 }

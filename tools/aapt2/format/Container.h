@@ -19,14 +19,13 @@
 
 #include <inttypes.h>
 
-#include "google/protobuf/io/coded_stream.h"
-#include "google/protobuf/io/zero_copy_stream.h"
-
 #include "Resources.pb.h"
 #include "ResourcesInternal.pb.h"
+#include "androidfw/BigBuffer.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/io/zero_copy_stream.h"
 #include "io/Io.h"
 #include "io/Util.h"
-#include "util/BigBuffer.h"
 
 namespace aapt {
 

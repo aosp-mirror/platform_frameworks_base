@@ -19,16 +19,38 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.shared.recents.utilities.Utilities;
+
+import javax.inject.Inject;
+
 /**
  * Receiver for the Keyboard Shortcuts Helper.
  */
 public class KeyboardShortcutsReceiver extends BroadcastReceiver {
+
+    private boolean mIsShortcutListSearchEnabled;
+
+    @Inject
+    public KeyboardShortcutsReceiver(FeatureFlags featureFlags) {
+        mIsShortcutListSearchEnabled = featureFlags.isEnabled(Flags.SHORTCUT_LIST_SEARCH_LAYOUT);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
-            KeyboardShortcuts.show(context, -1 /* deviceId unknown */);
-        } else if (Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
-            KeyboardShortcuts.dismiss();
+        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(context)) {
+            if (Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
+                KeyboardShortcutListSearch.show(context, -1 /* deviceId unknown */);
+            } else if (Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
+                KeyboardShortcutListSearch.dismiss();
+            }
+        } else {
+            if (Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
+                KeyboardShortcuts.show(context, -1 /* deviceId unknown */);
+            } else if (Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
+                KeyboardShortcuts.dismiss();
+            }
         }
     }
 }

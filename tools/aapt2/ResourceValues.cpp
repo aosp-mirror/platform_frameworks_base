@@ -75,7 +75,8 @@ void BaseItem<Derived>::Accept(ConstValueVisitor* visitor) const {
   visitor->Visit(static_cast<const Derived*>(this));
 }
 
-RawString::RawString(const StringPool::Ref& ref) : value(ref) {}
+RawString::RawString(const android::StringPool::Ref& ref) : value(ref) {
+}
 
 bool RawString::Equals(const Value* value) const {
   const RawString* other = ValueCast<RawString>(value);
@@ -87,7 +88,7 @@ bool RawString::Equals(const Value* value) const {
 
 bool RawString::Flatten(android::Res_value* out_value) const {
   out_value->dataType = android::Res_value::TYPE_STRING;
-  out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
+  out_value->data = android::util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
 }
 
@@ -136,7 +137,7 @@ bool Reference::Flatten(android::Res_value* out_value) const {
       out_value->dataType = android::Res_value::TYPE_ATTRIBUTE;
     }
   }
-  out_value->data = util::HostToDevice32(resid.id);
+  out_value->data = android::util::HostToDevice32(resid.id);
   return true;
 }
 
@@ -205,7 +206,7 @@ void Reference::PrettyPrint(Printer* printer) const {
   PrettyPrintReferenceImpl(*this, true /*print_package*/, printer);
 }
 
-void Reference::PrettyPrint(const StringPiece& package, Printer* printer) const {
+void Reference::PrettyPrint(StringPiece package, Printer* printer) const {
   const bool print_package = name ? package != name.value().package : true;
   PrettyPrintReferenceImpl(*this, print_package, printer);
 }
@@ -216,7 +217,7 @@ bool Id::Equals(const Value* value) const {
 
 bool Id::Flatten(android::Res_value* out) const {
   out->dataType = android::Res_value::TYPE_INT_BOOLEAN;
-  out->data = util::HostToDevice32(0);
+  out->data = android::util::HostToDevice32(0);
   return true;
 }
 
@@ -224,7 +225,7 @@ void Id::Print(std::ostream* out) const {
   *out << "(id)";
 }
 
-String::String(const StringPool::Ref& ref) : value(ref) {
+String::String(const android::StringPool::Ref& ref) : value(ref) {
 }
 
 bool String::Equals(const Value* value) const {
@@ -258,7 +259,7 @@ bool String::Flatten(android::Res_value* out_value) const {
   }
 
   out_value->dataType = android::Res_value::TYPE_STRING;
-  out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
+  out_value->data = android::util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
 }
 
@@ -272,7 +273,7 @@ void String::PrettyPrint(Printer* printer) const {
   printer->Print("\"");
 }
 
-StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {
+StyledString::StyledString(const android::StringPool::StyleRef& ref) : value(ref) {
 }
 
 bool StyledString::Equals(const Value* value) const {
@@ -305,18 +306,18 @@ bool StyledString::Flatten(android::Res_value* out_value) const {
   }
 
   out_value->dataType = android::Res_value::TYPE_STRING;
-  out_value->data = util::HostToDevice32(static_cast<uint32_t>(value.index()));
+  out_value->data = android::util::HostToDevice32(static_cast<uint32_t>(value.index()));
   return true;
 }
 
 void StyledString::Print(std::ostream* out) const {
   *out << "(styled string) \"" << value->value << "\"";
-  for (const StringPool::Span& span : value->spans) {
+  for (const android::StringPool::Span& span : value->spans) {
     *out << " " << *span.name << ":" << span.first_char << "," << span.last_char;
   }
 }
 
-FileReference::FileReference(const StringPool::Ref& _path) : path(_path) {
+FileReference::FileReference(const android::StringPool::Ref& _path) : path(_path) {
 }
 
 bool FileReference::Equals(const Value* value) const {
@@ -333,7 +334,7 @@ bool FileReference::Flatten(android::Res_value* out_value) const {
   }
 
   out_value->dataType = android::Res_value::TYPE_STRING;
-  out_value->data = util::HostToDevice32(static_cast<uint32_t>(path.index()));
+  out_value->data = android::util::HostToDevice32(static_cast<uint32_t>(path.index()));
   return true;
 }
 
@@ -373,7 +374,7 @@ bool BinaryPrimitive::Equals(const Value* value) const {
 
 bool BinaryPrimitive::Flatten(::android::Res_value* out_value) const {
   out_value->dataType = value.dataType;
-  out_value->data = util::HostToDevice32(value.data);
+  out_value->data = android::util::HostToDevice32(value.data);
   return true;
 }
 
@@ -678,7 +679,7 @@ void Attribute::Print(std::ostream* out) const {
 }
 
 static void BuildAttributeMismatchMessage(const Attribute& attr, const Item& value,
-                                          DiagMessage* out_msg) {
+                                          android::DiagMessage* out_msg) {
   *out_msg << "expected";
   if (attr.type_mask & android::ResTable_map::TYPE_BOOLEAN) {
     *out_msg << " boolean";
@@ -723,7 +724,7 @@ static void BuildAttributeMismatchMessage(const Attribute& attr, const Item& val
   *out_msg << " but got " << value;
 }
 
-bool Attribute::Matches(const Item& item, DiagMessage* out_msg) const {
+bool Attribute::Matches(const Item& item, android::DiagMessage* out_msg) const {
   constexpr const uint32_t TYPE_ENUM = android::ResTable_map::TYPE_ENUM;
   constexpr const uint32_t TYPE_FLAGS = android::ResTable_map::TYPE_FLAGS;
   constexpr const uint32_t TYPE_INTEGER = android::ResTable_map::TYPE_INTEGER;
@@ -732,7 +733,7 @@ bool Attribute::Matches(const Item& item, DiagMessage* out_msg) const {
   android::Res_value val = {};
   item.Flatten(&val);
 
-  const uint32_t flattened_data = util::DeviceToHost32(val.data);
+  const uint32_t flattened_data = android::util::DeviceToHost32(val.data);
 
   // Always allow references.
   const uint32_t actual_type = ResourceUtils::AndroidTypeToAttributeTypeMask(val.dataType);
@@ -872,7 +873,7 @@ void Style::Print(std::ostream* out) const {
   *out << " [" << util::Joiner(entries, ", ") << "]";
 }
 
-Style::Entry CloneEntry(const Style::Entry& entry, StringPool* pool) {
+Style::Entry CloneEntry(const Style::Entry& entry, android::StringPool* pool) {
   Style::Entry cloned_entry{entry.key};
   if (entry.value != nullptr) {
     CloningValueTransformer cloner(pool);
@@ -881,7 +882,7 @@ Style::Entry CloneEntry(const Style::Entry& entry, StringPool* pool) {
   return cloned_entry;
 }
 
-void Style::MergeWith(Style* other, StringPool* pool) {
+void Style::MergeWith(Style* other, android::StringPool* pool) {
   if (other->parent) {
     parent = other->parent;
   }
@@ -1077,7 +1078,7 @@ std::unique_ptr<T> CopyValueFields(std::unique_ptr<T> new_value, const T* value)
   return new_value;
 }
 
-CloningValueTransformer::CloningValueTransformer(StringPool* new_pool)
+CloningValueTransformer::CloningValueTransformer(android::StringPool* new_pool)
     : ValueTransformer(new_pool) {
 }
 

@@ -16,11 +16,14 @@
 package com.android.server.am;
 
 import android.app.ActivityThread;
+import android.content.ContentResolver;
+import android.content.Intent;
 import android.provider.Settings;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -53,9 +56,12 @@ public class ActivityManagerUtils {
     static int getAndroidIdHash() {
         // No synchronization is required. Double-initialization is fine here.
         if (sAndroidIdHash == null) {
-            final String androidId = Settings.Secure.getString(
-                    ActivityThread.currentApplication().getContentResolver(),
-                    Settings.Secure.ANDROID_ID);
+            final ContentResolver resolver = ActivityThread.currentApplication()
+                                             .getContentResolver();
+            final String androidId = Settings.Secure.getStringForUser(
+                    resolver,
+                    Settings.Secure.ANDROID_ID,
+                    resolver.getUserId());
             sAndroidIdHash = getUnsignedHashUnCached(
                     sInjectedAndroidId != null ? sInjectedAndroidId : androidId);
         }
@@ -128,5 +134,26 @@ public class ActivityManagerUtils {
      */
     public static int hashComponentNameForAtom(String shortInstanceName) {
         return getUnsignedHashUnCached(shortInstanceName) ^ getAndroidIdHash();
+    }
+
+    /**
+     * Helper method to log an unsafe intent event.
+     */
+    public static void logUnsafeIntentEvent(int event, int callingUid,
+            Intent intent, String resolvedType, boolean blocked) {
+        String[] categories = intent.getCategories() == null ? new String[0]
+                : intent.getCategories().toArray(String[]::new);
+        String component = intent.getComponent() == null ? null
+                : intent.getComponent().flattenToString();
+        FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
+                event,
+                callingUid,
+                component,
+                intent.getPackage(),
+                intent.getAction(),
+                categories,
+                resolvedType,
+                intent.getScheme(),
+                blocked);
     }
 }

@@ -48,10 +48,8 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.dex.DexManager;
-import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.SharedUserApi;
@@ -122,8 +120,9 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final boolean filterAppAccess(String packageName, int callingUid, int userId) {
-        return snapshot().filterAppAccess(packageName, callingUid, userId);
+    public final boolean filterAppAccess(String packageName, int callingUid, int userId,
+            boolean filterUninstalled) {
+        return snapshot().filterAppAccess(packageName, callingUid, userId, filterUninstalled);
     }
 
     @Override
@@ -154,7 +153,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Nullable
     @Override
     @Deprecated
-    public final AndroidPackageApi getAndroidPackage(@NonNull String packageName) {
+    public final AndroidPackage getAndroidPackage(@NonNull String packageName) {
         return snapshot().getPackage(packageName);
     }
 
@@ -308,7 +307,8 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     public final List<ResolveInfo> queryIntentActivities(
             Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             int filterCallingUid, int userId) {
-        return snapshot().queryIntentActivitiesInternal(intent, resolvedType, flags, userId);
+        return snapshot().queryIntentActivitiesInternal(intent, resolvedType, flags,
+                filterCallingUid, userId);
     }
 
     @Override
@@ -353,7 +353,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final void setOwnerProtectedPackages(
-            @UserIdInt int userId, @NonNull List<String> packageNames) {
+            @UserIdInt int userId, @Nullable List<String> packageNames) {
         getProtectedPackages().setOwnerProtectedPackages(userId, packageNames);
     }
 
@@ -464,6 +464,20 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
                 filterCallingUid);
     }
 
+    /**
+     * @deprecated similar to {@link resolveIntent} but limits the matches to exported components.
+     */
+    @Override
+    @Deprecated
+    public final ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags,
+            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
+            boolean resolveForStart, int filterCallingUid, int callingPid) {
+        return getResolveIntentHelper().resolveIntentInternal(snapshot(),
+                intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
+                filterCallingUid, true, callingPid);
+    }
+
     @Override
     @Deprecated
     public final ResolveInfo resolveService(Intent intent, String resolvedType,
@@ -537,12 +551,6 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final int[] getPermissionGids(String permissionName, int userId) {
         return getPermissionManager().getPermissionGids(permissionName, userId);
-    }
-
-    @Override
-    @Deprecated
-    public final boolean isOnlyCoreApps() {
-        return mService.isOnlyCoreApps();
     }
 
     @Override
@@ -637,7 +645,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final boolean isApexPackage(String packageName) {
-        return getApexManager().isApexPackage(packageName);
+        return snapshot().isApexPackage(packageName);
     }
 
     @Override
@@ -726,6 +734,17 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         return snapshot().isUidPrivileged(uid);
     }
 
+    @Override
+    public int checkUidSignaturesForAllUsers(int uid1, int uid2) {
+        return snapshot().checkUidSignaturesForAllUsers(uid1, uid2);
+    }
+
+    @Override
+    public void setPackageStoppedState(@NonNull String packageName, boolean stopped,
+            int userId) {
+        mService.setPackageStoppedState(snapshot(), packageName, stopped, userId);
+    }
+
     @NonNull
     @Override
     @Deprecated
@@ -746,11 +765,5 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final void shutdown() {
         mService.shutdown();
-    }
-
-    @Override
-    @Deprecated
-    public final DynamicCodeLogger getDynamicCodeLogger() {
-        return getDexManager().getDynamicCodeLogger();
     }
 }

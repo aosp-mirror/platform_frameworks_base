@@ -19,14 +19,13 @@ package com.android.wm.shell.unfold;
 import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
-import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.annotation.ColorRes;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 
 /**
  * Controls background color layer for the unfold animations
@@ -34,16 +33,15 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 public class UnfoldBackgroundController {
 
     private static final int BACKGROUND_LAYER_Z_INDEX = -1;
-
-    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final float[] mBackgroundColor;
+    private final float[] mSplitScreenBackgroundColor;
+    private float[] mBackgroundColorSet;
     private SurfaceControl mBackgroundLayer;
+    private boolean mSplitScreenVisible = false;
 
-    public UnfoldBackgroundController(
-            @NonNull Context context,
-            @NonNull RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
-        mBackgroundColor = getBackgroundColor(context);
+    public UnfoldBackgroundController(@NonNull Context context) {
+        mBackgroundColor = getRGBColorFromId(context, R.color.unfold_background);
+        mSplitScreenBackgroundColor = getRGBColorFromId(context, R.color.split_divider_background);
     }
 
     /**
@@ -51,19 +49,26 @@ public class UnfoldBackgroundController {
      * @param transaction where we should add the background if it is not added
      */
     public void ensureBackground(@NonNull SurfaceControl.Transaction transaction) {
-        if (mBackgroundLayer != null) return;
+        float[] expectedColor = getCurrentBackgroundColor();
+        if (mBackgroundLayer != null) {
+            if (mBackgroundColorSet != expectedColor) {
+                transaction.setColor(mBackgroundLayer, expectedColor);
+                mBackgroundColorSet = expectedColor;
+            }
+            return;
+        }
 
         SurfaceControl.Builder colorLayerBuilder = new SurfaceControl.Builder()
                 .setName("app-unfold-background")
                 .setCallsite("AppUnfoldTransitionController")
                 .setColorLayer();
-        mRootTaskDisplayAreaOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, colorLayerBuilder);
         mBackgroundLayer = colorLayerBuilder.build();
 
         transaction
-                .setColor(mBackgroundLayer, mBackgroundColor)
+                .setColor(mBackgroundLayer, expectedColor)
                 .show(mBackgroundLayer)
                 .setLayer(mBackgroundLayer, BACKGROUND_LAYER_Z_INDEX);
+        mBackgroundColorSet = expectedColor;
     }
 
     /**
@@ -78,8 +83,25 @@ public class UnfoldBackgroundController {
         mBackgroundLayer = null;
     }
 
-    private float[] getBackgroundColor(Context context) {
-        int colorInt = context.getResources().getColor(R.color.unfold_transition_background);
+    /**
+     * Expected to be called whenever split screen visibility changes.
+     *
+     * @param visible True when split screen is visible
+     */
+    public void onSplitVisibilityChanged(boolean visible) {
+        mSplitScreenVisible = visible;
+    }
+
+    private float[] getCurrentBackgroundColor() {
+        if (mSplitScreenVisible) {
+            return mSplitScreenBackgroundColor;
+        } else {
+            return mBackgroundColor;
+        }
+    }
+
+    private float[] getRGBColorFromId(Context context, @ColorRes int id) {
+        int colorInt = context.getResources().getColor(id);
         return new float[]{
                 (float) red(colorInt) / 255.0F,
                 (float) green(colorInt) / 255.0F,

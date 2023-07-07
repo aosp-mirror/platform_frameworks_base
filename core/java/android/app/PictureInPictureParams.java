@@ -157,13 +157,18 @@ public final class PictureInPictureParams implements Parcelable {
         }
 
         /**
-         * Sets the source bounds hint. These bounds are only used when an activity first enters
-         * picture-in-picture, and describe the bounds in window coordinates of activity entering
-         * picture-in-picture that will be visible following the transition. For the best effect,
-         * these bounds should also match the aspect ratio in the arguments.
+         * Sets the window-coordinate bounds of an activity transitioning to picture-in-picture.
+         * The bounds is the area of an activity that will be visible in the transition to
+         * picture-in-picture mode. For the best effect, these bounds should also match the
+         * aspect ratio in the arguments.
+         *
+         * In Android 12+ these bounds are also reused to improve the exit transition from 
+         * picture-in-picture mode. See
+         * <a href="{@docRoot}develop/ui/views/picture-in-picture#smoother-exit">Support
+         * smoother animations when exiting out of PiP mode</a> for more details.
          *
          * @param launchBounds window-coordinate bounds indicating the area of the activity that
-         * will still be visible following the transition into picture-in-picture (eg. the video
+         * will still be visible following the transition into picture-in-picture (e.g. the video
          * view bounds in a video player)
          *
          * @return this builder instance.

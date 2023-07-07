@@ -20,11 +20,16 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Binder;
+import android.os.UserHandle;
+
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Map;
 
 /**
  * In-process API for server side PackageManager related infrastructure.
@@ -57,10 +62,10 @@ public interface PackageManagerLocal {
             FLAG_STORAGE_CE,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StorageFlags {}
+    @interface StorageFlags {}
 
     /**
-     * Reconcile sdk data sub-directories for the given {@code packagName}.
+     * Reconcile sdk data sub-directories for the given {@code packageName}.
      *
      * Sub directories are created if they do not exist already. If there is an existing per-
      * sdk directory that is missing from {@code subDirNames}, then it is removed.
@@ -80,4 +85,108 @@ public interface PackageManagerLocal {
     void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
             @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
             @NonNull String seInfo, @StorageFlags int flags) throws IOException;
+
+    /**
+     * Provides a snapshot scoped class to access snapshot-aware APIs. Should be short-term use and
+     * closed as soon as possible.
+     * <p/>
+     * All reachable types in the snapshot are read-only.
+     * <p/>
+     * The snapshot assumes the caller is acting on behalf of the system and will not filter any
+     * results.
+     */
+    @NonNull
+    UnfilteredSnapshot withUnfilteredSnapshot();
+
+    /**
+     * {@link #withFilteredSnapshot(int, UserHandle)} that infers the UID and user from the
+     * caller through {@link Binder#getCallingUid()} and {@link Binder#getCallingUserHandle()}.
+     *
+     * @see #withFilteredSnapshot(int, UserHandle)
+     */
+    @NonNull
+    FilteredSnapshot withFilteredSnapshot();
+
+    /**
+     * Provides a snapshot scoped class to access snapshot-aware APIs. Should be short-term use and
+     * closed as soon as possible.
+     * <p/>
+     * All reachable types in the snapshot are read-only.
+     *
+     * @param callingUid The caller UID to filter results based on. This includes package visibility
+     *                   and permissions, including cross-user enforcement.
+     * @param user       The user to query as, should usually be the user that the caller was
+     *                   invoked from.
+     */
+    @SuppressWarnings("UserHandleName") // Ignore naming convention, not invoking action as user
+    @NonNull
+    FilteredSnapshot withFilteredSnapshot(int callingUid, @NonNull UserHandle user);
+
+    /**
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    interface UnfilteredSnapshot extends AutoCloseable {
+
+        /**
+         * Allows re-use of this snapshot, but in a filtered context. This allows a caller to invoke
+         * itself as multiple other actual callers without having to re-take a snapshot.
+         * <p/>
+         * Note that closing the parent snapshot closes any filtered children generated from it.
+         *
+         * @return An isolated instance of {@link FilteredSnapshot} which can be closed without
+         * affecting this parent snapshot or any sibling snapshots.
+         */
+        @SuppressWarnings("UserHandleName") // Ignore naming convention, not invoking action as user
+        @NonNull
+        FilteredSnapshot filtered(int callingUid, @NonNull UserHandle user);
+
+        /**
+         * Returns a map of all {@link PackageState PackageStates} on the device.
+         *
+         * @return Mapping of package name to {@link PackageState}.
+         */
+        @NonNull
+        Map<String, PackageState> getPackageStates();
+
+        /**
+         * Returns a map of all disabled system {@link PackageState PackageStates} on the device.
+         *
+         * @return Mapping of package name to disabled system {@link PackageState}.
+         *
+         * @hide Pending API
+         */
+        @NonNull
+        Map<String, PackageState> getDisabledSystemPackageStates();
+
+        @Override
+        void close();
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    interface FilteredSnapshot extends AutoCloseable {
+
+        /**
+         * @return {@link PackageState} for the {@code packageName}, filtered if applicable.
+         */
+        @Nullable
+        PackageState getPackageState(@NonNull String packageName);
+
+        /**
+         * Returns a map of all {@link PackageState PackageStates} on the device.
+         * <p>
+         * This will cause app visibility filtering to be invoked on each state on the device,
+         * which can be expensive. Prefer {@link #getPackageState(String)} if possible.
+         *
+         * @return Mapping of package name to {@link PackageState}.
+         */
+        @NonNull
+        Map<String, PackageState> getPackageStates();
+
+        @Override
+        void close();
+    }
 }

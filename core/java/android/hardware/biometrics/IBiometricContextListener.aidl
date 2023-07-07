@@ -17,11 +17,25 @@ package android.hardware.biometrics;
 
 /**
  * A secondary communication channel from AuthController back to BiometricService for
- * events that are not associated with an autentication session. See
+ * events that are not associated with an authentication session. See
  * {@link IBiometricSysuiReceiver} for events associated with a session.
  *
  * @hide
  */
 oneway interface IBiometricContextListener {
-    void onDozeChanged(boolean isDozing);
+    @VintfStability
+    @Backing(type="int")
+    enum FoldState {
+        UNKNOWN = 0,
+        HALF_OPENED = 1,
+        FULLY_OPENED = 2,
+        FULLY_CLOSED = 3,
+    }
+
+    // Called when the fold state of the device changes.
+    void onFoldChanged(FoldState FoldState);
+
+    // Called when the display state of the device changes.
+    // Where `displayState` is defined in AuthenticateOptions.DisplayState
+    void onDisplayStateChanged(int displayState);
 }

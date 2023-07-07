@@ -48,6 +48,10 @@ public abstract class AnimatableProperty {
             View.SCALE_Y, R.id.scale_y_animator_tag, R.id.scale_y_animator_start_value_tag,
             R.id.scale_y_animator_end_value_tag);
 
+    public static final AnimatableProperty ALPHA = AnimatableProperty.from(
+            View.ALPHA, R.id.alpha_animator_tag, R.id.alpha_animator_start_value_tag,
+            R.id.alpha_animator_end_value_tag);
+
     /**
      * Similar to X, however this doesn't allow for any other modifications other than from this
      * property. When using X, it's possible that the view is laid out during the animation,

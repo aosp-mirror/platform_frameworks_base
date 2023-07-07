@@ -84,6 +84,14 @@ TEST(UtilTest, TokenizeAtEnd) {
   ASSERT_THAT(*iter, Eq(StringPiece()));
 }
 
+TEST(UtilTest, TokenizeNone) {
+  auto tokenizer = util::Tokenize(StringPiece("none"), '.');
+  auto iter = tokenizer.begin();
+  ASSERT_THAT(*iter, Eq("none"));
+  ++iter;
+  ASSERT_THAT(iter, Eq(tokenizer.end()));
+}
+
 TEST(UtilTest, IsJavaClassName) {
   EXPECT_TRUE(util::IsJavaClassName("android.test.Class"));
   EXPECT_TRUE(util::IsJavaClassName("android.test.Class$Inner"));

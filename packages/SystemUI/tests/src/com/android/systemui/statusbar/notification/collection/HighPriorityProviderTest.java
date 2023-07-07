@@ -92,8 +92,62 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .getPeopleNotificationType(entry))
                 .thenReturn(TYPE_PERSON);
 
-        // THEN it has high priority
+        // THEN it has high priority BUT it has low explicit priority.
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
+        assertFalse(mHighPriorityProvider.isExplicitlyHighPriority(entry));
+    }
+
+    @Test
+    public void highImportanceConversation() {
+        // GIVEN notification is high importance and is a people notification
+        final Notification notification = new Notification.Builder(mContext, "test")
+                .build();
+        final NotificationEntry entry = new NotificationEntryBuilder()
+                .setNotification(notification)
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry))
+                .thenReturn(TYPE_PERSON);
+
+        // THEN it is high priority conversation
+        assertTrue(mHighPriorityProvider.isHighPriorityConversation(entry));
+    }
+
+    @Test
+    public void lowImportanceConversation() {
+        // GIVEN notification is low importance and is a people notification
+        final Notification notification = new Notification.Builder(mContext, "test")
+                .build();
+        final NotificationEntry entry = new NotificationEntryBuilder()
+                .setNotification(notification)
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry))
+                .thenReturn(TYPE_PERSON);
+
+        // THEN it is low priority conversation
+        assertFalse(mHighPriorityProvider.isHighPriorityConversation(entry));
+    }
+
+    @Test
+    public void highImportanceConversationWhenAnyOfChildIsHighPriority() {
+        // GIVEN notification is high importance and is a people notification
+        final NotificationEntry summary = createNotifEntry(false);
+        final NotificationEntry lowPriorityChild = createNotifEntry(false);
+        final NotificationEntry highPriorityChild = createNotifEntry(true);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(summary))
+                .thenReturn(TYPE_PERSON);
+        final GroupEntry groupEntry = new GroupEntryBuilder()
+                .setParent(GroupEntry.ROOT_ENTRY)
+                .setSummary(summary)
+                .setChildren(List.of(lowPriorityChild, highPriorityChild))
+                .build();
+
+        // THEN the groupEntry is high priority conversation since it has a high priority child
+        assertTrue(mHighPriorityProvider.isHighPriorityConversation(groupEntry));
     }
 
     @Test
@@ -109,8 +163,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .getPeopleNotificationType(entry))
                 .thenReturn(TYPE_NON_PERSON);
 
-        // THEN it has high priority
+        // THEN it has high priority but low explicit priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
+        assertFalse(mHighPriorityProvider.isExplicitlyHighPriority(entry));
     }
 
     @Test

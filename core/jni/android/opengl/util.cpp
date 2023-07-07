@@ -541,87 +541,6 @@ jint util_visibilityTest(JNIEnv *env, jclass clazz,
             indices.mData, indexCount);
 }
 
-#define I(_i, _j) ((_j)+ 4*(_i))
-
-static
-void multiplyMM(float* r, const float* lhs, const float* rhs)
-{
-    for (int i=0 ; i<4 ; i++) {
-        const float rhs_i0 = rhs[ I(i,0) ];
-        float ri0 = lhs[ I(0,0) ] * rhs_i0;
-        float ri1 = lhs[ I(0,1) ] * rhs_i0;
-        float ri2 = lhs[ I(0,2) ] * rhs_i0;
-        float ri3 = lhs[ I(0,3) ] * rhs_i0;
-        for (int j=1 ; j<4 ; j++) {
-            const float rhs_ij = rhs[ I(i,j) ];
-            ri0 += lhs[ I(j,0) ] * rhs_ij;
-            ri1 += lhs[ I(j,1) ] * rhs_ij;
-            ri2 += lhs[ I(j,2) ] * rhs_ij;
-            ri3 += lhs[ I(j,3) ] * rhs_ij;
-        }
-        r[ I(i,0) ] = ri0;
-        r[ I(i,1) ] = ri1;
-        r[ I(i,2) ] = ri2;
-        r[ I(i,3) ] = ri3;
-    }
-}
-
-static
-void util_multiplyMM(JNIEnv *env, jclass clazz,
-    jfloatArray result_ref, jint resultOffset,
-    jfloatArray lhs_ref, jint lhsOffset,
-    jfloatArray rhs_ref, jint rhsOffset) {
-
-    FloatArrayHelper resultMat(env, result_ref, resultOffset, 16);
-    FloatArrayHelper lhs(env, lhs_ref, lhsOffset, 16);
-    FloatArrayHelper rhs(env, rhs_ref, rhsOffset, 16);
-
-    bool checkOK = resultMat.check() && lhs.check() && rhs.check();
-
-    if ( !checkOK ) {
-        return;
-    }
-
-    resultMat.bind();
-    lhs.bind();
-    rhs.bind();
-
-    multiplyMM(resultMat.mData, lhs.mData, rhs.mData);
-
-    resultMat.commitChanges();
-}
-
-static
-void multiplyMV(float* r, const float* lhs, const float* rhs)
-{
-    mx4transform(rhs[0], rhs[1], rhs[2], rhs[3], lhs, r);
-}
-
-static
-void util_multiplyMV(JNIEnv *env, jclass clazz,
-    jfloatArray result_ref, jint resultOffset,
-    jfloatArray lhs_ref, jint lhsOffset,
-    jfloatArray rhs_ref, jint rhsOffset) {
-
-    FloatArrayHelper resultV(env, result_ref, resultOffset, 4);
-    FloatArrayHelper lhs(env, lhs_ref, lhsOffset, 16);
-    FloatArrayHelper rhs(env, rhs_ref, rhsOffset, 4);
-
-    bool checkOK = resultV.check() && lhs.check() && rhs.check();
-
-    if ( !checkOK ) {
-        return;
-    }
-
-    resultV.bind();
-    lhs.bind();
-    rhs.bind();
-
-    multiplyMV(resultV.mData, lhs.mData, rhs.mData);
-
-    resultV.commitChanges();
-}
-
 // ---------------------------------------------------------------------------
 
 // The internal format is no longer the same as pixel format, per Table 2 in
@@ -720,19 +639,22 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz, jint target, jint level,
         jint internalformat, jobject bitmapObj, jint type, jint border)
 {
     graphics::Bitmap bitmap(env, bitmapObj);
-    AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
+    if (bitmap.isValid() && bitmap.getPixels() != nullptr) {
+        AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
 
-    if (internalformat < 0) {
-        internalformat = getInternalFormat(bitmapInfo.format);
-    }
-    if (type < 0) {
-        type = getType(bitmapInfo.format);
-    }
+        if (internalformat < 0) {
+            internalformat = getInternalFormat(bitmapInfo.format);
+        }
+        if (type < 0) {
+            type = getType(bitmapInfo.format);
+        }
 
-    if (checkInternalFormat(bitmapInfo.format, internalformat, type)) {
-        glTexImage2D(target, level, internalformat, bitmapInfo.width, bitmapInfo.height, border,
-                     getPixelFormatFromInternalFormat(internalformat), type, bitmap.getPixels());
-        return 0;
+        if (checkInternalFormat(bitmapInfo.format, internalformat, type)) {
+            glTexImage2D(target, level, internalformat, bitmapInfo.width, bitmapInfo.height, border,
+                         getPixelFormatFromInternalFormat(internalformat), type,
+                         bitmap.getPixels());
+            return 0;
+        }
     }
     return -1;
 }
@@ -741,19 +663,21 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz, jint target, jint leve
         jint xoffset, jint yoffset, jobject bitmapObj, jint format, jint type)
 {
     graphics::Bitmap bitmap(env, bitmapObj);
-    AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
+    if (bitmap.isValid() && bitmap.getPixels() != nullptr) {
+        AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
 
-    int internalFormat = getInternalFormat(bitmapInfo.format);
-    if (format < 0) {
-        format = getPixelFormatFromInternalFormat(internalFormat);
-        if (format == GL_PALETTE8_RGBA8_OES)
-            return -1; // glCompressedTexSubImage2D() not supported
-    }
+        int internalFormat = getInternalFormat(bitmapInfo.format);
+        if (format < 0) {
+            format = getPixelFormatFromInternalFormat(internalFormat);
+            if (format == GL_PALETTE8_RGBA8_OES)
+                return -1; // glCompressedTexSubImage2D() not supported
+        }
 
-    if (checkInternalFormat(bitmapInfo.format, internalFormat, type)) {
-        glTexSubImage2D(target, level, xoffset, yoffset, bitmapInfo.width, bitmapInfo.height,
-                        format, type, bitmap.getPixels());
-        return 0;
+        if (checkInternalFormat(bitmapInfo.format, internalFormat, type)) {
+            glTexSubImage2D(target, level, xoffset, yoffset, bitmapInfo.width, bitmapInfo.height,
+                            format, type, bitmap.getPixels());
+            return 0;
+        }
     }
     return -1;
 }
@@ -1009,11 +933,6 @@ static jint etc1_getHeight(JNIEnv *env, jclass clazz,
  * JNI registration
  */
 
-static const JNINativeMethod gMatrixMethods[] = {
-    { "multiplyMM", "([FI[FI[FI)V", (void*)util_multiplyMM },
-    { "multiplyMV", "([FI[FI[FI)V", (void*)util_multiplyMV },
-};
-
 static const JNINativeMethod gVisibilityMethods[] = {
     { "computeBoundingSphere", "([FII[FI)V", (void*)util_computeBoundingSphere },
     { "frustumCullSpheres", "([FI[FII[III)I", (void*)util_frustumCullSpheres },
@@ -1046,7 +965,6 @@ typedef struct _ClassRegistrationInfo {
 } ClassRegistrationInfo;
 
 static const ClassRegistrationInfo gClasses[] = {
-    {"android/opengl/Matrix", gMatrixMethods, NELEM(gMatrixMethods)},
     {"android/opengl/Visibility", gVisibilityMethods, NELEM(gVisibilityMethods)},
     {"android/opengl/GLUtils", gUtilsMethods, NELEM(gUtilsMethods)},
     {"android/opengl/ETC1", gEtc1Methods, NELEM(gEtc1Methods)},

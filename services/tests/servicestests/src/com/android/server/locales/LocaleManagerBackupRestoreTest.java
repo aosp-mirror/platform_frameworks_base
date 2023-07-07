@@ -18,9 +18,11 @@ package com.android.server.locales;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -44,15 +47,18 @@ import android.os.LocaleList;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SimpleClock;
+import android.util.ArraySet;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.locales.LocaleManagerBackupHelper.LocalesInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -69,9 +75,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Unit tests for the {@link LocaleManagerInternal}.
@@ -89,8 +98,8 @@ public class LocaleManagerBackupRestoreTest {
     private static final Duration RETENTION_PERIOD = Duration.ofDays(3);
     private static final LocaleList DEFAULT_LOCALES =
             LocaleList.forLanguageTags(DEFAULT_LOCALE_TAGS);
-    private static final Map<String, String> DEFAULT_PACKAGE_LOCALES_MAP = Map.of(
-            DEFAULT_PACKAGE_NAME, DEFAULT_LOCALE_TAGS);
+    private static final Map<String, LocalesInfo> DEFAULT_PACKAGE_LOCALES_INFO_MAP = Map.of(
+            DEFAULT_PACKAGE_NAME, new LocalesInfo(DEFAULT_LOCALE_TAGS, false));
     private static final SparseArray<LocaleManagerBackupHelper.StagedData> STAGE_DATA =
             new SparseArray<>();
 
@@ -103,6 +112,10 @@ public class LocaleManagerBackupRestoreTest {
     private PackageManager mMockPackageManager;
     @Mock
     private LocaleManagerService mMockLocaleManagerService;
+    @Mock
+    private SharedPreferences mMockDelegateAppLocalePackages;
+    @Mock
+    private SharedPreferences.Editor mMockSpEditor;
 
     BroadcastReceiver mUserMonitor;
     PackageMonitor mPackageMonitor;
@@ -127,9 +140,12 @@ public class LocaleManagerBackupRestoreTest {
         mMockContext = mock(Context.class);
         mMockPackageManager = mock(PackageManager.class);
         mMockLocaleManagerService = mock(LocaleManagerService.class);
+        mMockDelegateAppLocalePackages = mock(SharedPreferences.class);
+        mMockSpEditor = mock(SharedPreferences.Editor.class);
         SystemAppUpdateTracker systemAppUpdateTracker = mock(SystemAppUpdateTracker.class);
 
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
+        doReturn(mMockSpEditor).when(mMockDelegateAppLocalePackages).edit();
 
         HandlerThread broadcastHandlerThread = new HandlerThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -137,12 +153,12 @@ public class LocaleManagerBackupRestoreTest {
 
         mBackupHelper = spy(new ShadowLocaleManagerBackupHelper(mMockContext,
                 mMockLocaleManagerService, mMockPackageManager, mClock, STAGE_DATA,
-                broadcastHandlerThread));
+                broadcastHandlerThread, mMockDelegateAppLocalePackages));
         doNothing().when(mBackupHelper).notifyBackupManager();
 
         mUserMonitor = mBackupHelper.getUserMonitor();
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
-            systemAppUpdateTracker);
+            systemAppUpdateTracker, mMockLocaleManagerService);
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS);
     }
 
@@ -171,9 +187,23 @@ public class LocaleManagerBackupRestoreTest {
     public void testBackupPayload_appLocalesSet_returnsNonNullBlob() throws Exception {
         setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, DEFAULT_LOCALES);
         setUpDummyAppForPackageManager(DEFAULT_PACKAGE_NAME);
+        setUpPackageNamesForSp(Collections.<String>emptySet());
 
         byte[] payload = mBackupHelper.getBackupPayload(DEFAULT_USER_ID);
-        verifyPayloadForAppLocales(DEFAULT_PACKAGE_LOCALES_MAP, payload);
+        verifyPayloadForAppLocales(DEFAULT_PACKAGE_LOCALES_INFO_MAP, payload);
+    }
+
+    @Test
+    public void testBackupPayload_appLocalesSet_fromDelegateSelector() throws Exception {
+        setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, DEFAULT_LOCALES);
+        setUpDummyAppForPackageManager(DEFAULT_PACKAGE_NAME);
+        setUpPackageNamesForSp(new ArraySet<>(Arrays.asList(DEFAULT_PACKAGE_NAME)));
+        Map<String, LocalesInfo> expectPackageLocalePack = Map.of(DEFAULT_PACKAGE_NAME,
+                new LocalesInfo(DEFAULT_LOCALE_TAGS, true));
+
+        byte[] payload = mBackupHelper.getBackupPayload(DEFAULT_USER_ID);
+
+        verifyPayloadForAppLocales(expectPackageLocalePack, payload);
     }
 
     @Test
@@ -195,14 +225,15 @@ public class LocaleManagerBackupRestoreTest {
         anotherAppInfo.packageName = "com.android.anotherapp";
         doReturn(List.of(defaultAppInfo, anotherAppInfo)).when(mMockPackageManager)
                 .getInstalledApplicationsAsUser(any(), anyInt());
-
         setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, DEFAULT_LOCALES);
+        setUpPackageNamesForSp(Collections.<String>emptySet());
         // Exception when getting locales for anotherApp.
         doThrow(new RemoteException("mock")).when(mMockLocaleManagerService).getApplicationLocales(
                 eq(anotherAppInfo.packageName), anyInt());
 
         byte[] payload = mBackupHelper.getBackupPayload(DEFAULT_USER_ID);
-        verifyPayloadForAppLocales(DEFAULT_PACKAGE_LOCALES_MAP, payload);
+
+        verifyPayloadForAppLocales(DEFAULT_PACKAGE_LOCALES_INFO_MAP, payload);
     }
 
     @Test
@@ -226,8 +257,7 @@ public class LocaleManagerBackupRestoreTest {
     @Test
     public void testRestore_allAppsInstalled_noStageDataCreated() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
         setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, LocaleList.getEmptyLocaleList());
 
@@ -235,38 +265,108 @@ public class LocaleManagerBackupRestoreTest {
 
         // Locales were restored
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(DEFAULT_PACKAGE_NAME,
-                DEFAULT_USER_ID, DEFAULT_LOCALES);
-
+                DEFAULT_USER_ID, DEFAULT_LOCALES, false, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
         checkStageDataDoesNotExist(DEFAULT_USER_ID);
+    }
+
+    @Test
+    public void testRestore_allAppsInstalled_nothingToSp() throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
+        setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
+        setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, LocaleList.getEmptyLocaleList());
+        setUpPackageNamesForSp(new ArraySet<>());
+
+        mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
+
+        // Locales were restored
+        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(DEFAULT_PACKAGE_NAME,
+                DEFAULT_USER_ID, DEFAULT_LOCALES, false, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
+
+        mBackupHelper.persistLocalesModificationInfo(DEFAULT_USER_ID, DEFAULT_PACKAGE_NAME, false,
+                false);
+
+        verify(mMockSpEditor, times(0)).putStringSet(anyString(), any());
+    }
+
+    @Test
+    public void testRestore_allAppsInstalled_storeInfoToSp() throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Map<String, LocalesInfo> pkgLocalesMap = Map.of(DEFAULT_PACKAGE_NAME,
+                new LocalesInfo(DEFAULT_LOCALE_TAGS, true));
+        writeTestPayload(out, pkgLocalesMap);
+        setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
+        setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, LocaleList.getEmptyLocaleList());
+        setUpPackageNamesForSp(new ArraySet<>());
+
+        mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
+
+        // Locales were restored
+        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(DEFAULT_PACKAGE_NAME,
+                DEFAULT_USER_ID, DEFAULT_LOCALES, true, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
+
+        mBackupHelper.persistLocalesModificationInfo(DEFAULT_USER_ID, DEFAULT_PACKAGE_NAME, true,
+                false);
+
+        verify(mMockSpEditor, times(1)).putStringSet(Integer.toString(DEFAULT_USER_ID),
+                new ArraySet<>(Arrays.asList(DEFAULT_PACKAGE_NAME)));
+    }
+
+    @Test
+    public void testRestore_allAppsInstalled_InfoHasExistedInSp() throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Map<String, LocalesInfo> pkgLocalesMap = Map.of(DEFAULT_PACKAGE_NAME,
+                new LocalesInfo(DEFAULT_LOCALE_TAGS, true));
+        writeTestPayload(out, pkgLocalesMap);
+        setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
+        setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, LocaleList.getEmptyLocaleList());
+        setUpPackageNamesForSp(new ArraySet<>(Arrays.asList(DEFAULT_PACKAGE_NAME)));
+
+        mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
+
+        // Locales were restored
+        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID, DEFAULT_LOCALES, true,
+                FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
+        checkStageDataDoesNotExist(DEFAULT_USER_ID);
+
+        mBackupHelper.persistLocalesModificationInfo(DEFAULT_USER_ID, DEFAULT_PACKAGE_NAME, true,
+                false);
+
+        verify(mMockSpEditor, times(0)).putStringSet(anyString(), any());
     }
 
     @Test
     public void testRestore_noAppsInstalled_everythingStaged() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         setUpPackageNotInstalled(DEFAULT_PACKAGE_NAME);
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_INFO_MAP,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
     }
 
     @Test
     public void testRestore_someAppsInstalled_partiallyStaged() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HashMap<String, String> pkgLocalesMap = new HashMap<>();
-
+        HashMap<String, LocalesInfo> pkgLocalesMap = new HashMap<>();
         String pkgNameA = "com.android.myAppA";
         String pkgNameB = "com.android.myAppB";
         String langTagsA = "ru";
         String langTagsB = "hi,fr";
-        pkgLocalesMap.put(pkgNameA, langTagsA);
-        pkgLocalesMap.put(pkgNameB, langTagsB);
+        LocalesInfo localesInfoA = new LocalesInfo(langTagsA, true);
+        LocalesInfo localesInfoB = new LocalesInfo(langTagsB, true);
+        pkgLocalesMap.put(pkgNameA, localesInfoA);
+        pkgLocalesMap.put(pkgNameB, localesInfoB);
         writeTestPayload(out, pkgLocalesMap);
-
         setUpPackageInstalled(pkgNameA);
         setUpPackageNotInstalled(pkgNameB);
         setUpLocalesForPackage(pkgNameA, LocaleList.getEmptyLocaleList());
@@ -274,9 +374,11 @@ public class LocaleManagerBackupRestoreTest {
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameA, DEFAULT_USER_ID,
-                LocaleList.forLanguageTags(langTagsA));
+                LocaleList.forLanguageTags(langTagsA), true, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
 
         pkgLocalesMap.remove(pkgNameA);
+
         verifyStageDataForUser(pkgLocalesMap,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
     }
@@ -284,8 +386,7 @@ public class LocaleManagerBackupRestoreTest {
     @Test
     public void testRestore_appLocalesAlreadySet_nothingRestoredAndNoStageData() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         setUpPackageInstalled(DEFAULT_PACKAGE_NAME);
         setUpLocalesForPackage(DEFAULT_PACKAGE_NAME, LocaleList.forLanguageTags("hi,mr"));
 
@@ -300,19 +401,20 @@ public class LocaleManagerBackupRestoreTest {
     public void testRestore_appLocalesSetForSomeApps_restoresOnlyForAppsHavingNoLocalesSet()
             throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HashMap<String, String> pkgLocalesMap = new HashMap<>();
-
+        HashMap<String, LocalesInfo> pkgLocalesMap = new HashMap<>();
         String pkgNameA = "com.android.myAppA";
         String pkgNameB = "com.android.myAppB";
         String pkgNameC = "com.android.myAppC";
         String langTagsA = "ru";
         String langTagsB = "hi,fr";
         String langTagsC = "zh,es";
-        pkgLocalesMap.put(pkgNameA, langTagsA);
-        pkgLocalesMap.put(pkgNameB, langTagsB);
-        pkgLocalesMap.put(pkgNameC, langTagsC);
+        LocalesInfo localesInfoA = new LocalesInfo(langTagsA, true);
+        LocalesInfo localesInfoB = new LocalesInfo(langTagsB, true);
+        LocalesInfo localesInfoC = new LocalesInfo(langTagsC, true);
+        pkgLocalesMap.put(pkgNameA, localesInfoA);
+        pkgLocalesMap.put(pkgNameB, localesInfoB);
+        pkgLocalesMap.put(pkgNameC, localesInfoC);
         writeTestPayload(out, pkgLocalesMap);
-
         // Both app A & B are installed on the device but A has locales already set.
         setUpPackageInstalled(pkgNameA);
         setUpPackageInstalled(pkgNameB);
@@ -320,20 +422,23 @@ public class LocaleManagerBackupRestoreTest {
         setUpLocalesForPackage(pkgNameA, LocaleList.forLanguageTags("mr,fr"));
         setUpLocalesForPackage(pkgNameB, LocaleList.getEmptyLocaleList());
         setUpLocalesForPackage(pkgNameC, LocaleList.getEmptyLocaleList());
+        setUpPackageNamesForSp(new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB, pkgNameC)));
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         // Restore locales only for myAppB.
         verify(mMockLocaleManagerService, times(0)).setApplicationLocales(eq(pkgNameA), anyInt(),
-                any());
+                any(), anyBoolean(), anyInt());
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameB, DEFAULT_USER_ID,
-                LocaleList.forLanguageTags(langTagsB));
+                LocaleList.forLanguageTags(langTagsB), true, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
         verify(mMockLocaleManagerService, times(0)).setApplicationLocales(eq(pkgNameC), anyInt(),
-                any());
+                any(), anyBoolean(), anyInt());
 
         // App C is staged.
         pkgLocalesMap.remove(pkgNameA);
         pkgLocalesMap.remove(pkgNameB);
+
         verifyStageDataForUser(pkgLocalesMap,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
     }
@@ -341,40 +446,41 @@ public class LocaleManagerBackupRestoreTest {
     @Test
     public void testRestore_restoreInvokedAgain_creationTimeChanged() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         setUpPackageNotInstalled(DEFAULT_PACKAGE_NAME);
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
-        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_INFO_MAP,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         final long newCreationTime = DEFAULT_CREATION_TIME_MILLIS + 100;
         setCurrentTimeMillis(newCreationTime);
+
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
-        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_INFO_MAP,
                 newCreationTime, DEFAULT_USER_ID);
     }
 
     @Test
     public void testRestore_appInstalledAfterSUW_restoresFromStage() throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HashMap<String, String> pkgLocalesMap = new HashMap<>();
-
+        HashMap<String, LocalesInfo> pkgLocalesMap = new HashMap<>();
         String pkgNameA = "com.android.myAppA";
         String pkgNameB = "com.android.myAppB";
         String langTagsA = "ru";
         String langTagsB = "hi,fr";
-        pkgLocalesMap.put(pkgNameA, langTagsA);
-        pkgLocalesMap.put(pkgNameB, langTagsB);
+        LocalesInfo localesInfoA = new LocalesInfo(langTagsA, false);
+        LocalesInfo localesInfoB = new LocalesInfo(langTagsB, true);
+        pkgLocalesMap.put(pkgNameA, localesInfoA);
+        pkgLocalesMap.put(pkgNameB, localesInfoB);
         writeTestPayload(out, pkgLocalesMap);
-
         setUpPackageNotInstalled(pkgNameA);
         setUpPackageNotInstalled(pkgNameB);
         setUpLocalesForPackage(pkgNameA, LocaleList.getEmptyLocaleList());
         setUpLocalesForPackage(pkgNameB, LocaleList.getEmptyLocaleList());
+        setUpPackageNamesForSp(new ArraySet<>());
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
@@ -385,9 +491,15 @@ public class LocaleManagerBackupRestoreTest {
         mPackageMonitor.onPackageAdded(pkgNameA, DEFAULT_UID);
 
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameA, DEFAULT_USER_ID,
-                LocaleList.forLanguageTags(langTagsA));
+                LocaleList.forLanguageTags(langTagsA), false, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
+
+        mBackupHelper.persistLocalesModificationInfo(DEFAULT_USER_ID, pkgNameA, false, false);
+
+        verify(mMockSpEditor, times(0)).putStringSet(anyString(), any());
 
         pkgLocalesMap.remove(pkgNameA);
+
         verifyStageDataForUser(pkgLocalesMap, DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         setUpPackageInstalled(pkgNameB);
@@ -395,7 +507,13 @@ public class LocaleManagerBackupRestoreTest {
         mPackageMonitor.onPackageAdded(pkgNameB, DEFAULT_UID);
 
         verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameB, DEFAULT_USER_ID,
-                LocaleList.forLanguageTags(langTagsB));
+                LocaleList.forLanguageTags(langTagsB), true, FrameworkStatsLog
+                        .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
+
+        mBackupHelper.persistLocalesModificationInfo(DEFAULT_USER_ID, pkgNameB, true, false);
+
+        verify(mMockSpEditor, times(1)).putStringSet(Integer.toString(DEFAULT_USER_ID),
+                new ArraySet<>(Arrays.asList(pkgNameB)));
         checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
@@ -403,15 +521,14 @@ public class LocaleManagerBackupRestoreTest {
     public void testRestore_appInstalledAfterSUWAndLocalesAlreadySet_restoresNothing()
             throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         // Package is not present on the device when the SUW restore is going on.
         setUpPackageNotInstalled(DEFAULT_PACKAGE_NAME);
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_INFO_MAP,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         // App is installed later (post SUW).
@@ -429,14 +546,13 @@ public class LocaleManagerBackupRestoreTest {
     public void testStageDataDeletion_backupPassRunAfterRetentionPeriod_stageDataDeleted()
             throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(out, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         setUpPackageNotInstalled(DEFAULT_PACKAGE_NAME);
 
         mBackupHelper.stageAndApplyRestoredPayload(out.toByteArray(), DEFAULT_USER_ID);
 
         verifyNothingRestored();
-        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_INFO_MAP,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         // Retention period has not elapsed.
@@ -444,8 +560,8 @@ public class LocaleManagerBackupRestoreTest {
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.minusHours(1).toMillis());
         doReturn(List.of()).when(mMockPackageManager)
                 .getInstalledApplicationsAsUser(any(), anyInt());
-        assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
+        assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
         checkStageDataExists(DEFAULT_USER_ID);
 
         // Exactly RETENTION_PERIOD amount of time has passed so stage data should still not be
@@ -453,8 +569,8 @@ public class LocaleManagerBackupRestoreTest {
         setCurrentTimeMillis(DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.toMillis());
         doReturn(List.of()).when(mMockPackageManager)
                 .getInstalledApplicationsAsUser(any(), anyInt());
-        assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
+        assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
         checkStageDataExists(DEFAULT_USER_ID);
 
         // Retention period has now expired, stage data should be deleted.
@@ -462,8 +578,8 @@ public class LocaleManagerBackupRestoreTest {
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.plusSeconds(1).toMillis());
         doReturn(List.of()).when(mMockPackageManager)
                 .getInstalledApplicationsAsUser(any(), anyInt());
-        assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
 
+        assertNull(mBackupHelper.getBackupPayload(DEFAULT_USER_ID));
         checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
@@ -471,16 +587,16 @@ public class LocaleManagerBackupRestoreTest {
     public void testStageDataDeletion_lazyRestoreAfterRetentionPeriod_stageDataDeleted()
             throws Exception {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HashMap<String, String> pkgLocalesMap = new HashMap<>();
-
+        HashMap<String, LocalesInfo> pkgLocalesMap = new HashMap<>();
         String pkgNameA = "com.android.myAppA";
         String pkgNameB = "com.android.myAppB";
         String langTagsA = "ru";
         String langTagsB = "hi,fr";
-        pkgLocalesMap.put(pkgNameA, langTagsA);
-        pkgLocalesMap.put(pkgNameB, langTagsB);
+        LocalesInfo localesInfoA = new LocalesInfo(langTagsA, false);
+        LocalesInfo localesInfoB = new LocalesInfo(langTagsB, false);
+        pkgLocalesMap.put(pkgNameA, localesInfoA);
+        pkgLocalesMap.put(pkgNameB, localesInfoB);
         writeTestPayload(out, pkgLocalesMap);
-
         setUpPackageNotInstalled(pkgNameA);
         setUpPackageNotInstalled(pkgNameB);
         setUpLocalesForPackage(pkgNameA, LocaleList.getEmptyLocaleList());
@@ -494,40 +610,41 @@ public class LocaleManagerBackupRestoreTest {
         // Retention period has not elapsed.
         setCurrentTimeMillis(
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.minusHours(1).toMillis());
-
         setUpPackageInstalled(pkgNameA);
+
         mPackageMonitor.onPackageAdded(pkgNameA, DEFAULT_UID);
 
-        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(pkgNameA, DEFAULT_USER_ID,
-                LocaleList.forLanguageTags(langTagsA));
+        verify(mMockLocaleManagerService, times(1)).setApplicationLocales(
+                pkgNameA, DEFAULT_USER_ID, LocaleList.forLanguageTags(langTagsA), false,
+                FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
 
         pkgLocalesMap.remove(pkgNameA);
+
         verifyStageDataForUser(pkgLocalesMap, DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
 
         // Retention period has now expired, stage data should be deleted.
         setCurrentTimeMillis(
                 DEFAULT_CREATION_TIME_MILLIS + RETENTION_PERIOD.plusSeconds(1).toMillis());
         setUpPackageInstalled(pkgNameB);
+
         mPackageMonitor.onPackageAdded(pkgNameB, DEFAULT_UID);
 
         verify(mMockLocaleManagerService, times(0)).setApplicationLocales(eq(pkgNameB), anyInt(),
-                any());
-
+                any(), anyBoolean(), anyInt());
         checkStageDataDoesNotExist(DEFAULT_USER_ID);
     }
 
     @Test
     public void testUserRemoval_userRemoved_stageDataDeleted() throws Exception {
         final ByteArrayOutputStream outDefault = new ByteArrayOutputStream();
-        writeTestPayload(outDefault, DEFAULT_PACKAGE_LOCALES_MAP);
-
+        writeTestPayload(outDefault, DEFAULT_PACKAGE_LOCALES_INFO_MAP);
         final ByteArrayOutputStream outWorkProfile = new ByteArrayOutputStream();
         String anotherPackage = "com.android.anotherapp";
         String anotherLangTags = "mr,zh";
-        HashMap<String, String> pkgLocalesMapWorkProfile = new HashMap<>();
-        pkgLocalesMapWorkProfile.put(anotherPackage, anotherLangTags);
+        LocalesInfo localesInfo = new LocalesInfo(anotherLangTags, false);
+        HashMap<String, LocalesInfo> pkgLocalesMapWorkProfile = new HashMap<>();
+        pkgLocalesMapWorkProfile.put(anotherPackage, localesInfo);
         writeTestPayload(outWorkProfile, pkgLocalesMapWorkProfile);
-
         // DEFAULT_PACKAGE_NAME is NOT installed on the device.
         setUpPackageNotInstalled(DEFAULT_PACKAGE_NAME);
         setUpPackageNotInstalled(anotherPackage);
@@ -537,8 +654,7 @@ public class LocaleManagerBackupRestoreTest {
                 WORK_PROFILE_USER_ID);
 
         verifyNothingRestored();
-
-        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_MAP,
+        verifyStageDataForUser(DEFAULT_PACKAGE_LOCALES_INFO_MAP,
                 DEFAULT_CREATION_TIME_MILLIS, DEFAULT_USER_ID);
         verifyStageDataForUser(pkgLocalesMapWorkProfile,
                 DEFAULT_CREATION_TIME_MILLIS, WORK_PROFILE_USER_ID);
@@ -552,6 +668,45 @@ public class LocaleManagerBackupRestoreTest {
         checkStageDataDoesNotExist(DEFAULT_USER_ID);
         verifyStageDataForUser(pkgLocalesMapWorkProfile,
                 DEFAULT_CREATION_TIME_MILLIS, WORK_PROFILE_USER_ID);
+    }
+
+    @Test
+    public void testPackageRemoved_noInfoInSp() throws Exception {
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        setUpPackageNamesForSp(new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB)));
+
+        mBackupHelper.onPackageRemoved(DEFAULT_PACKAGE_NAME, DEFAULT_UID);
+
+        verify(mMockSpEditor, times(0)).putStringSet(anyString(), any());
+    }
+
+    @Test
+    public void testPackageRemoved_removeInfoFromSp() throws Exception {
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        Set<String> pkgNames = new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB));
+        setUpPackageNamesForSp(pkgNames);
+
+        mBackupHelper.onPackageRemoved(pkgNameA, DEFAULT_UID);
+        pkgNames.remove(pkgNameA);
+
+        verify(mMockSpEditor, times(1)).putStringSet(
+                Integer.toString(DEFAULT_USER_ID), pkgNames);
+    }
+
+    @Test
+    public void testPackageDataCleared_removeInfoFromSp() throws Exception {
+        String pkgNameA = "com.android.myAppA";
+        String pkgNameB = "com.android.myAppB";
+        Set<String> pkgNames = new ArraySet<>(Arrays.asList(pkgNameA, pkgNameB));
+        setUpPackageNamesForSp(pkgNames);
+
+        mBackupHelper.onPackageDataCleared(pkgNameB, DEFAULT_UID);
+        pkgNames.remove(pkgNameB);
+
+        verify(mMockSpEditor, times(1)).putStringSet(
+                Integer.toString(DEFAULT_USER_ID), pkgNames);
     }
 
     private void setUpPackageInstalled(String packageName) throws Exception {
@@ -576,6 +731,11 @@ public class LocaleManagerBackupRestoreTest {
                 .getInstalledApplicationsAsUser(any(), anyInt());
     }
 
+    private void setUpPackageNamesForSp(Set<String> packageNames) {
+        doReturn(packageNames).when(mMockDelegateAppLocalePackages).getStringSet(anyString(),
+                any());
+    }
+
     /**
      * Verifies that nothing was restored for any package.
      *
@@ -584,31 +744,34 @@ public class LocaleManagerBackupRestoreTest {
      */
     private void verifyNothingRestored() throws Exception {
         verify(mMockLocaleManagerService, times(0)).setApplicationLocales(anyString(), anyInt(),
-                any());
+                any(), anyBoolean(), anyInt());
     }
 
-    private static void verifyPayloadForAppLocales(Map<String, String> expectedPkgLocalesMap,
+    private static void verifyPayloadForAppLocales(Map<String, LocalesInfo> expectedPkgLocalesMap,
             byte[] payload)
             throws IOException, XmlPullParserException {
         final ByteArrayInputStream stream = new ByteArrayInputStream(payload);
         final TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(stream, StandardCharsets.UTF_8.name());
 
-        Map<String, String> backupDataMap = new HashMap<>();
+        Map<String, LocalesInfo> backupDataMap = new HashMap<>();
         XmlUtils.beginDocument(parser, TEST_LOCALES_XML_TAG);
         int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
             if (parser.getName().equals("package")) {
                 String packageName = parser.getAttributeValue(null, "name");
                 String languageTags = parser.getAttributeValue(null, "locales");
-                backupDataMap.put(packageName, languageTags);
+                boolean delegateSelector = parser.getAttributeBoolean(null, "delegate_selector");
+                LocalesInfo localesInfo = new LocalesInfo(languageTags, delegateSelector);
+                backupDataMap.put(packageName, localesInfo);
             }
         }
 
-        assertEquals(expectedPkgLocalesMap, backupDataMap);
+        verifyStageData(expectedPkgLocalesMap, backupDataMap);
     }
 
-    private static void writeTestPayload(OutputStream stream, Map<String, String> pkgLocalesMap)
+    private static void writeTestPayload(OutputStream stream,
+            Map<String, LocalesInfo> pkgLocalesMap)
             throws IOException {
         if (pkgLocalesMap.isEmpty()) {
             return;
@@ -622,7 +785,9 @@ public class LocaleManagerBackupRestoreTest {
         for (String pkg : pkgLocalesMap.keySet()) {
             out.startTag(/* namespace= */ null, "package");
             out.attribute(/* namespace= */ null, "name", pkg);
-            out.attribute(/* namespace= */ null, "locales", pkgLocalesMap.get(pkg));
+            out.attribute(/* namespace= */ null, "locales", pkgLocalesMap.get(pkg).mLocales);
+            out.attributeBoolean(/* namespace= */ null, "delegate_selector",
+                    pkgLocalesMap.get(pkg).mSetFromDelegate);
             out.endTag(/*namespace= */ null, "package");
         }
 
@@ -630,12 +795,23 @@ public class LocaleManagerBackupRestoreTest {
         out.endDocument();
     }
 
-    private void verifyStageDataForUser(Map<String, String> expectedPkgLocalesMap,
+    private void verifyStageDataForUser(Map<String, LocalesInfo> expectedPkgLocalesMap,
             long expectedCreationTimeMillis, int userId) {
         LocaleManagerBackupHelper.StagedData stagedDataForUser = STAGE_DATA.get(userId);
         assertNotNull(stagedDataForUser);
         assertEquals(expectedCreationTimeMillis, stagedDataForUser.mCreationTimeMillis);
-        assertEquals(expectedPkgLocalesMap, stagedDataForUser.mPackageStates);
+        verifyStageData(expectedPkgLocalesMap, stagedDataForUser.mPackageStates);
+    }
+
+    private static void verifyStageData(Map<String, LocalesInfo> expectedPkgLocalesMap,
+            Map<String, LocalesInfo> stageData) {
+        assertEquals(expectedPkgLocalesMap.size(), stageData.size());
+        for (String pkg : expectedPkgLocalesMap.keySet()) {
+            assertTrue(stageData.containsKey(pkg));
+            assertEquals(expectedPkgLocalesMap.get(pkg).mLocales, stageData.get(pkg).mLocales);
+            assertEquals(expectedPkgLocalesMap.get(pkg).mSetFromDelegate,
+                    stageData.get(pkg).mSetFromDelegate);
+        }
     }
 
     private static void checkStageDataExists(int userId) {

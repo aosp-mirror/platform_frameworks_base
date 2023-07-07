@@ -1,0 +1,340 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+import "frameworks/base/tools/aapt2/Resources.proto";
+
+package aapt.pb;
+
+option java_package = "com.android.aapt";
+
+// Top level message representing data extracted from the APK for 'apkinfo'
+// command.
+message ApkInfo {
+  message XmlFile {
+    string path = 1;
+    XmlNode root = 2;
+  }
+
+  Badging badging = 1;
+  ResourceTable resource_table = 2;
+  repeated XmlFile xml_files = 3;
+}
+
+// Data extracted from the manifest of the APK.
+message Badging {
+  PackageInfo package = 1;
+  Application application = 2;
+  UsesSdk uses_sdk = 3;
+  // Previously: UsesConfiguration uses_configuration = 4;
+  reserved 4;
+  SupportsScreen supports_screen = 5;
+  SupportsInput supports_input = 6;
+  LaunchableActivity launchable_activity = 7;
+  LeanbackLaunchableActivity leanback_launchable_activity = 8;
+  StaticLibrary static_library = 9;
+  SdkLibrary sdk_library = 10;
+  Overlay overlay = 11;
+  PackageVerifier package_verifier = 12;
+  CompatibleScreens compatible_screens = 13;
+  Architectures architectures = 14;
+  SupportsGlTexture supports_gl_texture = 15;
+  Components components = 16;
+
+  repeated string locales = 17;
+  repeated int32 densities = 18;
+
+  repeated UsesPackage uses_packages = 51;
+  repeated UsesConfiguration uses_configurations = 52;
+  repeated FeatureGroup feature_groups = 53;
+  repeated UsesPermission uses_permissions = 54;
+  repeated Permission permissions = 55;
+  repeated UsesLibrary uses_libraries = 56;
+  repeated UsesStaticLibrary uses_static_libraries = 57;
+  repeated UsesSdkLibrary uses_sdk_libraries = 58;
+  repeated UsesNativeLibrary uses_native_libraries = 59;
+
+  repeated Metadata metadata = 62;
+  repeated Property properties = 63;
+}
+
+// Information extracted about package from <manifest> and
+// <original-package> tags.
+message PackageInfo {
+  enum InstallLocation {
+    DEFAULT_INSTALL_LOCATION = 0;
+    AUTO = 1;
+    INTERNAL_ONLY = 2;
+    PREFER_EXTERNAL = 3;
+  }
+
+  string package = 1;
+  int32 version_code = 2;
+  string version_name = 3;
+
+  string split = 4;
+
+  string platform_version_name = 5;
+  string platform_version_code = 6;
+
+  int32 compile_sdk_version = 7;
+  string compile_sdk_version_codename = 8;
+
+  InstallLocation install_location = 9;
+
+  string original_package = 10;
+}
+
+// Information extracted from <application> element.
+message Application {
+  string label = 1;
+  string icon = 2;
+  string banner = 3;
+
+  bool test_only = 4;
+  bool game = 5;
+  bool debuggable = 6;
+
+  map<string, string> locale_labels = 8;
+  map<int32, string> density_icons = 9;
+}
+
+// Components defined in the APK.
+message Components {
+  bool main = 1;
+  bool other_activities = 2;
+  bool other_receivers = 3;
+  bool other_services = 4;
+
+  repeated string provided_components = 5;
+}
+
+// Application's min and target SDKs.
+message UsesSdk {
+  oneof min_sdk {
+    int32 min_sdk_version = 2;
+    string min_sdk_version_name = 3;
+  }
+  int32 max_sdk_version = 4;
+  oneof target_sdk {
+    int32 target_sdk_version = 5;
+    string target_sdk_version_name = 6;
+  }
+}
+
+message UsesConfiguration {
+  int32 req_touch_screen = 1;
+  int32 req_keyboard_type = 2;
+  int32 req_hard_keyboard = 3;
+  int32 req_navigation = 4;
+  int32 req_five_way_nav = 5;
+}
+
+// Screens supported by this application.
+message SupportsScreen {
+  enum ScreenType {
+    UNSPECIFIED_SCREEN_TYPE = 0;
+    SMALL = 1;
+    NORMAL = 2;
+    LARGE = 3;
+    XLARGE = 4;
+  }
+  repeated ScreenType screens = 1;
+  bool supports_any_densities = 2;
+  int32 requires_smallest_width_dp = 3;
+  int32 compatible_width_limit_dp = 4;
+  int32 largest_width_limit_dp = 5;
+}
+
+// Inputs supported by this application.
+message SupportsInput {
+  repeated string inputs = 1;
+}
+
+// Information about used features which is extracted from <uses-permission>
+// elements or implied from permissions.
+message Feature {
+  message ImpliedData {
+      bool from_sdk_23_permission = 1;
+      repeated string reasons = 2;
+  }
+
+  string name = 1;
+  bool required = 2;
+  int32 version = 3;
+
+  ImpliedData implied_data = 4;
+}
+
+message FeatureGroup {
+  string label = 1;
+  int32 open_gles_version = 2;
+  repeated Feature features = 3;
+}
+
+// Information about permission requested by the application.
+message UsesPermission {
+  message PermissionFlags {
+    bool never_for_location = 1;
+  }
+
+  string name = 1;
+  int32 max_sdk_version = 2;
+  bool required = 3;
+  bool implied = 4;
+  bool sdk23_and_above = 5;
+
+  repeated string required_features = 6;
+  repeated string required_not_features = 7;
+
+  PermissionFlags permission_flags = 8;
+}
+
+// Permission defined by the application.
+message Permission {
+  string name = 1;
+}
+
+// Data extracted about launchable activity. Launchable activity is an entry
+// point on phone and tablet devices.
+message LaunchableActivity {
+  string name = 1;
+  string icon = 2;
+  string label = 3;
+}
+
+// Data extracted about leanback launchable activity. Leanback launchable
+// activity is an entry point on TV devices.
+message LeanbackLaunchableActivity {
+  string name = 1;
+  string icon = 2;
+  string label = 3;
+  string banner = 4;
+}
+
+// Library used by the application.
+message UsesLibrary {
+  string name = 1;
+  bool required = 2;
+}
+
+// Static library this APK declares.
+message StaticLibrary {
+  string name = 1;
+  int32 version = 2;
+  int32 version_major = 3;
+}
+
+// Static library used by the application.
+message UsesStaticLibrary {
+  string name = 1;
+  int32 version = 2;
+  int32 version_major = 3;
+  repeated string certificates = 4;
+}
+
+// SDK library this APK declares.
+message SdkLibrary {
+  string name = 1;
+  int32 version_major = 2;
+}
+
+// SDK library used by the application.
+message UsesSdkLibrary {
+  string name = 1;
+  int32 version_major = 2;
+  repeated string certificates = 3;
+}
+
+// Native library used by the application.
+message UsesNativeLibrary {
+  string name = 1;
+  bool required = 2;
+}
+
+// Information extracted from <meta-data> elements defined across
+// AndroidManifest.xml.
+message Metadata {
+  string name = 1;
+  oneof value {
+    string value_string = 2;
+    int32 value_int = 3;
+  }
+  oneof resource {
+    string resource_string = 4;
+    int32 resource_int = 5;
+  }
+}
+
+// Information about overlay that is declared in the APK.
+message Overlay {
+  string target_package = 1;
+  int32 priority = 2;
+  bool static = 3;
+  string required_property_name = 4;
+  string required_property_value = 5;
+}
+
+// Data extracted from <package-verifier> element.
+message PackageVerifier {
+  string name = 1;
+  string public_key = 2;
+}
+
+// External packages used by the application
+message UsesPackage {
+  string name = 1;
+  string package_type = 2;
+  int32 version = 3;
+  int32 version_major = 4;
+  repeated string certificates = 5;
+}
+
+// Open GL textures format supported by the current application.
+message SupportsGlTexture {
+  repeated string name = 1;
+}
+
+// Screens compatible with the application.
+message CompatibleScreens {
+  message Screen {
+    int32 size = 1;
+    int32 density = 2;
+  }
+
+  repeated Screen screens = 1;
+}
+
+// Architectures supported by the application.
+message Architectures {
+  repeated string architectures = 1;
+  repeated string alt_architectures = 2;
+}
+
+// Information extracted from <property> elements defined across
+// AndroidManifest.xml.
+message Property {
+  string name = 1;
+  oneof value {
+    string value_string = 2;
+    int32 value_int = 3;
+  }
+  oneof resource {
+    string resource_string = 4;
+    int32 resource_int = 5;
+  }
+}

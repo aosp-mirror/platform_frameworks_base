@@ -16,13 +16,14 @@
 package com.android.keyguard;
 
 import android.hardware.biometrics.BiometricSourceType;
-import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.plugins.WeatherData;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 
 import java.util.TimeZone;
@@ -31,10 +32,6 @@ import java.util.TimeZone;
  * Callback for general information relevant to lock screen.
  */
 public class KeyguardUpdateMonitorCallback {
-
-    private static final long VISIBILITY_CHANGED_COLLAPSE_MS = 1000;
-    private long mVisibilityChangedCalled;
-    private boolean mShowing;
 
     /**
      * Called when the battery status changes, e.g. when plugged in or unplugged, charge
@@ -62,6 +59,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onTimeFormatChanged(String timeFormat) { }
 
     /**
+     * Called when receive new weather data.
+     */
+    public void onWeatherDataChanged(WeatherData data) { }
+
+    /**
      * Called when the carrier PLMN or SPN changes.
      */
     public void onRefreshCarrierInfo() { }
@@ -75,32 +77,17 @@ public class KeyguardUpdateMonitorCallback {
     public void onPhoneStateChanged(int phoneState) { }
 
     /**
-     * Called when the visibility of the keyguard changes.
-     * @param showing Indicates if the keyguard is now visible.
-     */
-    public void onKeyguardVisibilityChanged(boolean showing) { }
-
-    /**
-     * Called when the keyguard occluded state changes.
-     * @param occluded Indicates if the keyguard is now occluded.
-     */
-    public void onKeyguardOccludedChanged(boolean occluded) { }
-
-    public void onKeyguardVisibilityChangedRaw(boolean showing) {
-        final long now = SystemClock.elapsedRealtime();
-        if (showing == mShowing
-                && (now - mVisibilityChangedCalled) < VISIBILITY_CHANGED_COLLAPSE_MS) return;
-        onKeyguardVisibilityChanged(showing);
-        mVisibilityChangedCalled = now;
-        mShowing = showing;
-    }
-
-    /**
      * Called when the keyguard enters or leaves bouncer mode.
      * @param bouncerIsOrWillBeShowing if true, keyguard is showing the bouncer or transitioning
      *                                 from/to bouncer mode.
      */
     public void onKeyguardBouncerStateChanged(boolean bouncerIsOrWillBeShowing) { }
+
+    /**
+     * Called when the keyguard visibility changes.
+     * @param visible whether the keyguard is showing and is NOT occluded
+     */
+    public void onKeyguardVisibilityChanged(boolean visible) { }
 
     /**
      * Called when the keyguard fully transitions to the bouncer or is no longer the bouncer
@@ -115,12 +102,6 @@ public class KeyguardUpdateMonitorCallback {
      * remote animation).
      */
     public void onKeyguardDismissAnimationFinished() { }
-
-    /**
-     * Called when visibility of lockscreen clock changes, such as when
-     * obscured by a widget.
-     */
-    public void onClockVisibilityChanged() { }
 
     /**
      * Called when the device becomes provisioned
@@ -149,11 +130,6 @@ public class KeyguardUpdateMonitorCallback {
      * @param simState
      */
     public void onSimStateChanged(int subId, int slotId, int simState) { }
-
-    /**
-     * Called when the user's info changed.
-     */
-    public void onUserInfoChanged(int userId) { }
 
     /**
      * Called when a user got unlocked.
@@ -205,14 +181,20 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustManagedChanged(int userId) { }
 
     /**
-     * Called after trust was granted with non-zero flags.
+     * Called after trust was granted.
+     * @param dismissKeyguard whether the keyguard should be dismissed as a result of the
+     *                        trustGranted
+     * @param newlyUnlocked whether the grantedTrust is believed to be the cause of a newly
+     *                      unlocked device (after being locked).
+     * @param message optional message the trust agent has provided to show that should indicate
+     *                why trust was granted.
      */
-    public void onTrustGrantedWithFlags(int flags, int userId) { }
-
-    /**
-     * Called when setting the trust granted message.
-     */
-    public void showTrustGrantedMessage(@Nullable CharSequence message) { }
+    public void onTrustGrantedForCurrentUser(
+            boolean dismissKeyguard,
+            boolean newlyUnlocked,
+            @NonNull TrustGrantFlags flags,
+            @Nullable String message
+    ) { }
 
     /**
      * Called when a biometric has been acquired.
@@ -232,11 +214,19 @@ public class KeyguardUpdateMonitorCallback {
     public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) { }
 
     /**
-     * Called when a biometric is recognized.
+     * Called when a biometric is authenticated.
      * @param userId the user id for which the biometric sample was authenticated
      * @param biometricSourceType
      */
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) { }
+
+    /**
+     * Called when a biometric is detected but not successfully authenticated.
+     * @param userId the user id for which the biometric sample was detected
+     * @param biometricSourceType
+     */
+    public void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) { }
 
     /**
@@ -258,11 +248,6 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onBiometricError(int msgId, String errString,
             BiometricSourceType biometricSourceType) { }
-
-    /**
-     * Called when the state of face unlock changed.
-     */
-    public void onFaceUnlockStateChanged(boolean running, int userId) { }
 
     /**
      * Called when biometric running state changed.
@@ -293,7 +278,7 @@ public class KeyguardUpdateMonitorCallback {
      * like fingerprint authentication errors.
      *
      * @param message Message that indicates an error.
-     * @see KeyguardIndicationController.BaseKeyguardCallback#HIDE_DELAY_MS
+     * @see KeyguardIndicationController#DEFAULT_HIDE_DELAY_MS
      * @see KeyguardIndicationController#showTransientIndication(CharSequence)
      */
     public void onTrustAgentErrorMessage(CharSequence message) { }
@@ -327,4 +312,19 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the notification shade is expanded or collapsed.
      */
     public void onShadeExpandedChanged(boolean expanded) { }
+
+    /**
+     * Called when the non-strong biometric state changed.
+     */
+    public void onNonStrongBiometricAllowedChanged(int userId) { }
+
+    /**
+     * Called when keyguard is going away or not going away.
+     */
+    public void onKeyguardGoingAway() { }
+
+    /**
+     * Called when the enabled trust agents associated with the specified user.
+     */
+    public void onEnabledTrustAgentsChanged(int userId) { }
 }

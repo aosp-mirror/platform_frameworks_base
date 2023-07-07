@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2022 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- This test config file is auto-generated. -->
+<configuration description="Runs {MODULE}">
+    <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="apct-unit-tests" />
+    <option name="config-descriptor:metadata" key="component" value="{MODULE}" />
+
+    {EXTRA_CONFIGS}
+
+    <test class="com.android.tradefed.testtype.IsolatedHostTest" >
+        <option name="jar" value="{MODULE}.jar" />
+        <option name="java-flags" value="--add-modules=jdk.compiler"/>
+        <option name="java-flags" value="--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"/>
+        <option name="java-flags" value="--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"/>
+        <option name="java-flags" value="--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"/>
+        <option name="java-flags" value="--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"/>
+    </test>
+</configuration>

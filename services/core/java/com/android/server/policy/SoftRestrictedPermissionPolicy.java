@@ -42,7 +42,7 @@ import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
 
 import com.android.server.LocalServices;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.Arrays;
 import java.util.HashSet;

@@ -23,6 +23,7 @@ import android.hardware.radio.V1_5.AccessNetwork;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 
 /**
  * Contains access network related constants.
@@ -114,16 +115,16 @@ public final class AccessNetworkConstants {
 
         /** @hide */
         public static @RadioAccessNetworkType int fromString(@NonNull String str) {
-            switch (str.toUpperCase()) {
-                case "GERAN" : return GERAN;
-                case "UTRAN" : return UTRAN;
-                case "EUTRAN" : return EUTRAN;
-                case "CDMA2000" : return CDMA2000;
-                case "IWLAN" : return IWLAN;
-                case "NGRAN" : return NGRAN;
+            switch (str.toUpperCase(Locale.ROOT)) {
+                case "UNKNOWN": return UNKNOWN;
+                case "GERAN": return GERAN;
+                case "UTRAN": return UTRAN;
+                case "EUTRAN": return EUTRAN;
+                case "CDMA2000": return CDMA2000;
+                case "IWLAN": return IWLAN;
+                case "NGRAN": return NGRAN;
                 default:
-                    Rlog.e(TAG, "Invalid access network type " + str);
-                    return UNKNOWN;
+                    throw new IllegalArgumentException("Invalid access network type " + str);
             }
         }
     }
@@ -604,9 +605,9 @@ public final class AccessNetworkConstants {
         EUTRAN_ARFCN_FREQUENCY_BAND_41(
                 EutranBand.BAND_41, 2496000, 39650, 41589, 2496000, 39650, 41589),
         EUTRAN_ARFCN_FREQUENCY_BAND_42(
-                EutranBand.BAND_42, 3400000, 41950, 43589, 3400000, 41950, 43589),
+                EutranBand.BAND_42, 3400000, 41590, 43589, 3400000, 41590, 43589),
         EUTRAN_ARFCN_FREQUENCY_BAND_43(
-                EutranBand.BAND_43, 3600000, 43950, 45589, 3600000, 43950, 45589),
+                EutranBand.BAND_43, 3600000, 43590, 45589, 3600000, 43590, 45589),
         EUTRAN_ARFCN_FREQUENCY_BAND_44(
                 EutranBand.BAND_44, 703000, 45590, 46589, 703000, 45590, 46589),
         EUTRAN_ARFCN_FREQUENCY_BAND_45(

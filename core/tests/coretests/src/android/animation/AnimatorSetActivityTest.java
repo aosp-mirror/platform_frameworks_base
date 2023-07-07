@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import android.util.Property;
 import android.view.View;
 
 import androidx.test.annotation.UiThreadTest;
@@ -435,9 +436,11 @@ public class AnimatorSetActivityTest {
         mActivityRule.runOnUiThread(s::start);
 
         while (!listener.endIsCalled) {
-            boolean passedStartDelay = a1.isStarted() || a2.isStarted() || a3.isStarted() ||
-                    a4.isStarted() || a5.isStarted();
-            assertEquals(passedStartDelay, s.isRunning());
+            mActivityRule.runOnUiThread(() -> {
+                boolean passedStartDelay = a1.isStarted() || a2.isStarted() || a3.isStarted()
+                        || a4.isStarted() || a5.isStarted();
+                assertEquals(passedStartDelay, s.isRunning());
+            });
             Thread.sleep(50);
         }
         assertFalse(s.isRunning());
@@ -571,6 +574,42 @@ public class AnimatorSetActivityTest {
             assertTrue(onlyContains(startedAnimators, s1, s2, s3));
             assertTrue(onlyContains(canceledAnimators, s3));
             assertTrue(onlyContains(endedAnimators, s1, s2, s3));
+        });
+    }
+
+    @Test
+    public void testInitializeWithoutReadingValues() throws Throwable {
+        // Some consumers crash while reading values before the animator starts
+        Property<int[], Integer> property = new Property<>(Integer.class, "firstValue") {
+            @Override
+            public Integer get(int[] target) {
+                throw new IllegalStateException("Shouldn't be called");
+            }
+
+            @Override
+            public void set(int[] target, Integer value) {
+                target[0] = value;
+            }
+        };
+
+        int[] target1 = new int[1];
+        int[] target2 = new int[1];
+        int[] target3 = new int[1];
+        ObjectAnimator animator1 = ObjectAnimator.ofInt(target1, property, 0, 100);
+        ObjectAnimator animator2 = ObjectAnimator.ofInt(target2, property, 0, 100);
+        ObjectAnimator animator3 = ObjectAnimator.ofInt(target3, property, 0, 100);
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(animator1, animator2, animator3);
+
+        mActivityRule.runOnUiThread(() -> {
+            set.setCurrentPlayTime(900);
+            assertEquals(100, target1[0]);
+            assertEquals(100, target2[0]);
+            assertEquals(100, target3[0]);
+            set.setCurrentPlayTime(0);
+            assertEquals(0, target1[0]);
+            assertEquals(0, target2[0]);
+            assertEquals(0, target3[0]);
         });
     }
 

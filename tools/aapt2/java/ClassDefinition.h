@@ -59,8 +59,8 @@ class ClassMember {
 template <typename T>
 class PrimitiveMember : public ClassMember {
  public:
-  PrimitiveMember(const android::StringPiece& name, const T& val, bool staged_api = false)
-      : name_(name.to_string()), val_(val), staged_api_(staged_api) {
+  PrimitiveMember(android::StringPiece name, const T& val, bool staged_api = false)
+      : name_(name), val_(val), staged_api_(staged_api) {
   }
 
   bool empty() const override {
@@ -104,8 +104,8 @@ class PrimitiveMember : public ClassMember {
 template <>
 class PrimitiveMember<std::string> : public ClassMember {
  public:
-  PrimitiveMember(const android::StringPiece& name, const std::string& val, bool staged_api = false)
-      : name_(name.to_string()), val_(val) {
+  PrimitiveMember(android::StringPiece name, const std::string& val, bool staged_api = false)
+      : name_(name), val_(val) {
   }
 
   bool empty() const override {
@@ -141,7 +141,8 @@ using StringMember = PrimitiveMember<std::string>;
 template <typename T, typename StringConverter>
 class PrimitiveArrayMember : public ClassMember {
  public:
-  explicit PrimitiveArrayMember(const android::StringPiece& name) : name_(name.to_string()) {}
+  explicit PrimitiveArrayMember(android::StringPiece name) : name_(name) {
+  }
 
   void AddElement(const T& val) {
     elements_.emplace_back(val);
@@ -209,12 +210,12 @@ using ResourceArrayMember = PrimitiveArrayMember<std::variant<ResourceId, FieldR
 class MethodDefinition : public ClassMember {
  public:
   // Expected method signature example: 'public static void onResourcesLoaded(int p)'.
-  explicit MethodDefinition(const android::StringPiece& signature)
-      : signature_(signature.to_string()) {}
+  explicit MethodDefinition(android::StringPiece signature) : signature_(signature) {
+  }
 
   // Appends a single statement to the method. It should include no newlines or else
   // formatting may be broken.
-  void AppendStatement(const android::StringPiece& statement);
+  void AppendStatement(android::StringPiece statement);
 
   // Not quite the same as a name, but good enough.
   const std::string& GetName() const override {
@@ -239,11 +240,12 @@ enum class ClassQualifier { kNone, kStatic };
 
 class ClassDefinition : public ClassMember {
  public:
-  static void WriteJavaFile(const ClassDefinition* def, const android::StringPiece& package,
-                            bool final, bool strip_api_annotations, io::OutputStream* out);
+  static void WriteJavaFile(const ClassDefinition* def, android::StringPiece package, bool final,
+                            bool strip_api_annotations, io::OutputStream* out);
 
-  ClassDefinition(const android::StringPiece& name, ClassQualifier qualifier, bool createIfEmpty)
-      : name_(name.to_string()), qualifier_(qualifier), create_if_empty_(createIfEmpty) {}
+  ClassDefinition(android::StringPiece name, ClassQualifier qualifier, bool createIfEmpty)
+      : name_(name), qualifier_(qualifier), create_if_empty_(createIfEmpty) {
+  }
 
   enum class Result {
     kAdded,

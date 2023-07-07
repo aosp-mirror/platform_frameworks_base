@@ -21,6 +21,7 @@
 
 #include "SkiaPipeline.h"
 #include "renderstate/RenderState.h"
+#include "renderthread/HardwareBufferRenderParams.h"
 
 namespace android {
 
@@ -36,22 +37,29 @@ public:
 
     renderthread::MakeCurrentResult makeCurrent() override;
     renderthread::Frame getFrame() override;
-    renderthread::IRenderPipeline::DrawResult draw(const renderthread::Frame& frame,
-                                                   const SkRect& screenDirty, const SkRect& dirty,
-                                                   const LightGeometry& lightGeometry,
-                                                   LayerUpdateQueue* layerUpdateQueue,
-                                                   const Rect& contentDrawBounds, bool opaque,
-                                                   const LightInfo& lightInfo,
-                                                   const std::vector<sp<RenderNode> >& renderNodes,
-                                                   FrameInfoVisualizer* profiler) override;
+    renderthread::IRenderPipeline::DrawResult draw(
+            const renderthread::Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
+            const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+            const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
+            const std::vector<sp<RenderNode> >& renderNodes, FrameInfoVisualizer* profiler,
+            const renderthread::HardwareBufferRenderParams& bufferParams) override;
     GrSurfaceOrigin getSurfaceOrigin() override { return kBottomLeft_GrSurfaceOrigin; }
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(ANativeWindow* surface, renderthread::SwapBehavior swapBehavior) override;
+    [[nodiscard]] android::base::unique_fd flush() override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
+
+    const SkM44& getPixelSnapMatrix() const override {
+        // Small (~1/16th) nudge to ensure that pixel-aligned non-AA'd draws fill the
+        // desired fragment
+        static const SkScalar kOffset = 0.063f;
+        static const SkM44 sSnapMatrix = SkM44::Translate(kOffset, kOffset);
+        return sSnapMatrix;
+    }
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
 
@@ -61,7 +69,8 @@ protected:
 private:
     renderthread::EglManager& mEglManager;
     EGLSurface mEglSurface = EGL_NO_SURFACE;
-    bool mBufferPreserved = false;
+    sp<ANativeWindow> mNativeWindow;
+    renderthread::SwapBehavior mSwapBehavior = renderthread::SwapBehavior::kSwap_discardBuffer;
 };
 
 } /* namespace skiapipeline */

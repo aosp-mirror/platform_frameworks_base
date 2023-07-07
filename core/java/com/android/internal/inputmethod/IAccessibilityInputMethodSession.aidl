@@ -16,17 +16,9 @@
 
 package com.android.internal.inputmethod;
 
-import android.graphics.Rect;
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.ExtractedText;
 
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
-import com.android.internal.view.IInputContext;
 
 /**
  * Sub-interface of IInputMethodSession which is safe to give to A11y IME.

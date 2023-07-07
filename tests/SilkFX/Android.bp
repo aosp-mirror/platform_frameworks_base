@@ -25,13 +25,17 @@ package {
 
 android_test {
     name: "SilkFX",
-    srcs: ["**/*.java", "**/*.kt"],
+    srcs: [
+        "**/*.java",
+        "**/*.kt",
+    ],
     platform_apis: true,
     certificate: "platform",
-        static_libs: [
+    static_libs: [
         "androidx.core_core",
         "androidx.appcompat_appcompat",
         "com.google.android.material_material",
         "androidx-constraintlayout_constraintlayout",
+        "subsampling-scale-image-view",
     ],
 }

@@ -16,7 +16,9 @@
 
 package com.android.systemui.util
 
+import android.graphics.Rect
 import android.util.IndentingPrintWriter
+import android.view.View
 import android.view.ViewGroup
 import java.io.PrintWriter
 
@@ -46,3 +48,11 @@ inline fun PrintWriter.indentIfPossible(block: PrintWriter.() -> Unit) {
     block()
     if (this is IndentingPrintWriter) decreaseIndent()
 }
+
+/** Convenience extension property for [View.getBoundsOnScreen]. */
+val View.boundsOnScreen: Rect
+    get() {
+        val bounds = Rect()
+        getBoundsOnScreen(bounds)
+        return bounds
+    }

@@ -21,18 +21,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
-import android.util.Pair;
+import android.util.Slog;
 
 import com.android.internal.util.HexDump;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -132,7 +130,13 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
      */
     public boolean insertNewRecord(byte[] appDigest, String cncDomain,
             long timestamp) {
-        final SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db;
+        try {
+            db = getWritableDatabase();
+        } catch (SQLiteException e) {
+            Slog.e(TAG, "Error opening the database to insert a new record", e);
+            return false;
+        }
         final ContentValues values = new ContentValues();
         values.put(WhiteListReportContract.APP_DIGEST, appDigest);
         values.put(WhiteListReportContract.CNC_DOMAIN, cncDomain);
@@ -148,7 +152,13 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
     public AggregatedResult getAggregatedRecords(long untilTimestamp) {
         final String selectStatement = WhiteListReportContract.TIMESTAMP + " < ?";
 
-        final SQLiteDatabase db = getReadableDatabase();
+        final SQLiteDatabase db;
+        try {
+            db = getReadableDatabase();
+        } catch (SQLiteException e) {
+            Slog.e(TAG, "Error opening the database", e);
+            return null;
+        }
         Cursor c = null;
         try {
             c = db.query(true /* distinct */,
@@ -186,7 +196,13 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
      * @return True if success.
      */
     public boolean cleanup(long untilTimestamp) {
-        final SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db;
+        try {
+            db = getWritableDatabase();
+        } catch (SQLiteException e) {
+            Slog.e(TAG, "Error opening the database to cleanup", e);
+            return false;
+        }
         final String clause = WhiteListReportContract.TIMESTAMP + "< " + untilTimestamp;
         return db.delete(WhiteListReportContract.TABLE, clause, null) != 0;
     }

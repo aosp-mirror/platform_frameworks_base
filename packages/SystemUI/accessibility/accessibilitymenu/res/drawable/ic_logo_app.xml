@@ -1,0 +1,8 @@
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/colorAccessibilityMenuIcon" />
+    <foreground>
+        <inset
+            android:drawable="@drawable/ic_logo_app_foreground"
+            android:inset="21.88%" />
+    </foreground>
+</adaptive-icon>

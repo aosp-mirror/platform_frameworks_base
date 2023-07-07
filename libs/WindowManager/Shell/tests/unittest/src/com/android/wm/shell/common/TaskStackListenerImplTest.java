@@ -35,6 +35,8 @@ import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class TaskStackListenerImplTest {
+public class TaskStackListenerImplTest extends ShellTestCase {
 
     @Mock
     private IActivityTaskManager mActivityTaskManager;
@@ -110,9 +112,9 @@ public class TaskStackListenerImplTest {
     @Test
     public void testOnTaskProfileLocked() {
         ActivityManager.RunningTaskInfo info = mock(ActivityManager.RunningTaskInfo.class);
-        mImpl.onTaskProfileLocked(info);
-        verify(mCallback).onTaskProfileLocked(eq(info));
-        verify(mOtherCallback).onTaskProfileLocked(eq(info));
+        mImpl.onTaskProfileLocked(info, 0);
+        verify(mCallback).onTaskProfileLocked(eq(info), eq(0));
+        verify(mOtherCallback).onTaskProfileLocked(eq(info), eq(0));
     }
 
     @Test

@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -89,7 +90,7 @@ class SurfaceFreezer {
 
         freezeTarget = freezeTarget != null ? freezeTarget : mAnimatable.getFreezeSnapshotTarget();
         if (freezeTarget != null) {
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer = createSnapshotBufferInner(
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer = createSnapshotBufferInner(
                     freezeTarget, startBounds);
             final HardwareBuffer buffer = screenshotBuffer == null ? null
                     : screenshotBuffer.getHardwareBuffer();
@@ -183,31 +184,31 @@ class SurfaceFreezer {
         return mLeash != null;
     }
 
-    private static SurfaceControl.ScreenshotHardwareBuffer createSnapshotBuffer(
+    private static ScreenCapture.ScreenshotHardwareBuffer createSnapshotBuffer(
             @NonNull SurfaceControl target, @Nullable Rect bounds) {
         Rect cropBounds = null;
         if (bounds != null) {
             cropBounds = new Rect(bounds);
             cropBounds.offsetTo(0, 0);
         }
-        SurfaceControl.LayerCaptureArgs captureArgs =
-                new SurfaceControl.LayerCaptureArgs.Builder(target)
+        ScreenCapture.LayerCaptureArgs captureArgs =
+                new ScreenCapture.LayerCaptureArgs.Builder(target)
                         .setSourceCrop(cropBounds)
                         .setCaptureSecureLayers(true)
                         .setAllowProtected(true)
                         .build();
-        return SurfaceControl.captureLayers(captureArgs);
+        return ScreenCapture.captureLayers(captureArgs);
     }
 
     @VisibleForTesting
-    SurfaceControl.ScreenshotHardwareBuffer createSnapshotBufferInner(
+    ScreenCapture.ScreenshotHardwareBuffer createSnapshotBufferInner(
             SurfaceControl target, Rect bounds) {
         return createSnapshotBuffer(target, bounds);
     }
 
     @VisibleForTesting
     GraphicBuffer createFromHardwareBufferInner(
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer) {
         return GraphicBuffer.createFromHardwareBuffer(screenshotBuffer.getHardwareBuffer());
     }
 
@@ -220,7 +221,7 @@ class SurfaceFreezer {
          * @param screenshotBuffer A thumbnail or placeholder for thumbnail to initialize with.
          */
         Snapshot(SurfaceControl.Transaction t,
-                SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer, SurfaceControl parent) {
+                ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer, SurfaceControl parent) {
             GraphicBuffer graphicBuffer = createFromHardwareBufferInner(screenshotBuffer);
 
             mSurfaceControl = mAnimatable.makeAnimationLeash()

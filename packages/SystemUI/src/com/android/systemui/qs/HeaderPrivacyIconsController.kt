@@ -26,6 +26,9 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import javax.inject.Named
 
 interface ChipVisibilityListener {
     fun onChipVisibilityRefreshed(visible: Boolean)
@@ -44,17 +47,18 @@ interface ChipVisibilityListener {
 class HeaderPrivacyIconsController @Inject constructor(
     private val privacyItemController: PrivacyItemController,
     private val uiEventLogger: UiEventLogger,
-    private val privacyChip: OngoingPrivacyChip,
+    @Named(SHADE_HEADER) private val privacyChip: OngoingPrivacyChip,
     private val privacyDialogController: PrivacyDialogController,
     private val privacyLogger: PrivacyLogger,
-    private val iconContainer: StatusIconContainer,
+    @Named(SHADE_HEADER) private val iconContainer: StatusIconContainer,
     private val permissionManager: PermissionManager,
     @Background private val backgroundExecutor: Executor,
     @Main private val uiExecutor: Executor,
     private val activityStarter: ActivityStarter,
     private val appOpsController: AppOpsController,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val safetyCenterManager: SafetyCenterManager
+    private val safetyCenterManager: SafetyCenterManager,
+    private val deviceProvisionedController: DeviceProvisionedController
 ) {
 
     var chipVisibilityListener: ChipVisibilityListener? = null
@@ -134,6 +138,8 @@ class HeaderPrivacyIconsController @Inject constructor(
 
     fun onParentVisible() {
         privacyChip.setOnClickListener {
+            // Do not expand dialog while device is not provisioned
+            if (!deviceProvisionedController.isDeviceProvisioned) return@setOnClickListener
             // If the privacy chip is visible, it means there were some indicators
             uiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK)
             if (safetyCenterEnabled) {

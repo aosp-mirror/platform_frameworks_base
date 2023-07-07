@@ -20,7 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -41,6 +42,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 
 import libcore.io.IoUtils;
 
@@ -136,7 +138,7 @@ import java.util.concurrent.CountDownLatch;
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
     private static final boolean DEBUG = false;
-    private static final int DEFAULT_OPERATION_TYPE = OperationType.BACKUP;
+    private static final int DEFAULT_BACKUP_DESTINATION = BackupDestination.CLOUD;
 
     /** @hide */
     public static final int RESULT_SUCCESS = 0;
@@ -202,10 +204,11 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
+    @Nullable private volatile BackupRestoreEventLogger mLogger = null;
     @Nullable private UserHandle mUser;
      // This field is written from the main thread (in onCreate), and read in a Binder thread (in
      // onFullBackup that is called from system_server via Binder).
-    @OperationType private volatile int mOperationType = DEFAULT_OPERATION_TYPE;
+    @BackupDestination private volatile int mBackupDestination = DEFAULT_BACKUP_DESTINATION;
 
     Handler getHandler() {
         if (mHandler == null) {
@@ -234,6 +237,20 @@ public abstract class BackupAgent extends ContextWrapper {
         } catch (InterruptedException e) { /* ignored */ }
     }
 
+    /**
+     * Get a logger to record app-specific backup and restore events that are happening during a
+     * backup or restore operation.
+     *
+     * <p>The logger instance had been created by the system with the correct {@link
+     * BackupRestoreEventLogger.OperationType} that corresponds to the operation the {@code
+     * BackupAgent} is currently handling.
+     *
+     * @hide
+     */
+    @Nullable
+    public BackupRestoreEventLogger getBackupRestoreEventLogger() {
+        return mLogger;
+    }
 
     public BackupAgent() {
         super(null);
@@ -248,26 +265,33 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onCreate() {
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public void onCreate(UserHandle user) {
-        onCreate(user, DEFAULT_OPERATION_TYPE);
+        mUser = user;
+        onCreate();
     }
 
     /**
-     * Provided as a convenience for agent implementations that need an opportunity
-     * to do one-time initialization before the actual backup or restore operation
-     * is begun with information about the calling user.
-     * <p>
+     * @deprecated Use {@link BackupAgent#onCreate(UserHandle, int, int)} instead.
      *
      * @hide
      */
-    public void onCreate(UserHandle user, @OperationType int operationType) {
-        onCreate();
+    @Deprecated
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
+        mBackupDestination = backupDestination;
 
-        mUser = user;
-        mOperationType = operationType;
+        onCreate(user);
+    }
+
+    /**
+    * @hide
+    */
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination,
+            @OperationType int operationType) {
+        mBackupDestination = backupDestination;
+        mLogger = new BackupRestoreEventLogger(operationType);
+
+        onCreate(user, backupDestination);
     }
 
     /**
@@ -414,7 +438,7 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
         FullBackup.BackupScheme backupScheme = FullBackup.getBackupScheme(this,
-                mOperationType);
+                mBackupDestination);
         if (!backupScheme.isFullBackupEnabled(data.getTransportFlags())) {
             return;
         }
@@ -624,7 +648,7 @@ public abstract class BackupAgent extends ContextWrapper {
         if (includeMap == null || includeMap.size() == 0) {
             // Do entire sub-tree for the provided token.
             fullBackupFileTree(packageName, domainToken,
-                    FullBackup.getBackupScheme(this, mOperationType)
+                    FullBackup.getBackupScheme(this, mBackupDestination)
                             .tokenToDirectoryPath(domainToken),
                     filterSet, traversalExcludeSet, data);
         } else if (includeMap.get(domainToken) != null) {
@@ -796,7 +820,7 @@ public abstract class BackupAgent extends ContextWrapper {
                                             ArraySet<String> systemExcludes,
             FullBackupDataOutput output) {
         // Pull out the domain and set it aside to use when making the tarball.
-        String domainPath = FullBackup.getBackupScheme(this, mOperationType)
+        String domainPath = FullBackup.getBackupScheme(this, mBackupDestination)
                 .tokenToDirectoryPath(domain);
         if (domainPath == null) {
             // Should never happen.
@@ -908,7 +932,7 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean isFileEligibleForRestore(File destination) throws IOException {
-        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this, mOperationType);
+        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this, mBackupDestination);
         if (!bs.isFullRestoreEnabled()) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(FullBackup.TAG_XML_PARSER,
@@ -982,7 +1006,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 + " domain=" + domain + " relpath=" + path + " mode=" + mode
                 + " mtime=" + mtime);
 
-        basePath = FullBackup.getBackupScheme(this, mOperationType).tokenToDirectoryPath(
+        basePath = FullBackup.getBackupScheme(this, mBackupDestination).tokenToDirectoryPath(
                 domain);
         if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
             mode = -1;  // < 0 is a token to skip attempting a chmod()
@@ -1024,6 +1048,18 @@ public abstract class BackupAgent extends ContextWrapper {
      * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
      */
     public void onRestoreFinished() {
+    }
+
+    /**
+     * Clears all pending logs currently stored in the agent's event logger.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public final void clearBackupRestoreEventLogger() {
+        if (mLogger != null) {
+            mLogger.clearData();
+        }
     }
 
     // ----- Core implementation -----
@@ -1303,6 +1339,36 @@ public abstract class BackupAgent extends ContextWrapper {
                 } catch (RemoteException e) {
                     // We will time out anyway.
                 }
+            }
+        }
+
+        @Override
+        public void getLoggerResults(
+                AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> in) {
+            if (mLogger != null) {
+                in.complete(mLogger.getLoggingResults());
+            } else {
+                in.complete(Collections.emptyList());
+            }
+        }
+
+        @Override
+        public void getOperationType(
+                AndroidFuture<Integer> in) {
+            in.complete(mLogger == null ? OperationType.UNKNOWN : mLogger.getOperationType());
+        }
+
+        @Override
+        public void clearBackupRestoreEventLogger() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                BackupAgent.this.clearBackupRestoreEventLogger();
+            } catch (Exception e) {
+                Log.d(TAG, "clearBackupRestoreEventLogger (" + BackupAgent.this.getClass().getName()
+                        + ") threw", e);
+                throw e;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }

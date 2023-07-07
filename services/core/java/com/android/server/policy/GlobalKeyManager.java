@@ -137,20 +137,27 @@ final class GlobalKeyManager {
                         String componentName = parser.getAttributeValue(null, ATTR_COMPONENT);
                         String dispatchWhenNonInteractive =
                                 parser.getAttributeValue(null, ATTR_DISPATCH_WHEN_NON_INTERACTIVE);
+                        if (keyCodeName == null || componentName == null) {
+                            Log.wtf(TAG, "Failed to parse global keys entry: " + parser.getText());
+                            continue;
+                        }
                         int keyCode = KeyEvent.keyCodeFromString(keyCodeName);
                         if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
                             mKeyMapping.put(keyCode, new GlobalKeyAction(
                                     componentName, dispatchWhenNonInteractive));
+                        } else {
+                            Log.wtf(TAG, "Global keys entry does not map to a valid key code: "
+                                    + keyCodeName);
                         }
                     }
                 }
             }
         } catch (Resources.NotFoundException e) {
-            Log.w(TAG, "global keys file not found", e);
+            Log.wtf(TAG, "global keys file not found", e);
         } catch (XmlPullParserException e) {
-            Log.w(TAG, "XML parser exception reading global keys file", e);
+            Log.wtf(TAG, "XML parser exception reading global keys file", e);
         } catch (IOException e) {
-            Log.w(TAG, "I/O exception reading global keys file", e);
+            Log.e(TAG, "I/O exception reading global keys file", e);
         }
     }
 

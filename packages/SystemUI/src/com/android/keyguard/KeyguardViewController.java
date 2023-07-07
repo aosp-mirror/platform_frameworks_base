@@ -23,11 +23,11 @@ import android.view.ViewRootImpl;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which
@@ -50,14 +50,9 @@ public interface KeyguardViewController {
 
     /**
      * Resets the state of Keyguard View.
-     * @param hideBouncerWhenShowing
+     * @param hideBouncerWhenShowing when true, hides the primary and alternate bouncers if showing.
      */
     void reset(boolean hideBouncerWhenShowing);
-
-    /**
-     * Stop showing any alternate auth methods.
-     */
-    void resetAlternateAuth(boolean forceUpdateScrim);
 
     /**
      * Called when the device started going to sleep.
@@ -92,11 +87,6 @@ public interface KeyguardViewController {
      * @param animate
      */
     void setOccluded(boolean occluded, boolean animate);
-
-    /**
-     * @return Whether the keyguard is showing
-     */
-    boolean isShowing();
 
     /**
      * Dismisses the keyguard by going to the next screen or making it gone.
@@ -161,20 +151,24 @@ public interface KeyguardViewController {
     void notifyKeyguardAuthenticated(boolean strongAuth);
 
     /**
-     * Shows the Bouncer.
-     *
+     * Shows the primary bouncer.
      */
-    void showBouncer(boolean scrimmed);
+    void showPrimaryBouncer(boolean scrimmed);
 
     /**
-     * Returns {@code true} when the bouncer is currently showing
+     * When the primary bouncer is fully visible or is showing but animation didn't finish yet.
+     */
+    boolean primaryBouncerIsOrWillBeShowing();
+
+    /**
+     * Returns {@code true} when the primary bouncer or alternate bouncer is currently showing
      */
     boolean isBouncerShowing();
 
     /**
-     * When bouncer is fully visible or it is showing but animation didn't finish yet.
+     * Stop showing the alternate bouncer, if showing.
      */
-    boolean bouncerIsOrWillBeShowing();
+    void hideAlternateBouncer(boolean updateScrim);
 
     // TODO: Deprecate registerStatusBar in KeyguardViewController interface. It is currently
     //  only used for testing purposes in StatusBarKeyguardViewManager, and it prevents us from
@@ -184,8 +178,8 @@ public interface KeyguardViewController {
      * Registers the CentralSurfaces to which this Keyguard View is mounted.
      */
     void registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            NotificationPanelViewController notificationPanelViewController,
-            @Nullable PanelExpansionStateManager panelExpansionStateManager,
+            ShadeViewController shadeViewController,
+            @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
             KeyguardBypassController bypassController);

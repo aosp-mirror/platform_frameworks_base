@@ -236,7 +236,7 @@ public class BinderLatencyObserver {
     }
 
     protected boolean shouldKeepSample() {
-        return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
+        return mRandom.nextInt(mPeriodicSamplingInterval) == 0;
     }
 
     /** Updates the sampling interval. */

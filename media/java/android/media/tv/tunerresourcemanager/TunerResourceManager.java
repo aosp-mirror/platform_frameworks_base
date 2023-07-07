@@ -289,6 +289,23 @@ public class TunerResourceManager {
     }
 
     /**
+     * Updates the current TRM of the TunerHAL Demux information.
+     *
+     * <p><strong>Note:</strong> This update must happen before the first
+     * {@link #requestDemux(TunerDemuxRequest, int[])} and
+     * {@link #releaseDemux(int, int)} call.
+     *
+     * @param infos an array of the available {@link TunerDemuxInfo} information.
+     */
+    public void setDemuxInfoList(@NonNull TunerDemuxInfo[] infos) {
+        try {
+            mService.setDemuxInfoList(infos);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Updates the TRM of the current CAS information.
      *
      * <p><strong>Note:</strong> This update must happen before the first

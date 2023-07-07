@@ -21,4 +21,5 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 interface IProcessResultImpl
 {
     void onCaptureCompleted(long shutterTimestamp, in CameraMetadataNative results);
+    void onCaptureProcessProgressed(int progress);
 }

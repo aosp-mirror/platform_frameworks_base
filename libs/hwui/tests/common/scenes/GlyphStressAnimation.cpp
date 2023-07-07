@@ -20,6 +20,8 @@
 #include <hwui/Paint.h>
 #include <minikin/Layout.h>
 
+#include <SkBlendMode.h>
+
 #include <cstdio>
 
 class GlyphStressAnimation;

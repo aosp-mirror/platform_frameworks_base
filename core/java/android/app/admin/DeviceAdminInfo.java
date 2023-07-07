@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -37,9 +38,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -157,6 +159,24 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9;
 
+
+    /**
+     * Value for {@link #getHeadlessDeviceOwnerMode} which indicates that this DPC should not
+     * be provisioned into Device Owner mode on a Headless System User Mode device.
+     */
+    public static final int HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED = 0;
+
+    /**
+     * Value for {@link #getHeadlessDeviceOwnerMode} which indicates that this DPC should be
+     * provisioned into "affiliated" mode when on a Headless System User Mode device.
+     *
+     * <p>This mode adds a Profile Owner to all users other than the user the Device Owner is on.
+     */
+    public static final int HEADLESS_DEVICE_OWNER_MODE_AFFILIATED = 1;
+
+    @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED})
+    private @interface HeadlessDeviceOwnerMode {}
+
     /** @hide */
     public static class PolicyInfo {
         public final int ident;
@@ -254,6 +274,8 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     boolean mSupportsTransferOwnership;
 
+    @HeadlessDeviceOwnerMode int mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+
     /**
      * Constructor.
      *
@@ -340,6 +362,17 @@ public final class DeviceAdminInfo implements Parcelable {
                                 "support-transfer-ownership tag must be empty.");
                     }
                     mSupportsTransferOwnership = true;
+                } else if (tagName.equals("headless-system-user")) {
+                    String deviceOwnerModeStringValue =
+                            parser.getAttributeValue(null, "device-owner-mode");
+
+                    if (deviceOwnerModeStringValue.equalsIgnoreCase("unsupported")) {
+                        mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+                    } else if (deviceOwnerModeStringValue.equalsIgnoreCase("affiliated")) {
+                        mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
+                    } else {
+                        throw new XmlPullParserException("headless-system-user mode must be valid");
+                    }
                 }
             }
         } catch (NameNotFoundException e) {
@@ -354,6 +387,7 @@ public final class DeviceAdminInfo implements Parcelable {
         mActivityInfo = ActivityInfo.CREATOR.createFromParcel(source);
         mUsesPolicies = source.readInt();
         mSupportsTransferOwnership = source.readBoolean();
+        mHeadlessDeviceOwnerMode = source.readInt();
     }
 
     /**
@@ -459,6 +493,14 @@ public final class DeviceAdminInfo implements Parcelable {
         return mSupportsTransferOwnership;
     }
 
+    /**
+     * Returns the mode this DeviceAdmin wishes to use if provisioned as a Device Owner on a
+     * headless system user mode device.
+     */
+    public @HeadlessDeviceOwnerMode int getHeadlessDeviceOwnerMode() {
+        return mHeadlessDeviceOwnerMode;
+    }
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ArrayList<PolicyInfo> getUsedPolicies() {
@@ -504,6 +546,7 @@ public final class DeviceAdminInfo implements Parcelable {
         mActivityInfo.writeToParcel(dest, flags);
         dest.writeInt(mUsesPolicies);
         dest.writeBoolean(mSupportsTransferOwnership);
+        dest.writeInt(mHeadlessDeviceOwnerMode);
     }
 
     /**

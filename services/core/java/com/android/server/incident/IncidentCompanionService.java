@@ -34,7 +34,6 @@ import android.os.IncidentManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import com.android.internal.util.DumpUtils;
@@ -128,21 +127,21 @@ public class IncidentCompanionService extends SystemService {
             try {
                 final Context context = getContext();
 
-                final int primaryUser = getAndValidateUser(context);
-                if (primaryUser == UserHandle.USER_NULL) {
+                // Get the current admin user. Only they can do incident reports.
+                final int currentAdminUser = getCurrentUserIfAdmin();
+                if (currentAdminUser == UserHandle.USER_NULL) {
                     return;
                 }
 
                 final Intent intent = new Intent(Intent.ACTION_INCIDENT_REPORT_READY);
                 intent.setComponent(new ComponentName(pkg, cls));
 
-                Log.d(TAG, "sendReportReadyBroadcast sending primaryUser=" + primaryUser
-                        + " userHandle=" + UserHandle.getUserHandleForUid(primaryUser)
+                Log.d(TAG, "sendReportReadyBroadcast sending currentUser=" + currentAdminUser
+                        + " userHandle=" + UserHandle.of(currentAdminUser)
                         + " intent=" + intent);
 
-                // Send it to the primary user.  Only they can do incident reports.
                 context.sendBroadcastAsUserMultiplePermissions(intent,
-                        UserHandle.getUserHandleForUid(primaryUser),
+                        UserHandle.of(currentAdminUser),
                         DUMP_AND_USAGE_STATS_PERMISSIONS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -414,10 +413,10 @@ public class IncidentCompanionService extends SystemService {
     }
 
     /**
-     * Check whether the current user is the primary user, and return the user id if they are.
+     * Check whether the current user is an admin user, and return the user id if they are.
      * Returns UserHandle.USER_NULL if not valid.
      */
-    public static int getAndValidateUser(Context context) {
+    public static int getCurrentUserIfAdmin() {
         // Current user
         UserInfo currentUser;
         try {
@@ -427,28 +426,21 @@ public class IncidentCompanionService extends SystemService {
             throw new RuntimeException(ex);
         }
 
-        // Primary user
-        final UserManager um = UserManager.get(context);
-        final UserInfo primaryUser = um.getPrimaryUser();
-
         // Check that we're using the right user.
         if (currentUser == null) {
             Log.w(TAG, "No current user.  Nobody to approve the report."
                     + " The report will be denied.");
             return UserHandle.USER_NULL;
         }
-        if (primaryUser == null) {
-            Log.w(TAG, "No primary user.  Nobody to approve the report."
-                    + " The report will be denied.");
-            return UserHandle.USER_NULL;
-        }
-        if (primaryUser.id != currentUser.id) {
-            Log.w(TAG, "Only the primary user can approve bugreports, but they are not"
-                    + " the current user. The report will be denied.");
+
+        if (!currentUser.isAdmin()) {
+            Log.w(TAG, "Only an admin user running in foreground can approve "
+                    + "bugreports, but the current foreground user is not an admin user. "
+                    + "The report will be denied.");
             return UserHandle.USER_NULL;
         }
 
-        return primaryUser.id;
+        return currentUser.id;
     }
 }
 

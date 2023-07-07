@@ -14,43 +14,61 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/data_transfer_confirmation"
-              style="@style/ContainerLayout">
-
-    <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
-
-    <LinearLayout style="@style/Description">
-        <TextView
-            android:id="@+id/title"
-            style="@style/DescriptionTitle" />
-
-        <TextView
-            android:id="@+id/summary"
-            style="@style/DescriptionSummary" />
-
-    </LinearLayout>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/ScrollViewStyle">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp">
+        android:id="@+id/data_transfer_confirmation"
+        style="@style/ContainerLayout">
 
-        <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+        <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 
-        <Button
-            android:id="@+id/btn_positive"
-            style="@style/PositiveButton"
-            android:text="@string/consent_yes" />
+        <ImageView
+            android:id="@+id/header_icon"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:layout_marginTop="18dp"
+            android:src="@drawable/ic_warning"
+            android:contentDescription="@null" />
 
-        <Button
-            android:id="@+id/btn_negative"
-            android:layout_marginBottom="12dp"
-            style="@style/NegativeButton"
-            android:text="@string/consent_no" />
+        <LinearLayout style="@style/Description">
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/DescriptionTitle" />
+
+            <TextView
+                android:id="@+id/summary"
+                style="@style/DescriptionSummary" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="18dp">
+
+            <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+
+            <Button
+                android:id="@+id/btn_positive"
+                style="@style/PositiveButton"
+                android:text="@string/consent_yes" />
+
+            <Button
+                android:id="@+id/btn_negative"
+                style="@style/NegativeButton"
+                android:text="@string/consent_no" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

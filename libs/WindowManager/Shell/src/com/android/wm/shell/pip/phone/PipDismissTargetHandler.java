@@ -235,21 +235,14 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
     public void createOrUpdateDismissTarget() {
-        if (!mTargetViewContainer.isAttachedToWindow()) {
+        if (mTargetViewContainer.getParent() == null) {
             mTargetViewContainer.cancelAnimators();
 
             mTargetViewContainer.setVisibility(View.INVISIBLE);
             mTargetViewContainer.getViewTreeObserver().removeOnPreDrawListener(this);
             mHasDismissTargetSurface = false;
 
-            try {
-                mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
-            } catch (IllegalStateException e) {
-                // This shouldn't happen, but if the target is already added, just update its layout
-                // params.
-                mWindowManager.updateViewLayout(
-                        mTargetViewContainer, getDismissTargetLayoutParams());
-            }
+            mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
         } else {
             mWindowManager.updateViewLayout(mTargetViewContainer, getDismissTargetLayoutParams());
         }
@@ -288,8 +281,10 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
         if (mTargetViewContainer.getVisibility() != View.VISIBLE) {
             mTargetViewContainer.getViewTreeObserver().addOnPreDrawListener(this);
-            mTargetViewContainer.show();
         }
+        // always invoke show, since the target might still be VISIBLE while playing hide animation,
+        // so we want to ensure it will show back again
+        mTargetViewContainer.show();
     }
 
     /** Animates the magnetic dismiss target out and then sets it to GONE. */
@@ -304,7 +299,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
      * Removes the dismiss target and cancels any pending callbacks to show it.
      */
     public void cleanUpDismissTarget() {
-        if (mTargetViewContainer.isAttachedToWindow()) {
+        if (mTargetViewContainer.getParent() != null) {
             mWindowManager.removeViewImmediate(mTargetViewContainer);
         }
     }

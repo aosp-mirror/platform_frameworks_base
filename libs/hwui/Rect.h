@@ -71,9 +71,14 @@ public:
             , right(rect.fRight)
             , bottom(rect.fBottom) {}
 
-    friend int operator==(const Rect& a, const Rect& b) { return !memcmp(&a, &b, sizeof(a)); }
+    friend int operator==(const Rect& a, const Rect& b) {
+        return a.left == b.left &&
+               a.top == b.top &&
+               a.right == b.right &&
+               a.bottom == b.bottom;
+    }
 
-    friend int operator!=(const Rect& a, const Rect& b) { return memcmp(&a, &b, sizeof(a)); }
+    friend int operator!=(const Rect& a, const Rect& b) { return !(a == b); }
 
     inline void clear() { left = top = right = bottom = 0.0f; }
 

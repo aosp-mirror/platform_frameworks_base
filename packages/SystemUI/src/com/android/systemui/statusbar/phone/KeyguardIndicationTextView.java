@@ -30,15 +30,17 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.keyguard.KeyguardIndication;
 
 /**
  * A view to show hints on Keyguard ("Swipe up to unlock", "Tap again to open").
  */
 public class KeyguardIndicationTextView extends TextView {
+    public static final long Y_IN_DURATION = 600L;
+
     @StyleRes
     private static int sStyleId = R.style.TextAppearance_Keyguard_BottomArea;
     @StyleRes
@@ -49,6 +51,7 @@ public class KeyguardIndicationTextView extends TextView {
     private KeyguardIndication mKeyguardIndicationInfo;
 
     private Animator mLastAnimator;
+    private boolean mAlwaysAnnounceText;
 
     public KeyguardIndicationTextView(Context context) {
         super(context);
@@ -74,6 +77,7 @@ public class KeyguardIndicationTextView extends TextView {
         if (mLastAnimator != null) {
             mLastAnimator.cancel();
         }
+        mMessage = "";
         setText("");
     }
 
@@ -98,6 +102,19 @@ public class KeyguardIndicationTextView extends TextView {
      */
     public void switchIndication(CharSequence text, KeyguardIndication indication) {
         switchIndication(text, indication, true, null);
+    }
+
+    /**
+     * Controls whether the text displayed in the indication area will be announced always.
+     */
+    public void setAlwaysAnnounceEnabled(boolean enabled) {
+        this.mAlwaysAnnounceText = enabled;
+        if (mAlwaysAnnounceText) {
+            // We will announce the text programmatically anyway.
+            setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_NONE);
+        } else {
+            setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
+        }
     }
 
     /**
@@ -163,6 +180,13 @@ public class KeyguardIndicationTextView extends TextView {
         }
     }
 
+    /**
+     * Get the message that should be shown after the previous text animates out.
+     */
+    public CharSequence getMessage() {
+        return mMessage;
+    }
+
     private AnimatorSet getOutAnimator() {
         AnimatorSet animatorSet = new AnimatorSet();
         Animator fadeOut = ObjectAnimator.ofFloat(this, View.ALPHA, 0f);
@@ -217,6 +241,9 @@ public class KeyguardIndicationTextView extends TextView {
             setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
         }
         setText(mMessage);
+        if (mAlwaysAnnounceText) {
+            announceForAccessibility(mMessage);
+        }
     }
 
     private AnimatorSet getInAnimator() {
@@ -259,7 +286,7 @@ public class KeyguardIndicationTextView extends TextView {
 
     private long getYInDuration() {
         if (!mAnimationsEnabled) return 0L;
-        return 600L;
+        return Y_IN_DURATION;
     }
 
     private long getFadeOutDuration() {

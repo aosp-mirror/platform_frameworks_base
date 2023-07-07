@@ -18,10 +18,12 @@ package android.hardware.display;
 
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
+import android.hardware.OverlayProperties;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -82,6 +84,9 @@ interface IDisplayManager {
 
     // No permissions required.
     int[] getUserDisabledHdrTypes();
+
+    // Requires ACCESS_SURFACE_FLINGER permission.
+    void overrideHdrTypes(int displayId, in int[] modes);
 
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
@@ -170,6 +175,15 @@ interface IDisplayManager {
     Mode getUserPreferredDisplayMode(int displayId);
     Mode getSystemPreferredDisplayMode(int displayId);
 
+    // Sets the HDR conversion mode for a device.
+    // Requires MODIFY_HDR_CONVERSION_MODE permission.
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+                + ".permission.MODIFY_HDR_CONVERSION_MODE)")
+    void setHdrConversionMode(in HdrConversionMode hdrConversionMode);
+    HdrConversionMode getHdrConversionModeSetting();
+    HdrConversionMode getHdrConversionMode();
+    int[] getSupportedHdrOutputTypes();
+
     // When enabled the app requested display resolution and refresh rate is always selected
     // in DisplayModeDirector regardless of user settings and policies for low brightness, low
     // battery etc.
@@ -184,4 +198,12 @@ interface IDisplayManager {
 
     // Query for DISPLAY_DECORATION support.
     DisplayDecorationSupport getDisplayDecorationSupport(int displayId);
+
+    // This method is to support behavior that was calling hidden APIs. The caller was requesting
+    // to set the layerStack after the display was created, which is not something we support in
+    // DMS. This should be deleted in V release.
+    void setDisplayIdToMirror(in IBinder token, int displayId);
+
+    // Query overlay properties of the device
+    OverlayProperties getOverlaySupport();
 }

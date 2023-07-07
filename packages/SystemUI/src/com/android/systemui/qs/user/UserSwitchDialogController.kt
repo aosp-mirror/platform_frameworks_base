@@ -23,17 +23,20 @@ import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
-import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.user.ui.dialog.DialogShowerImpl
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -67,6 +70,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
     )
 
     companion object {
+        private const val INTERACTION_JANK_TAG = "switch_user"
         private val USER_SETTINGS_INTENT = Intent(Settings.ACTION_USER_SETTINGS)
     }
 
@@ -74,10 +78,10 @@ class UserSwitchDialogController @VisibleForTesting constructor(
      * Show a [UserDialog].
      *
      * Populate the dialog with information from and adapter obtained from
-     * [userDetailViewAdapterProvider] and show it as launched from [view].
+     * [userDetailViewAdapterProvider] and show it as launched from [expandable].
      */
-    fun showDialog(view: View) {
-        with(dialogFactory(view.context)) {
+    fun showDialog(context: Context, expandable: Expandable) {
+        with(dialogFactory(context)) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
 
@@ -89,14 +93,16 @@ class UserSwitchDialogController @VisibleForTesting constructor(
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                     uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
                     val controller = dialogLaunchAnimator.createActivityLaunchController(
-                        getButton(BUTTON_NEUTRAL))
+                        getButton(BUTTON_NEUTRAL)
+                    )
 
                     if (controller == null) {
                         dismiss()
                     }
 
                     activityStarter.postStartActivityDismissingKeyguard(
-                        USER_SETTINGS_INTENT, 0, controller)
+                        USER_SETTINGS_INTENT, 0, controller
+                    )
                 }
             }, false /* dismissOnClick */)
             val gridFrame = LayoutInflater.from(this.context)
@@ -107,25 +113,25 @@ class UserSwitchDialogController @VisibleForTesting constructor(
 
             adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
-            dialogLaunchAnimator.showFromView(this, view)
+            val controller =
+                expandable.dialogLaunchController(
+                    DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
+                )
+            if (controller != null) {
+                dialogLaunchAnimator.show(
+                    this,
+                    controller,
+                )
+            } else {
+                show()
+            }
+
             uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
             adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
         }
     }
 
-    private class DialogShowerImpl(
-        private val animateFrom: Dialog,
-        private val dialogLaunchAnimator: DialogLaunchAnimator
-    ) : DialogInterface by animateFrom, DialogShower {
-        override fun showDialog(dialog: Dialog) {
-            dialogLaunchAnimator.showFromDialog(
-                dialog,
-                animateFrom = animateFrom
-            )
-        }
-    }
-
     interface DialogShower : DialogInterface {
-        fun showDialog(dialog: Dialog)
+        fun showDialog(dialog: Dialog, cuj: DialogCuj)
     }
 }

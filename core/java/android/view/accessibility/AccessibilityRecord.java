@@ -72,6 +72,7 @@ public class AccessibilityRecord {
     private static final int PROPERTY_FULL_SCREEN = 0x00000080;
     private static final int PROPERTY_SCROLLABLE = 0x00000100;
     private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 0x00000200;
+    private static final int PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 0x00000400;
 
     private static final int GET_SOURCE_PREFETCH_FLAGS =
             AccessibilityNodeInfo.FLAG_PREFETCH_ANCESTORS
@@ -159,6 +160,8 @@ public class AccessibilityRecord {
             important = root.isImportantForAccessibility();
             rootViewId = root.getAccessibilityViewId();
             mSourceWindowId = root.getAccessibilityWindowId();
+            setBooleanProperty(PROPERTY_ACCESSIBILITY_DATA_SENSITIVE,
+                    root.isAccessibilityDataSensitive());
         }
         setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, important);
         mSourceNodeId = AccessibilityNodeInfo.makeNodeId(rootViewId, virtualDescendantId);
@@ -385,6 +388,23 @@ public class AccessibilityRecord {
     public void setImportantForAccessibility(boolean importantForAccessibility) {
         enforceNotSealed();
         setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, importantForAccessibility);
+    }
+
+    /**
+     * @see AccessibilityEvent#isAccessibilityDataSensitive
+     * @hide
+     */
+    boolean isAccessibilityDataSensitive() {
+        return getBooleanProperty(PROPERTY_ACCESSIBILITY_DATA_SENSITIVE);
+    }
+
+    /**
+     * @see AccessibilityEvent#setAccessibilityDataSensitive
+     * @hide
+     */
+    void setAccessibilityDataSensitive(boolean accessibilityDataSensitive) {
+        enforceNotSealed();
+        setBooleanProperty(PROPERTY_ACCESSIBILITY_DATA_SENSITIVE, accessibilityDataSensitive);
     }
 
     /**
@@ -941,6 +961,8 @@ public class AccessibilityRecord {
         appendUnless(false, PROPERTY_CHECKED, builder);
         appendUnless(false, PROPERTY_FULL_SCREEN, builder);
         appendUnless(false, PROPERTY_SCROLLABLE, builder);
+        appendUnless(false, PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, builder);
+        appendUnless(false, PROPERTY_ACCESSIBILITY_DATA_SENSITIVE, builder);
 
         append(builder, "BeforeText", mBeforeText);
         append(builder, "FromIndex", mFromIndex);
@@ -954,6 +976,7 @@ public class AccessibilityRecord {
         append(builder, "AddedCount", mAddedCount);
         append(builder, "RemovedCount", mRemovedCount);
         append(builder, "ParcelableData", mParcelableData);
+        append(builder, "DisplayId", mSourceDisplayId);
         builder.append(" ]");
         return builder;
     }
@@ -974,6 +997,8 @@ public class AccessibilityRecord {
             case PROPERTY_SCROLLABLE: return "Scrollable";
             case PROPERTY_IMPORTANT_FOR_ACCESSIBILITY:
                 return "ImportantForAccessibility";
+            case PROPERTY_ACCESSIBILITY_DATA_SENSITIVE:
+                return "AccessibilityDataSensitive";
             default: return Integer.toHexString(prop);
         }
     }

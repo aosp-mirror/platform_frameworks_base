@@ -20,17 +20,29 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioMixerAttributes;
 import android.media.AudioSystem;
+import android.media.IDevicesForAttributesCallback;
+import android.media.ISoundDose;
+import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
+import android.os.IBinder;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,9 +72,25 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     private String[] mMethodNames = {"getDevicesForAttributes"};
 
     private static final boolean USE_CACHE_FOR_GETDEVICES = true;
+    private static final Object sDeviceCacheLock = new Object();
+    private ConcurrentHashMap<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
+            mLastDevicesForAttr = new ConcurrentHashMap<>();
+    @GuardedBy("sDeviceCacheLock")
     private ConcurrentHashMap<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
             mDevicesForAttrCache;
+    @GuardedBy("sDeviceCacheLock")
+    private long mDevicesForAttributesCacheClearTimeMs = System.currentTimeMillis();
     private int[] mMethodCacheHit;
+    /**
+     * Map that stores all attributes + forVolume pairs that are registered for
+     * routing change callback. The key is the {@link IBinder} that corresponds
+     * to the remote callback.
+     */
+    private final ArrayMap<IBinder, List<Pair<AudioAttributes, Boolean>>> mRegisteredAttributesMap =
+            new ArrayMap<>();
+    private final RemoteCallbackList<IDevicesForAttributesCallback>
+            mDevicesForAttributesCallbacks = new RemoteCallbackList<>();
+
     private static final Object sRoutingListenerLock = new Object();
     @GuardedBy("sRoutingListenerLock")
     private static @Nullable OnRoutingUpdatedListener sRoutingListener;
@@ -93,6 +121,34 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         if (listener != null) {
             listener.onRoutingUpdatedFromNative();
         }
+
+        synchronized (mRegisteredAttributesMap) {
+            final int nbCallbacks = mDevicesForAttributesCallbacks.beginBroadcast();
+
+            for (int i = 0; i < nbCallbacks; i++) {
+                IDevicesForAttributesCallback cb =
+                        mDevicesForAttributesCallbacks.getBroadcastItem(i);
+                List<Pair<AudioAttributes, Boolean>> attrList =
+                        mRegisteredAttributesMap.get(cb.asBinder());
+
+                if (attrList == null) {
+                    throw new IllegalStateException("Attribute list must not be null");
+                }
+
+                for (Pair<AudioAttributes, Boolean> attr : attrList) {
+                    ArrayList<AudioDeviceAttributes> devices =
+                            getDevicesForAttributes(attr.first, attr.second);
+                    if (!mLastDevicesForAttr.containsKey(attr)
+                            || !sameDeviceList(devices, mLastDevicesForAttr.get(attr))) {
+                        try {
+                            cb.onDevicesForAttributesChanged(
+                                    attr.first, attr.second, devices);
+                        } catch (RemoteException e) { }
+                    }
+                }
+            }
+            mDevicesForAttributesCallbacks.finishBroadcast();
+        }
     }
 
     interface OnRoutingUpdatedListener {
@@ -103,6 +159,76 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         synchronized (sRoutingListenerLock) {
             sRoutingListener = listener;
         }
+    }
+
+    /**
+     * Empties the routing cache if enabled.
+     */
+    public void clearRoutingCache() {
+        if (DEBUG_CACHE) {
+            Log.d(TAG, "---- routing cache clear (from java) ----------");
+        }
+        invalidateRoutingCache();
+    }
+
+    /**
+     * @see AudioManager#addOnDevicesForAttributesChangedListener(
+     *      AudioAttributes, Executor, OnDevicesForAttributesChangedListener)
+     */
+    public void addOnDevicesForAttributesChangedListener(AudioAttributes attributes,
+            boolean forVolume, @NonNull IDevicesForAttributesCallback listener) {
+        List<Pair<AudioAttributes, Boolean>> res;
+        final Pair<AudioAttributes, Boolean> attr = new Pair(attributes, forVolume);
+        synchronized (mRegisteredAttributesMap) {
+            res = mRegisteredAttributesMap.get(listener.asBinder());
+            if (res == null) {
+                res = new ArrayList<>();
+                mRegisteredAttributesMap.put(listener.asBinder(), res);
+                mDevicesForAttributesCallbacks.register(listener);
+            }
+
+            if (!res.contains(attr)) {
+                res.add(attr);
+            }
+        }
+
+        // Make query on registration to populate cache
+        getDevicesForAttributes(attributes, forVolume);
+    }
+
+    /**
+     * @see AudioManager#removeOnDevicesForAttributesChangedListener(
+     *      OnDevicesForAttributesChangedListener)
+     */
+    public void removeOnDevicesForAttributesChangedListener(
+            @NonNull IDevicesForAttributesCallback listener) {
+        synchronized (mRegisteredAttributesMap) {
+            if (!mRegisteredAttributesMap.containsKey(listener.asBinder())) {
+                Log.w(TAG, "listener to be removed is not found.");
+                return;
+            }
+            mRegisteredAttributesMap.remove(listener.asBinder());
+            mDevicesForAttributesCallbacks.unregister(listener);
+        }
+    }
+
+    /**
+     * Helper function to compare lists of {@link AudioDeviceAttributes}
+     * @return true if the two lists contains the same devices, false otherwise.
+     */
+    private boolean sameDeviceList(@NonNull List<AudioDeviceAttributes> a,
+            @NonNull List<AudioDeviceAttributes> b) {
+        for (AudioDeviceAttributes device : a) {
+            if (!b.contains(device)) {
+                return false;
+            }
+        }
+        for (AudioDeviceAttributes device : b) {
+            if (!a.contains(device)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -140,9 +266,11 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
             AudioSystem.setRoutingCallback(sSingletonDefaultAdapter);
             AudioSystem.setVolumeRangeInitRequestCallback(sSingletonDefaultAdapter);
             if (USE_CACHE_FOR_GETDEVICES) {
-                sSingletonDefaultAdapter.mDevicesForAttrCache =
-                        new ConcurrentHashMap<>(AudioSystem.getNumStreamTypes());
-                sSingletonDefaultAdapter.mMethodCacheHit = new int[NB_MEASUREMENTS];
+                synchronized (sDeviceCacheLock) {
+                    sSingletonDefaultAdapter.mDevicesForAttrCache =
+                            new ConcurrentHashMap<>(AudioSystem.getNumStreamTypes());
+                    sSingletonDefaultAdapter.mMethodCacheHit = new int[NB_MEASUREMENTS];
+                }
             }
             if (ENABLE_GETDEVICES_STATS) {
                 sSingletonDefaultAdapter.mMethodCallCounter = new int[NB_MEASUREMENTS];
@@ -156,8 +284,12 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         if (DEBUG_CACHE) {
             Log.d(TAG, "---- clearing cache ----------");
         }
-        if (mDevicesForAttrCache != null) {
-            synchronized (mDevicesForAttrCache) {
+        synchronized (sDeviceCacheLock) {
+            if (mDevicesForAttrCache != null) {
+                mDevicesForAttributesCacheClearTimeMs = System.currentTimeMillis();
+                // Save latest cache to determine routing updates
+                mLastDevicesForAttr.putAll(mDevicesForAttrCache);
+
                 mDevicesForAttrCache.clear();
             }
         }
@@ -186,18 +318,10 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         if (USE_CACHE_FOR_GETDEVICES) {
             ArrayList<AudioDeviceAttributes> res;
             final Pair<AudioAttributes, Boolean> key = new Pair(attributes, forVolume);
-            synchronized (mDevicesForAttrCache) {
+            synchronized (sDeviceCacheLock) {
                 res = mDevicesForAttrCache.get(key);
                 if (res == null) {
-                    // result from AudioSystem guaranteed non-null, but could be invalid
-                    // if there is a failure to talk to APM
                     res = AudioSystem.getDevicesForAttributes(attributes, forVolume);
-                    if (res.size() > 1 && res.get(0) != null
-                            && res.get(0).getInternalType() == AudioSystem.DEVICE_NONE) {
-                        Log.e(TAG, "unable to get devices for " + attributes);
-                        // return now, do not put invalid value in cache
-                        return res;
-                    }
                     mDevicesForAttrCache.put(key, res);
                     if (DEBUG_CACHE) {
                         Log.d(TAG, mMethodNames[METHOD_GETDEVICESFORATTRIBUTES]
@@ -284,14 +408,27 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
-     * Same as {@link AudioSystem#removeDevicesRoleForStrategy(int, int)}
+     * Same as {@link AudioSystem#removeDevicesRoleForStrategy(int, int, List)}
+     * @param strategy
+     * @param role
+     * @param devices
+     * @return
+     */
+    public int removeDevicesRoleForStrategy(int strategy, int role,
+                                            @NonNull List<AudioDeviceAttributes> devices) {
+        invalidateRoutingCache();
+        return AudioSystem.removeDevicesRoleForStrategy(strategy, role, devices);
+    }
+
+    /**
+     * Same as {@link AudioSystem#clearDevicesRoleForStrategy(int, int)}
      * @param strategy
      * @param role
      * @return
      */
-    public int removeDevicesRoleForStrategy(int strategy, int role) {
+    public int clearDevicesRoleForStrategy(int strategy, int role) {
         invalidateRoutingCache();
-        return AudioSystem.removeDevicesRoleForStrategy(strategy, role);
+        return AudioSystem.clearDevicesRoleForStrategy(strategy, role);
     }
 
     /**
@@ -308,7 +445,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
-     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int, int[], String[])}
+     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int, List)}
      * @param capturePreset
      * @param role
      * @param devicesToRemove
@@ -318,6 +455,19 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
             int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devicesToRemove) {
         invalidateRoutingCache();
         return AudioSystem.removeDevicesRoleForCapturePreset(capturePreset, role, devicesToRemove);
+    }
+
+    /**
+     * Same as {@link AudioSystem#addDevicesRoleForCapturePreset(int, int, List)}
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param devices the list of devices to be added as role for the given capture preset
+     * @return {@link #SUCCESS} if successfully added
+     */
+    public int addDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        invalidateRoutingCache();
+        return AudioSystem.addDevicesRoleForCapturePreset(capturePreset, role, devices);
     }
 
     /**
@@ -337,6 +487,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      * @return
      */
     public int setParameters(String keyValuePairs) {
+        invalidateRoutingCache();
         return AudioSystem.setParameters(keyValuePairs);
     }
 
@@ -384,6 +535,17 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      */
     public boolean isStreamActiveRemotely(int stream, int inPastMs) {
         return AudioSystem.isStreamActiveRemotely(stream, inPastMs);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setStreamVolumeIndexAS(int, int, int)}
+     * @param stream
+     * @param index
+     * @param device
+     * @return
+     */
+    public int setStreamVolumeIndexAS(int stream, int index, int device) {
+        return AudioSystem.setStreamVolumeIndexAS(stream, index, device);
     }
 
     /**
@@ -484,28 +646,75 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
+     * Same as {@link AudioSystem#getSoundDoseInterface(ISoundDoseCallback)}
+     * @param callback
+     * @return
+     */
+    public ISoundDose getSoundDoseInterface(ISoundDoseCallback callback) {
+        return AudioSystem.getSoundDoseInterface(callback);
+    }
+
+    /**
+     * Same as
+     * {@link AudioSystem#setPreferredMixerAttributes(
+     *        AudioAttributes, int, int, AudioMixerAttributes)}
+     * @param attributes
+     * @param mixerAttributes
+     * @param uid
+     * @param portId
+     * @return
+     */
+    public int setPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes,
+            int portId,
+            int uid,
+            @NonNull AudioMixerAttributes mixerAttributes) {
+        return AudioSystem.setPreferredMixerAttributes(attributes, portId, uid, mixerAttributes);
+    }
+
+    /**
+     * Same as {@link AudioSystem#clearPreferredMixerAttributes(AudioAttributes, int, int)}
+     * @param attributes
+     * @param uid
+     * @param portId
+     * @return
+     */
+    public int clearPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes, int portId, int uid) {
+        return AudioSystem.clearPreferredMixerAttributes(attributes, portId, uid);
+    }
+
+    /**
      * Part of AudioService dump
      * @param pw
      */
     public void dump(PrintWriter pw) {
         pw.println("\nAudioSystemAdapter:");
-        pw.println(" mDevicesForAttrCache:");
-        if (mDevicesForAttrCache != null) {
-            for (Map.Entry<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
-                    entry : mDevicesForAttrCache.entrySet()) {
-                final AudioAttributes attributes = entry.getKey().first;
-                try {
-                    final int stream = attributes.getVolumeControlStream();
-                    pw.println("\t" + attributes + " forVolume: " + entry.getKey().second
-                            + " stream: "
-                            + AudioSystem.STREAM_NAMES[stream] + "(" + stream + ")");
-                    for (AudioDeviceAttributes devAttr : entry.getValue()) {
-                        pw.println("\t\t" + devAttr);
+        final DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("MM-dd HH:mm:ss:SSS")
+                .withLocale(Locale.US)
+                .withZone(ZoneId.systemDefault());
+        synchronized (sDeviceCacheLock) {
+            pw.println(" last cache clear time: " + formatter.format(
+                    Instant.ofEpochMilli(mDevicesForAttributesCacheClearTimeMs)));
+            pw.println(" mDevicesForAttrCache:");
+            if (mDevicesForAttrCache != null) {
+                for (Map.Entry<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
+                        entry : mDevicesForAttrCache.entrySet()) {
+                    final AudioAttributes attributes = entry.getKey().first;
+                    try {
+                        final int stream = attributes.getVolumeControlStream();
+                        pw.println("\t" + attributes + " forVolume: " + entry.getKey().second
+                                + " stream: "
+                                + AudioSystem.STREAM_NAMES[stream] + "(" + stream + ")");
+                        for (AudioDeviceAttributes devAttr : entry.getValue()) {
+                            pw.println("\t\t" + devAttr);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // dump could fail if attributes do not map to a stream.
+                        pw.println("\t dump failed for attributes: " + attributes);
+                        Log.e(TAG, "dump failed", e);
                     }
-                } catch (IllegalArgumentException e) {
-                    // dump could fail if attributes do not map to a stream.
-                    pw.println("\t dump failed for attributes: " + attributes);
-                    Log.e(TAG, "dump failed", e);
                 }
             }
         }

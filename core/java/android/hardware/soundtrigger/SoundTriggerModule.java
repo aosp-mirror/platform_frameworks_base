@@ -22,13 +22,13 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.SafeCloseable;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -61,36 +61,44 @@ public class SoundTriggerModule {
      * This variant is intended for use when the caller is acting an originator, rather than on
      * behalf of a different entity, as far as authorization goes.
      */
-    SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
+    public SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
             int moduleId, @NonNull SoundTrigger.StatusListener listener, @NonNull Looper looper,
-            @NonNull Identity originatorIdentity)
-            throws RemoteException {
+            @NonNull Identity originatorIdentity) {
         mId = moduleId;
         mEventHandlerDelegate = new EventHandlerDelegate(listener, looper);
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            mService = service.attachAsOriginator(moduleId, originatorIdentity,
-                    mEventHandlerDelegate);
+        try {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                mService = service.attachAsOriginator(moduleId, originatorIdentity,
+                        mEventHandlerDelegate);
+            }
+            mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
     }
 
     /**
      * This variant is intended for use when the caller is acting as a middleman, i.e. on behalf of
      * a different entity, as far as authorization goes.
      */
-    SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
+    public SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
             int moduleId, @NonNull SoundTrigger.StatusListener listener, @NonNull Looper looper,
-            @NonNull Identity middlemanIdentity, @NonNull Identity originatorIdentity)
-            throws RemoteException {
+            @NonNull Identity middlemanIdentity, @NonNull Identity originatorIdentity,
+            boolean isTrusted) {
         mId = moduleId;
         mEventHandlerDelegate = new EventHandlerDelegate(listener, looper);
 
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            mService = service.attachAsMiddleman(moduleId, middlemanIdentity, originatorIdentity,
-                    mEventHandlerDelegate);
+        try {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                mService = service.attachAsMiddleman(moduleId, middlemanIdentity,
+                        originatorIdentity,
+                        mEventHandlerDelegate,
+                        isTrusted);
+            }
+            mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
     }
 
     @Override
@@ -102,7 +110,9 @@ public class SoundTriggerModule {
      * Detach from this module. The {@link SoundTrigger.StatusListener} callback will not be called
      * anymore and associated resources will be released.
      * All models must have been unloaded prior to detaching.
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public synchronized void detach() {
         try {
@@ -131,7 +141,9 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public synchronized int loadSoundModel(@NonNull SoundTrigger.SoundModel model,
             @NonNull int[] soundModelHandle) {
@@ -191,8 +203,10 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_BAD_VALUE} if the sound model handle is invalid
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public synchronized int unloadSoundModel(int soundModelHandle) {
         try {
             mService.unloadModel(soundModelHandle);
@@ -219,8 +233,10 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public synchronized int startRecognition(int soundModelHandle,
             SoundTrigger.RecognitionConfig config) {
         try {
@@ -230,6 +246,16 @@ public class SoundTriggerModule {
         } catch (Exception e) {
             return SoundTrigger.handleException(e);
         }
+    }
+
+    /**
+     * Same as above, but return a binder token associated with the session.
+     * @hide
+     */
+    public synchronized IBinder startRecognitionWithToken(int soundModelHandle,
+            SoundTrigger.RecognitionConfig config) throws RemoteException {
+        return mService.startRecognition(soundModelHandle,
+                ConversionUtil.api2aidlRecognitionConfig(config));
     }
 
     /**
@@ -244,8 +270,10 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public synchronized int stopRecognition(int soundModelHandle) {
         try {
             mService.stopRecognition(soundModelHandle);
@@ -382,7 +410,7 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onRecognition(int handle, RecognitionEvent event,
+        public synchronized void onRecognition(int handle, RecognitionEventSys event,
                 int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
@@ -391,7 +419,7 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event,
+        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEventSys event,
                 int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,

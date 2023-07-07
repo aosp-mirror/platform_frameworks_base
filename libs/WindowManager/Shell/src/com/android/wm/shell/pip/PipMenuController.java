@@ -26,10 +26,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.RemoteAction;
+import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+
+import com.android.wm.shell.R;
 
 import java.util.List;
 
@@ -40,6 +43,13 @@ import java.util.List;
 public interface PipMenuController {
 
     String MENU_WINDOW_TITLE = "PipMenuView";
+
+    /**
+     * Used with
+     * {@link PipMenuController#movePipMenu(SurfaceControl, SurfaceControl.Transaction, Rect,
+     * float)} to indicate that we don't want to affect the alpha value of the menu surfaces.
+     */
+    float ALPHA_NO_CHANGE = -1f;
 
     /**
      * Called when
@@ -82,8 +92,8 @@ public interface PipMenuController {
      * need to synchronize the movements on the same frame as PiP.
      */
     default void movePipMenu(@Nullable SurfaceControl pipLeash,
-            @Nullable SurfaceControl.Transaction t,
-            Rect destinationBounds) {}
+            @Nullable SurfaceControl.Transaction t, Rect destinationBounds, float alpha) {
+    }
 
     /**
      * Update the PiP menu with the given bounds for re-layout purposes.
@@ -97,16 +107,20 @@ public interface PipMenuController {
 
     /**
      * Returns a default LayoutParams for the PIP Menu.
+     * @param context the context.
      * @param width the PIP stack width.
      * @param height the PIP stack height.
      */
-    default WindowManager.LayoutParams getPipMenuLayoutParams(String title, int width, int height) {
+    default WindowManager.LayoutParams getPipMenuLayoutParams(Context context, String title,
+            int width, int height) {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
                 TYPE_APPLICATION_OVERLAY,
                 FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY | FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= PRIVATE_FLAG_TRUSTED_OVERLAY;
         lp.setTitle(title);
+        lp.accessibilityTitle = context.getResources().getString(
+                R.string.pip_menu_accessibility_title);
         return lp;
     }
 }

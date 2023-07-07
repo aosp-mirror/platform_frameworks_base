@@ -117,6 +117,7 @@ interface INetworkManagementService
     /**
      * Shuts down the service
      */
+    @EnforcePermission("SHUTDOWN")
     void shutdown();
 
     /**
@@ -277,6 +278,7 @@ interface INetworkManagementService
      */
     void setUidOnMeteredNetworkDenylist(int uid, boolean enable);
     void setUidOnMeteredNetworkAllowlist(int uid, boolean enable);
+    @EnforcePermission("NETWORK_SETTINGS")
     boolean setDataSaverModeEnabled(boolean enable);
 
     void setUidCleartextNetworkPolicy(int uid, int policy);
@@ -308,5 +310,6 @@ interface INetworkManagementService
     void removeInterfaceFromLocalNetwork(String iface);
     int removeRoutesFromLocalNetwork(in List<RouteInfo> routes);
 
+    @EnforcePermission("OBSERVE_NETWORK_POLICY")
     boolean isNetworkRestricted(int uid);
 }

@@ -44,17 +44,22 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setAppInactive(String packageName, boolean inactive, int userId);
+    boolean isAppStandbyEnabled();
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isAppInactive(String packageName, int userId, String callingPackage);
     void onCarrierPrivilegedAppsChanged();
     void reportChooserSelection(String packageName, int userId, String contentType,
             in String[] annotations, String action);
     int getAppStandbyBucket(String packageName, String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_IDLE_STATE")
     void setAppStandbyBucket(String packageName, int bucket, int userId);
     ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_IDLE_STATE")
     void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
     int getAppMinStandbyBucket(String packageName, String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_LAUNCH_TIME_ESTIMATE")
     void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime, int userId);
+    @EnforcePermission("CHANGE_APP_LAUNCH_TIME_ESTIMATE")
     void setEstimatedLaunchTimes(in ParceledListSlice appLaunchTimes, int userId);
     void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
             in PendingIntent callback, String callingPackage);

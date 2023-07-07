@@ -17,8 +17,9 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

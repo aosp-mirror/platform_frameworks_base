@@ -28,6 +28,7 @@ import android.hardware.HardwareBuffer;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.view.Surface;
 import android.view.WindowInsetsController;
 
@@ -38,6 +39,9 @@ import android.view.WindowInsetsController;
 public class TaskSnapshot implements Parcelable {
     // Identifier of this snapshot
     private final long mId;
+    // The elapsed real time (in nanoseconds) when this snapshot was captured, not intended for use outside the
+    // process in which the snapshot was taken (ie. this is not parceled)
+    private final long mCaptureTime;
     // Top activity in task when snapshot was taken
     private final ComponentName mTopActivityComponent;
     private final HardwareBuffer mSnapshot;
@@ -65,7 +69,7 @@ public class TaskSnapshot implements Parcelable {
     // Must be one of the named color spaces, otherwise, always use SRGB color space.
     private final ColorSpace mColorSpace;
 
-    public TaskSnapshot(long id,
+    public TaskSnapshot(long id, long captureTime,
             @NonNull ComponentName topActivityComponent, HardwareBuffer snapshot,
             @NonNull ColorSpace colorSpace, int orientation, int rotation, Point taskSize,
             Rect contentInsets, Rect letterboxInsets, boolean isLowResolution,
@@ -73,6 +77,7 @@ public class TaskSnapshot implements Parcelable {
             @WindowInsetsController.Appearance int appearance, boolean isTranslucent,
             boolean hasImeSurface) {
         mId = id;
+        mCaptureTime = captureTime;
         mTopActivityComponent = topActivityComponent;
         mSnapshot = snapshot;
         mColorSpace = colorSpace.getId() < 0
@@ -92,6 +97,7 @@ public class TaskSnapshot implements Parcelable {
 
     private TaskSnapshot(Parcel source) {
         mId = source.readLong();
+        mCaptureTime = SystemClock.elapsedRealtimeNanos();
         mTopActivityComponent = ComponentName.readFromParcel(source);
         mSnapshot = source.readTypedObject(HardwareBuffer.CREATOR);
         int colorSpaceId = source.readInt();
@@ -116,6 +122,14 @@ public class TaskSnapshot implements Parcelable {
      */
     public long getId() {
         return mId;
+    }
+
+    /**
+     * @return The elapsed real time (in nanoseconds) when this snapshot was captured. This time is
+     * only valid in the process where this snapshot was taken.
+     */
+    public long getCaptureTime() {
+        return mCaptureTime;
     }
 
     /**
@@ -268,6 +282,7 @@ public class TaskSnapshot implements Parcelable {
         final int height = mSnapshot != null ? mSnapshot.getHeight() : 0;
         return "TaskSnapshot{"
                 + " mId=" + mId
+                + " mCaptureTime=" + mCaptureTime
                 + " mTopActivityComponent=" + mTopActivityComponent.flattenToShortString()
                 + " mSnapshot=" + mSnapshot + " (" + width + "x" + height + ")"
                 + " mColorSpace=" + mColorSpace.toString()
@@ -296,6 +311,7 @@ public class TaskSnapshot implements Parcelable {
     /** Builder for a {@link TaskSnapshot} object */
     public static final class Builder {
         private long mId;
+        private long mCaptureTime;
         private ComponentName mTopActivity;
         private HardwareBuffer mSnapshot;
         private ColorSpace mColorSpace;
@@ -314,6 +330,11 @@ public class TaskSnapshot implements Parcelable {
 
         public Builder setId(long id) {
             mId = id;
+            return this;
+        }
+
+        public Builder setCaptureTime(long captureTime) {
+            mCaptureTime = captureTime;
             return this;
         }
 
@@ -400,6 +421,7 @@ public class TaskSnapshot implements Parcelable {
         public TaskSnapshot build() {
             return new TaskSnapshot(
                     mId,
+                    mCaptureTime,
                     mTopActivity,
                     mSnapshot,
                     mColorSpace,

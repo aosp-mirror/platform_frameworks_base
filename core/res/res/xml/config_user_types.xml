@@ -83,6 +83,8 @@ Supported optional properties (to be used as shown in the example above) are as 
 For profile and full users:
     default-restrictions (with values defined in UserRestrictionUtils.USER_RESTRICTIONS)
     enabled
+    user-properties
+    max-allowed
 For profile users only:
     max-allowed-per-parent
     icon-badge
