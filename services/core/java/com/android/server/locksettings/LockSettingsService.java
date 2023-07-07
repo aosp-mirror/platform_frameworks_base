@@ -311,8 +311,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             super.onBootPhase(phase);
             if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mLockSettingsService.migrateOldDataAfterSystemReady();
-                mLockSettingsService.loadEscrowData();
                 mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
+            } else if (phase == PHASE_BOOT_COMPLETED) {
+                mLockSettingsService.loadEscrowData();
             }
         }
 
