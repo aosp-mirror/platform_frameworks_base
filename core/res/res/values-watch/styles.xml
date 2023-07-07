@@ -58,4 +58,22 @@
         <item name="drawableTint">@android:color/white</item>
         <item name="drawableTintMode">src_atop</item>
     </style>
+
+    <!-- @hide -->
+    <style name="InputMethodSwitchHardKeyboardText">
+        <item name="paddingStart">?attr/listPreferredItemPaddingStart</item>
+        <item name="paddingEnd">16dp</item>
+        <item name="paddingTop">16dp</item>
+        <item name="paddingBottom">5dp</item>
+        <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="InputMethodSwitchHardKeyboardSwitch">
+        <item name="layout_marginEnd">?attr/listPreferredItemPaddingEnd</item>
+    </style>
+
+    <style name="InputMethodSwitchDialogStyle" parent="AlertDialog.DeviceDefault">
+        <item name="android:listLayout">@layout/input_method_switcher_list_layout</item>
+    </style>
 </resources>
