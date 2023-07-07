@@ -40,11 +40,11 @@ public final class Checksum implements Parcelable {
     /**
      * Root SHA256 hash of a 4K Merkle tree computed over all file bytes.
      * <a href="https://source.android.com/security/apksigning/v4">See APK Signature Scheme V4</a>.
-     * <a href="https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/tree/Documentation/filesystems/fsverity.rst">See fs-verity</a>.
+     * <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">See fs-verity</a>.
      *
      * Recommended for all new applications.
      * Can be used by kernel to enforce authenticity and integrity of the APK.
-     * <a href="https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/tree/Documentation/filesystems/fsverity.rst#">See fs-verity for details</a>
+     * <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">See fs-verity for details</a>
      *
      * @see PackageManager#requestChecksums
      */
