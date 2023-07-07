@@ -54,7 +54,6 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import kotlin.reflect.KClass
 
 /**
  * Wraps the widgets that make up the UI representation of a {@link Control}. Updates to the view
@@ -68,7 +67,8 @@ class ControlViewHolder(
     val bgExecutor: DelayableExecutor,
     val controlActionCoordinator: ControlActionCoordinator,
     val controlsMetricsLogger: ControlsMetricsLogger,
-    val uid: Int
+    val uid: Int,
+    val currentUserId: Int
 ) {
 
     companion object {
@@ -85,27 +85,6 @@ class ControlViewHolder(
         private val ATTR_DISABLED = intArrayOf(-android.R.attr.state_enabled)
         const val MIN_LEVEL = 0
         const val MAX_LEVEL = 10000
-
-        fun findBehaviorClass(
-            status: Int,
-            template: ControlTemplate,
-            deviceType: Int
-        ): KClass<out Behavior> {
-            return when {
-                status != Control.STATUS_OK -> StatusBehavior::class
-                template == ControlTemplate.NO_TEMPLATE -> TouchBehavior::class
-                template is ThumbnailTemplate -> ThumbnailBehavior::class
-
-                // Required for legacy support, or where cameras do not use the new template
-                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
-                template is ToggleTemplate -> ToggleBehavior::class
-                template is StatelessTemplate -> TouchBehavior::class
-                template is ToggleRangeTemplate -> ToggleRangeBehavior::class
-                template is RangeTemplate -> ToggleRangeBehavior::class
-                template is TemperatureControlTemplate -> TemperatureControlBehavior::class
-                else -> DefaultBehavior::class
-            }
-        }
     }
 
     private val toggleBackgroundIntensity: Float = layout.context.resources
@@ -146,6 +125,26 @@ class ControlViewHolder(
         status.setSelected(true)
     }
 
+    fun findBehavior(
+        status: Int,
+        template: ControlTemplate,
+        deviceType: Int
+    ): () -> Behavior {
+        return when {
+            status != Control.STATUS_OK -> { { StatusBehavior() } }
+            template == ControlTemplate.NO_TEMPLATE -> { { TouchBehavior() } }
+            template is ThumbnailTemplate -> { { ThumbnailBehavior(currentUserId) } }
+            // Required for legacy support, or where cameras do not use the new template
+            deviceType == DeviceTypes.TYPE_CAMERA -> { { TouchBehavior() } }
+            template is ToggleTemplate -> { { ToggleBehavior() } }
+            template is StatelessTemplate -> { { TouchBehavior() } }
+            template is ToggleRangeTemplate -> { { ToggleRangeBehavior() } }
+            template is RangeTemplate -> { { ToggleRangeBehavior() } }
+            template is TemperatureControlTemplate -> { { TemperatureControlBehavior() } }
+            else -> { { DefaultBehavior() } }
+        }
+    }
+
     fun bindData(cws: ControlWithState, isLocked: Boolean) {
         // If an interaction is in progress, the update may visually interfere with the action the
         // action the user wants to make. Don't apply the update, and instead assume a new update
@@ -179,7 +178,7 @@ class ControlViewHolder(
         val wasLoading = isLoading
         isLoading = false
         behavior = bindBehavior(behavior,
-            findBehaviorClass(controlStatus, controlTemplate, deviceType))
+            findBehavior(controlStatus, controlTemplate, deviceType))
         updateContentDescription()
 
         // Only log one event per control, at the moment we have determined that the control
@@ -251,13 +250,14 @@ class ControlViewHolder(
 
     fun bindBehavior(
         existingBehavior: Behavior?,
-        clazz: KClass<out Behavior>,
+        createBehaviour: () -> Behavior,
         offset: Int = 0
     ): Behavior {
-        val behavior = if (existingBehavior == null || existingBehavior!!::class != clazz) {
+        val newBehavior = createBehaviour()
+        val behavior = if (existingBehavior == null ||
+                existingBehavior::class != newBehavior::class) {
             // Behavior changes can signal a change in template from the app or
             // first time setup
-            val newBehavior = clazz.java.newInstance()
             newBehavior.initialize(this)
 
             // let behaviors define their own, if necessary, and clear any existing ones
