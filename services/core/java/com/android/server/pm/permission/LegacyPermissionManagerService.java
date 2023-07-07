@@ -46,7 +46,7 @@ import com.android.server.pm.UserManagerService;
  * Legacy permission manager service.
  */
 public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stub {
-    private static final String TAG = "PackageManager";
+    private static final String TAG = "PermissionManager";
 
     /** Injector that can be used to facilitate testing. */
     private final Injector mInjector;
@@ -413,8 +413,8 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
                 return result;
             }
             mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(
-                    AppOpsManager.OP_RECORD_AUDIO_HOTWORD, uid, packageName, attributionTag,
-                    reason);
+                    AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, uid, packageName,
+                    attributionTag, reason);
             return result;
         }
     }

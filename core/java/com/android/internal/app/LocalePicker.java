@@ -100,6 +100,9 @@ public class LocalePicker extends ListFragment {
     }
 
     public static String[] getSupportedLocales(Context context) {
+        if (context == null) {
+            return new String[0];
+        }
         String[] allLocales = context.getResources().getStringArray(R.array.supported_locales);
 
         Predicate<String> localeFilter = getLocaleFilter();
@@ -311,8 +314,7 @@ public class LocalePicker extends ListFragment {
 
         try {
             final IActivityManager am = ActivityManager.getService();
-            final Configuration config = am.getConfiguration();
-
+            final Configuration config = new Configuration();
             config.setLocales(locales);
             config.userSetLocale = true;
 

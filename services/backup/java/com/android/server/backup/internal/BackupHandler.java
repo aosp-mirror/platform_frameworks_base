@@ -20,7 +20,8 @@ import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreSet;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -203,6 +204,14 @@ public class BackupHandler extends Handler {
                     }
                 }
 
+                // Ask the transport for a monitor that will be used to relay log events back to it.
+                IBackupManagerMonitor monitor = null;
+                try {
+                    monitor = transport.getBackupManagerMonitor();
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Failed to retrieve monitor from transport");
+                }
+
                 // At this point, we have started a new journal file, and the old
                 // file identity is being passed to the backup processing task.
                 // When it completes successfully, that old journal file will be
@@ -225,13 +234,13 @@ public class BackupHandler extends Handler {
                                 queue,
                                 oldJournal,
                                 /* observer */ null,
-                                /* monitor */ null,
+                                monitor,
                                 listener,
                                 Collections.emptyList(),
                                 /* userInitiated */ false,
                                 /* nonIncremental */ false,
                                 backupManagerService.getEligibilityRulesForOperation(
-                                        OperationType.BACKUP));
+                                        BackupDestination.CLOUD));
                     } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.
@@ -366,7 +375,7 @@ public class BackupHandler extends Handler {
 
             case MSG_RUN_GET_RESTORE_SETS: {
                 // Like other async operations, this is entered with the wakelock held
-                RestoreSet[] sets = null;
+                List<RestoreSet> sets = null;
                 RestoreGetSetsParams params = (RestoreGetSetsParams) msg.obj;
                 String callerLogString = "BH/MSG_RUN_GET_RESTORE_SETS";
                 try {
@@ -385,7 +394,12 @@ public class BackupHandler extends Handler {
                 } finally {
                     if (params.observer != null) {
                         try {
-                            params.observer.restoreSetsAvailable(sets);
+                            if (sets == null) {
+                                params.observer.restoreSetsAvailable(null);
+                            } else {
+                                params.observer.restoreSetsAvailable(
+                                        sets.toArray(new RestoreSet[0]));
+                            }
                         } catch (RemoteException re) {
                             Slog.e(TAG, "Unable to report listing to observer");
                         } catch (Exception e) {

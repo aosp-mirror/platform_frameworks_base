@@ -56,7 +56,8 @@ class AppOpsPrivacyItemMonitor @Inject constructor(
         val OPS_MIC_CAMERA = intArrayOf(AppOpsManager.OP_CAMERA,
                 AppOpsManager.OP_PHONE_CALL_CAMERA, AppOpsManager.OP_RECORD_AUDIO,
                 AppOpsManager.OP_PHONE_CALL_MICROPHONE,
-                AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO)
+                AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+                AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO)
         val OPS_LOCATION = intArrayOf(
                 AppOpsManager.OP_COARSE_LOCATION,
                 AppOpsManager.OP_FINE_LOCATION)
@@ -210,6 +211,7 @@ class AppOpsPrivacyItemMonitor @Inject constructor(
             AppOpsManager.OP_FINE_LOCATION -> PrivacyType.TYPE_LOCATION
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }

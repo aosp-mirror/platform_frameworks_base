@@ -15,15 +15,22 @@
  */
 
 @file:JvmName("FlickerExtensions")
+
 package com.android.server.wm.flicker.helpers
 
-import com.android.server.wm.flicker.Flicker
-import com.android.server.wm.flicker.rules.ChangeDisplayOrientationRule
+import android.tools.common.Rotation
+import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 
 /**
  * Changes the device [rotation] and wait for the rotation animation to complete
  *
  * @param rotation New device rotation
  */
-fun Flicker.setRotation(rotation: Int) =
-    ChangeDisplayOrientationRule.setRotation(rotation, instrumentation, wmHelper)
+fun IFlickerTestData.setRotation(rotation: Rotation) =
+    ChangeDisplayOrientationRule.setRotation(
+        rotation,
+        instrumentation,
+        clearCacheAfterParsing = false,
+        wmHelper = wmHelper
+    )

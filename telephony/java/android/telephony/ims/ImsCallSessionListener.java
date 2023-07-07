@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -25,12 +26,16 @@ import android.telephony.CallQuality;
 import android.telephony.ServiceState;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
+import android.telephony.ims.stub.ImsCallSessionImplBase.MediaStreamDirection;
+import android.telephony.ims.stub.ImsCallSessionImplBase.MediaStreamType;
+import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Listener interface for notifying the Framework's {@link ImsCallSession} for updates to an ongoing
@@ -44,8 +49,9 @@ import java.util.Set;
 // ImsCallSessionListenerConverter is also changed.
 @SystemApi
 public class ImsCallSessionListener {
-
+    private static final String TAG = "ImsCallSessionListener";
     private final IImsCallSessionListener mListener;
+    private Executor mExecutor = null;
 
     /** @hide */
     public ImsCallSessionListener(IImsCallSessionListener l) {
@@ -243,6 +249,9 @@ public class ImsCallSessionListener {
     public void callSessionMergeStarted(ImsCallSessionImplBase newSession, ImsCallProfile profile)
     {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionMergeStarted(newSession != null ?
                             newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
@@ -274,6 +283,9 @@ public class ImsCallSessionListener {
      */
     public void callSessionMergeComplete(ImsCallSessionImplBase newSession) {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionMergeComplete(newSession != null ?
                     newSession.getServiceImpl() : null);
         } catch (RemoteException e) {
@@ -361,6 +373,9 @@ public class ImsCallSessionListener {
     public void callSessionConferenceExtended(ImsCallSessionImplBase newSession,
             ImsCallProfile profile) {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionConferenceExtended(
                     newSession != null ? newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
@@ -406,6 +421,9 @@ public class ImsCallSessionListener {
     public void callSessionConferenceExtendReceived(ImsCallSessionImplBase newSession,
             ImsCallProfile profile) {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionConferenceExtendReceived(newSession != null
                     ? newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
@@ -806,6 +824,44 @@ public class ImsCallSessionListener {
             mListener.callSessionTransferFailed(reasonInfo);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Access Network Bitrate Recommendation Query (ANBRQ), see 3GPP TS 26.114.
+     * This API triggers radio to send ANBRQ message to the access network to query the
+     * desired bitrate.
+     *
+     * @param mediaType {@link ImsCallSessionImplBase.MediaStreamType} is used to identify
+     *        media stream such as audio or video.
+     * @param direction {@link ImsCallSessionImplBase.MediaStreamDirection} of this packet
+     *        stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE through
+     *        RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate
+     *        (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     * @hide
+     */
+    public final void callSessionSendAnbrQuery(@MediaStreamType int mediaType,
+                @MediaStreamDirection int direction, @IntRange(from = 0) int bitsPerSecond) {
+        Log.d(TAG, "callSessionSendAnbrQuery in imscallsessonListener");
+        try {
+            mListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set default Executor from ImsService.
+     * @param executor The default executor to use when executing the methods by the vendor
+     *                 implementation of {@link ImsCallSessionImplBase} for conference call.
+     *                 This executor is dedicated to set vendor CallSessionImpl
+     *                 only when conference call is established.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mExecutor == null) {
+            mExecutor = executor;
         }
     }
 }

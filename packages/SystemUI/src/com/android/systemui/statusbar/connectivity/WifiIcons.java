@@ -23,7 +23,7 @@ import com.android.settingslib.SignalIcon.IconGroup;
 /** */
 public class WifiIcons {
 
-    static final int[] WIFI_FULL_ICONS = {
+    public static final int[] WIFI_FULL_ICONS = {
             com.android.internal.R.drawable.ic_wifi_signal_0,
             com.android.internal.R.drawable.ic_wifi_signal_1,
             com.android.internal.R.drawable.ic_wifi_signal_2,
@@ -31,7 +31,7 @@ public class WifiIcons {
             com.android.internal.R.drawable.ic_wifi_signal_4
     };
 
-    private static final int[] WIFI_NO_INTERNET_ICONS = {
+    public static final int[] WIFI_NO_INTERNET_ICONS = {
             R.drawable.ic_no_internet_wifi_signal_0,
             R.drawable.ic_no_internet_wifi_signal_1,
             R.drawable.ic_no_internet_wifi_signal_2,
@@ -48,7 +48,7 @@ public class WifiIcons {
 
     public static final int QS_WIFI_DISABLED = com.android.internal.R.drawable.ic_wifi_signal_0;
     public static final int QS_WIFI_NO_NETWORK = com.android.internal.R.drawable.ic_wifi_signal_0;
-    static final int WIFI_NO_NETWORK = QS_WIFI_NO_NETWORK;
+    public static final int WIFI_NO_NETWORK = QS_WIFI_NO_NETWORK;
 
     static final int WIFI_LEVEL_COUNT = WIFI_SIGNAL_STRENGTH[0].length;
 

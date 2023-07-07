@@ -22,8 +22,35 @@ import android.annotation.Nullable;
  * Exception thrown if MediaCrypto object could not be instantiated or
  * if unable to perform an operation on the MediaCrypto object.
  */
-public final class MediaCryptoException extends Exception {
+public final class MediaCryptoException extends Exception implements MediaDrmThrowable {
     public MediaCryptoException(@Nullable String detailMessage) {
-        super(detailMessage);
+        this(detailMessage, 0, 0, 0);
     }
+
+    /**
+     * @hide
+     */
+    public MediaCryptoException(String message, int vendorError, int oemError, int errorContext) {
+        super(message);
+        mVendorError = vendorError;
+        mOemError = oemError;
+        mErrorContext = errorContext;
+    }
+
+    @Override
+    public int getVendorError() {
+        return mVendorError;
+    }
+
+    @Override
+    public int getOemError() {
+        return mOemError;
+    }
+
+    @Override
+    public int getErrorContext() {
+        return mErrorContext;
+    }
+
+    private final int mVendorError, mOemError, mErrorContext;
 }

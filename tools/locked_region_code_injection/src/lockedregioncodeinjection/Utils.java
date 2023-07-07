@@ -20,7 +20,7 @@ import java.util.List;
 
 public class Utils {
 
-    public static final int ASM_VERSION = Opcodes.ASM7;
+    public static final int ASM_VERSION = Opcodes.ASM9;
 
     /**
      * Reads a comma separated configuration similar to the Jack definition.
@@ -43,5 +43,28 @@ public class Utils {
         }
 
         return config;
+    }
+
+    /**
+     * Returns a single {@link LockTarget} from a string.  The target is a comma-separated list of
+     * the target class, the request method, the release method, and a boolean which is true if this
+     * is a scoped target and false if this is a legacy target.  The boolean is optional and
+     * defaults to true.
+     */
+    public static LockTarget getScopedTarget(String arg) {
+        String[] c = arg.split(",");
+        if (c.length == 3) {
+          return new LockTarget(c[0], c[1], c[2], true);
+        } else if (c.length == 4) {
+            if (c[3].equals("true")) {
+                return new LockTarget(c[0], c[1], c[2], true);
+            } else if (c[3].equals("false")) {
+                return new LockTarget(c[0], c[1], c[2], false);
+            } else {
+                System.err.println("illegal target parameter \"" + c[3] + "\"");
+            }
+        }
+        // Fall through
+        throw new RuntimeException("invalid scoped target format");
     }
 }

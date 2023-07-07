@@ -24,18 +24,19 @@ import android.util.SparseArray;
 
 import com.android.server.pm.InstallSource;
 import com.android.server.pm.PackageKeySetData;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.permission.LegacyPermissionState;
 
 import java.util.UUID;
 
 /**
  * Exposes internal types for internal usage of {@link PackageState}.
+ * @hide
  */
 public interface PackageStateInternal extends PackageState {
 
     @NonNull
-    AndroidPackage getPkg();
+    AndroidPackageInternal getPkg();
 
     // TODO: Remove in favor of exposing APIs directly?
     @NonNull
@@ -80,6 +81,34 @@ public interface PackageStateInternal extends PackageState {
 
     float getLoadingProgress();
 
+    long getLoadingCompletedTime();
+
     @NonNull
     PackageKeySetData getKeySetData();
+
+    /**
+     * Return the exact value stored inside this object for the primary CPU ABI type. This does
+     * not fallback to the inner {@link #getAndroidPackage()}, unlike {@link #getPrimaryCpuAbi()}.
+     *
+     * @deprecated Use {@link #getPrimaryCpuAbi()} if at all possible.
+     *
+     * TODO(b/249779400): Remove and see if the fallback-only API is a usable replacement
+     */
+    @Deprecated
+    @Nullable
+    String getPrimaryCpuAbiLegacy();
+
+    /**
+     * Same behavior as {@link #getPrimaryCpuAbiLegacy()}, but with the secondary ABI.
+     *
+     * @deprecated Use {@link #getSecondaryCpuAbi()} if at all possible.
+     */
+    @Nullable
+    String getSecondaryCpuAbiLegacy();
+
+    /**
+     * @return the app metadata file path.
+     */
+    @Nullable
+    String getAppMetadataFilePath();
 }

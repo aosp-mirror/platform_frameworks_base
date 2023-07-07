@@ -32,16 +32,20 @@ import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionMode;
 import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
+import android.system.ErrnoException;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.UUID;
 
 /** @hide */
-class ConversionUtil {
+public class ConversionUtil {
     public static SoundTrigger.ModuleProperties aidl2apiModuleDescriptor(
             SoundTriggerModuleDescriptor aidlDesc) {
         Properties properties = aidlDesc.properties;
@@ -140,6 +144,14 @@ class ConversionUtil {
         return aidlPhrase;
     }
 
+    public static SoundTrigger.Keyphrase aidl2apiPhrase(Phrase aidlPhrase) {
+        return new SoundTrigger.Keyphrase(aidlPhrase.id,
+                aidl2apiRecognitionModes(aidlPhrase.recognitionModes),
+                new Locale.Builder().setLanguageTag(aidlPhrase.locale).build(),
+                aidlPhrase.text,
+                Arrays.copyOf(aidlPhrase.users, aidlPhrase.users.length));
+    }
+
     public static RecognitionConfig api2aidlRecognitionConfig(
             SoundTrigger.RecognitionConfig apiConfig) {
         RecognitionConfig aidlConfig = new RecognitionConfig();
@@ -154,6 +166,21 @@ class ConversionUtil {
         aidlConfig.data = Arrays.copyOf(apiConfig.data, apiConfig.data.length);
         aidlConfig.audioCapabilities = api2aidlAudioCapabilities(apiConfig.audioCapabilities);
         return aidlConfig;
+    }
+
+    public static SoundTrigger.RecognitionConfig aidl2apiRecognitionConfig(
+            RecognitionConfig aidlConfig) {
+        var keyphrases =
+            new SoundTrigger.KeyphraseRecognitionExtra[aidlConfig.phraseRecognitionExtras.length];
+        int i = 0;
+        for (var extras : aidlConfig.phraseRecognitionExtras) {
+            keyphrases[i++] = aidl2apiPhraseRecognitionExtra(extras);
+        }
+        return new SoundTrigger.RecognitionConfig(aidlConfig.captureRequested,
+                false /** allowMultipleTriggers **/,
+                keyphrases,
+                Arrays.copyOf(aidlConfig.data, aidlConfig.data.length),
+                aidl2apiAudioCapabilities(aidlConfig.audioCapabilities));
     }
 
     public static PhraseRecognitionExtra api2aidlPhraseRecognitionExtra(
@@ -194,37 +221,42 @@ class ConversionUtil {
         return new SoundTrigger.ConfidenceLevel(apiLevel.userId, apiLevel.levelPercent);
     }
 
-    public static SoundTrigger.RecognitionEvent aidl2apiRecognitionEvent(
-            int modelHandle, int captureSession, RecognitionEvent aidlEvent) {
+    public static SoundTrigger.RecognitionEvent aidl2apiRecognitionEvent(int modelHandle,
+            int captureSession, RecognitionEventSys aidlEvent) {
+        RecognitionEvent recognitionEvent = aidlEvent.recognitionEvent;
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
-        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(
-                aidlEvent.audioConfig, true /*isInput*/);
-        return new SoundTrigger.GenericRecognitionEvent(
-                aidlEvent.status,
-                modelHandle, aidlEvent.captureAvailable, captureSession,
-                aidlEvent.captureDelayMs, aidlEvent.capturePreambleMs, aidlEvent.triggerInData,
-                audioFormat, aidlEvent.data, aidlEvent.recognitionStillActive);
+        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(recognitionEvent.audioConfig,
+                true /*isInput*/);
+        return new SoundTrigger.GenericRecognitionEvent(recognitionEvent.status, modelHandle,
+                recognitionEvent.captureAvailable, captureSession, recognitionEvent.captureDelayMs,
+                recognitionEvent.capturePreambleMs, recognitionEvent.triggerInData, audioFormat,
+                recognitionEvent.data,
+                recognitionEvent.recognitionStillActive, aidlEvent.halEventReceivedMillis,
+                aidlEvent.token);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(
-            int modelHandle, int captureSession,
-            PhraseRecognitionEvent aidlEvent) {
+            int modelHandle, int captureSession, PhraseRecognitionEventSys aidlEvent) {
+        PhraseRecognitionEvent recognitionEvent = aidlEvent.phraseRecognitionEvent;
         SoundTrigger.KeyphraseRecognitionExtra[] apiExtras =
-                new SoundTrigger.KeyphraseRecognitionExtra[aidlEvent.phraseExtras.length];
-        for (int i = 0; i < aidlEvent.phraseExtras.length; ++i) {
-            apiExtras[i] = aidl2apiPhraseRecognitionExtra(aidlEvent.phraseExtras[i]);
+                new SoundTrigger.KeyphraseRecognitionExtra[recognitionEvent.phraseExtras.length];
+        for (int i = 0; i < recognitionEvent.phraseExtras.length; ++i) {
+            apiExtras[i] = aidl2apiPhraseRecognitionExtra(recognitionEvent.phraseExtras[i]);
         }
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
         AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(
-                aidlEvent.common.audioConfig, true /*isInput*/);
-        return new SoundTrigger.KeyphraseRecognitionEvent(aidlEvent.common.status, modelHandle,
-                aidlEvent.common.captureAvailable,
-                captureSession, aidlEvent.common.captureDelayMs,
-                aidlEvent.common.capturePreambleMs, aidlEvent.common.triggerInData,
-                audioFormat, aidlEvent.common.data,
-                apiExtras);
+                recognitionEvent.common.audioConfig,
+                true /*isInput*/);
+        return new SoundTrigger.KeyphraseRecognitionEvent(recognitionEvent.common.status,
+                modelHandle,
+                recognitionEvent.common.captureAvailable, captureSession,
+                recognitionEvent.common.captureDelayMs,
+                recognitionEvent.common.capturePreambleMs, recognitionEvent.common.triggerInData,
+                audioFormat,
+                recognitionEvent.common.data, apiExtras, aidlEvent.halEventReceivedMillis,
+                aidlEvent.token);
     }
 
     // In case of a null input returns a non-null valid output.
@@ -233,7 +265,11 @@ class ConversionUtil {
         if (audioConfig != null) {
             return AidlConversion.aidl2api_AudioConfig_AudioFormat(audioConfig, isInput);
         }
-        return new AudioFormat.Builder().build();
+        return new AudioFormat.Builder()
+            .setSampleRate(48000)
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+            .build();
     }
 
     public static int api2aidlModelParameter(int apiParam) {
@@ -277,7 +313,7 @@ class ConversionUtil {
         return result;
     }
 
-    private static @Nullable ParcelFileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
+    public static @Nullable ParcelFileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
         if (data.length == 0) {
             return null;
         }
@@ -291,6 +327,21 @@ class ConversionUtil {
             shmem.close();
             return fd;
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static byte[] sharedMemoryToByteArray(@Nullable ParcelFileDescriptor pfd, int size) {
+        if (pfd == null || size == 0) {
+            return new byte[0];
+        }
+        try (SharedMemory mem = SharedMemory.fromFileDescriptor(pfd)) {
+            ByteBuffer buffer = mem.mapReadOnly();
+            byte[] data = new byte[(size > mem.getSize()) ? mem.getSize() : size];
+            buffer.get(data);
+            mem.unmap(buffer);
+            return data;
+        } catch (ErrnoException e) {
             throw new RuntimeException(e);
         }
     }

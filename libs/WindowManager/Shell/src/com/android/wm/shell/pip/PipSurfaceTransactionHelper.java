@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -38,6 +39,10 @@ public class PipSurfaceTransactionHelper {
 
     private int mCornerRadius;
     private int mShadowRadius;
+
+    public PipSurfaceTransactionHelper(Context context) {
+        onDensityOrFontScaleChanged(context);
+    }
 
     /**
      * Called when display size or font size of settings changed
@@ -104,25 +109,28 @@ public class PipSurfaceTransactionHelper {
     public PipSurfaceTransactionHelper scaleAndCrop(SurfaceControl.Transaction tx,
             SurfaceControl leash, Rect sourceRectHint,
             Rect sourceBounds, Rect destinationBounds, Rect insets,
-            boolean isInPipDirection) {
+            boolean isInPipDirection, float fraction) {
         mTmpDestinationRect.set(sourceBounds);
         // Similar to {@link #scale}, we want to position the surface relative to the screen
         // coordinates so offset the bounds to 0,0
         mTmpDestinationRect.offsetTo(0, 0);
         mTmpDestinationRect.inset(insets);
-        // Scale by the shortest edge and offset such that the top/left of the scaled inset source
-        // rect aligns with the top/left of the destination bounds
+        // Scale to the bounds no smaller than the destination and offset such that the top/left
+        // of the scaled inset source rect aligns with the top/left of the destination bounds
         final float scale;
         if (isInPipDirection
                 && sourceRectHint != null && sourceRectHint.width() < sourceBounds.width()) {
             // scale by sourceRectHint if it's not edge-to-edge, for entering PiP transition only.
-            scale = sourceBounds.width() <= sourceBounds.height()
+            final float endScale = sourceBounds.width() <= sourceBounds.height()
                     ? (float) destinationBounds.width() / sourceRectHint.width()
                     : (float) destinationBounds.height() / sourceRectHint.height();
-        } else {
-            scale = sourceBounds.width() <= sourceBounds.height()
+            final float startScale = sourceBounds.width() <= sourceBounds.height()
                     ? (float) destinationBounds.width() / sourceBounds.width()
                     : (float) destinationBounds.height() / sourceBounds.height();
+            scale = (1 - fraction) * startScale + fraction * endScale;
+        } else {
+            scale = Math.max((float) destinationBounds.width() / sourceBounds.width(),
+                    (float) destinationBounds.height() / sourceBounds.height());
         }
         final float left = destinationBounds.left - insets.left * scale;
         final float top = destinationBounds.top - insets.top * scale;
@@ -225,5 +233,19 @@ public class PipSurfaceTransactionHelper {
 
     public interface SurfaceControlTransactionFactory {
         SurfaceControl.Transaction getTransaction();
+    }
+
+    /**
+     * Implementation of {@link SurfaceControlTransactionFactory} that returns
+     * {@link SurfaceControl.Transaction} with VsyncId being set.
+     */
+    public static class VsyncSurfaceControlTransactionFactory
+            implements SurfaceControlTransactionFactory {
+        @Override
+        public SurfaceControl.Transaction getTransaction() {
+            final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+            return tx;
+        }
     }
 }

@@ -62,6 +62,8 @@ public class RuntimeInit {
     private static IBinder mApplicationObject;
 
     private static volatile boolean mCrashing = false;
+    private static final String SYSPROP_CRASH_COUNT = "sys.system_server.crash_java";
+    private static int mCrashCount;
 
     private static volatile ApplicationWtfHandler sDefaultApplicationWtfHandler;
 
@@ -105,6 +107,8 @@ public class RuntimeInit {
             // first clause in either of these two cases, only for system_server.
             if (mApplicationObject == null && (Process.SYSTEM_UID == Process.myUid())) {
                 Clog_e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
+                mCrashCount = SystemProperties.getInt(SYSPROP_CRASH_COUNT, 0) + 1;
+                SystemProperties.set(SYSPROP_CRASH_COUNT, String.valueOf(mCrashCount));
             } else {
                 logUncaught(t.getName(), ActivityThread.currentProcessName(), Process.myPid(), e);
             }

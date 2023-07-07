@@ -45,12 +45,10 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
             "mark-profile-owner-on-organization-owned-device";
 
     private static final String USER_OPTION = "--user";
-    private static final String NAME_OPTION = "--name";
     private static final String DO_ONLY_OPTION = "--device-owner-only";
 
     private final DevicePolicyManagerService mService;
     private int mUserId = UserHandle.USER_SYSTEM;
-    private String mName = "";
     private ComponentName mComponent;
     private boolean mSetDoOnly;
 
@@ -132,16 +130,16 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
                 CMD_SET_ACTIVE_ADMIN, USER_OPTION);
         pw.printf("    Sets the given component as active admin for an existing user.\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s <NAME> ] [ %s ]"
-                + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, NAME_OPTION, DO_ONLY_OPTION);
+        pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s ]"
+                + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, DO_ONLY_OPTION);
         pw.printf("    Sets the given component as active admin, and its package as device owner."
                 + "\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current ] [ %s <NAME> ] <COMPONENT>\n",
-                CMD_SET_PROFILE_OWNER, USER_OPTION, NAME_OPTION);
+        pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
+                CMD_SET_PROFILE_OWNER, USER_OPTION);
         pw.printf("    Sets the given component as active admin and profile owner for an existing "
                 + "user.\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current ] [ %s <NAME> ] <COMPONENT>\n",
-                CMD_REMOVE_ACTIVE_ADMIN, USER_OPTION, NAME_OPTION);
+        pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
+                CMD_REMOVE_ACTIVE_ADMIN, USER_OPTION);
         pw.printf("    Disables an active admin, the admin must have declared android:testOnly in "
                 + "the application in its manifest. This will also remove device and profile "
                 + "owners.\n\n");
@@ -244,7 +242,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
     }
 
     private int runSetActiveAdmin(PrintWriter pw) {
-        parseArgs(/* canHaveName= */ false);
+        parseArgs();
         mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
 
         pw.printf("Success: Active admin set to component %s\n", mComponent.flattenToShortString());
@@ -252,11 +250,11 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
     }
 
     private int runSetDeviceOwner(PrintWriter pw) {
-        parseArgs(/* canHaveName= */ true);
+        parseArgs();
         mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
 
         try {
-            if (!mService.setDeviceOwner(mComponent, mName, mUserId,
+            if (!mService.setDeviceOwner(mComponent, mUserId,
                     /* setProfileOwnerOnCurrentUserIfNecessary= */ !mSetDoOnly)) {
                 throw new RuntimeException(
                         "Can't set package " + mComponent + " as device owner.");
@@ -276,18 +274,18 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
     }
 
     private int runRemoveActiveAdmin(PrintWriter pw) {
-        parseArgs(/* canHaveName= */ false);
+        parseArgs();
         mService.forceRemoveActiveAdmin(mComponent, mUserId);
         pw.printf("Success: Admin removed %s\n", mComponent);
         return 0;
     }
 
     private int runSetProfileOwner(PrintWriter pw) {
-        parseArgs(/* canHaveName= */ true);
+        parseArgs();
         mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
 
         try {
-            if (!mService.setProfileOwner(mComponent, mName, mUserId)) {
+            if (!mService.setProfileOwner(mComponent, mUserId)) {
                 throw new RuntimeException("Can't set component "
                         + mComponent.flattenToShortString() + " as profile owner for user "
                         + mUserId);
@@ -339,13 +337,13 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
     }
 
     private int runMarkProfileOwnerOnOrganizationOwnedDevice(PrintWriter pw) {
-        parseArgs(/* canHaveName= */ false);
+        parseArgs();
         mService.setProfileOwnerOnOrganizationOwnedDevice(mComponent, mUserId, true);
         pw.printf("Success\n");
         return 0;
     }
 
-    private void parseArgs(boolean canHaveName) {
+    private void parseArgs() {
         String opt;
         while ((opt = getNextOption()) != null) {
             if (USER_OPTION.equals(opt)) {
@@ -356,8 +354,6 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
                 }
             } else if (DO_ONLY_OPTION.equals(opt)) {
                 mSetDoOnly = true;
-            } else if (canHaveName && NAME_OPTION.equals(opt)) {
-                mName = getNextArgRequired();
             } else {
                 throw new IllegalArgumentException("Unknown option: " + opt);
             }

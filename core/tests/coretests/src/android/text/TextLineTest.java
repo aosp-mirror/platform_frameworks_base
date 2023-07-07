@@ -26,12 +26,13 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.platform.test.annotations.Presubmit;
 import android.text.Layout.TabStops;
+import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -97,7 +98,18 @@ public class TextLineTest {
             InstrumentationRegistry.getInstrumentation().getTargetContext().getAssets(),
             "fonts/StaticLayoutLineBreakingTestFont.ttf");
 
-    private TextLine getTextLine(String str, TextPaint paint, TabStops tabStops) {
+    // The test font has following coverage and width.
+    // U+0020: 1em
+    // U+0049 (I): 1em
+    // U+0066 (f): 0.5em
+    // U+0069 (i): 0.5em
+    // ligature fi: 2em
+    // U+10331 (\uD800\uDF31): 10em
+    private static final Typeface TYPEFACE_LIGATURE = Typeface.createFromAsset(
+            InstrumentationRegistry.getInstrumentation().getTargetContext().getAssets(),
+            "fonts/ligature.ttf");
+
+    private TextLine getTextLine(CharSequence str, TextPaint paint, TabStops tabStops) {
         Layout layout =
                 StaticLayout.Builder.obtain(str, 0, str.length(), paint, Integer.MAX_VALUE)
                     .build();
@@ -109,7 +121,7 @@ public class TextLineTest {
         return tl;
     }
 
-    private TextLine getTextLine(String str, TextPaint paint) {
+    private TextLine getTextLine(CharSequence str, TextPaint paint) {
         return getTextLine(str, paint, null);
     }
 
@@ -264,6 +276,34 @@ public class TextLineTest {
         TextLine tl = getTextLine("I I", paint);
         assertMeasurements(tl, 3, false,
                 new float[]{0.0f, 10.0f, 120.0f, 130.0f});
+        assertMeasurements(tl, 3, true,
+                new float[]{0.0f, 10.0f, 120.0f, 130.0f});
+    }
+
+    @Test
+    public void testMeasure_surrogate() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("I\uD800\uDF31I", paint);
+        assertMeasurements(tl, 4, false,
+                new float[]{0.0f, 10.0f, 110.0f, 110.0f, 120.0f});
+        assertMeasurements(tl, 4, true,
+                new float[]{0.0f, 10.0f, 110.0f, 110.0f, 120.0f});
+    }
+
+    @Test
+    public void testMeasure_ligature() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE_LIGATURE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("IfiI", paint);
+        assertMeasurements(tl, 4, false,
+                new float[]{0.0f, 10.0f, 20.0f, 30.0f, 40.0f});
+        assertMeasurements(tl, 4, true,
+                new float[]{0.0f, 10.0f, 20.0f, 30.0f, 40.0f});
     }
 
     @Test
@@ -316,14 +356,275 @@ public class TextLineTest {
         assertTrue(span.mIsUsed);
     }
 
+    @Test
+    public void testMeasureAllBounds_LTR() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("IIIIIV", paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 20.0f, 20.0f, 30.0f, 30.0f, 40.0f,
+                40.0f, 50.0f, 50.0f, 100.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 50.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_LTR_StyledText() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+        SpannableString text = new SpannableString("IIIIIV");
+        text.setSpan(new AbsoluteSizeSpan(5), 1, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextLine tl = getTextLine(text, paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 15.0f, 15.0f, 20.0f, 20.0f, 30.0f,
+                30.0f, 40.0f, 40.0f, 90.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 5.0f, 5.0f, 10.0f, 10.0f, 50.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_RTL() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("\u05D0\u05D0\u05D0\u05D0\u05D0\u05D1", paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {-10.0f, 0.0f, -20.0f, -10.0f, -30.0f, -20.0f, -40.0f, -30.0f,
+                -50.0f, -40.0f, -100.0f, -50.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 50.0f}, advances, 0.0f);
+    }
+
+
+    @Test
+    public void testMeasureAllBounds_RTL_StyledText() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+        SpannableString text = new SpannableString("\u05D0\u05D0\u05D0\u05D0\u05D0\u05D1");
+        text.setSpan(new AbsoluteSizeSpan(5), 1, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextLine tl = getTextLine(text, paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {-10.0f, 0.0f, -15.0f, -10.0f, -20.0f, -15.0f,
+                -30.0f, -20.0f, -40.0f, -30.0f, -90.0f, -40.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 5.0f, 5.0f, 10.0f, 10.0f, 50.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_BiDi() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("II\u05D0\u05D0II", paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 20.0f, 30.0f, 40.0f, 20.0f, 30.0f,
+                40.0f, 50.0f, 50.0f, 60.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_BiDi2() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("I" + RLI + "I\u05D0\u05D0" + PDI + "I", paint);
+        float[] bounds = new float[14];
+        float[] advances = new float[7];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 10.0f, 30.0f, 40.0f, 20.0f, 30.0f,
+                10.0f, 20.0f, 40.0f, 40.0f, 40.0f, 50.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 0.0f, 10.0f, 10.0f, 10.0f, 0.0f, 10.0f}, advances,
+                0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_BiDi3() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("\u05D0" + LRI + "\u05D0II" + PDI + "\u05D0", paint);
+        float[] bounds = new float[14];
+        float[] advances = new float[7];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {-10.0f, 0.0f, -10.0f, -10.0f, -40.0f, -30.0f,
+                -30.0f, -20.0f, -20.0f, -10.0f, -40.0f, -40.0f, -50.0f, -40.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 0.0f, 10.0f, 10.0f, 10.0f, 0.0f, 10.0f}, advances,
+                0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_styled_BiDi() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        SpannableString text = new SpannableString("II\u05D0\u05D0II");
+        text.setSpan(new AbsoluteSizeSpan(5), 1, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextLine tl = getTextLine(text, paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 15.0f, 25.0f, 30.0f,
+                15.0f, 25.0f, 30.0f, 40.0f, 40.0f, 50.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 5.0f, 5.0f, 10.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_Tab_LTR() {
+        final Object[] spans = { new TabStopSpan.Standard(100) };
+        final TabStops stops = new TabStops(100, spans);
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("II\tII", paint, stops);
+        float[] bounds = new float[10];
+        float[] advances = new float[5];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 20.0f, 20.0f, 100.0f, 100.0f, 110.0f,
+                110.0f, 120.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 80.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_Tab_RTL() {
+        final Object[] spans = { new TabStopSpan.Standard(100) };
+        final TabStops stops = new TabStops(100, spans);
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("\u05D0\u05D0\t\u05D0\u05D0", paint, stops);
+        float[] bounds = new float[10];
+        float[] advances = new float[5];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {-10.0f, 0.0f, -20.0f, -10.0f, -100.0f, -20.0f,
+                -110.0f, -100.0f, -120.0f, -110.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 80.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_Tab_BiDi() {
+        final Object[] spans = { new TabStopSpan.Standard(100) };
+        final TabStops stops = new TabStops(100, spans);
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("I\u05D0\tI\u05D0", paint, stops);
+        float[] bounds = new float[10];
+        float[] advances = new float[5];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 20.0f, 20.0f, 100.0f,
+                100.0f, 110.0f, 110.0f, 120.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 80.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_Tab_BiDi2() {
+        final Object[] spans = { new TabStopSpan.Standard(100) };
+        final TabStops stops = new TabStops(100, spans);
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        TextLine tl = getTextLine("\u05D0I\t\u05D0I", paint, stops);
+        float[] bounds = new float[10];
+        float[] advances = new float[5];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {-10.0f, 0.0f, -20.0f, -10.0f, -100.0f, -20.0f,
+                -110.0f, -100.0f, -120.0f, -110.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 10.0f, 80.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_replacement_LTR() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        SpannableString text = new SpannableString("IIIII");
+        text.setSpan(new TestReplacementSpan(5), 1, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextLine tl = getTextLine(text, paint);
+        float[] bounds = new float[10];
+        float[] advances = new float[5];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 15.0f, 15.0f, 15.0f,
+                15.0f, 25.0f, 25.0f, 35.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 5.0f, 0.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_replacement_RTL() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        SpannableString text = new SpannableString("\u05D0\u05D0\u05D0\u05D0\u05D0");
+        text.setSpan(new TestReplacementSpan(5), 1, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextLine tl = getTextLine(text, paint);
+        float[] bounds = new float[10];
+        float[] advances = new float[5];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {-10.0f, 0.0f, -15.0f, -10.0f, -15.0f, -15.0f,
+                -25.0f, -15.0f, -35.0f, -25.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 5.0f, 0.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
+    @Test
+    public void testMeasureAllBounds_replacement_BiDi() {
+        final TextPaint paint = new TextPaint();
+        paint.setTypeface(TYPEFACE);
+        paint.setTextSize(10.0f);  // make 1em = 10px
+
+        SpannableString text = new SpannableString("II\u05D0\u05D0II");
+        text.setSpan(new TestReplacementSpan(5), 1, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextLine tl = getTextLine(text, paint);
+        float[] bounds = new float[12];
+        float[] advances = new float[6];
+        tl.measureAllBounds(bounds, advances);
+        assertArrayEquals(new float[] {0.0f, 10.0f, 10.0f, 15.0f, 15.0f, 15.0f,
+                15.0f, 25.0f, 25.0f, 35.0f, 35.0f, 45.0f}, bounds, 0.0f);
+        assertArrayEquals(new float[] {10.0f, 5.0f, 0.0f, 10.0f, 10.0f, 10.0f}, advances, 0.0f);
+    }
+
     private static class TestReplacementSpan extends ReplacementSpan {
         boolean mIsUsed;
+        private final int mWidth;
+
+        TestReplacementSpan() {
+            mWidth = 0;
+        }
+
+        TestReplacementSpan(int width) {
+            mWidth = width;
+        }
 
         @Override
         public int getSize(Paint paint, CharSequence text, int start, int end,
                 Paint.FontMetricsInt fm) {
             mIsUsed = true;
-            return 0;
+            return mWidth;
         }
 
         @Override

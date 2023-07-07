@@ -823,6 +823,11 @@ public abstract class Window {
     /** @hide */
     public final void destroy() {
         mDestroyed = true;
+        onDestroy();
+    }
+
+    /** @hide */
+    protected void onDestroy() {
     }
 
     /** @hide */
@@ -2771,13 +2776,6 @@ public abstract class Window {
      */
     @SuppressWarnings("HiddenAbstractMethod")
     public abstract void onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
-
-    /**
-     * Called when the activity just relaunched.
-     * @hide
-     */
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void reportActivityRelaunched();
 
     /**
      * @return The {@link WindowInsetsController} associated with this window

@@ -26,8 +26,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHierarchyManager;
-import com.android.systemui.media.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
@@ -39,25 +39,27 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /** Controller for {@link QuickQSPanel}. */
 @QSScope
 public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
 
-    private final boolean mUsingCollapsedLandscapeMedia;
+    private final Provider<Boolean> mUsingCollapsedLandscapeMediaProvider;
 
     @Inject
-    QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
+    QuickQSPanelController(QuickQSPanel view, QSHost qsHost,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
-            @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA) boolean usingCollapsedLandscapeMedia,
+            @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
+                    Provider<Boolean> usingCollapsedLandscapeMediaProvider,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
             DumpManager dumpManager
     ) {
-        super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
+        super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager);
-        mUsingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia;
+        mUsingCollapsedLandscapeMediaProvider = usingCollapsedLandscapeMediaProvider;
     }
 
     @Override
@@ -72,7 +74,8 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         int rotation = getRotation();
         boolean isLandscape = rotation == RotationUtils.ROTATION_LANDSCAPE
                 || rotation == RotationUtils.ROTATION_SEASCAPE;
-        if (!mUsingCollapsedLandscapeMedia || !isLandscape) {
+        boolean usingCollapsedLandscapeMedia = mUsingCollapsedLandscapeMediaProvider.get();
+        if (!usingCollapsedLandscapeMedia || !isLandscape) {
             mMediaHost.setExpansion(MediaHost.EXPANDED);
         } else {
             mMediaHost.setExpansion(MediaHost.COLLAPSED);
@@ -120,7 +123,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         super.setTiles(tiles, /* collapsedView */ true);
     }
 
-    /** */
     public void setContentMargins(int marginStart, int marginEnd) {
         mView.setContentMargins(marginStart, marginEnd, mMediaHost.getHostView());
     }

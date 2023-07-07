@@ -17,7 +17,7 @@
 package com.android.internal.telephony;
 
 import android.telephony.BarringInfo;
-import android.telephony.CallAttributes;
+import android.telephony.CallState;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
@@ -31,6 +31,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 
 /**
  * {@hide}
@@ -62,7 +63,7 @@ oneway interface IPhoneStateListener {
     void onPhoneCapabilityChanged(in PhoneCapability capability);
     void onActiveDataSubIdChanged(in int subId);
     void onRadioPowerStateChanged(in int state);
-    void onCallAttributesChanged(in CallAttributes callAttributes);
+    void onCallStatesChanged(in List<CallState> callStateList);
     @SuppressWarnings(value={"untyped-collection"})
     void onEmergencyNumberListChanged(in Map emergencyNumberList);
     void onOutgoingEmergencyCall(in EmergencyNumber placedEmergencyNumber, int subscriptionId);
@@ -76,4 +77,7 @@ oneway interface IPhoneStateListener {
     void onDataEnabledChanged(boolean enabled, int reason);
     void onAllowedNetworkTypesChanged(in int reason, in long allowedNetworkType);
     void onLinkCapacityEstimateChanged(in List<LinkCapacityEstimate> linkCapacityEstimateList);
+    void onMediaQualityStatusChanged(in MediaQualityStatus mediaQualityStatus);
+    void onCallBackModeStarted(int type);
+    void onCallBackModeStopped(int type, int reason);
 }

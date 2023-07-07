@@ -334,6 +334,17 @@ public final class InlineFillUi {
          * Callback on errors.
          */
         void onError();
+
+        /**
+         * Callback when the when the IME inflates the suggestion
+         *
+         * This goes through the following path:
+         * 1. IME Chip inflation inflate() ->
+         * 2. RemoteInlineSuggestionUi::handleInlineSuggestionUiReady() ->
+         * 3. RemoteInlineSuggestionViewConnector::onRender() ->
+         * 4. InlineSuggestionUiCallback::onInflate()
+         */
+        void onInflate();
     }
 
     /**

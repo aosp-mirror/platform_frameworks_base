@@ -302,7 +302,7 @@ public abstract class SmartspaceService extends Service {
                 Slog.e(TAG, "Callback is null, likely the binder has died.");
                 return false;
             }
-            return mCallback.equals(callback);
+            return mCallback.asBinder().equals(callback.asBinder());
         }
 
         @Override

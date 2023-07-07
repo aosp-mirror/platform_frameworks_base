@@ -29,7 +29,7 @@ namespace io {
 
 class StringInputStream : public KnownSizeInputStream {
  public:
-  explicit StringInputStream(const android::StringPiece& str);
+  explicit StringInputStream(android::StringPiece str);
 
   bool Next(const void** data, size_t* size) override;
 

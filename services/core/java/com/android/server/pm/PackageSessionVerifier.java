@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -46,7 +45,6 @@ import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.rollback.RollbackManagerInternal;
 
 import java.io.File;
@@ -101,10 +99,12 @@ final class PackageSessionVerifier {
                     for (PackageInstallerSession child : session.getChildSessions()) {
                         checkApexUpdateAllowed(child);
                         checkRebootlessApex(child);
+                        checkApexSignature(child);
                     }
                 } else {
                     checkApexUpdateAllowed(session);
                     checkRebootlessApex(session);
+                    checkApexSignature(session);
                 }
                 verifyAPK(session, callback);
             } catch (PackageManagerException e) {
@@ -113,6 +113,47 @@ final class PackageSessionVerifier {
                 callback.onResult(e.error, e.getMessage());
             }
         });
+    }
+
+    private SigningDetails getSigningDetails(PackageInfo apexPkg) throws PackageManagerException {
+        final String apexPath = apexPkg.applicationInfo.sourceDir;
+        final int minSignatureScheme =
+                ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                        apexPkg.applicationInfo.targetSdkVersion);
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<SigningDetails> result = ApkSignatureVerifier.verify(
+                input, apexPath, minSignatureScheme);
+        if (result.isError()) {
+            throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                    "Failed to verify APEX package " + apexPath + " : "
+                            + result.getException(), result.getException());
+        }
+        return result.getResult();
+    }
+
+    private void checkApexSignature(PackageInstallerSession session)
+            throws PackageManagerException {
+        if (!session.isApexSession()) {
+            return;
+        }
+        final String packageName = session.getPackageName();
+        final PackageInfo existingApexPkg = mPm.snapshotComputer().getPackageInfo(
+                session.getPackageName(), PackageManager.MATCH_APEX, UserHandle.USER_SYSTEM);
+        if (existingApexPkg == null) {
+            throw new PackageManagerException(PackageManager.INSTALL_FAILED_PACKAGE_CHANGED,
+                    "Attempting to install new APEX package " + packageName);
+        }
+        final SigningDetails existingSigningDetails = getSigningDetails(existingApexPkg);
+        final SigningDetails newSigningDetails = session.getSigningDetails();
+        if (newSigningDetails.checkCapability(existingSigningDetails,
+                SigningDetails.CertCapabilities.INSTALLED_DATA)
+                || existingSigningDetails.checkCapability(newSigningDetails,
+                SigningDetails.CertCapabilities.ROLLBACK)) {
+            return;
+        }
+        throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                "APK container signature of APEX package " + packageName
+                        + " is not compatible with the one currently installed on device");
     }
 
     /**
@@ -144,12 +185,12 @@ final class PackageSessionVerifier {
                 }
             }
         };
-        final VerificationParams verifyingSession = makeVerificationParams(session, observer);
+        final VerifyingSession verifyingSession = createVerifyingSession(session, observer);
         if (session.isMultiPackage()) {
             final List<PackageInstallerSession> childSessions = session.getChildSessions();
-            List<VerificationParams> verifyingChildSessions = new ArrayList<>(childSessions.size());
+            List<VerifyingSession> verifyingChildSessions = new ArrayList<>(childSessions.size());
             for (PackageInstallerSession child : childSessions) {
-                verifyingChildSessions.add(makeVerificationParams(child, null));
+                verifyingChildSessions.add(createVerifyingSession(child, null));
             }
             verifyingSession.verifyStage(verifyingChildSessions);
         } else {
@@ -157,7 +198,7 @@ final class PackageSessionVerifier {
         }
     }
 
-    private VerificationParams makeVerificationParams(
+    private VerifyingSession createVerifyingSession(
             PackageInstallerSession session, IPackageInstallObserver2 observer) {
         final UserHandle user;
         if ((session.params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
@@ -165,9 +206,9 @@ final class PackageSessionVerifier {
         } else {
             user = new UserHandle(session.userId);
         }
-        return new VerificationParams(user, session.stageDir, observer, session.params,
+        return new VerifyingSession(user, session.stageDir, observer, session.params,
                 session.getInstallSource(), session.getInstallerUid(), session.getSigningDetails(),
-                session.sessionId, session.getPackageLite(), mPm);
+                session.sessionId, session.getPackageLite(), session.getUserActionRequired(), mPm);
     }
 
     /**
@@ -283,13 +324,7 @@ final class PackageSessionVerifier {
         // APEX checks. For single-package sessions, check if they contain an APEX. For
         // multi-package sessions, find all the child sessions that contain an APEX.
         if (hasApex) {
-            final List<PackageInfo> apexPackages = submitSessionToApexService(session, rollbackId);
-            for (int i = 0, size = apexPackages.size(); i < size; i++) {
-                validateApexSignature(apexPackages.get(i));
-            }
-            final PackageManagerInternal packageManagerInternal =
-                    LocalServices.getService(PackageManagerInternal.class);
-            packageManagerInternal.pruneCachedApksInApex(apexPackages);
+            submitSessionToApexService(session, rollbackId);
         }
     }
 
@@ -333,62 +368,7 @@ final class PackageSessionVerifier {
         }
     }
 
-    /**
-     * Validates the signature used to sign the container of the new apex package
-     *
-     * @param newApexPkg The new apex package that is being installed
-     */
-    private void validateApexSignature(PackageInfo newApexPkg) throws PackageManagerException {
-        // Get signing details of the new package
-        final String apexPath = newApexPkg.applicationInfo.sourceDir;
-        final String packageName = newApexPkg.packageName;
-        int minSignatureScheme = ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
-                newApexPkg.applicationInfo.targetSdkVersion);
-
-        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-        final ParseResult<SigningDetails> newResult = ApkSignatureVerifier.verify(
-                input.reset(), apexPath, minSignatureScheme);
-        if (newResult.isError()) {
-            throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                    "Failed to parse APEX package " + apexPath + " : "
-                            + newResult.getException(), newResult.getException());
-        }
-        final SigningDetails newSigningDetails = newResult.getResult();
-
-        // Get signing details of the existing package
-        final PackageInfo existingApexPkg = mApexManager.getPackageInfo(packageName,
-                ApexManager.MATCH_ACTIVE_PACKAGE);
-        if (existingApexPkg == null) {
-            // This should never happen, because submitSessionToApexService ensures that no new
-            // apexes were installed.
-            throw new IllegalStateException("Unknown apex package " + packageName);
-        }
-
-        final ParseResult<SigningDetails> existingResult = ApkSignatureVerifier.verify(
-                input.reset(), existingApexPkg.applicationInfo.sourceDir,
-                SigningDetails.SignatureSchemeVersion.JAR);
-        if (existingResult.isError()) {
-            throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                    "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir
-                            + " : " + existingResult.getException(), existingResult.getException());
-        }
-        final SigningDetails existingSigningDetails = existingResult.getResult();
-
-        // Verify signing details for upgrade
-        if (newSigningDetails.checkCapability(existingSigningDetails,
-                SigningDetails.CertCapabilities.INSTALLED_DATA)
-                || existingSigningDetails.checkCapability(newSigningDetails,
-                SigningDetails.CertCapabilities.ROLLBACK)) {
-            return;
-        }
-
-        throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                "APK-container signature of APEX package " + packageName + " with version "
-                        + newApexPkg.versionCodeMajor + " and path " + apexPath + " is not"
-                        + " compatible with the one currently installed on device");
-    }
-
-    private List<PackageInfo> submitSessionToApexService(StagingManager.StagedSession session,
+    private void submitSessionToApexService(StagingManager.StagedSession session,
             int rollbackId) throws PackageManagerException {
         final IntArray childSessionIds = new IntArray();
         if (session.isMultiPackage()) {
@@ -413,32 +393,21 @@ final class PackageSessionVerifier {
         // submitStagedSession will throw a PackageManagerException if apexd verification fails,
         // which will be propagated to populate stagedSessionErrorMessage of this session.
         final ApexInfoList apexInfoList = mApexManager.submitStagedSession(apexSessionParams);
-        final List<PackageInfo> result = new ArrayList<>();
         final List<String> apexPackageNames = new ArrayList<>();
         for (ApexInfo apexInfo : apexInfoList.apexInfos) {
-            final PackageInfo packageInfo;
-            final int flags = PackageManager.GET_META_DATA;
+            final ParsedPackage parsedPackage;
             try (PackageParser2 packageParser = mPackageParserSupplier.get()) {
                 File apexFile = new File(apexInfo.modulePath);
-                final ParsedPackage parsedPackage = packageParser.parsePackage(
-                        apexFile, flags, false);
-                packageInfo = PackageInfoWithoutStateUtils.generate(parsedPackage, apexInfo, flags);
-                if (packageInfo == null) {
-                    throw new PackageManagerException(
-                            PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                            "Unable to generate package info: " + apexInfo.modulePath);
-                }
+                parsedPackage = packageParser.parsePackage(apexFile, 0, false);
             } catch (PackageManagerException e) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                         "Failed to parse APEX package " + apexInfo.modulePath + " : " + e, e);
             }
-            result.add(packageInfo);
-            apexPackageNames.add(packageInfo.packageName);
+            apexPackageNames.add(parsedPackage.getPackageName());
         }
         Slog.d(TAG, "Session " + session.sessionId() + " has following APEX packages: "
                 + apexPackageNames);
-        return result;
     }
 
     private int retrieveRollbackIdForCommitSession(int sessionId) throws PackageManagerException {
@@ -514,7 +483,7 @@ final class PackageSessionVerifier {
             return;
         }
         final String packageName = session.getPackageName();
-        final String installerPackageName = session.getInstallSource().installerPackageName;
+        final String installerPackageName = session.getInstallSource().mInstallerPackageName;
         if (!isApexUpdateAllowed(packageName, installerPackageName)) {
             throw new PackageManagerException(
                     PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,

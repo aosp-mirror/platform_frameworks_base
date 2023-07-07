@@ -35,9 +35,13 @@ import android.widget.LinearLayout;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
+import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.Objects;
@@ -57,7 +61,7 @@ public class PhoneStatusBarView extends FrameLayout {
     private Rect mDisplaySize;
     private int mStatusBarHeight;
     @Nullable
-    private TouchEventHandler mTouchEventHandler;
+    private Gefingerpoken mTouchEventHandler;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -69,8 +73,13 @@ public class PhoneStatusBarView extends FrameLayout {
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
-    void setTouchEventHandler(TouchEventHandler handler) {
+    void setTouchEventHandler(Gefingerpoken handler) {
         mTouchEventHandler = handler;
+    }
+
+    void init(StatusBarUserChipViewModel viewModel) {
+        StatusBarUserSwitcherContainer container = findViewById(R.id.user_switcher_container);
+        StatusBarUserChipViewBinder.bind(container, viewModel);
     }
 
     @Override
@@ -177,7 +186,7 @@ public class PhoneStatusBarView extends FrameLayout {
             );
             return true;
         }
-        return mTouchEventHandler.handleTouchEvent(event);
+        return mTouchEventHandler.onTouchEvent(event);
     }
 
     @Override
@@ -258,29 +267,5 @@ public class PhoneStatusBarView extends FrameLayout {
                 getPaddingTop(),
                 insets.second,
                 getPaddingBottom());
-    }
-
-    /**
-     * A handler responsible for all touch event handling on the status bar.
-     *
-     * Touches that occur on the status bar view may have ramifications for the notification
-     * panel (e.g. a touch that pulls down the shade could start on the status bar), so this
-     * interface provides a way to notify the panel controller when these touches occur.
-     *
-     * The handler will be notified each time {@link PhoneStatusBarView#onTouchEvent} and
-     * {@link PhoneStatusBarView#onInterceptTouchEvent} are called.
-     **/
-    public interface TouchEventHandler {
-        /** Called each time {@link PhoneStatusBarView#onInterceptTouchEvent} is called. */
-        void onInterceptTouchEvent(MotionEvent event);
-
-        /**
-         * Called each time {@link PhoneStatusBarView#onTouchEvent} is called.
-         *
-         * Should return true if the touch was handled by this handler and false otherwise. The
-         * return value from the handler will be returned from
-         * {@link PhoneStatusBarView#onTouchEvent}.
-         */
-        boolean handleTouchEvent(MotionEvent event);
     }
 }

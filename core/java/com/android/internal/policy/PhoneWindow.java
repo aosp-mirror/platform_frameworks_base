@@ -295,6 +295,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
+    private int mAudioMode = AudioManager.MODE_NORMAL;
     private MediaController mMediaController;
 
     private AudioManager mAudioManager;
@@ -316,6 +317,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mInvalidatePanelMenuFeatures = 0;
         }
     };
+
+    private AudioManager.OnModeChangedListener mOnModeChangedListener;
 
     private Transition mEnterTransition = null;
     private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
@@ -357,8 +360,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mLayoutInflater = LayoutInflater.from(context);
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
-        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(
-                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
+        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
     }
 
     /**
@@ -379,8 +381,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // window, as we'll be skipping the addView in handleResumeActivity(), and
             // the token will not be updated as for a new window.
             getAttributes().token = preservedWindow.getAttributes().token;
-            mProxyOnBackInvokedDispatcher.setActualDispatcher(
-                    preservedWindow.getOnBackInvokedDispatcher());
+            final ViewRootImpl viewRoot = mDecor.getViewRootImpl();
+            if (viewRoot != null) {
+                // Clear the old callbacks and attach to the new window.
+                viewRoot.getOnBackInvokedDispatcher().clear();
+                onViewRootImplSet(viewRoot);
+            }
         }
         // Even though the device doesn't support picture-in-picture mode,
         // an user can force using it through developer options.
@@ -786,13 +792,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    @Override
-    public void reportActivityRelaunched() {
-        if (mDecor != null && mDecor.getViewRootImpl() != null) {
-            mDecor.getViewRootImpl().reportActivityRelaunched();
-        }
-    }
-
     private static void clearMenuViews(PanelFeatureState st) {
         // This can be called on config changes, so we should make sure
         // the views will be reconstructed based on the new orientation, etc.
@@ -913,6 +912,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (lp != null && lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
                 width = MATCH_PARENT;
             }
+        }
+
+        if (!st.hasPanelItems()) {
+            // Ensure that |st.decorView| has its actual content. Otherwise, an empty window can be
+            // created and cause ANR.
+            return;
         }
 
         st.isHandled = false;
@@ -1940,9 +1945,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                // If we have a session send it the volume command, otherwise
-                // use the suggested stream.
-                if (mMediaController != null) {
+                // If we have a session and no active phone call send it the volume command,
+                // otherwise use the suggested stream.
+                if (mMediaController != null && !isActivePhoneCallOngoing()) {
                     getMediaSessionManager().dispatchVolumeKeyEventToSessionAsSystemService(event,
                             mMediaController.getSessionToken());
                 } else {
@@ -1991,6 +1996,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         return false;
+    }
+
+    private boolean isActivePhoneCallOngoing() {
+        return mAudioMode == AudioManager.MODE_IN_CALL
+                || mAudioMode == AudioManager.MODE_IN_COMMUNICATION;
     }
 
     private KeyguardManager getKeyguardManager() {
@@ -2154,6 +2164,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        viewRoot.getOnBackInvokedDispatcher().updateContext(getContext());
         mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }
@@ -2313,6 +2324,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     openPanel(st, null);
                 }
             }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mOnModeChangedListener != null) {
+            getAudioManager().removeOnModeChangedListener(mOnModeChangedListener);
+            mOnModeChangedListener = null;
         }
     }
 
@@ -2492,12 +2511,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
 
         if (!mForcedStatusBarColor) {
-            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
+            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, Color.BLACK);
         }
         if (!mForcedNavigationBarColor) {
-            mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+            final int navBarCompatibleColor = context.getColor(R.color.navigation_bar_compatible);
+            final int navBarDefaultColor = context.getColor(R.color.navigation_bar_default);
+            final int navBarColor = a.getColor(R.styleable.Window_navigationBarColor,
+                    navBarDefaultColor);
+
+            mNavigationBarColor =
+                    navBarColor == navBarDefaultColor
+                            && !context.getResources().getBoolean(
+                                    R.bool.config_navBarDefaultTransparent)
+                    ? navBarCompatibleColor
+                    : navBarColor;
+
             mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
-                    0x00000000);
+                    Color.TRANSPARENT);
         }
         if (!targetPreQ) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
@@ -2520,6 +2550,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mDecor.mForceWindowDrawsBarBackgrounds) {
                 params.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
             }
+            params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        }
+        if (a.getBoolean(
+                R.styleable.Window_windowNoMoveAnimation,
+                false)) {
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
         final int sysUiVis = decor.getSystemUiVisibility();
@@ -3198,6 +3233,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void setMediaController(MediaController controller) {
         mMediaController = controller;
+        if (controller != null && mOnModeChangedListener == null) {
+            mAudioMode = getAudioManager().getMode();
+            mOnModeChangedListener = mode -> mAudioMode = mode;
+            getAudioManager().addOnModeChangedListener(getContext().getMainExecutor(),
+                    mOnModeChangedListener);
+        } else if (mOnModeChangedListener != null) {
+            getAudioManager().removeOnModeChangedListener(mOnModeChangedListener);
+            mOnModeChangedListener = null;
+        }
     }
 
     @Override

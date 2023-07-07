@@ -81,8 +81,14 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             @OnBackInvokedDispatcher.Priority int priority,
             @NonNull OnBackInvokedCallback callback) {
         final Bundle bundle = new Bundle();
+        // Always invoke back for ime without checking the window focus.
+        // We use strong reference in the binder wrapper to avoid accidentally GC the callback.
+        // This is necessary because the callback is sent to and registered from
+        // the app process, which may treat the IME callback as weakly referenced. This will not
+        // cause a memory leak because the app side already clears the reference correctly.
         final IOnBackInvokedCallback iCallback =
-                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(callback);
+                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(
+                        callback, false /* useWeakRef */);
         bundle.putBinder(RESULT_KEY_CALLBACK, iCallback.asBinder());
         bundle.putInt(RESULT_KEY_PRIORITY, priority);
         bundle.putInt(RESULT_KEY_ID, callback.hashCode());
@@ -122,7 +128,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
     private void receive(
             int resultCode, Bundle resultData,
-            @NonNull OnBackInvokedDispatcher receivingDispatcher) {
+            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
         final int callbackId = resultData.getInt(RESULT_KEY_ID);
         if (resultCode == RESULT_CODE_REGISTER) {
             int priority = resultData.getInt(RESULT_KEY_PRIORITY);
@@ -139,11 +145,11 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             @NonNull IOnBackInvokedCallback iCallback,
             @OnBackInvokedDispatcher.Priority int priority,
             int callbackId,
-            @NonNull OnBackInvokedDispatcher receivingDispatcher) {
+            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
         final ImeOnBackInvokedCallback imeCallback =
                 new ImeOnBackInvokedCallback(iCallback, callbackId, priority);
         mImeCallbacks.add(imeCallback);
-        receivingDispatcher.registerOnBackInvokedCallback(priority, imeCallback);
+        receivingDispatcher.registerOnBackInvokedCallbackUnchecked(imeCallback, priority);
     }
 
     private void unregisterReceivedCallback(
@@ -210,6 +216,12 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         IOnBackInvokedCallback getIOnBackInvokedCallback() {
             return mIOnBackInvokedCallback;
         }
+
+        @Override
+        public String toString() {
+            return "ImeCallback=ImeOnBackInvokedCallback@" + mId
+                    + " Callback=" + mIOnBackInvokedCallback;
+        }
     }
 
     /**
@@ -219,16 +231,14 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
      * @param previous the previously focused {@link ViewRootImpl}.
      * @param current the currently focused {@link ViewRootImpl}.
      */
-    // TODO(b/232845902): Add CTS to test IME back behavior when there's root view change while
-    // IME is up.
     public void switchRootView(ViewRootImpl previous, ViewRootImpl current) {
         for (ImeOnBackInvokedCallback imeCallback : mImeCallbacks) {
             if (previous != null) {
                 previous.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(imeCallback);
             }
             if (current != null) {
-                current.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        imeCallback.mPriority, imeCallback);
+                current.getOnBackInvokedDispatcher().registerOnBackInvokedCallbackUnchecked(
+                        imeCallback, imeCallback.mPriority);
             }
         }
     }

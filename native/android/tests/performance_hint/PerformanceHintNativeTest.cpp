@@ -37,10 +37,15 @@ using namespace testing;
 class MockIHintManager : public IHintManager {
 public:
     MOCK_METHOD(Status, createHintSession,
-                (const ::android::sp<::android::IBinder>& token, const ::std::vector<int32_t>& tids,
-                 int64_t durationNanos, ::android::sp<::android::os::IHintSession>* _aidl_return),
+                (const sp<IBinder>& token, const ::std::vector<int32_t>& tids,
+                 int64_t durationNanos, ::android::sp<IHintSession>* _aidl_return),
                 (override));
     MOCK_METHOD(Status, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
+    MOCK_METHOD(Status, setHintSessionThreads,
+                (const sp<IHintSession>& hintSession, const ::std::vector<int32_t>& tids),
+                (override));
+    MOCK_METHOD(Status, getHintSessionThreadIds,
+                (const sp<IHintSession>& hintSession, ::std::vector<int32_t>* tids), (override));
     MOCK_METHOD(IBinder*, onAsBinder, (), (override));
 };
 
@@ -51,6 +56,7 @@ public:
                 (const ::std::vector<int64_t>& actualDurationNanos,
                  const ::std::vector<int64_t>& timeStampNanos),
                 (override));
+    MOCK_METHOD(Status, sendHint, (int32_t hints), (override));
     MOCK_METHOD(Status, close, (), (override));
     MOCK_METHOD(IBinder*, onAsBinder, (), (override));
 };
@@ -121,6 +127,55 @@ TEST_F(PerformanceHintTest, TestSession) {
     result = APerformanceHint_reportActualWorkDuration(session, -1L);
     EXPECT_EQ(EINVAL, result);
 
+    SessionHint hintId = SessionHint::CPU_LOAD_RESET;
+    EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(1));
+    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_EQ(0, result);
+    usleep(110000); // Sleep for longer than the update timeout.
+    EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(1));
+    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_EQ(0, result);
+    // Expect to get rate limited if we try to send faster than the limiter allows
+    EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(0));
+    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_EQ(0, result);
+
+    result = APerformanceHint_sendHint(session, static_cast<SessionHint>(-1));
+    EXPECT_EQ(EINVAL, result);
+
     EXPECT_CALL(*iSession, close()).Times(Exactly(1));
     APerformanceHint_closeSession(session);
+}
+
+TEST_F(PerformanceHintTest, SetThreads) {
+    APerformanceHintManager* manager = createManager();
+
+    std::vector<int32_t> tids;
+    tids.push_back(1);
+    tids.push_back(2);
+    int64_t targetDuration = 56789L;
+
+    StrictMock<MockIHintSession>* iSession = new StrictMock<MockIHintSession>();
+    sp<IHintSession> session_sp(iSession);
+
+    EXPECT_CALL(*mMockIHintManager, createHintSession(_, Eq(tids), Eq(targetDuration), _))
+            .Times(Exactly(1))
+            .WillRepeatedly(DoAll(SetArgPointee<3>(std::move(session_sp)), Return(Status())));
+
+    APerformanceHintSession* session =
+            APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
+    ASSERT_TRUE(session);
+
+    std::vector<int32_t> emptyTids;
+    int result = APerformanceHint_setThreads(session, emptyTids.data(), emptyTids.size());
+    EXPECT_EQ(EINVAL, result);
+
+    std::vector<int32_t> newTids;
+    newTids.push_back(1);
+    newTids.push_back(3);
+    EXPECT_CALL(*mMockIHintManager, setHintSessionThreads(_, Eq(newTids)))
+            .Times(Exactly(1))
+            .WillOnce(Return(Status()));
+    result = APerformanceHint_setThreads(session, newTids.data(), newTids.size());
+    EXPECT_EQ(0, result);
 }

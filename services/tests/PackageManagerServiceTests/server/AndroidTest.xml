@@ -20,7 +20,16 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
+        <option name="install-arg" value="-g" />
         <option name="test-file-name" value="PackageManagerServiceServerTests.apk" />
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="settings put global verifier_engprod 1" />
+    </target_preparer>
+
+    <!-- Load additional APKs onto device -->
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <option name="push" value="StubTestApp.apk->/data/local/tmp/servicestests/StubTestApp.apk"/>
     </target_preparer>
 
     <option name="test-tag" value="PackageManagerServiceServerTests" />

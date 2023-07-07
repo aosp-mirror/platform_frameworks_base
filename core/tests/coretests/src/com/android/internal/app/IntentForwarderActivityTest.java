@@ -16,6 +16,12 @@
 
 package com.android.internal.app;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -53,6 +59,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -140,6 +147,8 @@ public class IntentForwarderActivityTest {
     @Test
     public void forwardToManagedProfile_canForward_sendIntent() throws Exception {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
+        sActivityName = "MyTestActivity";
+        sPackageName = "test.package.name";
 
         // Intent can be forwarded.
         when(mIPm.canForwardTo(
@@ -160,7 +169,13 @@ public class IntentForwarderActivityTest {
         verify(mIPm).canForwardTo(intentCaptor.capture(), eq(TYPE_PLAIN_TEXT), anyInt(), anyInt());
         assertEquals(Intent.ACTION_SEND, intentCaptor.getValue().getAction());
 
-        assertEquals(Intent.ACTION_SEND, intentCaptor.getValue().getAction());
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        onView(withId(R.id.icon)).check(matches(isDisplayed()));
+        onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+        onView(withId(R.id.use_same_profile_browser)).check(matches(isDisplayed()));
+        onView(withId(R.id.button_open)).perform(click());
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
         assertNotNull(activity.mStartActivityIntent);
         assertEquals(Intent.ACTION_SEND, activity.mStartActivityIntent.getAction());
         assertNull(activity.mStartActivityIntent.getPackage());
@@ -250,6 +265,8 @@ public class IntentForwarderActivityTest {
     @Test
     public void forwardToManagedProfile_canForward_selectorIntent() throws Exception {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
+        sActivityName = "MyTestActivity";
+        sPackageName = "test.package.name";
 
         // Intent can be forwarded.
         when(mIPm.canForwardTo(
@@ -264,12 +281,20 @@ public class IntentForwarderActivityTest {
         // Create selector intent.
         Intent intent = Intent.makeMainSelectorActivity(
                 Intent.ACTION_VIEW, Intent.CATEGORY_BROWSABLE);
+
         IntentForwarderWrapperActivity activity = mActivityRule.launchActivity(intent);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mIPm).canForwardTo(
                 intentCaptor.capture(), nullable(String.class), anyInt(), anyInt());
         assertEquals(Intent.ACTION_VIEW, intentCaptor.getValue().getAction());
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        onView(withId(R.id.icon)).check(matches(isDisplayed()));
+        onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+        onView(withId(R.id.use_same_profile_browser)).check(matches(isDisplayed()));
+        onView(withId(R.id.button_open)).perform(click());
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
         assertNotNull(activity.mStartActivityIntent);
         assertEquals(Intent.ACTION_MAIN, activity.mStartActivityIntent.getAction());
@@ -608,7 +633,7 @@ public class IntentForwarderActivityTest {
     }
 
     private void setupShouldSkipDisclosureTest() throws RemoteException {
-        sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
+        sComponentName = FORWARD_TO_PARENT_COMPONENT_NAME;
         sActivityName = "MyTestActivity";
         sPackageName = "test.package.name";
         Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
@@ -619,6 +644,7 @@ public class IntentForwarderActivityTest {
         profiles.add(CURRENT_USER_INFO);
         profiles.add(MANAGED_PROFILE_INFO);
         when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
+        when(mUserManager.getProfileParent(anyInt())).thenReturn(CURRENT_USER_INFO);
         // Intent can be forwarded.
         when(mIPm.canForwardTo(
                 any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
@@ -651,6 +677,11 @@ public class IntentForwarderActivityTest {
                 boolean ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
+        }
+
+        @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            return this;
         }
 
         @Override

@@ -51,7 +51,7 @@ abstract class UdfpsDrawable(
             invalidateSelf()
         }
 
-    var isIlluminationShowing: Boolean = false
+    var isDisplayConfigured: Boolean = false
         set(showing) {
             if (field == showing) {
                 return

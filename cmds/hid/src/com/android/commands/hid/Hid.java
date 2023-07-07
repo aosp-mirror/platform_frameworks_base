@@ -93,6 +93,10 @@ public class Hid {
                 d.addDelay(e.getDuration());
             } else if (Event.COMMAND_REPORT.equals(e.getCommand())) {
                 d.sendReport(e.getReport());
+            } else if (Event.COMMAND_SET_GET_REPORT_RESPONSE.equals(e.getCommand())) {
+                d.setGetReportResponse(e.getReport());
+            } else if (Event.COMMAND_SEND_SET_REPORT_REPLY.equals(e.getCommand())) {
+                d.sendSetReportReply(e.getReply());
             } else {
                 if (Event.COMMAND_REGISTER.equals(e.getCommand())) {
                     error("Device id=" + e.getId() + " is already registered. Ignoring event.");
