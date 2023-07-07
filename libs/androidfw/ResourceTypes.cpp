@@ -2568,6 +2568,22 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
     return false;
 }
 
+bool ResTable_config::isBetterThanBeforeLocale(const ResTable_config& o,
+        const ResTable_config* requested) const {
+    if (requested) {
+        if (imsi || o.imsi) {
+            if ((mcc != o.mcc) && requested->mcc) {
+                return (mcc);
+            }
+
+            if ((mnc != o.mnc) && requested->mnc) {
+                return (mnc);
+            }
+        }
+    }
+    return false;
+}
+
 bool ResTable_config::isBetterThan(const ResTable_config& o,
         const ResTable_config* requested) const {
     if (requested) {
