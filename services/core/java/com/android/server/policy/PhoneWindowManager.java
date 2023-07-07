@@ -3442,16 +3442,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void requestBugreportForTv() {
-        if ("1".equals(SystemProperties.get("ro.debuggable"))
-                || Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
-            try {
-                if (!ActivityManager.getService().launchBugReportHandlerApp()) {
-                    ActivityManager.getService().requestInteractiveBugReport();
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error taking bugreport", e);
+        try {
+            if (!ActivityManager.getService().launchBugReportHandlerApp()) {
+                ActivityManager.getService().requestInteractiveBugReport();
             }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error taking bugreport", e);
         }
     }
 
