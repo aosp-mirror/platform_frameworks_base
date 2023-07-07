@@ -30,12 +30,16 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
+import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -79,7 +83,9 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Mock lateinit var deleteButton: NumPadButton
     @Mock lateinit var enterButton: View
 
-    lateinit var pinViewController: KeyguardPinViewController
+    private lateinit var pinViewController: KeyguardPinViewController
+
+    @Captor lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
 
     @Before
     fun setup() {
@@ -97,6 +103,9 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(keyguardPinView.findViewById<NumPadButton>(R.id.delete_button))
             .thenReturn(deleteButton)
         `when`(keyguardPinView.findViewById<View>(R.id.key_enter)).thenReturn(enterButton)
+        // For posture tests:
+        `when`(keyguardPinView.buttons).thenReturn(arrayOf())
+
         pinViewController =
             KeyguardPinViewController(
                 keyguardPinView,
@@ -112,6 +121,33 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
                 postureController,
                 featureFlags
             )
+    }
+
+    @Test
+    fun onViewAttached_deviceHalfFolded_propagatedToPinView() {
+        `when`(postureController.devicePosture).thenReturn(DEVICE_POSTURE_HALF_OPENED)
+
+        pinViewController.onViewAttached()
+
+        verify(keyguardPinView).onDevicePostureChanged(DEVICE_POSTURE_HALF_OPENED)
+    }
+
+    @Test
+    fun onDevicePostureChanged_deviceHalfFolded_propagatedToPinView() {
+        `when`(postureController.devicePosture).thenReturn(DEVICE_POSTURE_HALF_OPENED)
+
+        // Verify view begins in posture state DEVICE_POSTURE_HALF_OPENED
+        pinViewController.onViewAttached()
+
+        verify(keyguardPinView).onDevicePostureChanged(DEVICE_POSTURE_HALF_OPENED)
+
+        // Simulate posture change to state DEVICE_POSTURE_OPENED with callback
+        verify(postureController).addCallback(postureCallbackCaptor.capture())
+        val postureCallback: DevicePostureController.Callback = postureCallbackCaptor.value
+        postureCallback.onPostureChanged(DEVICE_POSTURE_OPENED)
+
+        // Verify view is now in posture state DEVICE_POSTURE_OPENED
+        verify(keyguardPinView).onDevicePostureChanged(DEVICE_POSTURE_OPENED)
     }
 
     @Test
