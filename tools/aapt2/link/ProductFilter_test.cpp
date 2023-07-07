@@ -31,27 +31,29 @@ TEST(ProductFilterTest, SelectTwoProducts) {
   ResourceTable table;
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("land/default.xml")).Build(), land)
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("land/default.xml")).Build(),
+                    land)
           .Build(),
       context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("land/tablet.xml")).Build(), land,
-                    "tablet")
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("land/tablet.xml")).Build(),
+                    land, "tablet")
           .Build(),
       context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("port/default.xml")).Build(), port)
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("port/default.xml")).Build(),
+                    port)
           .Build(),
       context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("port/tablet.xml")).Build(), port,
-                    "tablet")
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("port/tablet.xml")).Build(),
+                    port, "tablet")
           .Build(),
       context->GetDiagnostics()));
 
@@ -74,13 +76,14 @@ TEST(ProductFilterTest, SelectDefaultProduct) {
   ResourceTable table;
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("default.xml")).Build())
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("default.xml")).Build())
           .Build(),
       context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("tablet.xml")).Build(), {}, "tablet")
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("tablet.xml")).Build(), {},
+                    "tablet")
           .Build(),
       context->GetDiagnostics()));
   ;
@@ -102,20 +105,21 @@ TEST(ProductFilterTest, FailOnAmbiguousProduct) {
   ResourceTable table;
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("default.xml")).Build())
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("default.xml")).Build())
           .Build(),
       context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("tablet.xml")).Build(), {}, "tablet")
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("tablet.xml")).Build(), {},
+                    "tablet")
           .Build(),
       context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("no-sdcard.xml")).Build(), {},
-                    "no-sdcard")
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("no-sdcard.xml")).Build(),
+                    {}, "no-sdcard")
           .Build(),
       context->GetDiagnostics()));
 
@@ -127,15 +131,15 @@ TEST(ProductFilterTest, FailOnMultipleDefaults) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
 
   ResourceTable table;
-  ASSERT_TRUE(
-      table.AddResource(NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-                            .SetValue(test::ValueBuilder<Id>().SetSource(Source(".xml")).Build())
-                            .Build(),
-                        context->GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source(".xml")).Build())
+          .Build(),
+      context->GetDiagnostics()));
 
   ASSERT_TRUE(table.AddResource(
       NewResourceBuilder(test::ParseNameOrDie("android:string/one"))
-          .SetValue(test::ValueBuilder<Id>().SetSource(Source("default.xml")).Build(), {},
+          .SetValue(test::ValueBuilder<Id>().SetSource(android::Source("default.xml")).Build(), {},
                     "default")
           .Build(),
       context->GetDiagnostics()));

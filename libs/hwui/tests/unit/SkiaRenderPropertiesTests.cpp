@@ -17,6 +17,7 @@
 #include <VectorDrawable.h>
 #include <gtest/gtest.h>
 
+#include <SkCanvas.h>
 #include <SkClipStack.h>
 #include <SkSurface_Base.h>
 #include <string.h>

@@ -21,23 +21,28 @@ import android.content.ContextWrapper
 import android.content.SharedPreferences
 import android.os.Handler
 import android.provider.Settings
+import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
@@ -65,22 +70,31 @@ class DndTileTest : SysuiTestCase() {
 
     @Mock
     private lateinit var qsHost: QSHost
+
     @Mock
     private lateinit var metricsLogger: MetricsLogger
+
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
+
     @Mock
     private lateinit var activityStarter: ActivityStarter
+
     @Mock
     private lateinit var qsLogger: QSLogger
+
     @Mock
-    private lateinit var uiEventLogger: UiEventLogger
+    private lateinit var uiEventLogger: QsEventLogger
+
     @Mock
     private lateinit var zenModeController: ZenModeController
+
     @Mock
     private lateinit var sharedPreferences: SharedPreferences
+
     @Mock
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+
     @Mock
     private lateinit var hostDialog: Dialog
 
@@ -95,7 +109,6 @@ class DndTileTest : SysuiTestCase() {
         secureSettings = FakeSettings()
 
         whenever(qsHost.userId).thenReturn(DEFAULT_USER)
-        whenever(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         val wrappedContext = object : ContextWrapper(context) {
             override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
@@ -106,6 +119,7 @@ class DndTileTest : SysuiTestCase() {
 
         tile = DndTile(
             qsHost,
+            uiEventLogger,
             testableLooper.looper,
             Handler(testableLooper.looper),
             FalsingManagerFake(),
@@ -122,7 +136,8 @@ class DndTileTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        tile.handleSetListening(false)
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test
@@ -173,7 +188,7 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator).showFromView(any(), eq(view), anyBoolean())
+        verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 
     @Test
@@ -187,6 +202,26 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), anyBoolean())
+        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), nullable(), anyBoolean())
+    }
+
+    @Test
+    fun testIcon_whenDndModeOff_isOffState() {
+        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+        val state = QSTile.BooleanState()
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon).isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_dnd_icon_off))
+    }
+
+    @Test
+    fun testIcon_whenDndModeOn_isOnState() {
+        whenever(zenModeController.zen).thenReturn(ZEN_MODE_NO_INTERRUPTIONS)
+        val state = QSTile.BooleanState()
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon).isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_dnd_icon_on))
     }
 }

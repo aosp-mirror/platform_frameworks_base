@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.drawable.Icon;
@@ -96,7 +97,9 @@ public class OverlayActionChip extends FrameLayout {
     public void setPendingIntent(PendingIntent intent, Runnable finisher) {
         setOnClickListener(v -> {
             try {
-                intent.send();
+                BroadcastOptions options = BroadcastOptions.makeBasic();
+                options.setInteractive(true);
+                intent.send(options.toBundle());
                 finisher.run();
             } catch (PendingIntent.CanceledException e) {
                 Log.e(TAG, "Intent cancelled", e);
@@ -118,13 +121,15 @@ public class OverlayActionChip extends FrameLayout {
         LinearLayout.LayoutParams textParams =
                 (LinearLayout.LayoutParams) mTextView.getLayoutParams();
         if (hasText) {
-            int paddingHorizontal = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.overlay_action_chip_padding_horizontal);
+            int paddingStart = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.overlay_action_chip_padding_start);
             int spacing = mContext.getResources().getDimensionPixelSize(
                     R.dimen.overlay_action_chip_spacing);
-            iconParams.setMarginStart(paddingHorizontal);
+            int paddingEnd = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.overlay_action_chip_padding_end);
+            iconParams.setMarginStart(paddingStart);
             iconParams.setMarginEnd(spacing);
-            textParams.setMarginEnd(paddingHorizontal);
+            textParams.setMarginEnd(paddingEnd);
         } else {
             int paddingHorizontal = mContext.getResources().getDimensionPixelSize(
                     R.dimen.overlay_action_chip_icon_only_padding_horizontal);

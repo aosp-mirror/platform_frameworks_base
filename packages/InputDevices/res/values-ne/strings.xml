@@ -4,17 +4,17 @@
     <string name="app_label" msgid="8016145283189546017">"इनपुट डिभाइस"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android किबोर्ड"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"अङ्ग्रेजी (बेलायत)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"अङ्ग्रेजी (अमेरिकी)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"अङ्ग्रेजी (अमेरिकी), अन्तर्राष्ट्रिय शैली"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"अङ्ग्रेजी (अमेरिकी), कोलमाक शैली"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"अङ्ग्रेजी (अमेरिकी), डेभोर्याक शैली"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"अङ्ग्रेजी (सं.रा. अमेरिका)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"अङ्ग्रेजी (सं.रा. अमेरिका), अन्तर्राष्ट्रिय शैली"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"अङ्ग्रेजी (सं.रा. अमेरिका), कोलमाक शैली"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"अङ्ग्रेजी (सं.रा. अमेरिका), डेभोर्याक शैली"</string>
     <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"अंग्रेजी (अमेरिका), वर्कम्यान शैली"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"जर्मन"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"फ्रान्सेली"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"फ्रेंच (क्यानाडा)"</string>
     <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"रसियन"</string>
     <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"रूसी, म्याक शैली"</string>
-    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"स्पानिस"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"स्पेनी"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"स्विस फ्रान्सेली"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"स्विस-जर्मन"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"बेल्जियन"</string>

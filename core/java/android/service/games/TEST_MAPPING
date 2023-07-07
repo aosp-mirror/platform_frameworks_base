@@ -1,0 +1,16 @@
+{
+  "presubmit": [
+    // TODO(b/245615658): fix flaky CTS test CtsGameServiceTestCases and add it as presubmit
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {
+          "include-filter": "android.service.games"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

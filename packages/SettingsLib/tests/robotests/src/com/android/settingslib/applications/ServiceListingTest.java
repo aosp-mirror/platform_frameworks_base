@@ -18,19 +18,34 @@ package com.android.settingslib.applications;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.provider.Settings;
+
+import androidx.test.core.app.ApplicationProvider;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+
+import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 public class ServiceListingTest {
@@ -39,16 +54,97 @@ public class ServiceListingTest {
     private static final String TEST_INTENT = "com.example.intent";
 
     private ServiceListing mServiceListing;
+    private Context mContext;
+    private PackageManager mPm;
 
     @Before
     public void setUp() {
-        mServiceListing = new ServiceListing.Builder(RuntimeEnvironment.application)
+        mPm = mock(PackageManager.class);
+        mContext = spy(ApplicationProvider.getApplicationContext());
+        when(mContext.getPackageManager()).thenReturn(mPm);
+
+        mServiceListing = new ServiceListing.Builder(mContext)
                 .setTag("testTag")
                 .setSetting(TEST_SETTING)
                 .setNoun("testNoun")
                 .setIntentAction(TEST_INTENT)
                 .setPermission("testPermission")
                 .build();
+    }
+
+    @Test
+    public void testValidator() {
+        ServiceInfo s1 = new ServiceInfo();
+        s1.permission = "testPermission";
+        s1.packageName = "pkg";
+        ServiceInfo s2 = new ServiceInfo();
+        s2.permission = "testPermission";
+        s2.packageName = "pkg2";
+        ResolveInfo r1 = new ResolveInfo();
+        r1.serviceInfo = s1;
+        ResolveInfo r2 = new ResolveInfo();
+        r2.serviceInfo = s2;
+
+        when(mPm.queryIntentServicesAsUser(any(), anyInt(), anyInt())).thenReturn(
+                ImmutableList.of(r1, r2));
+
+        mServiceListing = new ServiceListing.Builder(mContext)
+                .setTag("testTag")
+                .setSetting(TEST_SETTING)
+                .setNoun("testNoun")
+                .setIntentAction(TEST_INTENT)
+                .setValidator(info -> {
+                    if (info.packageName.equals("pkg")) {
+                        return true;
+                    }
+                    return false;
+                })
+                .setPermission("testPermission")
+                .build();
+        ServiceListing.Callback callback = mock(ServiceListing.Callback.class);
+        mServiceListing.addCallback(callback);
+        mServiceListing.reload();
+
+        verify(mPm).queryIntentServicesAsUser(any(), anyInt(), anyInt());
+        ArgumentCaptor<List<ServiceInfo>> captor = ArgumentCaptor.forClass(List.class);
+        verify(callback, times(1)).onServicesReloaded(captor.capture());
+
+        assertThat(captor.getValue().size()).isEqualTo(1);
+        assertThat(captor.getValue().get(0)).isEqualTo(s1);
+    }
+
+    @Test
+    public void testNoValidator() {
+        ServiceInfo s1 = new ServiceInfo();
+        s1.permission = "testPermission";
+        s1.packageName = "pkg";
+        ServiceInfo s2 = new ServiceInfo();
+        s2.permission = "testPermission";
+        s2.packageName = "pkg2";
+        ResolveInfo r1 = new ResolveInfo();
+        r1.serviceInfo = s1;
+        ResolveInfo r2 = new ResolveInfo();
+        r2.serviceInfo = s2;
+
+        when(mPm.queryIntentServicesAsUser(any(), anyInt(), anyInt())).thenReturn(
+                ImmutableList.of(r1, r2));
+
+        mServiceListing = new ServiceListing.Builder(mContext)
+                .setTag("testTag")
+                .setSetting(TEST_SETTING)
+                .setNoun("testNoun")
+                .setIntentAction(TEST_INTENT)
+                .setPermission("testPermission")
+                .build();
+        ServiceListing.Callback callback = mock(ServiceListing.Callback.class);
+        mServiceListing.addCallback(callback);
+        mServiceListing.reload();
+
+        verify(mPm).queryIntentServicesAsUser(any(), anyInt(), anyInt());
+        ArgumentCaptor<List<ServiceInfo>> captor = ArgumentCaptor.forClass(List.class);
+        verify(callback, times(1)).onServicesReloaded(captor.capture());
+
+        assertThat(captor.getValue().size()).isEqualTo(2);
     }
 
     @Test

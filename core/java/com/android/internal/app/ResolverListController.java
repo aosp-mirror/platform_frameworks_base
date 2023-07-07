@@ -33,6 +33,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,6 +61,7 @@ public class ResolverListController {
 
     private AbstractResolverComparator mResolverComparator;
     private boolean isComputed = false;
+    private final UserHandle mQueryIntentsAsUser;
 
     public ResolverListController(
             Context context,
@@ -67,10 +69,17 @@ public class ResolverListController {
             Intent targetIntent,
             String referrerPackage,
             int launchedFromUid,
-            UserHandle userHandle) {
+            UserHandle userHandle,
+            UserHandle queryIntentsAsUser) {
         this(context, pm, targetIntent, referrerPackage, launchedFromUid, userHandle,
                     new ResolverRankerServiceResolverComparator(
-                        context, targetIntent, referrerPackage, null, null));
+                            context,
+                            targetIntent,
+                            referrerPackage,
+                            null,
+                            null,
+                            userHandle),
+                queryIntentsAsUser);
     }
 
     public ResolverListController(
@@ -80,7 +89,8 @@ public class ResolverListController {
             String referrerPackage,
             int launchedFromUid,
             UserHandle userHandle,
-            AbstractResolverComparator resolverComparator) {
+            AbstractResolverComparator resolverComparator,
+            UserHandle queryIntentsAsUser) {
         mContext = context;
         mpm = pm;
         mLaunchedFromUid = launchedFromUid;
@@ -88,6 +98,7 @@ public class ResolverListController {
         mReferrerPackage = referrerPackage;
         mUserHandle = userHandle;
         mResolverComparator = resolverComparator;
+        mQueryIntentsAsUser = queryIntentsAsUser;
     }
 
     @VisibleForTesting
@@ -110,21 +121,24 @@ public class ResolverListController {
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntent(
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
+            boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents) {
         return getResolversForIntentAsUser(shouldGetResolvedFilter, shouldGetActivityMetadata,
-                intents, mUserHandle);
+                shouldGetOnlyDefaultActivities, intents, mQueryIntentsAsUser);
     }
 
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntentAsUser(
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
+            boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents,
             UserHandle userHandle) {
-        int baseFlags = PackageManager.MATCH_DEFAULT_ONLY
+        int baseFlags = (shouldGetOnlyDefaultActivities ? PackageManager.MATCH_DEFAULT_ONLY : 0)
                 | PackageManager.MATCH_DIRECT_BOOT_AWARE
                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                 | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
-                | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0);
+                | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0)
+                | PackageManager.MATCH_CLONE_PROFILE;
         return getResolversForIntentAsUserInternal(intents, userHandle, baseFlags);
     }
 
@@ -134,12 +148,15 @@ public class ResolverListController {
             int baseFlags) {
         List<ResolverActivity.ResolvedComponentInfo> resolvedComponents = null;
         for (int i = 0, N = intents.size(); i < N; i++) {
-            final Intent intent = intents.get(i);
+            Intent intent = intents.get(i);
             int flags = baseFlags;
             if (intent.isWebIntent()
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 flags |= PackageManager.MATCH_INSTANT;
             }
+            // Because of AIDL bug, queryIntentActivitiesAsUser can't accept subclasses of Intent.
+            intent = (intent.getClass() == Intent.class) ? intent : new Intent(
+                    intent);
             final List<ResolveInfo> infos = mpm.queryIntentActivitiesAsUser(intent, flags,
                     userHandle);
             if (infos != null) {
@@ -165,6 +182,10 @@ public class ResolverListController {
         final int intoCount = into.size();
         for (int i = 0; i < fromCount; i++) {
             final ResolveInfo newInfo = from.get(i);
+            if (newInfo.userHandle == null) {
+                Log.w(TAG, "Skipping ResolveInfo with no userHandle: " + newInfo);
+                continue;
+            }
             boolean found = false;
             // Only loop to the end of into as it was before we started; no dupes in from.
             for (int j = 0; j < intoCount; j++) {
@@ -383,22 +404,22 @@ public class ResolverListController {
 
     @VisibleForTesting
     public float getScore(DisplayResolveInfo target) {
-        return mResolverComparator.getScore(target.getResolvedComponentName());
+        return mResolverComparator.getScore(target);
     }
 
     /**
      * Returns the app share score of the given {@code componentName}.
      */
-    public float getScore(ComponentName componentName) {
-        return mResolverComparator.getScore(componentName);
+    public float getScore(TargetInfo targetInfo) {
+        return mResolverComparator.getScore(targetInfo);
     }
 
-    public void updateModel(ComponentName componentName) {
-        mResolverComparator.updateModel(componentName);
+    public void updateModel(TargetInfo targetInfo) {
+        mResolverComparator.updateModel(targetInfo);
     }
 
-    public void updateChooserCounts(String packageName, int userId, String action) {
-        mResolverComparator.updateChooserCounts(packageName, userId, action);
+    public void updateChooserCounts(String packageName, UserHandle user, String action) {
+        mResolverComparator.updateChooserCounts(packageName, user, action);
     }
 
     public void destroy() {

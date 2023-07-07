@@ -17,7 +17,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="8898068901680117589">"Sim app dialogue"</string>
+    <string name="app_name" msgid="8898068901680117589">"Sim App Dialog"</string>
     <string name="install_carrier_app_title" msgid="334729104862562585">"Activate mobile service"</string>
     <string name="install_carrier_app_description" msgid="4014303558674923797">"To get your new SIM working properly, you\'ll need to install the <xliff:g id="ID_1">%1$s</xliff:g> app"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"To get your new SIM working properly, you\'ll need to install the carrier app"</string>

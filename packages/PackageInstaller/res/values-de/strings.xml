@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"App wurde installiert."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Möchtest du diese App installieren?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Möchtest du diese App aktualisieren?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Diese App mit einem Update von <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> aktualisieren?\n\nSie erhält normalerweise Updates von <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Wenn du ein Update von einer anderen Quelle verwendest, erhältst du möglicherweise zukünftige Updates von beliebigen Quellen auf deinem Smartphone. Die Funktionalität der App kann sich ändern."</string>
     <string name="install_failed" msgid="5777824004474125469">"App wurde nicht installiert."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die Installation des Pakets wurde blockiert."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Die App wurde nicht installiert, da das Paket in Konflikt mit einem bestehenden Paket steht."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Dieser Nutzer darf keine unbekannten Apps installieren"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Dieser Nutzer darf keine Apps installieren"</string>
     <string name="ok" msgid="7871959885003339302">"Ok"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Trotzdem aktualisieren"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Apps verwalten"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Kein freier Speicher vorhanden"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht installiert werden. Gib Speicherplatz frei und versuche es noch einmal."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Diese App durch die Werksversion ersetzen? Alle Daten werden entfernt."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Diese App durch die Werksversion ersetzen? Alle Daten werden entfernt. Dies betrifft alle Nutzer des Geräts, einschließlich Arbeitsprofilen."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> an App-Daten behalten."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Möchtest du diese App löschen?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Möchtest du diese App deinstallieren? Der <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-Klon wird ebenfalls gelöscht."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Laufende Deinstallationen"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Fehlgeschlagene Deinstallationen"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Wird deinstalliert..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> wird deinstalliert…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Deinstallation abgeschlossen."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deinstalliert"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klon von „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ gelöscht"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Deinstallation fehlgeschlagen."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Deinstallation von <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> fehlgeschlagen."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-Klon wird gelöscht…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktive Apps zur Geräteverwaltung können nicht deinstalliert werden"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Die aktive App zur Geräteverwaltung kann nicht für <xliff:g id="USERNAME">%1$s</xliff:g> deinstalliert werden"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Diese App wird für einige Nutzer oder Profile benötigt und wurde für andere deinstalliert"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Unbekannt"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Aus Sicherheitsgründen kannst du auf deinem Tablet zurzeit keine unbekannten Apps aus dieser Quelle installieren. Das kannst du in den Einstellungen ändern."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Aus Sicherheitsgründen kannst du auf deinem Fernseher zurzeit keine unbekannten Apps aus dieser Quelle installieren. Das kannst du in den Einstellungen ändern."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Aus Sicherheitsgründen kannst du auf deiner Smartwatch zurzeit keine unbekannten Apps aus dieser Quelle installieren. Du kannst das in den Einstellungen ändern."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Aus Sicherheitsgründen kannst du auf deinem Smartphone zurzeit keine unbekannten Apps aus dieser Quelle installieren. Das kannst du in den Einstellungen ändern."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Unbekannte Apps können gefährlich für dein Smartphone und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Smartphone und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Unbekannte Apps können gefährlich für dein Tablet und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Tablet und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Unbekannte Apps können gefährlich für deinen Fernseher und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Fernseher und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-Klon"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Weiter"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Einstellungen"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear-Apps installieren/deinstallieren"</string>

@@ -22,8 +22,7 @@ import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
-
-import java.io.Closeable;
+import android.view.KeyEvent;
 
 /**
  * A virtual keyboard representing a key input mechanism on a remote device, such as a built-in
@@ -35,25 +34,13 @@ import java.io.Closeable;
  * @hide
  */
 @SystemApi
-public class VirtualKeyboard implements Closeable {
+public class VirtualKeyboard extends VirtualInputDevice {
 
-    private final IVirtualDevice mVirtualDevice;
-    private final IBinder mToken;
+    private final int mUnsupportedKeyCode = KeyEvent.KEYCODE_DPAD_CENTER;
 
     /** @hide */
     public VirtualKeyboard(IVirtualDevice virtualDevice, IBinder token) {
-        mVirtualDevice = virtualDevice;
-        mToken = token;
-    }
-
-    @Override
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void close() {
-        try {
-            mVirtualDevice.unregisterInputDevice(mToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        super(virtualDevice, token);
     }
 
     /**
@@ -64,6 +51,11 @@ public class VirtualKeyboard implements Closeable {
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendKeyEvent(@NonNull VirtualKeyEvent event) {
         try {
+            if (mUnsupportedKeyCode == event.getKeyCode()) {
+                throw new IllegalArgumentException(
+                    "Unsupported key code " + event.getKeyCode()
+                        + " sent to a VirtualKeyboard input device.");
+            }
             mVirtualDevice.sendKeyEvent(mToken, event);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

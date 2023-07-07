@@ -130,4 +130,15 @@ public interface TargetInfo {
      * @return true if this target should be pinned to the front by the request of the user
      */
     boolean isPinned();
+
+    /**
+     * Fix the URIs in {@code intent} if cross-profile sharing is required. This should be called
+     * before launching the intent as another user.
+     */
+    static void prepareIntentForCrossProfileLaunch(Intent intent, int targetUserId) {
+        final int currentUserId = UserHandle.myUserId();
+        if (targetUserId != currentUserId) {
+            intent.fixUris(currentUserId);
+        }
+    }
 }

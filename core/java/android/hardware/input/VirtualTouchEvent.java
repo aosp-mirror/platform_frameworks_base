@@ -18,10 +18,13 @@ package android.hardware.input;
 
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.view.InputEvent;
 import android.view.MotionEvent;
 
 import java.lang.annotation.Retention;
@@ -32,6 +35,11 @@ import java.lang.annotation.RetentionPolicy;
  *
  * The pointer id, tool type, action, and location are required; pressure and main axis size are
  * optional.
+ *
+ * Note: A VirtualTouchEvent with ACTION_CANCEL can only be created with TOOL_TYPE_PALM (and vice
+ * versa). Events are injected into the uinput kernel module, which has no concept of cancelling
+ * an action. The only way to state the intention that a pointer should not be handled as a pointer
+ * is to change its tool type to TOOL_TYPE_PALM.
  *
  * @hide
  */
@@ -77,6 +85,10 @@ public final class VirtualTouchEvent implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {}
 
+    // The maximum number of pointers that can be touching the screen at once. (See MAX_POINTERS
+    // in frameworks/native/include/input/Input.h)
+    private static final int MAX_POINTERS = 16;
+
     private final int mPointerId;
     private final @ToolType int mToolType;
     private final @Action int mAction;
@@ -84,9 +96,10 @@ public final class VirtualTouchEvent implements Parcelable {
     private final float mY;
     private final float mPressure;
     private final float mMajorAxisSize;
+    private final long mEventTimeNanos;
 
     private VirtualTouchEvent(int pointerId, @ToolType int toolType, @Action int action,
-            float x, float y, float pressure, float majorAxisSize) {
+            float x, float y, float pressure, float majorAxisSize, long eventTimeNanos) {
         mPointerId = pointerId;
         mToolType = toolType;
         mAction = action;
@@ -94,6 +107,7 @@ public final class VirtualTouchEvent implements Parcelable {
         mY = y;
         mPressure = pressure;
         mMajorAxisSize = majorAxisSize;
+        mEventTimeNanos = eventTimeNanos;
     }
 
     private VirtualTouchEvent(@NonNull Parcel parcel) {
@@ -104,6 +118,7 @@ public final class VirtualTouchEvent implements Parcelable {
         mY = parcel.readFloat();
         mPressure = parcel.readFloat();
         mMajorAxisSize = parcel.readFloat();
+        mEventTimeNanos = parcel.readLong();
     }
 
     @Override
@@ -115,6 +130,7 @@ public final class VirtualTouchEvent implements Parcelable {
         dest.writeFloat(mY);
         dest.writeFloat(mPressure);
         dest.writeFloat(mMajorAxisSize);
+        dest.writeLong(mEventTimeNanos);
     }
 
     @Override
@@ -172,6 +188,16 @@ public final class VirtualTouchEvent implements Parcelable {
     }
 
     /**
+     * Returns the time this event occurred, in the {@link SystemClock#uptimeMillis()} time base but
+     * with nanosecond (instead of millisecond) precision.
+     *
+     * @see InputEvent#getEventTime()
+     */
+    public long getEventTimeNanos() {
+        return mEventTimeNanos;
+    }
+
+    /**
      * Builder for {@link VirtualTouchEvent}.
      */
     public static final class Builder {
@@ -183,9 +209,14 @@ public final class VirtualTouchEvent implements Parcelable {
         private float mY = Float.NaN;
         private float mPressure = Float.NaN;
         private float mMajorAxisSize = Float.NaN;
+        private long mEventTimeNanos = 0L;
 
         /**
          * Creates a {@link VirtualTouchEvent} object with the current builder configuration.
+         *
+         * @throws IllegalArgumentException if one of the required arguments is missing or if
+         * ACTION_CANCEL is not set in combination with TOOL_TYPE_PALM. See
+         * {@link VirtualTouchEvent} for a detailed explanation.
          */
         public @NonNull VirtualTouchEvent build() {
             if (mToolType == TOOL_TYPE_UNKNOWN || mPointerId == MotionEvent.INVALID_POINTER_ID
@@ -199,15 +230,23 @@ public final class VirtualTouchEvent implements Parcelable {
                         "ACTION_CANCEL and TOOL_TYPE_PALM must always appear together");
             }
             return new VirtualTouchEvent(mPointerId, mToolType, mAction, mX, mY, mPressure,
-                    mMajorAxisSize);
+                    mMajorAxisSize, mEventTimeNanos);
         }
 
         /**
          * Sets the pointer id of the event.
          *
+         * <p>A Valid pointer id need to be in the range of 0 to 15.
+         *
          * @return this builder, to allow for chaining of calls
          */
-        public @NonNull Builder setPointerId(int pointerId) {
+        public @NonNull Builder setPointerId(
+                @IntRange(from = 0, to = MAX_POINTERS - 1) int pointerId) {
+            if (pointerId < 0 || pointerId > 15) {
+                throw new IllegalArgumentException(
+                        "The pointer id must be in the range 0 - " + (MAX_POINTERS - 1)
+                                + "inclusive, but was: " + pointerId);
+            }
             mPointerId = pointerId;
             return this;
         }
@@ -262,6 +301,16 @@ public final class VirtualTouchEvent implements Parcelable {
         /**
          * Sets the pressure of the event. This field is optional and can be omitted.
          *
+         * @param pressure The pressure of the touch.
+         *                 Note: The VirtualTouchscreen, consuming VirtualTouchEvents, is
+         *                 configured with a pressure axis range from 0.0 to 255.0. Only the
+         *                 lower end of the range is enforced. You can pass values larger than
+         *                 255.0. With physical input devices this could happen if the
+         *                 calibration is off. Values larger than 255.0 will not be trimmed and
+         *                 passed on as is.
+         *
+         * @throws IllegalArgumentException if the pressure is smaller than 0.
+         *
          * @return this builder, to allow for chaining of calls
          */
         public @NonNull Builder setPressure(@FloatRange(from = 0f) float pressure) {
@@ -283,6 +332,23 @@ public final class VirtualTouchEvent implements Parcelable {
                         "Touch event major axis size cannot be negative");
             }
             mMajorAxisSize = majorAxisSize;
+            return this;
+        }
+
+        /**
+         * Sets the time (in nanoseconds) when this specific event was generated. This may be
+         * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
+         * millisecond), but can be different depending on the use case.
+         * This field is optional and can be omitted.
+         *
+         * @return this builder, to allow for chaining of calls
+         * @see InputEvent#getEventTime()
+         */
+        public @NonNull Builder setEventTimeNanos(long eventTimeNanos) {
+            if (eventTimeNanos < 0L) {
+                throw new IllegalArgumentException("Event time cannot be negative");
+            }
+            mEventTimeNanos = eventTimeNanos;
             return this;
         }
     }

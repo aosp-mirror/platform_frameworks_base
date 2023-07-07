@@ -16,6 +16,8 @@ roosa@google.com
 per-file package_item_info.proto = toddke@google.com,patb@google.com
 per-file usagestatsservice.proto, usagestatsservice_v2.proto = file:/core/java/android/app/usage/OWNERS
 per-file apphibernationservice.proto = file:/core/java/android/apphibernation/OWNERS
+per-file android/hardware/sensorprivacy.proto = ntmyren@google.com,evanseverson@google.com
+per-file background_install_control.proto = wenhaowang@google.com,georgechan@google.com,billylau@google.com
 
 # Biometrics
 jaggies@google.com

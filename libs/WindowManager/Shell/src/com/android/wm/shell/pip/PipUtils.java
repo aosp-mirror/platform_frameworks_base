@@ -18,6 +18,7 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
@@ -26,8 +27,10 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.window.TaskSnapshot;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -70,6 +73,13 @@ public class PipUtils {
     }
 
     /**
+     * @return the pixels for a given dp value.
+     */
+    public static int dpToPx(float dpValue, DisplayMetrics dm) {
+        return (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, dpValue, dm);
+    }
+
+    /**
      * @return true if the aspect ratios differ
      */
     public static boolean aspectRatioChanged(float aspectRatio1, float aspectRatio2) {
@@ -83,7 +93,9 @@ public class PipUtils {
     public static boolean remoteActionsMatch(RemoteAction action1, RemoteAction action2) {
         if (action1 == action2) return true;
         if (action1 == null || action2 == null) return false;
-        return Objects.equals(action1.getTitle(), action2.getTitle())
+        return action1.isEnabled() == action2.isEnabled()
+                && action1.shouldShowIcon() == action2.shouldShowIcon()
+                && Objects.equals(action1.getTitle(), action2.getTitle())
                 && Objects.equals(action1.getContentDescription(), action2.getContentDescription())
                 && Objects.equals(action1.getActionIntent(), action2.getActionIntent());
     }
@@ -116,7 +128,7 @@ public class PipUtils {
         if (taskId <= 0) return null;
         try {
             return ActivityTaskManager.getService().getTaskSnapshot(
-                    taskId, isLowResolution);
+                    taskId, isLowResolution, false /* takeSnapshotIfNeeded */);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;

@@ -43,7 +43,7 @@ public class BluetoothDeviceFilterUtils {
     private BluetoothDeviceFilterUtils() {}
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "BluetoothDeviceFilterUtils";
+    private static final String LOG_TAG = "CDM_BluetoothDeviceFilterUtils";
 
     @Nullable
     static String patternToString(@Nullable Pattern p) {

@@ -23,10 +23,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -64,6 +66,7 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -272,6 +275,19 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void persistScale_setValueWhenScaleIsOne_nothingChanged() {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        final float persistedScale = mWindowMagnificationManager.getPersistedScale(TEST_DISPLAY);
+
+        mWindowMagnificationManager.setScale(TEST_DISPLAY, 1.0f);
+        mWindowMagnificationManager.persistScale(TEST_DISPLAY);
+
+        assertEquals(Settings.Secure.getFloatForUser(mResolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0f,
+                CURRENT_USER_ID), persistedScale);
+    }
+
+    @Test
     public void scaleSetterGetter_enabledOnTestDisplay_expectedValue() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2.0f, NaN, NaN);
@@ -290,6 +306,18 @@ public class WindowMagnificationManagerTest {
 
         assertEquals(mWindowMagnificationManager.getScale(TEST_DISPLAY),
                 MagnificationScaleProvider.MAX_SCALE);
+    }
+
+    @Ignore("b/278816260: We could refer to b/182561174#comment4 for solution.")
+    @Test
+    public void logTrackingTypingFocus_processScroll_logDuration() {
+        WindowMagnificationManager spyWindowMagnificationManager = spy(mWindowMagnificationManager);
+        spyWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        spyWindowMagnificationManager.onImeWindowVisibilityChanged(TEST_DISPLAY, /* shown */ true);
+
+        spyWindowMagnificationManager.processScroll(TEST_DISPLAY, 10f, 10f);
+
+        verify(spyWindowMagnificationManager).logTrackingTypingFocus(anyLong());
     }
 
     @Test
@@ -508,6 +536,15 @@ public class WindowMagnificationManagerTest {
 
         mWindowMagnificationManager.removeMagnificationButton(TEST_DISPLAY);
         verify(mMockConnection.getConnection()).removeMagnificationButton(TEST_DISPLAY);
+    }
+
+    @Test
+    public void removeMagnificationSettingsPanel_hasConnection_invokeConnectionMethod()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+
+        mWindowMagnificationManager.removeMagnificationSettingsPanel(TEST_DISPLAY);
+        verify(mMockConnection.getConnection()).removeMagnificationSettingsPanel(TEST_DISPLAY);
     }
 
     @Test

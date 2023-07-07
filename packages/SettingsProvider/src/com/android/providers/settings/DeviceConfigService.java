@@ -26,16 +26,23 @@ import android.content.AttributionSource;
 import android.content.IContentProvider;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigShellCommandHandler;
 import android.provider.Settings;
 import android.provider.Settings.Config.SyncDisabledMode;
+import android.provider.UpdatableDeviceConfigServiceReadiness;
+
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,8 +63,32 @@ public final class DeviceConfigService extends Binder {
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-        (new MyShellCommand(mProvider)).exec(this, in, out, err, args, callback, resultReceiver);
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+            throws RemoteException {
+        if (UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService()) {
+            callUpdableDeviceConfigShellCommandHandler(in, out, err, args, resultReceiver);
+        } else {
+            (new MyShellCommand(mProvider))
+                    .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+    }
+
+    private void callUpdableDeviceConfigShellCommandHandler(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+        int result = -1;
+        try (
+                ParcelFileDescriptor inPfd = ParcelFileDescriptor.dup(in);
+                ParcelFileDescriptor outPfd = ParcelFileDescriptor.dup(out);
+                ParcelFileDescriptor errPfd = ParcelFileDescriptor.dup(err)) {
+            result = DeviceConfigShellCommandHandler.handleShellCommand(inPfd, outPfd, errPfd,
+                    args);
+        } catch (IOException e) {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(err));
+            pw.println("dup() failed: " + e.getMessage());
+            pw.flush();
+        } finally {
+            resultReceiver.send(result, null);
+        }
     }
 
     static final class MyShellCommand extends ShellCommand {

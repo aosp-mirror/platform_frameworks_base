@@ -71,8 +71,6 @@ static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimat
 static const char PRODUCT_BOOTANIMATION_FILE[] = "/product/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char APEX_BOOTANIMATION_FILE[] = "/apex/com.android.bootanimation/etc/bootanimation.zip";
-static const char PRODUCT_ENCRYPTED_BOOTANIMATION_FILE[] = "/product/media/bootanimation-encrypted.zip";
-static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
 static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
 static const char PRODUCT_SHUTDOWNANIMATION_FILE[] = "/product/media/shutdownanimation.zip";
 static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanimation.zip";
@@ -107,6 +105,7 @@ static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
 static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const char CLOCK_ENABLED_PROP_NAME[] = "persist.sys.bootanim.clock.enabled";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
+static const int MAX_CHECK_EXIT_INTERVAL_US = 50000;
 static constexpr size_t TEXT_POS_LEN_MAX = 16;
 static const int DYNAMIC_COLOR_COUNT = 4;
 static const char U_TEXTURE[] = "uTexture";
@@ -132,14 +131,14 @@ static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
     uniform sampler2D uTexture;
     uniform float uFade;
     uniform float uColorProgress;
-    uniform vec4 uStartColor0;
-    uniform vec4 uStartColor1;
-    uniform vec4 uStartColor2;
-    uniform vec4 uStartColor3;
-    uniform vec4 uEndColor0;
-    uniform vec4 uEndColor1;
-    uniform vec4 uEndColor2;
-    uniform vec4 uEndColor3;
+    uniform vec3 uStartColor0;
+    uniform vec3 uStartColor1;
+    uniform vec3 uStartColor2;
+    uniform vec3 uStartColor3;
+    uniform vec3 uEndColor0;
+    uniform vec3 uEndColor1;
+    uniform vec3 uEndColor2;
+    uniform vec3 uEndColor3;
     varying highp vec2 vUv;
     void main() {
         vec4 mask = texture2D(uTexture, vUv);
@@ -152,12 +151,12 @@ static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
             * step(cWhiteMaskThreshold, g)
             * step(cWhiteMaskThreshold, b)
             * step(cWhiteMaskThreshold, a);
-        vec4 color = r * mix(uStartColor0, uEndColor0, uColorProgress)
+        vec3 color = r * mix(uStartColor0, uEndColor0, uColorProgress)
                 + g * mix(uStartColor1, uEndColor1, uColorProgress)
                 + b * mix(uStartColor2, uEndColor2, uColorProgress)
                 + a * mix(uStartColor3, uEndColor3, uColorProgress);
-        color = mix(color, vec4(vec3((r + g + b + a) * 0.25), 1.0), useWhiteMask);
-        gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade)) * color.a;
+        color = mix(color, vec3((r + g + b + a) * 0.25), useWhiteMask);
+        gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade));
     })";
 static const char IMAGE_FRAG_SHADER_SOURCE[] = R"(
     precision mediump float;
@@ -460,6 +459,7 @@ public:
 
 EGLConfig BootAnimation::getEglConfig(const EGLDisplay& display) {
     const EGLint attribs[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_RED_SIZE,   8,
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE,  8,
@@ -494,27 +494,13 @@ ui::Size BootAnimation::limitSurfaceSize(int width, int height) const {
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
-    mDisplayToken = SurfaceComposerClient::getInternalDisplayToken();
-    if (mDisplayToken == nullptr)
+    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (ids.empty()) {
+        SLOGE("Failed to get ID for any displays\n");
         return NAME_NOT_FOUND;
+    }
 
-    DisplayMode displayMode;
-    const status_t error =
-            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
-    if (error != NO_ERROR)
-        return error;
-
-    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
-    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
-    ui::Size resolution = displayMode.resolution;
-    resolution = limitSurfaceSize(resolution.width, resolution.height);
-    // create the native surface
-    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
-            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565);
-
-    SurfaceComposerClient::Transaction t;
-
-    // this guest property specifies multi-display IDs to show the boot animation
+    // this system property specifies multi-display IDs to show the boot animation
     // multiple ids can be set with comma (,) as separator, for example:
     // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
     Vector<PhysicalDisplayId> physicalDisplayIds;
@@ -541,9 +527,44 @@ status_t BootAnimation::readyToRun() {
                 stream.ignore();
         }
 
+        // the first specified display id is used to retrieve mDisplayToken
+        for (const auto id : physicalDisplayIds) {
+            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
+                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
+                    mDisplayToken = token;
+                    break;
+                }
+            }
+        }
+    }
+
+    // If the system property is not present or invalid, display 0 is used
+    if (mDisplayToken == nullptr) {
+        mDisplayToken = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
+        if (mDisplayToken == nullptr) {
+            return NAME_NOT_FOUND;
+        }
+    }
+
+    DisplayMode displayMode;
+    const status_t error =
+            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
+    if (error != NO_ERROR) {
+        return error;
+    }
+
+    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
+    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
+    ui::Size resolution = displayMode.resolution;
+    resolution = limitSurfaceSize(resolution.width, resolution.height);
+    // create the native surface
+    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
+            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
+            ISurfaceComposerClient::eOpaque);
+
+    SurfaceComposerClient::Transaction t;
+    if (isValid) {
         // In the case of multi-display, boot animation shows on the specified displays
-        // in addition to the primary display
-        const auto ids = SurfaceComposerClient::getPhysicalDisplayIds();
         for (const auto id : physicalDisplayIds) {
             if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
                 if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
@@ -571,8 +592,9 @@ status_t BootAnimation::readyToRun() {
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
 
-    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
+    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
         return NO_INIT;
+    }
 
     mDisplay = display;
     mContext = context;
@@ -582,6 +604,15 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
     mTargetInset = -1;
+
+    // Rotate the boot animation according to the value specified in the sysprop
+    // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
+    // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
+    // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
+    // This is needed to support having boot animation in orientations different from the natural
+    // device orientation. For example, on tablets that may want to keep natural orientation
+    // portrait for applications compatibility and to have the boot animation in landscape.
+    rotateAwayFromNaturalOrientationIfNeeded();
 
     projectSceneToWindow();
 
@@ -594,6 +625,50 @@ status_t BootAnimation::readyToRun() {
             new DisplayEventCallback(this), nullptr);
 
     return NO_ERROR;
+}
+
+void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
+    const auto orientation = parseOrientationProperty();
+
+    if (orientation == ui::ROTATION_0) {
+        // Do nothing if the sysprop isn't set or is set to ROTATION_0.
+        return;
+    }
+
+    if (orientation == ui::ROTATION_90 || orientation == ui::ROTATION_270) {
+        std::swap(mWidth, mHeight);
+        std::swap(mInitWidth, mInitHeight);
+        mFlingerSurfaceControl->updateDefaultBufferSize(mWidth, mHeight);
+    }
+
+    Rect displayRect(0, 0, mWidth, mHeight);
+    Rect layerStackRect(0, 0, mWidth, mHeight);
+
+    SurfaceComposerClient::Transaction t;
+    t.setDisplayProjection(mDisplayToken, orientation, layerStackRect, displayRect);
+    t.apply();
+}
+
+ui::Rotation BootAnimation::parseOrientationProperty() {
+    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (displayIds.size() == 0) {
+        return ui::ROTATION_0;
+    }
+    const auto displayId = displayIds[0];
+    const auto syspropName = [displayId] {
+        std::stringstream ss;
+        ss << "ro.bootanim.set_orientation_" << displayId.value;
+        return ss.str();
+    }();
+    const auto syspropValue = android::base::GetProperty(syspropName, "ORIENTATION_0");
+    if (syspropValue == "ORIENTATION_90") {
+        return ui::ROTATION_90;
+    } else if (syspropValue == "ORIENTATION_180") {
+        return ui::ROTATION_180;
+    } else if (syspropValue == "ORIENTATION_270") {
+        return ui::ROTATION_270;
+    }
+    return ui::ROTATION_0;
 }
 
 void BootAnimation::projectSceneToWindow() {
@@ -615,10 +690,6 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     const auto limitedSize = limitSurfaceSize(newWidth, newHeight);
     mWidth = limitedSize.width;
     mHeight = limitedSize.height;
-
-    SurfaceComposerClient::Transaction t;
-    t.setSize(mFlingerSurfaceControl, mWidth, mHeight);
-    t.apply();
 
     EGLConfig config = getEglConfig(mDisplay);
     EGLSurface surface = eglCreateWindowSurface(mDisplay, config, mFlingerSurface.get(), nullptr);
@@ -653,23 +724,6 @@ bool BootAnimation::findBootAnimationFileInternal(const std::vector<std::string>
 }
 
 void BootAnimation::findBootAnimationFile() {
-    // If the device has encryption turned on or is in process
-    // of being encrypted we show the encrypted boot animation.
-    char decrypt[PROPERTY_VALUE_MAX];
-    property_get("vold.decrypt", decrypt, "");
-
-    bool encryptedAnimation = atoi(decrypt) != 0 ||
-        !strcmp("trigger_restart_min_framework", decrypt);
-
-    if (!mShuttingDown && encryptedAnimation) {
-        static const std::vector<std::string> encryptedBootFiles = {
-            PRODUCT_ENCRYPTED_BOOTANIMATION_FILE, SYSTEM_ENCRYPTED_BOOTANIMATION_FILE,
-        };
-        if (findBootAnimationFileInternal(encryptedBootFiles)) {
-            return;
-        }
-    }
-
     const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
     static const std::vector<std::string> bootFiles = {
         APEX_BOOTANIMATION_FILE, playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,
@@ -1113,6 +1167,11 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
 
         int nextReadPos;
 
+        if (strlen(l) == 0) {
+            s = ++endl;
+            continue;
+        }
+
         int topLineNumbers = sscanf(l, "%d %d %d %d", &width, &height, &fps, &progress);
         if (topLineNumbers == 3 || topLineNumbers == 4) {
             // SLOGD("> w=%d, h=%d, fps=%d, progress=%d", width, height, fps, progress);
@@ -1440,12 +1499,12 @@ void BootAnimation::initDynamicColors() {
     for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
         float *startColor = mAnimation->startColors[i];
         float *endColor = mAnimation->endColors[i];
-        glUniform4f(glGetUniformLocation(mImageShader,
+        glUniform3f(glGetUniformLocation(mImageShader,
             (U_START_COLOR_PREFIX + std::to_string(i)).c_str()),
-            startColor[0], startColor[1], startColor[2], 1 /* alpha */);
-        glUniform4f(glGetUniformLocation(mImageShader,
+            startColor[0], startColor[1], startColor[2]);
+        glUniform3f(glGetUniformLocation(mImageShader,
             (U_END_COLOR_PREFIX + std::to_string(i)).c_str()),
-            endColor[0], endColor[1], endColor[2], 1 /* alpha */);
+            endColor[0], endColor[1], endColor[2]);
     }
     mImageColorProgressLocation = glGetUniformLocation(mImageShader, U_COLOR_PROGRESS);
 }
@@ -1620,7 +1679,17 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 checkExit();
             }
 
-            usleep(part.pause * ns2us(frameDuration));
+            int pauseDuration = part.pause * ns2us(frameDuration);
+            while(pauseDuration > 0 && !exitPending()){
+                if (pauseDuration > MAX_CHECK_EXIT_INTERVAL_US) {
+                    usleep(MAX_CHECK_EXIT_INTERVAL_US);
+                    pauseDuration -= MAX_CHECK_EXIT_INTERVAL_US;
+                } else {
+                    usleep(pauseDuration);
+                    break;
+                }
+                checkExit();
+            }
 
             if (exitPending() && !part.count && mCurrentInset >= mTargetInset &&
                 !part.hasFadingPhase()) {

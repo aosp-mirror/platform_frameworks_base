@@ -19,15 +19,19 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -162,7 +166,7 @@ public class TestableLooperTest {
 
     @Test
     public void testCorrectLooperExecution() throws Exception {
-        boolean[] hasRun = new boolean[] { false };
+        boolean[] hasRun = new boolean[]{false};
         Runnable r = () -> {
             assertEquals("Should run on main looper", Looper.getMainLooper(), Looper.myLooper());
             hasRun[0] = true;
@@ -177,4 +181,63 @@ public class TestableLooperTest {
             testableLooper.destroy();
         }
     }
+
+    @Test
+    public void testDelayedDispatchNoTimeMove() {
+        Handler handler = spy(new Handler(mTestableLooper.getLooper()));
+        InOrder inOrder = inOrder(handler);
+
+        final Message messageA = handler.obtainMessage(1);
+        final Message messageB = handler.obtainMessage(2);
+
+        handler.sendMessageDelayed(messageA, 0);
+        handler.sendMessageDelayed(messageB, 0);
+
+        mTestableLooper.processAllMessages();
+
+        inOrder.verify(handler).dispatchMessage(messageA);
+        inOrder.verify(handler).dispatchMessage(messageB);
+    }
+
+    @Test
+    public void testDelayedMessageDoesntSend() {
+        Handler handler = spy(new Handler(mTestableLooper.getLooper()));
+        InOrder inOrder = inOrder(handler);
+
+        final Message messageA = handler.obtainMessage(1);
+        final Message messageB = handler.obtainMessage(2);
+        final Message messageC = handler.obtainMessage(3);
+
+        handler.sendMessageDelayed(messageA, 0);
+        handler.sendMessageDelayed(messageB, 0);
+        handler.sendMessageDelayed(messageC, 500);
+
+        mTestableLooper.processAllMessages();
+
+        inOrder.verify(handler).dispatchMessage(messageA);
+        inOrder.verify(handler).dispatchMessage(messageB);
+        verify(handler, never()).dispatchMessage(messageC);
+    }
+
+    @Test
+    public void testMessageSendsAfterDelay() {
+        Handler handler = spy(new Handler(mTestableLooper.getLooper()));
+        InOrder inOrder = inOrder(handler);
+
+        final Message messageA = handler.obtainMessage(1);
+        final Message messageB = handler.obtainMessage(2);
+        final Message messageC = handler.obtainMessage(3);
+
+        handler.sendMessageDelayed(messageA, 0);
+        handler.sendMessageDelayed(messageB, 0);
+        handler.sendMessageDelayed(messageC, 500);
+
+        mTestableLooper.moveTimeForward(500);
+        mTestableLooper.processAllMessages();
+
+        inOrder.verify(handler).dispatchMessage(messageA);
+        inOrder.verify(handler).dispatchMessage(messageB);
+        inOrder.verify(handler).dispatchMessage(messageC);
+    }
+
 }

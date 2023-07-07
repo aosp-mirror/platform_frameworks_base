@@ -37,24 +37,24 @@
 namespace aapt {
 namespace test {
 
-IDiagnostics* GetDiagnostics();
+android::IDiagnostics* GetDiagnostics();
 
-inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
+inline ResourceName ParseNameOrDie(android::StringPiece str) {
   ResourceNameRef ref;
   CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name: " << str;
   return ref.ToResourceName();
 }
 
-inline android::ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
-    android::ConfigDescription config;
+inline android::ConfigDescription ParseConfigOrDie(android::StringPiece str) {
+  android::ConfigDescription config;
   CHECK(android::ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
   return config;
 }
 
 template <typename T = Value>
-T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece& res_name,
+T* GetValueForConfigAndProduct(ResourceTable* table, android::StringPiece res_name,
                                const android::ConfigDescription& config,
-                               const android::StringPiece& product) {
+                               android::StringPiece product) {
   std::optional<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
   if (result) {
     ResourceConfigValue* config_value = result.value().entry->FindValue(config, product);
@@ -66,25 +66,25 @@ T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece&
 }
 
 template <>
-Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
-                                          const android::StringPiece& res_name,
+Value* GetValueForConfigAndProduct<Value>(ResourceTable* table, android::StringPiece res_name,
                                           const android::ConfigDescription& config,
-                                          const android::StringPiece& product);
+                                          android::StringPiece product);
 
 template <typename T = Value>
-T* GetValueForConfig(ResourceTable* table, const android::StringPiece& res_name,
+T* GetValueForConfig(ResourceTable* table, android::StringPiece res_name,
                      const android::ConfigDescription& config) {
   return GetValueForConfigAndProduct<T>(table, res_name, config, {});
 }
 
 template <typename T = Value>
-T* GetValue(ResourceTable* table, const android::StringPiece& res_name) {
+T* GetValue(ResourceTable* table, android::StringPiece res_name) {
   return GetValueForConfig<T>(table, res_name, {});
 }
 
 class TestFile : public io::IFile {
  public:
-  explicit TestFile(const android::StringPiece& path) : source_(path) {}
+  explicit TestFile(android::StringPiece path) : source_(path) {
+  }
 
   std::unique_ptr<io::IData> OpenAsData() override {
     return {};
@@ -94,14 +94,14 @@ class TestFile : public io::IFile {
     return OpenAsData();
   }
 
-  const Source& GetSource() const override {
+  const android::Source& GetSource() const override {
     return source_;
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TestFile);
 
-  Source source_;
+  android::Source source_;
 };
 
 }  // namespace test

@@ -166,12 +166,12 @@
     </string-array>
 
     <array name="sim_colors">
-        <item>@color/Teal_700</item>
-        <item>@color/Blue_700</item>
-        <item>@color/Indigo_700</item>
-        <item>@color/Purple_700</item>
-        <item>@color/Pink_700</item>
-        <item>@color/Red_700</item>
+        <item>@color/SIM_color_cyan</item>
+        <item>@color/SIM_color_blue</item>
+        <item>@color/SIM_color_green</item>
+        <item>@color/SIM_color_purple</item>
+        <item>@color/SIM_color_pink</item>
+        <item>@color/SIM_color_orange</item>
     </array>
 
     <!-- Used in ResolverTargetActionsDialogFragment -->
@@ -207,4 +207,36 @@
          be set by OEMs for devices which use eUICCs. -->
     <integer-array name="non_removable_euicc_slots"></integer-array>
 
+    <!-- Device state identifiers and strings for system notifications. The string arrays must have
+         the same length and order as the identifier array. -->
+    <integer-array name="device_state_notification_state_identifiers">
+        <item>@integer/config_deviceStateConcurrentRearDisplay</item>
+    </integer-array>
+    <string-array name="device_state_notification_names">
+        <item>@string/concurrent_display_notification_name</item>
+    </string-array>
+    <string-array name="device_state_notification_active_titles">
+        <item>@string/concurrent_display_notification_active_title</item>
+    </string-array>
+    <string-array name="device_state_notification_active_contents">
+        <item>@string/concurrent_display_notification_active_content</item>
+    </string-array>
+    <string-array name="device_state_notification_thermal_titles">
+        <item>@string/concurrent_display_notification_thermal_title</item>
+    </string-array>
+    <string-array name="device_state_notification_thermal_contents">
+        <item>@string/concurrent_display_notification_thermal_content</item>
+    </string-array>
+    <string-array name="device_state_notification_power_save_titles">
+        <item>@string/concurrent_display_notification_power_save_title</item>
+    </string-array>
+    <string-array name="device_state_notification_power_save_contents">
+        <item>@string/concurrent_display_notification_power_save_content</item>
+    </string-array>
+
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner of the
+         demo device provisioning permissions. -->
+    <string-array name="demo_device_provisioning_known_signers">
+        <item>@string/config_retailDemoPackageSignature</item>
+    </string-array>
 </resources>

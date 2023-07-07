@@ -52,17 +52,20 @@ interface IAppOpsService {
     int checkAudioOperation(int code, int usage, int uid, String packageName);
     boolean shouldCollectNotes(int opCode);
     void setCameraAudioRestriction(int mode);
+    void startWatchingModeWithFlags(int op, String packageName, int flags,
+            IAppOpsCallback callback);
     // End of methods also called by native code.
     // Any new method exposed to native must be added after the last one, do not reorder
 
     SyncNotedAppOp noteProxyOperation(int code, in AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation);
-    SyncNotedAppOp startProxyOperation(int code, in AttributionSource attributionSource,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-            boolean shouldCollectMessage, boolean skipProxyOperation, int proxyAttributionFlags,
-            int proxiedAttributionFlags, int attributionChainId);
-    void finishProxyOperation(int code, in AttributionSource attributionSource,
+    SyncNotedAppOp startProxyOperation(IBinder clientId, int code,
+            in AttributionSource attributionSource, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
+            int attributionChainId);
+    void finishProxyOperation(IBinder clientId, int code, in AttributionSource attributionSource,
             boolean skipProxyOperation);
 
     // Remaining methods are only used in Java.
@@ -108,8 +111,6 @@ interface IAppOpsService {
 
     void startWatchingStarted(in int[] ops, IAppOpsStartedCallback callback);
     void stopWatchingStarted(IAppOpsStartedCallback callback);
-
-    void startWatchingModeWithFlags(int op, String packageName, int flags, IAppOpsCallback callback);
 
     void startWatchingNoted(in int[] ops, IAppOpsNotedCallback callback);
     void stopWatchingNoted(IAppOpsNotedCallback callback);

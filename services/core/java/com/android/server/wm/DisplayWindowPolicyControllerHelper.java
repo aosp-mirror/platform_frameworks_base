@@ -19,15 +19,19 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.window.DisplayWindowPolicyController;
 
 import java.io.PrintWriter;
 import java.util.List;
 
 class DisplayWindowPolicyControllerHelper {
+    private static final String TAG = "DisplayWindowPolicyControllerHelper";
 
     private final DisplayContent mDisplayContent;
 
@@ -69,6 +73,17 @@ class DisplayWindowPolicyControllerHelper {
     public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
             @WindowConfiguration.WindowingMode int windowingMode) {
         if (mDisplayWindowPolicyController == null) {
+            for (int i = activities.size() - 1; i >= 0; i--) {
+                final ActivityInfo aInfo = activities.get(i);
+                if (aInfo.requiredDisplayCategory != null) {
+                    Slog.e(TAG,
+                            String.format("Activity with requiredDisplayCategory='%s' cannot be"
+                                            + " displayed on display %d because that display does"
+                                            + " not have a matching category",
+                                    aInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
+                    return false;
+                }
+            }
             return true;
         }
         return mDisplayWindowPolicyController.canContainActivities(activities, windowingMode);
@@ -78,20 +93,28 @@ class DisplayWindowPolicyControllerHelper {
      * @see DisplayWindowPolicyController#canActivityBeLaunched(ActivityInfo, int, int, boolean)
      */
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask) {
+            Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask) {
         if (mDisplayWindowPolicyController == null) {
+            if (activityInfo.requiredDisplayCategory != null) {
+                Slog.e(TAG,
+                        String.format("Activity with requiredDisplayCategory='%s' cannot be"
+                                + " launched on display %d because that display does"
+                                + " not have a matching category",
+                                activityInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
+                return false;
+            }
             return true;
         }
-        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, windowingMode,
-            launchingFromDisplayId, isNewTask);
+        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, intent,
+            windowingMode, launchingFromDisplayId, isNewTask);
     }
 
     /**
      * @see DisplayWindowPolicyController#keepActivityOnWindowFlagsChanged(ActivityInfo, int, int)
      */
     boolean keepActivityOnWindowFlagsChanged(ActivityInfo aInfo, int flagChanges,
-            int privateFlagChanges) {
+            int privateFlagChanges, int flagValues, int privateFlagValues) {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
@@ -102,7 +125,7 @@ class DisplayWindowPolicyControllerHelper {
         }
 
         return mDisplayWindowPolicyController.keepActivityOnWindowFlagsChanged(
-                aInfo, flagChanges, privateFlagChanges);
+                aInfo, flagValues, privateFlagValues);
     }
 
     /** Update the top activity and the uids of non-finishing activity */
@@ -116,10 +139,14 @@ class DisplayWindowPolicyControllerHelper {
                 true /* includeOverlays */);
         if (topActivity != mTopRunningActivity) {
             mTopRunningActivity = topActivity;
-            mDisplayWindowPolicyController.onTopActivityChanged(
-                    topActivity == null ? null : topActivity.info.getComponentName(),
-                    topActivity == null
-                            ? UserHandle.USER_NULL : topActivity.info.applicationInfo.uid);
+            if (topActivity == null) {
+                mDisplayWindowPolicyController.onTopActivityChanged(null, Process.INVALID_UID,
+                        UserHandle.USER_NULL);
+            } else {
+                mDisplayWindowPolicyController.onTopActivityChanged(
+                        topActivity.info.getComponentName(), topActivity.info.applicationInfo.uid,
+                        topActivity.mUserId);
+            }
         }
 
         // Update running uid.
@@ -153,14 +180,25 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canShowTasksInRecents()
+     * @see DisplayWindowPolicyController#canShowTasksInHostDeviceRecents()
      */
-    public final boolean canShowTasksInRecents() {
+    public final boolean canShowTasksInHostDeviceRecents() {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
-        return mDisplayWindowPolicyController.canShowTasksInRecents();
+        return mDisplayWindowPolicyController.canShowTasksInHostDeviceRecents();
     }
+
+    /**
+     * @see DisplayWindowPolicyController#isEnteringPipAllowed(int)
+     */
+    public final boolean isEnteringPipAllowed(int uid) {
+        if (mDisplayWindowPolicyController == null) {
+            return true;
+        }
+        return mDisplayWindowPolicyController.isEnteringPipAllowed(uid);
+    }
+
 
     void dump(String prefix, PrintWriter pw) {
         if (mDisplayWindowPolicyController != null) {

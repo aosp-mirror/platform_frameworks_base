@@ -10087,7 +10087,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
         static final int FLAG_IGNORE = 1 << 7;
 
         /**
-         * When the View is detached form the parent, we set this flag so that we can take correct
+         * When the View is detached from the parent, we set this flag so that we can take correct
          * action when we need to remove it or add it back.
          */
         static final int FLAG_TMP_DETACHED = 1 << 8;

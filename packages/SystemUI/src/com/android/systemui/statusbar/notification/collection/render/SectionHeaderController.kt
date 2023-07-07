@@ -100,4 +100,7 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
 
     override val view: View
         get() = _view!!
+    override fun offerToKeepInParentForAnimation(): Boolean = false
+    override fun removeFromParentIfKeptForAnimation(): Boolean = false
+    override fun resetKeepInParentForAnimation() {}
 }

@@ -31,7 +31,10 @@ android_test {
         "collector-device-lib",
         "platform-test-annotations",
     ],
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
     data: [":perfetto_artifacts"],
     platform_apis: true,
     certificate: "platform",

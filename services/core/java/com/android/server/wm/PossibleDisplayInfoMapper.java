@@ -22,6 +22,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,19 +54,21 @@ public class PossibleDisplayInfoMapper {
 
 
     /**
-     * Returns, for the given displayId, a set of display infos. Set contains each supported device
-     * state.
+     * Returns, for the given displayId, a list of unique display infos. List contains each
+     * supported device state.
+     * <p>List contents are guaranteed to be unique, but returned as a list rather than a set to
+     * minimize copies needed to make an iteraable data structure.
      */
-    public Set<DisplayInfo> getPossibleDisplayInfos(int displayId) {
+    public List<DisplayInfo> getPossibleDisplayInfos(int displayId) {
         // Update display infos before returning, since any cached values would have been removed
         // in response to any display event. This model avoids re-computing the cache for every
         // display change event (which occurs extremely frequently in the normal usage of the
         // device).
         updatePossibleDisplayInfos(displayId);
         if (!mDisplayInfos.contains(displayId)) {
-            return new ArraySet<>();
+            return new ArrayList<>();
         }
-        return Set.copyOf(mDisplayInfos.get(displayId));
+        return List.copyOf(mDisplayInfos.get(displayId));
     }
 
     /**

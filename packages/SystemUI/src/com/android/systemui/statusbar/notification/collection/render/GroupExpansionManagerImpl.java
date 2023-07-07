@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.coordinator.Coordinator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 
 import java.io.PrintWriter;
@@ -28,18 +32,25 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 /**
  * Provides grouping information for notification entries including information about a group's
  * expanded state.
  */
-public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordinator {
+@SysUISingleton
+public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpable {
+    private final DumpManager mDumpManager;
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
 
     // Set of summary keys whose groups are expanded
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
 
-    public GroupExpansionManagerImpl(GroupMembershipManager groupMembershipManager) {
+    @Inject
+    public GroupExpansionManagerImpl(DumpManager dumpManager,
+            GroupMembershipManager groupMembershipManager) {
+        mDumpManager = dumpManager;
         mGroupMembershipManager = groupMembershipManager;
     }
 
@@ -56,8 +67,8 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
         mExpandedGroups.removeIf(expandedGroup -> !renderingSummaries.contains(expandedGroup));
     };
 
-    @Override
     public void attach(NotifPipeline pipeline) {
+        mDumpManager.registerDumpable(this);
         pipeline.addOnBeforeRenderListListener(mNotifTracker);
     }
 
@@ -97,11 +108,11 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("NotificationEntryExpansion state:");
-        pw.println("  # expanded groups: " +  mExpandedGroups.size());
+        pw.println("  mExpandedGroups: " + mExpandedGroups.size());
         for (NotificationEntry entry : mExpandedGroups) {
-            pw.println("    summary key of expanded group: " + entry.getKey());
+            pw.println("  * " + entry.getKey());
         }
     }
 

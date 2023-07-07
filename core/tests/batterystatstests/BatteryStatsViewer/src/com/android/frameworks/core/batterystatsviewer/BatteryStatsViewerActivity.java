@@ -285,38 +285,38 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case UID_POWER_MODELED:
+                case UID_POWER_PROFILE:
                     setTitleIconAndBackground(viewHolder, entry.title,
                             R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case UID_POWER_MODELED_PROCESS_STATE:
+                case UID_POWER_PROFILE_PROCESS_STATE:
                     setTitleIconAndBackground(viewHolder, "    " + entry.title,
                             R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     viewHolder.value2TextView.setVisibility(View.INVISIBLE);
                     break;
-                case UID_POWER_MEASURED:
+                case UID_POWER_ENERGY_CONSUMPTION:
                     setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_amp_24,
-                            R.color.battery_consumer_bg_measured_energy);
+                            R.drawable.gm_energy_24,
+                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case UID_POWER_MEASURED_PROCESS_STATE:
+                case UID_POWER_ENERGY_PROCESS_STATE:
                     setTitleIconAndBackground(viewHolder, "    " + entry.title,
-                            R.drawable.gm_amp_24,
-                            R.color.battery_consumer_bg_measured_energy);
+                            R.drawable.gm_energy_24,
+                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     viewHolder.value2TextView.setVisibility(View.INVISIBLE);
                     break;
                 case UID_POWER_CUSTOM:
                     setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_custom_24,
-                            R.color.battery_consumer_bg_measured_energy);
+                            R.drawable.gm_energy_24,
+                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
@@ -339,17 +339,17 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
-                case DEVICE_POWER_MEASURED:
+                case DEVICE_POWER_ENERGY_CONSUMPTION:
                     setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_amp_24,
-                            R.color.battery_consumer_bg_measured_energy);
+                            R.drawable.gm_energy_24,
+                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
                 case DEVICE_POWER_CUSTOM:
                     setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_custom_24,
-                            R.color.battery_consumer_bg_measured_energy);
+                            R.drawable.gm_energy_24,
+                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
