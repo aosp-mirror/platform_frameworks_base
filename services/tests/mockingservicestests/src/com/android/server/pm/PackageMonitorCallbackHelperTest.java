@@ -221,6 +221,19 @@ public class PackageMonitorCallbackHelperTest {
         assertThat(pkgNames[0]).isEqualTo(FAKE_PACKAGE_NAME);
     }
 
+    @Test
+    public void testPackageMonitorCallback_onUserRemoved_callbackNotCalled() throws Exception {
+        IRemoteCallback callback = createMockPackageMonitorCallback();
+        mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, 10 /* userId */);
+
+        mPackageMonitorCallbackHelper.onUserRemoved(10);
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
+                FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{10} /* userIds */,
+                null /* instantUserIds */);
+
+        verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
+    }
+
     private IRemoteCallback createMockPackageMonitorCallback() {
         return spy(new IRemoteCallback.Stub() {
             @Override
