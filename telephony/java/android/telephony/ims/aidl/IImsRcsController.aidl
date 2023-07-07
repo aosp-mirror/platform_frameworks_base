@@ -30,6 +30,7 @@ import android.telephony.ims.aidl.ISipDelegateConnectionStateCallback;
 import com.android.ims.ImsFeatureContainer;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.IIntegerConsumer;
+import com.android.internal.telephony.ISipDialogStateCallback;
 
 /**
  * Interface used to interact with the Telephony IMS.
@@ -69,6 +70,10 @@ interface IImsRcsController {
     void destroySipDelegate(int subId, ISipDelegate connection, int reason);
     void triggerNetworkRegistration(int subId, ISipDelegate connection, int sipCode,
             String sipReason);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    void registerSipDialogStateCallback(int subId, in ISipDialogStateCallback cb);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    void unregisterSipDialogStateCallback(int subId, in ISipDialogStateCallback cb);
 
     // Internal commands that should not be made public
     void registerRcsFeatureCallback(int slotId, in IImsServiceFeatureCallback callback);

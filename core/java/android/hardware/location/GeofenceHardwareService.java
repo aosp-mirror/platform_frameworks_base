@@ -75,76 +75,84 @@ public class GeofenceHardwareService extends Service {
             mGeofenceHardwareImpl.setFusedGeofenceHardware(service);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public int[] getMonitoringTypes() {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.getMonitoringTypes_enforcePermission();
 
             return mGeofenceHardwareImpl.getMonitoringTypes();
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public int getStatusOfMonitoringType(int monitoringType) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.getStatusOfMonitoringType_enforcePermission();
 
             return mGeofenceHardwareImpl.getStatusOfMonitoringType(monitoringType);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean addCircularFence(
                 int monitoringType,
                 GeofenceHardwareRequestParcelable request,
                 IGeofenceHardwareCallback callback) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+            super.addCircularFence_enforcePermission();
+
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.addCircularFence(monitoringType, request, callback);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean removeGeofence(int id, int monitoringType) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.removeGeofence_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.removeGeofence(id, monitoringType);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean pauseGeofence(int id, int monitoringType) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.pauseGeofence_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.pauseGeofence(id, monitoringType);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean resumeGeofence(int id, int monitoringType, int monitorTransitions) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.resumeGeofence_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.resumeGeofence(id, monitoringType, monitorTransitions);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean registerForMonitorStateChangeCallback(int monitoringType,
                 IGeofenceHardwareMonitorCallback callback) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.registerForMonitorStateChangeCallback_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.registerForMonitorStateChangeCallback(monitoringType,
                     callback);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
         @Override
         public boolean unregisterForMonitorStateChangeCallback(int monitoringType,
                 IGeofenceHardwareMonitorCallback callback) {
-            mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                    "Location Hardware permission not granted to access hardware geofence");
+
+            super.unregisterForMonitorStateChangeCallback_enforcePermission();
 
             checkPermission(Binder.getCallingPid(), Binder.getCallingUid(), monitoringType);
             return mGeofenceHardwareImpl.unregisterForMonitorStateChangeCallback(monitoringType,

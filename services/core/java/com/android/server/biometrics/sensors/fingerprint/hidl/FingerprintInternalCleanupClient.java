@@ -45,11 +45,10 @@ class FingerprintInternalCleanupClient
             @NonNull Supplier<IBiometricsFingerprint> lazyDaemon, int userId,
             @NonNull String owner, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            @NonNull List<Fingerprint> enrolledList,
             @NonNull BiometricUtils<Fingerprint> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, logger, biometricContext,
-                enrolledList, utils, authenticatorIds);
+                utils, authenticatorIds);
     }
 
     @Override

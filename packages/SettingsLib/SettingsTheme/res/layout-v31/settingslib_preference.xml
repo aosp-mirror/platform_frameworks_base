@@ -42,8 +42,9 @@
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:textAlignment="viewStart"
             android:maxLines="2"
-            android:hyphenationFrequency="normalFast"
             android:textAppearance="?android:attr/textAppearanceListItem"
             android:ellipsize="marquee"/>
 
@@ -58,7 +59,6 @@
             android:textAlignment="viewStart"
             android:textColor="?android:attr/textColorSecondary"
             android:maxLines="10"
-            android:hyphenationFrequency="normalFast"
             style="@style/PreferenceSummaryTextStyle"/>
 
     </RelativeLayout>

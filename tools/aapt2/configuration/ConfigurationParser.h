@@ -24,8 +24,7 @@
 #include <vector>
 
 #include "androidfw/ConfigDescription.h"
-
-#include "Diagnostics.h"
+#include "androidfw/IDiagnostics.h"
 
 namespace aapt {
 
@@ -44,7 +43,7 @@ enum class Abi {
 };
 
 /** Helper method to convert an ABI to a string representing the path within the APK. */
-const android::StringPiece& AbiToString(Abi abi);
+android::StringPiece AbiToString(Abi abi);
 
 /**
  * Represents an individual locale. When a locale is included, it must be
@@ -126,9 +125,6 @@ struct OutputArtifact {
 
 }  // namespace configuration
 
-// Forward declaration of classes used in the API.
-struct IDiagnostics;
-
 /**
  * XML configuration file parser for the split and optimize commands.
  */
@@ -145,7 +141,7 @@ class ConfigurationParser {
   }
 
   /** Sets the diagnostics context to use when parsing. */
-  ConfigurationParser& WithDiagnostics(IDiagnostics* diagnostics) {
+  ConfigurationParser& WithDiagnostics(android::IDiagnostics* diagnostics) {
     diag_ = diagnostics;
     return *this;
   }
@@ -154,8 +150,7 @@ class ConfigurationParser {
    * Parses the configuration file and returns the results. If the configuration could not be parsed
    * the result is empty and any errors will be displayed with the provided diagnostics context.
    */
-  std::optional<std::vector<configuration::OutputArtifact>> Parse(
-      const android::StringPiece& apk_path);
+  std::optional<std::vector<configuration::OutputArtifact>> Parse(android::StringPiece apk_path);
 
  protected:
   /**
@@ -166,7 +161,7 @@ class ConfigurationParser {
   ConfigurationParser(std::string contents, const std::string& config_path);
 
   /** Returns the current diagnostics context to any subclasses. */
-  IDiagnostics* diagnostics() {
+  android::IDiagnostics* diagnostics() {
     return diag_;
   }
 
@@ -176,7 +171,7 @@ class ConfigurationParser {
   /** Path to the input configuration. */
   const std::string config_path_;
   /** The diagnostics context to send messages to. */
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
 };
 
 }  // namespace aapt

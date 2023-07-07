@@ -17,7 +17,7 @@
 
 package android.window;
 
-import android.window.BackEvent;
+import android.window.BackMotionEvent;
 
 /**
  * Interface that wraps a {@link OnBackInvokedCallback} object, to be stored in window manager
@@ -28,19 +28,21 @@ import android.window.BackEvent;
 oneway interface IOnBackInvokedCallback {
    /**
     * Called when a back gesture has been started, or back button has been pressed down.
-    * Wraps {@link OnBackInvokedCallback#onBackStarted()}.
+    * Wraps {@link OnBackInvokedCallback#onBackStarted(BackEvent)}.
+    *
+    * @param backMotionEvent The {@link BackMotionEvent} containing information about the touch
+    *        or button press.
     */
-    void onBackStarted();
+    void onBackStarted(in BackMotionEvent backMotionEvent);
 
     /**
      * Called on back gesture progress.
-     * Wraps {@link OnBackInvokedCallback#onBackProgressed()}.
+     * Wraps {@link OnBackInvokedCallback#onBackProgressed(BackEvent)}.
      *
-     * @param touchX Absolute X location of the touch point.
-     * @param touchY Absolute Y location of the touch point.
-     * @param progress Value between 0 and 1 on how far along the back gesture is.
+     * @param backMotionEvent The {@link BackMotionEvent} containing information about the latest
+     *                        touch point and the progress that the back animation should seek to.
      */
-    void onBackProgressed(in BackEvent backEvent);
+    void onBackProgressed(in BackMotionEvent backMotionEvent);
 
     /**
      * Called when a back gesture or back button press has been cancelled.

@@ -180,7 +180,7 @@ public class EventManager {
             }
         }
 
-        private final List<Event> mEvents = Collections.synchronizedList(new LinkedList<>());
+        private final List<Event> mEvents = Collections.synchronizedList(new ArrayList<>());
         private final Loggable mRecordEntry;
 
         public EventRecord(Loggable recordEntry) {
@@ -197,7 +197,7 @@ public class EventManager {
         }
 
         public List<Event> getEvents() {
-            return new LinkedList<>(mEvents);
+            return new ArrayList<>(mEvents);
         }
 
         public List<EventTiming> extractEventTimings() {
@@ -205,7 +205,7 @@ public class EventManager {
                 return Collections.emptyList();
             }
 
-            LinkedList<EventTiming> result = new LinkedList<>();
+            ArrayList<EventTiming> result = new ArrayList<>();
             Map<String, PendingResponse> pendingResponses = new HashMap<>();
             synchronized (mEvents) {
                 for (Event event : mEvents) {

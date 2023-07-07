@@ -30,7 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:clipChildren="false"/>
 
     <LinearLayout
         android:id="@+id/bubble_overflow_empty_state"

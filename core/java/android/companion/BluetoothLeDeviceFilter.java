@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "BluetoothLeDeviceFilter";
+    private static final String LOG_TAG = "CDM_BluetoothLeDeviceFilter";
 
     private static final int RENAME_PREFIX_LENGTH_LIMIT = 10;
 
@@ -204,9 +204,10 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mNamePattern, mScanFilter, mRawDataFilter, mRawDataFilterMask,
-                mRenamePrefix, mRenameSuffix, mRenameBytesFrom, mRenameBytesLength,
-                mRenameNameFrom, mRenameNameLength, mRenameBytesReverseOrder);
+        return Objects.hash(mNamePattern, mScanFilter, Arrays.hashCode(mRawDataFilter),
+                Arrays.hashCode(mRawDataFilterMask), mRenamePrefix, mRenameSuffix,
+                mRenameBytesFrom, mRenameBytesLength, mRenameNameFrom, mRenameNameLength,
+                mRenameBytesReverseOrder);
     }
 
     @Override

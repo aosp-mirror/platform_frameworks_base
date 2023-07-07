@@ -1,0 +1,88 @@
+<!--
+  Copyright (C) 2022 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/screenrecord_options_padding_bottom">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="@dimen/screenrecord_option_icon_size"
+            android:layout_height="@dimen/screenrecord_option_icon_size"
+            android:src="@drawable/ic_mic_26dp"
+            android:tint="?android:attr/textColorSecondary"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:layout_marginRight="@dimen/screenrecord_option_padding"
+            android:importantForAccessibility="no"/>
+        <Spinner
+            android:id="@+id/screen_recording_options"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_weight="1"
+            android:popupBackground="@drawable/screenrecord_spinner_background"
+            android:dropDownWidth="274dp"
+            android:importantForAccessibility="yes"/>
+        <Switch
+            android:layout_width="wrap_content"
+            android:minWidth="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="0"
+            android:layout_gravity="end"
+            android:id="@+id/screenrecord_audio_switch"
+            style="@style/ScreenRecord.Switch"
+            android:importantForAccessibility="yes"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/show_taps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/screenrecord_option_padding">
+        <ImageView
+            android:layout_width="@dimen/screenrecord_option_icon_size"
+            android:layout_height="@dimen/screenrecord_option_icon_size"
+            android:layout_weight="0"
+            android:src="@drawable/ic_touch"
+            android:tint="?android:attr/textColorSecondary"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="@dimen/screenrecord_option_padding"
+            android:importantForAccessibility="no"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/screenrecord_taps_label"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:textColor="?android:attr/textColorPrimary"
+            android:contentDescription="@string/screenrecord_taps_label"/>
+        <Switch
+            android:layout_width="wrap_content"
+            android:minWidth="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="0"
+            android:id="@+id/screenrecord_taps_switch"
+            style="@style/ScreenRecord.Switch"
+            android:importantForAccessibility="yes"/>
+    </LinearLayout>
+</LinearLayout>

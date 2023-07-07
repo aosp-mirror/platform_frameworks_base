@@ -244,12 +244,9 @@ public final class MediaSession {
                 mCallback = null;
                 return;
             }
-            if (handler == null) {
-                handler = new Handler();
-            }
+            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
             callback.mSession = this;
-            CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
-                    callback);
+            CallbackMessageHandler msgHandler = new CallbackMessageHandler(looper, callback);
             mCallback = msgHandler;
         }
     }
@@ -296,12 +293,16 @@ public final class MediaSession {
      * Set the component name of the manifest-declared {@link android.content.BroadcastReceiver}
      * class that should receive media buttons. This allows restarting playback after the session
      * has been stopped. If your app is started in this way an {@link Intent#ACTION_MEDIA_BUTTON}
-     * intent will be sent to the broadcast receiver.
-     * <p>
-     * Note: The given {@link android.content.BroadcastReceiver} should belong to the same package
-     * as the context that was given when creating {@link MediaSession}.
+     * intent will be sent to the broadcast receiver. On apps targeting Android U and above, this
+     * will throw an {@link IllegalArgumentException} if the provided {@link ComponentName} does not
+     * resolve to an existing {@link android.content.BroadcastReceiver broadcast receiver}.
+     *
+     * <p>Note: The given {@link android.content.BroadcastReceiver} should belong to the same
+     * package as the context that was given when creating {@link MediaSession}.
      *
      * @param broadcastReceiver the component name of the BroadcastReceiver class
+     * @throws IllegalArgumentException if {@code broadcastReceiver} does not exist on apps
+     *     targeting Android U and above
      */
     public void setMediaButtonBroadcastReceiver(@Nullable ComponentName broadcastReceiver) {
         try {
@@ -917,7 +918,7 @@ public final class MediaSession {
         public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
             if (mSession != null && mHandler != null
                     && Intent.ACTION_MEDIA_BUTTON.equals(mediaButtonIntent.getAction())) {
-                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent.class);
                 if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
                     PlaybackState state = mSession.mPlaybackState;
                     long validActions = state == null ? 0 : state.getActions();

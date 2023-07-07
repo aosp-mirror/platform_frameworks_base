@@ -17,6 +17,7 @@
 #include "idmap2/Idmap.h"
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -76,8 +77,7 @@ bool WARN_UNUSED ReadString(std::istream& stream, std::string* out) {
     return false;
   }
   uint32_t padding_size = CalculatePadding(size);
-  std::string padding(padding_size, '\0');
-  if (!stream.read(padding.data(), padding_size)) {
+  if (padding_size != 0 && !stream.seekg(padding_size, std::ios_base::cur)) {
     return false;
   }
   *out = buf;
@@ -185,6 +185,8 @@ std::unique_ptr<const IdmapData::Header> IdmapData::Header::FromBinaryStream(std
   std::unique_ptr<IdmapData::Header> idmap_data_header(new IdmapData::Header());
   if (!Read32(stream, &idmap_data_header->target_entry_count) ||
       !Read32(stream, &idmap_data_header->target_entry_inline_count) ||
+      !Read32(stream, &idmap_data_header->target_entry_inline_value_count) ||
+      !Read32(stream, &idmap_data_header->config_count) ||
       !Read32(stream, &idmap_data_header->overlay_entry_count) ||
       !Read32(stream, &idmap_data_header->string_pool_index_offset)) {
     return nullptr;
@@ -206,20 +208,59 @@ std::unique_ptr<const IdmapData> IdmapData::FromBinaryStream(std::istream& strea
     if (!Read32(stream, &target_entry.target_id) || !Read32(stream, &target_entry.overlay_id)) {
       return nullptr;
     }
-    data->target_entries_.push_back(target_entry);
+    data->target_entries_.emplace_back(target_entry);
   }
 
   // Read the mapping of target resource id to inline overlay values.
-  uint8_t unused1;
-  uint16_t unused2;
+  std::vector<std::tuple<TargetInlineEntry, uint32_t, uint32_t>> target_inline_entries;
   for (size_t i = 0; i < data->header_->GetTargetInlineEntryCount(); i++) {
     TargetInlineEntry target_entry{};
-    if (!Read32(stream, &target_entry.target_id) || !Read16(stream, &unused2) ||
-        !Read8(stream, &unused1) || !Read8(stream, &target_entry.value.data_type) ||
-        !Read32(stream, &target_entry.value.data_value)) {
+    uint32_t entry_offset;
+    uint32_t entry_count;
+    if (!Read32(stream, &target_entry.target_id) || !Read32(stream, &entry_offset)
+        || !Read32(stream, &entry_count)) {
       return nullptr;
     }
-    data->target_inline_entries_.push_back(target_entry);
+    target_inline_entries.emplace_back(target_entry, entry_offset, entry_count);
+  }
+
+  // Read the inline overlay resource values
+  std::vector<std::pair<uint32_t, TargetValue>> target_values;
+  uint8_t unused1;
+  uint16_t unused2;
+  for (size_t i = 0; i < data->header_->GetTargetInlineEntryValueCount(); i++) {
+    uint32_t config_index;
+    if (!Read32(stream, &config_index)) {
+      return nullptr;
+    }
+    TargetValue value;
+    if (!Read16(stream, &unused2)
+        || !Read8(stream, &unused1)
+        || !Read8(stream, &value.data_type)
+        || !Read32(stream, &value.data_value)) {
+      return nullptr;
+    }
+    target_values.emplace_back(config_index, value);
+  }
+
+  // Read the configurations
+  std::vector<ConfigDescription> configurations;
+  for (size_t i = 0; i < data->header_->GetConfigCount(); i++) {
+    ConfigDescription cd;
+    if (!stream.read(reinterpret_cast<char*>(&cd), sizeof(ConfigDescription))) {
+      return nullptr;
+    }
+    configurations.emplace_back(cd);
+  }
+
+  // Construct complete target inline entries
+  for (auto [target_entry, entry_offset, entry_count] : target_inline_entries) {
+    for(size_t i = 0; i < entry_count; i++) {
+      const auto& target_value = target_values[entry_offset + i];
+      const auto& config = configurations[target_value.first];
+      target_entry.values[config] = target_value.second;
+    }
+    data->target_inline_entries_.emplace_back(target_entry);
   }
 
   // Read the mapping of overlay resource id to target resource id.
@@ -276,13 +317,22 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
   }
 
   std::unique_ptr<IdmapData> data(new IdmapData());
-  data->string_pool_data_ = resource_mapping.GetStringPoolData().to_string();
+  data->string_pool_data_ = std::string(resource_mapping.GetStringPoolData());
+  uint32_t inline_value_count = 0;
+  std::set<std::string> config_set;
   for (const auto& mapping : resource_mapping.GetTargetToOverlayMap()) {
     if (auto overlay_resource = std::get_if<ResourceId>(&mapping.second)) {
       data->target_entries_.push_back({mapping.first, *overlay_resource});
     } else {
-      data->target_inline_entries_.push_back(
-          {mapping.first, std::get<TargetValue>(mapping.second)});
+      std::map<ConfigDescription, TargetValue> values;
+      for (const auto& [config, value] : std::get<ConfigMap>(mapping.second)) {
+        config_set.insert(config);
+        ConfigDescription cd;
+        ConfigDescription::Parse(config, &cd);
+        values[cd] = value;
+        inline_value_count++;
+      }
+      data->target_inline_entries_.push_back({mapping.first, values});
     }
   }
 
@@ -294,6 +344,8 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
   data_header->target_entry_count = static_cast<uint32_t>(data->target_entries_.size());
   data_header->target_entry_inline_count =
       static_cast<uint32_t>(data->target_inline_entries_.size());
+  data_header->target_entry_inline_value_count = inline_value_count;
+  data_header->config_count = config_set.size();
   data_header->overlay_entry_count = static_cast<uint32_t>(data->overlay_entries_.size());
   data_header->string_pool_index_offset = resource_mapping.GetStringPoolOffset();
   data->header_ = std::move(data_header);

@@ -220,6 +220,11 @@ public final class UsageStatsManager {
      */
     public static final int REASON_SUB_DEFAULT_APP_UPDATE = 0x0001;
     /**
+     * The app was restored.
+     * @hide
+     */
+    public static final int REASON_SUB_DEFAULT_APP_RESTORED = 0x0002;
+    /**
      * The app was interacted with in some way by the system.
      * @hide
      */
@@ -634,6 +639,19 @@ public final class UsageStatsManager {
             }
         }
         return aggregatedStats;
+    }
+
+    /**
+     * Returns whether the app standby bucket feature is enabled.
+     * @hide
+     */
+    @TestApi
+    public boolean isAppStandbyEnabled() {
+        try {
+            return mService.isAppStandbyEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1208,6 +1226,9 @@ public final class UsageStatsManager {
                         break;
                     case REASON_SUB_DEFAULT_APP_UPDATE:
                         sb.append("-au");
+                        break;
+                    case REASON_SUB_DEFAULT_APP_RESTORED:
+                        sb.append("-ar");
                         break;
                 }
                 break;

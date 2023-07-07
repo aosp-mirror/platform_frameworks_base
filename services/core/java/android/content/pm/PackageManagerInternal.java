@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.SignatureResult;
 import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.Bundle;
@@ -43,12 +44,12 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
@@ -112,11 +113,11 @@ public abstract class PackageManagerInternal {
     /** Observer called whenever the list of packages changes */
     public interface PackageListObserver {
         /** A package was added to the system. */
-        void onPackageAdded(@NonNull String packageName, int uid);
+        default void onPackageAdded(@NonNull String packageName, int uid) {}
         /** A package was changed - either installed for a specific user or updated. */
         default void onPackageChanged(@NonNull String packageName, int uid) {}
         /** A package was removed from the system. */
-        void onPackageRemoved(@NonNull String packageName, int uid);
+        default void onPackageRemoved(@NonNull String packageName, int uid) {}
     }
 
     /**
@@ -153,16 +154,24 @@ public abstract class PackageManagerInternal {
 
 
     /**
+     * Variant of {@link #isSameApp(String, long, int, int)} with no flags.
+     * @see #isSameApp(String, long, int, int)
+     */
+    public abstract boolean isSameApp(String packageName, int callingUid, int userId);
+
+    /**
      * Gets whether a given package name belongs to the calling uid. If the calling uid is an
      * {@link Process#isSdkSandboxUid(int) sdk sandbox uid}, checks whether the package name is
      * equal to {@link PackageManager#getSdkSandboxPackageName()}.
      *
      * @param packageName The package name to check.
+     * @param flags The PackageInfoFlagsBits flags to use during uid lookup.
      * @param callingUid The calling uid.
      * @param userId The user under which to check.
      * @return True if the package name belongs to the calling uid.
      */
-    public abstract boolean isSameApp(String packageName, int callingUid, int userId);
+    public abstract boolean isSameApp(String packageName,
+            @PackageManager.PackageInfoFlagsBits long flags, int callingUid, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
@@ -270,6 +279,26 @@ public abstract class PackageManagerInternal {
     public abstract String getSuspendingPackage(String suspendedPackage, int userId);
 
     /**
+     * Suspend or unsuspend packages upon admin request.
+     *
+     * @param userId The target user.
+     * @param packageNames The names of the packages to set the suspended status.
+     * @param suspended Whether the packages should be suspended or unsuspended.
+     * @return an array of package names for which the suspended status could not be set as
+     *   requested in this method.
+     */
+    public abstract String[] setPackagesSuspendedByAdmin(
+            @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended);
+
+    /**
+     * Suspend or unsuspend packages in a profile when quiet mode is toggled.
+     *
+     * @param userId The target user.
+     * @param suspended Whether the packages should be suspended or unsuspended.
+     */
+    public abstract void setPackagesSuspendedForQuietMode(@UserIdInt int userId, boolean suspended);
+
+    /**
      * Get the information describing the dialog to be shown to the user when they try to launch a
      * suspended application.
      *
@@ -375,10 +404,15 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Marks packages as protected for a given user or all users in case of USER_ALL.
+     * Marks packages as protected for a given user or all users in case of USER_ALL. Setting
+     * {@code packageNames} to {@code null} means unset all existing protected packages for the
+     * given user.
+     *
+     * <p> Note that setting it if set for a specific user, it takes precedence over the packages
+     * set globally using USER_ALL.
      */
     public abstract void setOwnerProtectedPackages(
-            @UserIdInt int userId, @NonNull List<String> packageNames);
+            @UserIdInt int userId, @Nullable List<String> packageNames);
 
     /**
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
@@ -502,12 +536,6 @@ public abstract class PackageManagerInternal {
     public abstract void pruneInstantApps();
 
     /**
-     * Prunes the cache of the APKs in the given APEXes.
-     * @param apexPackages The list of APEX packages that may contain APK-in-APEX.
-     */
-    public abstract void pruneCachedApksInApex(@NonNull List<PackageInfo> apexPackages);
-
-    /**
      * @return The SetupWizard package name.
      */
     public abstract String getSetupWizardPackageName();
@@ -556,18 +584,23 @@ public abstract class PackageManagerInternal {
     /**
      * Set which overlay to use for a package.
      * @param userId The user for which to update the overlays.
-     * @param targetPackageName The package name of the package for which to update the overlays.
-     * @param overlayPaths  The complete list of overlay paths that should be enabled for
+     * @param pendingChanges is a map to describe all overlay targets and their related overlay
+     *                      paths. Its key is the overlay target package and its value is the
+     *                      complete list of overlay paths that should be enabled for
      *                      the target. Previously enabled overlays not specified in the list
      *                      will be disabled. Pass in null or empty paths to disable all overlays.
      *                      The order of the items is significant if several overlays modify the
-     *                      same resource.
+     *                      same resource. To pass the concrete ArrayMap type is to reduce the
+     *                      overheads of system server.
      * @param outUpdatedPackageNames An output list that contains the package names of packages
      *                               affected by the update of enabled overlays.
-     * @return true if all packages names were known by the package manager, false otherwise
+     * @param outInvalidPackageNames An output list that contains the package names of packages
+     *                               are not valid.
      */
-    public abstract boolean setEnabledOverlayPackages(int userId, String targetPackageName,
-            @Nullable OverlayPaths overlayPaths, Set<String> outUpdatedPackageNames);
+    public abstract void setEnabledOverlayPackages(int userId,
+            @NonNull ArrayMap<String, OverlayPaths> pendingChanges,
+            @NonNull Set<String> outUpdatedPackageNames,
+            @NonNull Set<String> outInvalidPackageNames);
 
     /**
      * Resolves an activity intent, allowing instant apps to be resolved.
@@ -576,6 +609,14 @@ public abstract class PackageManagerInternal {
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
             int filterCallingUid);
+
+    /**
+     * Resolves an exported activity intent, allowing instant apps to be resolved.
+     */
+    public abstract ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags,
+            @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
+            int filterCallingUid, int callingPid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.
@@ -644,7 +685,7 @@ public abstract class PackageManagerInternal {
      * Returns the {@link SystemApi} variant of a package for use with mainline.
      */
     @Nullable
-    public abstract AndroidPackageApi getAndroidPackage(@NonNull String packageName);
+    public abstract AndroidPackage getAndroidPackage(@NonNull String packageName);
 
     @Nullable
     public abstract PackageStateInternal getPackageStateInternal(@NonNull String packageName);
@@ -731,28 +772,49 @@ public abstract class PackageManagerInternal {
     public abstract @Nullable String getInstantAppPackageName(int uid);
 
     /**
-     * Returns whether or not access to the application should be filtered.
+     * Returns whether or not access to the application should be filtered. The access is not
+     * allowed if the application is not installed under the given user.
      * <p>
      * Access may be limited based upon whether the calling or target applications
      * are instant applications.
      *
      * @see #canAccessInstantApps
+     *
+     * @param pkg The package to be accessed.
+     * @param callingUid The uid that attempts to access the package.
+     * @param userId The user id where the package resides.
      */
     public abstract boolean filterAppAccess(
             @NonNull AndroidPackage pkg, int callingUid, int userId);
 
     /**
-     * Returns whether or not access to the application should be filtered.
+     * Returns whether or not access to the application should be filtered. The access is not
+     * allowed if the application is not installed under the given user.
      *
      * @see #filterAppAccess(AndroidPackage, int, int)
      */
+    public boolean filterAppAccess(@NonNull String packageName, int callingUid, int userId) {
+        return filterAppAccess(packageName, callingUid, userId, true /* filterUninstalled */);
+    }
+
+    /**
+     * Returns whether or not access to the application should be filtered.
+     *
+     * @param packageName The package to be accessed.
+     * @param callingUid The uid that attempts to access the package.
+     * @param userId The user id where the package resides.
+     * @param filterUninstalled Set to true to filter the access if the package is not installed
+     *                        under the given user.
+     * @see #filterAppAccess(AndroidPackage, int, int)
+     */
     public abstract boolean filterAppAccess(
-            @NonNull String packageName, int callingUid, int userId);
+            @NonNull String packageName, int callingUid, int userId, boolean filterUninstalled);
 
     /**
      * Returns whether or not access to the application which belongs to the given UID should be
      * filtered. If the UID is part of a shared user ID, return {@code true} if all applications
-     * belong to the shared user ID should be filtered.
+     * belong to the shared user ID should be filtered. The access is not allowed if the uid does
+     * not exist in the device.
      *
      * @see #filterAppAccess(AndroidPackage, int, int)
      */
@@ -798,7 +860,7 @@ public abstract class PackageManagerInternal {
             @NonNull String packageName);
 
     /**
-     * Returns {@code true} if the the signing information for {@code clientUid} is sufficient
+     * Returns {@code true} if the signing information for {@code clientUid} is sufficient
      * to gain access gated by {@code capability}.  This can happen if the two UIDs have the
      * same signing information, if the signing information {@code clientUid} indicates that
      * it has the signing certificate for {@code serverUid} in its signing history (if it was
@@ -843,13 +905,6 @@ public abstract class PackageManagerInternal {
      * array if the gid ints.
      */
     public abstract int[] getPermissionGids(String permissionName, int userId);
-
-    /**
-     * Return if device is currently in a "core" boot environment, typically
-     * used to support full-disk encryption. Only apps marked with
-     * {@code coreApp} attribute are available.
-     */
-    public abstract boolean isOnlyCoreApps();
 
     /**
      * Make a best-effort attempt to provide the requested free disk space by
@@ -960,11 +1015,6 @@ public abstract class PackageManagerInternal {
      *            PACKAGE_ROLLBACK_AGENT permission.
      */
     public abstract void setEnableRollbackCode(int token, int enableRollbackCode);
-
-    /**
-     * Ask the package manager to compile layouts in the given package.
-     */
-    public abstract boolean compileLayouts(String packageName);
 
     /*
      * Inform the package manager that the pending package install identified by
@@ -1285,4 +1335,33 @@ public abstract class PackageManagerInternal {
     public abstract void shutdown();
 
     public abstract DynamicCodeLogger getDynamicCodeLogger();
+
+    /**
+     * Compare the signatures of two packages that are installed in different users.
+     *
+     * @param uid1 First UID whose signature will be compared.
+     * @param uid2 Second UID whose signature will be compared.
+     * @return {@link PackageManager#SIGNATURE_MATCH} if signatures are matched.
+     * @throws SecurityException if the caller does not hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS}.
+     */
+    public abstract @SignatureResult int checkUidSignaturesForAllUsers(int uid1, int uid2);
+
+    public abstract void setPackageStoppedState(@NonNull String packageName, boolean stopped,
+            @UserIdInt int userId);
+
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public abstract void legacyDumpProfiles(@NonNull String packageName,
+            boolean dumpClassesAndMethods) throws LegacyDexoptDisabledException;
+
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public abstract void legacyForceDexOpt(@NonNull String packageName)
+            throws LegacyDexoptDisabledException;
+
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public abstract void legacyReconcileSecondaryDexFiles(String packageName)
+            throws LegacyDexoptDisabledException;
 }

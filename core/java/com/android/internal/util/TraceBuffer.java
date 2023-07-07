@@ -103,6 +103,10 @@ public class TraceBuffer<P, S extends P, T extends P> {
         this(bufferCapacity, new ProtoOutputStreamProvider(), null);
     }
 
+    public TraceBuffer(int bufferCapacity, Consumer<T> protoDequeuedCallback) {
+        this(bufferCapacity, new ProtoOutputStreamProvider(), protoDequeuedCallback);
+    }
+
     public TraceBuffer(int bufferCapacity, ProtoProvider protoProvider,
             Consumer<T> protoDequeuedCallback) {
         mBufferCapacity = bufferCapacity;
@@ -193,7 +197,7 @@ public class TraceBuffer<P, S extends P, T extends P> {
     }
 
     /**
-     * Removes all elements form the buffer
+     * Removes all elements from the buffer
      */
     public void resetBuffer() {
         synchronized (mBufferLock) {

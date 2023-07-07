@@ -19,22 +19,28 @@ package com.android.wm.shell.common;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
+import android.view.inputmethod.ImeTracker;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +51,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
-public class DisplayInsetsControllerTest {
+public class DisplayInsetsControllerTest extends ShellTestCase {
 
     private static final int SECOND_DISPLAY = DEFAULT_DISPLAY + 10;
 
@@ -53,6 +59,8 @@ public class DisplayInsetsControllerTest {
     private IWindowManager mWm;
     @Mock
     private DisplayController mDisplayController;
+    @Mock
+    private ShellInit mShellInit;
     private DisplayInsetsController mController;
     private SparseArray<IDisplayWindowInsetsController> mInsetsControllersByDisplayId;
     private TestShellExecutor mExecutor;
@@ -67,8 +75,13 @@ public class DisplayInsetsControllerTest {
         mInsetsControllersByDisplayId = new SparseArray<>();
         mDisplayIdCaptor =  ArgumentCaptor.forClass(Integer.class);
         mInsetsControllerCaptor = ArgumentCaptor.forClass(IDisplayWindowInsetsController.class);
-        mController = new DisplayInsetsController(mWm, mDisplayController, mExecutor);
+        mController = new DisplayInsetsController(mWm, mShellInit, mDisplayController, mExecutor);
         addDisplay(DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
@@ -97,11 +110,13 @@ public class DisplayInsetsControllerTest {
         mController.addInsetsChangedListener(SECOND_DISPLAY, secondListener);
 
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).topFocusedWindowChanged(null,
-                new InsetsVisibilities());
+                WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false,
+                null /* statsToken */);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false,
+                null /* statsToken */);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -117,11 +132,13 @@ public class DisplayInsetsControllerTest {
         assertTrue(secondListener.hideInsetsCount == 0);
 
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).topFocusedWindowChanged(null,
-                new InsetsVisibilities());
+                WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false,
+                null /* statsToken */);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false,
+                null /* statsToken */);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -164,8 +181,7 @@ public class DisplayInsetsControllerTest {
         int hideInsetsCount = 0;
 
         @Override
-        public void topFocusedWindowChanged(String packageName,
-                InsetsVisibilities requestedVisibilities) {
+        public void topFocusedWindowChanged(ComponentName component, int requestedVisibleTypes) {
             topFocusedWindowChangedCount++;
         }
 
@@ -181,12 +197,12 @@ public class DisplayInsetsControllerTest {
         }
 
         @Override
-        public void showInsets(int types, boolean fromIme) {
+        public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
             showInsetsCount++;
         }
 
         @Override
-        public void hideInsets(int types, boolean fromIme) {
+        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
             hideInsetsCount++;
         }
     }

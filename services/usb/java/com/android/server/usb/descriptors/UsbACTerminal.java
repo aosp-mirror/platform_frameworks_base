@@ -66,6 +66,8 @@ public abstract class UsbACTerminal extends UsbACInterface {
         canvas.writeListItem("Type: " + ReportCanvas.getHexString(terminalType) + ": "
                 + UsbStrings.getTerminalName(terminalType));
         canvas.writeListItem("ID: " + ReportCanvas.getHexString(getTerminalID()));
+        canvas.writeListItem("Associated terminal: "
+                + ReportCanvas.getHexString(getAssocTerminal()));
         canvas.closeList();
     }
 }

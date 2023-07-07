@@ -56,10 +56,11 @@ public:
 
     template <class BaseScene>
     static bool registerBitmapAllocationScene(std::string name, std::string description) {
-        TestScene::registerScene({name + "GlTex", description + " (GlTex version).",
+        TestScene::registerScene({name + "Texture", description + " (Texture version).",
                                   createBitmapAllocationScene<BaseScene, &allocateHeapBitmap>});
 
-        TestScene::registerScene({name + "EglImage", description + " (EglImage version).",
+        TestScene::registerScene({name + "HardwareBuffer",
+                                  description + " (HardwareBuffer version).",
                                   createBitmapAllocationScene<BaseScene, &allocateHardwareBitmap>});
         return true;
     }

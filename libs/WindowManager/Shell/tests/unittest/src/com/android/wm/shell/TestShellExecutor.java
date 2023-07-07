@@ -48,9 +48,8 @@ public class TestShellExecutor implements ShellExecutor {
     }
 
     public void flushAll() {
-        for (Runnable r : mRunnables) {
-            r.run();
+        while (!mRunnables.isEmpty()) {
+            mRunnables.remove(0).run();
         }
-        mRunnables.clear();
     }
 }

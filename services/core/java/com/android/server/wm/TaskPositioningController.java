@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -27,6 +29,8 @@ import android.view.Display;
 import android.view.IWindow;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Controller for task positioning by drag.
@@ -58,14 +62,16 @@ class TaskPositioningController {
     void hideInputSurface(int displayId) {
         if (mPositioningDisplay != null && mPositioningDisplay.getDisplayId() == displayId
                 && mInputSurface != null) {
-            mTransaction.hide(mInputSurface);
-            mTransaction.syncInputWindows().apply();
+            mTransaction.hide(mInputSurface).apply();
         }
     }
 
-    void showInputSurface(int displayId) {
+    /**
+     * @return a future that completes after window info is sent.
+     */
+    CompletableFuture<Void> showInputSurface(int displayId) {
         if (mPositioningDisplay == null || mPositioningDisplay.getDisplayId() != displayId) {
-            return;
+            return completedFuture(null);
         }
         final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
         if (mInputSurface == null) {
@@ -81,7 +87,7 @@ class TaskPositioningController {
         if (h == null) {
             Slog.w(TAG_WM, "Drag is in progress but there is no "
                     + "drag window handle.");
-            return;
+            return completedFuture(null);
         }
 
         final Display display = dc.getDisplay();
@@ -89,25 +95,38 @@ class TaskPositioningController {
         display.getRealSize(p);
         mTmpClipRect.set(0, 0, p.x, p.y);
 
+        CompletableFuture<Void> result = new CompletableFuture<>();
         mTransaction.show(mInputSurface)
                 .setInputWindowInfo(mInputSurface, h)
                 .setLayer(mInputSurface, Integer.MAX_VALUE)
                 .setPosition(mInputSurface, 0, 0)
                 .setCrop(mInputSurface, mTmpClipRect)
-                .syncInputWindows()
+                .addWindowInfosReportedListener(() -> result.complete(null))
                 .apply();
+        return result;
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
         WindowState win = null;
+        CompletableFuture<Boolean> startPositioningLockedFuture;
         synchronized (mService.mGlobalLock) {
             win = mService.windowForClientLocked(null, window, false);
-            // win shouldn't be null here, pass it down to startPositioningLocked
-            // to get warning if it's null.
-            if (!startPositioningLocked(
-                    win, false /*resize*/, false /*preserveOrientation*/, startX, startY)) {
+            startPositioningLockedFuture =
+                startPositioningLocked(
+                    win, false /*resize*/, false /*preserveOrientation*/, startX, startY);
+        }
+
+        try {
+            if (!startPositioningLockedFuture.get()) {
                 return false;
             }
+        } catch (Exception exception) {
+            Slog.e(TAG_WM, "Exception thrown while waiting for startPositionLocked future",
+                    exception);
+            return false;
+        }
+
+        synchronized (mService.mGlobalLock) {
             mService.mAtmService.setFocusedTask(win.getTask().mTaskId);
         }
         return true;
@@ -115,25 +134,37 @@ class TaskPositioningController {
 
     void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
         mService.mH.post(() -> {
+            Task task;
+            CompletableFuture<Boolean> startPositioningLockedFuture;
             synchronized (mService.mGlobalLock) {
-                final Task task = displayContent.findTaskForResizePoint(x, y);
-                if (task != null) {
-                    if (!task.isResizeable()) {
-                        // The task is not resizable, so don't do anything when the user drags the
-                        // the resize handles.
-                        return;
-                    }
-                    if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
-                            task.preserveOrientationOnResize(), x, y)) {
-                        return;
-                    }
-                    mService.mAtmService.setFocusedTask(task.mTaskId);
+                task = displayContent.findTaskForResizePoint(x, y);
+                if (task == null || !task.isResizeable()) {
+                    // The task is not resizable, so don't do anything when the user drags the
+                    // the resize handles.
+                    return;
                 }
+                startPositioningLockedFuture =
+                    startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
+                            task.preserveOrientationOnResize(), x, y);
+            }
+
+            try {
+                if (!startPositioningLockedFuture.get()) {
+                    return;
+                }
+            } catch (Exception exception) {
+                Slog.e(TAG_WM, "Exception thrown while waiting for startPositionLocked future",
+                        exception);
+                return;
+            }
+
+            synchronized (mService.mGlobalLock) {
+                mService.mAtmService.setFocusedTask(task.mTaskId);
             }
         });
     }
 
-    private boolean startPositioningLocked(WindowState win, boolean resize,
+    private CompletableFuture<Boolean> startPositioningLocked(WindowState win, boolean resize,
             boolean preserveOrientation, float startX, float startY) {
         if (DEBUG_TASK_POSITIONING)
             Slog.d(TAG_WM, "startPositioningLocked: "
@@ -142,43 +173,48 @@ class TaskPositioningController {
 
         if (win == null || win.mActivityRecord == null) {
             Slog.w(TAG_WM, "startPositioningLocked: Bad window " + win);
-            return false;
+            return completedFuture(false);
         }
         if (win.mInputChannel == null) {
             Slog.wtf(TAG_WM, "startPositioningLocked: " + win + " has no input channel, "
                     + " probably being removed");
-            return false;
+            return completedFuture(false);
         }
 
         final DisplayContent displayContent = win.getDisplayContent();
         if (displayContent == null) {
             Slog.w(TAG_WM, "startPositioningLocked: Invalid display content " + win);
-            return false;
+            return completedFuture(false);
         }
         mPositioningDisplay = displayContent;
 
         mTaskPositioner = TaskPositioner.create(mService);
-        mTaskPositioner.register(displayContent, win);
+        return mTaskPositioner.register(displayContent, win).thenApply(unused -> {
+            // The global lock is held by the callers of startPositioningLocked but released before
+            // the async results are waited on. We must acquire the lock in this callback to ensure
+            // thread safety.
+            synchronized (mService.mGlobalLock) {
+                // We need to grab the touch focus so that the touch events during the
+                // resizing/scrolling are not sent to the app. 'win' is the main window
+                // of the app, it may not have focus since there might be other windows
+                // on top (eg. a dialog window).
+                WindowState transferFocusFromWin = win;
+                if (displayContent.mCurrentFocus != null && displayContent.mCurrentFocus != win
+                        && displayContent.mCurrentFocus.mActivityRecord == win.mActivityRecord) {
+                    transferFocusFromWin = displayContent.mCurrentFocus;
+                }
+                if (!mService.mInputManager.transferTouchFocus(
+                        transferFocusFromWin.mInputChannel, mTaskPositioner.mClientChannel,
+                        false /* isDragDrop */)) {
+                    Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
+                    cleanUpTaskPositioner();
+                    return false;
+                }
 
-        // We need to grab the touch focus so that the touch events during the
-        // resizing/scrolling are not sent to the app. 'win' is the main window
-        // of the app, it may not have focus since there might be other windows
-        // on top (eg. a dialog window).
-        WindowState transferFocusFromWin = win;
-        if (displayContent.mCurrentFocus != null && displayContent.mCurrentFocus != win
-                && displayContent.mCurrentFocus.mActivityRecord == win.mActivityRecord) {
-            transferFocusFromWin = displayContent.mCurrentFocus;
-        }
-        if (!mService.mInputManager.transferTouchFocus(
-                transferFocusFromWin.mInputChannel, mTaskPositioner.mClientChannel,
-                false /* isDragDrop */)) {
-            Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
-            cleanUpTaskPositioner();
-            return false;
-        }
-
-        mTaskPositioner.startDrag(resize, preserveOrientation, startX, startY);
-        return true;
+                mTaskPositioner.startDrag(resize, preserveOrientation, startX, startY);
+                return true;
+            }
+        });
     }
 
     public void finishTaskPositioning(IWindow window) {

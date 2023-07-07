@@ -25,7 +25,7 @@ import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.media.systemsounds.HomeSoundEffectController
 import com.android.systemui.power.PowerUI
-import com.android.systemui.privacy.television.TvOngoingPrivacyChip
+import com.android.systemui.privacy.television.TvPrivacyChipsController
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.tv.TvStatusBar
@@ -133,11 +133,11 @@ abstract class TVSystemUICoreStartableModule {
     @ClassKey(TvNotificationPanel::class)
     abstract fun bindTvNotificationPanel(sysui: TvNotificationPanel): CoreStartable
 
-    /** Inject into TvOngoingPrivacyChip.  */
+    /** Inject into TvPrivacyChipsController.  */
     @Binds
     @IntoMap
-    @ClassKey(TvOngoingPrivacyChip::class)
-    abstract fun bindTvOngoingPrivacyChip(sysui: TvOngoingPrivacyChip): CoreStartable
+    @ClassKey(TvPrivacyChipsController::class)
+    abstract fun bindTvPrivacyChipsController(sysui: TvPrivacyChipsController): CoreStartable
 
     /** Inject into TvStatusBar.  */
     @Binds

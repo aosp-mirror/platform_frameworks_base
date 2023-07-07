@@ -59,6 +59,10 @@ public final class TunerVersionChecker {
      * Tuner version 2.0.
      */
     public static final int TUNER_VERSION_2_0 = (2 << 16);
+    /**
+     * Tuner version 3.0.
+     */
+    public static final int TUNER_VERSION_3_0 = (3 << 16);
 
     /**
      * Get the current running Tuner version.

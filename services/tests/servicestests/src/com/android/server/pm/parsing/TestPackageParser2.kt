@@ -17,9 +17,11 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.ApplicationInfo
+import java.io.File
 
-class TestPackageParser2 : PackageParser2(null /* separateProcesses */, false /* onlyCoreApps */,
-        null /* displayMetrics */, null /* cacheDir */, object : PackageParser2.Callback() {
+class TestPackageParser2(var cacheDir: File? = null) : PackageParser2(
+        null /* separateProcesses */, null /* displayMetrics */,
+        cacheDir /* cacheDir */, object : PackageParser2.Callback() {
     override fun isChangeEnabled(changeId: Long, appInfo: ApplicationInfo): Boolean {
         return true
     }

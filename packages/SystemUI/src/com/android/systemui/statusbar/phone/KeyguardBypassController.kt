@@ -26,9 +26,13 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm
+import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN
+import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
 import java.io.PrintWriter
@@ -39,12 +43,19 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
 
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
+    private val devicePostureController: DevicePostureController
     @BypassOverride private val bypassOverride: Int
     private var hasFaceFeature: Boolean
+    @DevicePostureInt private val configFaceAuthSupportedPosture: Int
+    @DevicePostureInt private var postureState: Int = DEVICE_POSTURE_UNKNOWN
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
-    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
-
+    private val postureCallback = DevicePostureController.Callback { posture ->
+        if (postureState != posture) {
+            postureState = posture
+            notifyListeners()
+        }
+    }
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()
     }
@@ -86,7 +97,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 FACE_UNLOCK_BYPASS_NEVER -> false
                 else -> field
             }
-            return enabled && mKeyguardStateController.isFaceAuthEnabled
+            return enabled && mKeyguardStateController.isFaceAuthEnabled &&
+                    isPostureAllowedForFaceAuth()
         }
         private set(value) {
             field = value
@@ -96,14 +108,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     var bouncerShowing: Boolean = false
     var altBouncerShowing: Boolean = false
     var launchingAffordance: Boolean = false
-    var qSExpanded = false
-        set(value) {
-            val changed = field != value
-            field = value
-            if (changed && !value) {
-                maybePerformPendingUnlock()
-            }
-        }
+    var qsExpanded = false
 
     @Inject
     constructor(
@@ -112,16 +117,30 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         statusBarStateController: StatusBarStateController,
         lockscreenUserManager: NotificationLockscreenUserManager,
         keyguardStateController: KeyguardStateController,
+        shadeExpansionStateManager: ShadeExpansionStateManager,
+        devicePostureController: DevicePostureController,
         dumpManager: DumpManager
     ) {
         this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
+        this.devicePostureController = devicePostureController
 
         bypassOverride = context.resources.getInteger(R.integer.config_face_unlock_bypass_override)
+        configFaceAuthSupportedPosture =
+            context.resources.getInteger(R.integer.config_face_auth_supported_posture)
 
-        hasFaceFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)
+        hasFaceFeature = context.packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)
         if (!hasFaceFeature) {
             return
+        }
+
+        if (configFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
+            devicePostureController.addCallback { posture ->
+                if (postureState != posture) {
+                    postureState = posture
+                    notifyListeners()
+                }
+            }
         }
 
         dumpManager.registerDumpable("KeyguardBypassController", this)
@@ -132,6 +151,14 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 }
             }
         })
+
+        shadeExpansionStateManager.addQsExpansionListener { isQsExpanded ->
+            val changed = qsExpanded != isQsExpanded
+            qsExpanded = isQsExpanded
+            if (changed && !isQsExpanded) {
+                maybePerformPendingUnlock()
+            }
+        }
 
         val dismissByDefault = if (context.resources.getBoolean(
                         com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
@@ -161,7 +188,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     ): Boolean {
         if (biometricSourceType == BiometricSourceType.FACE && bypassEnabled) {
             val can = canBypass()
-            if (!can && (isPulseExpanding || qSExpanded)) {
+            if (!can && (isPulseExpanding || qsExpanded)) {
                 pendingUnlock = PendingUnlock(biometricSourceType, isStrongBiometric)
             }
             return can
@@ -190,21 +217,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 altBouncerShowing -> true
                 statusBarStateController.state != StatusBarState.KEYGUARD -> false
                 launchingAffordance -> false
-                isPulseExpanding || qSExpanded -> false
-                else -> true
-            }
-        }
-        return false
-    }
-
-    /**
-     * If shorter animations should be played when unlocking.
-     */
-    fun canPlaySubtleWindowAnimations(): Boolean {
-        if (bypassEnabled) {
-            return when {
-                statusBarStateController.state != StatusBarState.KEYGUARD -> false
-                qSExpanded -> false
+                isPulseExpanding || qsExpanded -> false
                 else -> true
             }
         }
@@ -213,6 +226,13 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
 
     fun onStartedGoingToSleep() {
         pendingUnlock = null
+    }
+
+    fun isPostureAllowedForFaceAuth(): Boolean {
+        return when (configFaceAuthSupportedPosture) {
+            DEVICE_POSTURE_UNKNOWN -> true
+            else -> (postureState == configFaceAuthSupportedPosture)
+        }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -229,9 +249,9 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pw.println("  altBouncerShowing: $altBouncerShowing")
         pw.println("  isPulseExpanding: $isPulseExpanding")
         pw.println("  launchingAffordance: $launchingAffordance")
-        pw.println("  qSExpanded: $qSExpanded")
+        pw.println("  qSExpanded: $qsExpanded")
         pw.println("  hasFaceFeature: $hasFaceFeature")
-        pw.println("  userHasDeviceEntryIntent: $userHasDeviceEntryIntent")
+        pw.println("  postureState: $postureState")
     }
 
     /** Registers a listener for bypass state changes. */

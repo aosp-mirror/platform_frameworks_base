@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -26,6 +28,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
+import android.content.Context;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicy;
@@ -36,6 +41,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -48,8 +54,8 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -266,15 +272,19 @@ public class AudioTrack extends PlayerBase
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
-    /* Enumeration of metadata types permitted for use by
+    /**
+     * Enumeration of metadata types permitted for use by
      * encapsulation mode audio streams.
+     * @hide
      */
-    /** @hide */
-    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
-        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
-        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
-        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
-    })
+    @IntDef(prefix = {"ENCAPSULATION_METADATA_TYPE_"},
+            value =
+                    {
+                            ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+                            ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+                            ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+                            ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT,
+                    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationMetadataType {}
 
@@ -297,6 +307,45 @@ public class AudioTrack extends PlayerBase
      * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
      */
     public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
+
+    /**
+     * Encapsulation metadata type for placement of supplementary audio.
+     *
+     * A 32 bit integer constant, one of {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL}, {@link
+     * #SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT}, {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT}.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3;
+
+    /**
+     * Enumeration of supplementary audio placement types.
+     * @hide
+     */
+    @IntDef(prefix = {"SUPPLEMENTARY_AUDIO_PLACEMENT_"},
+            value =
+                    {
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT,
+                    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SupplementaryAudioPlacement {}
+    // Important: The SUPPLEMENTARY_AUDIO_PLACEMENT values must be kept in sync with native header
+    // files.
+
+    /**
+     * Supplementary audio placement normal.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0;
+
+    /**
+     * Supplementary audio placement left.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1;
+
+    /**
+     * Supplementary audio placement right.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2;
 
     /* Dual Mono handling is used when a stereo audio stream
      * contains separate audio content on the left and right channels.
@@ -545,7 +594,7 @@ public class AudioTrack extends PlayerBase
     /**
      * Audio session ID
      */
-    private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+    private int mSessionId = AUDIO_SESSION_ID_GENERATE;
     /**
      * HW_AV_SYNC track AV Sync Header
      */
@@ -645,7 +694,7 @@ public class AudioTrack extends PlayerBase
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
         this(streamType, sampleRateInHz, channelConfig, audioFormat,
-                bufferSizeInBytes, mode, AudioManager.AUDIO_SESSION_ID_GENERATE);
+                bufferSizeInBytes, mode, AUDIO_SESSION_ID_GENERATE);
     }
 
     /**
@@ -749,12 +798,12 @@ public class AudioTrack extends PlayerBase
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
-        this(attributes, format, bufferSizeInBytes, mode, sessionId, false /*offload*/,
-                ENCAPSULATION_MODE_NONE, null /* tunerConfiguration */);
+        this(null /* context */, attributes, format, bufferSizeInBytes, mode, sessionId,
+                false /*offload*/, ENCAPSULATION_MODE_NONE, null /* tunerConfiguration */);
     }
 
-    private AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
-            int mode, int sessionId, boolean offload, int encapsulationMode,
+    private AudioTrack(@Nullable Context context, AudioAttributes attributes, AudioFormat format,
+            int bufferSizeInBytes, int mode, int sessionId, boolean offload, int encapsulationMode,
             @Nullable TunerConfiguration tunerConfiguration)
                     throws IllegalArgumentException {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
@@ -817,16 +866,22 @@ public class AudioTrack extends PlayerBase
 
         int[] sampleRate = new int[] {mSampleRate};
         int[] session = new int[1];
-        session[0] = sessionId;
+        session[0] = resolvePlaybackSessionId(context, sessionId);
+
+        AttributionSource attributionSource = context == null
+                ? AttributionSource.myAttributionSource() : context.getAttributionSource();
+
         // native initialization
-        int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
-                sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
-                mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload, encapsulationMode, tunerConfiguration,
-                getCurrentOpPackageName());
-        if (initResult != SUCCESS) {
-            loge("Error code "+initResult+" when initializing AudioTrack.");
-            return; // with mState == STATE_UNINITIALIZED
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
+                    sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
+                    mNativeBufferSizeInBytes, mDataLoadMode, session,
+                    attributionSourceState.getParcel(), 0 /*nativeTrackInJavaObj*/, offload,
+                    encapsulationMode, tunerConfiguration, getCurrentOpPackageName());
+            if (initResult != SUCCESS) {
+                loge("Error code " + initResult + " when initializing AudioTrack.");
+                return; // with mState == STATE_UNINITIALIZED
+            }
         }
 
         mSampleRate = sampleRate[0];
@@ -898,23 +953,27 @@ public class AudioTrack extends PlayerBase
             // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
             int[] session = { 0 };
             int[] rates = { 0 };
-            int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                    null /*mAttributes - NA*/,
-                    rates /*sampleRate - NA*/,
-                    0 /*mChannelMask - NA*/,
-                    0 /*mChannelIndexMask - NA*/,
-                    0 /*mAudioFormat - NA*/,
-                    0 /*mNativeBufferSizeInBytes - NA*/,
-                    0 /*mDataLoadMode - NA*/,
-                    session,
-                    nativeTrackInJavaObj,
-                    false /*offload*/,
-                    ENCAPSULATION_MODE_NONE,
-                    null /* tunerConfiguration */,
-                    "" /* opPackagename */);
-            if (initResult != SUCCESS) {
-                loge("Error code "+initResult+" when initializing AudioTrack.");
-                return; // with mState == STATE_UNINITIALIZED
+            try (ScopedParcelState attributionSourceState =
+                         AttributionSource.myAttributionSource().asScopedParcelState()) {
+                int initResult = native_setup(new WeakReference<AudioTrack>(this),
+                        null /*mAttributes - NA*/,
+                        rates /*sampleRate - NA*/,
+                        0 /*mChannelMask - NA*/,
+                        0 /*mChannelIndexMask - NA*/,
+                        0 /*mAudioFormat - NA*/,
+                        0 /*mNativeBufferSizeInBytes - NA*/,
+                        0 /*mDataLoadMode - NA*/,
+                        session,
+                        attributionSourceState.getParcel(),
+                        nativeTrackInJavaObj,
+                        false /*offload*/,
+                        ENCAPSULATION_MODE_NONE,
+                        null /* tunerConfiguration */,
+                        "" /* opPackagename */);
+                if (initResult != SUCCESS) {
+                    loge("Error code " + initResult + " when initializing AudioTrack.");
+                    return; // with mState == STATE_UNINITIALIZED
+                }
             }
 
             mSessionId = session[0];
@@ -1028,11 +1087,12 @@ public class AudioTrack extends PlayerBase
      * <br>Offload is false by default.
      */
     public static class Builder {
+        private Context mContext;
         private AudioAttributes mAttributes;
         private AudioFormat mFormat;
         private int mBufferSizeInBytes;
         private int mEncapsulationMode = ENCAPSULATION_MODE_NONE;
-        private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+        private int mSessionId = AUDIO_SESSION_ID_GENERATE;
         private int mMode = MODE_STREAM;
         private int mPerformanceMode = PERFORMANCE_MODE_NONE;
         private boolean mOffload = false;
@@ -1043,6 +1103,19 @@ public class AudioTrack extends PlayerBase
          * Constructs a new Builder with the default values as described above.
          */
         public Builder() {
+        }
+
+        /**
+         * Sets the context the track belongs to. This context will be used to pull information,
+         * such as {@link android.content.AttributionSource} and device specific audio session ids,
+         * which will be associated with the {@link AudioTrack}. However, the context itself will
+         * not be retained by the {@link AudioTrack}.
+         * @param context a non-null {@link Context} instance
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setContext(@NonNull Context context) {
+            mContext = Objects.requireNonNull(context);
+            return this;
         }
 
         /**
@@ -1152,6 +1225,10 @@ public class AudioTrack extends PlayerBase
 
         /**
          * Sets the session ID the {@link AudioTrack} will be attached to.
+         *
+         * Note, that if there's a device specific session id asociated with the context, explicitly
+         * setting a session id using this method will override it
+         * (see {@link Builder#setContext(Context)}).
          * @param sessionId a strictly positive ID number retrieved from another
          *     <code>AudioTrack</code> via {@link AudioTrack#getAudioSessionId()} or allocated by
          *     {@link AudioManager} via {@link AudioManager#generateAudioSessionId()}, or
@@ -1161,7 +1238,7 @@ public class AudioTrack extends PlayerBase
          */
         public @NonNull Builder setSessionId(@IntRange(from = 1) int sessionId)
                 throws IllegalArgumentException {
-            if ((sessionId != AudioManager.AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
+            if ((sessionId != AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
                 throw new IllegalArgumentException("Invalid audio session ID " + sessionId);
             }
             mSessionId = sessionId;
@@ -1231,18 +1308,6 @@ public class AudioTrack extends PlayerBase
             mTunerConfiguration = tunerConfiguration;
             return this;
         }
-
-        /**
-         * Sets the tuner configuration for the {@code AudioTrack}.
-         *
-         * The {@link AudioTrack.TunerConfiguration} consists of parameters obtained from
-         * the Android TV tuner API which indicate the audio content stream id and the
-         * synchronization id for the {@code AudioTrack}.
-         *
-         * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
-         * @return the same Builder instance.
-         * @hide
-         */
 
         /**
          * @hide
@@ -1383,8 +1448,8 @@ public class AudioTrack extends PlayerBase
 
             try {
                 final AudioTrack track = new AudioTrack(
-                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload,
-                        mEncapsulationMode, mTunerConfiguration);
+                        mContext, mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId,
+                        mOffload, mEncapsulationMode, mTunerConfiguration);
                 if (track.getState() == STATE_UNINITIALIZED) {
                     // release is not necessary
                     throw new UnsupportedOperationException("Cannot create AudioTrack");
@@ -1867,26 +1932,24 @@ public class AudioTrack extends PlayerBase
     }
 
     // General pair map
-    private static final HashMap<String, Integer> CHANNEL_PAIR_MAP = new HashMap<>() {{
-        put("front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
-                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
-        put("back", AudioFormat.CHANNEL_OUT_BACK_LEFT
-                | AudioFormat.CHANNEL_OUT_BACK_RIGHT);
-        put("front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
-                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
-        put("side", AudioFormat.CHANNEL_OUT_SIDE_LEFT
-                | AudioFormat.CHANNEL_OUT_SIDE_RIGHT);
-        put("top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
-                | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT);
-        put("top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
-                | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT);
-        put("top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
-                | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT);
-        put("bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
-                | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
-        put("front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
-                | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
-    }};
+    private static final Map<String, Integer> CHANNEL_PAIR_MAP = Map.of(
+            "front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
+            "back", AudioFormat.CHANNEL_OUT_BACK_LEFT
+                    | AudioFormat.CHANNEL_OUT_BACK_RIGHT,
+            "front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
+                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
+            "side", AudioFormat.CHANNEL_OUT_SIDE_LEFT | AudioFormat.CHANNEL_OUT_SIDE_RIGHT,
+            "top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT,
+            "top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
+                    | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT,
+            "top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
+                    | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT,
+            "bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
+            "front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
+                    | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
 
     /**
      * Convenience method to check that the channel configuration (a.k.a channel mask) is supported
@@ -1924,7 +1987,7 @@ public class AudioTrack extends PlayerBase
                 return false;
         }
         // Check all pairs to see that they are matched (front duplicated here).
-        for (HashMap.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
+        for (Map.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
             final int positionPair = e.getValue();
             if ((channelConfig & positionPair) != 0
                     && (channelConfig & positionPair) != positionPair) {
@@ -4363,9 +4426,9 @@ public class AudioTrack extends PlayerBase
     private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload, int encapsulationMode, Object tunerConfiguration,
-            @NonNull String opPackageName);
+            int buffSizeInBytes, int mode, int[] sessionId, @NonNull Parcel attributionSource,
+            long nativeAudioTrack, boolean offload, int encapsulationMode,
+            Object tunerConfiguration, @NonNull String opPackageName);
 
     private native final void native_finalize();
 

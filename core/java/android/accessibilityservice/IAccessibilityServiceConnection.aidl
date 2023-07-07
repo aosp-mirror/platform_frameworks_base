@@ -24,12 +24,15 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.AccessibilityWindowInfo;
 import java.util.List;
+import android.window.ScreenCapture;
 
 /**
  * Interface given to an AccessibilitySerivce to talk to the AccessibilityManagerService.
@@ -122,6 +125,10 @@ interface IAccessibilityServiceConnection {
 
     void takeScreenshot(int displayId, in RemoteCallback callback);
 
+    void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
+        in ScreenCapture.ScreenCaptureListener listener,
+        IAccessibilityInteractionConnectionCallback callback);
+
     void setGestureDetectionPassthroughRegion(int displayId, in Region region);
 
     void setTouchExplorationPassthroughRegion(int displayId, in Region region);
@@ -146,4 +153,11 @@ interface IAccessibilityServiceConnection {
     void onDoubleTapAndHold(int displayId);
 
     void setAnimationScale(float scale);
+
+    void setInstalledAndEnabledServices(in List<AccessibilityServiceInfo> infos);
+
+    List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
+    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl sc);
+
+    void attachAccessibilityOverlayToWindow(int accessibilityWindowId, in SurfaceControl sc);
 }
