@@ -1396,7 +1396,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"வேண்டாம்"</string>
     <string name="select_input_method" msgid="3971267998568587025">"உள்ளீட்டு முறையைத் தேர்வுசெய்க"</string>
     <string name="show_ime" msgid="6406112007347443383">"கைமுறை கீபோர்டு இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
-    <string name="hardware" msgid="1800597768237606953">"விர்ச்சுவல் கீபோர்டை காட்டு"</string>
+    <string name="hardware" msgid="3611039921284836033">"ஸ்கிரீன் கீபோர்டை உபயோகி"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> சாதனத்தை உள்ளமைத்தல்"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"கீபோர்டுகளை உள்ளமைத்தல்"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"மொழியையும் தளவமைப்பையும் தேர்ந்தெடுக்க, தட்டவும்"</string>
@@ -1959,8 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"அணுகல் கோரிக்கை முடக்கப்பட்டது"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"கேமராவைப் பயன்படுத்த முடியாது"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"மொபைலில் தொடருங்கள்"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"மைக்ரோஃபோனைப் பயன்படுத்த முடியாது"</string>
@@ -1971,12 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"தற்போது உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக Android TV சாதனத்தில் பயன்படுத்திப் பாருங்கள்."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"தற்போது உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் டேப்லெட்டில் பயன்படுத்திப் பாருங்கள்."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"தற்போது உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பாருங்கள்."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"இந்த ஆப்ஸ் கூடுதல் அனுமதிகளைக் கோருகிறது. ஆனால் ஸ்ட்ரீமிங் அமர்வில் அனுமதிகள் வழங்கப்படாது. முதலில் உங்கள் Android TV சாதனத்தில் அனுமதி வழங்கவும்."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"இந்த ஆப்ஸ் கூடுதல் அனுமதிகளைக் கோருகிறது. ஆனால் ஸ்ட்ரீமிங் அமர்வில் அனுமதிகள் வழங்கப்படாது. முதலில் உங்கள் டேப்லெட்டில் அனுமதி வழங்கவும்."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"இந்த ஆப்ஸ் கூடுதல் அனுமதிகளைக் கோருகிறது. ஆனால் ஸ்ட்ரீமிங் அமர்வில் அனுமதிகள் வழங்கப்படாது. முதலில் உங்கள் மொபைலில் அனுமதி வழங்கவும்."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"இந்த ஆப்ஸ் கூடுதல் பாதுகாப்பைக் கோருகிறது. அதற்குப் பதிலாக உங்கள் Android TV சாதனத்தில் பயன்படுத்திப் பார்க்கவும்."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"இந்த ஆப்ஸ் கூடுதல் பாதுகாப்பைக் கோருகிறது. அதற்குப் பதிலாக உங்கள் டேப்லெட்டில் பயன்படுத்திப் பார்க்கவும்."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"இந்த ஆப்ஸ் கூடுதல் பாதுகாப்பைக் கோருகிறது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பார்க்கவும்."</string>
