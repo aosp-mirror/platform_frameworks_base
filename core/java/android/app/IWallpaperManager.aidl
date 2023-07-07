@@ -220,20 +220,6 @@ interface IWallpaperManager {
     void notifyGoingToSleep(int x, int y, in Bundle extras);
 
     /**
-     * Called when the screen has been fully turned on and is visible.
-     *
-     * @hide
-     */
-    void notifyScreenTurnedOn(int displayId);
-
-    /**
-     * Called when the screen starts turning on.
-     *
-     * @hide
-     */
-    void notifyScreenTurningOn(int displayId);
-
-    /**
      * Sets the wallpaper dim amount between [0f, 1f] which would be blended with the system default
      * dimming. 0f doesn't add any additional dimming and 1f makes the wallpaper fully black.
      *
@@ -259,9 +245,24 @@ interface IWallpaperManager {
     boolean lockScreenWallpaperExists();
 
     /**
+     * Return true if there is a static wallpaper on the specified screen. With which=FLAG_LOCK,
+     * always return false if the lock screen doesn't run its own wallpaper engine.
+     *
+     * @hide
+     */
+    boolean isStaticWallpaper(int which);
+
+    /**
      * Temporary method for project b/197814683.
      * Return true if the lockscreen wallpaper always uses a WallpaperService, not a static image.
      * @hide
      */
      boolean isLockscreenLiveWallpaperEnabled();
+
+    /**
+     * Temporary method for project b/270726737.
+     * Return true if the wallpaper supports different crops for different display dimensions.
+     * @hide
+     */
+     boolean isMultiCropEnabled();
 }

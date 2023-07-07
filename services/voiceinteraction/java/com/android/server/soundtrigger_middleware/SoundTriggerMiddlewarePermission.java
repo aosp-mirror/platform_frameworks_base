@@ -27,15 +27,15 @@ import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -78,18 +78,18 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     public @NonNull
     SoundTriggerModuleDescriptor[] listModules() {
         Identity identity = getIdentity();
-        enforcePermissionsForPreflight(identity);
+        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD);
         return mDelegate.listModules();
     }
 
     @Override
     public @NonNull
     ISoundTriggerModule attach(int handle,
-            @NonNull ISoundTriggerCallback callback) {
+            @NonNull ISoundTriggerCallback callback, boolean isTrusted) {
         Identity identity = getIdentity();
         enforcePermissionsForPreflight(identity);
-        ModuleWrapper wrapper = new ModuleWrapper(identity, callback);
-        return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper()));
+        ModuleWrapper wrapper = new ModuleWrapper(identity, callback, isTrusted);
+        return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper(), isTrusted));
     }
 
     // Override toString() in order to have the delegate's ID in it.
@@ -204,11 +204,14 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         private ISoundTriggerModule mDelegate;
         private final @NonNull Identity mOriginatorIdentity;
         private final @NonNull CallbackWrapper mCallbackWrapper;
+        private final boolean mIsTrusted;
 
         ModuleWrapper(@NonNull Identity originatorIdentity,
-                @NonNull ISoundTriggerCallback callback) {
+                @NonNull ISoundTriggerCallback callback,
+                boolean isTrusted) {
             mOriginatorIdentity = originatorIdentity;
             mCallbackWrapper = new CallbackWrapper(callback);
+            mIsTrusted = isTrusted;
         }
 
         ModuleWrapper attach(@NonNull ISoundTriggerModule delegate) {
@@ -241,10 +244,10 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         }
 
         @Override
-        public void startRecognition(int modelHandle, @NonNull RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, @NonNull RecognitionConfig config)
                 throws RemoteException {
             enforcePermissions();
-            mDelegate.startRecognition(modelHandle, config);
+            return mDelegate.startRecognition(modelHandle, config);
         }
 
         @Override
@@ -307,16 +310,15 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
-                    throws RemoteException {
+            public void onRecognition(int modelHandle, RecognitionEventSys event,
+                    int captureSession) throws RemoteException {
                 enforcePermissions("Sound trigger recognition.");
                 mDelegate.onRecognition(modelHandle, event, captureSession);
             }
 
             @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
-                    int captureSession)
-                    throws RemoteException {
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEventSys event,
+                    int captureSession) throws RemoteException {
                 enforcePermissions("Sound trigger phrase recognition.");
                 mDelegate.onPhraseRecognition(modelHandle, event, captureSession);
             }
@@ -348,7 +350,11 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             private void enforcePermissions(String reason) {
-                enforcePermissionsForDataDelivery(mOriginatorIdentity, reason);
+                if (mIsTrusted) {
+                    enforcePermissionsForPreflight(mOriginatorIdentity);
+                } else {
+                    enforcePermissionsForDataDelivery(mOriginatorIdentity, reason);
+                }
             }
         }
     }

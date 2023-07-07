@@ -574,6 +574,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     @Override
                     public void onActivityPinned(String packageName, int userId, int taskId,
                             int stackId) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onActivityPinned: %s", packageName);
                         mTouchHandler.onActivityPinned();
                         mMediaController.onActivityPinned();
                         mAppOpsListener.onActivityPinned(packageName);
@@ -585,6 +587,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         final Pair<ComponentName, Integer> topPipActivityInfo =
                                 PipUtils.getTopPipActivity(mContext);
                         final ComponentName topActivity = topPipActivityInfo.first;
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onActivityUnpinned: %s", topActivity);
                         mTouchHandler.onActivityUnpinned(topActivity);
                         mAppOpsListener.onActivityUnpinned();
                         mPipInputConsumer.unregisterInputConsumer();
@@ -593,6 +597,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onActivityRestartAttempt: %s", task.topActivity);
                         if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
                             return;
                         }
@@ -677,7 +683,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 });
 
         mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
-            if (!mTabletopModeController.enableMoveFloatingWindowInTabletop()) return;
             final String tag = "tabletop-mode";
             if (!isInTabletopMode) {
                 mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
@@ -946,10 +951,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
             mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
+            updatePipPositionForKeepClearAreas();
         } else {
             mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
+            // postpone moving in response to hide of Launcher in case there's another change
+            mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
+            mMainExecutor.executeDelayed(
+                    mMovePipInResponseToKeepClearAreasChangeCallback,
+                    PIP_KEEP_CLEAR_AREAS_DELAY);
         }
-        updatePipPositionForKeepClearAreas();
     }
 
     private void setLauncherAppIconSize(int iconSizePx) {
@@ -1012,6 +1022,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
     }
 
+    private void abortSwipePipToHome(int taskId, ComponentName componentName) {
+        mPipTaskOrganizer.abortSwipePipToHome(taskId, componentName);
+    }
+
     private String getTransitionTag(int direction) {
         switch (direction) {
             case TRANSITION_DIRECTION_TO_PIP:
@@ -1060,13 +1074,22 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /** Save the state to restore to on re-entry. */
     public void saveReentryState(Rect pipBounds) {
         float snapFraction = mPipBoundsAlgorithm.getSnapFraction(pipBounds);
-        if (mPipBoundsState.hasUserResizedPip()) {
-            final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
-            final Size reentrySize = new Size(reentryBounds.width(), reentryBounds.height());
-            mPipBoundsState.saveReentryState(reentrySize, snapFraction);
-        } else {
+
+        if (!mPipBoundsState.hasUserResizedPip()) {
             mPipBoundsState.saveReentryState(null /* bounds */, snapFraction);
+            return;
         }
+
+        Size reentrySize = new Size(pipBounds.width(), pipBounds.height());
+
+        // TODO: b/279937014 Investigate why userResizeBounds are empty with shell transitions on
+        // fallback to using the userResizeBounds if userResizeBounds are not empty
+        if (!mTouchHandler.getUserResizeBounds().isEmpty()) {
+            Rect userResizeBounds = mTouchHandler.getUserResizeBounds();
+            reentrySize = new Size(userResizeBounds.width(), userResizeBounds.height());
+        }
+
+        mPipBoundsState.saveReentryState(reentrySize, snapFraction);
     }
 
     @Override
@@ -1296,6 +1319,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.stopSwipePipToHome(
                             taskId, componentName, destinationBounds, overlay));
+        }
+
+        @Override
+        public void abortSwipePipToHome(int taskId, ComponentName componentName) {
+            executeRemoteCallWithTaskPermission(mController, "abortSwipePipToHome",
+                    (controller) -> controller.abortSwipePipToHome(taskId, componentName));
         }
 
         @Override

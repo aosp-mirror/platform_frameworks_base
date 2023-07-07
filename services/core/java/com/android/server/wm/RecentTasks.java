@@ -33,6 +33,7 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
@@ -209,7 +210,8 @@ class RecentTasks {
     private final PointerEventListener mListener = new PointerEventListener() {
         @Override
         public void onPointerEvent(MotionEvent ev) {
-            if (!mFreezeTaskListReordering || ev.getAction() != MotionEvent.ACTION_DOWN) {
+            if (!mFreezeTaskListReordering || ev.getAction() != MotionEvent.ACTION_DOWN
+                    || ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE) {
                 // Skip if we aren't freezing or starting a gesture
                 return;
             }

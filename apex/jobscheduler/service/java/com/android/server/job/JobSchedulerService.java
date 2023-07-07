@@ -106,6 +106,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.AppSchedulingModuleThread;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
@@ -193,7 +195,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final long REQUIRE_NETWORK_CONSTRAINT_FOR_NETWORK_JOB_WORK_ITEMS = 241104082L;
 
     /**
-     * Require the app to have the INTERNET and ACCESS_NETWORK_STATE permissions when scheduling
+     * Require the app to have the ACCESS_NETWORK_STATE permissions when scheduling
      * a job with a connectivity constraint.
      */
     @ChangeId
@@ -320,16 +322,25 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
     private static final String QUOTA_TRACKER_SCHEDULE_LOGGED =
             ".schedulePersisted out-of-quota logged";
+    private static final String QUOTA_TRACKER_TIMEOUT_UIJ_TAG = "timeout-uij";
+    private static final String QUOTA_TRACKER_TIMEOUT_EJ_TAG = "timeout-ej";
+    private static final String QUOTA_TRACKER_TIMEOUT_REG_TAG = "timeout-reg";
+    private static final String QUOTA_TRACKER_TIMEOUT_TOTAL_TAG = "timeout-total";
+    private static final String QUOTA_TRACKER_ANR_TAG = "anr";
     private static final Category QUOTA_TRACKER_CATEGORY_SCHEDULE_PERSISTED = new Category(
             ".schedulePersisted()");
     private static final Category QUOTA_TRACKER_CATEGORY_SCHEDULE_LOGGED = new Category(
             ".schedulePersisted out-of-quota logged");
-    private static final Categorizer QUOTA_CATEGORIZER = (userId, packageName, tag) -> {
-        if (QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG.equals(tag)) {
-            return QUOTA_TRACKER_CATEGORY_SCHEDULE_PERSISTED;
-        }
-        return QUOTA_TRACKER_CATEGORY_SCHEDULE_LOGGED;
-    };
+    private static final Category QUOTA_TRACKER_CATEGORY_TIMEOUT_UIJ =
+            new Category(QUOTA_TRACKER_TIMEOUT_UIJ_TAG);
+    private static final Category QUOTA_TRACKER_CATEGORY_TIMEOUT_EJ =
+            new Category(QUOTA_TRACKER_TIMEOUT_EJ_TAG);
+    private static final Category QUOTA_TRACKER_CATEGORY_TIMEOUT_REG =
+            new Category(QUOTA_TRACKER_TIMEOUT_REG_TAG);
+    private static final Category QUOTA_TRACKER_CATEGORY_TIMEOUT_TOTAL =
+            new Category(QUOTA_TRACKER_TIMEOUT_TOTAL_TAG);
+    private static final Category QUOTA_TRACKER_CATEGORY_ANR = new Category(QUOTA_TRACKER_ANR_TAG);
+    private static final Category QUOTA_TRACKER_CATEGORY_DISABLED = new Category("disabled");
 
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
@@ -377,6 +388,28 @@ public class JobSchedulerService extends com.android.server.SystemService
             new JobStatus[DEBUG ? NUM_COMPLETED_JOB_HISTORY : 0];
     private final long[] mLastCancelledJobTimeElapsed =
             new long[DEBUG ? NUM_COMPLETED_JOB_HISTORY : 0];
+
+    private static final Histogram sEnqueuedJwiHighWaterMarkLogger = new Histogram(
+            "job_scheduler.value_hist_w_uid_enqueued_work_items_high_water_mark",
+            new Histogram.ScaledRangeOptions(25, 0, 5, 1.4f));
+    private static final Histogram sInitialJobEstimatedNetworkDownloadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_job_estimated_network_download_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sInitialJwiEstimatedNetworkDownloadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_jwi_estimated_network_download_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sInitialJobEstimatedNetworkUploadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_job_estimated_network_upload_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sInitialJwiEstimatedNetworkUploadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_jwi_estimated_network_upload_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sJobMinimumChunkKBLogger = new Histogram(
+            "job_scheduler.value_hist_w_uid_job_minimum_chunk_kilobytes",
+            new Histogram.ScaledRangeOptions(25, 0, 5 /* 5 KB */, 1.76f));
+    private static final Histogram sJwiMinimumChunkKBLogger = new Histogram(
+            "job_scheduler.value_hist_w_uid_jwi_minimum_chunk_kilobytes",
+            new Histogram.ScaledRangeOptions(25, 0, 5 /* 5 KB */, 1.76f));
 
     /**
      * A mapping of which uids are currently in the foreground to their effective bias.
@@ -469,10 +502,18 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     switch (name) {
                         case Constants.KEY_ENABLE_API_QUOTAS:
+                        case Constants.KEY_ENABLE_EXECUTION_SAFEGUARDS_UDC:
                         case Constants.KEY_API_QUOTA_SCHEDULE_COUNT:
                         case Constants.KEY_API_QUOTA_SCHEDULE_WINDOW_MS:
                         case Constants.KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT:
                         case Constants.KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT:
+                        case Constants.KEY_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS:
                             if (!apiQuotaScheduleUpdated) {
                                 mConstants.updateApiQuotaConstantsLocked();
                                 updateQuotaTracker();
@@ -559,10 +600,26 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @VisibleForTesting
     void updateQuotaTracker() {
-        mQuotaTracker.setEnabled(mConstants.ENABLE_API_QUOTAS);
+        mQuotaTracker.setEnabled(
+                mConstants.ENABLE_API_QUOTAS || mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC);
         mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_SCHEDULE_PERSISTED,
                 mConstants.API_QUOTA_SCHEDULE_COUNT,
                 mConstants.API_QUOTA_SCHEDULE_WINDOW_MS);
+        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_TIMEOUT_UIJ,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS);
+        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_TIMEOUT_EJ,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS);
+        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_TIMEOUT_REG,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS);
+        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_TIMEOUT_TOTAL,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS);
+        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_ANR,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_ANR_COUNT,
+                mConstants.EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS);
     }
 
     /**
@@ -592,6 +649,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "conn_low_signal_strength_relax_frac";
         private static final String KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS =
                 "prefetch_force_batch_relax_threshold_ms";
+        // This has been enabled for 3+ full releases. We're unlikely to disable it.
+        // TODO(141645789): remove this flag
         private static final String KEY_ENABLE_API_QUOTAS = "enable_api_quotas";
         private static final String KEY_API_QUOTA_SCHEDULE_COUNT = "aq_schedule_count";
         private static final String KEY_API_QUOTA_SCHEDULE_WINDOW_MS = "aq_schedule_window_ms";
@@ -599,6 +658,22 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "aq_schedule_throw_exception";
         private static final String KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 "aq_schedule_return_failure";
+        private static final String KEY_ENABLE_EXECUTION_SAFEGUARDS_UDC =
+                "enable_execution_safeguards_udc";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT =
+                "es_u_timeout_uij_count";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT =
+                "es_u_timeout_ej_count";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT =
+                "es_u_timeout_reg_count";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT =
+                "es_u_timeout_total_count";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS =
+                "es_u_timeout_window_ms";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT =
+                "es_u_anr_count";
+        private static final String KEY_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS =
+                "es_u_anr_window_ms";
 
         private static final String KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS =
                 "runtime_free_quota_max_limit_ms";
@@ -638,6 +713,17 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        private static final boolean DEFAULT_ENABLE_EXECUTION_SAFEGUARDS_UDC = true;
+        private static final int DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
+        // EJs have a shorter timeout, so set a higher limit for them to start with.
+        private static final int DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT = 5;
+        private static final int DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT = 3;
+        private static final int DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT = 10;
+        private static final long DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS =
+                24 * HOUR_IN_MILLIS;
+        private static final int DEFAULT_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT = 3;
+        private static final long DEFAULT_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS =
+                6 * HOUR_IN_MILLIS;
         @VisibleForTesting
         public static final long DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS = 30 * MINUTE_IN_MILLIS;
         @VisibleForTesting
@@ -749,6 +835,55 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         public boolean API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT;
+
+        /**
+         * Whether to enable the execution safeguards added in UDC.
+         */
+        public boolean ENABLE_EXECUTION_SAFEGUARDS_UDC = DEFAULT_ENABLE_EXECUTION_SAFEGUARDS_UDC;
+        /**
+         * The maximum number of times an app can have a user-iniated job time out before the system
+         * begins removing some of the app's privileges.
+         */
+        public int EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT =
+                DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT;
+        /**
+         * The maximum number of times an app can have an expedited job time out before the system
+         * begins removing some of the app's privileges.
+         */
+        public int EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT =
+                DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT;
+        /**
+         * The maximum number of times an app can have a regular job time out before the system
+         * begins removing some of the app's privileges.
+         */
+        public int EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT =
+                DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT;
+        /**
+         * The maximum number of times an app can have jobs time out before the system
+         * attempts to restrict most of the app's privileges.
+         */
+        public int EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT =
+                DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT;
+        /**
+         * The time window that {@link #EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT},
+         * {@link #EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT},
+         * {@link #EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT}, and
+         * {@link #EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT} should be evaluated over.
+         */
+        public long EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS =
+                DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS;
+
+        /**
+         * The maximum number of times an app can ANR from JobScheduler's perspective before
+         * JobScheduler will attempt to restrict the app.
+         */
+        public int EXECUTION_SAFEGUARDS_UDC_ANR_COUNT = DEFAULT_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT;
+        /**
+         * The time window that {@link #EXECUTION_SAFEGUARDS_UDC_ANR_COUNT}
+         * should be evaluated over.
+         */
+        public long EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS =
+                DEFAULT_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS;
 
         /** The maximum amount of time we will let a job run for when quota is "free". */
         public long RUNTIME_FREE_QUOTA_MAX_LIMIT_MS = DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
@@ -891,6 +1026,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         private void updateApiQuotaConstantsLocked() {
             ENABLE_API_QUOTAS = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_ENABLE_API_QUOTAS, DEFAULT_ENABLE_API_QUOTAS);
+            ENABLE_EXECUTION_SAFEGUARDS_UDC = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_ENABLE_EXECUTION_SAFEGUARDS_UDC, DEFAULT_ENABLE_EXECUTION_SAFEGUARDS_UDC);
             // Set a minimum value on the quota limit so it's not so low that it interferes with
             // legitimate use cases.
             API_QUOTA_SCHEDULE_COUNT = Math.max(250,
@@ -907,6 +1045,40 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT,
                     DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT);
+
+            // Set a minimum value on the timeout limit so it's not so low that it interferes with
+            // legitimate use cases.
+            EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = Math.max(2,
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                            KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT,
+                            DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT));
+            EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT = Math.max(2,
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                            KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT,
+                            DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT));
+            EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT = Math.max(2,
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                            KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT,
+                            DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT));
+            final int highestTimeoutCount = Math.max(EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT,
+                    Math.max(EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT,
+                            EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT));
+            EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT = Math.max(highestTimeoutCount,
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                            KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT,
+                            DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT));
+            EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS,
+                    DEFAULT_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS);
+            EXECUTION_SAFEGUARDS_UDC_ANR_COUNT = Math.max(1,
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                            KEY_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT,
+                            DEFAULT_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT));
+            EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS,
+                    DEFAULT_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS);
         }
 
         private void updateRuntimeConstantsLocked() {
@@ -1004,6 +1176,23 @@ public class JobSchedulerService extends com.android.server.SystemService
                     API_QUOTA_SCHEDULE_THROW_EXCEPTION).println();
             pw.print(KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT,
                     API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT).println();
+
+            pw.print(KEY_ENABLE_EXECUTION_SAFEGUARDS_UDC, ENABLE_EXECUTION_SAFEGUARDS_UDC)
+                    .println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT,
+                    EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT).println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT,
+                    EXECUTION_SAFEGUARDS_UDC_TIMEOUT_EJ_COUNT).println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT,
+                    EXECUTION_SAFEGUARDS_UDC_TIMEOUT_REG_COUNT).println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT,
+                    EXECUTION_SAFEGUARDS_UDC_TIMEOUT_TOTAL_COUNT).println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS,
+                    EXECUTION_SAFEGUARDS_UDC_TIMEOUT_WINDOW_MS).println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_ANR_COUNT,
+                    EXECUTION_SAFEGUARDS_UDC_ANR_COUNT).println();
+            pw.print(KEY_EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS,
+                    EXECUTION_SAFEGUARDS_UDC_ANR_WINDOW_MS).println();
 
             pw.print(KEY_RUNTIME_MIN_GUARANTEE_MS, RUNTIME_MIN_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
@@ -1419,7 +1608,36 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mActivityManagerInternal.isAppStartModeDisabled(uId, servicePkg)) {
             Slog.w(TAG, "Not scheduling job " + uId + ":" + job.toString()
                     + " -- package not allowed to start");
+            Counter.logIncrementWithUid(
+                    "job_scheduler.value_cntr_w_uid_schedule_failure_app_start_mode_disabled",
+                    uId);
             return JobScheduler.RESULT_FAILURE;
+        }
+
+        if (job.getRequiredNetwork() != null) {
+            sInitialJobEstimatedNetworkDownloadKBLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(
+                            job.getEstimatedNetworkDownloadBytes()));
+            sInitialJobEstimatedNetworkUploadKBLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(job.getEstimatedNetworkUploadBytes()));
+            sJobMinimumChunkKBLogger.logSampleWithUid(uId,
+                    safelyScaleBytesToKBForHistogram(job.getMinimumNetworkChunkBytes()));
+            if (work != null) {
+                sInitialJwiEstimatedNetworkDownloadKBLogger.logSample(
+                        safelyScaleBytesToKBForHistogram(
+                                work.getEstimatedNetworkDownloadBytes()));
+                sInitialJwiEstimatedNetworkUploadKBLogger.logSample(
+                        safelyScaleBytesToKBForHistogram(
+                                work.getEstimatedNetworkUploadBytes()));
+                sJwiMinimumChunkKBLogger.logSampleWithUid(uId,
+                        safelyScaleBytesToKBForHistogram(
+                                work.getMinimumNetworkChunkBytes()));
+            }
+        }
+
+        if (work != null) {
+            Counter.logIncrementWithUid(
+                    "job_scheduler.value_cntr_w_uid_job_work_items_enqueued", uId);
         }
 
         synchronized (mLock) {
@@ -1450,7 +1668,18 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
 
                     toCancel.enqueueWorkLocked(work);
+                    if (toCancel.getJob().isUserInitiated()) {
+                        // The app is in a state to successfully schedule a UI job. Presumably, the
+                        // user has asked for this additional bit of work, so remove any demotion
+                        // flags. Only do this for UI jobs since they have strict scheduling
+                        // requirements; it's harder to assume other jobs were scheduled due to
+                        // user interaction/request.
+                        toCancel.removeInternalFlags(
+                                JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER
+                                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+                    }
                     mJobs.touchJob(toCancel);
+                    sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, toCancel.getWorkCount());
 
                     // If any of work item is enqueued when the source is in the foreground,
                     // exempt the entire job.
@@ -1468,6 +1697,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if ((mConstants.USE_TARE_POLICY && !mTareController.canScheduleEJ(jobStatus))
                         || (!mConstants.USE_TARE_POLICY
                         && !mQuotaController.isWithinEJQuotaLocked(jobStatus))) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler.value_cntr_w_uid_schedule_failure_ej_out_of_quota",
+                            uId);
                     return JobScheduler.RESULT_FAILURE;
                 }
             }
@@ -1483,6 +1715,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (packageName == null) {
                 if (mJobs.countJobsForUid(uId) > MAX_JOBS_PER_APP) {
                     Slog.w(TAG, "Too many jobs for uid " + uId);
+                    Counter.logIncrementWithUid(
+                            "job_scheduler.value_cntr_w_uid_max_scheduling_limit_hit", uId);
                     throw new IllegalStateException("Apps may not schedule more than "
                             + MAX_JOBS_PER_APP + " distinct jobs");
                 }
@@ -1522,13 +1756,14 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (work != null) {
                 // If work has been supplied, enqueue it into the new job.
                 jobStatus.enqueueWorkLocked(work);
+                sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, jobStatus.getWorkCount());
             }
 
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     uId, null, jobStatus.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
                     JobProtoEnums.INTERNAL_STOP_REASON_UNKNOWN, jobStatus.getStandbyBucket(),
-                    jobStatus.getJobId(),
+                    jobStatus.getLoggingJobId(),
                     jobStatus.hasChargingConstraint(),
                     jobStatus.hasBatteryNotLowConstraint(),
                     jobStatus.hasStorageNotLowConstraint(),
@@ -1560,7 +1795,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getJob().getMinLatencyMillis(),
                     jobStatus.getEstimatedNetworkDownloadBytes(),
                     jobStatus.getEstimatedNetworkUploadBytes(),
-                    jobStatus.getWorkCount());
+                    jobStatus.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(jobStatus.getUid())),
+                    jobStatus.getNamespaceHash());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1935,6 +2172,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * {@code incomingJob} is non-null, it replaces {@code cancelled} in the store of
      * currently scheduled jobs.
      */
+    @GuardedBy("mLock")
     private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
@@ -1954,7 +2192,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getSourceUid(), null, cancelled.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__CANCELLED,
                     internalReasonCode, cancelled.getStandbyBucket(),
-                    cancelled.getJobId(),
+                    cancelled.getLoggingJobId(),
                     cancelled.hasChargingConstraint(),
                     cancelled.hasBatteryNotLowConstraint(),
                     cancelled.hasStorageNotLowConstraint(),
@@ -1986,7 +2224,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getJob().getMinLatencyMillis(),
                     cancelled.getEstimatedNetworkDownloadBytes(),
                     cancelled.getEstimatedNetworkUploadBytes(),
-                    cancelled.getWorkCount());
+                    cancelled.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(cancelled.getUid())),
+                    cancelled.getNamespaceHash());
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -2177,12 +2417,52 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Set up the app standby bucketing tracker
         mStandbyTracker = new StandbyTracker();
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
-        mQuotaTracker = new CountQuotaTracker(context, QUOTA_CATEGORIZER);
-        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_SCHEDULE_PERSISTED,
-                mConstants.API_QUOTA_SCHEDULE_COUNT,
-                mConstants.API_QUOTA_SCHEDULE_WINDOW_MS);
+
+        final Categorizer quotaCategorizer = (userId, packageName, tag) -> {
+            if (QUOTA_TRACKER_TIMEOUT_UIJ_TAG.equals(tag)) {
+                return mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC
+                        ? QUOTA_TRACKER_CATEGORY_TIMEOUT_UIJ
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            if (QUOTA_TRACKER_TIMEOUT_EJ_TAG.equals(tag)) {
+                return mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC
+                        ? QUOTA_TRACKER_CATEGORY_TIMEOUT_EJ
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            if (QUOTA_TRACKER_TIMEOUT_REG_TAG.equals(tag)) {
+                return mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC
+                        ? QUOTA_TRACKER_CATEGORY_TIMEOUT_REG
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            if (QUOTA_TRACKER_TIMEOUT_TOTAL_TAG.equals(tag)) {
+                return mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC
+                        ? QUOTA_TRACKER_CATEGORY_TIMEOUT_TOTAL
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            if (QUOTA_TRACKER_ANR_TAG.equals(tag)) {
+                return mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC
+                        ? QUOTA_TRACKER_CATEGORY_ANR
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            if (QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG.equals(tag)) {
+                return mConstants.ENABLE_API_QUOTAS
+                        ? QUOTA_TRACKER_CATEGORY_SCHEDULE_PERSISTED
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            if (QUOTA_TRACKER_SCHEDULE_LOGGED.equals(tag)) {
+                return mConstants.ENABLE_API_QUOTAS
+                        ? QUOTA_TRACKER_CATEGORY_SCHEDULE_LOGGED
+                        : QUOTA_TRACKER_CATEGORY_DISABLED;
+            }
+            Slog.wtf(TAG, "Unexpected category tag: " + tag);
+            return QUOTA_TRACKER_CATEGORY_DISABLED;
+        };
+        mQuotaTracker = new CountQuotaTracker(context, quotaCategorizer);
+        updateQuotaTracker();
         // Log at most once per minute.
+        // Set outside updateQuotaTracker() since this is intentionally not configurable.
         mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_SCHEDULE_LOGGED, 1, 60_000);
+        mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_DISABLED, Integer.MAX_VALUE, 60_000);
 
         mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
         mAppStandbyInternal.addListener(mStandbyTracker);
@@ -2522,39 +2802,49 @@ public class JobSchedulerService extends com.android.server.SystemService
         // or the user stopped the job somehow.
         if (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH
                 || internalStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
+                || internalStopReason == JobParameters.INTERNAL_STOP_REASON_ANR
                 || stopReason == JobParameters.STOP_REASON_USER) {
             numFailures++;
         } else {
             numSystemStops++;
         }
-        final int backoffAttempts = Math.max(1,
-                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO);
-        long delayMillis;
+        final int backoffAttempts =
+                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO;
+        final long earliestRuntimeMs;
 
-        switch (job.getBackoffPolicy()) {
-            case JobInfo.BACKOFF_POLICY_LINEAR: {
-                long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
-                    backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
+        if (backoffAttempts == 0) {
+            earliestRuntimeMs = JobStatus.NO_EARLIEST_RUNTIME;
+        } else {
+            long delayMillis;
+            switch (job.getBackoffPolicy()) {
+                case JobInfo.BACKOFF_POLICY_LINEAR: {
+                    long backoff = initialBackoffMillis;
+                    if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
+                        backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
+                    }
+                    delayMillis = backoff * backoffAttempts;
                 }
-                delayMillis = backoff * backoffAttempts;
-            } break;
-            default:
-                if (DEBUG) {
-                    Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
+                break;
+                default:
+                    if (DEBUG) {
+                        Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
+                    }
+                    // Intentional fallthrough.
+                case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
+                    long backoff = initialBackoffMillis;
+                    if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
+                        backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
+                    }
+                    delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
                 }
-            case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
-                long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
-                    backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
-                }
-                delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
-            } break;
+                break;
+            }
+            delayMillis =
+                    Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
+            earliestRuntimeMs = elapsedNowMillis + delayMillis;
         }
-        delayMillis =
-                Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
         JobStatus newJob = new JobStatus(failureToReschedule,
-                elapsedNowMillis + delayMillis,
+                earliestRuntimeMs,
                 JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis(),
                 failureToReschedule.getCumulativeExecutionTimeMs());
@@ -2677,6 +2967,48 @@ public class JobSchedulerService extends com.android.server.SystemService
                 0 /* Reset cumulativeExecutionTime because of successful execution */);
     }
 
+    @VisibleForTesting
+    void maybeProcessBuggyJob(@NonNull JobStatus jobStatus, int debugStopReason) {
+        boolean jobTimedOut = debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT;
+        // If madeActive = 0, the job never actually started.
+        if (!jobTimedOut && jobStatus.madeActive > 0) {
+            final long executionDurationMs = sUptimeMillisClock.millis() - jobStatus.madeActive;
+            // The debug reason may be different if we stopped the job for some other reason
+            // (eg. constraints), so look at total execution time to be safe.
+            if (jobStatus.startedAsUserInitiatedJob) {
+                // TODO: factor in different min guarantees for different UI job types
+                jobTimedOut = executionDurationMs >= mConstants.RUNTIME_MIN_UI_GUARANTEE_MS;
+            } else if (jobStatus.startedAsExpeditedJob) {
+                jobTimedOut = executionDurationMs >= mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS;
+            } else {
+                jobTimedOut = executionDurationMs >= mConstants.RUNTIME_MIN_GUARANTEE_MS;
+            }
+        }
+        if (jobTimedOut) {
+            final int userId = jobStatus.getTimeoutBlameUserId();
+            final String pkg = jobStatus.getTimeoutBlamePackageName();
+            mQuotaTracker.noteEvent(userId, pkg,
+                    jobStatus.startedAsUserInitiatedJob
+                            ? QUOTA_TRACKER_TIMEOUT_UIJ_TAG
+                            : (jobStatus.startedAsExpeditedJob
+                                    ? QUOTA_TRACKER_TIMEOUT_EJ_TAG
+                                    : QUOTA_TRACKER_TIMEOUT_REG_TAG));
+            if (!mQuotaTracker.noteEvent(userId, pkg, QUOTA_TRACKER_TIMEOUT_TOTAL_TAG)) {
+                mAppStandbyInternal.restrictApp(
+                        pkg, userId, UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+            }
+        }
+
+        if (debugStopReason == JobParameters.INTERNAL_STOP_REASON_ANR) {
+            final int callingUserId = jobStatus.getUserId();
+            final String callingPkg = jobStatus.getServiceComponent().getPackageName();
+            if (!mQuotaTracker.noteEvent(callingUserId, callingPkg, QUOTA_TRACKER_ANR_TAG)) {
+                mAppStandbyInternal.restrictApp(callingPkg, callingUserId,
+                        UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+            }
+        }
+    }
+
     // JobCompletedListener implementations.
 
     /**
@@ -2698,6 +3030,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mLastCompletedJobs[mLastCompletedJobIndex] = jobStatus;
         mLastCompletedJobTimeElapsed[mLastCompletedJobIndex] = sElapsedRealtimeClock.millis();
         mLastCompletedJobIndex = (mLastCompletedJobIndex + 1) % NUM_COMPLETED_JOB_HISTORY;
+
+        maybeProcessBuggyJob(jobStatus, debugStopReason);
 
         if (debugStopReason == JobParameters.INTERNAL_STOP_REASON_UNINSTALL
                 || debugStopReason == JobParameters.INTERNAL_STOP_REASON_DATA_CLEARED) {
@@ -3426,26 +3760,36 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (job.shouldTreatAsUserInitiatedJob()
                     && checkRunUserInitiatedJobsPermission(
                             job.getSourceUid(), job.getSourcePackageName())) {
+                // The calling package is the one doing the work, so use it in the
+                // timeout quota checks.
+                final boolean isWithinTimeoutQuota = mQuotaTracker.isWithinQuota(
+                        job.getTimeoutBlameUserId(), job.getTimeoutBlamePackageName(),
+                        QUOTA_TRACKER_TIMEOUT_UIJ_TAG);
+                final long upperLimitMs = isWithinTimeoutQuota
+                        ? mConstants.RUNTIME_UI_LIMIT_MS
+                        : mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
                 if (job.getJob().getRequiredNetwork() != null) {
                     // User-initiated data transfers.
                     if (mConstants.RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS) {
                         final long estimatedTransferTimeMs =
                                 mConnectivityController.getEstimatedTransferTimeMs(job);
                         if (estimatedTransferTimeMs == ConnectivityController.UNKNOWN_TIME) {
-                            return mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS;
+                            return Math.min(upperLimitMs,
+                                    mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS);
                         }
                         // Try to give the job at least as much time as we think the transfer
                         // will take, but cap it at the maximum limit.
                         final long factoredTransferTimeMs = (long) (estimatedTransferTimeMs
                                 * mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR);
-                        return Math.min(mConstants.RUNTIME_UI_LIMIT_MS,
+                        return Math.min(upperLimitMs,
                                 Math.max(factoredTransferTimeMs,
                                         mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS));
                     }
-                    return Math.max(mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
-                            mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS);
+                    return Math.min(upperLimitMs,
+                            Math.max(mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
+                                    mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS));
                 }
-                return mConstants.RUNTIME_MIN_UI_GUARANTEE_MS;
+                return Math.min(upperLimitMs, mConstants.RUNTIME_MIN_UI_GUARANTEE_MS);
             } else if (job.shouldTreatAsExpeditedJob()) {
                 // Don't guarantee RESTRICTED jobs more than 5 minutes.
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
@@ -3462,13 +3806,24 @@ public class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             if (job.shouldTreatAsUserInitiatedJob()
                     && checkRunUserInitiatedJobsPermission(
-                            job.getSourceUid(), job.getSourcePackageName())) {
+                            job.getSourceUid(), job.getSourcePackageName())
+                    && mQuotaTracker.isWithinQuota(job.getTimeoutBlameUserId(),
+                            job.getTimeoutBlamePackageName(),
+                            QUOTA_TRACKER_TIMEOUT_UIJ_TAG)) {
                 return mConstants.RUNTIME_UI_LIMIT_MS;
             }
             if (job.shouldTreatAsUserInitiatedJob()) {
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
             }
-            return Math.min(mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+            // Only let the app use the higher runtime if it hasn't repeatedly timed out.
+            final String timeoutTag = job.shouldTreatAsExpeditedJob()
+                    ? QUOTA_TRACKER_TIMEOUT_EJ_TAG : QUOTA_TRACKER_TIMEOUT_REG_TAG;
+            final long upperLimitMs =
+                    mQuotaTracker.isWithinQuota(job.getTimeoutBlameUserId(),
+                            job.getTimeoutBlamePackageName(), timeoutTag)
+                            ? mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS
+                            : mConstants.RUNTIME_MIN_GUARANTEE_MS;
+            return Math.min(upperLimitMs,
                     mConstants.USE_TARE_POLICY
                             ? mTareController.getMaxJobExecutionTimeMsLocked(job)
                             : mQuotaController.getMaxJobExecutionTimeMsLocked(job));
@@ -3712,6 +4067,17 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public boolean isAppConsideredBuggy(int callingUserId, @NonNull String callingPackageName,
+                int timeoutBlameUserId, @NonNull String timeoutBlamePackageName) {
+            return !mQuotaTracker.isWithinQuota(callingUserId, callingPackageName,
+                            QUOTA_TRACKER_ANR_TAG)
+                    || !mQuotaTracker.isWithinQuota(callingUserId, callingPackageName,
+                            QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG)
+                    || !mQuotaTracker.isWithinQuota(timeoutBlameUserId, timeoutBlamePackageName,
+                            QUOTA_TRACKER_TIMEOUT_TOTAL_TAG);
+        }
+
+        @Override
         public boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId,
                 int userId, @NonNull String packageName) {
             if (packageName == null) {
@@ -3831,6 +4197,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         return bucket;
     }
 
+    static int safelyScaleBytesToKBForHistogram(long bytes) {
+        long kilobytes = bytes / 1000;
+        // Anything over Integer.MAX_VALUE or under Integer.MIN_VALUE isn't expected and will
+        // be put into the overflow buckets.
+        if (kilobytes > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else if (kilobytes < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) kilobytes;
+    }
+
     private class CloudProviderChangeListener implements
             StorageManagerInternal.CloudProviderChangeListener {
 
@@ -3926,12 +4304,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (job.getRequiredNetwork() != null
                     && CompatChanges.isChangeEnabled(
                             REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS, uid)) {
-                // All networking, including with the local network and even local to the device,
-                // requires the INTERNET permission.
-                if (!hasPermission(uid, pid, Manifest.permission.INTERNET)) {
-                    throw new SecurityException(Manifest.permission.INTERNET
-                            + " required for jobs with a connectivity constraint");
-                }
                 if (!hasPermission(uid, pid, Manifest.permission.ACCESS_NETWORK_STATE)) {
                     throw new SecurityException(Manifest.permission.ACCESS_NETWORK_STATE
                             + " required for jobs with a connectivity constraint");
@@ -4014,6 +4386,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (!isInStateToScheduleUiJobSource && !isInStateToScheduleUiJobCalling) {
                     Slog.e(TAG, "Uid(s) " + sourceUid + "/" + callingUid
                             + " not in a state to schedule user-initiated jobs");
+                    Counter.logIncrementWithUid(
+                            "job_scheduler.value_cntr_w_uid_schedule_failure_uij_invalid_state",
+                            callingUid);
                     return JobScheduler.RESULT_FAILURE;
                 }
             }
@@ -4055,6 +4430,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (namespace.isEmpty()) {
                     throw new IllegalArgumentException("namespace cannot be empty");
                 }
+                if (namespace.length() > 1000) {
+                    throw new IllegalArgumentException(
+                            "namespace cannot be more than 1000 characters");
+                }
                 namespace = namespace.intern();
             }
             return namespace;
@@ -4063,10 +4442,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         private int validateRunUserInitiatedJobsPermission(int uid, String packageName) {
             final int state = getRunUserInitiatedJobsPermissionState(uid, packageName);
             if (state == PermissionChecker.PERMISSION_HARD_DENIED) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_schedule_failure_uij_no_permission", uid);
                 throw new SecurityException(android.Manifest.permission.RUN_USER_INITIATED_JOBS
                         + " required to schedule user-initiated jobs.");
             }
             if (state == PermissionChecker.PERMISSION_SOFT_DENIED) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_schedule_failure_uij_no_permission", uid);
                 return JobScheduler.RESULT_FAILURE;
             }
             return JobScheduler.RESULT_SUCCESS;

@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -635,7 +636,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         int hint;
         if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = getViewHeight(VISIBLE_TYPE_HEADSUP);
-            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()) {
+            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()
+                    && mHeadsUpRemoteInputController.isFocusAnimationFlagActive()) {
                 // While the RemoteInputView is animating its appearance, it should be allowed
                 // to overlap the hint, therefore no space is reserved for the hint during the
                 // appearance animation of the RemoteInputView
@@ -1192,6 +1194,7 @@ public class NotificationContentView extends FrameLayout implements Notification
 
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
+            Trace.beginSection("NotifContentView#updateSingleLineView");
             boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
                     mSingleLineView, mContractedChild, mNotificationEntry.getSbn(), this);
@@ -1199,6 +1202,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                 updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
                         mSingleLineView, mSingleLineView);
             }
+            Trace.endSection();
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
             mSingleLineView = null;

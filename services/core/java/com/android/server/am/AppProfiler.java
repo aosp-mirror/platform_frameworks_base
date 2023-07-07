@@ -500,10 +500,11 @@ public class AppProfiler {
                 mLatestFrozenTimestamp = 0L;
                 mTotalFrozenDurations = 0L;
                 mNumOfFrozenApps = 0;
+                final int lruSize = mService.mProcessList.getLruSizeLOSP();
                 if (mCachedAppFrozenDurations == null
-                        || mCachedAppFrozenDurations.length < mCachedAppHighWatermark) {
+                        || mCachedAppFrozenDurations.length < lruSize) {
                     mCachedAppFrozenDurations = new long[Math.max(
-                            mCachedAppHighWatermark, mService.mConstants.CUR_MAX_CACHED_PROCESSES)];
+                            lruSize, mService.mConstants.CUR_MAX_CACHED_PROCESSES)];
                 }
                 mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
                     if (app.mOptRecord.isFrozen()) {
@@ -1199,6 +1200,17 @@ public class AppProfiler {
                     .sendToTarget();
         }
 
+        mCachedAppsWatermarkData.updateCachedAppsHighWatermarkIfNecessaryLocked(
+                numCached + numEmpty, now);
+        boolean allChanged;
+        int trackerMemFactor;
+        synchronized (mService.mProcessStats.mLock) {
+            allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
+                    mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(),
+                    SystemClock.uptimeMillis() /* re-acquire the time within the lock */);
+            trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
+        }
+
         if (mService.mConstants.USE_MODERN_TRIM) {
             // Modern trim is not sent based on lowmem state
             // Dispatch UI_HIDDEN to processes that need it
@@ -1231,14 +1243,6 @@ public class AppProfiler {
 
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
-        boolean allChanged;
-        int trackerMemFactor;
-        synchronized (mService.mProcessStats.mLock) {
-            allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
-                    mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(),
-                    SystemClock.uptimeMillis() /* re-acquire the time within the lock */);
-            trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
-        }
         if (memFactor != ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;
@@ -1316,8 +1320,6 @@ public class AppProfiler {
                 profile.setTrimMemoryLevel(0);
             });
         }
-        mCachedAppsWatermarkData.updateCachedAppsHighWatermarkIfNecessaryLocked(
-                numCached + numEmpty, now);
         return allChanged;
     }
 

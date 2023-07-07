@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import javax.inject.Qualifier;
 
 /**
- * A {@link com.android.systemui.plugins.log.LogBuffer} for BiometricMessages processing such as
+ * A {@link com.android.systemui.log.LogBuffer} for BiometricMessages processing such as
  * {@link com.android.systemui.biometrics.FaceHelpMessageDeferral}
  */
 @Qualifier

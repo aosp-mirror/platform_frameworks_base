@@ -27,6 +27,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.RadioGroup
 import android.widget.Spinner
@@ -44,6 +45,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
     private var gainmap: Gainmap? = null
     private var gainmapVisualizer: Bitmap? = null
     private lateinit var imageView: SubsamplingScaleImageView
+    private lateinit var gainmapMetadataEditor: GainmapMetadataEditor
 
     init {
         gainmapImages = context.assets.list("gainmaps")!!
@@ -58,6 +60,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         super.onFinishInflate()
 
         imageView = findViewById(R.id.image)!!
+        gainmapMetadataEditor = GainmapMetadataEditor(this, imageView)
 
         findViewById<RadioGroup>(R.id.output_mode)!!.also {
             it.check(outputMode)
@@ -90,6 +93,10 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
+        }
+
+        findViewById<Button>(R.id.gainmap_metadata)!!.setOnClickListener {
+            gainmapMetadataEditor.openEditor()
         }
 
         setImage(0)
@@ -132,6 +139,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             findViewById<RadioGroup>(R.id.output_mode)!!.visibility = View.VISIBLE
 
             gainmap = bitmap!!.gainmap
+            gainmapMetadataEditor.setGainmap(gainmap)
             val map = gainmap!!.gainmapContents
             if (map.config != Bitmap.Config.ALPHA_8) {
                 gainmapVisualizer = map
@@ -175,7 +183,15 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
 
         imageView.setImage(ImageSource.cachedBitmap(when (outputMode) {
             R.id.output_hdr -> {
-                bitmap!!.gainmap = gainmap; bitmap!!
+                gainmapMetadataEditor.useOriginalMetadata()
+                bitmap!!.gainmap = gainmap
+                bitmap!!
+            }
+
+            R.id.output_hdr_test -> {
+                gainmapMetadataEditor.useEditMetadata()
+                bitmap!!.gainmap = gainmap
+                bitmap!!
             }
 
             R.id.output_sdr -> {

@@ -53,7 +53,6 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.CropView;
-import com.android.systemui.screenshot.MagnifierView;
 import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
@@ -93,7 +92,6 @@ public class AppClipsActivity extends ComponentActivity {
     private View mRoot;
     private ImageView mPreview;
     private CropView mCropView;
-    private MagnifierView mMagnifierView;
     private Button mSave;
     private Button mCancel;
     private AppClipsViewModel mViewModel;
@@ -156,9 +154,8 @@ public class AppClipsActivity extends ComponentActivity {
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
 
-        mMagnifierView = mLayout.findViewById(R.id.magnifier);
+
         mCropView = mLayout.findViewById(R.id.crop_view);
-        mCropView.setCropInteractionListener(mMagnifierView);
 
         mPreview = mLayout.findViewById(R.id.preview);
         mPreview.addOnLayoutChangeListener(
@@ -218,8 +215,6 @@ public class AppClipsActivity extends ComponentActivity {
         mPreview.setImageDrawable(drawable);
         mPreview.setAlpha(1f);
 
-        mMagnifierView.setDrawable(drawable, screenshot.getWidth(), screenshot.getHeight());
-
         // Screenshot is now available so set content view.
         setContentView(mLayout);
     }
@@ -252,13 +247,18 @@ public class AppClipsActivity extends ComponentActivity {
         }
 
         updateImageDimensions();
-        mViewModel.saveScreenshotThenFinish(drawable, bounds);
+        mViewModel.saveScreenshotThenFinish(drawable, bounds, getUser());
     }
 
     private void setResultThenFinish(Uri uri) {
         if (mResultReceiver == null) {
             return;
         }
+
+        // Grant permission here instead of in the trampoline activity because this activity can run
+        // as work profile user so the URI can belong to the work profile user while the trampoline
+        // activity always runs as main user.
+        grantUriPermission(mCallingPackageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         Bundle data = new Bundle();
         data.putInt(Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE,

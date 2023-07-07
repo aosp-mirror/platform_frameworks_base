@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
@@ -392,23 +394,32 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     @Test
     public void testSnapchild_targetIsZero() {
-        doNothing().when(mSwipeHelper).superSnapChild(mView, 0, 0);
-        mSwipeHelper.snapChild(mView, 0, 0);
+        doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 0, 0);
+        mSwipeHelper.snapChild(mNotificationRow, 0, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mView);
-        verify(mSwipeHelper, times(1)).superSnapChild(mView, 0, 0);
+        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 0, 0);
         verify(mSwipeHelper, times(1)).handleMenuCoveredOrDismissed();
     }
 
 
     @Test
     public void testSnapchild_targetNotZero() {
+        doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 10, 0);
+        mSwipeHelper.snapChild(mNotificationRow, 10, 0);
+
+        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 10, 0);
+        verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
+    }
+
+    @Test
+    public void testSnapchild_targetNotSwipeable() {
         doNothing().when(mSwipeHelper).superSnapChild(mView, 10, 0);
         mSwipeHelper.snapChild(mView, 10, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mView);
-        verify(mSwipeHelper, times(1)).superSnapChild(mView, 10, 0);
-        verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
+        verify(mCallback).onDragCancelled(mView);
+        verify(mSwipeHelper, never()).superSnapChild(mView, 10, 0);
     }
 
     @Test
@@ -658,6 +669,28 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         mSwipeHelper.onTranslationUpdate(mNotificationRow, 12, false);
 
         verify(mNotificationRow, never()).setContentAlpha(anyFloat());
+    }
+
+    @Test
+    public void testForceResetSwipeStateDoesNothingIfTranslationIsZero() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+        doReturn(0f).when(mNotificationRow).getTranslationX();
+
+        mSwipeHelper.forceResetSwipeState(mNotificationRow);
+
+        verify(mNotificationRow).getTranslationX();
+        verifyNoMoreInteractions(mNotificationRow);
+    }
+
+    @Test
+    public void testForceResetSwipeStateResetsTranslationAndAlpha() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+        doReturn(10f).when(mNotificationRow).getTranslationX();
+
+        mSwipeHelper.forceResetSwipeState(mNotificationRow);
+
+        verify(mNotificationRow).setTranslation(eq(0f));
+        verify(mNotificationRow).setContentAlpha(eq(1f));
     }
 
     @Test

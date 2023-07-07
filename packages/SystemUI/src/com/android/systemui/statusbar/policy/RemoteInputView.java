@@ -46,7 +46,6 @@ import android.view.OnReceiveContentListener;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.ViewGroupOverlay;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
@@ -57,6 +56,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -134,6 +134,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Nullable
     private RevealParams mRevealParams;
     private Rect mContentBackgroundBounds;
+    private boolean mIsFocusAnimationFlagActive;
     private boolean mIsAnimatingAppearance = false;
 
     // TODO(b/193539698): move these to a Controller
@@ -431,28 +432,26 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         // case to prevent flicker.
         if (!mRemoved) {
             ViewGroup parent = (ViewGroup) getParent();
-            if (animate && parent != null) {
+            if (animate && parent != null && mIsFocusAnimationFlagActive) {
 
                 ViewGroup grandParent = (ViewGroup) parent.getParent();
-                ViewGroupOverlay overlay = parent.getOverlay();
                 View actionsContainer = getActionsContainerLayout();
                 int actionsContainerHeight =
                         actionsContainer != null ? actionsContainer.getHeight() : 0;
 
-                // After adding this RemoteInputView to the overlay of the parent (and thus removing
-                // it from the parent itself), the parent will shrink in height. This causes the
-                // overlay to be moved. To correct the position of the overlay we need to offset it.
-                int overlayOffsetY = actionsContainerHeight - getHeight();
-                overlay.add(this);
+                // When defocusing, the notification needs to shrink. Therefore, we need to free
+                // up the space that was needed for the RemoteInputView. This is done by setting
+                // a negative top margin of the height difference of the RemoteInputView and its
+                // sibling (the actions_container_layout containing the Reply button etc.)
+                final int heightToShrink = actionsContainerHeight - getHeight();
+                setTopMargin(heightToShrink);
                 if (grandParent != null) grandParent.setClipChildren(false);
 
-                Animator animator = getDefocusAnimator(actionsContainer, overlayOffsetY);
-                View self = this;
+                final Animator animator = getDefocusAnimator(actionsContainer);
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        overlay.remove(self);
-                        parent.addView(self);
+                        setTopMargin(0);
                         if (grandParent != null) grandParent.setClipChildren(true);
                         setVisibility(GONE);
                         if (mWrapper != null) {
@@ -495,6 +494,13 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     mEntry.getSbn().getUid(), mEntry.getSbn().getPackageName(),
                     mEntry.getSbn().getInstanceId());
         }
+    }
+
+    private void setTopMargin(int topMargin) {
+        if (!(getLayoutParams() instanceof FrameLayout.LayoutParams)) return;
+        final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
+        layoutParams.topMargin = topMargin;
+        setLayoutParams(layoutParams);
     }
 
     @VisibleForTesting
@@ -596,10 +602,24 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     /**
+     * Sets whether the feature flag for the revised inline reply animation is active or not.
+     * @param active
+     */
+    public void setIsFocusAnimationFlagActive(boolean active) {
+        mIsFocusAnimationFlagActive = active;
+    }
+
+    /**
      * Focuses the RemoteInputView and animates its appearance
      */
     public void focusAnimated() {
-        if (getVisibility() != VISIBLE) {
+        if (!mIsFocusAnimationFlagActive && getVisibility() != VISIBLE
+                && mRevealParams != null) {
+            android.animation.Animator animator = mRevealParams.createCircularRevealAnimator(this);
+            animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            animator.start();
+        } else if (mIsFocusAnimationFlagActive && getVisibility() != VISIBLE) {
             mIsAnimatingAppearance = true;
             setAlpha(0f);
             Animator focusAnimator = getFocusAnimator(getActionsContainerLayout());
@@ -654,19 +674,37 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void reset() {
-        mProgressBar.setVisibility(INVISIBLE);
+        if (mIsFocusAnimationFlagActive) {
+            mProgressBar.setVisibility(INVISIBLE);
+            mResetting = true;
+            mSending = false;
+            mController.removeSpinning(mEntry.getKey(), mToken);
+            onDefocus(true /* animate */, false /* logClose */, () -> {
+                mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+                mEditText.getText().clear();
+                mEditText.setEnabled(isAggregatedVisible());
+                mSendButton.setVisibility(VISIBLE);
+                updateSendButton();
+                setAttachment(null);
+                mResetting = false;
+            });
+            return;
+        }
+
         mResetting = true;
         mSending = false;
-        onDefocus(true /* animate */, false /* logClose */, () -> {
-            mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
-            mEditText.getText().clear();
-            mEditText.setEnabled(isAggregatedVisible());
-            mSendButton.setVisibility(VISIBLE);
-            mController.removeSpinning(mEntry.getKey(), mToken);
-            updateSendButton();
-            setAttachment(null);
-            mResetting = false;
-        });
+        mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+
+        mEditText.getText().clear();
+        mEditText.setEnabled(isAggregatedVisible());
+        mSendButton.setVisibility(VISIBLE);
+        mProgressBar.setVisibility(INVISIBLE);
+        mController.removeSpinning(mEntry.getKey(), mToken);
+        updateSendButton();
+        onDefocus(false /* animate */, false /* logClose */, null /* doAfterDefocus */);
+        setAttachment(null);
+
+        mResetting = false;
     }
 
     @Override
@@ -810,7 +848,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        setPivotY(getMeasuredHeight());
+        if (mIsFocusAnimationFlagActive) setPivotY(getMeasuredHeight());
         if (mContentBackgroundBounds != null) {
             mContentBackground.setBounds(mContentBackgroundBounds);
         }
@@ -840,7 +878,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         ValueAnimator scaleAnimator = ValueAnimator.ofFloat(FOCUS_ANIMATION_MIN_SCALE, 1f);
         scaleAnimator.addUpdateListener(valueAnimator -> {
-            setFocusAnimationScaleY((float) scaleAnimator.getAnimatedValue(), 0);
+            setFocusAnimationScaleY((float) scaleAnimator.getAnimatedValue());
         });
         scaleAnimator.setDuration(FOCUS_ANIMATION_TOTAL_DURATION);
         scaleAnimator.setInterpolator(InterpolatorsAndroidX.FAST_OUT_SLOW_IN);
@@ -867,9 +905,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * Creates an animator for the defocus animation.
      *
      * @param fadeInView View that will be faded in during the defocus animation.
-     * @param offsetY    The RemoteInputView will be offset by offsetY during the animation
      */
-    private Animator getDefocusAnimator(@Nullable View fadeInView, int offsetY) {
+    private Animator getDefocusAnimator(@Nullable View fadeInView) {
         final AnimatorSet animatorSet = new AnimatorSet();
 
         final Animator alphaAnimator = ObjectAnimator.ofFloat(this, View.ALPHA, 1f, 0f);
@@ -879,14 +916,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         ValueAnimator scaleAnimator = ValueAnimator.ofFloat(1f, FOCUS_ANIMATION_MIN_SCALE);
         scaleAnimator.addUpdateListener(valueAnimator -> {
-            setFocusAnimationScaleY((float) scaleAnimator.getAnimatedValue(), offsetY);
+            setFocusAnimationScaleY((float) scaleAnimator.getAnimatedValue());
         });
         scaleAnimator.setDuration(FOCUS_ANIMATION_TOTAL_DURATION);
         scaleAnimator.setInterpolator(InterpolatorsAndroidX.FAST_OUT_SLOW_IN);
         scaleAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation, boolean isReverse) {
-                setFocusAnimationScaleY(1f /* scaleY */, 0 /* verticalOffset */);
+                setFocusAnimationScaleY(1f /* scaleY */);
             }
         });
 
@@ -908,9 +945,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * Sets affected view properties for a vertical scale animation
      *
      * @param scaleY         desired vertical view scale
-     * @param verticalOffset vertical offset to apply to the RemoteInputView during the animation
      */
-    private void setFocusAnimationScaleY(float scaleY, int verticalOffset) {
+    private void setFocusAnimationScaleY(float scaleY) {
         int verticalBoundOffset = (int) ((1f - scaleY) * 0.5f * mContentView.getHeight());
         Rect contentBackgroundBounds = new Rect(0, verticalBoundOffset, mContentView.getWidth(),
                 mContentView.getHeight() - verticalBoundOffset);
@@ -921,7 +957,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         } else {
             mContentBackgroundBounds = contentBackgroundBounds;
         }
-        setTranslationY(verticalBoundOffset + verticalOffset);
+        setTranslationY(verticalBoundOffset);
     }
 
     /** Handler for button click on send action in IME. */

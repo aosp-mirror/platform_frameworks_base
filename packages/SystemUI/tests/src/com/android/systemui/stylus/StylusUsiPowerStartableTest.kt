@@ -113,20 +113,6 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStylusBluetoothConnected_refreshesNotification() {
-        startable.onStylusBluetoothConnected(STYLUS_DEVICE_ID, "ANY")
-
-        verify(stylusUsiPowerUi, times(1)).refresh()
-    }
-
-    @Test
-    fun onStylusBluetoothDisconnected_refreshesNotification() {
-        startable.onStylusBluetoothDisconnected(STYLUS_DEVICE_ID, "ANY")
-
-        verify(stylusUsiPowerUi, times(1)).refresh()
-    }
-
-    @Test
     fun onStylusUsiBatteryStateChanged_batteryPresentValidCapacity_refreshesNotification() {
         val batteryState = FixedCapacityBatteryState(0.1f)
 

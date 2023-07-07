@@ -18,7 +18,7 @@ package com.android.server.companion.datatransfer.contextsync;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.os.Parcel;
+import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
 
 import org.junit.Test;
@@ -28,37 +28,42 @@ import org.junit.runner.RunWith;
 public class CallMetadataSyncDataTest {
 
     @Test
-    public void call_writeToParcel_fromParcel_reconstructsSuccessfully() {
+    public void call_writeToBundle_fromBundle_reconstructsSuccessfully() {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
-        final long id = 5;
+        final String id = "5";
         final String callerId = "callerId";
         final byte[] appIcon = "appIcon".getBytes();
         final String appName = "appName";
         final String appIdentifier = "com.google.test";
+        final String extendedId = "com.google.test/.InCallService";
         final int status = 1;
+        final int direction = android.companion.Telecom.Call.OUTGOING;
         final int control1 = 2;
         final int control2 = 3;
         call.setId(id);
         call.setCallerId(callerId);
         call.setAppIcon(appIcon);
-        call.setAppName(appName);
-        call.setAppIdentifier(appIdentifier);
+        final CallMetadataSyncData.CallFacilitator callFacilitator =
+                new CallMetadataSyncData.CallFacilitator(appName, appIdentifier, extendedId);
+        call.setFacilitator(callFacilitator);
         call.setStatus(status);
+        call.setDirection(direction);
         call.addControl(control1);
         call.addControl(control2);
 
-        Parcel parcel = Parcel.obtain();
-        call.writeToParcel(parcel, /* flags= */ 0);
-        parcel.setDataPosition(0);
-        final CallMetadataSyncData.Call reconstructedCall = CallMetadataSyncData.Call.fromParcel(
-                parcel);
+        final Bundle bundle = call.writeToBundle();
+        final CallMetadataSyncData.Call reconstructedCall = CallMetadataSyncData.Call.fromBundle(
+                bundle);
 
         assertThat(reconstructedCall.getId()).isEqualTo(id);
         assertThat(reconstructedCall.getCallerId()).isEqualTo(callerId);
         assertThat(reconstructedCall.getAppIcon()).isEqualTo(appIcon);
-        assertThat(reconstructedCall.getAppName()).isEqualTo(appName);
-        assertThat(reconstructedCall.getAppIdentifier()).isEqualTo(appIdentifier);
+        assertThat(reconstructedCall.getFacilitator().getName()).isEqualTo(appName);
+        assertThat(reconstructedCall.getFacilitator().getIdentifier()).isEqualTo(appIdentifier);
+        assertThat(reconstructedCall.getFacilitator().getExtendedIdentifier())
+                .isEqualTo(extendedId);
         assertThat(reconstructedCall.getStatus()).isEqualTo(status);
+        assertThat(reconstructedCall.getDirection()).isEqualTo(direction);
         assertThat(reconstructedCall.getControls()).containsExactly(control1, control2);
     }
 }

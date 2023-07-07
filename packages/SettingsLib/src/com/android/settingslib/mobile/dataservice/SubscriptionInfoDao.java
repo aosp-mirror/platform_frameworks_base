@@ -16,14 +16,13 @@
 
 package com.android.settingslib.mobile.dataservice;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
+
+import java.util.List;
 
 @Dao
 public interface SubscriptionInfoDao {
@@ -32,7 +31,9 @@ public interface SubscriptionInfoDao {
     void insertSubsInfo(SubscriptionInfoEntity... subscriptionInfo);
 
     @Query("SELECT * FROM " + DataServiceUtils.SubscriptionInfoData.TABLE_NAME + " ORDER BY "
-            + DataServiceUtils.SubscriptionInfoData.COLUMN_ID)
+            + " CASE WHEN " +  DataServiceUtils.SubscriptionInfoData.COLUMN_SIM_SLOT_INDEX
+            + " >= 0 THEN 1 ELSE 2 END , "
+            + DataServiceUtils.SubscriptionInfoData.COLUMN_SIM_SLOT_INDEX)
     LiveData<List<SubscriptionInfoEntity>> queryAvailableSubInfos();
 
     @Query("SELECT * FROM " + DataServiceUtils.SubscriptionInfoData.TABLE_NAME + " WHERE "
@@ -43,7 +44,8 @@ public interface SubscriptionInfoDao {
             + DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_SUBSCRIPTION_ID
             + " = :isActiveSubscription" + " AND "
             + DataServiceUtils.SubscriptionInfoData.COLUMN_IS_SUBSCRIPTION_VISIBLE
-            + " = :isSubscriptionVisible")
+            + " = :isSubscriptionVisible" + " ORDER BY "
+            + DataServiceUtils.SubscriptionInfoData.COLUMN_SIM_SLOT_INDEX)
     LiveData<List<SubscriptionInfoEntity>> queryActiveSubInfos(
             boolean isActiveSubscription, boolean isSubscriptionVisible);
 

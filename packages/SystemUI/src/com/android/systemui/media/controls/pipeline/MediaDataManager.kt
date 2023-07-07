@@ -16,10 +16,12 @@
 
 package com.android.systemui.media.controls.pipeline
 
+import android.annotation.SuppressLint
 import android.app.BroadcastOptions
 import android.app.Notification
 import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
+import android.app.StatusBarManager
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
@@ -43,7 +45,6 @@ import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Parcelable
 import android.os.Process
-import android.os.RemoteException
 import android.os.UserHandle
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
@@ -52,8 +53,8 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
+import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
-import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
 import com.android.systemui.R
@@ -185,7 +186,6 @@ class MediaDataManager(
     private val logger: MediaUiEventLogger,
     private val smartspaceManager: SmartspaceManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val statusBarService: IStatusBarService,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -220,7 +220,7 @@ class MediaDataManager(
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     // There should ONLY be at most one Smartspace media recommendation.
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
-    private var smartspaceSession: SmartspaceSession? = null
+    @Keep private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = allowMediaRecommendations(context)
 
     private val artworkWidth =
@@ -229,6 +229,10 @@ class MediaDataManager(
         )
     private val artworkHeight =
         context.resources.getDimensionPixelSize(R.dimen.qs_media_session_height_expanded)
+
+    @SuppressLint("WrongConstant") // sysui allowed to call STATUS_BAR_SERVICE
+    private val statusBarManager =
+        context.getSystemService(Context.STATUS_BAR_SERVICE) as StatusBarManager
 
     /** Check whether this notification is an RCN */
     private fun isRemoteCastNotification(sbn: StatusBarNotification): Boolean {
@@ -257,7 +261,6 @@ class MediaDataManager(
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
         smartspaceManager: SmartspaceManager,
-        statusBarService: IStatusBarService,
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
@@ -283,7 +286,6 @@ class MediaDataManager(
         logger,
         smartspaceManager,
         keyguardUpdateMonitor,
-        statusBarService,
     )
 
     private val appChangeReceiver =
@@ -380,6 +382,8 @@ class MediaDataManager(
 
     fun destroy() {
         smartspaceMediaDataProvider.unregisterListener(this)
+        smartspaceSession?.close()
+        smartspaceSession = null
         context.unregisterReceiver(appChangeReceiver)
     }
 
@@ -774,40 +778,33 @@ class MediaDataManager(
         val metadata = mediaController.metadata
         val notif: Notification = sbn.notification
 
-        // Song name
-        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
-        if (song == null) {
-            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
-        }
-        if (song == null) {
-            song = HybridGroupManager.resolveTitle(notif)
-        }
-        // Media data must have a title.
-        if (song.isNullOrBlank()) {
-            try {
-                statusBarService.onNotificationError(
-                    sbn.packageName,
-                    sbn.tag,
-                    sbn.id,
-                    sbn.uid,
-                    sbn.initialPid,
-                    MEDIA_TITLE_ERROR_MESSAGE,
-                    sbn.user.identifier
-                )
-            } catch (e: RemoteException) {
-                Log.e(TAG, "cancelNotification failed: $e")
-            }
-            // Only add log for media removed if active media is updated with invalid title.
-            foregroundExecutor.execute { removeEntry(key, !isNewlyActiveEntry) }
-            return
-        }
-
         val appInfo =
             notif.extras.getParcelable(
                 Notification.EXTRA_BUILDER_APPLICATION_INFO,
                 ApplicationInfo::class.java
             )
                 ?: getAppInfoFromPackage(sbn.packageName)
+
+        // App name
+        val appName = getAppName(sbn, appInfo)
+
+        // Song name
+        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+        if (song.isNullOrBlank()) {
+            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
+        }
+        if (song.isNullOrBlank()) {
+            song = HybridGroupManager.resolveTitle(notif)
+        }
+        if (song.isNullOrBlank()) {
+            // For apps that don't include a title, log and add a placeholder
+            song = context.getString(R.string.controls_media_empty_title, appName)
+            try {
+                statusBarManager.logBlankMediaTitle(sbn.packageName, sbn.user.identifier)
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Error reporting blank media title for package ${sbn.packageName}")
+            }
+        }
 
         // Album art
         var artworkBitmap = metadata?.let { loadBitmapFromUri(it) }
@@ -824,9 +821,6 @@ class MediaDataManager(
                 Icon.createWithBitmap(artworkBitmap)
             }
 
-        // App name
-        val appName = getAppName(sbn, appInfo)
-
         // App Icon
         val smallIcon = sbn.notification.smallIcon
 
@@ -841,7 +835,7 @@ class MediaDataManager(
 
         // Artist name
         var artist: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
-        if (artist == null) {
+        if (artist.isNullOrBlank()) {
             artist = HybridGroupManager.resolveText(notif)
         }
 

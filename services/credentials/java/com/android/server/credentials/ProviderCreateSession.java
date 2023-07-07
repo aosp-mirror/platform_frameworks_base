@@ -54,7 +54,7 @@ public final class ProviderCreateSession extends ProviderSession<
     private static final String TAG = "ProviderCreateSession";
 
     // Key to be used as an entry key for a save entry
-    private static final String SAVE_ENTRY_KEY = "save_entry_key";
+    public static final String SAVE_ENTRY_KEY = "save_entry_key";
     // Key to be used as an entry key for a remote entry
     private static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
@@ -75,7 +75,8 @@ public final class ProviderCreateSession extends ProviderSession<
         CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
-                        createRequestSession.mClientAppInfo);
+                        createRequestSession.mClientAppInfo,
+                        providerInfo.isSystemProvider());
         if (providerCreateRequest != null) {
             return new ProviderCreateSession(
                     context,
@@ -92,7 +93,7 @@ public final class ProviderCreateSession extends ProviderSession<
                     createRequestSession.mHybridService
             );
         }
-        Slog.d(TAG, "Unable to create provider session for: "
+        Slog.i(TAG, "Unable to create provider session for: "
                 + providerInfo.getComponentName());
         return null;
     }
@@ -114,9 +115,16 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     @Nullable
-    private static CreateCredentialRequest createProviderRequest(List<String> providerCapabilities,
+    private static CreateCredentialRequest createProviderRequest(
+            List<String> providerCapabilities,
             android.credentials.CreateCredentialRequest clientRequest,
-            CallingAppInfo callingAppInfo) {
+            CallingAppInfo callingAppInfo,
+            boolean isSystemProvider) {
+        if (clientRequest.isSystemProviderRequired() && !isSystemProvider) {
+            // Request requires system provider but this session does not correspond to a
+            // system service
+            return null;
+        }
         String capability = clientRequest.getType();
         if (providerCapabilities.contains(capability)) {
             return new CreateCredentialRequest(callingAppInfo, capability,
@@ -145,7 +153,7 @@ public final class ProviderCreateSession extends ProviderSession<
     @Override
     public void onProviderResponseSuccess(
             @Nullable BeginCreateCredentialResponse response) {
-        Slog.d(TAG, "Remote provider responded with a valid response: " + mComponentName);
+        Slog.i(TAG, "Remote provider responded with a valid response: " + mComponentName);
         onSetInitialRemoteResponse(response);
     }
 
@@ -159,7 +167,7 @@ public final class ProviderCreateSession extends ProviderSession<
             mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
-        updateStatusAndInvokeCallback(toStatus(errorCode),
+        updateStatusAndInvokeCallback(Status.CANCELED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
@@ -185,11 +193,13 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false,
+                    ((RequestSession) mCallbacks).mRequestSessionMetric.getInitialPhaseMetric());
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false,
+                    ((RequestSession) mCallbacks).mRequestSessionMetric.getInitialPhaseMetric());
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }
@@ -200,7 +210,7 @@ public final class ProviderCreateSession extends ProviderSession<
     protected CreateCredentialProviderData prepareUiData()
             throws IllegalArgumentException {
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
-            Slog.d(TAG, "No data for UI from: " + mComponentName.flattenToString());
+            Slog.i(TAG, "No data for UI from: " + mComponentName.flattenToString());
             return null;
         }
 
@@ -216,7 +226,7 @@ public final class ProviderCreateSession extends ProviderSession<
         switch (entryType) {
             case SAVE_ENTRY_KEY:
                 if (mProviderResponseDataHandler.getCreateEntry(entryKey) == null) {
-                    Slog.w(TAG, "Unexpected save entry key");
+                    Slog.i(TAG, "Unexpected save entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
@@ -224,14 +234,14 @@ public final class ProviderCreateSession extends ProviderSession<
                 break;
             case REMOTE_ENTRY_KEY:
                 if (mProviderResponseDataHandler.getRemoteEntry(entryKey) == null) {
-                    Slog.w(TAG, "Unexpected remote entry key");
+                    Slog.i(TAG, "Unexpected remote entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
                 onRemoteEntrySelected(providerPendingIntentResponse);
                 break;
             default:
-                Slog.w(TAG, "Unsupported entry type selected");
+                Slog.i(TAG, "Unsupported entry type selected");
                 invokeCallbackOnInternalInvalidState();
         }
     }
@@ -240,7 +250,8 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest, this);
+            mRemoteCredentialService.setCallback(this);
+            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest);
         }
     }
 
@@ -266,7 +277,7 @@ public final class ProviderCreateSession extends ProviderSession<
         if (credentialResponse != null) {
             mCallbacks.onFinalResponseReceived(mComponentName, credentialResponse);
         } else {
-            Slog.w(TAG, "onSaveEntrySelected - no response or error found in pending "
+            Slog.i(TAG, "onSaveEntrySelected - no response or error found in pending "
                     + "intent response");
             invokeCallbackOnInternalInvalidState();
         }
@@ -282,14 +293,14 @@ public final class ProviderCreateSession extends ProviderSession<
     private CreateCredentialException maybeGetPendingIntentException(
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
-            Slog.w(TAG, "pendingIntentResponse is null");
+            Slog.i(TAG, "pendingIntentResponse is null");
             return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREATE_OPTIONS);
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             CreateCredentialException exception = PendingIntentResultHandler
                     .extractCreateCredentialException(pendingIntentResponse.getResultData());
             if (exception != null) {
-                Slog.d(TAG, "Pending intent contains provider exception");
+                Slog.i(TAG, "Pending intent contains provider exception");
                 return exception;
             }
         } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {

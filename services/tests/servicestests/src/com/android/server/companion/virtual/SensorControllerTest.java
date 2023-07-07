@@ -70,8 +70,7 @@ public class SensorControllerTest {
         LocalServices.removeServiceForTest(SensorManagerInternal.class);
         LocalServices.addService(SensorManagerInternal.class, mSensorManagerInternalMock);
 
-        mSensorController =
-                new SensorController(new Object(), VIRTUAL_DEVICE_ID, mVirtualSensorCallback);
+        mSensorController = new SensorController(VIRTUAL_DEVICE_ID, mVirtualSensorCallback);
         mSensorEvent = new VirtualSensorEvent.Builder(new float[] { 1f, 2f, 3f}).build();
         mVirtualSensorConfig =
                 new VirtualSensorConfig.Builder(Sensor.TYPE_ACCELEROMETER, VIRTUAL_SENSOR_NAME)

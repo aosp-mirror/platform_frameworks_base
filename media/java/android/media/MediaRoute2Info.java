@@ -57,6 +57,30 @@ public final class MediaRoute2Info implements Parcelable {
         }
     };
 
+    /**
+     * The {@link #getOriginalId() original id} of the route that represents the built-in media
+     * route.
+     *
+     * <p>A route with this id will only be visible to apps with permission to do system routing,
+     * which means having {@link android.Manifest.permission#BLUETOOTH_CONNECT} and {@link
+     * android.Manifest.permission#BLUETOOTH_SCAN}, or {@link
+     * android.Manifest.permission#MODIFY_AUDIO_ROUTING}.
+     *
+     * @hide
+     */
+    public static final String ROUTE_ID_DEVICE = "DEVICE_ROUTE";
+
+    /**
+     * The {@link #getOriginalId() original id} of the route that represents the default system
+     * media route.
+     *
+     * <p>A route with this id will be visible to apps with no permission over system routing. See
+     * {@link #ROUTE_ID_DEVICE} for details.
+     *
+     * @hide
+     */
+    public static final String ROUTE_ID_DEFAULT = "DEFAULT_ROUTE";
+
     /** @hide */
     @IntDef({CONNECTION_STATE_DISCONNECTED, CONNECTION_STATE_CONNECTING,
             CONNECTION_STATE_CONNECTED})
@@ -126,6 +150,13 @@ public final class MediaRoute2Info implements Parcelable {
                 TYPE_REMOTE_TV,
                 TYPE_REMOTE_SPEAKER,
                 TYPE_REMOTE_AUDIO_VIDEO_RECEIVER,
+                TYPE_REMOTE_TABLET,
+                TYPE_REMOTE_TABLET_DOCKED,
+                TYPE_REMOTE_COMPUTER,
+                TYPE_REMOTE_GAME_CONSOLE,
+                TYPE_REMOTE_CAR,
+                TYPE_REMOTE_SMARTWATCH,
+                TYPE_REMOTE_SMARTPHONE,
                 TYPE_GROUP
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -245,6 +276,83 @@ public final class MediaRoute2Info implements Parcelable {
      * @see #getType
      */
     public static final int TYPE_REMOTE_AUDIO_VIDEO_RECEIVER = 1003;
+
+    /**
+     * Indicates the route is a remote tablet.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_TABLET = 1004;
+
+    /**
+     * Indicates the route is a remote docked tablet.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_TABLET_DOCKED = 1005;
+
+    /**
+     * Indicates the route is a remote computer.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_COMPUTER = 1006;
+
+    /**
+     * Indicates the route is a remote gaming console.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_GAME_CONSOLE = 1007;
+
+    /**
+     * Indicates the route is a remote car.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_CAR = 1008;
+
+    /**
+     * Indicates the route is a remote smartwatch.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_SMARTWATCH = 1009;
+
+    /**
+     * Indicates the route is a remote smartphone.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_SMARTPHONE = 1010;
 
     /**
      * Indicates the route is a group of devices.
@@ -452,22 +560,6 @@ public final class MediaRoute2Info implements Parcelable {
 
     /**
      * Returns the type of this route.
-     *
-     * @see #TYPE_UNKNOWN
-     * @see #TYPE_BUILTIN_SPEAKER
-     * @see #TYPE_WIRED_HEADSET
-     * @see #TYPE_WIRED_HEADPHONES
-     * @see #TYPE_BLUETOOTH_A2DP
-     * @see #TYPE_HDMI
-     * @see #TYPE_DOCK
-     * @see #TYPE_USB_DEVICE
-     * @see #TYPE_USB_ACCESSORY
-     * @see #TYPE_USB_HEADSET
-     * @see #TYPE_HEARING_AID
-     * @see #TYPE_REMOTE_TV
-     * @see #TYPE_REMOTE_SPEAKER
-     * @see #TYPE_REMOTE_AUDIO_VIDEO_RECEIVER
-     * @see #TYPE_GROUP
      */
     @Type
     public int getType() {
@@ -838,6 +930,20 @@ public final class MediaRoute2Info implements Parcelable {
                 return "REMOTE_SPEAKER";
             case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
                 return "REMOTE_AUDIO_VIDEO_RECEIVER";
+            case TYPE_REMOTE_TABLET:
+                return "REMOTE_TABLET";
+            case TYPE_REMOTE_TABLET_DOCKED:
+                return "REMOTE_TABLET_DOCKED";
+            case TYPE_REMOTE_COMPUTER:
+                return "REMOTE_COMPUTER";
+            case TYPE_REMOTE_GAME_CONSOLE:
+                return "REMOTE_GAME_CONSOLE";
+            case TYPE_REMOTE_CAR:
+                return "REMOTE_CAR";
+            case TYPE_REMOTE_SMARTWATCH:
+                return "REMOTE_SMARTWATCH";
+            case TYPE_REMOTE_SMARTPHONE:
+                return "REMOTE_SMARTPHONE";
             case TYPE_GROUP:
                 return "GROUP";
             case TYPE_UNKNOWN:

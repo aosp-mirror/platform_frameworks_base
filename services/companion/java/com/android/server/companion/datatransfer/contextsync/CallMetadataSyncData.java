@@ -16,10 +16,8 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
-import android.annotation.NonNull;
 import android.companion.ContextSyncMessage;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,14 +31,16 @@ import java.util.Set;
 /** A read-only snapshot of an {@link ContextSyncMessage}. */
 class CallMetadataSyncData {
 
-    final Map<Long, CallMetadataSyncData.Call> mCalls = new HashMap<>();
-    final List<CallMetadataSyncData.Call> mRequests = new ArrayList<>();
+    final Map<String, CallMetadataSyncData.Call> mCalls = new HashMap<>();
+    final List<CallMetadataSyncData.CallCreateRequest> mCallCreateRequests = new ArrayList<>();
+    final List<CallMetadataSyncData.CallControlRequest> mCallControlRequests = new ArrayList<>();
+    final List<CallMetadataSyncData.CallFacilitator> mCallFacilitators = new ArrayList<>();
 
     public void addCall(CallMetadataSyncData.Call call) {
         mCalls.put(call.getId(), call);
     }
 
-    public boolean hasCall(long id) {
+    public boolean hasCall(String id) {
         return mCalls.containsKey(id);
     }
 
@@ -48,53 +48,188 @@ class CallMetadataSyncData {
         return mCalls.values();
     }
 
-    public void addRequest(CallMetadataSyncData.Call call) {
-        mRequests.add(call);
+    public void addCallCreateRequest(CallMetadataSyncData.CallCreateRequest request) {
+        mCallCreateRequests.add(request);
     }
 
-    public List<CallMetadataSyncData.Call> getRequests() {
-        return mRequests;
+    public List<CallMetadataSyncData.CallCreateRequest> getCallCreateRequests() {
+        return mCallCreateRequests;
     }
 
-    public static class Call implements Parcelable {
-        private long mId;
+    public void addCallControlRequest(CallMetadataSyncData.CallControlRequest request) {
+        mCallControlRequests.add(request);
+    }
+
+    public List<CallMetadataSyncData.CallControlRequest> getCallControlRequests() {
+        return mCallControlRequests;
+    }
+
+    public void addFacilitator(CallFacilitator facilitator) {
+        mCallFacilitators.add(facilitator);
+    }
+
+    public List<CallFacilitator> getFacilitators() {
+        return mCallFacilitators;
+    }
+
+    public static class CallFacilitator {
+        private String mName;
+        private String mIdentifier;
+        private String mExtendedIdentifier;
+        private boolean mIsTel;
+
+        CallFacilitator() {}
+
+        CallFacilitator(String name, String identifier, String extendedIdentifier) {
+            mName = name;
+            mIdentifier = identifier;
+            mExtendedIdentifier = extendedIdentifier;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public String getIdentifier() {
+            return mIdentifier;
+        }
+
+        public String getExtendedIdentifier() {
+            return mExtendedIdentifier;
+        }
+
+        public boolean isTel() {
+            return mIsTel;
+        }
+
+        public void setName(String name) {
+            mName = name;
+        }
+
+        public void setIdentifier(String identifier) {
+            mIdentifier = identifier;
+        }
+
+        public void setExtendedIdentifier(String extendedIdentifier) {
+            mExtendedIdentifier = extendedIdentifier;
+        }
+
+        public void setIsTel(boolean isTel) {
+            mIsTel = isTel;
+        }
+    }
+
+    public static class CallControlRequest {
+        private String mId;
+        private int mControl;
+
+        public void setId(String id) {
+            mId = id;
+        }
+
+        public void setControl(int control) {
+            mControl = control;
+        }
+
+        public String getId() {
+            return mId;
+        }
+
+        public int getControl() {
+            return mControl;
+        }
+    }
+
+    public static class CallCreateRequest {
+        private String mId;
+        private String mAddress;
+        private CallFacilitator mFacilitator;
+
+        public void setId(String id) {
+            mId = id;
+        }
+
+        public void setAddress(String address) {
+            mAddress = address;
+        }
+
+        public void setFacilitator(CallFacilitator facilitator) {
+            mFacilitator = facilitator;
+        }
+
+        public String getId() {
+            return mId;
+        }
+
+        public String getAddress() {
+            return mAddress;
+        }
+
+        public CallFacilitator getFacilitator() {
+            return mFacilitator;
+        }
+    }
+
+    public static class Call {
+
+        private static final String EXTRA_CALLER_ID =
+                "com.android.server.companion.datatransfer.contextsync.extra.CALLER_ID";
+        private static final String EXTRA_APP_ICON =
+                "com.android.server.companion.datatransfer.contextsync.extra.APP_ICON";
+        private static final String EXTRA_FACILITATOR_NAME =
+                "com.android.server.companion.datatransfer.contextsync.extra.FACILITATOR_NAME";
+        private static final String EXTRA_FACILITATOR_ID =
+                "com.android.server.companion.datatransfer.contextsync.extra.FACILITATOR_ID";
+        private static final String EXTRA_FACILITATOR_EXT_ID =
+                "com.android.server.companion.datatransfer.contextsync.extra.FACILITATOR_EXT_ID";
+        private static final String EXTRA_STATUS =
+                "com.android.server.companion.datatransfer.contextsync.extra.STATUS";
+        private static final String EXTRA_DIRECTION =
+                "com.android.server.companion.datatransfer.contextsync.extra.DIRECTION";
+        private static final String EXTRA_CONTROLS =
+                "com.android.server.companion.datatransfer.contextsync.extra.CONTROLS";
+        private String mId;
         private String mCallerId;
         private byte[] mAppIcon;
-        private String mAppName;
-        private String mAppIdentifier;
+        private CallFacilitator mFacilitator;
         private int mStatus;
+        private int mDirection;
         private final Set<Integer> mControls = new HashSet<>();
 
-        public static Call fromParcel(Parcel parcel) {
+        public static Call fromBundle(Bundle bundle) {
             final Call call = new Call();
-            call.setId(parcel.readLong());
-            call.setCallerId(parcel.readString());
-            call.setAppIcon(parcel.readBlob());
-            call.setAppName(parcel.readString());
-            call.setAppIdentifier(parcel.readString());
-            call.setStatus(parcel.readInt());
-            final int numberOfControls = parcel.readInt();
-            for (int i = 0; i < numberOfControls; i++) {
-                call.addControl(parcel.readInt());
+            if (bundle != null) {
+                call.setId(bundle.getString(CrossDeviceSyncController.EXTRA_CALL_ID));
+                call.setCallerId(bundle.getString(EXTRA_CALLER_ID));
+                call.setAppIcon(bundle.getByteArray(EXTRA_APP_ICON));
+                final String facilitatorName = bundle.getString(EXTRA_FACILITATOR_NAME);
+                final String facilitatorIdentifier = bundle.getString(EXTRA_FACILITATOR_ID);
+                final String facilitatorExtendedIdentifier =
+                        bundle.getString(EXTRA_FACILITATOR_EXT_ID);
+                call.setFacilitator(new CallFacilitator(facilitatorName, facilitatorIdentifier,
+                        facilitatorExtendedIdentifier));
+                call.setStatus(bundle.getInt(EXTRA_STATUS));
+                call.setDirection(bundle.getInt(EXTRA_DIRECTION));
+                call.setControls(new HashSet<>(bundle.getIntegerArrayList(EXTRA_CONTROLS)));
             }
             return call;
         }
 
-        @Override
-        public void writeToParcel(Parcel parcel, int parcelableFlags) {
-            parcel.writeLong(mId);
-            parcel.writeString(mCallerId);
-            parcel.writeBlob(mAppIcon);
-            parcel.writeString(mAppName);
-            parcel.writeString(mAppIdentifier);
-            parcel.writeInt(mStatus);
-            parcel.writeInt(mControls.size());
-            for (int control : mControls) {
-                parcel.writeInt(control);
-            }
+        public Bundle writeToBundle() {
+            final Bundle bundle = new Bundle();
+            bundle.putString(CrossDeviceSyncController.EXTRA_CALL_ID, mId);
+            bundle.putString(EXTRA_CALLER_ID, mCallerId);
+            bundle.putByteArray(EXTRA_APP_ICON, mAppIcon);
+            bundle.putString(EXTRA_FACILITATOR_NAME, mFacilitator.getName());
+            bundle.putString(EXTRA_FACILITATOR_ID, mFacilitator.getIdentifier());
+            bundle.putString(EXTRA_FACILITATOR_EXT_ID, mFacilitator.getExtendedIdentifier());
+            bundle.putInt(EXTRA_STATUS, mStatus);
+            bundle.putInt(EXTRA_DIRECTION, mDirection);
+            bundle.putIntegerArrayList(EXTRA_CONTROLS, new ArrayList<>(mControls));
+            return bundle;
         }
 
-        void setId(long id) {
+        void setId(String id) {
             mId = id;
         }
 
@@ -106,23 +241,28 @@ class CallMetadataSyncData {
             mAppIcon = appIcon;
         }
 
-        void setAppName(String appName) {
-            mAppName = appName;
-        }
-
-        void setAppIdentifier(String appIdentifier) {
-            mAppIdentifier = appIdentifier;
+        void setFacilitator(CallFacilitator facilitator) {
+            mFacilitator = facilitator;
         }
 
         void setStatus(int status) {
             mStatus = status;
         }
 
+        void setDirection(int direction) {
+            mDirection = direction;
+        }
+
         void addControl(int control) {
             mControls.add(control);
         }
 
-        long getId() {
+        void setControls(Set<Integer> controls) {
+            mControls.clear();
+            mControls.addAll(controls);
+        }
+
+        String getId() {
             return mId;
         }
 
@@ -134,16 +274,16 @@ class CallMetadataSyncData {
             return mAppIcon;
         }
 
-        String getAppName() {
-            return mAppName;
-        }
-
-        String getAppIdentifier() {
-            return mAppIdentifier;
+        CallFacilitator getFacilitator() {
+            return mFacilitator;
         }
 
         int getStatus() {
             return mStatus;
+        }
+
+        int getDirection() {
+            return mDirection;
         }
 
         Set<Integer> getControls() {
@@ -157,7 +297,7 @@ class CallMetadataSyncData {
         @Override
         public boolean equals(Object other) {
             if (other instanceof CallMetadataSyncData.Call) {
-                return ((Call) other).getId() == getId();
+                return mId != null && mId.equals(((Call) other).getId());
             }
             return false;
         }
@@ -166,23 +306,5 @@ class CallMetadataSyncData {
         public int hashCode() {
             return Objects.hashCode(mId);
         }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @NonNull public static final Parcelable.Creator<Call> CREATOR = new Parcelable.Creator<>() {
-
-            @Override
-            public Call createFromParcel(Parcel source) {
-                return Call.fromParcel(source);
-            }
-
-            @Override
-            public Call[] newArray(int size) {
-                return new Call[size];
-            }
-        };
     }
 }

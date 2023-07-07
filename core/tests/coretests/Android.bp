@@ -36,6 +36,7 @@ android_test {
         "-c fa",
     ],
     static_libs: [
+        "collector-device-lib-platform",
         "frameworks-base-testutils",
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
         "core-tests-support",
@@ -59,6 +60,7 @@ android_test {
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
+        "device-time-shell-utils",
     ],
 
     libs: [
@@ -73,6 +75,7 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libworksourceparceltest_jni",
     ],
 
     sdk_version: "core_platform",

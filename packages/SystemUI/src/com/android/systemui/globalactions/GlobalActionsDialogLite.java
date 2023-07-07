@@ -128,6 +128,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -240,6 +241,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final ScreenshotHelper mScreenshotHelper;
     private final SysuiColorExtractor mSysuiColorExtractor;
     private final IStatusBarService mStatusBarService;
+    protected final LightBarController mLightBarController;
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
@@ -247,6 +249,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
+    private int mOrientation;
     private final Optional<CentralSurfaces> mCentralSurfacesOptional;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
@@ -349,6 +352,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             MetricsLogger metricsLogger,
             SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
+            LightBarController lightBarController,
             NotificationShadeWindowController notificationShadeWindowController,
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
@@ -381,12 +385,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mUiEventLogger = uiEventLogger;
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
+        mLightBarController = lightBarController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
         mRingerModeTracker = ringerModeTracker;
         mMainHandler = handler;
         mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
+        mOrientation = resources.getConfiguration().orientation;
         mCentralSurfacesOptional = centralSurfacesOptional;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
@@ -694,6 +700,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         ActionsDialogLite dialog = new ActionsDialogLite(mContext,
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
                 mAdapter, mOverflowAdapter, mSysuiColorExtractor, mStatusBarService,
+                mLightBarController,
                 mNotificationShadeWindowController, this::onRefresh, mKeyguardShowing,
                 mPowerAdapter, mUiEventLogger, mCentralSurfacesOptional, mKeyguardUpdateMonitor,
                 mLockPatternUtils);
@@ -739,8 +746,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     @Override
     public void onConfigChanged(Configuration newConfig) {
         if (mDialog != null && mDialog.isShowing()
-                && (newConfig.smallestScreenWidthDp != mSmallestScreenWidthDp)) {
+                && (newConfig.smallestScreenWidthDp != mSmallestScreenWidthDp
+                || newConfig.orientation != mOrientation)) {
             mSmallestScreenWidthDp = newConfig.smallestScreenWidthDp;
+            mOrientation = newConfig.orientation;
             mDialog.refreshDialog();
         }
     }
@@ -2192,6 +2201,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         protected final SysuiColorExtractor mColorExtractor;
         private boolean mKeyguardShowing;
         protected float mScrimAlpha;
+        protected final LightBarController mLightBarController;
         protected final NotificationShadeWindowController mNotificationShadeWindowController;
         private ListPopupWindow mOverflowPopup;
         private Dialog mPowerOptionsDialog;
@@ -2267,6 +2277,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         ActionsDialogLite(Context context, int themeRes, MyAdapter adapter,
                 MyOverflowAdapter overflowAdapter,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
+                LightBarController lightBarController,
                 NotificationShadeWindowController notificationShadeWindowController,
                 Runnable onRefreshCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
@@ -2282,6 +2293,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mPowerOptionsAdapter = powerAdapter;
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
+            mLightBarController = lightBarController;
             mNotificationShadeWindowController = notificationShadeWindowController;
             mOnRefreshCallback = onRefreshCallback;
             mKeyguardShowing = keyguardShowing;
@@ -2295,6 +2307,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            getWindow().setTitle(getContext().getString(
+                    com.android.systemui.R.string.accessibility_quick_settings_power_menu));
             initializeLayout();
             mWindowDimAmount = getWindow().getAttributes().dimAmount;
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
@@ -2474,6 +2488,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         @Override
         protected void start() {
             mGlobalActionsLayout.updateList();
+            mLightBarController.setGlobalActionsVisible(true);
 
             if (mBackgroundDrawable instanceof ScrimDrawable) {
                 mColorExtractor.addOnColorsChangedListener(this);
@@ -2504,6 +2519,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         protected void stop() {
+            mLightBarController.setGlobalActionsVisible(false);
             mColorExtractor.removeOnColorsChangedListener(this);
         }
 

@@ -18,8 +18,8 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.internal.annotations.Keep
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.annotations.ProvidesInterface
-import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -74,18 +74,10 @@ interface ClockController {
         resources: Resources,
         dozeFraction: Float,
         foldFraction: Float,
-    ) {
-        events.onColorPaletteChanged(resources)
-        smallClock.animations.doze(dozeFraction)
-        largeClock.animations.doze(dozeFraction)
-        smallClock.animations.fold(foldFraction)
-        largeClock.animations.fold(foldFraction)
-        smallClock.events.onTimeTick()
-        largeClock.events.onTimeTick()
-    }
+    )
 
     /** Optional method for dumping debug information */
-    fun dump(pw: PrintWriter) {}
+    fun dump(pw: PrintWriter)
 }
 
 /** Interface for a specific clock face version rendered by the clock */
@@ -109,65 +101,73 @@ interface ClockFaceController {
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
     /** Call whenever timezone changes */
-    fun onTimeZoneChanged(timeZone: TimeZone) {}
+    fun onTimeZoneChanged(timeZone: TimeZone)
 
     /** Call whenever the text time format changes (12hr vs 24hr) */
-    fun onTimeFormatChanged(is24Hr: Boolean) {}
+    fun onTimeFormatChanged(is24Hr: Boolean)
 
     /** Call whenever the locale changes */
-    fun onLocaleChanged(locale: Locale) {}
+    fun onLocaleChanged(locale: Locale)
 
     /** Call whenever the color palette should update */
-    fun onColorPaletteChanged(resources: Resources) {}
+    fun onColorPaletteChanged(resources: Resources)
 
     /** Call if the seed color has changed and should be updated */
-    fun onSeedColorChanged(seedColor: Int?) {}
+    fun onSeedColorChanged(seedColor: Int?)
 
     /** Call whenever the weather data should update */
-    fun onWeatherDataChanged(data: WeatherData) {}
+    fun onWeatherDataChanged(data: WeatherData)
 }
 
 /** Methods which trigger various clock animations */
 interface ClockAnimations {
     /** Runs an enter animation (if any) */
-    fun enter() {}
+    fun enter()
 
     /** Sets how far into AOD the device currently is. */
-    fun doze(fraction: Float) {}
+    fun doze(fraction: Float)
 
     /** Sets how far into the folding animation the device is. */
-    fun fold(fraction: Float) {}
+    fun fold(fraction: Float)
 
     /** Runs the battery animation (if any). */
-    fun charge() {}
+    fun charge()
 
-    /** Move the clock, for example, if the notification tray appears in split-shade mode. */
-    fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
+    /**
+     * Runs when the clock's position changed during the move animation.
+     *
+     * @param fromLeft the [View.getLeft] position of the clock, before it started moving.
+     * @param direction the direction in which it is moving. A positive number means right, and
+     *   negative means left.
+     * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1 means
+     *   it finished moving.
+     */
+    fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float)
 
     /**
      * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
      * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
      */
-    fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
+    fun onPickerCarouselSwiping(swipingFraction: Float)
 }
 
 /** Events that have specific data about the related face */
 interface ClockFaceEvents {
     /** Call every time tick */
-    fun onTimeTick() {}
+    fun onTimeTick()
 
     /**
      * Region Darkness specific to the clock face.
      * - isRegionDark = dark theme -> clock should be light
      * - !isRegionDark = light theme -> clock should be dark
      */
-    fun onRegionDarknessChanged(isRegionDark: Boolean) {}
+    fun onRegionDarknessChanged(isRegionDark: Boolean)
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock
      * design is allowed to ignore this target size on a case-by-case basis.
      */
-    fun onFontSettingChanged(fontSizePx: Float) {}
+    fun onFontSettingChanged(fontSizePx: Float)
 
     /**
      * Target region information for the clock face. For small clock, this will match the bounds of
@@ -176,7 +176,7 @@ interface ClockFaceEvents {
      * render within the centered targetRect to avoid obstructing other elements. The specified
      * targetRegion is relative to the parent view.
      */
-    fun onTargetRegionChanged(targetRegion: Rect?) {}
+    fun onTargetRegionChanged(targetRegion: Rect?)
 }
 
 /** Tick rates for clocks */
@@ -190,7 +190,9 @@ enum class ClockTickRate(val value: Int) {
 data class ClockMetadata(
     val clockId: ClockId,
     val name: String,
-)
+) {
+    constructor(clockId: ClockId) : this(clockId, clockId) {}
+}
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(

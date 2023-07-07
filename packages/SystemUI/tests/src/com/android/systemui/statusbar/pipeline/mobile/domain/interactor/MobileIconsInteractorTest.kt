@@ -61,6 +61,16 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
+    private val tableLogBuffer =
+        TableLogBuffer(
+            8,
+            "MobileIconsInteractorTest",
+            FakeSystemClock(),
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
+
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
     @Before
@@ -262,6 +272,52 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun filteredSubscriptions_vcnSubId_agreesWithActiveSubId_usesActiveAkaVcnSub() =
+        testScope.runTest {
+            val (sub1, sub3) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_3_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub3))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
+            connectivityRepository.vcnSubId.value = SUB_3_ID
+            whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
+                .thenReturn(false)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(sub3))
+
+            job.cancel()
+        }
+
+    @Test
+    fun filteredSubscriptions_vcnSubId_disagreesWithActiveSubId_usesVcnSub() =
+        testScope.runTest {
+            val (sub1, sub3) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_3_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub3))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
+            connectivityRepository.vcnSubId.value = SUB_1_ID
+            whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
+                .thenReturn(false)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(sub1))
+
+            job.cancel()
+        }
+
+    @Test
     fun activeDataConnection_turnedOn() =
         testScope.runTest {
             CONNECTION_1.setDataEnabled(true)
@@ -343,6 +399,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
 
             connectionsRepository.mobileIsDefault.value = true
+            connectionsRepository.defaultConnectionIsValidated.value = false
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun failedConnection_carrierMergedDefault_notValidated_failed() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.hasCarrierMergedConnection.value = true
             connectionsRepository.defaultConnectionIsValidated.value = false
             yield()
 
@@ -687,16 +758,14 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     }
 
     companion object {
-        private val tableLogBuffer =
-            TableLogBuffer(8, "MobileIconsInteractorTest", FakeSystemClock())
 
         private const val SUB_1_ID = 1
         private val SUB_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
-        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer)
+        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
         private const val SUB_2_ID = 2
         private val SUB_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
-        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, tableLogBuffer)
+        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, mock())
 
         private const val SUB_3_ID = 3
         private val SUB_3_OPP =
@@ -705,7 +774,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
             )
-        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, tableLogBuffer)
+        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, mock())
 
         private const val SUB_4_ID = 4
         private val SUB_4_OPP =
@@ -714,6 +783,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
             )
-        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, tableLogBuffer)
+        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, mock())
     }
 }

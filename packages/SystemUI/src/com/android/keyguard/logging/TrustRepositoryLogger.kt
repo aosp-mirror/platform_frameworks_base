@@ -17,10 +17,13 @@
 package com.android.keyguard.logging
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.ActiveUnlockModel
+import com.android.systemui.keyguard.shared.model.TrustManagedModel
 import com.android.systemui.keyguard.shared.model.TrustModel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.dagger.KeyguardUpdateMonitorLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Logging helper for trust repository. */
@@ -39,7 +42,7 @@ constructor(
     ) {
         logBuffer.log(
             TAG,
-            LogLevel.DEBUG,
+            DEBUG,
             {
                 bool1 = enabled
                 bool2 = newlyUnlocked
@@ -65,7 +68,7 @@ constructor(
     fun trustModelEmitted(value: TrustModel) {
         logBuffer.log(
             TAG,
-            LogLevel.DEBUG,
+            DEBUG,
             {
                 int1 = value.userId
                 bool1 = value.isTrusted
@@ -74,12 +77,61 @@ constructor(
         )
     }
 
-    fun isCurrentUserTrusted(isCurrentUserTrusted: Boolean) {
+    fun activeUnlockModelEmitted(value: ActiveUnlockModel) {
         logBuffer.log(
             TAG,
             LogLevel.DEBUG,
+            {
+                int1 = value.userId
+                bool1 = value.isRunning
+            },
+            { "activeUnlockModel emitted: userId: $int1 isRunning: $bool1" }
+        )
+    }
+
+    fun isCurrentUserTrusted(isCurrentUserTrusted: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
             { bool1 = isCurrentUserTrusted },
             { "isCurrentUserTrusted emitted: $bool1" }
+        )
+    }
+
+    fun isCurrentUserActiveUnlockRunning(isCurrentUserActiveUnlockRunning: Boolean) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { bool1 = isCurrentUserActiveUnlockRunning },
+            { "isCurrentUserActiveUnlockRunning emitted: $bool1" }
+        )
+    }
+
+    fun isCurrentUserTrustManaged(isTrustManaged: Boolean) {
+        logBuffer.log(TAG, DEBUG, { bool1 = isTrustManaged }, { "isTrustManaged emitted: $bool1" })
+    }
+
+    fun onTrustManagedChanged(trustManaged: Boolean, userId: Int) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = trustManaged
+                int1 = userId
+            },
+            { "onTrustManagedChanged isTrustManaged: $bool1 for user: $int1" }
+        )
+    }
+
+    fun trustManagedModelEmitted(it: TrustManagedModel) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = it.isTrustManaged
+                int1 = it.userId
+            },
+            { "trustManagedModel emitted: userId: $int1, isTrustManaged: $bool1" }
         )
     }
 

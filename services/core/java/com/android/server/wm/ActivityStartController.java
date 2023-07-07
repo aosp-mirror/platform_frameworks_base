@@ -45,6 +45,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -554,7 +555,25 @@ public class ActivityStartController {
                 .execute();
     }
 
+    /**
+     * A quick path (skip general intent/task resolving) to start recents animation if the recents
+     * (or home) activity is available in background.
+     * @return {@code true} if the recents activity is moved to front.
+     */
     boolean startExistingRecentsIfPossible(Intent intent, ActivityOptions options) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startExistingRecents");
+            if (startExistingRecents(intent, options)) {
+                return true;
+            }
+            // Else follow the standard launch procedure.
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+        return false;
+    }
+
+    private boolean startExistingRecents(Intent intent, ActivityOptions options) {
         final int activityType = mService.getRecentTasks().getRecentsComponent()
                 .equals(intent.getComponent()) ? ACTIVITY_TYPE_RECENTS : ACTIVITY_TYPE_HOME;
         final Task rootTask = mService.mRootWindowContainer.getDefaultTaskDisplayArea()
@@ -563,6 +582,7 @@ public class ActivityStartController {
         final ActivityRecord r = rootTask.topRunningActivity();
         if (r == null || r.isVisibleRequested() || !r.attachedToProcess()
                 || !r.mActivityComponent.equals(intent.getComponent())
+                || !mService.isCallerRecents(r.getUid())
                 // Recents keeps invisible while device is locked.
                 || r.mDisplayContent.isKeyguardLocked()) {
             return false;

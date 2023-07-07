@@ -311,16 +311,13 @@ class InsetsPolicy {
             state.removeSource(ID_IME);
         } else if (attrs.providedInsets != null) {
             for (InsetsFrameProvider provider : attrs.providedInsets) {
-                final int id = InsetsSource.createId(
-                        provider.getOwner(), provider.getIndex(), provider.getType());
-                final @InsetsType int type = provider.getType();
-                if ((type & WindowInsets.Type.systemBars()) == 0) {
+                if ((provider.getType() & WindowInsets.Type.systemBars()) == 0) {
                     continue;
                 }
                 if (state == originalState) {
                     state = new InsetsState(state);
                 }
-                state.removeSource(id);
+                state.removeSource(provider.getId());
             }
         }
 
@@ -570,8 +567,7 @@ class InsetsPolicy {
                 return focusedWin;
             }
         }
-        if (mPolicy.isForceShowNavigationBarEnabled() && focusedWin != null
-                && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+        if (forcesShowingNavigationBars(focusedWin)) {
             // When "force show navigation bar" is enabled, it means both force visible is true, and
             // we are in 3-button navigation. In this mode, the navigation bar is forcibly shown
             // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
@@ -605,6 +601,11 @@ class InsetsPolicy {
             return mPolicy.getTopFullscreenOpaqueWindow();
         }
         return focusedWin;
+    }
+
+    boolean forcesShowingNavigationBars(WindowState win) {
+        return mPolicy.isForceShowNavigationBarEnabled() && win != null
+                && win.getActivityType() == ACTIVITY_TYPE_STANDARD;
     }
 
     /**

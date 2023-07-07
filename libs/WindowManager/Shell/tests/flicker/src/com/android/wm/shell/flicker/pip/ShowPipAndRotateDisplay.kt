@@ -63,14 +63,13 @@ open class ShowPipAndRotateDisplay(flicker: FlickerTest) : PipTransition(flicker
     private val screenBoundsStart = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
 
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            setup {
-                testApp.launchViaIntent(wmHelper)
-                setRotation(flicker.scenario.startRotation)
-            }
-            transitions { setRotation(flicker.scenario.endRotation) }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        setup {
+            testApp.launchViaIntent(wmHelper)
+            setRotation(flicker.scenario.startRotation)
         }
+        transitions { setRotation(flicker.scenario.endRotation) }
+    }
 
     /** Checks that [testApp] layer is within [screenBoundsStart] at the start of the transition */
     @Presubmit

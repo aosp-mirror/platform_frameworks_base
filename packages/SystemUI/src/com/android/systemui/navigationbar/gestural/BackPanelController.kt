@@ -60,15 +60,20 @@ private const val MIN_DURATION_CANCELLED_ANIMATION = 200L
 private const val MIN_DURATION_COMMITTED_ANIMATION = 80L
 private const val MIN_DURATION_COMMITTED_AFTER_FLING_ANIMATION = 120L
 private const val MIN_DURATION_INACTIVE_BEFORE_FLUNG_ANIMATION = 50L
-private const val MIN_DURATION_INACTIVE_BEFORE_ACTIVE_ANIMATION = 80L
+private const val MIN_DURATION_INACTIVE_BEFORE_ACTIVE_ANIMATION = 160F
+private const val MIN_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION = 10F
+internal const val MAX_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION = 100F
 private const val MIN_DURATION_FLING_ANIMATION = 160L
 
 private const val MIN_DURATION_ENTRY_TO_ACTIVE_CONSIDERED_AS_FLING = 100L
 private const val MIN_DURATION_INACTIVE_TO_ACTIVE_CONSIDERED_AS_FLING = 400L
 
 private const val POP_ON_FLING_DELAY = 60L
-private const val POP_ON_FLING_SCALE = 2f
-private const val POP_ON_COMMITTED_SCALE = 3f
+private const val POP_ON_FLING_VELOCITY = 2f
+private const val POP_ON_COMMITTED_VELOCITY = 3f
+private const val POP_ON_ENTRY_TO_ACTIVE_VELOCITY = 4.5f
+private const val POP_ON_INACTIVE_TO_ACTIVE_VELOCITY = 4.7f
+private const val POP_ON_INACTIVE_VELOCITY = -1.5f
 
 internal val VIBRATE_ACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
@@ -156,12 +161,21 @@ class BackPanelController internal constructor(
 
     private var gestureEntryTime = 0L
     private var gestureInactiveTime = 0L
-    private var gesturePastActiveThresholdWhileInactiveTime = 0L
 
     private val elapsedTimeSinceInactive
         get() = SystemClock.uptimeMillis() - gestureInactiveTime
     private val elapsedTimeSinceEntry
         get() = SystemClock.uptimeMillis() - gestureEntryTime
+
+
+    private var pastThresholdWhileEntryOrInactiveTime = 0L
+    private var entryToActiveDelay = 0F
+    private val entryToActiveDelayCalculation = {
+        convertVelocityToAnimationFactor(
+            valueOnFastVelocity = MIN_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION,
+            valueOnSlowVelocity = MAX_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION,
+        )
+    }
 
     // Whether the current gesture has moved a sufficiently large amount,
     // so that we can unambiguously start showing the ENTRY animation
@@ -306,8 +320,9 @@ class BackPanelController internal constructor(
             MotionEvent.ACTION_UP -> {
                 when (currentState) {
                     GestureState.ENTRY -> {
-                        if (isFlungAwayFromEdge(endX = event.x)) {
-                            updateArrowState(GestureState.ACTIVE)
+                        if (isFlungAwayFromEdge(endX = event.x) ||
+                            previousXTranslation > params.staticTriggerThreshold
+                        ) {
                             updateArrowState(GestureState.FLUNG)
                         } else {
                             updateArrowState(GestureState.CANCELLED)
@@ -315,8 +330,11 @@ class BackPanelController internal constructor(
                     }
                     GestureState.INACTIVE -> {
                         if (isFlungAwayFromEdge(endX = event.x)) {
+                            // This is called outside of updateArrowState so that
+                            // BackAnimationController can immediately evaluate state
+                            // instead of after the flung delay
+                            backCallback.setTriggerBack(true)
                             mainHandler.postDelayed(MIN_DURATION_INACTIVE_BEFORE_FLUNG_ANIMATION) {
-                                updateArrowState(GestureState.ACTIVE)
                                 updateArrowState(GestureState.FLUNG)
                             }
                         } else {
@@ -394,12 +412,29 @@ class BackPanelController internal constructor(
     }
 
     private fun updateArrowStateOnMove(yTranslation: Float, xTranslation: Float) {
-
         val isWithinYActivationThreshold = xTranslation * 2 >= yTranslation
-
+        val isPastStaticThreshold = xTranslation > params.staticTriggerThreshold
         when (currentState) {
             GestureState.ENTRY -> {
-                if (xTranslation > params.staticTriggerThreshold) {
+                if (isPastThresholdToActive(
+                        isPastThreshold = isPastStaticThreshold,
+                        dynamicDelay = entryToActiveDelayCalculation
+                    )
+                ) {
+                    updateArrowState(GestureState.ACTIVE)
+                }
+            }
+            GestureState.INACTIVE -> {
+                val isPastDynamicReactivationThreshold =
+                    totalTouchDeltaInactive >= params.reactivationTriggerThreshold
+
+                if (isPastThresholdToActive(
+                        isPastThreshold = isPastStaticThreshold &&
+                                isPastDynamicReactivationThreshold &&
+                                isWithinYActivationThreshold,
+                        delay = MIN_DURATION_INACTIVE_BEFORE_ACTIVE_ANIMATION
+                    )
+                ) {
                     updateArrowState(GestureState.ACTIVE)
                 }
             }
@@ -408,43 +443,12 @@ class BackPanelController internal constructor(
                     totalTouchDeltaActive <= params.deactivationTriggerThreshold
                 val isMinDurationElapsed =
                     elapsedTimeSinceEntry > MIN_DURATION_ACTIVE_BEFORE_INACTIVE_ANIMATION
-
-                if (isMinDurationElapsed && (!isWithinYActivationThreshold ||
-                            isPastDynamicDeactivationThreshold)
-                ) {
+                val isPastAllThresholds =
+                    !isWithinYActivationThreshold || isPastDynamicDeactivationThreshold
+                if (isPastAllThresholds && isMinDurationElapsed) {
                     updateArrowState(GestureState.INACTIVE)
                 }
             }
-            GestureState.INACTIVE -> {
-                val isPastStaticThreshold =
-                    xTranslation > params.staticTriggerThreshold
-                val isPastDynamicReactivationThreshold =
-                    totalTouchDeltaInactive >= params.reactivationTriggerThreshold
-                val isPastAllThresholds = isPastStaticThreshold &&
-                        isPastDynamicReactivationThreshold &&
-                        isWithinYActivationThreshold
-                val isPastAllThresholdsForFirstTime = isPastAllThresholds &&
-                        gesturePastActiveThresholdWhileInactiveTime == 0L
-
-                gesturePastActiveThresholdWhileInactiveTime = when {
-                    isPastAllThresholdsForFirstTime -> SystemClock.uptimeMillis()
-                    isPastAllThresholds -> gesturePastActiveThresholdWhileInactiveTime
-                    else -> 0L
-                }
-
-                val elapsedTimePastAllThresholds =
-                    SystemClock.uptimeMillis() - gesturePastActiveThresholdWhileInactiveTime
-
-                val isPastMinimumInactiveToActiveDuration =
-                    elapsedTimePastAllThresholds > MIN_DURATION_INACTIVE_BEFORE_ACTIVE_ANIMATION
-
-                if (isPastAllThresholds && isPastMinimumInactiveToActiveDuration) {
-                    // The minimum duration adds the 'edge stickiness'
-                    // factor before pulling it off edge
-                    updateArrowState(GestureState.ACTIVE)
-                }
-            }
-
             else -> {}
         }
     }
@@ -603,7 +607,7 @@ class BackPanelController internal constructor(
         )
     }
 
-    private var previousPreThresholdWidthInterpolator = params.entryWidthTowardsEdgeInterpolator
+    private var previousPreThresholdWidthInterpolator = params.entryWidthInterpolator
     private fun preThresholdWidthStretchAmount(progress: Float): Float {
         val interpolator = run {
             val isPastSlop = totalTouchDeltaInactive > viewConfiguration.scaledTouchSlop
@@ -670,6 +674,28 @@ class BackPanelController internal constructor(
         val isPastFlingVelocityThreshold =
                 flingVelocity > viewConfiguration.scaledMinimumFlingVelocity
         return flingDistance > minFlingDistance && isPastFlingVelocityThreshold
+    }
+
+    private fun isPastThresholdToActive(
+        isPastThreshold: Boolean,
+        delay: Float? = null,
+        dynamicDelay: () -> Float = { delay ?: 0F }
+    ): Boolean {
+        val resetValue = 0L
+        val isPastThresholdForFirstTime = pastThresholdWhileEntryOrInactiveTime == resetValue
+
+        if (!isPastThreshold) {
+            pastThresholdWhileEntryOrInactiveTime = resetValue
+            return false
+        }
+
+        if (isPastThresholdForFirstTime) {
+            pastThresholdWhileEntryOrInactiveTime = SystemClock.uptimeMillis()
+            entryToActiveDelay = dynamicDelay()
+        }
+        val timePastThreshold = SystemClock.uptimeMillis() - pastThresholdWhileEntryOrInactiveTime
+
+        return timePastThreshold > entryToActiveDelay
     }
 
     private fun playWithBackgroundWidthAnimation(
@@ -886,33 +912,17 @@ class BackPanelController internal constructor(
             }
             GestureState.ACTIVE -> {
                 previousXTranslationOnActiveOffset = previousXTranslation
-
                 updateRestingArrowDimens()
-
                 vibratorHelper.cancel()
                 mainHandler.postDelayed(10L) {
                     vibratorHelper.vibrate(VIBRATE_ACTIVATED_EFFECT)
                 }
-
-                val minimumPop = 2f
-                val maximumPop = 4.5f
-
-                when (previousState) {
-                    GestureState.ENTRY -> {
-                        val startingVelocity = convertVelocityToSpringStartingVelocity(
-                            valueOnFastVelocity = minimumPop,
-                            valueOnSlowVelocity = maximumPop,
-                            fastVelocityBound = 1f,
-                            slowVelocityBound = 0.5f,
-                        )
-                        mView.popOffEdge(startingVelocity)
-                    }
-                    GestureState.INACTIVE -> {
-                        mView.popOffEdge(maximumPop)
-                    }
-
-                    else -> {}
+                val popVelocity = if (previousState == GestureState.INACTIVE) {
+                    POP_ON_INACTIVE_TO_ACTIVE_VELOCITY
+                } else {
+                    POP_ON_ENTRY_TO_ACTIVE_VELOCITY
                 }
+                mView.popOffEdge(popVelocity)
             }
 
             GestureState.INACTIVE -> {
@@ -925,17 +935,15 @@ class BackPanelController internal constructor(
                 // so that gesture progress in this state is consistent regardless of entry
                 totalTouchDeltaInactive = params.deactivationTriggerThreshold
 
-                val startingVelocity = convertVelocityToSpringStartingVelocity(
-                        valueOnFastVelocity = -1.05f,
-                        valueOnSlowVelocity = -1.50f
-                )
-                mView.popOffEdge(startingVelocity)
+                mView.popOffEdge(POP_ON_INACTIVE_VELOCITY)
 
                 vibratorHelper.vibrate(VIBRATE_DEACTIVATED_EFFECT)
                 updateRestingArrowDimens()
             }
             GestureState.FLUNG -> {
-                mainHandler.postDelayed(POP_ON_FLING_DELAY) { mView.popScale(POP_ON_FLING_SCALE) }
+                mainHandler.postDelayed(POP_ON_FLING_DELAY) {
+                    mView.popScale(POP_ON_FLING_VELOCITY)
+                }
                 updateRestingArrowDimens()
                 mainHandler.postDelayed(onEndSetCommittedStateListener.runnable,
                         MIN_DURATION_FLING_ANIMATION)
@@ -951,7 +959,7 @@ class BackPanelController internal constructor(
                     mainHandler.postDelayed(onEndSetGoneStateListener.runnable,
                             MIN_DURATION_COMMITTED_AFTER_FLING_ANIMATION)
                 } else {
-                    mView.popScale(POP_ON_COMMITTED_SCALE)
+                    mView.popScale(POP_ON_COMMITTED_VELOCITY)
                     mainHandler.postDelayed(onAlphaEndSetGoneStateListener.runnable,
                             MIN_DURATION_COMMITTED_ANIMATION)
                 }
@@ -968,11 +976,11 @@ class BackPanelController internal constructor(
         }
     }
 
-    private fun convertVelocityToSpringStartingVelocity(
+    private fun convertVelocityToAnimationFactor(
             valueOnFastVelocity: Float,
             valueOnSlowVelocity: Float,
-            fastVelocityBound: Float = 3f,
-            slowVelocityBound: Float = 0f,
+            fastVelocityBound: Float = 1f,
+            slowVelocityBound: Float = 0.5f,
     ): Float {
         val factor = velocityTracker?.run {
             computeCurrentVelocity(PX_PER_MS)

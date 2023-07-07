@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Įveskite PIN kodą"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Įveskite PIN kodą"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Nubrėžkite atrakinimo piešinį"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Nupieškite atrakinimo piešinį"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Nupieškite atrakinimo piešinį"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Įveskite slaptažodį"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Įveskite slaptažodį"</string>
@@ -124,5 +124,11 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Numatytasis"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Debesėlis"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoginis"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Įrenginio atrakinimas norint tęsti"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Atrakinkite įrenginį norėdami tęsti"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Įveskite PIN kodą, kad įdiegtumėte naujinį vėliau"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Įveskite slaptažodį, kad įdiegtumėte naujinį vėliau"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nubrėžkite atrakinimo piešinį, kad įdiegtumėte naujinį vėliau"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Įrenginys atnaujintas. Įveskite PIN kodą, kad galėtumėte tęsti."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Įrenginys atnaujintas. Įveskite slaptažodį, kad galėtumėte tęsti."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Įrenginys atnaujintas. Nubrėžkite atrakinimo piešinį, kad gal. tęsti."</string>
 </resources>

@@ -99,7 +99,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L៖ ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R៖ ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"សកម្ម"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"សកម្មខាងឆ្វេងតែប៉ុណ្ណោះ"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"សកម្ម ខាងឆ្វេងតែប៉ុណ្ណោះ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"សកម្មខាងស្ដាំតែប៉ុណ្ណោះ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"សកម្មខាងឆ្វេង និងស្ដាំ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"សំឡេង​មេឌៀ"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"សំឡេងកម្រិត HD៖ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"សំឡេងកម្រិត HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"បាន​ភ្ជាប់ទៅ​ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"បានភ្ជាប់​ទៅ LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"បា​ន​ភ្ជាប់​ទៅ​អូឌីយ៉ូ​មេឌៀ"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ជ្រើសរើស​កម្រងព័ត៌មាន"</string>
     <string name="category_personal" msgid="6236798763159385225">"ផ្ទាល់ខ្លួន"</string>
     <string name="category_work" msgid="4014193632325996115">"ការងារ"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ក្លូន"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ជម្រើសសម្រាប់អ្នកអភិវឌ្ឍន៍"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"បើកដំណើរការជម្រើសអ្នកអភិវឌ្ឍន៍"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"កំណត់​ជម្រើស​សម្រាប់​ការ​អភិវឌ្ឍ​កម្មវិធី"</string>
@@ -309,7 +310,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"ជ្រើស​ទំហំ Logger per log buffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"ជម្រះទំហំផ្ទុក logger ដែលប្រើបានយូរឬ?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"នៅពេលដែលយើងឈប់ធ្វើការត្រួតពិនិត្យតទៅទៀតដោយប្រើ logger ដែលប្រើបានយូរ យើងត្រូវបានតម្រូវឲ្យលុបទិន្នន័យ logger ដែលមាននៅលើឧបករណ៍របស់អ្នក"</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"ផ្ទុកទិន្នន័យឡុកជើនៅលើឧបករណ៍ឲ្យជាប់"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"ផ្ទុកទិន្នន័យឡុកជើនៅលើឧបករណ៍ឲ្យជាប់លាប់"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"ជ្រើសអង្គចងចាំកំណត់ហេតុបណ្តោះអាសន្នដើម្បីផ្ទុកនៅលើឧបករណ៍ឲ្យបានយូរ"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"ជ្រើស​ការ​កំណត់​រចនាសម្ព័ន្ធ​យូអេសប៊ី"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"ជ្រើស​ការ​កំណត់​រចនាសម្ព័ន្ធ​យូអេសប៊ី"</string>
@@ -380,8 +381,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"ការបំប្លែង​កម្រងព័ត៌មាន HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"បើក​ស្រទាប់​ជួសជុល GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"បើកការកត់ត្រាឥតសំចៃអំពីអ្នកផ្គត់ផ្គង់"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមបញ្ចូលកំណត់​ហេតុបន្ថែមអំពី​អ្នកផ្គត់ផ្គង់សម្រាប់ឧបករណ៍ជាក់លាក់​នៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានផ្ទុកព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាង និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាង។"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"បើកការកត់ត្រាអ្នកផ្គត់ផ្គង់ឥតសំចៃ"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមបញ្ចូលកំណត់​ហេតុ​អ្នកផ្គត់ផ្គង់​ពាក់ព័ន្ធ​នឹងឧបករណ៍បន្ថែមទៀតនៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានផ្ទុកព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាង និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាង។"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>
@@ -527,7 +528,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ម៉ោងរោទ៍ និងការរំលឹក"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"អនុញ្ញាតឱ្យ​កំណត់​ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ម៉ោងរោទ៍ និង​ការរំលឹក"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និងកំណត់កាលវិភាគសកម្មភាពដែលតម្រូវឱ្យទាន់ពេលវេលា។ ការធ្វើបែបនេះអនុញ្ញាតឱ្យកម្មវិធីនេះដំណើរការនៅផ្ទៃខាងក្រោយ ដែលអាចប្រើថ្មច្រើនជាងមុន។\n\nប្រសិនបើបិទការអនុញ្ញាតនេះ ម៉ោងរោទ៍ដែលមានស្រាប់ និងព្រឹត្តិការណ៍ផ្អែកលើពេលវេលាដែលកំណត់ដោយកម្មវិធីនេះ​នឹងមិនដំណើរការទេ។"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និងកំណត់កាលវិភាគសកម្មភាពដែលតម្រូវឱ្យទាន់ពេលវេលា។ ការធ្វើបែបនេះអនុញ្ញាតឱ្យកម្មវិធីនេះដំណើរការនៅផ្ទៃខាងក្រោយ ដែលអាចប្រើថ្មកាន់តែច្រើន។\n\nប្រសិនបើបិទការអនុញ្ញាតនេះ ម៉ោងរោទ៍ដែលមានស្រាប់ និងព្រឹត្តិការណ៍ផ្អែកលើពេលវេលាដែលកំណត់ដោយកម្មវិធីនេះ​នឹងមិនដំណើរការទេ។"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"កាលវិភាគ ម៉ោងរោទ៍ ការរំលឹក នាឡិកា"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"បើក"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"បើកមុខងារកុំរំខាន"</string>
@@ -544,13 +545,16 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ថេប្លេតនេះ"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ឧបករណ៍បំពងសំឡេងដែលមានជើងភ្ជាប់"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ឧបករណ៍ខាងក្រៅ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"​ឧបករណ៍ដែលបាន​ភ្ជាប់"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"មិនអាចចាក់នៅលើ​ឧបករណ៍នេះបានទេ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ដំឡើងកម្រិតគណនី ដើម្បីប្ដូរ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"មិនអាចចាក់ខ្លឹមសារដែលបានទាញយកនៅទីនេះបានទេ"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ព្យាយាមម្ដងទៀត បន្ទាប់ពីការផ្សាយពាណិជ្ជកម្ម"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ព្យាយាមម្ដងទៀត បន្ទាប់ពីពាណិជ្ជកម្ម"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ដាស់ឧបករណ៍ឱ្យចាក់នៅទីនេះ"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ឧបករណ៍មិន​យល់ព្រមឱ្យចាក់ទេ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ឧបករណ៍មិន​ព្រមឱ្យចាក់ទេ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"មិនអាចចាក់មេឌៀនេះ​នៅទីនេះបានទេ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>

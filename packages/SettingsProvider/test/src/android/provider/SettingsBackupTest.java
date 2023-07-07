@@ -77,7 +77,8 @@ public class SettingsBackupTest {
                     Settings.System.SCREEN_BRIGHTNESS, // removed in P
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
-                    Settings.System.SHOW_TOUCHES, // bug?
+                    Settings.System.SHOW_TOUCHES,
+                    Settings.System.SHOW_KEY_PRESSES,
                     Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
                     Settings.System.SIP_ALWAYS, // value, not a setting
                     Settings.System.SYSTEM_LOCALES, // bug?
@@ -97,7 +98,8 @@ public class SettingsBackupTest {
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
                     Settings.System.DESKTOP_MODE, // developer setting for internal prototyping
-                    Settings.System.FORCE_PEAK_REFRESH_RATE, // depends on hardware capabilities
+                    Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
+                    Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
@@ -110,9 +112,11 @@ public class SettingsBackupTest {
                     Settings.Global.ADB_ALLOWED_CONNECTION_TIME,
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADB_WIFI_ENABLED,
+                    Settings.Global.ADB_DISCONNECT_SESSIONS_ON_REVOKE,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
+                    Settings.Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS,
                     Settings.Global.SATELLITE_MODE_RADIOS,
                     Settings.Global.SATELLITE_MODE_ENABLED,
                     Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
@@ -514,8 +518,6 @@ public class SettingsBackupTest {
                     Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES,
                     Settings.Global.ANGLE_EGL_FEATURES,
-                    Settings.Global.ANGLE_DEFERLIST,
-                    Settings.Global.ANGLE_DEFERLIST_MODE,
                     Settings.Global.UPDATABLE_DRIVER_ALL_APPS,
                     Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS,
                     Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS,
@@ -840,7 +842,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
-                 Settings.Secure.CREDENTIAL_SERVICE);
+                 Settings.Secure.CREDENTIAL_SERVICE,
+                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

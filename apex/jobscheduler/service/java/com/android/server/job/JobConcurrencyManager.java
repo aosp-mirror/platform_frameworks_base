@@ -62,6 +62,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.StatLogger;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
@@ -471,6 +472,13 @@ class JobConcurrencyManager {
     private final Consumer<PackageStats> mPackageStatsStagingCountClearer =
             PackageStats::resetStagedCount;
 
+    private static final Histogram sConcurrencyHistogramLogger = new Histogram(
+            "job_scheduler.value_hist_job_concurrency",
+            // Create a histogram that expects values in the range [0, 99].
+            // Include more buckets than MAX_CONCURRENCY_LIMIT to account for/identify the cases
+            // where we may create additional slots for TOP-started EJs and UIJs
+            new Histogram.UniformOptions(100, 0, 99));
+
     private final StatLogger mStatLogger = new StatLogger(new String[]{
             "assignJobsToContexts",
             "refreshSystemState",
@@ -802,7 +810,7 @@ class JobConcurrencyManager {
                 mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
                 mRecycledAssignmentInfo, mRecycledPrivilegedState);
 
-        noteConcurrency();
+        noteConcurrency(true);
     }
 
     @VisibleForTesting
@@ -1429,10 +1437,13 @@ class JobConcurrencyManager {
         }
     }
 
-    private void noteConcurrency() {
+    private void noteConcurrency(boolean logForHistogram) {
         mService.mJobPackageTracker.noteConcurrency(mRunningJobs.size(),
                 // TODO: log per type instead of only TOP
                 mWorkCountTracker.getRunningJobCount(WORK_TYPE_TOP));
+        if (logForHistogram) {
+            sConcurrencyHistogramLogger.logSample(mActiveServices.size());
+        }
     }
 
     @GuardedBy("mLock")
@@ -1573,7 +1584,9 @@ class JobConcurrencyManager {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         if (pendingJobQueue.size() == 0) {
             worker.clearPreferredUid();
-            noteConcurrency();
+            // Don't log the drop in concurrency to the histogram, otherwise, we'll end up
+            // overcounting lower concurrency values as jobs end execution.
+            noteConcurrency(false);
             return;
         }
         if (mActiveServices.size() >= mSteadyStateConcurrencyLimit) {
@@ -1603,7 +1616,9 @@ class JobConcurrencyManager {
                 // scheduled), but we should
                 // be able to stop the other jobs soon so don't start running anything new until we
                 // get back below the limit.
-                noteConcurrency();
+                // Don't log the drop in concurrency to the histogram, otherwise, we'll end up
+                // overcounting lower concurrency values as jobs end execution.
+                noteConcurrency(false);
                 return;
             }
         }
@@ -1752,7 +1767,9 @@ class JobConcurrencyManager {
             }
         }
 
-        noteConcurrency();
+        // Don't log the drop in concurrency to the histogram, otherwise, we'll end up
+        // overcounting lower concurrency values as jobs end execution.
+        noteConcurrency(false);
     }
 
     /**

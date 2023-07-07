@@ -17,6 +17,7 @@
 package com.android.server.appop;
 
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
+import static android.app.AppOpsManager.OP_USE_FULL_SCREEN_INTENT;
 import static android.app.AppOpsManager._NUM_OP;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -31,6 +32,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -44,6 +46,7 @@ import android.content.pm.UserPackage;
 import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.permission.PermissionManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -87,6 +90,10 @@ public class AppOpsUpgradeTest {
             "AppOpsUpgradeTest/appops-unversioned.xml";
     private static final String APP_OPS_VERSION_1_ASSET_PATH =
             "AppOpsUpgradeTest/appops-version-1.xml";
+
+    private static final String APP_OPS_VERSION_3_ASSET_PATH =
+            "AppOpsUpgradeTest/appops-version-3.xml";
+
     private static final String APP_OPS_FILENAME = "appops-test.xml";
 
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
@@ -105,6 +112,8 @@ public class AppOpsUpgradeTest {
     private PermissionManagerServiceInternal mPermissionManagerInternal;
     @Mock
     private Handler mHandler;
+    @Mock
+    private PermissionManager mPermissionManager;
 
     private Object mLock = new Object();
     private SparseArray<int[]> mSwitchedOps;
@@ -211,7 +220,7 @@ public class AppOpsUpgradeTest {
         }
     }
 
-    private static int getModeInFile(int uid) {
+    private static int getModeInFile(int uid, int op) {
         switch (uid) {
             case 10198:
                 return 0;
@@ -222,7 +231,7 @@ public class AppOpsUpgradeTest {
             case 1110181:
                 return 2;
             default:
-                return AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM);
+                return AppOpsManager.opToDefaultMode(op);
         }
     }
 
@@ -258,7 +267,7 @@ public class AppOpsUpgradeTest {
         for (int userId : userIds) {
             for (int appId : appIds) {
                 final int uid = UserHandle.getUid(userId, appId);
-                final int previousMode = getModeInFile(uid);
+                final int previousMode = getModeInFile(uid, OP_SCHEDULE_EXACT_ALARM);
 
                 final int expectedMode;
                 if (previousMode == AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM)) {
@@ -281,6 +290,55 @@ public class AppOpsUpgradeTest {
     }
 
     @Test
+    public void resetUseFullScreenIntent() {
+        extractAppOpsFile(APP_OPS_VERSION_3_ASSET_PATH);
+
+        String[] packageNames = {"p1", "package2", "pkg3", "package.4", "pkg-5", "pkg.6"};
+        int[] appIds = {10267, 10181, 10198, 10199, 10200, 4213};
+        int[] userIds = {0, 10, 11};
+        int flag = 0;
+
+        doReturn(userIds).when(mUserManagerInternal).getUserIds();
+
+        doReturn(packageNames).when(mPermissionManagerInternal).getAppOpPermissionPackages(
+                AppOpsManager.opToPermission(OP_USE_FULL_SCREEN_INTENT));
+
+        doReturn(mPermissionManager).when(mTestContext).getSystemService(PermissionManager.class);
+
+        doReturn(flag).when(mPackageManager).getPermissionFlags(
+                anyString(), anyString(), isA(UserHandle.class));
+
+        doAnswer(invocation -> {
+            String pkg = invocation.getArgument(0);
+            int index = ArrayUtils.indexOf(packageNames, pkg);
+            if (index < 0) {
+                return index;
+            }
+            int userId = invocation.getArgument(2);
+            return UserHandle.getUid(userId, appIds[index]);
+        }).when(mPackageManagerInternal).getPackageUid(anyString(), anyLong(), anyInt());
+
+        AppOpsCheckingServiceImpl testService = new AppOpsCheckingServiceImpl(sAppOpsFile, mLock,
+                mHandler, mTestContext, mSwitchedOps);
+        testService.readState();
+
+        synchronized (testService) {
+            testService.resetUseFullScreenIntentLocked();
+        }
+
+        for (int userId : userIds) {
+            for (int appId : appIds) {
+                final int uid = UserHandle.getUid(userId, appId);
+                final int expectedMode = AppOpsManager.opToDefaultMode(OP_USE_FULL_SCREEN_INTENT);
+                synchronized (testService) {
+                    int mode = testService.getUidMode(uid, OP_USE_FULL_SCREEN_INTENT);
+                    assertEquals(expectedMode, mode);
+                }
+            }
+        }
+    }
+
+    @Test
     public void upgradeFromNoFile() {
         assertFalse(sAppOpsFile.exists());
 
@@ -290,12 +348,14 @@ public class AppOpsUpgradeTest {
 
         doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
         doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+        doNothing().when(testService).resetUseFullScreenIntentLocked();
 
         // trigger upgrade
         testService.systemReady();
 
         verify(testService, never()).upgradeRunAnyInBackgroundLocked();
         verify(testService, never()).upgradeScheduleExactAlarmLocked();
+        verify(testService, never()).resetUseFullScreenIntentLocked();
 
         testService.writeState();
 
@@ -319,12 +379,14 @@ public class AppOpsUpgradeTest {
 
         doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
         doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+        doNothing().when(testService).resetUseFullScreenIntentLocked();
 
         // trigger upgrade
         testService.systemReady();
 
         verify(testService).upgradeRunAnyInBackgroundLocked();
         verify(testService).upgradeScheduleExactAlarmLocked();
+        verify(testService).resetUseFullScreenIntentLocked();
 
         testService.writeState();
         assertTrue(parser.parse());
@@ -344,12 +406,40 @@ public class AppOpsUpgradeTest {
 
         doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
         doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+        doNothing().when(testService).resetUseFullScreenIntentLocked();
 
         // trigger upgrade
         testService.systemReady();
 
         verify(testService, never()).upgradeRunAnyInBackgroundLocked();
         verify(testService).upgradeScheduleExactAlarmLocked();
+        verify(testService).resetUseFullScreenIntentLocked();
+
+        testService.writeState();
+        assertTrue(parser.parse());
+        assertEquals(AppOpsCheckingServiceImpl.CURRENT_VERSION, parser.mVersion);
+    }
+
+    @Test
+    public void resetFromVersion3() {
+        extractAppOpsFile(APP_OPS_VERSION_3_ASSET_PATH);
+        AppOpsDataParser parser = new AppOpsDataParser(sAppOpsFile);
+        assertTrue(parser.parse());
+        assertEquals(3, parser.mVersion);
+
+        AppOpsCheckingServiceImpl testService = spy(new AppOpsCheckingServiceImpl(sAppOpsFile,
+                mLock, mHandler, mTestContext, mSwitchedOps));
+        testService.readState();
+
+        doNothing().when(testService).upgradeRunAnyInBackgroundLocked();
+        doNothing().when(testService).upgradeScheduleExactAlarmLocked();
+        doNothing().when(testService).resetUseFullScreenIntentLocked();
+
+        testService.systemReady();
+
+        verify(testService, never()).upgradeRunAnyInBackgroundLocked();
+        verify(testService, never()).upgradeScheduleExactAlarmLocked();
+        verify(testService).resetUseFullScreenIntentLocked();
 
         testService.writeState();
         assertTrue(parser.parse());

@@ -80,14 +80,16 @@ interface ISoundTriggerMiddlewareService {
      *   This implies that the caller must clear its caller identity to protect from the case where
      *   it resides in the same process as the callee.
      * - The identity of the entity on behalf of which module operations are to be performed.
-     *
+     * @param isTrusted - {@code true} if the middleware should not audit data delivery, since the
+     * callback is being delivered to another trusted component which will audit access.
      * listModules() must be called prior to calling this method and the provided handle must be
      * one of the handles from the returned list.
      */
     ISoundTriggerModule attachAsMiddleman(int handle,
                                           in Identity middlemanIdentity,
                                           in Identity originatorIdentity,
-                                          ISoundTriggerCallback callback);
+                                          ISoundTriggerCallback callback,
+                                          boolean isTrusted);
 
     /**
      * Attach an injection interface interface to the ST mock HAL.

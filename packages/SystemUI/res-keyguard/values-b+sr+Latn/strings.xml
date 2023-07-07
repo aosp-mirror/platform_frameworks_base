@@ -27,7 +27,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Unesite lozinku"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Unesite lozinku"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"Napunjena je"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Napunjeno"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mehurići"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogni"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Otključajte uređaj da biste nastavili"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Unesite PIN da biste kasnije istalirali ažuriranje"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Unesite lozinku da biste kasnije instalirali ažuriranje"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nacrtajte šablon da biste kasnije instalirali ažuriranje"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Uređaj je ažuriran. Unesite PIN da biste nastavili."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Uređaj je ažuriran. Unesite lozinku da biste nastavili."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Nacrtajte šablon da biste nastavili."</string>
 </resources>

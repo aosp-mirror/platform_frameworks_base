@@ -1698,27 +1698,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /**
-     * Returns whether the activity supports size changes.
-     * @hide
-     */
-    @SizeChangesSupportMode
-    public int supportsSizeChanges() {
-        if (isChangeEnabled(FORCE_NON_RESIZE_APP)) {
-            return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
-        }
-
-        if (supportsSizeChanges) {
-            return SIZE_CHANGES_SUPPORTED_METADATA;
-        }
-
-        if (isChangeEnabled(FORCE_RESIZE_APP)) {
-            return SIZE_CHANGES_SUPPORTED_OVERRIDE;
-        }
-
-        return SIZE_CHANGES_UNSUPPORTED_METADATA;
-    }
-
-    /**
      * Returns if the activity should never be sandboxed to the activity window bounds.
      * @hide
      */

@@ -80,8 +80,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
-import android.window.ScreenCapture.ScreenCaptureListener;
-import android.window.ScreenCapture.ScreenshotSync;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
@@ -260,7 +259,7 @@ public class BubbleController implements ConfigurationChangeListener,
     /** One handed mode controller to register transition listener. */
     private Optional<OneHandedController> mOneHandedOptional;
     /** Drag and drop controller to register listener for onDragStarted. */
-    private DragAndDropController mDragAndDropController;
+    private Optional<DragAndDropController> mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
 
@@ -286,7 +285,7 @@ public class BubbleController implements ConfigurationChangeListener,
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -469,7 +468,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 });
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
-        mDragAndDropController.addListener(this::collapseStack);
+        mDragAndDropController.ifPresent(controller -> controller.addListener(this::collapseStack));
 
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
@@ -1222,10 +1221,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /**
      * Performs a screenshot that may exclude the bubble layer, if one is present. The screenshot
-     * can be access via the supplied {@link ScreenshotSync#get()} asynchronously.
+     * can be access via the supplied {@link SynchronousScreenCaptureListener#getBuffer()}
+     * asynchronously.
      */
     public void getScreenshotExcludingBubble(int displayId,
-            Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener) {
+            SynchronousScreenCaptureListener screenCaptureListener) {
         try {
             ScreenCapture.CaptureArgs args = null;
             if (mStackView != null) {
@@ -1240,7 +1240,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 }
             }
 
-            mWmService.captureDisplay(displayId, args, screenCaptureListener.first);
+            mWmService.captureDisplay(displayId, args, screenCaptureListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to capture screenshot");
         }
@@ -2211,15 +2211,15 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         @Nullable
-        public ScreenshotSync getScreenshotExcludingBubble(int displayId) {
-            Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener =
+        public SynchronousScreenCaptureListener getScreenshotExcludingBubble(int displayId) {
+            SynchronousScreenCaptureListener screenCaptureListener =
                     ScreenCapture.createSyncCaptureListener();
 
             mMainExecutor.execute(
                     () -> BubbleController.this.getScreenshotExcludingBubble(displayId,
                             screenCaptureListener));
 
-            return screenCaptureListener.second;
+            return screenCaptureListener;
         }
 
         @Override

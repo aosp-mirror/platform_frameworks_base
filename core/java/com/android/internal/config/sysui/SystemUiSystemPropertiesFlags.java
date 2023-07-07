@@ -76,11 +76,15 @@ public class SystemUiSystemPropertiesFlags {
 
         /** Gating the removal of sorting-notifications-by-interruptiveness. */
         public static final Flag NO_SORT_BY_INTERRUPTIVENESS =
-                devFlag("persist.sysui.notification.no_sort_by_interruptiveness");
+                releasedFlag("persist.sysui.notification.no_sort_by_interruptiveness");
 
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
-                devFlag("persist.sysui.notification.log_dnd_state_events");
+                releasedFlag("persist.sysui.notification.log_dnd_state_events");
+
+        /** Gating the holding of WakeLocks until NLSes are told about a new notification. */
+        public static final Flag WAKE_LOCK_FOR_POSTING_NOTIFICATION =
+                devFlag("persist.sysui.notification.wake_lock_for_posting_notification");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////
@@ -115,7 +119,7 @@ public class SystemUiSystemPropertiesFlags {
     }
 
     /**
-     * Creates a flag that is enabled by default in debuggable builds.
+     * Creates a flag that is disabled by default in debuggable builds.
      * It can be enabled by setting this flag's SystemProperty to 1.
      *
      * This flag is ALWAYS disabled in release builds.

@@ -73,6 +73,13 @@ public class TaskConstants {
      */
     public static final int TASK_CHILD_LAYER_TASK_OVERLAY = 4 * TASK_CHILD_LAYER_REGION_SIZE;
 
+
+    /**
+     * Veil to cover task surface and other window decorations during resizes.
+     * @hide
+     */
+    public static final int TASK_CHILD_LAYER_RESIZE_VEIL = 6 * TASK_CHILD_LAYER_REGION_SIZE;
+
     /**
      * Z-orders of task child layers other than activities, task fragments and layers interleaved
      * with them, e.g. IME windows. [-10000, 10000) is reserved for these layers.
@@ -84,7 +91,8 @@ public class TaskConstants {
             TASK_CHILD_LAYER_COMPAT_UI,
             TASK_CHILD_LAYER_WINDOW_DECORATIONS,
             TASK_CHILD_LAYER_RECENTS_ANIMATION_PIP_OVERLAY,
-            TASK_CHILD_LAYER_TASK_OVERLAY
+            TASK_CHILD_LAYER_TASK_OVERLAY,
+            TASK_CHILD_LAYER_RESIZE_VEIL
     })
     public @interface TaskChildLayer {}
 }

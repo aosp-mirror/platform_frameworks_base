@@ -921,6 +921,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 p.getUsesStaticLibraries(), p.getUsesStaticLibrariesVersions(), p.getMimeGroups(),
                 mDomainVerificationManager.generateNewId());
         if (ret != null) {
+            ret.setAppMetadataFilePath(p.getAppMetadataFilePath());
             ret.getPkgState().setUpdatedSystemApp(false);
         }
         mDisabledSysPackages.remove(name);
@@ -3700,6 +3701,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ps.setSharedUserAppId(sharedUserAppId);
         }
 
+        ps.setAppMetadataFilePath(parser.getAttributeValue(null, "appMetadataFilePath"));
+
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3711,11 +3714,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             if (parser.getName().equals(TAG_PERMISSIONS)) {
                 final LegacyPermissionState legacyState;
                 if (ps.hasSharedUser()) {
-                    legacyState = getSettingLPr(ps.getSharedUserAppId()).getLegacyPermissionState();
+                    final SettingBase sharedUserSettings = getSettingLPr(
+                            ps.getSharedUserAppId());
+                    legacyState = sharedUserSettings != null
+                            ? sharedUserSettings.getLegacyPermissionState() : null;
                 } else {
                     legacyState = ps.getLegacyPermissionState();
                 }
-                readInstallPermissionsLPr(parser, legacyState, users);
+                if (legacyState != null) {
+                    readInstallPermissionsLPr(parser, legacyState, users);
+                }
             } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
                 readUsesStaticLibLPw(parser, ps);
             } else if (parser.getName().equals(TAG_USES_SDK_LIB)) {
@@ -4293,10 +4301,23 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                 // Non-Apex system apps, that are not included in the allowlist in
                 // initialNonStoppedSystemPackages, should be marked as stopped by default.
-                final boolean shouldBeStopped = service.mShouldStopSystemPackagesByDefault
+                boolean shouldBeStopped = service.mShouldStopSystemPackagesByDefault
                         && ps.isSystem()
                         && !ps.isApex()
                         && !service.mInitialNonStoppedSystemPackages.contains(ps.getPackageName());
+                if (shouldBeStopped) {
+                    final Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+                    launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    launcherIntent.setPackage(ps.getPackageName());
+                    final List<ResolveInfo> launcherActivities =
+                            service.snapshotComputer().queryIntentActivitiesInternal(launcherIntent,
+                                    null,
+                                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
+                    if (launcherActivities.isEmpty()) {
+                        shouldBeStopped = false;
+                    }
+                }
                 ps.setStopped(shouldBeStopped, userHandle);
 
                 // If userTypeInstallablePackages is the *only* reason why we're not installing,
@@ -4922,6 +4943,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             date.setTime(ps.getLoadingCompletedTime());
             pw.print(prefix); pw.println("  loadingCompletedTime=" + sdf.format(date));
         }
+        pw.print(prefix); pw.print("  appMetadataFilePath=");
+        pw.println(ps.getAppMetadataFilePath());
         if (ps.getVolumeUuid() != null) {
             pw.print(prefix); pw.print("  volumeUuid=");
                     pw.println(ps.getVolumeUuid());

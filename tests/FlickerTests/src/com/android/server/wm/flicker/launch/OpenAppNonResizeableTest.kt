@@ -20,7 +20,7 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerTest
@@ -47,6 +47,7 @@ import org.junit.runners.Parameterized
  *     Lock the device.
  *     Launch an app on top of the lock screen [testApp] and wait animation to complete
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -161,9 +162,7 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
         super.appWindowBecomesFirstAndOnlyTopWindow()
 
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+    @Presubmit @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
 
     /** Checks the [ComponentNameMatcher.NAV_BAR] is visible at the end of the transition */
     @Presubmit

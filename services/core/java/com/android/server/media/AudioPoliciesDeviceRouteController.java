@@ -42,12 +42,9 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
 
-
 /* package */ final class AudioPoliciesDeviceRouteController implements DeviceRouteController {
 
     private static final String TAG = "APDeviceRoutesController";
-
-    private static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
 
     @NonNull
     private final Context mContext;
@@ -182,10 +179,12 @@ import java.util.Objects;
 
         synchronized (this) {
             return new MediaRoute2Info.Builder(
-                    DEVICE_ROUTE_ID, mContext.getResources().getText(name).toString())
-                    .setVolumeHandling(mAudioManager.isVolumeFixed()
-                            ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
-                            : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
+                            MediaRoute2Info.ROUTE_ID_DEVICE,
+                            mContext.getResources().getText(name).toString())
+                    .setVolumeHandling(
+                            mAudioManager.isVolumeFixed()
+                                    ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
+                                    : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                     .setVolume(mDeviceVolume)
                     .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                     .setType(type)

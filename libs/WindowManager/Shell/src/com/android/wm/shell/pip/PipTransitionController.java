@@ -38,6 +38,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -223,6 +224,13 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         return false;
     }
 
+    /** Whether a particular package is same as current pip package. */
+    public boolean isInPipPackage(String packageName) {
+        final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
+        return packageName != null && inPipTask != null
+                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
+    }
+
     /** Add PiP-related changes to `outWCT` for the given request. */
     public void augmentRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request, @NonNull WindowContainerTransaction outWCT) {
@@ -238,6 +246,18 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             @NonNull final SurfaceControl.Transaction startTransaction,
             @NonNull final SurfaceControl.Transaction finishTransaction,
             @NonNull final Transitions.TransitionFinishCallback finishCallback) {
+    }
+
+    /**
+     * Applies the proper surface states (rounded corners/shadows) to pip surfaces in `info`.
+     * This is intended to be used when PiP is part of another animation but isn't, itself,
+     * animating (eg. unlocking).
+     * @return `true` if there was a pip in `info`.
+     */
+    public boolean syncPipSurfaceState(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        return false;
     }
 
     /** End the currently-playing PiP animation. */

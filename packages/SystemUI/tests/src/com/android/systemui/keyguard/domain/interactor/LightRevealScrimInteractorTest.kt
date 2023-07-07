@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeLightRevealScrimRepository
@@ -28,6 +29,7 @@ import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -37,13 +39,14 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository()
     private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
 
     private val keyguardTransitionInteractor =
-        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository)
+        KeyguardTransitionInteractor(fakeKeyguardTransitionRepository, TestScope().backgroundScope)
 
     private lateinit var underTest: LightRevealScrimInteractor
 

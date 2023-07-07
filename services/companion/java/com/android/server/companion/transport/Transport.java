@@ -19,7 +19,6 @@ package com.android.server.companion.transport;
 import android.annotation.NonNull;
 import android.companion.IOnMessageReceivedListener;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -47,7 +46,6 @@ public abstract class Transport {
     protected static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    public static final int MESSAGE_REQUEST_PLATFORM_INFO = 0x63807073; // ?PFI
     public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
@@ -70,6 +68,8 @@ public abstract class Transport {
      * value of the map can be a list.
      */
     private final Map<Integer, IOnMessageReceivedListener> mListeners;
+
+    private OnTransportClosedListener mOnTransportClosed;
 
     private static boolean isRequest(int message) {
         return (message & 0xFF000000) == 0x63000000;
@@ -113,27 +113,25 @@ public abstract class Transport {
     /**
      * Start listening to messages.
      */
-    public abstract void start();
+    abstract void start();
 
     /**
      * Soft stop listening to the incoming data without closing the streams.
      */
-    public abstract void stop();
+    abstract void stop();
 
     /**
-     * Stop listening to the incoming data and close the streams.
+     * Stop listening to the incoming data and close the streams. If a listener for closed event
+     * is set, then trigger it to assist with its clean-up.
      */
-    public abstract void close();
+    void close() {
+        if (mOnTransportClosed != null) {
+            mOnTransportClosed.onClosed(this);
+        }
+    }
 
     protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException;
-
-    /**
-     * Send a message.
-     */
-    public void sendMessage(int message, @NonNull byte[] data) throws IOException {
-        sendMessage(message, mNextSequence.incrementAndGet(), data);
-    }
 
     public Future<byte[]> requestForResponse(int message, byte[] data) {
         if (DEBUG) Slog.d(TAG, "Requesting for response");
@@ -183,23 +181,12 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
                 break;
             }
-            case MESSAGE_REQUEST_PLATFORM_INFO: {
-                callback(message, data);
-                // DO NOT SEND A RESPONSE!
-                break;
-            }
             case MESSAGE_REQUEST_CONTEXT_SYNC: {
                 callback(message, data);
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
                 break;
             }
             case MESSAGE_REQUEST_PERMISSION_RESTORE: {
-                if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
-                        && !Build.isDebuggable()) {
-                    Slog.w(TAG, "Restoring permissions only supported on watches");
-                    sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
-                    break;
-                }
                 try {
                     callback(message, data);
                     sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
@@ -252,5 +239,15 @@ public abstract class Transport {
                 Slog.w(TAG, "Ignoring unknown response 0x" + Integer.toHexString(message));
             }
         }
+    }
+
+    void setOnTransportClosedListener(OnTransportClosedListener callback) {
+        this.mOnTransportClosed = callback;
+    }
+
+    // Interface to pass transport to the transport manager to assist with detachment.
+    @FunctionalInterface
+    interface OnTransportClosedListener {
+        void onClosed(Transport transport);
     }
 }

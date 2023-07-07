@@ -1025,6 +1025,7 @@ public final class TextBoundsInfo implements Parcelable {
             mEnd = -1;
             mCharacterBounds = null;
             mCharacterFlags = null;
+            mCharacterBidiLevels = null;
             mLineSegmentFinder = null;
             mWordSegmentFinder = null;
             mGraphemeSegmentFinder = null;

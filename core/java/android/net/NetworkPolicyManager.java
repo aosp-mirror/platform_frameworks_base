@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 
@@ -805,6 +806,9 @@ public class NetworkPolicyManager {
     /** @hide */
     public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(
             int procState, @ProcessCapability int capability) {
+        if (procState == PROCESS_STATE_UNKNOWN) {
+            return false;
+        }
         return procState <= FOREGROUND_THRESHOLD_STATE
                 || (capability & ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0;
     }
@@ -832,6 +836,9 @@ public class NetworkPolicyManager {
     /** @hide */
     public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState,
             @ProcessCapability int capabilities) {
+        if (procState == PROCESS_STATE_UNKNOWN) {
+            return false;
+        }
         return procState <= FOREGROUND_THRESHOLD_STATE
                 // This is meant to be a user-initiated job, and therefore gets similar network
                 // access to FGS.

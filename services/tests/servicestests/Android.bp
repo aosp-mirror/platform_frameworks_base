@@ -114,7 +114,6 @@ android_test {
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",
-        ":StubTestApp",
         ":SuspendTestApp",
         ":MediaButtonReceiverHolderTestHelperApp",
         "data/broken_shortcut.xml",

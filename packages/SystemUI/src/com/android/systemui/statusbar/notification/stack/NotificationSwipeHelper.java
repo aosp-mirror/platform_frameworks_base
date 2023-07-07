@@ -34,8 +34,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -69,7 +69,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     private boolean mIsExpanded;
     private boolean mPulsing;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
-    private final boolean mUseRoundnessSourceTypes;
 
     NotificationSwipeHelper(
             Resources resources,
@@ -81,7 +80,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             NotificationRoundnessManager notificationRoundnessManager) {
         super(callback, resources, viewConfiguration, falsingManager, featureFlags);
         mNotificationRoundnessManager = notificationRoundnessManager;
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -323,8 +321,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     protected void prepareDismissAnimation(View view, Animator anim) {
         super.prepareDismissAnimation(view, anim);
 
-        if (mUseRoundnessSourceTypes
-                && view instanceof ExpandableNotificationRow
+        if (view instanceof ExpandableNotificationRow
                 && mNotificationRoundnessManager.isClearAllInProgress()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             anim.addListener(new AnimatorListenerAdapter() {
@@ -358,7 +355,11 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @Override
     protected void snapChild(final View animView, final float targetLeft, float velocity) {
-        superSnapChild(animView, targetLeft, velocity);
+        if (animView instanceof SwipeableView) {
+            // only perform the snapback animation on views that are swipeable inside the shade.
+            superSnapChild(animView, targetLeft, velocity);
+        }
+
         mCallback.onDragCancelled(animView);
         if (targetLeft == 0) {
             handleMenuCoveredOrDismissed();
@@ -545,14 +546,17 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private final FeatureFlags mFeatureFlags;
         private NotificationCallback mNotificationCallback;
         private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
+        private DumpManager mDumpManager;
         private NotificationRoundnessManager mNotificationRoundnessManager;
 
         @Inject
         Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
+                DumpManager dumpManager,
                 FalsingManager falsingManager, FeatureFlags featureFlags,
                 NotificationRoundnessManager notificationRoundnessManager) {
             mResources = resources;
             mViewConfiguration = viewConfiguration;
+            mDumpManager = dumpManager;
             mFalsingManager = falsingManager;
             mFeatureFlags = featureFlags;
             mNotificationRoundnessManager = notificationRoundnessManager;
@@ -570,9 +574,12 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         }
 
         NotificationSwipeHelper build() {
-            return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
+            NotificationSwipeHelper swipeHelper = new NotificationSwipeHelper(
+                    mResources, mViewConfiguration, mFalsingManager,
                     mFeatureFlags, mNotificationCallback, mOnMenuEventListener,
                     mNotificationRoundnessManager);
+            mDumpManager.registerDumpable(swipeHelper);
+            return swipeHelper;
         }
     }
 }

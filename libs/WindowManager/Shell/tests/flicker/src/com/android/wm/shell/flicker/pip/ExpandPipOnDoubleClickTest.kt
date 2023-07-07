@@ -18,7 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -56,8 +56,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition { transitions { pipApp.doubleClickPipWindow(wmHelper) } }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.doubleClickPipWindow(wmHelper) }
+    }
 
     /**
      * Checks that the pip app window remains inside the display bounds throughout the whole

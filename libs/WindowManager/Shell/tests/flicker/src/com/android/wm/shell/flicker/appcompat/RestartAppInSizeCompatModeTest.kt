@@ -17,11 +17,11 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
-import androidx.test.filters.RequiresDevice
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.helpers.WindowUtils
+import androidx.test.filters.RequiresDevice
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -36,13 +36,13 @@ import org.junit.runners.Parameterized
  *     Rotate app to opposite orientation to trigger size compat mode
  *     Press restart button and wait for letterboxed app to resize
  * ```
+ *
  * Notes:
  * ```
  *     Some default assertions (e.g., nav bar, status bar and screen covered)
  *     are inherited [BaseTest]
  * ```
  */
-
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -53,24 +53,29 @@ class RestartAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flick
         get() = {
             super.transition(this)
             transitions { letterboxApp.clickRestart(wmHelper) }
-            teardown { letterboxApp.exit(wmHelper) }
         }
 
-    @Postsubmit
-    @Test
-    fun appVisibleAtStartAndEnd() = assertLetterboxAppVisibleAtStartAndEnd()
+    @Postsubmit @Test fun appVisibleAtStartAndEnd() = assertLetterboxAppVisibleAtStartAndEnd()
 
     @Postsubmit
     @Test
-    fun appLayerVisibilityChanges() {
-        flicker.assertLayers {
-            this.isVisible(letterboxApp)
+    fun appWindowVisibilityChanges() {
+        flicker.assertWm {
+            this.isAppWindowVisible(letterboxApp)
                 .then()
-                .isInvisible(letterboxApp)
+                .isAppWindowInvisible(letterboxApp) // animatingExit true
                 .then()
-                .isVisible(letterboxApp)
+                .isAppWindowVisible(letterboxApp) // Activity finish relaunching
         }
     }
+
+    @Postsubmit
+    @Test
+    fun appLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
+
+    @Postsubmit
+    @Test
+    fun appIsLetterboxedAtStart() = assertAppLetterboxedAtStart()
 
     @Postsubmit
     @Test

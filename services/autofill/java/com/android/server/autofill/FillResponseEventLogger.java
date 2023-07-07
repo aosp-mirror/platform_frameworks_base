@@ -16,17 +16,23 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_ONLY;
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__DIALOG;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__MENU;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_SUCCESS;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_TYPE__DATASET_AUTHENTICATION;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_TYPE__FULL_AUTHENTICATION;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_UNKONWN;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__DIALOG;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__MENU;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_CANCELLED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_FAILURE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_SESSION_DESTROYED;
@@ -37,6 +43,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.os.SystemClock;
 import android.service.autofill.Dataset;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
@@ -53,6 +60,9 @@ import java.util.Optional;
  */
 public final class FillResponseEventLogger {
   private static final String TAG = "FillResponseEventLogger";
+
+  private static final long UNINITIALIZED_TIMESTAMP = -1;
+  private long startResponseProcessingTimestamp = UNINITIALIZED_TIMESTAMP;
 
   /**
    * Reasons why presentation was not shown. These are wrappers around
@@ -111,6 +121,20 @@ public final class FillResponseEventLogger {
   public @interface AuthenticationResult {
   }
 
+
+  /**
+   * Reasons why presentation was not shown. These are wrappers around
+   * {@link com.android.os.AtomsProto.AutofillFillResponseReported.DetectionPreference}.
+   */
+  @IntDef(prefix = {"DETECTION_PREFER"}, value = {
+      DETECTION_PREFER_UNKNOWN,
+      DETECTION_PREFER_AUTOFILL_PROVIDER,
+      DETECTION_PREFER_PCC
+  })
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface DetectionPreference {
+  }
+
   public static final int DISPLAY_PRESENTATION_TYPE_UNKNOWN =
       AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
   public static final int DISPLAY_PRESENTATION_TYPE_MENU =
@@ -144,6 +168,15 @@ public final class FillResponseEventLogger {
       AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_SUCCESS;
   public static final int RESPONSE_STATUS_UNKNOWN =
       AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_UNKNOWN;
+
+  // Values for AutofillFillResponseReported.detection_preference
+  public static final int DETECTION_PREFER_UNKNOWN =
+          AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_UNKONWN;
+  public static final int DETECTION_PREFER_AUTOFILL_PROVIDER =
+          AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
+  public static final int DETECTION_PREFER_PCC =
+          AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
+
 
   // Log a magic number when FillRequest failed or timeout to differentiate with FillRequest
   // succeeded.
@@ -219,6 +252,21 @@ public final class FillResponseEventLogger {
   public void maybeSetAvailableCount(int val) {
     mEventInternal.ifPresent(event -> {
       event.mAvailableCount = val;
+    });
+  }
+
+  public void maybeSetTotalDatasetsProvided(int val) {
+    mEventInternal.ifPresent(event -> {
+      // Don't reset if it's already populated.
+      // This is just a technical limitation of not having complicated logic.
+      // Autofill Provider may return some datasets which are applicable to data types.
+      // In such a case, we set available count to the number of datasets provided.
+      // However, it's possible that those data types aren't detected by PCC, so in effect, there
+      // are 0 datasets. In the codebase, we treat it as null response, which may call this again
+      // to set 0. But we don't want to overwrite already set value.
+      if (event.mTotalDatasetsProvided == -1) {
+        event.mTotalDatasetsProvided = val;
+      }
     });
   }
 
@@ -309,15 +357,78 @@ public final class FillResponseEventLogger {
     });
   }
 
+  public void startResponseProcessingTime() {
+    startResponseProcessingTimestamp = SystemClock.elapsedRealtime();
+  }
+
   /**
    * Set latency_response_processing_millis as long as mEventInternal presents.
    */
-  public void maybeSetLatencyResponseProcessingMillis(int val) {
+  public void maybeSetLatencyResponseProcessingMillis() {
     mEventInternal.ifPresent(event -> {
-      event.mLatencyResponseProcessingMillis = val;
+      if (startResponseProcessingTimestamp == UNINITIALIZED_TIMESTAMP && sVerbose) {
+        Slog.v(TAG, "uninitialized startResponseProcessingTimestamp");
+      }
+      event.mLatencyResponseProcessingMillis
+              = SystemClock.elapsedRealtime() - startResponseProcessingTimestamp;
     });
   }
 
+  /**
+   * Set available_pcc_count.
+   */
+  public void maybeSetAvailablePccCount(int val) {
+    mEventInternal.ifPresent(event -> {
+      event.mAvailablePccCount = val;
+    });
+  }
+
+  /**
+   * Set available_pcc_only_count.
+   */
+  public void maybeSetAvailablePccOnlyCount(int val) {
+    mEventInternal.ifPresent(event -> {
+      event.mAvailablePccOnlyCount = val;
+    });
+  }
+
+  /**
+   * Set available_pcc_count.
+   */
+  public void maybeSetDatasetsCountAfterPotentialPccFiltering(@Nullable List<Dataset> datasetList) {
+    mEventInternal.ifPresent(event -> {
+      int pccOnlyCount = 0;
+      int pccCount = 0;
+      int totalCount = 0;
+      if (datasetList != null) {
+        totalCount = datasetList.size();
+        for (int i = 0; i < datasetList.size(); i++) {
+          Dataset dataset = datasetList.get(i);
+          if (dataset != null) {
+            if (dataset.getEligibleReason() == PICK_REASON_PCC_DETECTION_ONLY) {
+              pccOnlyCount++;
+              pccCount++;
+            } else if (dataset.getEligibleReason()
+                    == PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER) {
+              pccCount++;
+            }
+          }
+        }
+      }
+      event.mAvailablePccOnlyCount = pccOnlyCount;
+      event.mAvailablePccCount = pccCount;
+      event.mAvailableCount = totalCount;
+    });
+  }
+
+  /**
+   * Set detection_pref
+   */
+  public void maybeSetDetectionPreference(@DetectionPreference int detectionPreference) {
+    mEventInternal.ifPresent(event -> {
+      event.mDetectionPref = detectionPreference;
+    });
+  }
 
   /**
    * Log an AUTOFILL_FILL_RESPONSE_REPORTED event.
@@ -344,7 +455,11 @@ public final class FillResponseEventLogger {
           + " mLatencyAuthenticationUiDisplayMillis=" + event.mLatencyAuthenticationUiDisplayMillis
           + " mLatencyDatasetDisplayMillis=" + event.mLatencyDatasetDisplayMillis
           + " mResponseStatus=" + event.mResponseStatus
-          + " mLatencyResponseProcessingMillis=" + event.mLatencyResponseProcessingMillis);
+          + " mLatencyResponseProcessingMillis=" + event.mLatencyResponseProcessingMillis
+          + " mAvailablePccCount=" + event.mAvailablePccCount
+          + " mAvailablePccOnlyCount=" + event.mAvailablePccOnlyCount
+          + " mTotalDatasetsProvided=" + event.mTotalDatasetsProvided
+          + " mDetectionPref=" + event.mDetectionPref);
     }
     FrameworkStatsLog.write(
         AUTOFILL_FILL_RESPONSE_REPORTED,
@@ -361,7 +476,11 @@ public final class FillResponseEventLogger {
         event.mLatencyAuthenticationUiDisplayMillis,
         event.mLatencyDatasetDisplayMillis,
         event.mResponseStatus,
-        event.mLatencyResponseProcessingMillis);
+        event.mLatencyResponseProcessingMillis,
+        event.mAvailablePccCount,
+        event.mAvailablePccOnlyCount,
+        event.mTotalDatasetsProvided,
+        event.mDetectionPref);
     mEventInternal = Optional.empty();
   }
 
@@ -371,14 +490,19 @@ public final class FillResponseEventLogger {
     int mDisplayPresentationType = DISPLAY_PRESENTATION_TYPE_UNKNOWN;
     int mAvailableCount = 0;
     int mSaveUiTriggerIds = -1;
-    int mLatencyFillResponseReceivedMillis = 0;
+    int mLatencyFillResponseReceivedMillis = (int) UNINITIALIZED_TIMESTAMP;
     int mAuthenticationType = AUTHENTICATION_TYPE_UNKNOWN;
     int mAuthenticationResult = AUTHENTICATION_RESULT_UNKNOWN;
     int mAuthenticationFailureReason = -1;
-    int mLatencyAuthenticationUiDisplayMillis = 0;
-    int mLatencyDatasetDisplayMillis = 0;
+    int mLatencyAuthenticationUiDisplayMillis = (int) UNINITIALIZED_TIMESTAMP;
+    int mLatencyDatasetDisplayMillis = (int) UNINITIALIZED_TIMESTAMP;
     int mResponseStatus = RESPONSE_STATUS_UNKNOWN;
-    int mLatencyResponseProcessingMillis = 0;
+    long mLatencyResponseProcessingMillis = UNINITIALIZED_TIMESTAMP;
+    int mAvailablePccCount = -1;
+    int mAvailablePccOnlyCount = -1;
+    int mTotalDatasetsProvided = -1;
+    @DetectionPreference
+    int mDetectionPref = DETECTION_PREFER_UNKNOWN;
 
     FillResponseEventInternal() {
     }

@@ -913,8 +913,10 @@ final class HotwordDetectionConnection {
         }
         // Handle case where all hotword detector sessions are destroyed with only the visual
         // detector session left
-        if (mDetectorSessions.size() == 1
-                && mDetectorSessions.get(0) instanceof VisualQueryDetectorSession) {
+        boolean allHotwordDetectionServiceSessionsRemoved = mDetectorSessions.size() == 0
+                || (mDetectorSessions.size() == 1 && mDetectorSessions.get(0)
+                instanceof VisualQueryDetectorSession);
+        if (allHotwordDetectionServiceSessionsRemoved) {
             unbindHotwordDetectionService();
         }
     }
@@ -960,7 +962,7 @@ final class HotwordDetectionConnection {
         final DetectorSession session = mDetectorSessions.get(
                 HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
         if (session == null || session.isDestroyed()) {
-            Slog.v(TAG, "Not found the look and talk perceiver");
+            Slog.v(TAG, "Not found the visual query detector");
             return null;
         }
         return (VisualQueryDetectorSession) session;

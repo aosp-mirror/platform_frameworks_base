@@ -23,8 +23,6 @@ import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.battery.BatterySaverModule;
@@ -42,6 +40,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.rotationlock.RotationLockModule;
+import com.android.systemui.scene.SceneContainerFrameworkModule;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -74,11 +73,11 @@ import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.volume.dagger.VolumeModule;
 
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /**
  * A dagger module for injecting default implementations of components of System UI.
@@ -105,6 +104,7 @@ import dagger.Provides;
         QSModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
+        SceneContainerFrameworkModule.class,
         StatusBarEventsModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class,
@@ -115,9 +115,8 @@ public abstract class ReferenceSystemUIModule {
     @SysUISingleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
-    @Nullable
     static String provideLeakReportEmail() {
-        return null;
+        return "";
     }
 
     @Binds

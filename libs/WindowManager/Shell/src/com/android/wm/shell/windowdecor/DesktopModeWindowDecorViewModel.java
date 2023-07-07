@@ -33,7 +33,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -41,7 +40,6 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.InputChannel;
@@ -63,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -101,22 +100,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
             new SparseArray<>();
-    private final DragListenerImpl mDragStartListener = new DragListenerImpl();
+    private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
     private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
+    private final Transitions mTransitions;
 
     private Optional<SplitScreenController> mSplitScreenController;
 
     private ValueAnimator mDragToDesktopValueAnimator;
     private final Rect mDragToDesktopAnimationStartBounds = new Rect();
     private boolean mDragToDesktopAnimationStarted;
-    private float mCaptionDragStartX;
-
-    // These values keep track of any transitions to freeform to stop relayout from running on
-    // changing task so that shellTransitions has a chance to animate the transition
-    private int mPauseRelayoutForTask = -1;
-    private IBinder mTransitionPausingRelayout;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -125,6 +119,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
+            Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<SplitScreenController> splitScreenController) {
@@ -135,6 +130,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 taskOrganizer,
                 displayController,
                 syncQueue,
+                transitions,
                 desktopModeController,
                 desktopTasksController,
                 splitScreenController,
@@ -151,6 +147,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
+            Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<SplitScreenController> splitScreenController,
@@ -165,6 +162,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mDisplayController = displayController;
         mSplitScreenController = splitScreenController;
         mSyncQueue = syncQueue;
+        mTransitions = transitions;
         mDesktopModeController = desktopModeController;
         mDesktopTasksController = desktopTasksController;
 
@@ -195,22 +193,25 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             @NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         if (change.getMode() == WindowManager.TRANSIT_CHANGE
-                && info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE) {
-            mTransitionPausingRelayout = transition;
+                && (info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE)) {
+            mWindowDecorByTaskId.get(change.getTaskInfo().taskId)
+                    .addTransitionPausingRelayout(transition);
         }
     }
 
     @Override
     public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
-        if (merged.equals(mTransitionPausingRelayout)) {
-            mTransitionPausingRelayout = playing;
+        for (int i = 0; i < mWindowDecorByTaskId.size(); i++) {
+            final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+            decor.mergeTransitionPausingRelayout(merged, playing);
         }
     }
 
     @Override
     public void onTransitionFinished(@NonNull IBinder transition) {
-        if (transition.equals(mTransitionPausingRelayout)) {
-            mPauseRelayoutForTask = -1;
+        for (int i = 0; i < mWindowDecorByTaskId.size(); i++) {
+            final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+            decor.removeTransitionPausingRelayout(transition);
         }
     }
 
@@ -225,12 +226,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
 
-        // TaskListener callbacks and shell transitions aren't synchronized, so starting a shell
-        // transition can trigger an onTaskInfoChanged call that updates the task's SurfaceControl
-        // and interferes with the transition animation that is playing at the same time.
-        if (taskInfo.taskId != mPauseRelayoutForTask) {
-            decoration.relayout(taskInfo);
-        }
+        decoration.relayout(taskInfo);
     }
 
     @Override
@@ -333,6 +329,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 decoration.closeHandleMenu();
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
+            } else if (id == R.id.select_button) {
+                if (DesktopModeStatus.IS_DISPLAY_CHANGE_ENABLED) {
+                    // TODO(b/278084491): dev option to enable display switching
+                    //  remove when select is implemented
+                    mDesktopTasksController.ifPresent(c -> c.moveToNextDisplay(mTaskId));
+                    decoration.closeHandleMenu();
+                }
             }
         }
 
@@ -393,10 +396,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    // Position of the task is calculated by subtracting the raw location of the
+                    // motion event (the location of the motion relative to the display) by the
+                    // location of the motion event relative to the task's bounds
+                    final Point position = new Point(
+                            (int) (e.getRawX(dragPointerIdx) - e.getX(dragPointerIdx)),
+                            (int) (e.getRawY(dragPointerIdx) - e.getY(dragPointerIdx)));
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
-                            e.getRawY(dragPointerIdx)));
+                            position));
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;
@@ -525,7 +534,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             DesktopModeWindowDecoration relevantDecor) {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
-                mCaptionDragStartX = ev.getX();
                 // Begin drag through status bar if applicable.
                 if (relevantDecor != null) {
                     mDragToDesktopAnimationStartBounds.set(
@@ -555,18 +563,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > 2 * statusBarHeight) {
                         if (DesktopModeStatus.isProto2Enabled()) {
-                            mPauseRelayoutForTask = relevantDecor.mTaskInfo.taskId;
-                            centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
+                            animateToDesktop(relevantDecor, ev);
                         } else if (DesktopModeStatus.isProto1Enabled()) {
                             mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
                         }
                         mDragToDesktopAnimationStarted = false;
                         return;
                     } else if (mDragToDesktopAnimationStarted) {
-                        Point startPosition = new Point((int) ev.getX(), (int) ev.getY());
+                        Point position = new Point((int) ev.getX(), (int) ev.getY());
                         mDesktopTasksController.ifPresent(
                                 c -> c.cancelMoveToFreeform(relevantDecor.mTaskInfo,
-                                        startPosition));
+                                        position));
                         mDragToDesktopAnimationStarted = false;
                         return;
                     }
@@ -581,8 +588,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 if (mTransitionDragActive) {
                     mDesktopTasksController.ifPresent(
-                            c -> c.onDragPositioningMoveThroughStatusBar(relevantDecor.mTaskInfo,
-                            relevantDecor.mTaskSurface, ev.getY()));
+                            c -> c.onDragPositioningMoveThroughStatusBar(
+                                    relevantDecor.mTaskInfo,
+                                    relevantDecor.mTaskSurface, ev.getY()));
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > statusBarHeight) {
@@ -617,11 +625,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      * Gets bounds of a scaled window centered relative to the screen bounds
      * @param scale the amount to scale to relative to the Screen Bounds
      */
-    private Rect calculateFreeformBounds(float scale) {
-        final Resources resources = mContext.getResources();
-        final DisplayMetrics metrics = resources.getDisplayMetrics();
-        final int screenWidth = metrics.widthPixels;
-        final int screenHeight = metrics.heightPixels;
+    private Rect calculateFreeformBounds(int displayId, float scale) {
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
+        final int screenWidth = displayLayout.width();
+        final int screenHeight = displayLayout.height();
 
         final float adjustmentPercentage = (1f - scale) / 2;
         final Rect endBounds = new Rect((int) (screenWidth * adjustmentPercentage),
@@ -629,6 +636,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 (int) (screenWidth * (adjustmentPercentage + scale)),
                 (int) (screenHeight * (adjustmentPercentage + scale)));
         return endBounds;
+    }
+
+    /**
+     * Blocks relayout until transition is finished and transitions to Desktop
+     */
+    private void animateToDesktop(DesktopModeWindowDecoration relevantDecor,
+            MotionEvent ev) {
+        relevantDecor.incrementRelayoutBlock();
+        centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
     }
 
     /**
@@ -641,7 +657,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
         animator.setDuration(FREEFORM_ANIMATION_DURATION);
         final SurfaceControl sc = relevantDecor.mTaskSurface;
-        final Rect endBounds = calculateFreeformBounds(DRAG_FREEFORM_SCALE);
+        final Rect endBounds = calculateFreeformBounds(ev.getDisplayId(), DRAG_FREEFORM_SCALE);
         final Transaction t = mTransactionFactory.get();
         final float diffX = endBounds.centerX() - ev.getX();
         final float diffY = endBounds.top - ev.getY();
@@ -661,7 +677,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDesktopTasksController.ifPresent(
                         c -> c.onDragPositioningEndThroughStatusBar(
                                 relevantDecor.mTaskInfo,
-                                calculateFreeformBounds(FINAL_FREEFORM_SCALE)));
+                                calculateFreeformBounds(ev.getDisplayId(), FINAL_FREEFORM_SCALE)));
             }
         });
         animator.start();
@@ -749,6 +765,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
+        if (mSplitScreenController.isPresent()
+                && mSplitScreenController.get().isTaskRootOrStageRoot(taskInfo.taskId)) {
+            return false;
+        }
         return DesktopModeStatus.isProto2Enabled()
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
@@ -777,21 +797,39 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final TaskPositioner taskPositioner =
-                new TaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
-                        mDragStartListener);
+        final DragPositioningCallback dragPositioningCallback = createDragPositioningCallback(
+                windowDecoration, taskInfo);
         final DesktopModeTouchEventListener touchEventListener =
-                new DesktopModeTouchEventListener(taskInfo, taskPositioner);
+                new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
+
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setCornersListener(mCornersListener);
-        windowDecoration.setDragPositioningCallback(taskPositioner);
+        windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */);
         incrementEventReceiverTasks(taskInfo.displayId);
     }
+    private DragPositioningCallback createDragPositioningCallback(
+            @NonNull DesktopModeWindowDecoration windowDecoration,
+            @NonNull RunningTaskInfo taskInfo) {
+        final int screenWidth = mDisplayController.getDisplayLayout(taskInfo.displayId).width();
+        final Rect disallowedAreaForEndBounds = new Rect(0, 0, screenWidth,
+                getStatusBarHeight(taskInfo.displayId));
+        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+            return new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener,
+                    mTransactionFactory);
+        } else {
+            windowDecoration.createResizeVeil();
+            return new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener,
+                    mTransitions);
+        }
+    }
 
-    private class DragListenerImpl implements TaskPositioner.DragStartListener {
+    private class DragStartListenerImpl
+            implements DragPositioningCallbackUtility.DragStartListener {
         @Override
         public void onDragStart(int taskId) {
             mWindowDecorByTaskId.get(taskId).closeHandleMenu();

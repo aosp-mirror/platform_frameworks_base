@@ -424,6 +424,16 @@ class ProcessRecord implements WindowProcessListener {
      */
     Runnable mSuccessorStartRunnable;
 
+    /**
+     * Whether or not the process group of this process has been created.
+     */
+    volatile boolean mProcessGroupCreated;
+
+    /**
+     * Whether or not we should skip the process group creation.
+     */
+    volatile boolean mSkipProcessGroupCreation;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
         this.mStartUid = startUid;
@@ -644,6 +654,11 @@ class ProcessRecord implements WindowProcessListener {
         }
     }
 
+    @GuardedBy({"mService", "mProcLock"})
+    int getSetAdj() {
+        return mState.getSetAdj();
+    }
+
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     IApplicationThread getThread() {
         return mThread;
@@ -652,6 +667,16 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     IApplicationThread getOnewayThread() {
         return mOnewayThread;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getCurProcState() {
+        return mState.getCurProcState();
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getSetProcState() {
+        return mState.getSetProcState();
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -1057,11 +1082,6 @@ class ProcessRecord implements WindowProcessListener {
         return mState.isCached();
     }
 
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
-    public boolean hasForegroundActivities() {
-        return mState.hasForegroundActivities();
-    }
-
     boolean hasActivities() {
         return mWindowProcessController.hasActivities();
     }
@@ -1182,13 +1202,15 @@ class ProcessRecord implements WindowProcessListener {
                         "Killing " + toShortString() + " (adj " + mState.getSetAdj()
                         + "): " + reason, info.uid);
             }
+            // Since the process is getting killed, reset the freezable related state.
+            mOptRecord.setPendingFreeze(false);
+            mOptRecord.setFrozen(false);
             if (mPid > 0) {
                 mService.mProcessList.noteAppKill(this, reasonCode, subReason, description);
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);
-                if (!asyncKPG) Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
-                ProcessList.killProcessGroup(uid, mPid);
+                killProcessGroupIfNecessaryLocked(asyncKPG);
             } else {
                 mPendingStart = false;
             }
@@ -1200,6 +1222,30 @@ class ProcessRecord implements WindowProcessListener {
                 }
             }
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    @GuardedBy("mService")
+    void killProcessGroupIfNecessaryLocked(boolean async) {
+        final boolean killProcessGroup;
+        if (mHostingRecord != null
+                && (mHostingRecord.usesWebviewZygote() || mHostingRecord.usesAppZygote())) {
+            synchronized (ProcessRecord.this) {
+                killProcessGroup = mProcessGroupCreated;
+                if (!killProcessGroup) {
+                    // The process group hasn't been created, request to skip it.
+                    mSkipProcessGroupCreation = true;
+                }
+            }
+        } else {
+            killProcessGroup = true;
+        }
+        if (killProcessGroup) {
+            if (async) {
+                ProcessList.killProcessGroup(uid, mPid);
+            } else {
+                Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
+            }
         }
     }
 

@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 오디오: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 오디오"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"보청기"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE 오디오"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE 오디오"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"보청기에 연결됨"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE 오디오에 연결됨"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"미디어 오디오에 연결됨"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"프로필 선택"</string>
     <string name="category_personal" msgid="6236798763159385225">"개인"</string>
     <string name="category_work" msgid="4014193632325996115">"직장"</string>
+    <string name="category_clone" msgid="1554511758987195974">"복사"</string>
     <string name="development_settings_title" msgid="140296922921597393">"개발자 옵션"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"개발자 옵션 사용"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"앱 개발 옵션 설정"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"다음"</string>
+    <string name="back" msgid="5554327870352703710">"뒤로"</string>
+    <string name="save" msgid="3745809743277153149">"저장"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
     <string name="done" msgid="381184316122520313">"완료"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"조금 전"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"태블릿"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"도크 스피커"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"외부 기기"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"연결된 기기"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"이 기기에서 재생할 수 없음"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"전환하려면 계정을 업그레이드하세요."</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"신규 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"추가 사용자를 만들어 다른 사용자와 기기를 공유할 수 있습니다. 각 사용자는 앱, 배경화면 등으로 맞춤설정할 수 있는 자신만의 공간을 갖게 됩니다. 또한 모든 사용자에게 영향을 미치는 Wi‑Fi와 같은 기기 설정도 조정할 수 있습니다.\n\n추가된 신규 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자가 앱을 업데이트할 수 있으며, 업데이트는 다른 사용자에게도 적용됩니다. 접근성 설정 및 서비스는 신규 사용자에게 이전되지 않을 수도 있습니다."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"이 사용자에게 관리자 권한을 부여하시겠습니까?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"관리자는 다른 사용자가 가지지 못한 특별한 권한을 보유합니다. 관리자는 모든 사용자를 관리하고, 기기를 업데이트하거나 재설정하고, 설정을 변경하고, 설치된 모든 앱을 확인하고, 다른 사용자에게 관리자 권한을 부여하거나 취소할 수 있습니다."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"관리자 권한 부여"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"지금 사용자를 설정하시겠습니까?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"사용자가 기기를 사용하여 자신의 공간을 설정할 수 있도록 하세요."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"지금 프로필을 설정하시겠습니까?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"현재 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"예, 관리자 권한을 부여합니다."</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"아니요, 관리자 권한을 부여하지 않습니다."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>

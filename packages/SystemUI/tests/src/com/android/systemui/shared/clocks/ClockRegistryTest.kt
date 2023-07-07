@@ -43,6 +43,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -172,7 +174,7 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
-    fun clockIdConflict_ErrorWithoutCrash() {
+    fun clockIdConflict_ErrorWithoutCrash_unloadDuplicate() {
         val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
         val plugin1 = FakeClockPlugin()
             .addClock("clock_1", "clock 1", { mockClock }, { mockThumbnail })
@@ -199,6 +201,8 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(registry.createExampleClock("clock_2"), mockClock)
         assertEquals(registry.getClockThumbnail("clock_1"), mockThumbnail)
         assertEquals(registry.getClockThumbnail("clock_2"), mockThumbnail)
+        verify(mockPluginLifecycle1, never()).unloadPlugin()
+        verify(mockPluginLifecycle2, times(2)).unloadPlugin()
     }
 
     @Test
@@ -291,6 +295,54 @@ class ClockRegistryTest : SysuiTestCase() {
         scheduler.runCurrent()
         assertEquals(3, changeCallCount)
         assertEquals(4, listChangeCallCount)
+    }
+
+    @Test
+    fun unknownPluginAttached_clockAndListUnchanged_loadRequested() {
+        val mockPluginLifecycle = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        whenever(mockPluginLifecycle.getPackage()).thenReturn("some.other.package")
+
+        var changeCallCount = 0
+        var listChangeCallCount = 0
+        registry.registerClockChangeListener(object : ClockRegistry.ClockChangeListener {
+            override fun onCurrentClockChanged() { changeCallCount++ }
+            override fun onAvailableClocksChanged() { listChangeCallCount++ }
+        })
+
+        assertEquals(true, pluginListener.onPluginAttached(mockPluginLifecycle))
+        scheduler.runCurrent()
+        assertEquals(0, changeCallCount)
+        assertEquals(0, listChangeCallCount)
+    }
+
+    @Test
+    fun knownPluginAttached_clockAndListChanged_notLoaded() {
+        val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        whenever(mockPluginLifecycle1.getPackage()).thenReturn("com.android.systemui.falcon.one")
+        val mockPluginLifecycle2 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        whenever(mockPluginLifecycle2.getPackage()).thenReturn("com.android.systemui.falcon.two")
+
+        var changeCallCount = 0
+        var listChangeCallCount = 0
+        registry.registerClockChangeListener(object : ClockRegistry.ClockChangeListener {
+            override fun onCurrentClockChanged() { changeCallCount++ }
+            override fun onAvailableClocksChanged() { listChangeCallCount++ }
+        })
+
+        registry.applySettings(ClockSettings("DIGITAL_CLOCK_CALLIGRAPHY", null))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(0, listChangeCallCount)
+
+        assertEquals(false, pluginListener.onPluginAttached(mockPluginLifecycle1))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(1, listChangeCallCount)
+
+        assertEquals(false, pluginListener.onPluginAttached(mockPluginLifecycle2))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(2, listChangeCallCount)
     }
 
     @Test

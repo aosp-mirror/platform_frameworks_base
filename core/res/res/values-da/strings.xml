@@ -268,7 +268,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Indstillinger"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Taleassistent"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lås enhed"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Ekstralås"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Ny notifikation"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fysisk tastatur"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-system"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Skift til personlig profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Skift til arbejdsprofil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Skift til <xliff:g id="APP_NAME">%1$s</xliff:g> til privat brug"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Skift til <xliff:g id="APP_NAME">%1$s</xliff:g> til arbejdsbrug"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"have adgang til dine kontakter"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokation"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tillader, at appen bruger vibration."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe direkte op til telefonnumre"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede opkrævninger eller opkald. Bemærk, at appen med denne tilladelse ikke kan ringe til nødopkaldsnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede debiteringer eller opkald. Vær opmærksom på, at dette ikke giver appen tilladelse til at ringe til alarmnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse eller ved at ringe op til operatørkoder, hvilket resulterer i, at indgående opkald automatisk viderestilles til et andet nummer."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"få adgang til chat-opkaldstjeneste"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tillader, at appen kan bruge chat-tjenesten til at foretage opkald, uden du gør noget."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"læse telefonens status og identitet"</string>
@@ -682,7 +684,7 @@
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Løft telefonen højere op"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Sænk telefonen"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Flyt telefonen længere til venstre for dig"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre for dig"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kig mere direkte på din enhed."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dit ansigt kan ikke registreres. Hold din telefon i øjenhøjde."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Der er for meget bevægelse. Hold telefonen stille."</string>
@@ -692,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kig mere direkte på din telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kig mere direkte på din telefon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kig mere direkte på din telefon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hvis noget skjuler dit ansigt, skal du fjerne det."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hvis noget skjuler dit ansigt, skal du fjerne det"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Rengør toppen af din skærm, inkl. den sorte bjælke"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -709,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansigtshandlingen blev annulleret."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansigtslås blev annulleret af brugeren"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Du har prøvet for mange gange. Prøv igen senere."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Du har brugt for mange forsøg. Ansigtslås er utilgængelig."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Du har brugt for mange forsøg. Angiv skærmlåsen i stedet."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ansigtet kan ikke genkendes. Prøv igen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har ikke konfigureret ansigtslås."</string>
@@ -1091,7 +1092,7 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Vil du aktivere Udforsk ved berøring?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er tændt, kan du høre eller se beskrivelser af, hvad der er under din finger eller udføre bevægelser for at interagere med tabletten."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er aktiveret, kan du høre eller se beskrivelser af, hvad der er under din finger, eller udføre bevægelser for at interagere med telefonen."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"for 1 måned siden"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 måned siden"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Før for 1 måned siden"</string>
     <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Seneste dag}one{De seneste # dag}other{De seneste # dage}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Seneste måned"</string>
@@ -1121,8 +1122,8 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{For # minut siden}one{For # minut siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}one{For # time siden}other{For # timer siden}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}one{For # dag siden}other{For # dage siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}one{# time siden}other{# timer siden}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{1 dag siden}one{1 dag siden}other{# dag siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}one{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}one{# minut}other{# minutter}}"</string>
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# time}one{# time}other{# timer}}"</string>
@@ -1681,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget høj musik over længere tid."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Advarsel!\nDu har overskredet den mængde af høje lydsignaler, det er forsvarligt at lytte til over en periode på en uge i dine høretelefoner.\n\nNår du overstiger denne grænse, tager din hørelse permanent skade."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Advarsel!\nDu har 5 gange overskredet den mængde af høje lydsignaler, det er forsvarligt at lytte til over en periode på en uge i dine høretelefoner.\n\nLydstyrken er blevet sænket for at beskytte din hørelse."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Den lydstyrke, du hører medier på, kan medføre høreskader over tid.\n\nHvis du fortsætter med at afspille medier ved så høj lydstyrke over længere tid, kan din hørelse tage skade."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ADvarsel!\nDu lytter i øjeblikket til indhold, der afspilles ved så høj en lydstyrke, at det kan gå ud over din hørelse.\n\nHvis du fortsætter med at afspille indhold ved så høj lydstyrke, vil din hørelse tage skade."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vil du fortsætte med at lytte ved høj lydstyrke?\n\nHøretelefonernes lydstyrke har været høj i længere tid end anbefalet, hvilket kan skade din hørelse"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Der er registreret høj lyd\n\nHøretelefonernes lydstyrke har været højere end anbefalet, hvilket kan skade din hørelse"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruge genvejen til Hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når genvejen er aktiveret, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vil du aktivere genvejen til hjælpefunktioner?"</string>
@@ -1851,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Stryg ned fra toppen for at afslutte."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK, det er forstået"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter, og få en bedre visning"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Afslut opdelt skærm, og få en bedre visning"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Åbn <xliff:g id="NAME">%s</xliff:g> i fuld skærm for at få en bedre visning"</string>
     <string name="done_label" msgid="7283767013231718521">"Udfør"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkulær timevælger"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkulær minutvælger"</string>
@@ -1976,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Du kan ikke gøre dette på din <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på din telefon i stedet."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Denne app er udviklet til en ældre version af Android. Den fungerer muligvis ikke korrekt, og den omfatter ikke de nyeste sikkerhedsfunktioner og den nyeste privatlivsbeskyttelse. Tjek, om der er en opdatering, eller kontakt appudvikleren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Søg efter opdatering"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Denne app er ikke kompatibel med den nyeste Android-version. Tjek, om der er en opdatering, eller kontakt appudvikleren."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye beskeder"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Åbn sms-appen for at se beskeden"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Nogle funktioner er begrænsede"</string>
@@ -2159,16 +2159,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Dette indhold kan ikke åbnes med arbejdsapps"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Dette indhold kan ikke deles med personlige apps"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Dette indhold kan ikke åbnes med personlige apps"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Arbejdsprofilen er sat på pause"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tryk for at aktivere"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Dine arbejdsapps er sat på pause"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Genoptag"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Der er ingen arbejdsapps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Der er ingen personlige apps"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Vil du åbne <xliff:g id="APP">%s</xliff:g> (arbejde)?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vil du åbne indholdet via <xliff:g id="APP">%s</xliff:g> (personlig)?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vil du åbne indholdet via <xliff:g id="APP">%s</xliff:g> (arbejde)?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vil du foretage et opkald via en arbejdsapp?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vil du skifte til en arbejdsapp?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Din organisation tillader kun, at du foretager opkald via arbejdsapps"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Din organisation tillader kun, at du sender beskeder via arbejdsapps"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Brug personlig browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Brug arbejdsbrowser"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ring op"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Skift"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkode til oplåsning af SIM-netværket"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkode til oplåsning af delmængde for SIM-netværket"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkode til oplåsning af virksomhedens SIM"</string>
@@ -2318,15 +2323,15 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillader, at en medfølgende app kan starte tjenester i forgrunden via tilladelser til tjenester i baggrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen er tilgængelig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen er blokeret"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dobbeltskærm"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dobbeltskærm er aktiveret"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen er aktiveret"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger begge skærme til at vise indhold"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheden er for varm"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dobbeltskærm er ikke tilgængelig, fordi din telefon er for varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen er ikke tilgængelig, fordi din telefon er for varm"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen er ikke tilgængelig"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen er ikke tilgængelig, fordi Batterisparefunktion er aktiveret. Du kan deaktivere dette i Indstillinger."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Gå til Indstillinger"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Deaktiver"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Sluk"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> er konfigureret"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Tastaturlayoutet er angivet som <xliff:g id="LAYOUT_1">%s</xliff:g>. Tryk for at ændre dette."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Tastaturlayoutet er angivet som <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tryk for at ændre dette."</string>

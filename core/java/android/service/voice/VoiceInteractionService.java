@@ -101,7 +101,7 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
     /**
-     * For apps targeting Build.VERSION_CODES.TRAMISU and above, implementors of this
+     * For apps targeting Build.VERSION_CODES.UPSIDE_DOWN_CAKE and above, implementors of this
      * service can create multiple AlwaysOnHotwordDetector instances in parallel. They will
      * also e ale to create a single SoftwareHotwordDetector in parallel with any other
      * active AlwaysOnHotwordDetector instances.
@@ -128,7 +128,7 @@ public class VoiceInteractionService extends Service {
      * @hide
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long MULTIPLE_ACTIVE_HOTWORD_DETECTORS = 193232191L;
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
@@ -389,7 +389,7 @@ public class VoiceInteractionService extends Service {
         // It's still guaranteed to have been stopped.
         // This helps with cases where the voice interaction implementation is changed
         // by the user.
-        safelyShutdownAllHotwordDetectors();
+        safelyShutdownAllHotwordDetectors(true);
     }
 
     /**
@@ -463,6 +463,10 @@ public class VoiceInteractionService extends Service {
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
      *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if there is no DSP hardware support when a caller has a
+     * target SDK of API level 34 or above.
+     *
      * @deprecated Use {@link #createAlwaysOnHotwordDetector(String, Locale, Executor,
      *             AlwaysOnHotwordDetector.Callback)} instead.
      * @hide
@@ -499,6 +503,10 @@ public class VoiceInteractionService extends Service {
      * @param executor The executor on which to run the callback.
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
+     *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if there is no DSP hardware support when a caller has a
+     * target SDK of API level 34 or above.
      *
      * @hide
      */
@@ -581,6 +589,11 @@ public class VoiceInteractionService extends Service {
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
      *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if the hotword detection service is not set, isolated process
+     * is not set, or there is no DSP hardware support when a caller has a target SDK of API
+     * level 34 or above.
+     *
      * @deprecated Use {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle,
      *             SharedMemory, Executor, AlwaysOnHotwordDetector.Callback)} instead.
      * @hide
@@ -630,6 +643,11 @@ public class VoiceInteractionService extends Service {
      * @param executor The executor on which to run the callback.
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
+     *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if the hotword detection service is not set, isolated process
+     * is not set, or there is no DSP hardware support when a caller has a target SDK of API level
+     * 34 or above.
      *
      * @hide
      */
@@ -697,7 +715,7 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
                 // Allow only one concurrent recognition via the APIs.
-                safelyShutdownAllHotwordDetectors();
+                safelyShutdownAllHotwordDetectors(false);
             } else {
                 for (HotwordDetector detector : mActiveDetectors) {
                     if (detector.isUsingSandboxedDetectionService()
@@ -860,7 +878,7 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
                 // Allow only one concurrent recognition via the APIs.
-                safelyShutdownAllHotwordDetectors();
+                safelyShutdownAllHotwordDetectors(false);
             } else {
                 for (HotwordDetector detector : mActiveDetectors) {
                     if (!detector.isUsingSandboxedDetectionService()) {
@@ -913,8 +931,6 @@ public class VoiceInteractionService extends Service {
      * sandboxed process.
      * @param callback The callback to notify of detection events.
      * @return An instanece of {@link VisualQueryDetector}.
-     * @throws UnsupportedOperationException if only single detector is supported. Multiple detector
-     * is only available for apps targeting {@link Build.VERSION_CODES#TIRAMISU} and above.
      * @throws IllegalStateException when there is an existing {@link VisualQueryDetector}, or when
      * there is a non-trusted hotword detector running.
      *
@@ -935,21 +951,16 @@ public class VoiceInteractionService extends Service {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         synchronized (mLock) {
-            if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
-                throw new UnsupportedOperationException("VisualQueryDetector is only available if "
-                        + "multiple detectors are allowed");
-            } else {
-                if (mActiveVisualQueryDetector != null) {
+            if (mActiveVisualQueryDetector != null) {
+                throw new IllegalStateException(
+                            "There is already an active VisualQueryDetector. "
+                                    + "It must be destroyed to create a new one.");
+            }
+            for (HotwordDetector detector : mActiveDetectors) {
+                if (!detector.isUsingSandboxedDetectionService()) {
                     throw new IllegalStateException(
-                                "There is already an active VisualQueryDetector. "
-                                        + "It must be destroyed to create a new one.");
-                }
-                for (HotwordDetector detector : mActiveDetectors) {
-                    if (!detector.isUsingSandboxedDetectionService()) {
-                        throw new IllegalStateException(
-                                "It disallows to create trusted and non-trusted detectors "
-                                        + "at the same time.");
-                    }
+                            "It disallows to create trusted and non-trusted detectors "
+                                    + "at the same time.");
                 }
             }
 
@@ -1051,11 +1062,16 @@ public class VoiceInteractionService extends Service {
         return mKeyphraseEnrollmentInfo.getKeyphraseMetadata(keyphrase, locale) != null;
     }
 
-    private void safelyShutdownAllHotwordDetectors() {
+    private void safelyShutdownAllHotwordDetectors(boolean shouldShutDownVisualQueryDetector) {
         synchronized (mLock) {
             mActiveDetectors.forEach(detector -> {
                 try {
-                    detector.destroy();
+                    // Skip destroying VisualQueryDetector if HotwordDetectors are created
+                    if (!(mActiveVisualQueryDetector != null
+                            && detector == mActiveVisualQueryDetector.getInitializationDelegate())
+                            || shouldShutDownVisualQueryDetector) {
+                        detector.destroy();
+                    }
                 } catch (Exception ex) {
                     Log.i(TAG, "exception destroying HotwordDetector", ex);
                 }
@@ -1070,21 +1086,6 @@ public class VoiceInteractionService extends Service {
                 mActiveVisualQueryDetector = null;
             }
             mActiveDetectors.remove(detector);
-            shutdownHotwordDetectionServiceIfRequiredLocked();
-        }
-    }
-
-    private void shutdownHotwordDetectionServiceIfRequiredLocked() {
-        for (HotwordDetector detector : mActiveDetectors) {
-            if (detector.isUsingSandboxedDetectionService()) {
-                return;
-            }
-        }
-
-        try {
-            mSystemService.shutdownHotwordDetectionService();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
         }
     }
 
@@ -1120,6 +1121,8 @@ public class VoiceInteractionService extends Service {
                     pw.println();
                 });
             }
+            pw.println("Available Model Enrollment Applications:");
+            pw.println("  " + mKeyphraseEnrollmentInfo);
         }
     }
 }

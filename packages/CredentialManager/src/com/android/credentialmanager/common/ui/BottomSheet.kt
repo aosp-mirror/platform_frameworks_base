@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.compose.rememberSystemUiController
@@ -28,19 +29,26 @@ import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
+import kotlinx.coroutines.launch
+
 
 /** Draws a modal bottom sheet with the same styles and effects shared by various flows. */
 @Composable
 fun ModalBottomSheet(
     sheetContent: @Composable ColumnScope.() -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isInitialRender: Boolean,
+    onInitialRenderComplete: () -> Unit,
+    isAutoSelectFlow: Boolean,
 ) {
+    val scope = rememberCoroutineScope()
     val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
+        initialValue = if (isAutoSelectFlow) ModalBottomSheetValue.Expanded
+        else ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
     val sysUiController = rememberSystemUiController()
-    if (state.targetValue == ModalBottomSheetValue.Hidden) {
+    if (state.targetValue == ModalBottomSheetValue.Hidden || isAutoSelectFlow) {
         setTransparentSystemBarsColor(sysUiController)
     } else {
         setBottomSheetSystemBarsColor(sysUiController)
@@ -54,7 +62,12 @@ fun ModalBottomSheet(
     ) {}
     LaunchedEffect(state.currentValue) {
         if (state.currentValue == ModalBottomSheetValue.Hidden) {
-            onDismiss()
+            if (isInitialRender) {
+                onInitialRenderComplete()
+                scope.launch { state.show() }
+            } else {
+                onDismiss()
+            }
         }
     }
 }

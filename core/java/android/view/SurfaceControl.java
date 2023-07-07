@@ -280,7 +280,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetLayerId(long nativeObject);
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
-    private static native void nativeSanitize(long transactionObject);
+    private static native void nativeSanitize(long transactionObject, int pid, int uid);
     private static native void nativeSetDestinationFrame(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
     private static native void nativeSetDefaultApplyToken(IBinder token);
@@ -461,6 +461,7 @@ public final class SurfaceControl implements Parcelable {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
+    private String mCallsite;
 
      /**
      * Note: do not rename, this field is used by native code.
@@ -774,7 +775,6 @@ public final class SurfaceControl implements Parcelable {
             release();
         }
         if (nativeObject != 0) {
-            mCloseGuard.openWithCallSite("release", callsite);
             mFreeNativeResources =
                     sRegistry.registerNativeAllocation(this, nativeObject);
         }
@@ -784,6 +784,12 @@ public final class SurfaceControl implements Parcelable {
             mReleaseStack = new Throwable("Assigned invalid nativeObject");
         } else {
             mReleaseStack = null;
+        }
+        setUnreleasedWarningCallSite(callsite);
+        if (nativeObject != 0) {
+            // Only add valid surface controls to the registry. This is called at the end of this
+            // method since its information is dumped if the process threshold is reached.
+            addToRegistry();
         }
     }
 
@@ -889,6 +895,10 @@ public final class SurfaceControl implements Parcelable {
             if ((mWidth > 0 || mHeight > 0) && (isEffectLayer() || isContainerLayer())) {
                 throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
+            }
+
+            if (mName == null) {
+                Log.w(TAG, "Missing name for SurfaceControl", new Throwable());
             }
 
             if ((mFlags & FX_SURFACE_MASK) == FX_SURFACE_NORMAL) {
@@ -1252,6 +1262,9 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Note: Most callers should use {@link SurfaceControl.Builder} or one of the other constructors
+     *       to build an instance of a SurfaceControl. This constructor is mainly used for
+     *       unparceling and passing into an AIDL call as an out parameter.
      * @hide
      */
     public SurfaceControl() {
@@ -1322,6 +1335,23 @@ public final class SurfaceControl implements Parcelable {
             return;
         }
         mCloseGuard.openWithCallSite("release", callsite);
+        mCallsite = callsite;
+    }
+
+    /**
+     * Returns the last provided call site when this SurfaceControl was created.
+     * @hide
+     */
+    @Nullable String getCallsite() {
+        return mCallsite;
+    }
+
+    /**
+     * Returns the name of this SurfaceControl, mainly for debugging purposes.
+     * @hide
+     */
+    @NonNull String getName() {
+        return mName;
     }
 
     /**
@@ -1435,6 +1465,7 @@ public final class SurfaceControl implements Parcelable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
+            removeFromRegistry();
         } finally {
             super.finalize();
         }
@@ -1465,6 +1496,7 @@ public final class SurfaceControl implements Parcelable {
                     mChoreographer = null;
                 }
             }
+            removeFromRegistry();
         }
     }
 
@@ -2474,6 +2506,7 @@ public final class SurfaceControl implements Parcelable {
     public static SurfaceControl mirrorSurface(SurfaceControl mirrorOf) {
         long nativeObj = nativeMirrorSurface(mirrorOf.mNativeObject);
         SurfaceControl sc = new SurfaceControl();
+        sc.mName = mirrorOf.mName + " (mirror)";
         sc.assignNativeObject(nativeObj, "mirrorSurface");
         return sc;
     }
@@ -3960,8 +3993,8 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public void sanitize() {
-            nativeSanitize(mNativeObject);
+        public void sanitize(int pid, int uid) {
+            nativeSanitize(mNativeObject, pid, uid);
         }
 
         /**
@@ -4302,6 +4335,26 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return -1;
+    }
+
+    /**
+     * Adds this surface control to the registry for this process if it is created.
+     */
+    private void addToRegistry() {
+        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+        if (registry != null) {
+            registry.add(this);
+        }
+    }
+
+    /**
+     * Removes this surface control from the registry for this process.
+     */
+    private void removeFromRegistry() {
+        final SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+        if (registry != null) {
+            registry.remove(this);
+        }
     }
 
     // Called by native

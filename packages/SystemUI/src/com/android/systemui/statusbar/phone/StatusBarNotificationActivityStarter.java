@@ -304,10 +304,11 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ActivityManager.getService().resumeAppSwitches();
         } catch (RemoteException e) {
         }
-        // If we are launching a work activity and require to launch
-        // separate work challenge, we defer the activity action and cancel
-        // notification until work challenge is unlocked.
-        if (isActivityIntent) {
+        // If the notification should be cancelled on click and we are launching a work activity in
+        // a locked profile with separate challenge, we defer the activity action and cancelling of
+        // the notification until work challenge is unlocked. If the notification shouldn't be
+        // cancelled, the work challenge will be shown by ActivityManager if necessary anyway.
+        if (isActivityIntent && shouldAutoCancel(entry.getSbn())) {
             final int userId = intent.getCreatorUserHandle().getIdentifier();
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
                     && mKeyguardManager.isDeviceLocked(userId)) {

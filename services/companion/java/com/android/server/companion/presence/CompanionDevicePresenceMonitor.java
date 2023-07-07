@@ -23,13 +23,16 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.companion.AssociationInfo;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.server.companion.AssociationStore;
 
@@ -86,13 +89,12 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     private final SimulatedDevicePresenceSchedulerHelper mSchedulerHelper =
             new SimulatedDevicePresenceSchedulerHelper();
 
-    public CompanionDevicePresenceMonitor(@NonNull AssociationStore associationStore,
-            @NonNull Callback callback) {
+    public CompanionDevicePresenceMonitor(UserManager userManager,
+            @NonNull AssociationStore associationStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mCallback = callback;
-
-        mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(associationStore,
-                /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
+        mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(userManager,
+                associationStore, /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
         mBleScanner = new BleCompanionDeviceScanner(associationStore,
                 /* BleCompanionDeviceScanner.Callback */ this);
     }
@@ -296,6 +298,15 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
         // what's needed.
+    }
+
+    /**
+     * Return a set of devices that pending to report connectivity
+     */
+    public SparseArray<Set<BluetoothDevice>> getPendingConnectedDevices() {
+        synchronized (mBtConnectionListener.mPendingConnectedDevices) {
+            return mBtConnectionListener.mPendingConnectedDevices;
+        }
     }
 
     private static void enforceCallerShellOrRoot() {

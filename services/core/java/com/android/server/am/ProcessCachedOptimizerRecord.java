@@ -16,7 +16,9 @@
 
 package com.android.server.am;
 
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal.OomAdjReason;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -118,6 +120,18 @@ final class ProcessCachedOptimizerRecord {
      */
     @GuardedBy("mProcLock")
     private boolean mPendingFreeze;
+
+    /**
+     * This is the soonest the process can be allowed to freeze, in uptime millis
+     */
+    @GuardedBy("mProcLock")
+    private @UptimeMillisLong long mEarliestFreezableTimeMillis;
+
+    /**
+     * This is the most recently used timeout for freezing the app in millis
+     */
+    @GuardedBy("mProcLock")
+    private long mLastUsedTimeout;
 
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
@@ -264,6 +278,26 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
+    @UptimeMillisLong long getEarliestFreezableTime() {
+        return mEarliestFreezableTimeMillis;
+    }
+
+    @GuardedBy("mProcLock")
+    void setEarliestFreezableTime(@UptimeMillisLong long earliestFreezableTimeMillis) {
+        mEarliestFreezableTimeMillis = earliestFreezableTimeMillis;
+    }
+
+    @GuardedBy("mProcLock")
+    long getLastUsedTimeout() {
+        return mLastUsedTimeout;
+    }
+
+    @GuardedBy("mProcLock")
+    void setLastUsedTimeout(long lastUsedTimeout) {
+        mLastUsedTimeout = lastUsedTimeout;
+    }
+
+    @GuardedBy("mProcLock")
     boolean isFreezeExempt() {
         return mFreezeExempt;
     }
@@ -303,5 +337,8 @@ final class ProcessCachedOptimizerRecord {
         pw.print(prefix); pw.print("isFreezeExempt="); pw.print(mFreezeExempt);
         pw.print(" isPendingFreeze="); pw.print(mPendingFreeze);
         pw.print(" " + IS_FROZEN + "="); pw.println(mFrozen);
+        pw.print(prefix); pw.print("earliestFreezableTimeMs=");
+        TimeUtils.formatDuration(mEarliestFreezableTimeMillis, nowUptime, pw);
+        pw.println();
     }
 }

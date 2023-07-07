@@ -1468,9 +1468,8 @@ class ActivityStarter {
         // transition based on a sub-action.
         // Only do the create here (and defer requestStart) since startActivityInner might abort.
         final TransitionController transitionController = r.mTransitionController;
-        Transition newTransition = (!transitionController.isCollecting()
-                && transitionController.getTransitionPlayer() != null)
-                ? transitionController.createTransition(TRANSIT_OPEN) : null;
+        Transition newTransition = transitionController.isShellTransitionsEnabled()
+                ? transitionController.createAndStartCollecting(TRANSIT_OPEN) : null;
         RemoteTransition remoteTransition = r.takeRemoteTransition();
         try {
             mService.deferWindowLayout();
@@ -1574,8 +1573,10 @@ class ActivityStarter {
             // existence change.
             transitionController.collectExistenceChange(started);
         } else if (result == START_DELIVERED_TO_TOP && newTransition != null
-                // An activity has changed order/visibility so this isn't just deliver-to-top
-                && mMovedToTopActivity == null) {
+                // An activity has changed order/visibility or the task is occluded by a transient
+                // activity, so this isn't just deliver-to-top
+                && mMovedToTopActivity == null
+                && !transitionController.isTransientHide(startedActivityRootTask)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
                 newTransition.abort();
@@ -1822,7 +1823,8 @@ class ActivityStarter {
         // If Activity's launching into PiP, move the mStartActivity immediately to pinned mode.
         // Note that mStartActivity and source should be in the same Task at this point.
         if (mOptions != null && mOptions.isLaunchIntoPip()
-                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()) {
+                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()
+                && balCode != BAL_BLOCK) {
             mRootWindowContainer.moveActivityToPinnedRootTask(mStartActivity,
                     sourceRecord, "launch-into-pip");
         }
@@ -2910,6 +2912,9 @@ class ActivityStarter {
     private void setTargetRootTaskIfNeeded(ActivityRecord intentActivity) {
         intentActivity.getTaskFragment().clearLastPausedActivity();
         Task intentTask = intentActivity.getTask();
+        // The intent task might be reparented while in getOrCreateRootTask, caches the original
+        // root task to distinguish if it is moving to front or not.
+        final Task origRootTask = intentTask != null ? intentTask.getRootTask() : null;
 
         if (mTargetRootTask == null) {
             // Update launch target task when it is not indicated.
@@ -2927,7 +2932,8 @@ class ActivityStarter {
         // the adjacent task as its launch target. So the existing task will be launched into the
         // closer one and won't be reparent redundantly.
         final Task adjacentTargetTask = mTargetRootTask.getAdjacentTask();
-        if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)) {
+        if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)
+                && intentTask.isOnTop()) {
             mTargetRootTask = adjacentTargetTask;
         }
 
@@ -2942,7 +2948,8 @@ class ActivityStarter {
                     ? null : focusRootTask.topRunningNonDelayedActivityLocked(mNotTop);
             final Task topTask = curTop != null ? curTop.getTask() : null;
             differentTopTask = topTask != intentTask
-                    || (focusRootTask != null && topTask != focusRootTask.getTopMostTask());
+                    || (focusRootTask != null && topTask != focusRootTask.getTopMostTask())
+                    || (focusRootTask != null && focusRootTask != origRootTask);
         } else {
             // The existing task should always be different from those in other displays.
             differentTopTask = true;

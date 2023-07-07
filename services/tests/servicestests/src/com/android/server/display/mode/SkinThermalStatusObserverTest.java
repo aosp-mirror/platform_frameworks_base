@@ -18,7 +18,6 @@ package com.android.server.display.mode;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import android.hardware.display.DisplayManager;
@@ -57,7 +56,7 @@ public class SkinThermalStatusObserverTest {
     private RegisteringFakesInjector mInjector = new RegisteringFakesInjector();
 
     private final TestHandler mHandler = new TestHandler(null);
-    private final FakeVoteStorage mStorage = new FakeVoteStorage();
+    private final VotesStorage mStorage = new VotesStorage(() -> {});
 
     @Before
     public void setUp() {
@@ -92,28 +91,26 @@ public class SkinThermalStatusObserverTest {
     public void testNotifyWithDefaultVotesForCritical() {
         // GIVEN 2 displays with no thermalThrottling config
         mObserver.observe();
-        assertEquals(0, mStorage.mVoteRegistry.size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
 
         // WHEN thermal sensor notifies CRITICAL
         mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_CRITICAL));
         mHandler.flush();
 
         // THEN 2 votes are added to storage with (0,60) render refresh rate(default behaviour)
-        assertEquals(2, mStorage.mVoteRegistry.size());
-
-        SparseArray<DisplayModeDirector.Vote> displayVotes = mStorage.mVoteRegistry.get(DISPLAY_ID);
+        SparseArray<Vote> displayVotes = mStorage.getVotes(DISPLAY_ID);
         assertEquals(1, displayVotes.size());
 
-        DisplayModeDirector.Vote vote = displayVotes.get(
-                DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE);
+        Vote vote = displayVotes.get(
+                Vote.PRIORITY_SKIN_TEMPERATURE);
         assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
         assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
 
-        SparseArray<DisplayModeDirector.Vote> otherDisplayVotes = mStorage.mVoteRegistry.get(
-                DISPLAY_ID_OTHER);
+        SparseArray<Vote> otherDisplayVotes = mStorage.getVotes(DISPLAY_ID_OTHER);
         assertEquals(1, otherDisplayVotes.size());
 
-        vote = otherDisplayVotes.get(DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE);
+        vote = otherDisplayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
         assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
         assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
     }
@@ -122,25 +119,29 @@ public class SkinThermalStatusObserverTest {
     public void testNotifyWithDefaultVotesChangeFromCriticalToSevere() {
         // GIVEN 2 displays with no thermalThrottling config AND temperature level CRITICAL
         mObserver.observe();
-        assertEquals(0, mStorage.mVoteRegistry.size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
         mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_CRITICAL));
         // WHEN thermal sensor notifies SEVERE
         mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_SEVERE));
         mHandler.flush();
         // THEN all votes with PRIORITY_SKIN_TEMPERATURE are removed from the storage
-        assertEquals(0, mStorage.mVoteRegistry.size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
     }
 
     @Test
     public void testNotifyWithDefaultVotesForSevere() {
         // GIVEN 2 displays with no thermalThrottling config
         mObserver.observe();
-        assertEquals(0, mStorage.mVoteRegistry.size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
         // WHEN thermal sensor notifies CRITICAL
         mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_SEVERE));
         mHandler.flush();
         // THEN nothing is added to the storage
-        assertEquals(0, mStorage.mVoteRegistry.size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
     }
 
     @Test
@@ -155,18 +156,20 @@ public class SkinThermalStatusObserverTest {
         mObserver = new SkinThermalStatusObserver(mInjector, mStorage, mHandler);
         mObserver.observe();
         mObserver.onDisplayChanged(DISPLAY_ID);
-        assertEquals(0, mStorage.mVoteRegistry.size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
         // WHEN thermal sensor notifies temperature above configured
         mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_SEVERE));
         mHandler.flush();
         // THEN vote with refreshRate from config is added to the storage
-        assertEquals(1, mStorage.mVoteRegistry.size());
-        SparseArray<DisplayModeDirector.Vote> displayVotes = mStorage.mVoteRegistry.get(DISPLAY_ID);
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
+
+        SparseArray<Vote> displayVotes = mStorage.getVotes(DISPLAY_ID);
         assertEquals(1, displayVotes.size());
-        DisplayModeDirector.Vote vote = displayVotes.get(
-                DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE);
+        Vote vote = displayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
         assertEquals(90, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
         assertEquals(120, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
     }
 
     @Test
@@ -178,14 +181,13 @@ public class SkinThermalStatusObserverTest {
         mObserver.onDisplayAdded(DISPLAY_ID_ADDED);
         mHandler.flush();
         // THEN 3rd vote is added to storage with (0,60) render refresh rate(default behaviour)
-        assertEquals(3, mStorage.mVoteRegistry.size());
+        assertEquals(1, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(1, mStorage.getVotes(DISPLAY_ID_OTHER).size());
+        assertEquals(1, mStorage.getVotes(DISPLAY_ID_ADDED).size());
 
-        SparseArray<DisplayModeDirector.Vote> displayVotes = mStorage.mVoteRegistry.get(
-                DISPLAY_ID_ADDED);
-        assertEquals(1, displayVotes.size());
+        SparseArray<Vote> displayVotes = mStorage.getVotes(DISPLAY_ID_ADDED);
 
-        DisplayModeDirector.Vote vote = displayVotes.get(
-                DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE);
+        Vote vote = displayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
         assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
         assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
     }
@@ -200,9 +202,9 @@ public class SkinThermalStatusObserverTest {
         mObserver.onDisplayRemoved(DISPLAY_ID_ADDED);
         mHandler.flush();
         // THEN there are 2 votes in registry
-        assertEquals(2, mStorage.mVoteRegistry.size());
-        assertNotNull(mStorage.mVoteRegistry.get(DISPLAY_ID));
-        assertNotNull(mStorage.mVoteRegistry.get(DISPLAY_ID_OTHER));
+        assertEquals(1, mStorage.getVotes(DISPLAY_ID).size());
+        assertEquals(1, mStorage.getVotes(DISPLAY_ID_OTHER).size());
+        assertEquals(0, mStorage.getVotes(DISPLAY_ID_ADDED).size());
     }
 
     private static Temperature createTemperature(@Temperature.ThrottlingStatus int status) {
@@ -257,29 +259,6 @@ public class SkinThermalStatusObserverTest {
                 return true;
             }
             return false;
-        }
-    }
-
-
-    private static class FakeVoteStorage implements DisplayModeDirector.BallotBox {
-        private final SparseArray<SparseArray<DisplayModeDirector.Vote>> mVoteRegistry =
-                new SparseArray<>();
-
-        @Override
-        public void vote(int displayId, int priority, DisplayModeDirector.Vote vote) {
-            SparseArray<DisplayModeDirector.Vote> votesPerDisplay = mVoteRegistry.get(displayId);
-            if (votesPerDisplay == null) {
-                votesPerDisplay = new SparseArray<>();
-                mVoteRegistry.put(displayId, votesPerDisplay);
-            }
-            if (vote == null) {
-                votesPerDisplay.remove(priority);
-            } else {
-                votesPerDisplay.put(priority, vote);
-            }
-            if (votesPerDisplay.size() == 0) {
-                mVoteRegistry.remove(displayId);
-            }
         }
     }
 }

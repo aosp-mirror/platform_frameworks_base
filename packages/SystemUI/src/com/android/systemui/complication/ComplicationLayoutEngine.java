@@ -16,9 +16,21 @@
 
 package com.android.systemui.complication;
 
+import static com.android.systemui.complication.ComplicationLayoutParams.DIRECTION_DOWN;
+import static com.android.systemui.complication.ComplicationLayoutParams.DIRECTION_END;
+import static com.android.systemui.complication.ComplicationLayoutParams.DIRECTION_START;
+import static com.android.systemui.complication.ComplicationLayoutParams.DIRECTION_UP;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_END;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_START;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_IN_DURATION;
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_OUT_DURATION;
-import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_DEFAULT;
+import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_DIRECTIONAL_SPACING_DEFAULT;
+import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_BOTTOM;
+import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_END;
+import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_START;
+import static com.android.systemui.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_POSITION_TOP;
 import static com.android.systemui.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 
 import android.util.Log;
@@ -29,6 +41,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
 import com.android.systemui.R;
+import com.android.systemui.complication.ComplicationLayoutParams.Direction;
 import com.android.systemui.complication.ComplicationLayoutParams.Position;
 import com.android.systemui.complication.dagger.ComplicationModule;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -55,6 +68,47 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     public static final String TAG = "ComplicationLayoutEng";
 
     /**
+     * Container for storing and operating on a tuple of margin values.
+     */
+    public static class Margins {
+        public final int start;
+        public final int top;
+        public final int end;
+        public final int bottom;
+
+        /**
+         * Default constructor with all margins set to 0.
+         */
+        public Margins() {
+            this(0, 0, 0, 0);
+        }
+
+        /**
+         * Cosntructor to specify margin in each direction.
+         * @param start start margin
+         * @param top top margin
+         * @param end end margin
+         * @param bottom bottom margin
+         */
+        public Margins(int start, int top, int end, int bottom) {
+            this.start = start;
+            this.top = top;
+            this.end = end;
+            this.bottom = bottom;
+        }
+
+        /**
+         * Creates a new {@link Margins} by adding the corresponding dimensions together.
+         */
+        public static Margins combine(Margins margins1, Margins margins2) {
+            return new Margins(margins1.start + margins2.start,
+                    margins1.top + margins2.top,
+                    margins1.end + margins2.end,
+                    margins1.bottom + margins2.bottom);
+        }
+    }
+
+    /**
      * {@link ViewEntry} is an internal container, capturing information necessary for working with
      * a particular {@link Complication} view.
      */
@@ -65,15 +119,13 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
         private final Parent mParent;
         @Complication.Category
         private final int mCategory;
-        private final int mDefaultMargin;
 
         /**
          * Default constructor. {@link Parent} allows for the {@link ViewEntry}'s surrounding
          * view hierarchy to be accessed without traversing the entire view tree.
          */
         ViewEntry(View view, ComplicationLayoutParams layoutParams,
-                TouchInsetManager.TouchInsetSession touchSession, int category, Parent parent,
-                int defaultMargin) {
+                TouchInsetManager.TouchInsetSession touchSession, int category, Parent parent) {
             mView = view;
             // Views that are generated programmatically do not have a unique id assigned to them
             // at construction. A new id is assigned here to enable ConstraintLayout relative
@@ -84,7 +136,6 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             mTouchInsetSession = touchSession;
             mCategory = category;
             mParent = parent;
-            mDefaultMargin = defaultMargin;
 
             touchSession.addViewToTracking(mView);
         }
@@ -192,23 +243,8 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                         break;
                 }
 
-                if (!isRoot) {
-                    final int margin = mLayoutParams.getMargin(mDefaultMargin);
-                    switch(direction) {
-                        case ComplicationLayoutParams.DIRECTION_DOWN:
-                            params.setMargins(0, margin, 0, 0);
-                            break;
-                        case ComplicationLayoutParams.DIRECTION_UP:
-                            params.setMargins(0, 0, 0, margin);
-                            break;
-                        case ComplicationLayoutParams.DIRECTION_END:
-                            params.setMarginStart(margin);
-                            break;
-                        case ComplicationLayoutParams.DIRECTION_START:
-                            params.setMarginEnd(margin);
-                            break;
-                    }
-                }
+                final Margins margins = mParent.getMargins(this, isRoot);
+                params.setMarginsRelative(margins.start, margins.top, margins.end, margins.bottom);
             });
 
             if (mLayoutParams.constraintSpecified()) {
@@ -275,7 +311,6 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             private final ComplicationLayoutParams mLayoutParams;
             private final int mCategory;
             private Parent mParent;
-            private int mDefaultMargin;
 
             Builder(View view, TouchInsetManager.TouchInsetSession touchSession,
                     ComplicationLayoutParams lp, @Complication.Category int category) {
@@ -311,20 +346,10 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             }
 
             /**
-             * Sets the margin that will be applied in the direction the complication is laid out
-             * towards.
-             */
-            Builder setDefaultMargin(int margin) {
-                mDefaultMargin = margin;
-                return this;
-            }
-
-            /**
              * Builds and returns the resulting {@link ViewEntry}.
              */
             ViewEntry build() {
-                return new ViewEntry(mView, mLayoutParams, mTouchSession, mCategory, mParent,
-                        mDefaultMargin);
+                return new ViewEntry(mView, mLayoutParams, mTouchSession, mCategory, mParent);
             }
         }
 
@@ -336,6 +361,11 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
              * Indicates the {@link ViewEntry} requests removal.
              */
             void removeEntry(ViewEntry entry);
+
+            /**
+             * Returns the margins to be applied to the entry
+             */
+            Margins getMargins(ViewEntry entry, boolean isRoot);
         }
     }
 
@@ -346,6 +376,15 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
      */
     private static class PositionGroup implements DirectionGroup.Parent {
         private final HashMap<Integer, DirectionGroup> mDirectionGroups = new HashMap<>();
+
+        private final HashMap<Integer, Margins> mDirectionalMargins;
+
+        private final int mDefaultDirectionalSpacing;
+
+        PositionGroup(int defaultDirectionalSpacing, HashMap<Integer, Margins> directionalMargins) {
+            mDefaultDirectionalSpacing = defaultDirectionalSpacing;
+            mDirectionalMargins = directionalMargins;
+        }
 
         /**
          * Invoked by the {@link PositionGroup} holder to introduce a {@link Complication} view to
@@ -368,6 +407,26 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             // that all {@link DirectionGroup} children are visited. It is possible the overall
             // head has changed, requiring constraints to be adjusted.
             updateViews();
+        }
+
+        @Override
+        public int getDefaultDirectionalSpacing() {
+            return mDefaultDirectionalSpacing;
+        }
+
+        @Override
+        public Margins getMargins(ViewEntry entry, boolean isRoot) {
+            if (isRoot) {
+                Margins cumulativeMargins = new Margins();
+
+                for (Margins margins : mDirectionalMargins.values()) {
+                    cumulativeMargins = Margins.combine(margins, cumulativeMargins);
+                }
+
+                return cumulativeMargins;
+            }
+
+            return mDirectionalMargins.get(entry.getLayoutParams().getDirection());
         }
 
         private void updateViews() {
@@ -417,14 +476,22 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
              * {@link DirectionGroup}.
              */
             void onEntriesChanged();
+
+            /**
+             * Returns the default spacing between elements.
+             */
+            int getDefaultDirectionalSpacing();
+
+            /**
+             * Returns the margins for the view entry.
+             */
+            Margins getMargins(ViewEntry entry, boolean isRoot);
         }
         private final ArrayList<ViewEntry> mViews = new ArrayList<>();
         private final Parent mParent;
 
         /**
-         * Creates a new {@link DirectionGroup} with the specified parent. Note that the
-         * {@link DirectionGroup} does not store its own direction. It is the responsibility of the
-         * {@link DirectionGroup.Parent} to maintain this association.
+         * Creates a new {@link DirectionGroup} with the specified parent.
          */
         DirectionGroup(Parent parent) {
             mParent = parent;
@@ -463,6 +530,33 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             mParent.onEntriesChanged();
         }
 
+        @Override
+        public Margins getMargins(ViewEntry entry, boolean isRoot) {
+            int directionalSpacing = entry.getLayoutParams().getDirectionalSpacing(
+                    mParent.getDefaultDirectionalSpacing());
+
+            Margins margins = new Margins();
+
+            if (!isRoot) {
+                switch (entry.getLayoutParams().getDirection()) {
+                    case ComplicationLayoutParams.DIRECTION_START:
+                        margins = new Margins(0, 0, directionalSpacing, 0);
+                        break;
+                    case ComplicationLayoutParams.DIRECTION_UP:
+                        margins = new Margins(0, 0, 0, directionalSpacing);
+                        break;
+                    case ComplicationLayoutParams.DIRECTION_END:
+                        margins = new Margins(directionalSpacing, 0, 0, 0);
+                        break;
+                    case ComplicationLayoutParams.DIRECTION_DOWN:
+                        margins = new Margins(0, directionalSpacing, 0, 0);
+                        break;
+                }
+            }
+
+            return Margins.combine(mParent.getMargins(entry, isRoot), margins);
+        }
+
         /**
          * Invoked by {@link Parent} to update the layout of all children {@link ViewEntry} with
          * the specified head. Note that the head might not be in this group and instead part of a
@@ -484,25 +578,70 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     }
 
     private final ConstraintLayout mLayout;
-    private final int mDefaultMargin;
+    private final int mDefaultDirectionalSpacing;
     private final HashMap<ComplicationId, ViewEntry> mEntries = new HashMap<>();
     private final HashMap<Integer, PositionGroup> mPositions = new HashMap<>();
     private final TouchInsetManager.TouchInsetSession mSession;
     private final int mFadeInDuration;
     private final int mFadeOutDuration;
+    private final HashMap<Integer, HashMap<Integer, Margins>> mPositionDirectionMarginMapping;
 
     /** */
     @Inject
     public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout,
-            @Named(COMPLICATION_MARGIN_DEFAULT) int defaultMargin,
+            @Named(COMPLICATION_DIRECTIONAL_SPACING_DEFAULT) int defaultDirectionalSpacing,
+            @Named(COMPLICATION_MARGIN_POSITION_START) int complicationMarginPositionStart,
+            @Named(COMPLICATION_MARGIN_POSITION_TOP) int complicationMarginPositionTop,
+            @Named(COMPLICATION_MARGIN_POSITION_END) int complicationMarginPositionEnd,
+            @Named(COMPLICATION_MARGIN_POSITION_BOTTOM) int complicationMarginPositionBottom,
             TouchInsetManager.TouchInsetSession session,
             @Named(COMPLICATIONS_FADE_IN_DURATION) int fadeInDuration,
             @Named(COMPLICATIONS_FADE_OUT_DURATION) int fadeOutDuration) {
         mLayout = layout;
-        mDefaultMargin = defaultMargin;
+        mDefaultDirectionalSpacing = defaultDirectionalSpacing;
         mSession = session;
         mFadeInDuration = fadeInDuration;
         mFadeOutDuration = fadeOutDuration;
+        mPositionDirectionMarginMapping = generatePositionDirectionalMarginsMapping(
+                complicationMarginPositionStart,
+                complicationMarginPositionTop,
+                complicationMarginPositionEnd,
+                complicationMarginPositionBottom);
+    }
+
+    private static HashMap<Integer, HashMap<Integer, Margins>>
+            generatePositionDirectionalMarginsMapping(int complicationMarginPositionStart,
+            int complicationMarginPositionTop,
+            int complicationMarginPositionEnd,
+            int complicationMarginPositionBottom) {
+        HashMap<Integer, HashMap<Integer, Margins>> mapping = new HashMap<>();
+
+        final Margins startMargins = new Margins(complicationMarginPositionStart, 0, 0, 0);
+        final Margins topMargins = new Margins(0, complicationMarginPositionTop, 0, 0);
+        final Margins endMargins = new Margins(0, 0, complicationMarginPositionEnd, 0);
+        final Margins bottomMargins = new Margins(0, 0, 0, complicationMarginPositionBottom);
+
+        addToMapping(mapping, POSITION_START | POSITION_TOP, DIRECTION_END, topMargins);
+        addToMapping(mapping, POSITION_START | POSITION_TOP, DIRECTION_DOWN, startMargins);
+
+        addToMapping(mapping, POSITION_START | POSITION_BOTTOM, DIRECTION_END, bottomMargins);
+        addToMapping(mapping, POSITION_START | POSITION_BOTTOM, DIRECTION_UP, startMargins);
+
+        addToMapping(mapping, POSITION_END | POSITION_TOP, DIRECTION_START, topMargins);
+        addToMapping(mapping, POSITION_END | POSITION_TOP, DIRECTION_DOWN, endMargins);
+
+        addToMapping(mapping, POSITION_END | POSITION_BOTTOM, DIRECTION_START, bottomMargins);
+        addToMapping(mapping, POSITION_END | POSITION_BOTTOM, DIRECTION_UP, endMargins);
+
+        return mapping;
+    }
+
+    private static void addToMapping(HashMap<Integer, HashMap<Integer, Margins>> mapping,
+            @Position int position, @Direction int direction, Margins margins) {
+        if (!mapping.containsKey(position)) {
+            mapping.put(position, new HashMap<>());
+        }
+        mapping.get(position).put(direction, margins);
     }
 
     @Override
@@ -537,13 +676,13 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             removeComplication(id);
         }
 
-        final ViewEntry.Builder entryBuilder = new ViewEntry.Builder(view, mSession, lp, category)
-                .setDefaultMargin(mDefaultMargin);
+        final ViewEntry.Builder entryBuilder = new ViewEntry.Builder(view, mSession, lp, category);
 
         // Add position group if doesn't already exist
         final int position = lp.getPosition();
         if (!mPositions.containsKey(position)) {
-            mPositions.put(position, new PositionGroup());
+            mPositions.put(position, new PositionGroup(mDefaultDirectionalSpacing,
+                    mPositionDirectionMarginMapping.get(lp.getPosition())));
         }
 
         // Insert entry into group

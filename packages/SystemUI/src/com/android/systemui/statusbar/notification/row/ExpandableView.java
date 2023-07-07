@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.PrintWriter;
@@ -52,7 +53,8 @@ import java.util.List;
 public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
     /** whether the dump() for this class should include verbose details */
-    protected static final boolean DUMP_VERBOSE = false;
+    protected static final boolean DUMP_VERBOSE =
+            Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
 
     private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;

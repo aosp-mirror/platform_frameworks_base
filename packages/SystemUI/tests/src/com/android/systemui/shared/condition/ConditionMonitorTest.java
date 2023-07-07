@@ -32,6 +32,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.log.TableLogBufferBase;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -39,11 +40,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+
+import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -54,15 +59,20 @@ public class ConditionMonitorTest extends SysuiTestCase {
     private HashSet<Condition> mConditions;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
+    @Mock
+    private CoroutineScope mScope;
+    @Mock
+    private TableLogBufferBase mLogBuffer;
+
     private Monitor mConditionMonitor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mCondition1 = spy(new FakeCondition());
-        mCondition2 = spy(new FakeCondition());
-        mCondition3 = spy(new FakeCondition());
+        mCondition1 = spy(new FakeCondition(mScope));
+        mCondition2 = spy(new FakeCondition(mScope));
+        mCondition3 = spy(new FakeCondition(mScope));
         mConditions = new HashSet<>(Arrays.asList(mCondition1, mCondition2, mCondition3));
 
         mConditionMonitor = new Monitor(mExecutor);
@@ -396,7 +406,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void unsetCondition_shouldNotAffectValue() {
-        final FakeCondition settableCondition = new FakeCondition(null, false);
+        final FakeCondition settableCondition = new FakeCondition(mScope, null, false);
         mCondition1.fakeUpdateCondition(true);
         mCondition2.fakeUpdateCondition(true);
         mCondition3.fakeUpdateCondition(true);
@@ -414,7 +424,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void setUnsetCondition_shouldAffectValue() {
-        final FakeCondition settableCondition = new FakeCondition(null, false);
+        final FakeCondition settableCondition = new FakeCondition(mScope, null, false);
         mCondition1.fakeUpdateCondition(true);
         mCondition2.fakeUpdateCondition(true);
         mCondition3.fakeUpdateCondition(true);
@@ -443,7 +453,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void clearingOverridingCondition_shouldBeExcluded() {
-        final FakeCondition overridingCondition = new FakeCondition(true, true);
+        final FakeCondition overridingCondition = new FakeCondition(mScope, true, true);
         mCondition1.fakeUpdateCondition(false);
         mCondition2.fakeUpdateCondition(false);
         mCondition3.fakeUpdateCondition(false);
@@ -466,7 +476,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void settingUnsetOverridingCondition_shouldBeIncluded() {
-        final FakeCondition overridingCondition = new FakeCondition(null, true);
+        final FakeCondition overridingCondition = new FakeCondition(mScope, null, true);
         mCondition1.fakeUpdateCondition(false);
         mCondition2.fakeUpdateCondition(false);
         mCondition3.fakeUpdateCondition(false);
@@ -623,5 +633,43 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
         verify(callback).onActiveChanged(eq(true));
         verify(callback).onConditionsChanged(eq(true));
+    }
+
+    @Test
+    public void testLoggingCallback() {
+        final Monitor monitor = new Monitor(mExecutor, Collections.emptySet(), mLogBuffer);
+
+        final FakeCondition condition = new FakeCondition(mScope);
+        final FakeCondition overridingCondition = new FakeCondition(
+                mScope,
+                /* initialValue= */ false,
+                /* overriding= */ true);
+
+        final Monitor.Callback callback = mock(Monitor.Callback.class);
+        monitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(condition)
+                .addCondition(overridingCondition)
+                .build());
+        mExecutor.runAllReady();
+
+        // condition set to true
+        condition.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition", "True");
+
+        // condition set to false
+        condition.fakeUpdateCondition(false);
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition", "False");
+
+        // condition unset
+        condition.fakeClearCondition();
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition", "Invalid");
+
+        // overriding condition set to true
+        overridingCondition.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(mLogBuffer).logChange("", "FakeCondition[OVRD]", "True");
     }
 }

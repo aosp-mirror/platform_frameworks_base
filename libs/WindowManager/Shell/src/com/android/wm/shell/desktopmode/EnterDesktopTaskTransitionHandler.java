@@ -39,6 +39,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -57,7 +58,8 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
-    private Point mStartPosition;
+    private Point mPosition;
+    private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
 
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions) {
@@ -75,9 +77,12 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
      * Starts Transition of a given type
      * @param type Transition type
      * @param wct WindowContainerTransaction for transition
+     * @param onAnimationEndCallback to be called after animation
      */
     public void startTransition(@WindowManager.TransitionType int type,
-                @NonNull WindowContainerTransaction wct) {
+            @NonNull WindowContainerTransaction wct,
+            Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
+        mOnAnimationFinishedCallback = onAnimationEndCallback;
         final IBinder token = mTransitions.startTransition(type, wct, this);
         mPendingTransitionTokens.add(token);
     }
@@ -85,12 +90,15 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     /**
      * Starts Transition of type TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
      * @param wct WindowContainerTransaction for transition
-     * @param startPosition Position of task when transition is triggered
+     * @param position Position of task when transition is triggered
+     * @param onAnimationEndCallback to be called after animation
      */
     public void startCancelMoveToDesktopMode(@NonNull WindowContainerTransaction wct,
-            Point startPosition) {
-        mStartPosition = startPosition;
-        startTransition(Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE, wct);
+            Point position,
+            Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
+        mPosition = position;
+        startTransition(Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE, wct,
+                onAnimationEndCallback);
     }
 
     @Override
@@ -111,7 +119,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
 
             if (change.getMode() == WindowManager.TRANSIT_CHANGE) {
                 transitionHandled |= startChangeTransition(
-                        transition, info.getType(), change, startT, finishCallback);
+                        transition, info.getType(), change, startT, finishT, finishCallback);
             }
         }
 
@@ -125,6 +133,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             @WindowManager.TransitionType int type,
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (!mPendingTransitionTokens.contains(transition)) {
             return false;
@@ -178,6 +187,9 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (mOnAnimationFinishedCallback != null) {
+                        mOnAnimationFinishedCallback.accept(finishT);
+                    }
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null, null));
                 }
@@ -189,27 +201,33 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
 
         if (type == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && mStartPosition != null) {
+                && mPosition != null) {
             // This Transition animates a task to fullscreen after being dragged from the status
             // bar and then released back into the status bar area
             final SurfaceControl sc = change.getLeash();
-            startT.setWindowCrop(sc, null);
-            startT.apply();
+            // Hide the first (fullscreen) frame because the animation will start from the smaller
+            // scale size.
+            startT.hide(sc)
+                    .setWindowCrop(sc, endBounds.width(), endBounds.height())
+                    .apply();
 
             final ValueAnimator animator = new ValueAnimator();
             animator.setFloatValues(DRAG_FREEFORM_SCALE, 1f);
             animator.setDuration(FREEFORM_ANIMATION_DURATION);
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             animator.addUpdateListener(animation -> {
-                final float scale = animation.getAnimatedFraction();
-                t.setPosition(sc, mStartPosition.x * (1 - scale),
-                        mStartPosition.y * (1 - scale));
-                t.setScale(sc, scale, scale);
-                t.apply();
+                final float scale = (float) animation.getAnimatedValue();
+                t.setPosition(sc, mPosition.x * (1 - scale), mPosition.y * (1 - scale))
+                        .setScale(sc, scale, scale)
+                        .show(sc)
+                        .apply();
             });
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (mOnAnimationFinishedCallback != null) {
+                        mOnAnimationFinishedCallback.accept(finishT);
+                    }
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null, null));
                 }

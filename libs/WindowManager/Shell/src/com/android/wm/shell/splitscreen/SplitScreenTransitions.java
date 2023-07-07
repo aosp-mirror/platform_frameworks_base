@@ -20,25 +20,22 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
+import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS_SNAP;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -67,7 +64,7 @@ class SplitScreenTransitions {
     private final Runnable mOnFinish;
 
     DismissSession mPendingDismiss = null;
-    TransitSession mPendingEnter = null;
+    EnterSession mPendingEnter = null;
     TransitSession mPendingResize = null;
 
     private IBinder mAnimatingTransition = null;
@@ -90,15 +87,22 @@ class SplitScreenTransitions {
         mStageCoordinator = stageCoordinator;
     }
 
+    private void initTransition(@NonNull IBinder transition,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mAnimatingTransition = transition;
+        mFinishTransaction = finishTransaction;
+        mFinishCallback = finishCallback;
+    }
+
+    /** Play animation for enter transition or dismiss transition. */
     void playAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
             @NonNull WindowContainerToken topRoot) {
-        mFinishCallback = finishCallback;
-        mAnimatingTransition = transition;
-        mFinishTransaction = finishTransaction;
+        initTransition(transition, finishTransaction, finishCallback);
 
         final TransitSession pendingTransition = getPendingTransition(transition);
         if (pendingTransition != null) {
@@ -120,17 +124,19 @@ class SplitScreenTransitions {
         playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot, topRoot);
     }
 
+    /** Internal funcation of playAnimation. */
     private void playInternalAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull WindowContainerToken mainRoot,
             @NonNull WindowContainerToken sideRoot, @NonNull WindowContainerToken topRoot) {
         // Play some place-holder fade animations
+        final boolean isEnter = isPendingEnter(transition);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final SurfaceControl leash = change.getLeash();
             final int mode = info.getChanges().get(i).getMode();
 
+            final int rootIdx = TransitionUtil.rootIndexFor(change, info);
             if (mode == TRANSIT_CHANGE) {
-                final int rootIdx = TransitionUtil.rootIndexFor(change, info);
                 if (change.getParent() != null) {
                     // This is probably reparented, so we want the parent to be immediately visible
                     final TransitionInfo.Change parentChange = info.getChange(change.getParent());
@@ -146,17 +152,23 @@ class SplitScreenTransitions {
                             change.getEndRelOffset().x, change.getEndRelOffset().y);
                 }
             }
-            boolean isRootOrSplitSideRoot = change.getParent() == null
-                    || topRoot.equals(change.getParent());
-            boolean isDivider = change.getFlags() == FLAG_IS_DIVIDER_BAR;
-            // For enter or exit, we only want to animate side roots and the divider but not the
-            // top-root.
-            if (!isRootOrSplitSideRoot || topRoot.equals(change.getContainer()) || isDivider) {
-                continue;
-            }
 
-            if (isPendingEnter(transition) && (mainRoot.equals(change.getContainer())
-                    || sideRoot.equals(change.getContainer()))) {
+            final boolean isTopRoot = topRoot.equals(change.getContainer());
+            final boolean isMainRoot = mainRoot.equals(change.getContainer());
+            final boolean isSideRoot = sideRoot.equals(change.getContainer());
+            final boolean isDivider = change.getFlags() == FLAG_IS_DIVIDER_BAR;
+            final boolean isMainChild = mainRoot.equals(change.getParent());
+            final boolean isSideChild = sideRoot.equals(change.getParent());
+            if (isEnter && (isMainChild || isSideChild)) {
+                // Reset child tasks bounds on finish.
+                mFinishTransaction.setPosition(leash,
+                        change.getEndRelOffset().x, change.getEndRelOffset().y);
+                mFinishTransaction.setCrop(leash, null);
+            } else if (isTopRoot) {
+                // Ensure top root is visible at start.
+                t.setAlpha(leash, 1.f);
+                t.show(leash);
+            } else if (isEnter && isMainRoot || isSideRoot) {
                 t.setPosition(leash, change.getEndAbsBounds().left, change.getEndAbsBounds().top);
                 t.setWindowCrop(leash, change.getEndAbsBounds().width(),
                         change.getEndAbsBounds().height());
@@ -165,62 +177,90 @@ class SplitScreenTransitions {
                 t.setLayer(leash, Integer.MAX_VALUE);
                 t.show(leash);
             }
-            boolean isOpening = isOpeningTransition(info);
-            if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
-                // fade in
-                startExampleAnimation(leash, true /* show */);
-            } else if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
+
+            // We want to use child tasks to animate so ignore split root container and non task
+            // except divider change.
+            if (isTopRoot || isMainRoot || isSideRoot
+                    || (change.getTaskInfo() == null && !isDivider)) {
+                continue;
+            }
+            if (isEnter && mPendingEnter.mResizeAnim) {
+                // We will run animation in next transition so skip anim here
+                continue;
+            } else if (isPendingDismiss(transition)
+                    && mPendingDismiss.mReason == EXIT_REASON_DRAG_DIVIDER) {
+                // TODO(b/280020345): need to refine animation for this but just skip anim now.
+                continue;
+            }
+
+            // Because cross fade might be looked more flicker during animation
+            // (surface become black in middle of animation), we only do fade-out
+            // and show opening surface directly.
+            boolean isOpening = TransitionUtil.isOpeningType(info.getType());
+            if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
                 // fade out
-                if (info.getType() == TRANSIT_SPLIT_DISMISS_SNAP) {
-                    // Dismissing via snap-to-top/bottom means that the dismissed task is already
-                    // not-visible (usually cropped to oblivion) so immediately set its alpha to 0
-                    // and don't animate it so it doesn't pop-in when reparented.
-                    t.setAlpha(leash, 0.f);
-                } else {
-                    startExampleAnimation(leash, false /* show */);
-                }
+                startFadeAnimation(leash, false /* show */);
+            } else if (mode == TRANSIT_CHANGE && change.getSnapshot() != null) {
+                t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
+                // Ensure snapshot it on the top of all transition surfaces
+                t.setLayer(change.getSnapshot(), info.getChanges().size() + 1);
+                t.setPosition(change.getSnapshot(), change.getStartAbsBounds().left,
+                        change.getStartAbsBounds().top);
+                t.show(change.getSnapshot());
+                startFadeAnimation(change.getSnapshot(), false /* show */);
             }
         }
         t.apply();
         onFinish(null /* wct */, null /* wctCB */);
     }
 
-    void applyDismissTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
+    /** Play animation for drag divider dismiss transition. */
+    void playDragDismissAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull WindowContainerToken topRoot,
-            @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
-            @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
-        if (mPendingDismiss.mDismissTop != STAGE_TYPE_UNDEFINED) {
-            mFinishCallback = finishCallback;
-            mAnimatingTransition = transition;
-            mFinishTransaction = finishTransaction;
+            @NonNull WindowContainerToken toTopRoot, @NonNull SplitDecorManager toTopDecor,
+            @NonNull WindowContainerToken topRoot) {
+        initTransition(transition, finishTransaction, finishCallback);
 
-            startTransaction.apply();
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final SurfaceControl leash = change.getLeash();
 
-            final SplitDecorManager topDecor = mPendingDismiss.mDismissTop == STAGE_TYPE_MAIN
-                    ? mainDecor : sideDecor;
-            topDecor.fadeOutDecor(() -> {
-                mTransitions.getMainExecutor().execute(() -> {
-                    onFinish(null /* wct */, null /* wctCB */);
+            if (toTopRoot.equals(change.getContainer())) {
+                startTransaction.setAlpha(leash, 1.f);
+                startTransaction.show(leash);
+
+                ValueAnimator va = new ValueAnimator();
+                mAnimations.add(va);
+
+                toTopDecor.onResized(startTransaction, animated -> {
+                    mAnimations.remove(va);
+                    if (animated) {
+                        mTransitions.getMainExecutor().execute(() -> {
+                            onFinish(null /* wct */, null /* wctCB */);
+                        });
+                    }
                 });
-            });
-        } else {
-            playAnimation(transition, info, startTransaction, finishTransaction,
-                    finishCallback, mainRoot, sideRoot, topRoot);
+            } else if (topRoot.equals(change.getContainer())) {
+                // Ensure it on top of all changes in transition.
+                startTransaction.setLayer(leash, Integer.MAX_VALUE);
+                startTransaction.setAlpha(leash, 1.f);
+                startTransaction.show(leash);
+            }
         }
+        startTransaction.apply();
+        onFinish(null /* wct */, null /* wctCB */);
     }
 
+    /** Play animation for resize transition. */
     void playResizeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
             @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
-        mFinishCallback = finishCallback;
-        mAnimatingTransition = transition;
-        mFinishTransaction = finishTransaction;
+        initTransition(transition, finishTransaction, finishCallback);
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -239,11 +279,13 @@ class SplitScreenTransitions {
                 mAnimations.add(va);
 
                 decor.setScreenshotIfNeeded(change.getSnapshot(), startTransaction);
-                decor.onResized(startTransaction, () -> {
-                    mTransitions.getMainExecutor().execute(() -> {
-                        mAnimations.remove(va);
-                        onFinish(null /* wct */, null /* wctCB */);
-                    });
+                decor.onResized(startTransaction, animated -> {
+                    mAnimations.remove(va);
+                    if (animated) {
+                        mTransitions.getMainExecutor().execute(() -> {
+                            onFinish(null /* wct */, null /* wctCB */);
+                        });
+                    }
                 });
             }
         }
@@ -294,25 +336,23 @@ class SplitScreenTransitions {
             WindowContainerTransaction wct,
             @Nullable RemoteTransition remoteTransition,
             Transitions.TransitionHandler handler,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback) {
+            int extraTransitType, boolean resizeAnim) {
         if (mPendingEnter != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                     + " skip to start enter split transition since it already exist. ");
             return null;
         }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
-        setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback);
+        setEnterTransition(transition, remoteTransition, extraTransitType, resizeAnim);
         return transition;
     }
 
     /** Sets a transition to enter split. */
     void setEnterTransition(@NonNull IBinder transition,
             @Nullable RemoteTransition remoteTransition,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback) {
-        mPendingEnter = new TransitSession(
-                transition, consumedCallback, finishedCallback, remoteTransition);
+            int extraTransitType, boolean resizeAnim) {
+        mPendingEnter = new EnterSession(
+                transition, remoteTransition, extraTransitType, resizeAnim);
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Enter split screen");
@@ -435,88 +475,32 @@ class SplitScreenTransitions {
         }
     }
 
-    // TODO(shell-transitions): real animations
-    private void startExampleAnimation(@NonNull SurfaceControl leash, boolean show) {
+    private void startFadeAnimation(@NonNull SurfaceControl leash, boolean show) {
         final float end = show ? 1.f : 0.f;
         final float start = 1.f - end;
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(start, end);
-        va.setDuration(500);
+        va.setDuration(FADE_DURATION);
+        va.setInterpolator(show ? ALPHA_IN : ALPHA_OUT);
         va.addUpdateListener(animation -> {
             float fraction = animation.getAnimatedFraction();
             transaction.setAlpha(leash, start * (1.f - fraction) + end * fraction);
             transaction.apply();
         });
-        final Runnable finisher = () -> {
-            transaction.setAlpha(leash, end);
-            transaction.apply();
-            mTransactionPool.release(transaction);
-            mTransitions.getMainExecutor().execute(() -> {
-                mAnimations.remove(va);
-                onFinish(null /* wct */, null /* wctCB */);
-            });
-        };
         va.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                finisher.run();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                finisher.run();
+                transaction.setAlpha(leash, end);
+                transaction.apply();
+                mTransactionPool.release(transaction);
+                mTransitions.getMainExecutor().execute(() -> {
+                    mAnimations.remove(va);
+                    onFinish(null /* wct */, null /* wctCB */);
+                });
             }
         });
         mAnimations.add(va);
         mTransitions.getAnimExecutor().execute(va::start);
-    }
-
-    // TODO(shell-transitions): real animations
-    private void startExampleResizeAnimation(@NonNull SurfaceControl leash,
-            @NonNull Rect startBounds, @NonNull Rect endBounds) {
-        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
-        final ValueAnimator va = ValueAnimator.ofFloat(0.f, 1.f);
-        va.setDuration(500);
-        va.addUpdateListener(animation -> {
-            float fraction = animation.getAnimatedFraction();
-            transaction.setWindowCrop(leash,
-                    (int) (startBounds.width() * (1.f - fraction) + endBounds.width() * fraction),
-                    (int) (startBounds.height() * (1.f - fraction)
-                            + endBounds.height() * fraction));
-            transaction.setPosition(leash,
-                    startBounds.left * (1.f - fraction) + endBounds.left * fraction,
-                    startBounds.top * (1.f - fraction) + endBounds.top * fraction);
-            transaction.apply();
-        });
-        final Runnable finisher = () -> {
-            transaction.setWindowCrop(leash, 0, 0);
-            transaction.setPosition(leash, endBounds.left, endBounds.top);
-            transaction.apply();
-            mTransactionPool.release(transaction);
-            mTransitions.getMainExecutor().execute(() -> {
-                mAnimations.remove(va);
-                onFinish(null /* wct */, null /* wctCB */);
-            });
-        };
-        va.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                finisher.run();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                finisher.run();
-            }
-        });
-        mAnimations.add(va);
-        mTransitions.getAnimExecutor().execute(va::start);
-    }
-
-    private boolean isOpeningTransition(TransitionInfo info) {
-        return TransitionUtil.isOpeningType(info.getType())
-                || info.getType() == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE
-                || info.getType() == TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
     }
 
     /** Calls when the transition got consumed. */
@@ -539,16 +523,19 @@ class SplitScreenTransitions {
         /** Whether the transition was canceled. */
         boolean mCanceled;
 
+        /** A note for extra transit type, to help indicate custom transition. */
+        final int mExtraTransitType;
+
         TransitSession(IBinder transition,
                 @Nullable TransitionConsumedCallback consumedCallback,
                 @Nullable TransitionFinishedCallback finishedCallback) {
-            this(transition, consumedCallback, finishedCallback, null /* remoteTransition */);
+            this(transition, consumedCallback, finishedCallback, null /* remoteTransition */, 0);
         }
 
         TransitSession(IBinder transition,
                 @Nullable TransitionConsumedCallback consumedCallback,
                 @Nullable TransitionFinishedCallback finishedCallback,
-                @Nullable RemoteTransition remoteTransition) {
+                @Nullable RemoteTransition remoteTransition, int extraTransitType) {
             mTransition = transition;
             mConsumedCallback = consumedCallback;
             mFinishedCallback = finishedCallback;
@@ -560,6 +547,7 @@ class SplitScreenTransitions {
                         mTransitions.getMainExecutor(), remoteTransition);
                 mRemoteHandler.setTransition(transition);
             }
+            mExtraTransitType = extraTransitType;
         }
 
         /** Sets transition consumed callback. */
@@ -594,6 +582,19 @@ class SplitScreenTransitions {
             if (mFinishedCallback != null) {
                 mFinishedCallback.onFinished(finishWct, finishT);
             }
+        }
+    }
+
+    /** Bundled information of enter transition. */
+    class EnterSession extends TransitSession {
+        final boolean mResizeAnim;
+
+        EnterSession(IBinder transition,
+                @Nullable RemoteTransition remoteTransition,
+                int extraTransitType, boolean resizeAnim) {
+            super(transition, null /* consumedCallback */, null /* finishedCallback */,
+                    remoteTransition, extraTransitType);
+            this.mResizeAnim = resizeAnim;
         }
     }
 

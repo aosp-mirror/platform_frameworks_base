@@ -13297,6 +13297,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Test API to verify carrier restriction status allow list i.e.
+     * packages/services/Telephony/assets/CarrierRestrictionOperatorDetails.json.
+     *
+     * @param pkgName : packaga name of the entry to verify
+     * @param carrierId : carrier Id of the entry
+     * @return {@code List<String>} : list of registered shaIds
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public List<String> getShaIdFromAllowList(String pkgName, int carrierId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getShaIdFromAllowList(pkgName, carrierId);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getShaIdFromAllowList: RemoteException = " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
      * Used to enable or disable carrier data by the system based on carrier signalling or
      * carrier privileged apps. Different from {@link #setDataEnabled(boolean)} which is linked to
      * user settings, carrier data on/off won't affect user settings but will bypass the

@@ -17,7 +17,12 @@
 package com.android.test.silkfx.hdr
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Gainmap
 import android.graphics.ImageDecoder
+import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.widget.Button
@@ -32,6 +37,25 @@ enum class DecodeMode {
     Scaled66,
     CropedSquared,
     CropedSquaredScaled33
+}
+
+fun gainmapVisualizer(gainmap: Gainmap): Bitmap {
+    val map = gainmap.gainmapContents
+    val gainmapVisualizer = Bitmap.createBitmap(map.width, map.height,
+            Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(gainmapVisualizer!!)
+    val paint = Paint()
+    paint.colorFilter = ColorMatrixColorFilter(
+            floatArrayOf(
+                    0f, 0f, 0f, 1f, 0f,
+                    0f, 0f, 0f, 1f, 0f,
+                    0f, 0f, 0f, 1f, 0f,
+                    0f, 0f, 0f, 0f, 255f
+            )
+    )
+    canvas.drawBitmap(map, 0f, 0f, paint)
+    canvas.setBitmap(null)
+    return gainmapVisualizer
 }
 
 class GainmapDecodeTest(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
@@ -71,7 +95,7 @@ class GainmapDecodeTest(context: Context, attrs: AttributeSet?) : LinearLayout(c
             }
         }
 
-        val gainmapContents = gainmapImage.gainmap!!.gainmapContents!!
+        val gainmapContents = gainmapImage.gainmap?.let { gainmapVisualizer(it) }
         val sdrBitmap = gainmapImage.also { it.gainmap = null }
 
         findViewById<ImageView>(R.id.sdr_source)!!.setImageBitmap(sdrBitmap)
@@ -80,7 +104,7 @@ class GainmapDecodeTest(context: Context, attrs: AttributeSet?) : LinearLayout(c
 
         findViewById<ImageView>(R.id.gainmap)!!.setImageBitmap(gainmapContents)
         findViewById<TextView>(R.id.gainmap_label)!!.text =
-            "Gainmap Size: ${gainmapContents.width}x${gainmapContents.height}"
+            "Gainmap Size: ${gainmapContents?.width ?: 0}x${gainmapContents?.height ?: 0}"
     }
 
     override fun onFinishInflate() {

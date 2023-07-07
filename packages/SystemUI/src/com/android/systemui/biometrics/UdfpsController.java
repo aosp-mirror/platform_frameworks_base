@@ -466,7 +466,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOnFingerDown) {
             playStartHaptic();
         }
-        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* primaryAuth */);
         mAttemptedToDismissKeyguard = true;
     }
 
@@ -553,6 +553,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     + mOverlay.getRequestId());
             return false;
         }
+        if (mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+                || mPrimaryBouncerInteractor.isInTransit()) {
+            return false;
+        }
 
         final TouchProcessorResult result = mTouchProcessor.processTouch(event, mActivePointerId,
                 mOverlayParams);
@@ -585,6 +589,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
                 // Pilfer if valid overlap, don't allow following events to reach keyguard
                 shouldPilfer = true;
+
+                // Touch is a valid UDFPS touch. Inform the falsing manager so that the touch
+                // isn't counted against the falsing algorithm as an accidental touch.
+                // We do this on the DOWN event instead of CANCEL/UP because the CANCEL/UP events
+                // get sent too late to this receiver (after the actual cancel/up motions occur),
+                // and therefore wouldn't end up being used as part of the falsing algo.
+                mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
                 break;
 
             case UP:
@@ -604,7 +615,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         data.getTime(),
                         data.getGestureStart(),
                         mStatusBarStateController.isDozing());
-                mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
                 break;
 
             case UNCHANGED:
@@ -626,14 +636,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             shouldPilfer = true;
         }
 
-        // Execute the pilfer, never pilfer if a vertical swipe is in progress
-        if (shouldPilfer && mLockscreenShadeTransitionController.getQSDragProgress() == 0f
-                && !mPrimaryBouncerInteractor.isInTransit()) {
+        // Execute the pilfer
+        if (shouldPilfer) {
             mInputManager.pilferPointers(
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
         }
 
-        return processedTouch.getTouchData().isWithinSensor(mOverlayParams.getNativeSensorBounds());
+        return processedTouch.getTouchData().isWithinBounds(mOverlayParams.getNativeSensorBounds());
     }
 
     private boolean oldOnTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
@@ -777,7 +786,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     private boolean shouldTryToDismissKeyguard() {
         return mOverlay != null
-                && mOverlay.getAnimationViewController() instanceof UdfpsKeyguardViewController
+                && mOverlay.getAnimationViewController()
+                instanceof UdfpsKeyguardViewControllerLegacy
                 && mKeyguardStateController.canDismissLockScreen()
                 && !mAttemptedToDismissKeyguard;
     }

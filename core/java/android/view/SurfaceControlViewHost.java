@@ -171,8 +171,7 @@ public class SurfaceControlViewHost {
         public SurfacePackage(@NonNull SurfacePackage other) {
             SurfaceControl otherSurfaceControl = other.mSurfaceControl;
             if (otherSurfaceControl != null && otherSurfaceControl.isValid()) {
-                mSurfaceControl = new SurfaceControl();
-                mSurfaceControl.copyFrom(otherSurfaceControl, "SurfacePackage");
+                mSurfaceControl = new SurfaceControl(otherSurfaceControl, "SurfacePackage");
             }
             mAccessibilityEmbeddedConnection = other.mAccessibilityEmbeddedConnection;
             mInputToken = other.mInputToken;

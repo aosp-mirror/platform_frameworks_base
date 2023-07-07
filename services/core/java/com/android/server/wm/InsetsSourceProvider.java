@@ -272,15 +272,17 @@ class InsetsSourceProvider {
 
     /** @return A new source computed by the specified window frame in the given display frames. */
     InsetsSource createSimulatedSource(DisplayFrames displayFrames, Rect frame) {
-        // Don't copy visible frame because it might not be calculated in the provided display
-        // frames and it is not significant for this usage.
-        final InsetsSource source = new InsetsSource(mSource.getId(), mSource.getType());
-        source.setVisible(mSource.isVisible());
+        final InsetsSource source = new InsetsSource(mSource);
         mTmpRect.set(frame);
         if (mFrameProvider != null) {
             mFrameProvider.apply(displayFrames, mWindowContainer, mTmpRect);
         }
         source.setFrame(mTmpRect);
+
+        // Don't copy visible frame because it might not be calculated in the provided display
+        // frames and it is not significant for this usage.
+        source.setVisibleFrame(null);
+
         return source;
     }
 
@@ -452,7 +454,7 @@ class InsetsSourceProvider {
         if (mSource.getType() == WindowInsets.Type.ime()) {
             setClientVisible(target.isRequestedVisible(WindowInsets.Type.ime()));
         }
-        final Transaction t = mDisplayContent.getSyncTransaction();
+        final Transaction t = mWindowContainer.getSyncTransaction();
         mWindowContainer.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL);
 

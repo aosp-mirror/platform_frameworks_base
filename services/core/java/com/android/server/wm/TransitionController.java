@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -39,6 +39,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -57,10 +58,38 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 /**
- * Handles all the aspects of recording and synchronizing transitions.
+ * Handles all the aspects of recording (collecting) and synchronizing transitions. This is only
+ * concerned with the WM changes. The actual animations are handled by the Player.
+ *
+ * Currently, only 1 transition can be the primary "collector" at a time. This is because WM changes
+ * are still performed in a "global" manner. However, collecting can actually be broken into
+ * two phases:
+ *    1. Actually making WM changes and recording the participating containers.
+ *    2. Waiting for the participating containers to become ready (eg. redrawing content).
+ * Because (2) takes most of the time AND doesn't change WM, we can actually have multiple
+ * transitions in phase (2) concurrently with one in phase (1). We refer to this arrangement as
+ * "parallel" collection even though there is still only ever 1 transition actually able to gain
+ * participants.
+ *
+ * Parallel collection happens when the "primary collector" has finished "setup" (phase 1) and is
+ * just waiting. At this point, another transition can start collecting. When this happens, the
+ * first transition is moved to a "waiting" list and the new transition becomes the "primary
+ * collector". If at any time, the "primary collector" moves to playing before one of the waiting
+ * transitions, then the first waiting transition will move back to being the "primary collector".
+ * This maintains the "global"-like abstraction that the rest of WM currently expects.
+ *
+ * When a transition move-to-playing, we check it against all other playing transitions. If it
+ * doesn't overlap with them, it can also animate in parallel. In this case it will be assigned a
+ * new "track". "tracks" are a way to communicate to the player about which transitions need to be
+ * played serially with each-other. So, if we find that a transition overlaps with other transitions
+ * in one track, the transition will be assigned to that track. If, however, the transition overlaps
+ * with transition in >1 track, we will actually just mark it as SYNC meaning it can't actually
+ * play until all prior transition animations finish. This is heavy-handed because it is a fallback
+ * situation and supporting something fancier would be unnecessarily complicated.
  */
 class TransitionController {
     private static final String TAG = "TransitionController";
@@ -105,10 +134,18 @@ class TransitionController {
     final ArrayList<Runnable> mStateValidators = new ArrayList<>();
 
     /**
+     * List of activity-records whose visibility changed outside the main/tracked part of a
+     * transition (eg. in the finish-transaction). These will be checked when idle to recover from
+     * degenerate states.
+     */
+    final ArrayList<ActivityRecord> mValidateCommitVis = new ArrayList<>();
+
+    /**
      * Currently playing transitions (in the order they were started). When finished, records are
      * removed from this list.
      */
     private final ArrayList<Transition> mPlayingTransitions = new ArrayList<>();
+    int mTrackCount = 0;
 
     /** The currently finishing transition. */
     Transition mFinishingTransition;
@@ -143,8 +180,24 @@ class TransitionController {
 
     private final ArrayList<QueuedTransition> mQueuedTransitions = new ArrayList<>();
 
-    /** The transition currently being constructed (collecting participants). */
+    /**
+     * The transition currently being constructed (collecting participants). Unless interrupted,
+     * all WM changes will go into this.
+     */
     private Transition mCollectingTransition = null;
+
+    /**
+     * The transitions that are complete but still waiting for participants to become ready
+     */
+    final ArrayList<Transition> mWaitingTransitions = new ArrayList<>();
+
+    /**
+     * The (non alwaysOnTop) tasks which were reported as on-top of their display most recently
+     * within a cluster of simultaneous transitions. If tasks are nested, all the tasks that are
+     * parents of the on-top task are also included. This is used to decide which transitions
+     * report which on-top changes.
+     */
+    final SparseArray<ArrayList<Task>> mLatestOnTopTasksReported = new SparseArray<>();
 
     /**
      * `true` when building surface layer order for the finish transaction. We want to prevent
@@ -153,6 +206,11 @@ class TransitionController {
      * transaction, set this to true so that the {@link canAssignLayers} will allow it.
      */
     boolean mBuildingFinishLayers = false;
+
+    /**
+     * Whether the surface of navigation bar token is reparented to an app.
+     */
+    boolean mNavigationBarAttachedToApp = false;
 
     private boolean mAnimatingState = false;
 
@@ -199,6 +257,11 @@ class TransitionController {
             mPlayingTransitions.get(i).cleanUpOnFailure();
         }
         mPlayingTransitions.clear();
+        // Clean up waiting transitions first since they technically started first.
+        for (int i = 0; i < mWaitingTransitions.size(); ++i) {
+            mWaitingTransitions.get(i).abort();
+        }
+        mWaitingTransitions.clear();
         if (mCollectingTransition != null) {
             mCollectingTransition.abort();
         }
@@ -223,8 +286,9 @@ class TransitionController {
             throw new IllegalStateException("Shell Transitions not enabled");
         }
         if (mCollectingTransition != null) {
-            throw new IllegalStateException("Simultaneous transition collection not supported"
-                    + " yet. Use {@link #createPendingTransition} for explicit queueing.");
+            throw new IllegalStateException("Trying to directly start transition collection while "
+                    + " collection is already ongoing. Use {@link #startCollectOrQueue} if"
+                    + " possible.");
         }
         Transition transit = new Transition(type, flags, this, mSyncEngine);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s", transit);
@@ -318,7 +382,12 @@ class TransitionController {
      *                      This is {@code false} once a transition is playing.
      */
     boolean isCollecting(@NonNull WindowContainer wc) {
-        return mCollectingTransition != null && mCollectingTransition.mParticipants.contains(wc);
+        if (mCollectingTransition == null) return false;
+        if (mCollectingTransition.mParticipants.contains(wc)) return true;
+        for (int i = 0; i < mWaitingTransitions.size(); ++i) {
+            if (mWaitingTransitions.get(i).mParticipants.contains(wc)) return true;
+        }
+        return false;
     }
 
     /**
@@ -327,7 +396,11 @@ class TransitionController {
      */
     boolean inCollectingTransition(@NonNull WindowContainer wc) {
         if (!isCollecting()) return false;
-        return mCollectingTransition.isInTransition(wc);
+        if (mCollectingTransition.isInTransition(wc)) return true;
+        for (int i = 0; i < mWaitingTransitions.size(); ++i) {
+            if (mWaitingTransitions.get(i).isInTransition(wc)) return true;
+        }
+        return false;
     }
 
     /**
@@ -348,9 +421,9 @@ class TransitionController {
         return false;
     }
 
-    /** Returns {@code true} if the `wc` is a participant of the finishing transition. */
+    /** Returns {@code true} if the finishing transition contains `wc`. */
     boolean inFinishingTransition(WindowContainer<?> wc) {
-        return mFinishingTransition != null && mFinishingTransition.mParticipants.contains(wc);
+        return mFinishingTransition != null && mFinishingTransition.isInTransition(wc);
     }
 
     /** @return {@code true} if a transition is running */
@@ -364,10 +437,26 @@ class TransitionController {
         return inCollectingTransition(wc) || inPlayingTransition(wc);
     }
 
+    /** Returns {@code true} if the id matches a collecting or playing transition. */
+    boolean inTransition(int syncId) {
+        if (mCollectingTransition != null && mCollectingTransition.getSyncId() == syncId) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).getSyncId() == syncId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @return {@code true} if wc is in a participant subtree */
     boolean isTransitionOnDisplay(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.isOnDisplay(dc)) {
             return true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isOnDisplay(dc)) return true;
         }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isOnDisplay(dc)) return true;
@@ -379,10 +468,26 @@ class TransitionController {
         if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
         }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isInTransientHide(task)) return true;
+        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
         }
         return false;
+    }
+
+    boolean canApplyDim(@Nullable Task task) {
+        if (task == null) {
+            // Always allow non-activity window.
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (!mPlayingTransitions.get(i).canApplyDim(task)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -430,8 +535,14 @@ class TransitionController {
      * playing, but can be "opened-up" for certain transition operations like calculating layers
      * for finishTransaction.
      */
-    boolean canAssignLayers() {
-        return mBuildingFinishLayers || !isPlaying();
+    boolean canAssignLayers(@NonNull WindowContainer wc) {
+        // Don't build window state into finish transaction in case another window is added or
+        // removed during transition playing.
+        if (mBuildingFinishLayers) {
+            return wc.asWindowState() == null;
+        }
+        // Always allow WindowState to assign layers since it won't affect transition.
+        return wc.asWindowState() != null || !isPlaying();
     }
 
     @WindowConfiguration.WindowingMode
@@ -527,9 +638,9 @@ class TransitionController {
             }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
-            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
-                // Add keyguard flag to dismiss keyguard
-                mCollectingTransition.addFlag(flags);
+            if ((flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
+                // Add keyguard flags to affect keyguard visibility
+                mCollectingTransition.addFlag(flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS);
             }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
@@ -740,6 +851,10 @@ class TransitionController {
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);
         mPlayingTransitions.remove(record);
+        if (!inTransition()) {
+            // reset track-count now since shell-side is idle.
+            mTrackCount = 0;
+        }
         updateRunningRemoteAnimation(record, false /* isPlaying */);
         record.finishTransition();
         for (int i = mAnimatingExitWindows.size() - 1; i >= 0; i--) {
@@ -752,9 +867,21 @@ class TransitionController {
             }
         }
         mRunningLock.doNotifyLocked();
-        // Run state-validation checks when no transitions are active anymore.
+        // Run state-validation checks when no transitions are active anymore (Note: sometimes
+        // finish can start a transition, so check afterwards -- eg. pip).
         if (!inTransition()) {
             validateStates();
+            mAtm.mWindowManager.onAnimationFinished();
+        }
+    }
+
+    /** Called by {@link Transition#finishTransition} if it committed invisible to any activities */
+    void onCommittedInvisibles() {
+        if (mCollectingTransition != null) {
+            mCollectingTransition.mPriorVisibilityMightBeDirty = true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            mWaitingTransitions.get(i).mPriorVisibilityMightBeDirty = true;
         }
     }
 
@@ -769,6 +896,35 @@ class TransitionController {
             }
         }
         mStateValidators.clear();
+        for (int i = 0; i < mValidateCommitVis.size(); ++i) {
+            final ActivityRecord ar = mValidateCommitVis.get(i);
+            if (!ar.isVisibleRequested() && ar.isVisible()) {
+                Slog.e(TAG, "Uncommitted visibility change: " + ar);
+                ar.commitVisibility(ar.isVisibleRequested(), false /* layout */,
+                        false /* fromTransition */);
+            }
+        }
+        mValidateCommitVis.clear();
+    }
+
+    /**
+     * Called when the transition has a complete set of participants for its operation. In other
+     * words, it is when the transition is "ready" but is still waiting for participants to draw.
+     */
+    void onTransitionPopulated(Transition transition) {
+        tryStartCollectFromQueue();
+    }
+
+    private boolean canStartCollectingNow(@Nullable Transition queued) {
+        if (mCollectingTransition == null) return true;
+        // Population (collect until ready) is still serialized, so always wait for that.
+        if (!mCollectingTransition.isPopulated()) return false;
+        // Check if queued *can* be independent with all collecting/waiting transitions.
+        if (!getCanBeIndependent(mCollectingTransition, queued)) return false;
+        for (int i = 0; i < mWaitingTransitions.size(); ++i) {
+            if (!getCanBeIndependent(mWaitingTransitions.get(i), queued)) return false;
+        }
+        return true;
     }
 
     void tryStartCollectFromQueue() {
@@ -776,7 +932,16 @@ class TransitionController {
         // Only need to try the next one since, even when transition can collect in parallel,
         // they still need to serialize on readiness.
         final QueuedTransition queued = mQueuedTransitions.get(0);
-        if (mCollectingTransition != null || mSyncEngine.hasActiveSync()) {
+        if (mCollectingTransition != null) {
+            // If it's a legacy sync, then it needs to wait until there is no collecting transition.
+            if (queued.mTransition == null) return;
+            if (!canStartCollectingNow(queued.mTransition)) return;
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from collecting"
+                    + " to waiting.", mCollectingTransition.getSyncId());
+            mWaitingTransitions.add(mCollectingTransition);
+            mCollectingTransition = null;
+        } else if (mSyncEngine.hasActiveSync()) {
+            // A legacy transition is on-going, so we must wait.
             return;
         }
         mQueuedTransitions.remove(0);
@@ -797,14 +962,148 @@ class TransitionController {
     }
 
     void moveToPlaying(Transition transition) {
-        if (transition != mCollectingTransition) {
-            throw new IllegalStateException("Trying to move non-collecting transition to playing");
+        if (transition == mCollectingTransition) {
+            mCollectingTransition = null;
+            if (!mWaitingTransitions.isEmpty()) {
+                mCollectingTransition = mWaitingTransitions.remove(0);
+            }
+            if (mCollectingTransition == null) {
+                // nothing collecting anymore, so clear order records.
+                mLatestOnTopTasksReported.clear();
+            }
+        } else {
+            if (!mWaitingTransitions.remove(transition)) {
+                throw new IllegalStateException("Trying to move non-collecting transition to"
+                        + "playing " + transition.getSyncId());
+            }
         }
-        mCollectingTransition = null;
         mPlayingTransitions.add(transition);
         updateRunningRemoteAnimation(transition, true /* isPlaying */);
-        mTransitionTracer.logState(transition);
         // Sync engine should become idle after this, so the idle listener will check the queue.
+    }
+
+    /**
+     * Checks if the `queued` transition has the potential to run independently of the
+     * `collecting` transition. It may still ultimately block in sync-engine or become dependent
+     * in {@link #getIsIndependent} later.
+     */
+    boolean getCanBeIndependent(Transition collecting, @Nullable Transition queued) {
+        // For tests
+        if (queued != null && queued.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL
+                && collecting.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL) {
+            return true;
+        }
+        // For recents
+        if (queued != null && queued.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+            if (collecting.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+                // Must serialize with itself.
+                return false;
+            }
+            // allow this if `collecting` only has activities
+            for (int i = 0; i < collecting.mParticipants.size(); ++i) {
+                final WindowContainer wc = collecting.mParticipants.valueAt(i);
+                final ActivityRecord ar = wc.asActivityRecord();
+                if (ar == null && wc.asWindowState() == null && wc.asWindowToken() == null) {
+                    // Is task or above, so can't be independent
+                    return false;
+                }
+                if (ar != null && ar.isActivityTypeHomeOrRecents()) {
+                    // It's a recents or home type, so it conflicts.
+                    return false;
+                }
+            }
+            return true;
+        } else if (collecting.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+            // We can collect simultaneously with recents if it is populated. This is because
+            // we know that recents will not collect/trampoline any more stuff. If anything in the
+            // queued transition overlaps, it will end up just waiting in sync-queue anyways.
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if `incoming` transition can run independently of `running` transition assuming that
+     * `running` is playing based on its current state.
+     */
+    static boolean getIsIndependent(Transition running, Transition incoming) {
+        // For tests
+        if (running.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL
+                && incoming.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL) {
+            return true;
+        }
+        // For now there's only one mutually-independent pair: an all activity-level transition and
+        // a transient-launch where none of the activities are part of the transient-launch task,
+        // so the following logic is hard-coded specifically for this.
+        // Also, we currently restrict valid transient-launches to just recents.
+        final Transition recents;
+        final Transition other;
+        if (running.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS
+                && running.hasTransientLaunch()) {
+            if (incoming.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+                // Recents can't be independent from itself.
+                return false;
+            }
+            recents = running;
+            other = incoming;
+        } else if (incoming.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS
+                && incoming.hasTransientLaunch()) {
+            recents = incoming;
+            other = running;
+        } else {
+            return false;
+        }
+        // Check against *targets* because that is the post-promotion set of containers that are
+        // actually animating.
+        for (int i = 0; i < other.mTargets.size(); ++i) {
+            final WindowContainer wc = other.mTargets.get(i).mContainer;
+            final ActivityRecord ar = wc.asActivityRecord();
+            if (ar == null && wc.asWindowState() == null && wc.asWindowToken() == null) {
+                // Is task or above, so for now don't let them be independent.
+                return false;
+            }
+            if (ar != null && recents.isTransientLaunch(ar)) {
+                // Change overlaps with recents, so serialize.
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void assignTrack(Transition transition, TransitionInfo info) {
+        int track = -1;
+        boolean sync = false;
+        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+            // ignore ourself obviously
+            if (mPlayingTransitions.get(i) == transition) continue;
+            if (getIsIndependent(mPlayingTransitions.get(i), transition)) continue;
+            if (track >= 0) {
+                // At this point, transition overlaps with multiple tracks, so just wait for
+                // everything
+                sync = true;
+                break;
+            }
+            track = mPlayingTransitions.get(i).mAnimationTrack;
+        }
+        if (sync) {
+            track = 0;
+        }
+        if (track < 0) {
+            // Didn't overlap with anything, so give it its own track
+            track = mTrackCount;
+            if (track > 0) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Playing #%d in parallel on "
+                        + "track #%d", transition.getSyncId(), track);
+            }
+        }
+        if (sync) {
+            info.setFlags(info.getFlags() | TransitionInfo.FLAG_SYNC);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Marking #%d animation as SYNC.",
+                    transition.getSyncId());
+        }
+        transition.mAnimationTrack = track;
+        info.setTrack(track);
+        mTrackCount = Math.max(mTrackCount, track + 1);
     }
 
     void updateAnimatingState(SurfaceControl.Transaction t) {
@@ -842,14 +1141,26 @@ class TransitionController {
         mRemotePlayer.update(delegate, isPlaying, true /* predict */);
     }
 
-    void abort(Transition transition) {
+    /** Called when a transition is aborted. This should only be called by {@link Transition} */
+    void onAbort(Transition transition) {
         if (transition != mCollectingTransition) {
-            throw new IllegalStateException("Too late to abort.");
+            int waitingIdx = mWaitingTransitions.indexOf(transition);
+            if (waitingIdx < 0) {
+                throw new IllegalStateException("Too late for abort.");
+            }
+            mWaitingTransitions.remove(waitingIdx);
+        } else {
+            mCollectingTransition = null;
+            if (!mWaitingTransitions.isEmpty()) {
+                mCollectingTransition = mWaitingTransitions.remove(0);
+            }
+            if (mCollectingTransition == null) {
+                // nothing collecting anymore, so clear order records.
+                mLatestOnTopTasksReported.clear();
+            }
         }
-        transition.abort();
-        mCollectingTransition = null;
-        mTransitionTracer.logState(transition);
-        // abort will call through the normal finish paths and thus check the queue.
+        // This is called during Transition.abort whose codepath will eventually check the queue
+        // via sync-engine idle.
     }
 
     /**
@@ -956,7 +1267,19 @@ class TransitionController {
             return false;
         }
         if (mSyncEngine.hasActiveSync()) {
-            if (!isCollecting()) {
+            if (isCollecting()) {
+                // Check if we can run in parallel here.
+                if (canStartCollectingNow(transit)) {
+                    // start running in parallel.
+                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
+                            + " collecting to waiting.", mCollectingTransition.getSyncId());
+                    mWaitingTransitions.add(mCollectingTransition);
+                    mCollectingTransition = null;
+                    moveToCollecting(transit);
+                    onStartCollect.onCollectStarted(false /* deferred */);
+                    return true;
+                }
+            } else {
                 Slog.w(TAG, "Ongoing Sync outside of transition.");
             }
             queueTransition(transit, onStartCollect);
@@ -967,18 +1290,56 @@ class TransitionController {
         return true;
     }
 
-    /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
-    boolean startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Runnable applySync) {
+    /**
+     * This will create and start collecting for a transition if possible. If there's no way to
+     * start collecting for `parallelType` now, then this returns null.
+     *
+     * WARNING: ONLY use this if the transition absolutely cannot be deferred!
+     */
+    @NonNull
+    Transition createAndStartCollecting(int type) {
+        if (mTransitionPlayer == null) {
+            return null;
+        }
+        if (!mQueuedTransitions.isEmpty()) {
+            // There is a queue, so it's not possible to start immediately
+            return null;
+        }
+        if (mSyncEngine.hasActiveSync()) {
+            if (isCollecting()) {
+                // Check if we can run in parallel here.
+                if (canStartCollectingNow(null /* transit */)) {
+                    // create and collect in parallel.
+                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
+                            + " collecting to waiting.", mCollectingTransition.getSyncId());
+                    mWaitingTransitions.add(mCollectingTransition);
+                    mCollectingTransition = null;
+                    Transition transit = new Transition(type, 0 /* flags */, this, mSyncEngine);
+                    moveToCollecting(transit);
+                    return transit;
+                }
+            } else {
+                Slog.w(TAG, "Ongoing Sync outside of transition.");
+            }
+            return null;
+        }
+        Transition transit = new Transition(type, 0 /* flags */, this, mSyncEngine);
+        moveToCollecting(transit);
+        return transit;
+    }
+
+    /** Starts the sync set if there is no pending or active syncs, otherwise enqueue the sync. */
+    void startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Consumer<Boolean> applySync) {
         if (!mQueuedTransitions.isEmpty() || mSyncEngine.hasActiveSync()) {
             // Just add to queue since we already have a queue.
-            mQueuedTransitions.add(new QueuedTransition(syncGroup, (d) -> applySync.run()));
+            mQueuedTransitions.add(new QueuedTransition(syncGroup,
+                    (deferred) -> applySync.accept(true /* deferred */)));
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
                     "Queueing legacy sync-set: %s", syncGroup.mSyncId);
-            return false;
+            return;
         }
         mSyncEngine.startSyncSet(syncGroup);
-        applySync.run();
-        return true;
+        applySync.accept(false /* deferred */);
     }
 
     interface OnStartCollect {
@@ -1091,12 +1452,11 @@ class TransitionController {
         long mReadyTimeNs;
         long mSendTimeNs;
         long mFinishTimeNs;
+        long mAbortTimeNs;
         TransitionRequestInfo mRequest;
         WindowContainerTransaction mStartWCT;
         int mSyncId;
         TransitionInfo mInfo;
-        ProtoOutputStream mProtoOutputStream = new ProtoOutputStream();
-        long mProtoToken;
 
         private String buildOnSendLog() {
             StringBuilder sb = new StringBuilder("Sent Transition #").append(mSyncId)

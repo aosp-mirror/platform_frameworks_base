@@ -17,21 +17,23 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.common.CommonProps;
-import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -41,8 +43,8 @@ import androidx.test.filters.SmallTest;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -82,17 +84,17 @@ public class SensorTest {
     @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
     @Mock
-    private IFace mDaemon;
+    FaceProvider mFaceProvider;
     @Mock
-    private BiometricStateCallback mBiometricStateCallback;
+    BaseClientMonitor mClientMonitor;
+    @Mock
+    AidlSession mCurrentSession;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
 
     private UserAwareBiometricScheduler mScheduler;
     private Sensor.HalSessionCallback mHalCallback;
-    private FaceProvider mFaceProvider;
-    private SensorProps[] mSensorProps;
 
     @Before
     public void setUp() {
@@ -113,16 +115,6 @@ public class SensorTest {
                 TAG, mScheduler, SENSOR_ID,
                 USER_ID, mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
                 mHalSessionCallback);
-
-        final SensorProps sensor1 = new SensorProps();
-        sensor1.commonProps = new CommonProps();
-        sensor1.commonProps.sensorId = 0;
-        final SensorProps sensor2 = new SensorProps();
-        sensor2.commonProps = new CommonProps();
-        sensor2.commonProps.sensorId = 1;
-        mSensorProps = new SensorProps[]{sensor1, sensor2};
-        mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
-                mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext);
     }
 
     @Test
@@ -154,14 +146,59 @@ public class SensorTest {
 
     @Test
     public void onBinderDied_noErrorOnNullClient() {
-        mScheduler.reset();
-        assertNull(mScheduler.getCurrentClient());
-        mFaceProvider.binderDied();
+        mLooper.dispatchAll();
 
-        for (int i = 0; i < mFaceProvider.mSensors.size(); i++) {
-            final Sensor sensor = mFaceProvider.mSensors.valueAt(i);
-            assertNull(sensor.getSessionForUser(USER_ID));
-        }
+        final SensorProps sensorProps = new SensorProps();
+        sensorProps.commonProps = new CommonProps();
+        sensorProps.commonProps.sensorId = 1;
+        final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
+                sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
+                sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                sensorProps.sensorType, sensorProps.supportsDetectInteraction,
+                sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
+        final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext, null,
+                internalProp, mLockoutResetDispatcher, mBiometricContext);
+
+        mScheduler.reset();
+
+        assertNull(mScheduler.getCurrentClient());
+
+        sensor.onBinderDied();
+
+        assertNull(sensor.getSessionForUser(USER_ID));
+    }
+
+    @Test
+    public void onBinderDied_cancelNonInterruptableClient() {
+        mLooper.dispatchAll();
+
+        when(mCurrentSession.getUserId()).thenReturn(USER_ID);
+        when(mClientMonitor.getTargetUserId()).thenReturn(USER_ID);
+        when(mClientMonitor.isInterruptable()).thenReturn(false);
+
+        final SensorProps sensorProps = new SensorProps();
+        sensorProps.commonProps = new CommonProps();
+        sensorProps.commonProps.sensorId = 1;
+        final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
+                sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
+                sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                sensorProps.sensorType, sensorProps.supportsDetectInteraction,
+                sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
+        final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext, null,
+                internalProp, mLockoutResetDispatcher, mBiometricContext, mCurrentSession);
+        mScheduler = (UserAwareBiometricScheduler) sensor.getScheduler();
+        sensor.mCurrentSession = new AidlSession(0, mock(ISession.class),
+                USER_ID, mHalCallback);
+
+        mScheduler.scheduleClientMonitor(mClientMonitor);
+
+        assertNotNull(mScheduler.getCurrentClient());
+
+        sensor.onBinderDied();
+
+        verify(mClientMonitor).cancel();
+        assertNull(sensor.getSessionForUser(USER_ID));
+        assertNull(mScheduler.getCurrentClient());
     }
 
     private void verifyNotLocked() {

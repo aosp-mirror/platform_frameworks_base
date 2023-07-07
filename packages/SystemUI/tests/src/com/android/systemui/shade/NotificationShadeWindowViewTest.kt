@@ -53,11 +53,13 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -103,6 +105,9 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock
     private lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
+    @Mock
+    private lateinit var unfoldTransitionProgressProvider:
+        Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
@@ -141,6 +146,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.DUAL_SHADE, false)
+        featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
         val multiShadeInteractor =
@@ -169,6 +175,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 lockIconViewController,
                 centralSurfaces,
                 notificationShadeWindowController,
+                unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,
@@ -189,6 +196,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                         keyguardTransitionInteractor =
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
+                                scope = testScope.backgroundScope
                             ),
                         falsingManager = FalsingManagerFake(),
                         shadeController = shadeController,

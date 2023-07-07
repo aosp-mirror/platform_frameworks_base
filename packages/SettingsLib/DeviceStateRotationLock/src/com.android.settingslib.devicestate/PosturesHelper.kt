@@ -19,6 +19,7 @@ package com.android.settingslib.devicestate
 import android.content.Context
 import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_KEY_FOLDED
 import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_KEY_HALF_FOLDED
+import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY
 import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_KEY_UNFOLDED
 import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_KEY_UNKNOWN
 import android.provider.Settings.Secure.DeviceStateRotationLockKey
@@ -33,6 +34,8 @@ class PosturesHelper(context: Context) {
         context.resources.getIntArray(R.array.config_halfFoldedDeviceStates)
     private val unfoldedDeviceStates =
         context.resources.getIntArray(R.array.config_openDeviceStates)
+    private val rearDisplayDeviceStates =
+        context.resources.getIntArray(R.array.config_rearDisplayDeviceStates)
 
     @DeviceStateRotationLockKey
     fun deviceStateToPosture(deviceState: Int): Int {
@@ -40,6 +43,7 @@ class PosturesHelper(context: Context) {
             in foldedDeviceStates -> DEVICE_STATE_ROTATION_KEY_FOLDED
             in halfFoldedDeviceStates -> DEVICE_STATE_ROTATION_KEY_HALF_FOLDED
             in unfoldedDeviceStates -> DEVICE_STATE_ROTATION_KEY_UNFOLDED
+            in rearDisplayDeviceStates -> DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY
             else -> DEVICE_STATE_ROTATION_KEY_UNKNOWN
         }
     }
@@ -49,6 +53,7 @@ class PosturesHelper(context: Context) {
             DEVICE_STATE_ROTATION_KEY_FOLDED -> foldedDeviceStates.firstOrNull()
             DEVICE_STATE_ROTATION_KEY_HALF_FOLDED -> halfFoldedDeviceStates.firstOrNull()
             DEVICE_STATE_ROTATION_KEY_UNFOLDED -> unfoldedDeviceStates.firstOrNull()
+            DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY -> rearDisplayDeviceStates.firstOrNull()
             else -> null
         }
     }

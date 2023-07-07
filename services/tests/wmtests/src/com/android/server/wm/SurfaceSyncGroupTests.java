@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 import static android.window.SurfaceSyncGroup.TRANSACTION_READY_TIMEOUT;
 
 import static org.junit.Assert.assertEquals;
@@ -51,6 +52,8 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 public class SurfaceSyncGroupTests {
     private static final String TAG = "SurfaceSyncGroupTests";
+
+    private static final long TIMEOUT_S = HW_TIMEOUT_MULTIPLIER * 5L;
 
     @Rule
     public ActivityTestRule<SurfaceSyncGroupActivity> mActivityRule = new ActivityTestRule<>(
@@ -93,7 +96,7 @@ public class SurfaceSyncGroupTests {
         addSecondSyncGroup(secondSsg, secondDrawCompleteLatch, bothSyncGroupsComplete);
 
         assertTrue("Failed to draw two frames",
-                secondDrawCompleteLatch.await(5, TimeUnit.SECONDS));
+                secondDrawCompleteLatch.await(TIMEOUT_S, TimeUnit.SECONDS));
 
         mHandler.postDelayed(() -> {
             // Don't add a markSyncReady for the first sync group until after it's added to another
@@ -105,7 +108,7 @@ public class SurfaceSyncGroupTests {
         }, 200);
 
         assertTrue("Failed to wait for both SurfaceSyncGroups to apply",
-                bothSyncGroupsComplete.await(5, TimeUnit.SECONDS));
+                bothSyncGroupsComplete.await(TIMEOUT_S, TimeUnit.SECONDS));
 
         validateScreenshot();
     }
@@ -123,7 +126,7 @@ public class SurfaceSyncGroupTests {
                 transaction -> mHandler.postDelayed(() -> {
                     try {
                         assertTrue("Failed to draw two frames",
-                                secondDrawCompleteLatch.await(5, TimeUnit.SECONDS));
+                                secondDrawCompleteLatch.await(TIMEOUT_S, TimeUnit.SECONDS));
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -143,7 +146,7 @@ public class SurfaceSyncGroupTests {
         addSecondSyncGroup(secondSsg, secondDrawCompleteLatch, bothSyncGroupsComplete);
 
         assertTrue("Failed to wait for both SurfaceSyncGroups to apply",
-                bothSyncGroupsComplete.await(5, TimeUnit.SECONDS));
+                bothSyncGroupsComplete.await(TIMEOUT_S, TimeUnit.SECONDS));
 
         validateScreenshot();
     }

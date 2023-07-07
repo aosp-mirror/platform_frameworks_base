@@ -16,10 +16,10 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.ScenarioBuilder
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -213,7 +213,7 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
     }
 
     @Test
-    @IwTest(focusArea = "framework")
+    @PlatinumTest(focusArea = "framework")
     override fun cujCompleted() {
         appWindowFullScreen()
         appWindowSeamlessRotation()

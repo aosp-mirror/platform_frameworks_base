@@ -227,5 +227,41 @@ public class InsetsSourceTest {
         assertEquals(numTotalSources, sources.size());
     }
 
+    @Test
+    public void testGetIndex() {
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int indexFromId = InsetsSource.getIndex(id);
+                    assertEquals("index and indexFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", indexFromId=" + indexFromId + ".", index, indexFromId);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testGetType() {
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int typeFromId = InsetsSource.getType(id);
+                    assertEquals("type and typeFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", typeFromId=" + typeFromId + ".", type, typeFromId);
+                }
+            }
+        }
+    }
+
     // Parcel and equals already tested via InsetsStateTest
 }

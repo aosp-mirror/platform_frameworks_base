@@ -279,6 +279,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -559,6 +560,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     // How many required verifiers can be on the system.
     private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
+
+    /**
+     * Specifies the minimum target SDK version an apk must specify in order to be installed
+     * on the system. This improves security and privacy by blocking low
+     * target sdk apps as malware can target older sdk versions to avoid
+     * the enforcement of new API behavior.
+     */
+    public static final int MIN_INSTALLABLE_TARGET_SDK = Build.VERSION_CODES.M;
 
     // Compilation reasons.
     // TODO(b/260124949): Clean this up with the legacy dexopt code.
@@ -3400,7 +3409,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Nullable
-    private String getDevicePolicyManagementRoleHolderPackageName(int userId) {
+    public String getDevicePolicyManagementRoleHolderPackageName(int userId) {
         return Binder.withCleanCallingIdentity(() -> {
             RoleManager roleManager = mContext.getSystemService(RoleManager.class);
             List<String> roleHolders =
@@ -5258,6 +5267,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public @NonNull List<String> getInitialNonStoppedSystemPackages() {
+            return mInitialNonStoppedSystemPackages != null
+                    ? new ArrayList<>(mInitialNonStoppedSystemPackages) : new ArrayList<>();
+        }
+
+        @Override
         public String[] getUnsuspendablePackagesForUser(String[] packageNames, int userId) {
             Objects.requireNonNull(packageNames, "packageNames cannot be null");
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
@@ -5336,7 +5351,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
                 int installReason, List<String> whiteListedPermissions) {
             return mInstallPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
-                    installReason, whiteListedPermissions, null);
+                    installReason, whiteListedPermissions, null).first;
         }
 
         @Override
@@ -6281,6 +6296,36 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         }
 
+        /**
+         * Wait for the handler to finish handling all pending messages.
+         * @param timeoutMillis Maximum time in milliseconds to wait.
+         * @param forBackgroundHandler Whether to wait for the background handler instead.
+         * @return True if all the waiting messages in the handler has been handled.
+         *         False if timeout.
+         */
+        @Override
+        public boolean waitForHandler(long timeoutMillis, boolean forBackgroundHandler) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            if (forBackgroundHandler) {
+                mBackgroundHandler.post(latch::countDown);
+            } else {
+                mHandler.post(latch::countDown);
+            }
+            final long endTimeMillis = System.currentTimeMillis() + timeoutMillis;
+            while (latch.getCount() > 0) {
+                try {
+                    final long remainingTimeMillis = endTimeMillis - System.currentTimeMillis();
+                    if (remainingTimeMillis <= 0) {
+                        return false;
+                    }
+                    return latch.await(remainingTimeMillis, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    // ignore and retry
+                }
+            }
+            return true;
+        }
+
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
@@ -6837,6 +6882,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public boolean isSameApp(@Nullable String packageName, int callingUid, int userId) {
+            return isSameApp(packageName, /*flags=*/0, callingUid, userId);
+        }
+
+        @Override
+        public boolean isSameApp(@Nullable String packageName,
+                @PackageManager.PackageInfoFlagsBits long flags, int callingUid, int userId) {
             if (packageName == null) {
                 return false;
             }
@@ -6845,7 +6896,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return packageName.equals(mRequiredSdkSandboxPackage);
             }
             Computer snapshot = snapshot();
-            int uid = snapshot.getPackageUid(packageName, 0, userId);
+            int uid = snapshot.getPackageUid(packageName, flags, userId);
             return UserHandle.isSameApp(uid, callingUid);
         }
 

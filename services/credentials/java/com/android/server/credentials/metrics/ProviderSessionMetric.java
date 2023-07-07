@@ -16,15 +16,23 @@
 
 package com.android.server.credentials.metrics;
 
+import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
+import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CredentialEntry;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;
+import com.android.server.credentials.metrics.shared.ResponseCollective;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides contextual metric collection for objects generated from
@@ -38,10 +46,21 @@ public class ProviderSessionMetric {
 
     // Specific candidate provider metric for the provider this session handles
     @NonNull
-    protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric =
-            new CandidatePhaseMetric();
+    protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric;
 
-    public ProviderSessionMetric() {}
+    // IFF there was an authentication entry clicked, this stores all required information for
+    // that event. This is for the 'get' flow. Notice these flows may be repetitive.
+    // Thus each provider stores a list of authentication metrics. The time between emits
+    // of these metrics should exceed 10 ms (given human reaction time is ~ 100's of ms), so emits
+    // will never collide. However, for aggregation, this will store information accordingly.
+    @NonNull
+    protected final List<BrowsedAuthenticationMetric> mBrowsedAuthenticationMetric =
+            new ArrayList<>();
+
+    public ProviderSessionMetric(int sessionIdTrackTwo) {
+        mCandidatePhasePerProviderMetric = new CandidatePhaseMetric(sessionIdTrackTwo);
+        mBrowsedAuthenticationMetric.add(new BrowsedAuthenticationMetric(sessionIdTrackTwo));
+    }
 
     /**
      * Retrieve the candidate provider phase metric and the data it contains.
@@ -51,13 +70,43 @@ public class ProviderSessionMetric {
     }
 
     /**
+     * Retrieves the authentication clicked metric information.
+     */
+    public List<BrowsedAuthenticationMetric> getBrowsedAuthenticationMetric() {
+        return mBrowsedAuthenticationMetric;
+    }
+
+    /**
      * This collects for ProviderSessions, with respect to the candidate providers, whether
      * an exception occurred in the candidate call.
      *
      * @param hasException indicates if the candidate provider associated with an exception
      */
     public void collectCandidateExceptionStatus(boolean hasException) {
-        mCandidatePhasePerProviderMetric.setHasException(hasException);
+        try {
+            mCandidatePhasePerProviderMetric.setHasException(hasException);
+        } catch (Exception e) {
+            Slog.i(TAG, "Error while setting candidate metric exception " + e);
+        }
+    }
+
+    /**
+     * This collects for ProviderSessions, with respect to the authentication entry provider,
+     * if an exception occurred in the authentication entry click. It's expected that these
+     * collections always occur after at least 1 authentication metric has been collected
+     * for the provider associated with this metric encapsulation.
+     *
+     * @param hasException indicates if the candidate provider from an authentication entry
+     *                     associated with an exception
+     */
+    public void collectAuthenticationExceptionStatus(boolean hasException) {
+        try {
+            BrowsedAuthenticationMetric mostRecentAuthenticationMetric =
+                    getUsedAuthenticationMetric();
+            mostRecentAuthenticationMetric.setHasException(hasException);
+        } catch (Exception e) {
+            Slog.i(TAG, "Error while setting authentication metric exception " + e);
+        }
     }
 
     /**
@@ -68,8 +117,31 @@ public class ProviderSessionMetric {
         try {
             mCandidatePhasePerProviderMetric.setFrameworkException(exceptionType);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate exception metric logging: " + e);
         }
+    }
+
+    private void collectAuthEntryUpdate(boolean isFailureStatus,
+            boolean isCompletionStatus, int providerSessionUid) {
+        BrowsedAuthenticationMetric mostRecentAuthenticationMetric =
+                getUsedAuthenticationMetric();
+        mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
+        if (isFailureStatus) {
+            mostRecentAuthenticationMetric.setAuthReturned(false);
+            mostRecentAuthenticationMetric.setProviderStatus(
+                    ProviderStatusForMetrics.QUERY_FAILURE
+                            .getMetricCode());
+        } else if (isCompletionStatus) {
+            mostRecentAuthenticationMetric.setAuthReturned(true);
+            mostRecentAuthenticationMetric.setProviderStatus(
+                    ProviderStatusForMetrics.QUERY_SUCCESS
+                            .getMetricCode());
+        }
+    }
+
+    private BrowsedAuthenticationMetric getUsedAuthenticationMetric() {
+        return mBrowsedAuthenticationMetric
+                .get(mBrowsedAuthenticationMetric.size() - 1);
     }
 
     /**
@@ -78,10 +150,17 @@ public class ProviderSessionMetric {
      * @param isFailureStatus indicates the candidate provider sent back a terminated response
      * @param isCompletionStatus indicates the candidate provider sent back a completion response
      * @param providerSessionUid the uid of the provider
+     * @param isPrimary indicates if this candidate provider was the primary provider
      */
     public void collectCandidateMetricUpdate(boolean isFailureStatus,
-            boolean isCompletionStatus, int providerSessionUid) {
+            boolean isCompletionStatus, int providerSessionUid, boolean isAuthEntry,
+            boolean isPrimary) {
         try {
+            if (isAuthEntry) {
+                collectAuthEntryUpdate(isFailureStatus, isCompletionStatus, providerSessionUid);
+                return;
+            }
+            mCandidatePhasePerProviderMetric.setPrimary(isPrimary);
             mCandidatePhasePerProviderMetric.setCandidateUid(providerSessionUid);
             mCandidatePhasePerProviderMetric
                     .setQueryFinishTimeNanoseconds(System.nanoTime());
@@ -97,7 +176,7 @@ public class ProviderSessionMetric {
                                 .getMetricCode());
             }
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate update metric logging: " + e);
         }
     }
 
@@ -113,12 +192,11 @@ public class ProviderSessionMetric {
      */
     public void collectCandidateMetricSetupViaInitialMetric(InitialPhaseMetric initMetric) {
         try {
-            mCandidatePhasePerProviderMetric.setSessionId(initMetric.getSessionId());
             mCandidatePhasePerProviderMetric.setServiceBeganTimeNanoseconds(
                     initMetric.getCredentialServiceStartedTimeNanoseconds());
             mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate setup metric logging: " + e);
         }
     }
 
@@ -127,70 +205,115 @@ public class ProviderSessionMetric {
      * purposes.
      *
      * @param response contains entries and data from the candidate provider responses
+     * @param isAuthEntry indicates if this is an auth entry collection or not
+     * @param initialPhaseMetric for create flows, this helps identify the response type, which
+     *                           will identify the *type* of create flow, especially important in
+     *                           track 2. This is expected to be null in get flows.
      * @param <R> the response type associated with the API flow in progress
      */
-    public <R> void collectCandidateEntryMetrics(R response) {
+    public <R> void collectCandidateEntryMetrics(R response, boolean isAuthEntry,
+            @Nullable InitialPhaseMetric initialPhaseMetric) {
         try {
             if (response instanceof BeginGetCredentialResponse) {
                 beginGetCredentialResponseCollectionCandidateEntryMetrics(
-                        (BeginGetCredentialResponse) response);
+                        (BeginGetCredentialResponse) response, isAuthEntry);
             } else if (response instanceof BeginCreateCredentialResponse) {
                 beginCreateCredentialResponseCollectionCandidateEntryMetrics(
-                        (BeginCreateCredentialResponse) response);
+                        (BeginCreateCredentialResponse) response, initialPhaseMetric);
             } else {
-                Log.i(TAG, "Your response type is unsupported for metric logging");
+                Slog.i(TAG, "Your response type is unsupported for candidate metric logging");
             }
-
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate entry metric logging: " + e);
         }
+    }
+
+    /**
+     * Once entries are received from the registry, this helps collect their info for metric
+     * purposes.
+     *
+     * @param entries contains matching entries from the Credential Registry.
+     */
+    public void collectCandidateEntryMetrics(List<CredentialEntry> entries) {
+        int numCredEntries = entries.size();
+        int numRemoteEntry = MetricUtilities.ZERO;
+        int numActionEntries = MetricUtilities.ZERO;
+        int numAuthEntries = MetricUtilities.ZERO;
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
+        Map<String, Integer> responseCounts = new LinkedHashMap<>();
+        entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
+        entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCredEntries);
+        entryCounts.put(EntryEnum.ACTION_ENTRY, numActionEntries);
+        entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
+
+        entries.forEach(entry -> {
+            String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
+            responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
+        });
+        ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
+        mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
+    }
+
+    /**
+     * This sets up an authentication metric collector to the flow. This must be called before
+     * any logical edits are done in a new authentication entry metric collection.
+     */
+    public void createAuthenticationBrowsingMetric() {
+        BrowsedAuthenticationMetric browsedAuthenticationMetric =
+                new BrowsedAuthenticationMetric(mCandidatePhasePerProviderMetric
+                        .getSessionIdProvider());
+        mBrowsedAuthenticationMetric.add(browsedAuthenticationMetric);
     }
 
     private void beginCreateCredentialResponseCollectionCandidateEntryMetrics(
-            BeginCreateCredentialResponse response) {
+            BeginCreateCredentialResponse response, InitialPhaseMetric initialPhaseMetric) {
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
         var createEntries = response.getCreateEntries();
-        int numRemoteEntry = MetricUtilities.ZERO;
-        if (response.getRemoteCreateEntry() != null) {
-            numRemoteEntry = MetricUtilities.UNIT;
-            mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
+        int numRemoteEntry = response.getRemoteCreateEntry() == null ? MetricUtilities.ZERO :
+                MetricUtilities.UNIT;
+        int numCreateEntries = createEntries.size();
+        entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
+        entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCreateEntries);
+
+        Map<String, Integer> responseCounts = new LinkedHashMap<>();
+        String[] requestStrings = initialPhaseMetric == null ? new String[0] :
+                initialPhaseMetric.getUniqueRequestStrings();
+        if (requestStrings.length > 0) {
+            responseCounts.put(requestStrings[0], initialPhaseMetric.getUniqueRequestCounts()[0]);
         }
-        int numCreateEntries =
-                createEntries == null ? MetricUtilities.ZERO : createEntries.size();
-        if (numCreateEntries > MetricUtilities.ZERO) {
-            createEntries.forEach(c ->
-                    mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-        }
-        mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries + numRemoteEntry);
-        mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
-        mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCreateEntries);
-        mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(MetricUtilities.UNIT);
+
+        ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
+        mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
 
     private void beginGetCredentialResponseCollectionCandidateEntryMetrics(
-            BeginGetCredentialResponse response) {
+            BeginGetCredentialResponse response, boolean isAuthEntry) {
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
+        Map<String, Integer> responseCounts = new LinkedHashMap<>();
         int numCredEntries = response.getCredentialEntries().size();
         int numActionEntries = response.getActions().size();
         int numAuthEntries = response.getAuthenticationActions().size();
-        int numRemoteEntry = MetricUtilities.ZERO;
-        if (response.getRemoteCredentialEntry() != null) {
-            numRemoteEntry = MetricUtilities.UNIT;
-            mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
+        int numRemoteEntry = response.getRemoteCredentialEntry() != null ? MetricUtilities.ZERO :
+                MetricUtilities.UNIT;
+        entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
+        entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCredEntries);
+        entryCounts.put(EntryEnum.ACTION_ENTRY, numActionEntries);
+        entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
+
+        response.getCredentialEntries().forEach(entry -> {
+            String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
+            responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
+        });
+
+        ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
+
+        if (!isAuthEntry) {
+            mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
+        } else {
+            // The most recent auth entry must be created already
+            var browsedAuthenticationMetric =
+                    mBrowsedAuthenticationMetric.get(mBrowsedAuthenticationMetric.size() - 1);
+            browsedAuthenticationMetric.setAuthEntryCollective(responseCollective);
         }
-        response.getCredentialEntries().forEach(c ->
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-        response.getActions().forEach(c ->
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.ACTION_ENTRY));
-        response.getAuthenticationActions().forEach(c ->
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.AUTHENTICATION_ENTRY));
-        mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCredEntries + numAuthEntries
-                + numActionEntries + numRemoteEntry);
-        mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCredEntries);
-        int numTypes = (response.getCredentialEntries().stream()
-                .map(CredentialEntry::getType).collect(
-                        Collectors.toSet())).size(); // Dedupe type strings
-        mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(numTypes);
-        mCandidatePhasePerProviderMetric.setActionEntryCount(numActionEntries);
-        mCandidatePhasePerProviderMetric.setAuthenticationEntryCount(numAuthEntries);
-        mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
     }
 }

@@ -28,7 +28,7 @@ import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutIn
 import javax.inject.Inject
 
 /**
- * Activity responsible for create a shortcut for notes action. If the shortcut is enabled, a new
+ * Activity responsible for creating a shortcut for notes action. If the shortcut is enabled, a new
  * shortcut will appear in the widget picker. If the shortcut is selected, the Activity here will be
  * launched, creating a new shortcut for [CreateNoteTaskShortcutActivity], and will finish.
  *

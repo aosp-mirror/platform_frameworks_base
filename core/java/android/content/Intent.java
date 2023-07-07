@@ -6907,7 +6907,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    public static final int FLAG_IGNORE_EPHEMERAL = 0x00000200;
+    public static final int FLAG_IGNORE_EPHEMERAL = 0x80000000;
 
     /**
      * If set, the new activity is not kept in the history stack.  As soon as

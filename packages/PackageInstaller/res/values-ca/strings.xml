@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"S\'ha instal·lat l\'aplicació."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vols instal·lar aquesta aplicació?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vols actualitzar aquesta aplicació?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vols actualitzar l\'aplicació de <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAquesta aplicació sol rebre actualitzacions de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font del teu telèfon. És possible que la funcionalitat de l\'aplicació canviï."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vols actualitzar l\'aplicació des de <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAquesta aplicació sol rebre actualitzacions a través de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font del teu telèfon. És possible que la funcionalitat de l\'aplicació canviï."</string>
     <string name="install_failed" msgid="5777824004474125469">"No s\'ha instal·lat l\'aplicació."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"El paquet s\'ha bloquejat perquè no es pugui instal·lar."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"L\'aplicació no s\'ha instal·lat perquè el paquet entra en conflicte amb un d\'existent."</string>

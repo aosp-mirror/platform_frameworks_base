@@ -26,6 +26,7 @@ import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
@@ -49,6 +50,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.CreateUserActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -292,6 +294,10 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+
+    val isUserSwitcherEnabled: Boolean
+        get() = repository.isUserSwitcherEnabled()
+
     val keyguardUpdateMonitorCallback =
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardGoingAway() {
@@ -368,6 +374,7 @@ constructor(
         }
 
         pw.println("isSimpleUserSwitcher=$isSimpleUserSwitcher")
+        pw.println("isUserSwitcherEnabled=$isUserSwitcherEnabled")
         pw.println("isGuestUserAutoCreated=$isGuestUserAutoCreated")
     }
 
@@ -454,13 +461,16 @@ constructor(
             UserActionModel.ADD_USER -> {
                 uiEventLogger.log(MultiUserActionsEvent.CREATE_USER_FROM_USER_SWITCHER)
                 val currentUser = repository.getSelectedUserInfo()
-                showDialog(
-                    ShowDialogRequestModel.ShowAddUserDialog(
-                        userHandle = currentUser.userHandle,
-                        isKeyguardShowing = keyguardInteractor.isKeyguardShowing(),
-                        showEphemeralMessage = currentUser.isGuest && currentUser.isEphemeral,
-                        dialogShower = dialogShower,
-                    )
+                dismissDialog()
+                activityStarter.startActivity(
+                    CreateUserActivity.createIntentForStart(
+                        applicationContext,
+                        keyguardInteractor.isKeyguardShowing()
+                    ),
+                    /* dismissShade= */ true,
+                    /* animationController */ null,
+                    /* showOverLockscreenWhenLocked */ true,
+                    /* userHandle */ currentUser.getUserHandle(),
                 )
             }
             UserActionModel.ADD_SUPERVISED_USER -> {
@@ -762,8 +772,18 @@ constructor(
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        // TODO(b/246631653): downscale the bitmaps to R.dimen.max_avatar_size if requested.
-        val userIcon = withContext(backgroundDispatcher) { manager.getUserIcon(userId) }
+        val userIcon = withContext(backgroundDispatcher) {
+            manager.getUserIcon(userId)
+                ?.let { bitmap ->
+                    val iconSize =
+                        applicationContext
+                            .resources
+                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                    Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
+                }
+        }
+
+
         if (userIcon != null) {
             return BitmapDrawable(userIcon)
         }

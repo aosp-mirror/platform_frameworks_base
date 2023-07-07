@@ -244,7 +244,7 @@
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
-    <string name="bluetooth_profile_le_audio">LE audio</string>
+    <string name="bluetooth_profile_le_audio">LE Audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
@@ -516,6 +516,9 @@
     <string name="category_personal">Personal</string>
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="category_work">Work</string>
+    <!-- Header for items under the clone user [CHAR LIMIT=30] -->
+    <string name="category_clone">Clone</string>
+
 
     <!-- Full package name of OEM preferred device feedback reporter. Leave this blank, overlaid in Settings/TvSettings [DO NOT TRANSLATE] -->
     <string name="oem_preferred_feedback_reporter" translatable="false" />
@@ -926,7 +929,7 @@
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
     <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
-    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=30] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
     <!-- UI debug setting: show missing channel toasts summary [CHAR LIMIT=50] -->
     <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
@@ -1324,6 +1327,12 @@
     <string name="media_transfer_this_device_name" product="default">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <!-- Name of the dock device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
+    <!-- Default name of the external device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_external_device_name">External Device</string>
+    <!-- Default name of the connected device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_default_device_name">Connected device</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
     <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->

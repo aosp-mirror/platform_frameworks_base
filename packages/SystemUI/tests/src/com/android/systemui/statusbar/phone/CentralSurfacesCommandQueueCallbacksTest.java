@@ -43,6 +43,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
@@ -96,6 +97,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private UserTracker mUserTracker;
     @Mock private QSHost mQSHost;
+    @Mock private ActivityStarter mActivityStarter;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -131,7 +133,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mSystemBarAttributesListener,
                 mCameraLauncherLazy,
                 mUserTracker,
-                mQSHost);
+                mQSHost,
+                mActivityStarter);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));

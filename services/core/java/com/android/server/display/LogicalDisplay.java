@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.Display;
@@ -203,6 +202,7 @@ final class LogicalDisplay {
         mIsEnabled = true;
         mIsInTransition = false;
         mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -332,6 +332,10 @@ final class LogicalDisplay {
         return mPrimaryDisplayDevice != null;
     }
 
+    boolean isDirtyLocked() {
+        return mDirty;
+    }
+
     /**
      * Updates the {@link DisplayGroup} to which the logical display belongs.
      *
@@ -340,8 +344,7 @@ final class LogicalDisplay {
     public void updateDisplayGroupIdLocked(int groupId) {
         if (groupId != mDisplayGroupId) {
             mDisplayGroupId = groupId;
-            mBaseDisplayInfo.displayGroupId = groupId;
-            mInfo.set(null);
+            mDirty = true;
         }
     }
 
@@ -514,6 +517,7 @@ final class LogicalDisplay {
 
             mBaseDisplayInfo.layoutLimitedRefreshRate = mLayoutLimitedRefreshRate;
             mBaseDisplayInfo.thermalRefreshRateThrottling = mThermalRefreshRateThrottling;
+            mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
@@ -886,19 +890,14 @@ final class LogicalDisplay {
     }
 
     /**
-     * @return The ID of the brightness throttling data that this display should use.
-     */
-    public String getThermalBrightnessThrottlingDataIdLocked() {
-        return mThermalBrightnessThrottlingDataId;
-    }
-
-    /**
      * @param brightnessThrottlingDataId The ID of the brightness throttling data that this
      *                                  display should use.
      */
     public void setThermalBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
-        mThermalBrightnessThrottlingDataId =
-                brightnessThrottlingDataId;
+        if (!Objects.equals(brightnessThrottlingDataId, mThermalBrightnessThrottlingDataId)) {
+            mThermalBrightnessThrottlingDataId = brightnessThrottlingDataId;
+            mDirty = true;
+        }
     }
 
     /**
@@ -933,18 +932,6 @@ final class LogicalDisplay {
      */
     public String getDisplayGroupNameLocked() {
         return mDisplayGroupName;
-    }
-
-    /**
-     * Returns whether a display group other than the default display group needs to be assigned.
-     *
-     * <p>If display group name is empty or {@code Display.FLAG_OWN_DISPLAY_GROUP} is set, the
-     * display is assigned to the default display group.
-     */
-    public boolean needsOwnDisplayGroupLocked() {
-        DisplayInfo info = getDisplayInfoLocked();
-        return (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0
-                || !TextUtils.isEmpty(mDisplayGroupName);
     }
 
     public void dumpLocked(PrintWriter pw) {

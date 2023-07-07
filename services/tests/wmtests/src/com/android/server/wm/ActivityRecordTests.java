@@ -851,7 +851,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                    public void onAnimationCancelled() {
                     }
                 }, 0, 0));
         activity.updateOptionsLocked(opts);
@@ -1996,7 +1996,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertTrue(activity.isSnapshotCompatible(snapshot));
 
-        setRotatedScreenOrientationSilently(activity);
+        doReturn(task.getWindowConfiguration().getRotation() + 1).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(activity);
 
         assertFalse(activity.isSnapshotCompatible(snapshot));
     }
@@ -2783,8 +2784,12 @@ public class ActivityRecordTests extends WindowTestsBase {
             testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
             testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU,
                     TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            // Above T
-            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU + 1, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            // Above V
+            testLegacySplashScreen(Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 2, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);
@@ -3124,7 +3129,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setSystemDecorations(true).build();
         // Add a decor insets provider window.
         final WindowState navbar = createNavBarWithProvidedInsets(squareDisplay);
-        assertTrue(navbar.providesNonDecorInsets()
+        assertTrue(navbar.providesDisplayDecorInsets()
                 && squareDisplay.getDisplayPolicy().updateDecorInsetsInfo());
         squareDisplay.sendNewConfiguration();
         final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();

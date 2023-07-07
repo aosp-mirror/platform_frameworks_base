@@ -205,8 +205,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        centralSurfaces.getShadeViewController()
-                                        .startExpandLatencyTracking();
+                        ShadeViewController shadeViewController =
+                                centralSurfaces.getShadeViewController();
+                        if (shadeViewController != null) {
+                            shadeViewController.startExpandLatencyTracking();
+                        }
                     }
                     mHandler.post(() -> {
                         int action = event.getActionMasked();

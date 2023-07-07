@@ -252,6 +252,15 @@ public final class SaveEventLogger {
   }
 
   /**
+   * Set is_framework_created_save_info as long as mEventInternal presents.
+   */
+  public void maybeSetIsFrameworkCreatedSaveInfo(boolean val) {
+    mEventInternal.ifPresent(event -> {
+      event.mIsFrameworkCreatedSaveInfo = val;
+    });
+  }
+
+  /**
    * Log an AUTOFILL_SAVE_EVENT_REPORTED event.
    */
   public void logAndEndEvent() {
@@ -277,7 +286,8 @@ public final class SaveEventLogger {
           + " mIsSaved=" + event.mIsSaved
           + " mLatencySaveUiDisplayMillis=" + event.mLatencySaveUiDisplayMillis
           + " mLatencySaveRequestMillis=" + event.mLatencySaveRequestMillis
-          + " mLatencySaveFinishMillis=" + event.mLatencySaveFinishMillis);
+          + " mLatencySaveFinishMillis=" + event.mLatencySaveFinishMillis
+          + " mIsFrameworkCreatedSaveInfo=" + event.mIsFrameworkCreatedSaveInfo);
     }
     FrameworkStatsLog.write(
         AUTOFILL_SAVE_EVENT_REPORTED,
@@ -295,7 +305,8 @@ public final class SaveEventLogger {
         event.mIsSaved,
         event.mLatencySaveUiDisplayMillis,
         event.mLatencySaveRequestMillis,
-        event.mLatencySaveFinishMillis);
+        event.mLatencySaveFinishMillis,
+        event.mIsFrameworkCreatedSaveInfo);
     mEventInternal = Optional.empty();
   }
 
@@ -314,6 +325,7 @@ public final class SaveEventLogger {
     long mLatencySaveUiDisplayMillis = 0;
     long mLatencySaveRequestMillis = 0;
     long mLatencySaveFinishMillis = 0;
+    boolean mIsFrameworkCreatedSaveInfo = false;
 
     SaveEventInternal() {
     }

@@ -24,6 +24,7 @@ import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -37,6 +38,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -655,6 +657,139 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun vcnSubId_initiallyNull() {
+        assertThat(underTest.vcnSubId.value).isNull()
+    }
+
+    @Test
+    fun vcnSubId_tracksVcnTransportInfo() =
+        testScope.runTest {
+            val vcnInfo = VcnTransportInfo(SUB_1_ID)
+
+            var latest: Int? = null
+            val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
+
+            val capabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(vcnInfo)
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isEqualTo(SUB_1_ID)
+            job.cancel()
+        }
+
+    @Test
+    fun vcnSubId_filersOutInvalid() =
+        testScope.runTest {
+            val vcnInfo = VcnTransportInfo(INVALID_SUBSCRIPTION_ID)
+
+            var latest: Int? = null
+            val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
+
+            val capabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(vcnInfo)
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isNull()
+            job.cancel()
+        }
+
+    @Test
+    fun vcnSubId_nullIfNoTransportInfo() =
+        testScope.runTest {
+            var latest: Int? = null
+            val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
+
+            val capabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(null)
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isNull()
+            job.cancel()
+        }
+
+    @Test
+    fun vcnSubId_nullIfVcnInfoIsNotCellular() =
+        testScope.runTest {
+            // If the underlying network of the VCN is a WiFi network, then there is no subId that
+            // could disagree with telephony's active data subscription id.
+
+            var latest: Int? = null
+            val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
+
+            val wifiInfo = mock<WifiInfo>()
+            val vcnInfo = VcnTransportInfo(wifiInfo)
+            val capabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(vcnInfo)
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isNull()
+            job.cancel()
+        }
+
+    @Test
+    fun vcnSubId_changingVcnInfoIsTracked() =
+        testScope.runTest {
+            var latest: Int? = null
+            val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
+
+            val wifiInfo = mock<WifiInfo>()
+            val wifiVcnInfo = VcnTransportInfo(wifiInfo)
+            val sub1VcnInfo = VcnTransportInfo(SUB_1_ID)
+            val sub2VcnInfo = VcnTransportInfo(SUB_2_ID)
+
+            val capabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(wifiVcnInfo)
+                }
+
+            // WIFI VCN info
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isNull()
+
+            // Cellular VCN info with subId 1
+            whenever(capabilities.hasTransport(eq(TRANSPORT_CELLULAR))).thenReturn(true)
+            whenever(capabilities.transportInfo).thenReturn(sub1VcnInfo)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isEqualTo(SUB_1_ID)
+
+            // Cellular VCN info with subId 2
+            whenever(capabilities.transportInfo).thenReturn(sub2VcnInfo)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isEqualTo(SUB_2_ID)
+
+            // No VCN anymore
+            whenever(capabilities.transportInfo).thenReturn(null)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
     fun getMainOrUnderlyingWifiInfo_wifi_hasInfo() {
         val wifiInfo = mock<WifiInfo>()
         val capabilities =
@@ -963,6 +1098,9 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
         private const val SLOT_ETHERNET = "ethernet"
         private const val SLOT_WIFI = "wifi"
         private const val SLOT_MOBILE = "mobile"
+
+        private const val SUB_1_ID = 1
+        private const val SUB_2_ID = 2
 
         const val NETWORK_ID = 45
         val NETWORK = mock<Network>().apply { whenever(this.getNetId()).thenReturn(NETWORK_ID) }

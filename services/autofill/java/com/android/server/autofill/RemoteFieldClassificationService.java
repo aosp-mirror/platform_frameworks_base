@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -42,6 +43,8 @@ import android.util.Slog;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Class responsible for connection with the Remote {@link FieldClassificationService}.
@@ -132,7 +135,8 @@ final class RemoteFieldClassificationService
     }
 
     public void onFieldClassificationRequest(@NonNull FieldClassificationRequest request,
-            FieldClassificationServiceCallbacks fieldClassificationServiceCallbacks) {
+            WeakReference<FieldClassificationServiceCallbacks>
+                fieldClassificationServiceCallbacksWeakRef) {
         final long startTime = SystemClock.elapsedRealtime();
         if (sVerbose) {
             Slog.v(TAG, "onFieldClassificationRequest request:" + request);
@@ -155,16 +159,50 @@ final class RemoteFieldClassificationService
                                     public void onSuccess(FieldClassificationResponse response) {
                                         logLatency(startTime);
                                         if (sDebug) {
-                                            Log.d(TAG, "onSuccess Response: " + response);
+                                            if (Build.IS_DEBUGGABLE) {
+                                                Slog.d(TAG, "onSuccess Response: " + response);
+                                            } else {
+                                                String msg = "";
+                                                if (response == null
+                                                        || response.getClassifications() == null) {
+                                                    msg = "null response";
+                                                } else {
+                                                    msg = "size: "
+                                                            + response.getClassifications().size();
+                                                }
+                                                Slog.d(TAG, "onSuccess " + msg);
+                                            }
                                         }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                        Helper.weakDeref(
+                                                                fieldClassificationServiceCallbacksWeakRef,
+                                                                TAG, "onSuccess "
+                                                        );
+                                        if (fieldClassificationServiceCallbacks == null) {
+                                            return;
+                                        }
+                                        fieldClassificationServiceCallbacks
+                                                .onClassificationRequestSuccess(response);
                                     }
 
                                     @Override
                                     public void onFailure() {
                                         logLatency(startTime);
                                         if (sDebug) {
-                                            Log.d(TAG, "onFailure");
+                                            Slog.d(TAG, "onFailure");
                                         }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                        Helper.weakDeref(
+                                                                fieldClassificationServiceCallbacksWeakRef,
+                                                                TAG, "onFailure "
+                                                        );
+                                        if (fieldClassificationServiceCallbacks == null) {
+                                            return;
+                                        }
+                                        fieldClassificationServiceCallbacks
+                                                .onClassificationRequestFailure(0, null);
                                     }
 
                                     @Override

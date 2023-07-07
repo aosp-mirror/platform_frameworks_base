@@ -266,8 +266,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController = inputController;
         }
         if (sensorController == null) {
-            mSensorController = new SensorController(
-                    mVirtualDeviceLock, mDeviceId, mParams.getVirtualSensorCallback());
+            mSensorController = new SensorController(mDeviceId, mParams.getVirtualSensorCallback());
         } else {
             mSensorController = sensorController;
         }
@@ -988,8 +987,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     "Virtual device doesn't have a virtual display with ID " + displayId);
         }
 
-        releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
-
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /**

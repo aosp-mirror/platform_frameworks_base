@@ -360,3 +360,11 @@ message DNDPolicyProto {
 
     optional ConversationType allow_conversations_from = 19;
 }
+
+// Enum identifying the type of rule that changed; values set to match ones used in the
+// DNDStateChanged proto.
+enum RuleType {
+    RULE_TYPE_UNKNOWN = 0;
+    RULE_TYPE_MANUAL = 1;
+    RULE_TYPE_AUTOMATIC = 2;
+}

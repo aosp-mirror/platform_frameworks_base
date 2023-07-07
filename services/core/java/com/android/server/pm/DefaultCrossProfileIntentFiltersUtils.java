@@ -382,7 +382,11 @@ public class DefaultCrossProfileIntentFiltersUtils {
         return filters;
     }
 
-    /** Call intent with tel scheme exclusively handled my managed profile. */
+    /** Call intent with tel scheme exclusively handled my managed profile.
+     * Note that work profile telephony relies on this intent filter to redirect intents to
+     * the IntentForwarderActivity. Work profile telephony error handling must be updated in
+     * the Telecomm package CallsManager if this filter is changed.
+     */
     private static final DefaultCrossProfileIntentFilter CALL_MANAGED_PROFILE =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
@@ -434,6 +438,16 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addAction(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
                     .addAction(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)
                     .addAction(MediaStore.INTENT_ACTION_VIDEO_CAMERA)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_PHOTOPICKER_SELECTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_USER_SELECT_IMAGES_FOR_APP)
                     .addCategory(Intent.CATEGORY_DEFAULT)
                     .build();
 
@@ -611,7 +625,8 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 CLONE_TO_PARENT_VIEW_ACTION,
                 CLONE_TO_PARENT_PICK_INSERT_ACTION,
                 CLONE_TO_PARENT_DIAL_DATA,
-                CLONE_TO_PARENT_SMS_MMS
+                CLONE_TO_PARENT_SMS_MMS,
+                CLONE_TO_PARENT_PHOTOPICKER_SELECTION
         );
     }
 }

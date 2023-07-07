@@ -149,11 +149,13 @@ public final class AccessibilityStatsLogUtils {
      *
      * @param mode The activated magnification mode.
      * @param duration The duration in milliseconds during the magnification is activated.
+     * @param scale The last magnification scale for the activation
      */
-    public static void logMagnificationUsageState(int mode, long duration) {
+    public static void logMagnificationUsageState(int mode, long duration, float scale) {
         FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED,
                 convertToLoggingMagnificationMode(mode),
-                duration);
+                duration,
+                convertToLoggingMagnificationScale(scale));
     }
 
     /**
@@ -253,5 +255,13 @@ public final class AccessibilityStatsLogUtils {
             default:
                 return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
         }
+    }
+
+    private static int convertToLoggingMagnificationScale(float scale) {
+        // per b/269366674, we make every 10% a bucket for both privacy and readability concern.
+        // For example
+        // 1. both 2.30f(230%) and 2.36f(236%) would return 230 as bucket id.
+        // 2. bucket id 370 means scale range in [370%, 379%]
+        return ((int) (scale * 10)) * 10;
     }
 }

@@ -59,10 +59,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.devicestate.DeviceStateManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
-import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.view.DisplayAddress;
@@ -518,7 +518,8 @@ public class DisplayRotationTests {
         mBuilder.build();
         configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
 
-        when(mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()).thenReturn(true);
+        when(mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mMockDisplayContent))
+                .thenReturn(true);
 
         thawRotation();
 
@@ -539,6 +540,26 @@ public class DisplayRotationTests {
         mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
         assertEquals(Surface.ROTATION_180, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_180));
+    }
+
+    @Test
+    public void testFreezeRotation_reverseRotationDirectionAroundZAxis_yes() throws Exception {
+        mBuilder.build();
+        when(mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mMockDisplayContent))
+                .thenReturn(true);
+
+        freezeRotation(Surface.ROTATION_90);
+        assertEquals(Surface.ROTATION_270, mTarget.getUserRotation());
+    }
+
+    @Test
+    public void testFreezeRotation_reverseRotationDirectionAroundZAxis_no() throws Exception {
+        mBuilder.build();
+        when(mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mMockDisplayContent))
+                .thenReturn(false);
+
+        freezeRotation(Surface.ROTATION_90);
+        assertEquals(Surface.ROTATION_90, mTarget.getUserRotation());
     }
 
     private boolean waitForUiHandler() {
@@ -922,8 +943,6 @@ public class DisplayRotationTests {
     @Test
     public void testIgnoresDeskDockRotation_whenNoSensorAndLockedRespected() throws Exception {
         mBuilder.setDeskDockRotation(Surface.ROTATION_270).build();
-        when(mMockDisplayPolicy.isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer())
-                .thenReturn(true);
         configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
 
         when(mMockDisplayPolicy.getDockMode()).thenReturn(Intent.EXTRA_DOCK_STATE_DESK);

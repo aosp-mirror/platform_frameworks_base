@@ -19,9 +19,9 @@
 package com.android.server.wm.flicker
 
 import android.tools.common.PlatformConsts
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.IComponentNameMatcher
 import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.IComponentNameMatcher
 import android.tools.common.traces.wm.WindowManagerTrace
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.helpers.WindowUtils
@@ -97,19 +97,19 @@ fun FlickerTest.entireScreenCovered(allStates: Boolean = true) {
     if (allStates) {
         assertLayers {
             this.invoke("entireScreenCovered") { entry ->
-                entry.entry.displays.forEach { display ->
+                entry.entry.displays.filter { it.isOn }.forEach { display ->
                     entry.visibleRegion().coversAtLeast(display.layerStackSpace)
                 }
             }
         }
     } else {
         assertLayersStart {
-            this.entry.displays.forEach { display ->
+            this.entry.displays.filter { it.isOn }.forEach { display ->
                 this.visibleRegion().coversAtLeast(display.layerStackSpace)
             }
         }
         assertLayersEnd {
-            this.entry.displays.forEach { display ->
+            this.entry.displays.filter { it.isOn }.forEach { display ->
                 this.visibleRegion().coversAtLeast(display.layerStackSpace)
             }
         }

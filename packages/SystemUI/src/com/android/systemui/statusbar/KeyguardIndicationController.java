@@ -41,8 +41,8 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
+import static com.android.systemui.log.LogLevel.ERROR;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
-import static com.android.systemui.plugins.log.LogLevel.ERROR;
 
 import android.app.AlarmManager;
 import android.app.admin.DevicePolicyManager;
@@ -91,12 +91,13 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -186,7 +187,7 @@ public class KeyguardIndicationController {
     private boolean mPowerPluggedInDock;
 
     private boolean mPowerCharged;
-    private boolean mBatteryOverheated;
+    private boolean mBatteryDefender;
     private boolean mEnableBatteryDefender;
     private boolean mIncompatibleCharger;
     private int mChargingSpeed;
@@ -224,6 +225,7 @@ public class KeyguardIndicationController {
     // triggered while the device is asleep
     private final AlarmTimeout mHideTransientMessageHandler;
     private final AlarmTimeout mHideBiometricMessageHandler;
+    private FeatureFlags mFeatureFlags;
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -253,7 +255,8 @@ public class KeyguardIndicationController {
             KeyguardLogger keyguardLogger,
             AlternateBouncerInteractor alternateBouncerInteractor,
             AlarmManager alarmManager,
-            UserTracker userTracker
+            UserTracker userTracker,
+            FeatureFlags flags
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -278,6 +281,7 @@ public class KeyguardIndicationController {
         mScreenLifecycle.addObserver(mScreenObserver);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
+        mFeatureFlags = flags;
 
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
@@ -335,11 +339,15 @@ public class KeyguardIndicationController {
             R.id.keyguard_indication_text_bottom);
         mInitialTextColorState = mTopIndicationView != null
                 ? mTopIndicationView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
+        if (mRotateTextViewController != null) {
+            mRotateTextViewController.destroy();
+        }
         mRotateTextViewController = new KeyguardIndicationRotateTextViewController(
                 mLockScreenIndicationView,
                 mExecutor,
                 mStatusBarStateController,
-                mKeyguardLogger
+                mKeyguardLogger,
+                mFeatureFlags
         );
         updateDeviceEntryIndication(false /* animate */);
         updateOrganizedOwnedDevice();
@@ -918,7 +926,7 @@ public class KeyguardIndicationController {
      */
     protected String computePowerIndication() {
         int chargingId;
-        if (mBatteryOverheated) {
+        if (mBatteryDefender) {
             chargingId = R.string.keyguard_plugged_in_charging_limited;
             String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
             return mContext.getResources().getString(chargingId, percentage);
@@ -1090,9 +1098,9 @@ public class KeyguardIndicationController {
             mChargingSpeed = status.getChargingSpeed(mContext);
             mBatteryLevel = status.level;
             mBatteryPresent = status.present;
-            mBatteryOverheated = status.isOverheated();
+            mBatteryDefender = status.isBatteryDefender();
             // when the battery is overheated, device doesn't charge so only guard on pluggedIn:
-            mEnableBatteryDefender = mBatteryOverheated && status.isPluggedIn();
+            mEnableBatteryDefender = mBatteryDefender && status.isPluggedIn();
             mIncompatibleCharger = status.incompatibleCharger.orElse(false);
             try {
                 mChargingTimeRemaining = mPowerPluggedIn
@@ -1103,7 +1111,7 @@ public class KeyguardIndicationController {
             }
 
             mKeyguardLogger.logRefreshBatteryInfo(isChargingOrFull, mPowerPluggedIn, mBatteryLevel,
-                    mBatteryOverheated);
+                    mBatteryDefender);
             updateDeviceEntryIndication(!wasPluggedIn && mPowerPluggedInWired);
         }
 

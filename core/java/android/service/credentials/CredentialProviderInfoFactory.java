@@ -93,7 +93,8 @@ public final class CredentialProviderInfoFactory {
                 getServiceInfoOrThrow(serviceComponent, userId),
                 isSystemProvider,
                 /* disableSystemAppVerificationForTests= */ false,
-                /* isEnabled= */ false);
+                /* isEnabled= */ false,
+                /* isPrimary= */ false);
     }
 
     /**
@@ -113,7 +114,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull ServiceInfo serviceInfo,
             boolean isSystemProvider,
             boolean disableSystemAppVerificationForTests,
-            boolean isEnabled)
+            boolean isEnabled,
+            boolean isPrimary)
             throws SecurityException {
         verifyProviderPermission(serviceInfo);
         if (isSystemProvider) {
@@ -128,6 +130,7 @@ public final class CredentialProviderInfoFactory {
         return populateMetadata(context, serviceInfo)
                 .setSystemProvider(isSystemProvider)
                 .setEnabled(isEnabled)
+                .setPrimary(isPrimary)
                 .build();
     }
 
@@ -165,7 +168,9 @@ public final class CredentialProviderInfoFactory {
             Slog.w(TAG, "Context is null in isSystemProviderWithValidPermission");
             return false;
         }
-        return PermissionUtils.hasPermission(context, serviceInfo.packageName,
+        return PermissionUtils.hasPermission(
+                context,
+                serviceInfo.packageName,
                 Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE);
     }
 
@@ -178,8 +183,11 @@ public final class CredentialProviderInfoFactory {
         if (disableSystemAppVerificationForTests) {
             Bundle metadata = serviceInfo.metaData;
             if (metadata == null) {
-                Slog.w(TAG, "metadata is null while reading "
-                        + "TEST_SYSTEM_PROVIDER_META_DATA_KEY: " + serviceInfo);
+                Slog.w(
+                        TAG,
+                        "metadata is null while reading "
+                                + "TEST_SYSTEM_PROVIDER_META_DATA_KEY: "
+                                + serviceInfo);
                 return false;
             }
             return metadata.getBoolean(
@@ -212,8 +220,10 @@ public final class CredentialProviderInfoFactory {
 
         // 3. Stop if we are missing data.
         if (resources == null) {
-            Slog.w(TAG, "Resources are null for the serviceInfo being processed: "
-                    + serviceInfo.getComponentName());
+            Slog.w(
+                    TAG,
+                    "Resources are null for the serviceInfo being processed: "
+                            + serviceInfo.getComponentName());
             return builder;
         }
 
@@ -374,7 +384,6 @@ public final class CredentialProviderInfoFactory {
                 if (appInfo == null || serviceInfo == null) {
                     continue;
                 }
-
                 services.add(serviceInfo);
             } catch (SecurityException | PackageManager.NameNotFoundException e) {
                 Slog.e(TAG, "Error getting info for " + serviceInfo, e);
@@ -406,7 +415,7 @@ public final class CredentialProviderInfoFactory {
                                 si,
                                 /* isSystemProvider= */ true,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(si.getComponentName()));
+                                enabledServices.contains(si.getComponentName()), false);
                 if (cpi.isSystemProvider()) {
                     providerInfos.add(cpi);
                 } else {
@@ -444,7 +453,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             int userId,
             int providerFilter,
-            Set<ComponentName> enabledServices) {
+            Set<ComponentName> enabledServices,
+            Set<String> primaryServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -457,7 +467,11 @@ public final class CredentialProviderInfoFactory {
                         context, pp, disableSystemAppVerificationForTests, providerFilter);
         generator.addUserProviders(
                 getUserProviders(
-                        context, userId, disableSystemAppVerificationForTests, enabledServices));
+                        context,
+                        userId,
+                        disableSystemAppVerificationForTests,
+                        enabledServices,
+                        primaryServices));
         generator.addSystemProviders(
                 getAvailableSystemServices(
                         context, userId, disableSystemAppVerificationForTests, enabledServices));
@@ -473,7 +487,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             int userId,
             int providerFilter,
-            Set<ComponentName> enabledServices) {
+            Set<ComponentName> enabledServices,
+            Set<String> primaryServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -486,7 +501,11 @@ public final class CredentialProviderInfoFactory {
                         context, pp, disableSystemAppVerificationForTests, providerFilter);
         generator.addUserProviders(
                 getUserProviders(
-                        context, userId, disableSystemAppVerificationForTests, enabledServices));
+                        context,
+                        userId,
+                        disableSystemAppVerificationForTests,
+                        enabledServices,
+                        primaryServices));
         generator.addSystemProviders(
                 getAvailableSystemServices(
                         context, userId, disableSystemAppVerificationForTests, enabledServices));
@@ -579,7 +598,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests,
-            Set<ComponentName> enabledServices) {
+            Set<ComponentName> enabledServices,
+            Set<String> primaryServices) {
         final List<CredentialProviderInfo> services = new ArrayList<>();
         final List<ResolveInfo> resolveInfos =
                 context.getPackageManager()
@@ -601,7 +621,9 @@ public final class CredentialProviderInfoFactory {
                                 serviceInfo,
                                 /* isSystemProvider= */ false,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(serviceInfo.getComponentName()));
+                                enabledServices.contains(serviceInfo.getComponentName()),
+                                primaryServices.contains(
+                                        serviceInfo.getComponentName().flattenToString()));
                 if (!cpi.isSystemProvider()) {
                     services.add(cpi);
                 }

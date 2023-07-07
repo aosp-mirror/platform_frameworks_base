@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ਆਡੀਓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ਆਡੀਓ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ਆਡੀਓ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ਆਡੀਓ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ਸੁਣਨ ਦੇ ਸਾਧਨਾਂ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ਆਡੀਓ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ਮੀਡੀਆ  ਆਡੀਓ  ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ਪ੍ਰੋਫਾਈਲ ਚੁਣੋ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ਨਿੱਜੀ"</string>
     <string name="category_work" msgid="4014193632325996115">"ਕੰਮ ਸੰਬੰਧੀ"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ਕਲੋਨ ਕਰੋ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ਵਿਕਾਸਕਾਰ ਚੋਣਾਂ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ਐਪ ਵਿਕਾਸ ਲਈ ਚੋਣਾਂ ਸੈੱਟ ਕਰੋ"</string>
@@ -345,7 +346,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ਡੀਬੱਗ ਕੀਤੀ ਐਪਲੀਕੇਸ਼ਨ ਚਲਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਅਟੈਚ ਕਰਨ ਲਈ ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ਇਨਪੁੱਟ"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ਡਰਾਇੰਗ"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
     <string name="media_category" msgid="8122076702526144053">"ਮੀਡੀਆ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="strict_mode" msgid="889864762140862437">"ਸਟ੍ਰਿਕਟ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
@@ -396,7 +397,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚਿਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ਐਪਾਂ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"ਵਿੰਡੋ ਮੁਤਾਬਕ ਸਰਗਰਮੀਆਂ ਦਾ ਆਕਾਰ ਬਦਲ ਦਿਓ"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"ਵਿੰਡੋ ਮੁਤਾਬਕ ਸਰਗਰਮੀਆਂ ਦਾ ਆਕਾਰ ਬਦਲਣ ਦਿਓ"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ਹੋਰ ਸਮਾਂ।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ਘੱਟ ਸਮਾਂ।"</string>
     <string name="cancel" msgid="5665114069455378395">"ਰੱਦ ਕਰੋ"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ਅੱਗੇ"</string>
+    <string name="back" msgid="5554327870352703710">"ਪਿੱਛੇ ਜਾਓ"</string>
+    <string name="save" msgid="3745809743277153149">"ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="okay" msgid="949938843324579502">"ਠੀਕ ਹੈ"</string>
     <string name="done" msgid="381184316122520313">"ਹੋ ਗਿਆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ਹੁਣੇ ਹੀ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ਇਹ ਫ਼ੋਨ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ਇਹ ਟੈਬਲੈੱਟ"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ਡੌਕ ਸਪੀਕਰ"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ਬਾਹਰੀ ਡੀਵਾਈਸ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ਇਹ ਫ਼ੋਨ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ਸਵਿੱਚ ਕਰਨ ਲਈ ਖਾਤੇ ਨੂੰ ਅੱਪਗ੍ਰੇਡ ਕਰੋ"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ਕੀ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ਤੁਸੀਂ ਵਾਧੂ ਵਰਤੋਂਕਾਰ ਬਣਾ ਕੇ ਹੋਰਾਂ ਲੋਕਾਂ ਨਾਲ ਇਹ ਡੀਵਾਈਸ ਸਾਂਝਾ ਕਰ ਸਕਦੇ ਹੋ। ਹਰੇਕ ਵਰਤੋਂਕਾਰ ਦੀ ਆਪਣੀ ਖੁਦ ਦੀ ਜਗ੍ਹਾ ਹੁੰਦੀ ਹੈ, ਜਿਸਨੂੰ ਉਹ ਐਪਾਂ ਅਤੇ ਵਾਲਪੇਪਰ ਆਦਿ ਨਾਲ ਵਿਉਂਤਬੱਧ ਕਰ ਸਕਦੇ ਹਨ। ਵਰਤੋਂਕਾਰ ਵਾਈ-ਫਾਈ ਵਰਗੀਆਂ ਡੀਵਾਈਸ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੀ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਸ ਨਾਲ ਹਰੇਕ ਵਰਤੋਂਕਾਰ \'ਤੇ ਅਸਰ ਪੈਂਦਾ ਹੈ।\n\nਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟ ਅੱਪ ਕਰਨੀ ਪੈਂਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਬਾਕੀ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ। ਸ਼ਾਇਦ ਪਹੁੰਚਯੋਗਤਾ ਸੈਟਿੰਗਾਂ ਅਤੇ ਸੇਵਾਵਾਂ ਨੂੰ ਕਿਸੇ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਟ੍ਰਾਂਸਫਰ ਨਾ ਕੀਤਾ ਜਾ ਸਕੇ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟਅੱਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ਕੀ ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਬਣਾਉਣਾ ਹੈ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ਪ੍ਰਸ਼ਾਸਕਾਂ ਕੋਲ ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰ ਹੁੰਦੇ ਹਨ ਜੋ ਹੋਰ ਵਰਤੋਂਕਾਰਾਂ ਕੋਲ ਨਹੀਂ ਹੁੰਦੇ। ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦਾ ਹੈ, ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਅੱਪਡੇਟ ਜਾਂ ਰੀਸੈੱਟ ਕਰ ਸਕਦਾ ਹੈ, ਸੈਟਿੰਗਾਂ ਨੂੰ ਸੋਧ ਸਕਦਾ ਹੈ, ਸਾਰੀਆਂ ਸਥਾਪਤ ਐਪਾਂ ਨੂੰ ਦੇਖ ਸਕਦਾ ਹੈ, ਅਤੇ ਦੂਜਿਆਂ ਲਈ ਪ੍ਰਸ਼ਾਸਕ ਦੇ ਅਧਿਕਾਰਾਂ ਨੂੰ ਮਨਜ਼ੂਰ ਜਾਂ ਰੱਦ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ਪ੍ਰਸ਼ਾਸਕ ਬਣਾਓ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ਕੀ ਹੁਣ ਵਰਤੋਂਕਾਰ ਸੈੱਟ ਅੱਪ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ਇਹ ਪੱਕਾ ਕਰੋ ਕਿ ਵਿਅਕਤੀ ਡੀਵਾਈਸ ਵਰਤਣ ਅਤੇ ਆਪਣੀ ਜਗ੍ਹਾ ਦੇ ਸੈੱਟ ਅੱਪ ਲਈ ਉਪਲਬਧ ਹੈ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ਕੀ ਹੁਣ ਪ੍ਰੋਫਾਈਲ ਸੈੱਟ ਅੱਪ ਕਰਨੀ ਹੈ?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ਇਸ ਨਾਲ ਨਵਾਂ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ਕੀ ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਣਾ ਹੈ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ਇਸ ਨਾਲ ਮੌਜੂਦਾ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"ਹਾਂ, ਉਨ੍ਹਾਂ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਬਣਾਓ"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ਨਹੀਂ, ਉਨ੍ਹਾਂ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਨਾ ਬਣਾਓ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ਬਾਹਰ ਜਾਓ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ਕੀ ਮਹਿਮਾਨ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰਨੀ ਹੈ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ਤੁਸੀਂ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਸਕਦੇ ਹੋ ਜਾਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>

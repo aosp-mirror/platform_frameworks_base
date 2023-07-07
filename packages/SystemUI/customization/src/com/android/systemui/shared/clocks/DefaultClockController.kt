@@ -24,6 +24,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockConfig
 import com.android.systemui.plugins.ClockController
@@ -32,7 +33,7 @@ import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockSettings
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.WeatherData
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -50,6 +51,7 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
+    private val hasStepClockAnimation: Boolean = false,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -170,7 +172,8 @@ class DefaultClockController(
         view: AnimatableClockView,
         seedColor: Int?,
     ) : DefaultClockFaceController(view, seedColor) {
-        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
+        override val config =
+            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
 
         init {
             animations = LargeClockAnimations(view, 0f, 0f)
@@ -189,8 +192,9 @@ class DefaultClockController(
             view.setLayoutParams(lp)
         }
 
-        fun moveForSplitShade(fromRect: Rect, toRect: Rect, fraction: Float) {
-            view.moveForSplitShade(fromRect, toRect, fraction)
+        /** See documentation at [AnimatableClockView.offsetGlyphsForStepClockAnimation]. */
+        fun offsetGlyphsForStepClockAnimation(fromLeft: Int, direction: Int, fraction: Float) {
+            view.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
         }
     }
 
@@ -224,6 +228,8 @@ class DefaultClockController(
 
             clocks.forEach { it.refreshFormat() }
         }
+
+        override fun onWeatherDataChanged(data: WeatherData) {}
     }
 
     open inner class DefaultClockAnimations(
@@ -264,12 +270,14 @@ class DefaultClockController(
             }
         }
 
-        override fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {
+        override fun onPickerCarouselSwiping(swipingFraction: Float) {
             // TODO(b/278936436): refactor this part when we change recomputePadding
             // when on the side, swipingFraction = 0, translationY should offset
             // the top margin change in recomputePadding to make clock be centered
             view.translationY = 0.5f * view.bottom * (1 - swipingFraction)
         }
+
+        override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
     }
 
     inner class LargeClockAnimations(
@@ -277,8 +285,8 @@ class DefaultClockController(
         dozeFraction: Float,
         foldFraction: Float,
     ) : DefaultClockAnimations(view, dozeFraction, foldFraction) {
-        override fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {
-            largeClock.moveForSplitShade(fromRect, toRect, fraction)
+        override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {
+            largeClock.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
         }
     }
 

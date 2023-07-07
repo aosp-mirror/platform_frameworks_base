@@ -27,9 +27,9 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.clocks.DefaultClockProvider;
 
@@ -63,7 +63,11 @@ public abstract class ClockRegistryModule {
                 bgDispatcher,
                 featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
                 /* handleAllUsers= */ true,
-                new DefaultClockProvider(context, layoutInflater, resources),
+                new DefaultClockProvider(
+                        context,
+                        layoutInflater,
+                        resources,
+                        featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION)),
                 context.getString(R.string.lockscreen_clock_id_fallback),
                 logBuffer,
                 /* keepAllLoaded = */ false,

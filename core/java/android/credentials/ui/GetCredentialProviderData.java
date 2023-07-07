@@ -19,7 +19,6 @@ package android.credentials.ui;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,11 +35,11 @@ import java.util.List;
 @TestApi
 public final class GetCredentialProviderData extends ProviderData implements Parcelable {
     @NonNull
-    private final ParceledListSlice<Entry> mCredentialEntries;
+    private final List<Entry> mCredentialEntries;
     @NonNull
-    private final ParceledListSlice<Entry> mActionChips;
+    private final List<Entry> mActionChips;
     @NonNull
-    private final ParceledListSlice<AuthenticationEntry> mAuthenticationEntries;
+    private final List<AuthenticationEntry> mAuthenticationEntries;
     @Nullable
     private final Entry mRemoteEntry;
 
@@ -50,25 +49,25 @@ public final class GetCredentialProviderData extends ProviderData implements Par
             @NonNull List<AuthenticationEntry> authenticationEntries,
             @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
-        mCredentialEntries = new ParceledListSlice<>(credentialEntries);
-        mActionChips = new ParceledListSlice<>(actionChips);
-        mAuthenticationEntries = new ParceledListSlice<>(authenticationEntries);
+        mCredentialEntries = new ArrayList<>(credentialEntries);
+        mActionChips = new ArrayList<>(actionChips);
+        mAuthenticationEntries = new ArrayList<>(authenticationEntries);
         mRemoteEntry = remoteEntry;
     }
 
     @NonNull
     public List<Entry> getCredentialEntries() {
-        return mCredentialEntries.getList();
+        return mCredentialEntries;
     }
 
     @NonNull
     public List<Entry> getActionChips() {
-        return mActionChips.getList();
+        return mActionChips;
     }
 
     @NonNull
     public List<AuthenticationEntry> getAuthenticationEntries() {
-        return mAuthenticationEntries.getList();
+        return mAuthenticationEntries;
     }
 
     @Nullable
@@ -78,16 +77,20 @@ public final class GetCredentialProviderData extends ProviderData implements Par
 
     private GetCredentialProviderData(@NonNull Parcel in) {
         super(in);
-        mCredentialEntries = in.readParcelable(null,
-                android.content.pm.ParceledListSlice.class);
+
+        List<Entry> credentialEntries = new ArrayList<>();
+        in.readTypedList(credentialEntries, Entry.CREATOR);
+        mCredentialEntries = credentialEntries;
         AnnotationValidations.validate(NonNull.class, null, mCredentialEntries);
 
-        mActionChips = in.readParcelable(null,
-                android.content.pm.ParceledListSlice.class);
+        List<Entry> actionChips  = new ArrayList<>();
+        in.readTypedList(actionChips, Entry.CREATOR);
+        mActionChips = actionChips;
         AnnotationValidations.validate(NonNull.class, null, mActionChips);
 
-        mAuthenticationEntries = in.readParcelable(null,
-                android.content.pm.ParceledListSlice.class);
+        List<AuthenticationEntry> authenticationEntries  = new ArrayList<>();
+        in.readTypedList(authenticationEntries, AuthenticationEntry.CREATOR);
+        mAuthenticationEntries = authenticationEntries;
         AnnotationValidations.validate(NonNull.class, null, mAuthenticationEntries);
 
         Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
@@ -97,9 +100,9 @@ public final class GetCredentialProviderData extends ProviderData implements Par
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeParcelable(mCredentialEntries, flags);
-        dest.writeParcelable(mActionChips, flags);
-        dest.writeParcelable(mAuthenticationEntries, flags);
+        dest.writeTypedList(mCredentialEntries);
+        dest.writeTypedList(mActionChips);
+        dest.writeTypedList(mAuthenticationEntries);
         dest.writeTypedObject(mRemoteEntry, flags);
     }
 

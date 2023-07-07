@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
+import android.annotation.NonNull;
+import android.content.Context;
 import android.provider.DeviceConfig;
 
 /**
@@ -29,6 +31,13 @@ public class AlwaysOnMagnificationFeatureFlag extends MagnificationFeatureFlagBa
     private static final String FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION =
             "AlwaysOnMagnifier__enable_always_on_magnifier";
 
+    private @NonNull Context mContext;
+
+    AlwaysOnMagnificationFeatureFlag(@NonNull Context context) {
+        super();
+        mContext = context;
+    }
+
     @Override
     String getNamespace() {
         return NAMESPACE;
@@ -41,6 +50,7 @@ public class AlwaysOnMagnificationFeatureFlag extends MagnificationFeatureFlagBa
 
     @Override
     boolean getDefaultValue() {
-        return false;
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_magnification_always_on_enabled);
     }
 }

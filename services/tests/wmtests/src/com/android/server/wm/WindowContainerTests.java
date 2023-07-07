@@ -1112,7 +1112,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                    public void onAnimationCancelled() {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
@@ -1443,10 +1443,8 @@ public class WindowContainerTests extends WindowTestsBase {
         final InsetsFrameProvider provider2 =
                 new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(genericOverlayInsetsRect2);
-        final int sourceId1 = InsetsSource.createId(
-                provider1.getOwner(), provider1.getIndex(), provider1.getType());
-        final int sourceId2 = InsetsSource.createId(
-                provider2.getOwner(), provider2.getIndex(), provider2.getType());
+        final int sourceId1 = provider1.getId();
+        final int sourceId2 = provider2.getId();
 
         rootTask.addLocalInsetsFrameProvider(provider1);
         container.addLocalInsetsFrameProvider(provider2);
@@ -1504,10 +1502,8 @@ public class WindowContainerTests extends WindowTestsBase {
         final InsetsFrameProvider provider2 =
                 new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(genericOverlayInsetsRect2);
-        final int sourceId1 = InsetsSource.createId(
-                provider1.getOwner(), provider1.getIndex(), provider1.getType());
-        final int sourceId2 = InsetsSource.createId(
-                provider2.getOwner(), provider2.getIndex(), provider2.getType());
+        final int sourceId1 = provider1.getId();
+        final int sourceId2 = provider2.getId();
 
         rootTask.addLocalInsetsFrameProvider(provider1);
         activity0.forAllWindows(window -> {
@@ -1566,10 +1562,8 @@ public class WindowContainerTests extends WindowTestsBase {
         final InsetsFrameProvider provider2 =
                 new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(navigationBarInsetsRect2);
-        final int sourceId1 = InsetsSource.createId(
-                provider1.getOwner(), provider1.getIndex(), provider1.getType());
-        final int sourceId2 = InsetsSource.createId(
-                provider2.getOwner(), provider2.getIndex(), provider2.getType());
+        final int sourceId1 = provider1.getId();
+        final int sourceId2 = provider2.getId();
 
         rootTask.addLocalInsetsFrameProvider(provider1);
         container.addLocalInsetsFrameProvider(provider2);

@@ -21,6 +21,7 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -98,9 +99,6 @@ public final class TransitionInfo implements Parcelable {
     /** The container is the display. */
     public static final int FLAG_IS_DISPLAY = 1 << 5;
 
-    /** The container can show on top of lock screen. */
-    public static final int FLAG_OCCLUDES_KEYGUARD = 1 << 6;
-
     /**
      * Only for IS_DISPLAY containers. Is set if the display has system alert windows. This is
      * used to prevent seamless rotation.
@@ -174,7 +172,6 @@ public final class TransitionInfo implements Parcelable {
             FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT,
             FLAG_IS_VOICE_INTERACTION,
             FLAG_IS_DISPLAY,
-            FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
             FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY,
@@ -423,8 +420,8 @@ public final class TransitionInfo implements Parcelable {
             case TRANSIT_NONE: return "NONE";
             case TRANSIT_OPEN: return "OPEN";
             case TRANSIT_CLOSE: return "CLOSE";
-            case TRANSIT_TO_FRONT: return "SHOW";
-            case TRANSIT_TO_BACK: return "HIDE";
+            case TRANSIT_TO_FRONT: return "TO_FRONT";
+            case TRANSIT_TO_BACK: return "TO_BACK";
             case TRANSIT_CHANGE: return "CHANGE";
             default: return "<unknown:" + mode + ">";
         }
@@ -455,9 +452,6 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_DISPLAY) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("IS_DISPLAY");
-        }
-        if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
-            sb.append(sb.length() == 0 ? "" : "|").append("OCCLUDES_KEYGUARD");
         }
         if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("DISPLAY_HAS_ALERT_WINDOWS");
@@ -491,6 +485,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
+        }
+        if ((flags & FLAG_MOVED_TO_TOP) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("MOVE_TO_TOP");
         }
         return sb.toString();
     }
@@ -549,6 +546,16 @@ public final class TransitionInfo implements Parcelable {
         releaseAnimSurfaces();
         for (int i = mChanges.size() - 1; i >= 0; --i) {
             mChanges.get(i).getLeash().release();
+        }
+    }
+
+    /**
+     * Updates the callsites of all the surfaces in this transition, which aids in the debugging of
+     * lingering surfaces.
+     */
+    public void setUnreleasedWarningCallSiteForAllSurfaces(String callsite) {
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            mChanges.get(i).getLeash().setUnreleasedWarningCallSite(callsite);
         }
     }
 
@@ -1064,6 +1071,11 @@ public final class TransitionInfo implements Parcelable {
 
         public static AnimationOptions makeCrossProfileAnimOptions() {
             AnimationOptions options = new AnimationOptions(ANIM_OPEN_CROSS_PROFILE_APPS);
+            return options;
+        }
+
+        public static AnimationOptions makeSceneTransitionAnimOptions() {
+            AnimationOptions options = new AnimationOptions(ANIM_SCENE_TRANSITION);
             return options;
         }
 

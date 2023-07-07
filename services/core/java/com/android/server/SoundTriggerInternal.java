@@ -47,15 +47,17 @@ public interface SoundTriggerInternal {
     int STATUS_OK = SoundTrigger.STATUS_OK;
 
     // Attach to a specific underlying STModule
-    Session attach(@NonNull IBinder client, ModuleProperties underlyingModule);
+    /**
+     * Attach to a specific underlying STModule.
+     * @param client - Binder token representing the app client for death notifications
+     * @param underlyingModule - Properties of the underlying STModule to attach to
+     * @param isTrusted - {@code true} if callbacks will be appropriately AppOps attributed by
+     * a trusted component prior to delivery to the ultimate client.
+     */
+    Session attach(@NonNull IBinder client, ModuleProperties underlyingModule, boolean isTrusted);
 
     // Enumerate possible STModules to attach to
     List<ModuleProperties> listModuleProperties(Identity originatorIdentity);
-
-    /**
-     * Dumps service-wide information.
-     */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
     interface Session {
         /**
@@ -142,13 +144,14 @@ public interface SoundTriggerInternal {
                 @ModelParams int modelParam);
 
         /**
+         * Invalidates the sound trigger session and clears any associated resources. Subsequent
+         * calls to this object will throw IllegalStateException.
+         */
+        void detach();
+
+        /**
          * Unloads (and stops if running) the given keyphraseId
          */
         int unloadKeyphraseModel(int keyphaseId);
-
-        /**
-         * Dumps session-wide information.
-         */
-        void dump(FileDescriptor fd, PrintWriter pw, String[] args);
     }
 }

@@ -179,6 +179,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -490,12 +491,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mMainHandler, context,
                 new PolicyWarningUIController.NotificationController(context));
         mSecurityPolicy = new AccessibilitySecurityPolicy(policyWarningUIController, mContext,
-                this);
+                this, LocalServices.getService(PackageManagerInternal.class));
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this, mTraceManager);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
-        mMagnificationController = new MagnificationController(this, mLock, mContext,
-                new MagnificationScaleProvider(mContext));
+        mMagnificationController = new MagnificationController(
+                this,
+                mLock,
+                mContext,
+                new MagnificationScaleProvider(mContext),
+                Executors.newSingleThreadExecutor()
+        );
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
         mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext, mMainHandler,
@@ -1012,8 +1018,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                 + Binder.getCallingPid() + " for device id " + deviceId
                                 + " with package names " + Arrays.toString(client.mPackageNames));
                     }
-                    return IntPair.of(mProxyManager.getStateLocked(deviceId,
-                                    mUiAutomationManager.isUiAutomationRunningLocked()),
+                    return IntPair.of(mProxyManager.getStateLocked(deviceId),
                             client.mLastSentRelevantEventTypes);
                 }
                 mGlobalClients.register(callback, client);
@@ -1028,8 +1033,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                 + Binder.getCallingPid() + " for device id " + deviceId
                                 + " with package names " + Arrays.toString(client.mPackageNames));
                     }
-                    return IntPair.of(mProxyManager.getStateLocked(deviceId,
-                                    mUiAutomationManager.isUiAutomationRunningLocked()),
+                    return IntPair.of(mProxyManager.getStateLocked(deviceId),
                             client.mLastSentRelevantEventTypes);
                 }
                 userState.mUserClients.register(callback, client);
@@ -4002,16 +4006,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
             throws RemoteException {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         if (client == null) {
             return false;
         }
         if (displayId < 0) {
             throw new IllegalArgumentException("The display id " + displayId + " is invalid.");
-        }
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("The default display cannot be proxy-ed.");
         }
         if (!isTrackedDisplay(displayId)) {
             throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
@@ -4021,12 +4022,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             throw new IllegalArgumentException("The display " + displayId + " is already being"
                     + " proxy-ed");
         }
+        if (!mProxyManager.displayBelongsToCaller(Binder.getCallingUid(), displayId)) {
+            throw new SecurityException("The display " + displayId + " does not belong to"
+                    + " the caller.");
+        }
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            mProxyManager.registerProxy(client, displayId, mContext,
-                    sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
-                    mWindowManagerService);
+            mProxyManager.registerProxy(client, displayId, sIdCounter++, mSecurityPolicy,
+                    this, getTraceManager(), mWindowManagerService);
 
             synchronized (mLock) {
                 notifyClearAccessibilityCacheLocked();
@@ -4039,8 +4043,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public boolean unregisterProxyForDisplay(int displayId) {
-        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+        mSecurityPolicy.checkForAccessibilityPermissionOrRole();
         final long identity = Binder.clearCallingIdentity();
         try {
             return mProxyManager.unregisterProxy(displayId);
@@ -5332,9 +5336,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mA11yOverlayLayers.remove(displayId);
             return;
         }
-        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
-        transaction.reparent(sc, parent);
-        transaction.apply();
-        transaction.close();
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.reparent(sc, parent).setTrustedOverlay(sc, true).apply();
+        t.close();
     }
 }

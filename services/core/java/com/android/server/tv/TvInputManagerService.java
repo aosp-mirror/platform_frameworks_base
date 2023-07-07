@@ -2154,6 +2154,9 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     try {
+                        final String inputId =
+                                getSessionStateLocked(sessionToken, callingUid, userId).inputId;
+                        mTvInputHardwareManager.setTvMessageEnabled(inputId, type, enabled);
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
                                 .setTvMessageEnabled(type, enabled);
                     } catch (RemoteException | SessionNotFoundException e) {
@@ -2626,6 +2629,10 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionState).notifyAdBufferReady(buffer);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in notifyAdBuffer", e);
+                    } finally {
+                        if (buffer != null) {
+                            buffer.getSharedMemory().close();
+                        }
                     }
                 }
             } finally {
@@ -2711,7 +2718,10 @@ public final class TvInputManagerService extends SystemService {
                         .audioAddress("0")
                         .hdmiPortId(0)
                         .build();
-            mTvInputHardwareManager.onDeviceAvailable(info, null);
+            TvStreamConfig[] configs = {
+                    new TvStreamConfig.Builder().streamId(19001)
+                            .generation(1).maxHeight(600).maxWidth(800).type(1).build()};
+            mTvInputHardwareManager.onDeviceAvailable(info, configs);
         }
 
         /**
@@ -3885,10 +3895,13 @@ public final class TvInputManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.client.onAdBufferConsumed(
-                            buffer, mSessionState.seq);
+                    mSessionState.client.onAdBufferConsumed(buffer, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onAdBufferConsumed", e);
+                } finally {
+                    if (buffer != null) {
+                        buffer.getSharedMemory().close();
+                    }
                 }
             }
         }
@@ -4129,6 +4142,32 @@ public final class TvInputManagerService extends SystemService {
                         serviceState.service.notifyHdmiDeviceUpdated(deviceInfo);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in notifyHdmiDeviceUpdated", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onTvMessage(String inputId, int type, Bundle data) {
+            synchronized (mLock) {
+                UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
+                TvInputState inputState = userState.inputMap.get(inputId);
+                if (inputState == null) {
+                    Slog.e(TAG, "failed to send TV message - unknown input id " + inputId);
+                    return;
+                }
+                ServiceState serviceState = userState.serviceStateMap.get(inputState.info
+                        .getComponent());
+                for (IBinder token : serviceState.sessionTokens) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(token,
+                                Binder.getCallingUid(), mCurrentUserId);
+                        if (!sessionState.isRecordingSession
+                                && sessionState.hardwareSessionToken != null) {
+                            sessionState.session.notifyTvMessage(type, data);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in onTvMessage", e);
                     }
                 }
             }

@@ -31,21 +31,28 @@ import com.android.systemui.DejankUtils
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -66,18 +73,12 @@ constructor(
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val context: Context,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    keyguardBypassController: KeyguardBypassController,
+    private val trustRepository: TrustRepository,
+    private val featureFlags: FeatureFlags,
+    @Application private val applicationScope: CoroutineScope,
 ) {
-    /** Whether we want to wait for face auth. */
-    private val primaryBouncerFaceDelay =
-        keyguardStateController.isFaceAuthEnabled &&
-            !keyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                KeyguardUpdateMonitor.getCurrentUser()
-            ) &&
-            !needsFullscreenBouncer() &&
-            keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE) &&
-            !keyguardBypassController.bypassEnabled
-
+    private val passiveAuthBouncerDelay = context.resources.getInteger(
+            R.integer.primary_bouncer_passive_auth_delay).toLong()
     /** Runnable to show the primary bouncer. */
     val showRunnable = Runnable {
         repository.setPrimaryShow(true)
@@ -109,6 +110,7 @@ constructor(
     /** Allow for interaction when just about fully visible */
     val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
     val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
+    private var currentUserActiveUnlockRunning = false
 
     /** This callback needs to be a class field so it does not get garbage collected. */
     val keyguardUpdateMonitorCallback =
@@ -127,6 +129,13 @@ constructor(
 
     init {
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        if (featureFlags.isEnabled(Flags.DELAY_BOUNCER)) {
+            applicationScope.launch {
+                trustRepository.isCurrentUserActiveUnlockRunning.collect {
+                    currentUserActiveUnlockRunning = it
+                }
+            }
+        }
     }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
@@ -160,8 +169,9 @@ constructor(
         }
 
         repository.setPrimaryShowingSoon(true)
-        if (primaryBouncerFaceDelay) {
-            mainHandler.postDelayed(showRunnable, 1200L)
+        if (usePrimaryBouncerPassiveAuthDelay()) {
+            Log.d(TAG, "delay bouncer, passive auth may succeed")
+            mainHandler.postDelayed(showRunnable, passiveAuthBouncerDelay)
         } else {
             DejankUtils.postAfterTraversal(showRunnable)
         }
@@ -187,6 +197,7 @@ constructor(
         cancelShowRunnable()
         repository.setPrimaryShowingSoon(false)
         repository.setPrimaryShow(false)
+        repository.setPanelExpansion(EXPANSION_HIDDEN)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.INVISIBLE)
         Trace.endSection()
     }
@@ -375,6 +386,18 @@ constructor(
 
     private fun isBouncerShowing(): Boolean {
         return repository.primaryBouncerShow.value
+    }
+
+    /** Whether we want to wait to show the bouncer in case passive auth succeeds. */
+    private fun usePrimaryBouncerPassiveAuthDelay(): Boolean {
+        val canRunFaceAuth = keyguardStateController.isFaceAuthEnabled &&
+                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE)
+        val canRunActiveUnlock = currentUserActiveUnlockRunning &&
+                keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()
+
+        return featureFlags.isEnabled(Flags.DELAY_BOUNCER) &&
+                !needsFullscreenBouncer() &&
+                (canRunFaceAuth || canRunActiveUnlock)
     }
 
     companion object {

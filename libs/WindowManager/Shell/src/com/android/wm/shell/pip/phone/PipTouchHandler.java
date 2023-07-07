@@ -199,11 +199,6 @@ public class PipTouchHandler {
         mMotionHelper = pipMotionHelper;
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
-        mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
-                        mMotionHelper, pipTaskOrganizer, mPipDismissTargetHandler,
-                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
-                        menuController, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
                     if (mPipBoundsState.isStashed()) {
@@ -220,6 +215,11 @@ public class PipTouchHandler {
                 },
                 menuController::hideMenu,
                 mainExecutor);
+        mPipResizeGestureHandler =
+                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
+                        mMotionHelper, mTouchState, pipTaskOrganizer, mPipDismissTargetHandler,
+                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
+                        menuController, mainExecutor);
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds,
@@ -553,6 +553,11 @@ public class PipTouchHandler {
     public boolean handleTouchEvent(InputEvent inputEvent) {
         // Skip any non motion events
         if (!(inputEvent instanceof MotionEvent)) {
+            return true;
+        }
+
+        // do not process input event if not allowed
+        if (!mTouchState.getAllowInputEvents()) {
             return true;
         }
 

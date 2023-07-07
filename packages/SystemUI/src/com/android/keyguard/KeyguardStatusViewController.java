@@ -24,6 +24,7 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CL
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
@@ -46,7 +47,6 @@ import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -215,6 +215,15 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Pass top margin from ClockPositionAlgorithm in NotificationPanelViewController
+     * Use for clock view in LS to compensate for top margin to align to the screen
+     * Regardless of translation from AOD and unlock gestures
+     */
+    public void setLockscreenClockY(int clockY) {
+        mKeyguardClockSwitchController.setLockscreenClockY(clockY);
+    }
+
+    /**
      * Set whether the view accessibility importance mode.
      */
     public void setStatusAccessibilityImportance(int mode) {
@@ -230,7 +239,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, float scale, boolean animate) {
-        float oldY = mView.getY();
         setProperty(AnimatableProperty.Y, y, animate);
 
         ClockController clock = mKeyguardClockSwitchController.getClock();
@@ -245,10 +253,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     CLOCK_ANIMATION_PROPERTIES, animate);
             setProperty(AnimatableProperty.SCALE_X, 1f, animate);
             setProperty(AnimatableProperty.SCALE_Y, 1f, animate);
-        }
-
-        if (oldY != y) {
-            mKeyguardClockSwitchController.updateKeyguardStatusViewOffset();
         }
     }
 
@@ -277,8 +281,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         @Override
-        public void onDensityOrFontScaleChanged() {
-            mKeyguardClockSwitchController.onDensityOrFontScaleChanged();
+        public void onConfigChanged(Configuration newConfig) {
+            mKeyguardClockSwitchController.onConfigChanged();
         }
     };
 
@@ -311,6 +315,21 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Returns true if the large clock will block the notification shelf in AOD
+     */
+    public boolean isLargeClockBlockingNotificationShelf() {
+        ClockController clock = mKeyguardClockSwitchController.getClock();
+        return clock != null && clock.getLargeClock().getConfig().getHasCustomWeatherDataDisplay();
+    }
+
+    /**
+     * Set if the split shade is enabled
+     */
+    public void setSplitShadeEnabled(boolean enabled) {
+        mKeyguardClockSwitchController.setSplitShadeEnabled(enabled);
+    }
+
+    /**
      * Updates the alignment of the KeyguardStatusView and animates the transition if requested.
      */
     public void updateAlignment(
@@ -318,6 +337,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             boolean splitShadeEnabled,
             boolean shouldBeCentered,
             boolean animate) {
+        mKeyguardClockSwitchController.setSplitShadeCentered(splitShadeEnabled && shouldBeCentered);
         if (mStatusViewCentered == shouldBeCentered) {
             return;
         }
@@ -337,6 +357,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         mInteractionJankMonitor.begin(mView, CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+        /* This transition blocks any layout changes while running. For that reason
+        * special logic with setting visibility was added to {@link BcSmartspaceView#setDozing}
+        * for split shade to avoid jump of the media object. */
         ChangeBounds transition = new ChangeBounds();
         if (splitShadeEnabled) {
             // Excluding media from the transition on split-shade, as it doesn't transition
@@ -351,7 +374,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         boolean customClockAnimation = clock != null
                 && clock.getLargeClock().getConfig().getHasCustomPositionUpdatedAnimation();
 
-        if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
+        if (customClockAnimation) {
             // Find the clock, so we can exclude it from this transition.
             FrameLayout clockContainerView = mView.findViewById(R.id.lockscreen_clock_view_large);
 
@@ -362,8 +385,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 TransitionManager.beginDelayedTransition(notifContainerParent, transition);
             } else {
                 View clockView = clockContainerView.getChildAt(0);
-
-                transition.excludeTarget(clockView, /* exclude= */ true);
 
                 TransitionSet set = new TransitionSet();
                 set.addTransition(transition);
@@ -389,8 +410,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     @VisibleForTesting
     static class SplitShadeTransitionAdapter extends Transition {
-        private static final String PROP_BOUNDS = "splitShadeTransitionAdapter:bounds";
-        private static final String[] TRANSITION_PROPERTIES = { PROP_BOUNDS };
+        private static final String PROP_BOUNDS_LEFT = "splitShadeTransitionAdapter:boundsLeft";
+        private static final String PROP_BOUNDS_RIGHT = "splitShadeTransitionAdapter:boundsRight";
+        private static final String PROP_X_IN_WINDOW = "splitShadeTransitionAdapter:xInWindow";
+        private static final String[] TRANSITION_PROPERTIES = {
+                PROP_BOUNDS_LEFT, PROP_BOUNDS_RIGHT, PROP_X_IN_WINDOW};
 
         private final KeyguardClockSwitchController mController;
 
@@ -400,12 +424,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         private void captureValues(TransitionValues transitionValues) {
-            Rect boundsRect = new Rect();
-            boundsRect.left = transitionValues.view.getLeft();
-            boundsRect.top = transitionValues.view.getTop();
-            boundsRect.right = transitionValues.view.getRight();
-            boundsRect.bottom = transitionValues.view.getBottom();
-            transitionValues.values.put(PROP_BOUNDS, boundsRect);
+            transitionValues.values.put(PROP_BOUNDS_LEFT, transitionValues.view.getLeft());
+            transitionValues.values.put(PROP_BOUNDS_RIGHT, transitionValues.view.getRight());
+            int[] locationInWindowTmp = new int[2];
+            transitionValues.view.getLocationInWindow(locationInWindowTmp);
+            transitionValues.values.put(PROP_X_IN_WINDOW, locationInWindowTmp[0]);
         }
 
         @Override
@@ -427,8 +450,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             }
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
 
-            Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
-            Rect to = (Rect) endValues.values.get(PROP_BOUNDS);
+            int fromLeft = (int) startValues.values.get(PROP_BOUNDS_LEFT);
+            int fromWindowX = (int) startValues.values.get(PROP_X_IN_WINDOW);
+            int toWindowX = (int) endValues.values.get(PROP_X_IN_WINDOW);
+            // Using windowX, to determine direction, instead of left, as in RTL the difference of
+            // toLeft - fromLeft is always positive, even when moving left.
+            int direction = toWindowX - fromWindowX > 0 ? 1 : -1;
 
             anim.addUpdateListener(animation -> {
                 ClockController clock = mController.getClock();
@@ -437,7 +464,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 }
 
                 clock.getLargeClock().getAnimations()
-                        .onPositionUpdated(from, to, animation.getAnimatedFraction());
+                        .onPositionUpdated(fromLeft, direction, animation.getAnimatedFraction());
             });
 
             return anim;

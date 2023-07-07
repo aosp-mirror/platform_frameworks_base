@@ -1120,12 +1120,12 @@ public class LauncherAppsService extends SystemService {
                     return shortcutOverridesInfo;
                 }
 
-                List<String> packagesToOverride =
+                Map<String, String> packagesToOverride =
                         DevicePolicyCache.getInstance().getLauncherShortcutOverrides();
-                for (String packageName : packagesToOverride) {
+                for (Map.Entry<String, String> packageNames : packagesToOverride.entrySet()) {
                     Intent intent = new Intent(Intent.ACTION_MAIN)
                             .addCategory(Intent.CATEGORY_LAUNCHER)
-                            .setPackage(packageName);
+                            .setPackage(packageNames.getValue());
 
                     List<LauncherActivityInfoInternal> possibleShortcutOverrides =
                             queryIntentLauncherActivities(
@@ -1135,7 +1135,8 @@ public class LauncherAppsService extends SystemService {
                             );
 
                     if (!possibleShortcutOverrides.isEmpty()) {
-                        shortcutOverridesInfo.put(packageName, possibleShortcutOverrides.get(0));
+                        shortcutOverridesInfo.put(packageNames.getKey(),
+                                possibleShortcutOverrides.get(0));
                     }
                 }
                 return shortcutOverridesInfo;
@@ -1329,7 +1330,11 @@ public class LauncherAppsService extends SystemService {
         @Override
         public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
-            ensureShortcutPermission(callingPackage);
+            if (mContext.checkPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS,
+                    injectBinderCallingPid(), injectBinderCallingUid())
+                            != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Permission START_TASKS_FROM_RECENTS required");
+            }
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
@@ -2016,7 +2021,7 @@ public class LauncherAppsService extends SystemService {
                         }
                         // Each launcher has a different set of pinned shortcuts, so we need to do a
                         // query in here.
-                        // (As of now, only one launcher has the permission at a time, so it's bit
+                        // (As of now, only one launcher has the permission at a time, so it's a bit
                         // moot, but we may change the permission model eventually.)
                         final List<ShortcutInfo> list =
                                 mShortcutServiceInternal.getShortcuts(launcherUserId,

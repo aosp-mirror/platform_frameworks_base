@@ -16,14 +16,14 @@
 
 package com.android.systemui.notetask.shortcut
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
-import android.util.Log
 import androidx.activity.ComponentActivity
+import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.settings.UserTracker
@@ -68,12 +68,18 @@ constructor(
         val mainUser: UserHandle? = userManager.mainUser
         if (userManager.isManagedProfile) {
             if (mainUser == null) {
-                logDebug { "Can't find the main user. Skipping the notes app launch." }
+                debugLog { "Can't find the main user. Skipping the notes app launch." }
             } else {
                 controller.startNoteTaskProxyActivityForUser(mainUser)
             }
         } else {
-            controller.showNoteTask(entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT)
+            val entryPoint =
+                if (isInMultiWindowMode) {
+                    NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
+                } else {
+                    NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
+                }
+            controller.showNoteTask(entryPoint)
         }
         finish()
     }
@@ -81,16 +87,14 @@ constructor(
     companion object {
 
         /** Creates a new [Intent] set to start [LaunchNoteTaskActivity]. */
-        fun newIntent(context: Context): Intent {
-            return Intent(context, LaunchNoteTaskActivity::class.java).apply {
+        fun createIntent(context: Context): Intent =
+            Intent(context, LaunchNoteTaskActivity::class.java).apply {
                 // Intent's action must be set in shortcuts, or an exception will be thrown.
                 action = Intent.ACTION_CREATE_NOTE
             }
-        }
-    }
-}
 
-/** [Log.println] a [Log.DEBUG] message, only when [Build.IS_DEBUGGABLE]. */
-private inline fun Any.logDebug(message: () -> String) {
-    if (Build.IS_DEBUGGABLE) Log.d(this::class.java.simpleName.orEmpty(), message())
+        /** Creates a new [ComponentName] for [LaunchNoteTaskActivity]. */
+        fun createComponent(context: Context): ComponentName =
+            ComponentName(context, LaunchNoteTaskActivity::class.java)
+    }
 }

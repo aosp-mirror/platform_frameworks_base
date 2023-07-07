@@ -37,6 +37,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +53,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     private boolean mDismissing;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected boolean mResumed;
+    protected boolean mLockedOut;
 
     private final KeyDownListener mKeyDownListener = (keyCode, keyEvent) -> {
         // Fingerprint sensor sends a KeyEvent.KEYCODE_UNKNOWN.
@@ -77,9 +79,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
-            EmergencyButtonController emergencyButtonController) {
+            EmergencyButtonController emergencyButtonController,
+            FeatureFlags featureFlags) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory);
+                messageAreaControllerFactory, featureFlags);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
@@ -135,6 +138,8 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     // Prevent user from using the PIN/Password entry until scheduled deadline.
     protected void handleAttemptLockout(long elapsedRealtimeDeadline) {
         mView.setPasswordEntryEnabled(false);
+        mView.setPasswordEntryInputEnabled(false);
+        mLockedOut = true;
         long elapsedRealtime = SystemClock.elapsedRealtime();
         long secondsInFuture = (long) Math.ceil(
                 (elapsedRealtimeDeadline - elapsedRealtime) / 1000.0);
@@ -156,6 +161,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             @Override
             public void onFinish() {
                 mMessageAreaController.setMessage("");
+                mLockedOut = false;
                 resetState();
             }
         }.start();
@@ -179,10 +185,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                     handleAttemptLockout(deadline);
                 }
             }
+            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (timeoutMs == 0) {
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
-            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             startErrorAnimation();
         }
     }
@@ -191,6 +197,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     protected void verifyPasswordAndUnlock() {
         if (mDismissing) return; // already verified but haven't been dismissed; don't do it again.
+        if (mLockedOut) return;
 
         final LockscreenCredential password = mView.getEnteredCredential();
         mView.setPasswordEntryInputEnabled(false);

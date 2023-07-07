@@ -46,6 +46,7 @@ public final class CredentialProviderInfo implements Parcelable {
     @Nullable private CharSequence mSettingsSubtitle = null;
     private final boolean mIsSystemProvider;
     private final boolean mIsEnabled;
+    private final boolean mIsPrimary;
 
     /**
      * Constructs an information instance of the credential provider.
@@ -58,6 +59,7 @@ public final class CredentialProviderInfo implements Parcelable {
         mIsSystemProvider = builder.mIsSystemProvider;
         mSettingsSubtitle = builder.mSettingsSubtitle;
         mIsEnabled = builder.mIsEnabled;
+        mIsPrimary = builder.mIsPrimary;
         mOverrideLabel = builder.mOverrideLabel;
     }
 
@@ -108,6 +110,15 @@ public final class CredentialProviderInfo implements Parcelable {
         return mIsEnabled;
     }
 
+    /**
+     * Returns whether the provider is set as primary by the user.
+     *
+     * @hide
+     */
+    public boolean isPrimary() {
+        return mIsPrimary;
+    }
+
     /** Returns the settings subtitle. */
     @Nullable
     public CharSequence getSettingsSubtitle() {
@@ -125,6 +136,7 @@ public final class CredentialProviderInfo implements Parcelable {
         dest.writeTypedObject(mServiceInfo, flags);
         dest.writeBoolean(mIsSystemProvider);
         dest.writeBoolean(mIsEnabled);
+        dest.writeBoolean(mIsPrimary);
         TextUtils.writeToParcel(mOverrideLabel, dest, flags);
         TextUtils.writeToParcel(mSettingsSubtitle, dest, flags);
 
@@ -149,6 +161,9 @@ public final class CredentialProviderInfo implements Parcelable {
                 + "isEnabled="
                 + mIsEnabled
                 + ", "
+                + "isPrimary="
+                + mIsPrimary
+                + ", "
                 + "overrideLabel="
                 + mOverrideLabel
                 + ", "
@@ -164,6 +179,7 @@ public final class CredentialProviderInfo implements Parcelable {
         mServiceInfo = in.readTypedObject(ServiceInfo.CREATOR);
         mIsSystemProvider = in.readBoolean();
         mIsEnabled = in.readBoolean();
+        mIsPrimary = in.readBoolean();
         mOverrideLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mSettingsSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
 
@@ -193,6 +209,7 @@ public final class CredentialProviderInfo implements Parcelable {
         private boolean mIsSystemProvider = false;
         @Nullable private CharSequence mSettingsSubtitle = null;
         private boolean mIsEnabled = false;
+        private boolean mIsPrimary = false;
         @Nullable private CharSequence mOverrideLabel = null;
 
         /**
@@ -245,6 +262,20 @@ public final class CredentialProviderInfo implements Parcelable {
         /** Sets whether it is enabled by the user. */
         public @NonNull Builder setEnabled(boolean isEnabled) {
             mIsEnabled = isEnabled;
+            return this;
+        }
+
+        /**
+         * Sets whether it is set as primary by the user.
+         *
+         * <p>Primary provider will be used for saving credentials by default. In most cases, there
+         * should only one primary provider exist. However, if there are multiple credential
+         * providers exist in the same package, all of them will be marked as primary.
+         *
+         * @hide
+         */
+        public @NonNull Builder setPrimary(boolean isPrimary) {
+            mIsPrimary = isPrimary;
             return this;
         }
 

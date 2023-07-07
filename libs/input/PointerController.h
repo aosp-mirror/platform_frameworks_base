@@ -19,6 +19,7 @@
 
 #include <PointerControllerInterface.h>
 #include <gui/DisplayEventReceiver.h>
+#include <gui/WindowInfosUpdate.h>
 #include <input/DisplayViewport.h>
 #include <input/Input.h>
 #include <utils/BitSet.h>
@@ -114,8 +115,7 @@ private:
     class DisplayInfoListener : public gui::WindowInfosListener {
     public:
         explicit DisplayInfoListener(PointerController* pc) : mPointerController(pc){};
-        void onWindowInfosChanged(const std::vector<android::gui::WindowInfo>&,
-                                  const std::vector<android::gui::DisplayInfo>&) override;
+        void onWindowInfosChanged(const gui::WindowInfosUpdate&) override;
         void onPointerControllerDestroyed();
 
         // This lock is also used by PointerController. See PointerController::getLock().

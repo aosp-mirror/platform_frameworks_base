@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.os.Looper
+import android.hardware.biometrics.BiometricSourceType
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -28,20 +28,24 @@ import com.android.systemui.DejankUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.BouncerViewDelegate
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,16 +71,25 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var mPrimaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
-    @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    private val mainHandler = FakeHandler(Looper.getMainLooper())
+    private lateinit var mainHandler: FakeHandler
     private lateinit var underTest: PrimaryBouncerInteractor
     private lateinit var resources: TestableResources
+    private lateinit var trustRepository: FakeTrustRepository
+    private lateinit var featureFlags: FakeFeatureFlags
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(keyguardSecurityModel.getSecurityMode(anyInt()))
+            .thenReturn(KeyguardSecurityModel.SecurityMode.PIN)
+
         DejankUtils.setImmediate(true)
+        testScope = TestScope()
+        mainHandler = FakeHandler(android.os.Looper.getMainLooper())
+        trustRepository = FakeTrustRepository()
+        featureFlags = FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) }
         underTest =
             PrimaryBouncerInteractor(
                 repository,
@@ -89,7 +102,9 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 dismissCallbackRegistry,
                 context,
                 keyguardUpdateMonitor,
-                keyguardBypassController,
+                trustRepository,
+                featureFlags,
+                testScope.backgroundScope,
             )
         whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         whenever(repository.primaryBouncerShow.value).thenReturn(false)
@@ -144,6 +159,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setPrimaryShow(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.INVISIBLE)
         verify(repository).setPrimaryStartDisappearAnimation(null)
+        verify(repository).setPanelExpansion(EXPANSION_HIDDEN)
     }
 
     @Test
@@ -381,6 +397,57 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         )
         underTest.updateSideFpsVisibility()
         verify(repository).setSideFpsShowing(false)
+    }
+
+    @Test
+    fun delayBouncerWhenFaceAuthPossible() {
+        mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+        // GIVEN bouncer should be delayed due to face auth
+        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
+            .thenReturn(true)
+
+        // WHEN bouncer show is requested
+        underTest.show(true)
+
+        // THEN primary show & primary showing soon aren't updated immediately
+        verify(repository, never()).setPrimaryShow(true)
+        verify(repository, never()).setPrimaryShowingSoon(false)
+
+        // WHEN all queued messages are dispatched
+        mainHandler.dispatchQueuedMessages()
+
+        // THEN primary show & primary showing soon are updated
+        verify(repository).setPrimaryShow(true)
+        verify(repository).setPrimaryShowingSoon(false)
+    }
+
+    @Test
+    fun delayBouncerWhenActiveUnlockPossible() {
+        testScope.run {
+            mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+            // GIVEN bouncer should be delayed due to active unlock
+            trustRepository.setCurrentUserActiveUnlockAvailable(true)
+            whenever(keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState())
+                .thenReturn(true)
+            runCurrent()
+
+            // WHEN bouncer show is requested
+            underTest.show(true)
+
+            // THEN primary show & primary showing soon were scheduled to update
+            verify(repository, never()).setPrimaryShow(true)
+            verify(repository, never()).setPrimaryShowingSoon(false)
+
+            // WHEN all queued messages are dispatched
+            mainHandler.dispatchQueuedMessages()
+
+            // THEN primary show & primary showing soon are updated
+            verify(repository).setPrimaryShow(true)
+            verify(repository).setPrimaryShowingSoon(false)
+        }
     }
 
     private fun updateSideFpsVisibilityParameters(

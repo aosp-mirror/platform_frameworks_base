@@ -3290,6 +3290,12 @@ class Task extends TaskFragment {
             scheduleAnimation();
         }
 
+        // Let organizer manage task visibility for shell transition. So don't change it's
+        // visibility during collecting.
+        if (mTransitionController.isCollecting() && mCreatedByOrganizer) {
+            return;
+        }
+
         // We intend to let organizer manage task visibility but it doesn't
         // have enough information until we finish shell transitions.
         // In the mean time we do an easy fix here.
@@ -3437,6 +3443,7 @@ class Task extends TaskFragment {
                 : INVALID_TASK_ID;
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
+        info.isVisibleRequested = isVisibleRequested();
         info.isSleeping = shouldSleepActivities();
         info.isLetterboxDoubleTapEnabled = top != null
                 && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
@@ -4614,6 +4621,13 @@ class Task extends TaskFragment {
                             topActivity.reparent(lastParentBeforePip,
                                     lastParentBeforePip.getChildCount() /* top */,
                                     "movePinnedActivityToOriginalTask");
+                            final DisplayContent dc = topActivity.getDisplayContent();
+                            if (dc != null && dc.isFixedRotationLaunchingApp(topActivity)) {
+                                // Expanding pip into new rotation, so create a rotation leash
+                                // until the display is rotated.
+                                topActivity.getOrCreateFixedRotationLeash(
+                                        topActivity.getSyncTransaction());
+                            }
                             lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
                         }
                     }
@@ -5163,6 +5177,12 @@ class Task extends TaskFragment {
             // task.
             r.setVisibility(true);
             ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            // If launching behind, the app will start regardless of what's above it, so mark it
+            // as unknown even before prior `pause`. This also prevents a race between set-ready
+            // and activityPause. Launch-behind is basically only used for dream now.
+            if (!r.isVisibleRequested()) {
+                r.notifyUnknownVisibilityLaunchedForKeyguardTransition();
+            }
             // Go ahead to execute app transition for this activity since the app transition
             // will not be triggered through the resume channel.
             mDisplayContent.executeAppTransition();
@@ -5660,6 +5680,7 @@ class Task extends TaskFragment {
                         }
                         mTransitionController.requestStartTransition(transition, tr,
                                 null /* remoteTransition */, null /* displayChange */);
+                        mTransitionController.collect(tr);
                         moveTaskToBackInner(tr);
                     });
         } else {
@@ -5673,17 +5694,28 @@ class Task extends TaskFragment {
     }
 
     private boolean moveTaskToBackInner(@NonNull Task task) {
-        moveToBack("moveTaskToBackInner", task);
-
-        if (inPinnedWindowingMode()) {
-            mTaskSupervisor.removeRootTask(this);
-            return true;
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // Preventing from update surface position for WindowState if configuration changed,
+            // because the position is depends on WindowFrame, so update the position before
+            // relayout will only update it to "old" position.
+            mAtmService.deferWindowLayout();
         }
+        try {
+            moveToBack("moveTaskToBackInner", task);
 
-        mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
-                false /* deferResume */);
+            if (inPinnedWindowingMode()) {
+                mTaskSupervisor.removeRootTask(this);
+                return true;
+            }
 
+            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
+                    mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
+                    false /* deferResume */);
+        } finally {
+            if (mTransitionController.isShellTransitionsEnabled()) {
+                mAtmService.continueWindowLayout();
+            }
+        }
         ActivityRecord topActivity = getDisplayArea().topRunningActivity();
         Task topRootTask = topActivity.getRootTask();
         if (topRootTask != null && topRootTask != this && topActivity.isState(RESUMED)) {

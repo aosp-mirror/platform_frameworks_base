@@ -78,6 +78,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -387,7 +388,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(clock.isLayoutRtl).thenReturn(false)
 
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
-        verify(clock).addOnLayoutChangeListener(capture(captor))
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
 
         captor.value.onLayoutChange(clock, 0, 1, 2, 3, 4, 5, 6, 7)
         verify(clock).pivotX = 0f
@@ -400,7 +401,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(clock.isLayoutRtl).thenReturn(true)
 
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
-        verify(clock).addOnLayoutChangeListener(capture(captor))
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
 
         captor.value.onLayoutChange(clock, 0, 1, 2, 3, 4, 5, 6, 7)
         verify(clock).pivotX = width.toFloat()
@@ -793,7 +794,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Test
     fun clockPivotYInCenter() {
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
-        verify(clock).addOnLayoutChangeListener(capture(captor))
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
         var height = 100
         val width = 50
 
@@ -825,16 +826,17 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun carrierLeftPaddingIsSetWhenClockLayoutChanges() {
-        val width = 200
-        whenever(clock.width).thenReturn(width)
-        whenever(clock.scaleX).thenReturn(2.57f) // 2.57 comes from qs_header.xml
+    fun carrierStartPaddingIsSetOnClockLayout() {
+        val clockWidth = 200
+        val maxClockScale = context.resources.getFloat(R.dimen.qqs_expand_clock_scale)
+        val expectedStartPadding = (clockWidth * maxClockScale).toInt()
+        whenever(clock.width).thenReturn(clockWidth)
+
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
+        captor.allValues.forEach { clock.executeLayoutChange(0, 0, clockWidth, 0, it) }
 
-        verify(clock).addOnLayoutChangeListener(capture(captor))
-        captor.value.onLayoutChange(clock, 0, 0, width, 0, 0, 0, 0, 0)
-
-        verify(carrierGroup).setPaddingRelative(514, 0, 0, 0)
+        verify(carrierGroup).setPaddingRelative(expectedStartPadding, 0, 0, 0)
     }
 
     @Test

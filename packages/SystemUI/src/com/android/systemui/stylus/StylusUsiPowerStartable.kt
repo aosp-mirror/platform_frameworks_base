@@ -50,14 +50,6 @@ constructor(
         }
     }
 
-    override fun onStylusBluetoothConnected(deviceId: Int, btAddress: String) {
-        stylusUsiPowerUi.refresh()
-    }
-
-    override fun onStylusBluetoothDisconnected(deviceId: Int, btAddress: String) {
-        stylusUsiPowerUi.refresh()
-    }
-
     override fun onStylusUsiBatteryStateChanged(
         deviceId: Int,
         eventTimeMillis: Long,

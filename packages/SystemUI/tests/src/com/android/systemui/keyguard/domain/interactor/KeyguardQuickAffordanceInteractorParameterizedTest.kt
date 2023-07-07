@@ -28,6 +28,7 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
@@ -37,6 +38,7 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
@@ -237,6 +239,8 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @JvmField @Parameter(3) var needsToUnlockFirst: Boolean = false
     @JvmField @Parameter(4) var startActivity: Boolean = false
     private lateinit var homeControls: FakeKeyguardQuickAffordanceConfig
+    private lateinit var dockManager: DockManagerFake
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
     private lateinit var userTracker: UserTracker
 
     @Before
@@ -247,6 +251,8 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         userTracker = FakeUserTracker()
         homeControls =
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
+        dockManager = DockManagerFake()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
         val quickAccessWallet =
             FakeKeyguardQuickAffordanceConfig(
                 BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
@@ -335,7 +341,10 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 launchAnimator = launchAnimator,
                 logger = logger,
                 devicePolicyManager = devicePolicyManager,
+                dockManager = dockManager,
+                biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
+                appContext = mContext,
             )
     }
 

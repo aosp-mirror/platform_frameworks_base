@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.DreamManager;
-import android.content.Context;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -42,12 +41,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import kotlinx.coroutines.CoroutineScope;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamConditionTest extends SysuiTestCase {
-    @Mock
-    Context mContext;
-
     @Mock
     Condition.Callback mCallback;
 
@@ -56,6 +54,9 @@ public class DreamConditionTest extends SysuiTestCase {
 
     @Mock
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    @Mock
+    CoroutineScope mScope;
 
     @Before
     public void setup() {
@@ -68,7 +69,8 @@ public class DreamConditionTest extends SysuiTestCase {
     @Test
     public void testInitialDreamingState() {
         when(mDreamManager.isDreaming()).thenReturn(true);
-        final DreamCondition condition = new DreamCondition(mDreamManager, mKeyguardUpdateMonitor);
+        final DreamCondition condition = new DreamCondition(mScope, mDreamManager,
+                mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
 
         verify(mCallback).onConditionChanged(eq(condition));
@@ -81,7 +83,8 @@ public class DreamConditionTest extends SysuiTestCase {
     @Test
     public void testInitialNonDreamingState() {
         when(mDreamManager.isDreaming()).thenReturn(false);
-        final DreamCondition condition = new DreamCondition(mDreamManager, mKeyguardUpdateMonitor);
+        final DreamCondition condition = new DreamCondition(mScope, mDreamManager,
+                mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
 
         verify(mCallback, never()).onConditionChanged(eq(condition));
@@ -96,7 +99,8 @@ public class DreamConditionTest extends SysuiTestCase {
         final ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCaptor =
                 ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
         when(mDreamManager.isDreaming()).thenReturn(true);
-        final DreamCondition condition = new DreamCondition(mDreamManager, mKeyguardUpdateMonitor);
+        final DreamCondition condition = new DreamCondition(mScope, mDreamManager,
+                mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
         verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture());
 

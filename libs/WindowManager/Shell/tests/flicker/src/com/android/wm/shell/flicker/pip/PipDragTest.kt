@@ -22,7 +22,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -37,28 +36,31 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipDragTest(flicker: FlickerTest) : PipTransition(flicker) {
     private var isDraggedLeft: Boolean = true
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            val stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true")
 
-            setup {
-                tapl.setEnableRotation(true)
-                // Launch the PIP activity and wait for it to enter PiP mode
-                RemoveAllTasksButHomeRule.removeAllTasksButHome()
-                pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.dragPipWindowAwayFromEdgeWithoutRelease(wmHelper, 50) }
+    }
 
-                // determine the direction of dragging to test for
-                isDraggedLeft = pipApp.isCloserToRightEdge(wmHelper)
-            }
-            teardown {
-                // release the primary pointer after dragging without release
-                pipApp.releasePipAfterDragging()
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        val stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true")
+        setup {
+            tapl.setEnableRotation(true)
+            pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
 
-                pipApp.exit(wmHelper)
-                tapl.setEnableRotation(false)
-            }
-            transitions { pipApp.dragPipWindowAwayFromEdgeWithoutRelease(wmHelper, 50) }
+            // determine the direction of dragging to test for
+            isDraggedLeft = pipApp.isCloserToRightEdge(wmHelper)
         }
+    }
+
+    override val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            // release the primary pointer after dragging without release
+            pipApp.releasePipAfterDragging()
+
+            pipApp.exit(wmHelper)
+            tapl.setEnableRotation(false)
+        }
+    }
 
     @Postsubmit
     @Test

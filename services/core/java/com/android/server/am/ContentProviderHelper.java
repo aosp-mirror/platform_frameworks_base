@@ -18,6 +18,7 @@ package com.android.server.am;
 import static android.Manifest.permission.GET_ANY_PROVIDER_TYPE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_PROVIDER;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_PROVIDER;
 import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
@@ -34,7 +35,6 @@ import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_E
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_PROVIDER;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -246,8 +246,12 @@ public class ContentProviderHelper {
                 }
             }
 
+            final int callingProcessState = r != null
+                    ? r.mState.getCurProcState() : ActivityManager.PROCESS_STATE_UNKNOWN;
+
             if (providerRunning) {
                 cpi = cpr.info;
+
 
                 if (r != null && cpr.canRunHere(r)) {
                     checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
@@ -266,7 +270,8 @@ public class ContentProviderHelper {
                             r.uid, callingUid,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                            cpi.packageName, callingPackage);
+                            cpi.packageName, callingPackage,
+                            callingProcessState, callingProcessState);
                     return holder;
                 }
 
@@ -281,6 +286,8 @@ public class ContentProviderHelper {
 
                 checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
                         cpr.name.flattenToShortString(), startTime);
+
+                final int providerProcessState = cpr.proc.mState.getCurProcState();
 
                 final long origId = Binder.clearCallingIdentity();
                 try {
@@ -338,7 +345,8 @@ public class ContentProviderHelper {
                                 cpr.proc.uid, callingUid,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                                cpi.packageName, callingPackage);
+                                cpi.packageName, callingPackage,
+                                callingProcessState, providerProcessState);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -516,7 +524,8 @@ public class ContentProviderHelper {
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
-                                    cpi.packageName, callingPackage);
+                                    cpi.packageName, callingPackage,
+                                    callingProcessState, proc.mState.getCurProcState());
                         } else {
                             final int packageState =
                                     ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
@@ -541,7 +550,8 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
-                                    packageState, cpi.packageName, callingPackage);
+                                    packageState, cpi.packageName, callingPackage,
+                                    callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
@@ -778,7 +788,7 @@ public class ContentProviderHelper {
      * Drop a content provider from a ProcessRecord's bookkeeping
      */
     void removeContentProvider(IBinder connection, boolean stable) {
-        mService.enforceNotIsolatedOrSdkSandboxCaller("removeContentProvider");
+        mService.enforceNotIsolatedCaller("removeContentProvider");
         final long ident = Binder.clearCallingIdentity();
         try {
             ContentProviderConnection conn;

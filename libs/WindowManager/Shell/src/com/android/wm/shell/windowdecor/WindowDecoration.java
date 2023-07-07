@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -256,13 +258,17 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
         mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
         mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
-        Point taskPosition = mTaskInfo.positionInParent;
+        final Point taskPosition = mTaskInfo.positionInParent;
         startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight)
                 .setShadowRadius(mTaskSurface, shadowRadius)
                 .setColor(mTaskSurface, mTmpColor)
                 .show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
                 .setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
+            finishT.setCornerRadius(mTaskSurface, params.mCornerRadius);
+        }
 
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
@@ -414,6 +420,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionWidthId;
         int mShadowRadiusId;
 
+        int mCornerRadius;
+
         int mCaptionX;
         int mCaptionY;
 
@@ -424,6 +432,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
             mShadowRadiusId = Resources.ID_NULL;
+
+            mCornerRadius = 0;
 
             mCaptionX = 0;
             mCaptionY = 0;
@@ -458,7 +468,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         SurfaceControlViewHost mWindowViewHost;
         Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
-        private AdditionalWindow(SurfaceControl surfaceControl,
+        AdditionalWindow(SurfaceControl surfaceControl,
                 SurfaceControlViewHost surfaceControlViewHost,
                 Supplier<SurfaceControl.Transaction> transactionSupplier) {
             mWindowSurface = surfaceControl;

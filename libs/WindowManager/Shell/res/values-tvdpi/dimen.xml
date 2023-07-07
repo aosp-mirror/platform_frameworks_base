@@ -33,8 +33,8 @@
     <!-- outer space minus border width -->
     <dimen name="pip_menu_outer_space_frame">20dp</dimen>
 
-    <dimen name="pip_menu_arrow_size">24dp</dimen>
-    <dimen name="pip_menu_arrow_elevation">5dp</dimen>
+    <dimen name="pip_menu_arrow_size">12dp</dimen>
+    <dimen name="pip_menu_arrow_elevation">1dp</dimen>
 
     <dimen name="pip_menu_elevation_no_menu">1dp</dimen>
     <dimen name="pip_menu_elevation_move_menu">7dp</dimen>

@@ -144,6 +144,7 @@ class ScreenRotationAnimation {
                                 .setCaptureSecureLayers(true)
                                 .setAllowProtected(true)
                                 .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
+                                .setHintForSeamlessTransition(true)
                                 .build();
                 ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                         ScreenCapture.captureLayers(args);

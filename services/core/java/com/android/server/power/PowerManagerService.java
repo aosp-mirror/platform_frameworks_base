@@ -40,13 +40,17 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.SynchronousUserSwitchObserver;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -62,6 +66,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -277,6 +282,18 @@ public final class PowerManagerService extends SystemService
      */
     private static final long ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS = 60 * 1000L;
 
+    /**
+     * Apps targeting Android V and above need to define
+     * {@link android.Manifest.permission#TURN_SCREEN_ON} in their manifest for
+     * {@link android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP} to have any effect.
+     * Note that most applications should use {@link android.R.attr#turnScreenOn} or
+     * {@link android.app.Activity#setTurnScreenOn(boolean)} instead, as this prevents the
+     * previous foreground app from being resumed first when the screen turns on.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    public static final long REQUIRE_TURN_SCREEN_ON_PERMISSION = 216114297L;
+
     /** Reason ID for holding display suspend blocker. */
     private static final String HOLDING_DISPLAY_SUSPEND_BLOCKER = "holding display";
 
@@ -304,8 +321,9 @@ public final class PowerManagerService extends SystemService
     private final SystemPropertiesWrapper mSystemProperties;
     private final Clock mClock;
     private final Injector mInjector;
+    private final PermissionCheckerWrapper mPermissionCheckerWrapper;
+    private final PowerPropertiesWrapper mPowerPropertiesWrapper;
 
-    private AppOpsManager mAppOpsManager;
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
     private DisplayManagerInternal mDisplayManagerInternal;
@@ -686,6 +704,8 @@ public final class PowerManagerService extends SystemService
         @Override
         public void onWakefulnessChangedLocked(int groupId, int wakefulness, long eventTime,
                 int reason, int uid, int opUid, String opPackageName, String details) {
+            mWakefulnessChanging = true;
+            mDirty |= DIRTY_WAKEFULNESS;
             if (wakefulness == WAKEFULNESS_AWAKE) {
                 // Kick user activity to prevent newly awake group from timing out instantly.
                 // The dream may end without user activity if the dream app crashes / is updated,
@@ -696,9 +716,8 @@ public final class PowerManagerService extends SystemService
                         PowerManager.USER_ACTIVITY_EVENT_OTHER, flags, uid);
             }
             mDirty |= DIRTY_DISPLAY_GROUP_WAKEFULNESS;
+            mNotifier.onGroupWakefulnessChangeStarted(groupId, wakefulness, reason, eventTime);
             updateGlobalWakefulnessLocked(eventTime, reason, uid, opUid, opPackageName, details);
-            mNotifier.onPowerGroupWakefulnessChanged(groupId, wakefulness, reason,
-                    getGlobalWakefulnessLocked());
             updatePowerStateLocked();
         }
     }
@@ -1028,9 +1047,64 @@ public final class PowerManagerService extends SystemService
             return new LowPowerStandbyController(context, looper);
         }
 
-        AppOpsManager createAppOpsManager(Context context) {
-            return context.getSystemService(AppOpsManager.class);
+        PermissionCheckerWrapper createPermissionCheckerWrapper() {
+            return PermissionChecker::checkPermissionForDataDelivery;
         }
+
+        PowerPropertiesWrapper createPowerPropertiesWrapper() {
+            return new PowerPropertiesWrapper() {
+                @Override
+                public boolean waive_target_sdk_check_for_turn_screen_on() {
+                    return PowerProperties.waive_target_sdk_check_for_turn_screen_on().orElse(
+                            false);
+                }
+
+                @Override
+                public boolean permissionless_turn_screen_on() {
+                    return PowerProperties.permissionless_turn_screen_on().orElse(false);
+                }
+            };
+        }
+    }
+
+    /** Interface for checking an app op permission */
+    @VisibleForTesting
+    interface PermissionCheckerWrapper {
+        /**
+         * Checks whether a given data access chain described by the given {@link AttributionSource}
+         * has a given permission and whether the app op that corresponds to this permission
+         * is allowed.
+         * See {@link PermissionChecker#checkPermissionForDataDelivery} for more details.
+         *
+         * @param context Context for accessing resources.
+         * @param permission The permission to check.
+         * @param pid The process id for which to check. Use {@link PermissionChecker#PID_UNKNOWN}
+         *    if the PID is not known.
+         * @param attributionSource the permission identity
+         * @param message A message describing the reason the permission was checked
+         * @return The permission check result which is any of
+         *     {@link PermissionChecker#PERMISSION_GRANTED},
+         *     {@link PermissionChecker#PERMISSION_SOFT_DENIED},
+         *     or {@link PermissionChecker#PERMISSION_HARD_DENIED}.
+         */
+        int checkPermissionForDataDelivery(@NonNull Context context, @NonNull String permission,
+                int pid, @NonNull AttributionSource attributionSource, @Nullable String message);
+    }
+
+    /** Interface for querying {@link PowerProperties} */
+    @VisibleForTesting
+    interface PowerPropertiesWrapper {
+        /**
+         * Waives the minimum target-sdk check for android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP
+         * and only allows the flag for apps holding android.permission.TURN_SCREEN_ON
+         */
+        boolean waive_target_sdk_check_for_turn_screen_on();
+
+        /**
+         * Allows apps to turn the screen on with android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP
+         * without being granted android.app.AppOpsManager#OP_TURN_SCREEN_ON.
+         */
+        boolean permissionless_turn_screen_on();
     }
 
     final Constants mConstants;
@@ -1085,8 +1159,8 @@ public final class PowerManagerService extends SystemService
                 Looper.getMainLooper());
         mInattentiveSleepWarningOverlayController =
                 mInjector.createInattentiveSleepWarningController();
-
-        mAppOpsManager = injector.createAppOpsManager(mContext);
+        mPermissionCheckerWrapper = mInjector.createPermissionCheckerWrapper();
+        mPowerPropertiesWrapper = mInjector.createPowerPropertiesWrapper();
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
 
@@ -1561,19 +1635,29 @@ public final class PowerManagerService extends SystemService
     }
 
     @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
-    private boolean isAcquireCausesWakeupFlagAllowed(String opPackageName, int opUid) {
+    private boolean isAcquireCausesWakeupFlagAllowed(String opPackageName, int opUid, int opPid) {
         if (opPackageName == null) {
             return false;
         }
-        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
-                == AppOpsManager.MODE_ALLOWED) {
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.TURN_SCREEN_ON)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Slog.i(TAG, "Allowing device wake-up from app " + opPackageName);
-                return true;
-            }
+        if (PermissionChecker.PERMISSION_GRANTED
+                == mPermissionCheckerWrapper.checkPermissionForDataDelivery(mContext,
+                android.Manifest.permission.TURN_SCREEN_ON, opPid,
+                new AttributionSource(opUid, opPackageName, /* attributionTag= */ null),
+                /* message= */ "ACQUIRE_CAUSES_WAKEUP for " + opPackageName)) {
+            Slog.i(TAG, "Allowing device wake-up from app " + opPackageName);
+            return true;
         }
-        if (PowerProperties.permissionless_turn_screen_on().orElse(false)) {
+        // CompatChanges#isChangeEnabled() returns false for apps with targetSdk < UDC and ensures
+        // backwards compatibility.
+        // waive_target_sdk_check_for_turn_screen_on() returns false by default and may be set to
+        // true on form factors with a more strict policy (e.g. TV)
+        if (!CompatChanges.isChangeEnabled(REQUIRE_TURN_SCREEN_ON_PERMISSION, opUid)
+                && !mPowerPropertiesWrapper.waive_target_sdk_check_for_turn_screen_on()) {
+            Slog.i(TAG, "Allowing device wake-up without android.permission.TURN_SCREEN_ON for "
+                    + opPackageName);
+            return true;
+        }
+        if (mPowerPropertiesWrapper.permissionless_turn_screen_on()) {
             Slog.d(TAG, "Device wake-up allowed by debug.power.permissionless_turn_screen_on");
             return true;
         }
@@ -1588,6 +1672,7 @@ public final class PowerManagerService extends SystemService
                 && isScreenLock(wakeLock)) {
             String opPackageName;
             int opUid;
+            int opPid = PermissionChecker.PID_UNKNOWN;
             if (wakeLock.mWorkSource != null && !wakeLock.mWorkSource.isEmpty()) {
                 WorkSource workSource = wakeLock.mWorkSource;
                 WorkChain workChain = getFirstNonEmptyWorkChain(workSource);
@@ -1602,10 +1687,12 @@ public final class PowerManagerService extends SystemService
             } else {
                 opPackageName = wakeLock.mPackageName;
                 opUid = wakeLock.mOwnerUid;
+                opPid = wakeLock.mOwnerPid;
             }
             Integer powerGroupId = wakeLock.getPowerGroupId();
             // powerGroupId is null if the wakelock associated display is no longer available
-            if (powerGroupId != null && isAcquireCausesWakeupFlagAllowed(opPackageName, opUid)) {
+            if (powerGroupId != null
+                    && isAcquireCausesWakeupFlagAllowed(opPackageName, opUid, opPid)) {
                 if (powerGroupId == Display.INVALID_DISPLAY_GROUP) {
                     // wake up all display groups
                     if (DEBUG_SPEW) {
@@ -2078,6 +2165,7 @@ public final class PowerManagerService extends SystemService
             int opUid, String opPackageName, String details) {
         mPowerGroups.get(groupId).setWakefulnessLocked(wakefulness, eventTime, uid, reason, opUid,
                 opPackageName, details);
+        mInjector.invalidateIsInteractiveCaches();
     }
 
     @SuppressWarnings("deprecation")
@@ -2152,7 +2240,7 @@ public final class PowerManagerService extends SystemService
             mDozeStartInProgress &= (newWakefulness == WAKEFULNESS_DOZING);
 
             if (mNotifier != null) {
-                mNotifier.onWakefulnessChangeStarted(newWakefulness, reason, eventTime);
+                mNotifier.onGlobalWakefulnessChangeStarted(newWakefulness, reason, eventTime);
             }
             mAttentionDetector.onWakefulnessChangeStarted(newWakefulness);
 
@@ -2162,15 +2250,6 @@ public final class PowerManagerService extends SystemService
                     mNotifier.onWakeUp(reason, details, uid, opPackageName, opUid);
                     if (sQuiescent) {
                         mDirty |= DIRTY_QUIESCENT;
-                    }
-                    PowerGroup defaultGroup = mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP);
-                    if (defaultGroup.getWakefulnessLocked() == WAKEFULNESS_DOZING) {
-                        // Workaround for b/187231320 where the AOD can get stuck in a "half on /
-                        // half off" state when a non-default-group VirtualDisplay causes the global
-                        // wakefulness to change to awake, even though the default display is
-                        // dozing. We set sandman summoned to restart dreaming to get it unstuck.
-                        // TODO(b/255688811) - fix this so that AOD never gets interrupted at all.
-                        defaultGroup.setSandmanSummonedLocked(true);
                     }
                     break;
 
@@ -2248,6 +2327,8 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     void onPowerGroupEventLocked(int event, PowerGroup powerGroup) {
+        mWakefulnessChanging = true;
+        mDirty |= DIRTY_WAKEFULNESS;
         final int groupId = powerGroup.getGroupId();
         if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mPowerGroups.delete(groupId);
@@ -2260,6 +2341,11 @@ public final class PowerManagerService extends SystemService
             // Kick user activity to prevent newly added group from timing out instantly.
             userActivityNoUpdateLocked(powerGroup, mClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_OTHER, /* flags= */ 0, Process.SYSTEM_UID);
+            mNotifier.onGroupWakefulnessChangeStarted(groupId,
+                    powerGroup.getWakefulnessLocked(), WAKE_REASON_DISPLAY_GROUP_ADDED,
+                    mClock.uptimeMillis());
+        } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
+            mNotifier.onGroupRemoved(groupId);
         }
 
         if (oldWakefulness != newWakefulness) {
@@ -3744,9 +3830,29 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private boolean isInteractiveInternal() {
+    private boolean isGloballyInteractiveInternal() {
         synchronized (mLock) {
             return PowerManagerInternal.isInteractive(getGlobalWakefulnessLocked());
+        }
+    }
+
+    private boolean isInteractiveInternal(int displayId, int uid) {
+        synchronized (mLock) {
+            DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
+            if (displayInfo == null) {
+                Slog.w(TAG, "Did not find DisplayInfo for displayId " + displayId);
+                return false;
+            }
+            if (!displayInfo.hasAccess(uid)) {
+                throw new SecurityException(
+                        "uid " + uid + " does not have access to display " + displayId);
+            }
+            PowerGroup powerGroup = mPowerGroups.get(displayInfo.displayGroupId);
+            if (powerGroup == null) {
+                Slog.w(TAG, "Did not find PowerGroup for displayId " + displayId);
+                return false;
+            }
+            return PowerManagerInternal.isInteractive(powerGroup.getWakefulnessLocked());
         }
     }
 
@@ -5691,8 +5797,14 @@ public final class PowerManagerService extends SystemService
             }
 
             if (eventTime > now) {
-                Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
-                throw new IllegalArgumentException("event time must not be in the future");
+                Slog.wtf(TAG, "Event cannot be newer than the current time ("
+                        + "now=" + now
+                        + ", eventTime=" + eventTime
+                        + ", displayId=" + displayId
+                        + ", event=" + PowerManager.userActivityEventToString(event)
+                        + ", flags=" + flags
+                        + ")");
+                return;
             }
 
             final int uid = Binder.getCallingUid();
@@ -5800,7 +5912,18 @@ public final class PowerManagerService extends SystemService
         public boolean isInteractive() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return isInteractiveInternal();
+                return isGloballyInteractiveInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isDisplayInteractive(int displayId) {
+            int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isInteractiveInternal(displayId, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

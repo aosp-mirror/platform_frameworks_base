@@ -238,6 +238,7 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
                     UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
                     UserManager.DISALLOW_CHANGE_WIFI_STATE,
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
                     UserManager.DISALLOW_WIFI_TETHERING,
                     UserManager.DISALLOW_WIFI_DIRECT,
                     UserManager.DISALLOW_ADD_WIFI_CONFIG,

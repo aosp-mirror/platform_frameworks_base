@@ -167,7 +167,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith("?");
-    private static final int MAX_LOW_POWER_STATS_SIZE = 16384;
+    private static final int MAX_LOW_POWER_STATS_SIZE = 32768;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
     private static final String EMPTY = "Empty";
 
@@ -397,6 +397,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats,
                 mBatteryUsageStatsStore);
         mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
+    }
+
+    /**
+     * Creates an instance of BatteryStatsService and restores data from stored state.
+     */
+    public static BatteryStatsService create(Context context, File systemDir, Handler handler,
+            BatteryStatsImpl.BatteryCallback callback) {
+        BatteryStatsService service = new BatteryStatsService(context, systemDir, handler);
+        service.mStats.setCallback(callback);
+        synchronized (service.mStats) {
+            service.mStats.readLocked();
+        }
+        service.scheduleWriteToDisk();
+        return service;
     }
 
     public void publish() {
@@ -2271,34 +2285,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             });
         }
-    }
-
-    /**
-     * Bluetooth on stat logging
-     */
-    @Override
-    @EnforcePermission(BLUETOOTH_CONNECT)
-    public void noteBluetoothOn(int uid, int reason, String packageName) {
-        super.noteBluetoothOn_enforcePermission();
-
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
-                Binder.getCallingUid(), null,
-                FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED,
-                reason, packageName);
-    }
-
-    /**
-     * Bluetooth off stat logging
-     */
-    @Override
-    @EnforcePermission(BLUETOOTH_CONNECT)
-    public void noteBluetoothOff(int uid, int reason, String packageName) {
-        super.noteBluetoothOff_enforcePermission();
-
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
-                Binder.getCallingUid(), null,
-                FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED,
-                reason, packageName);
     }
 
     @Override

@@ -25,6 +25,7 @@ import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceTarget
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.media.MediaDescription
@@ -40,7 +41,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
-import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
@@ -77,6 +77,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -131,7 +132,6 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var smartspaceManager: SmartspaceManager
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock lateinit var statusBarService: IStatusBarService
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
@@ -195,7 +195,6 @@ class MediaDataManagerTest : SysuiTestCase() {
                 logger = logger,
                 smartspaceManager = smartspaceManager,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
-                statusBarService = statusBarService,
             )
         verify(tunerService)
             .addTunable(capture(tunableCaptor), eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -520,8 +519,12 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnNotificationAdded_emptyTitle_notLoaded() {
-        // GIVEN that the manager has a notification with an empty title.
+    fun testOnNotificationAdded_emptyTitle_hasPlaceholder() {
+        // When the manager has a notification with an empty title, and the app is not
+        // required to include a non-empty title
+        val mockPackageManager = mock(PackageManager::class.java)
+        context.setMockPackageManager(mockPackageManager)
+        whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
         whenever(controller.metadata)
             .thenReturn(
                 metadataBuilder
@@ -530,72 +533,9 @@ class MediaDataManagerTest : SysuiTestCase() {
             )
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
 
+        // Then a media control is created with a placeholder title string
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(statusBarService)
-            .onNotificationError(
-                eq(PACKAGE_NAME),
-                eq(mediaNotification.tag),
-                eq(mediaNotification.id),
-                eq(mediaNotification.uid),
-                eq(mediaNotification.initialPid),
-                eq(MEDIA_TITLE_ERROR_MESSAGE),
-                eq(mediaNotification.user.identifier)
-            )
-        verify(listener, never())
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
-        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
-        verify(logger, never()).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), any())
-    }
-
-    @Test
-    fun testOnNotificationAdded_blankTitle_notLoaded() {
-        // GIVEN that the manager has a notification with a blank title.
-        whenever(controller.metadata)
-            .thenReturn(
-                metadataBuilder
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
-                    .build()
-            )
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(statusBarService)
-            .onNotificationError(
-                eq(PACKAGE_NAME),
-                eq(mediaNotification.tag),
-                eq(mediaNotification.id),
-                eq(mediaNotification.uid),
-                eq(mediaNotification.initialPid),
-                eq(MEDIA_TITLE_ERROR_MESSAGE),
-                eq(mediaNotification.user.identifier)
-            )
-        verify(listener, never())
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
-        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
-        verify(logger, never()).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), any())
-    }
-
-    @Test
-    fun testOnNotificationUpdated_invalidTitle_logMediaRemoved() {
-        addNotificationAndLoad()
-        val data = mediaDataCaptor.value
-
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -605,8 +545,17 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0),
                 eq(false)
             )
+        val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
+        assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
+    }
 
-        reset(listener)
+    @Test
+    fun testOnNotificationAdded_blankTitle_hasPlaceholder() {
+        // GIVEN that the manager has a notification with a blank title, and the app is not
+        // required to include a non-empty title
+        val mockPackageManager = mock(PackageManager::class.java)
+        context.setMockPackageManager(mockPackageManager)
+        whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
         whenever(controller.metadata)
             .thenReturn(
                 metadataBuilder
@@ -614,19 +563,11 @@ class MediaDataManagerTest : SysuiTestCase() {
                     .build()
             )
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        // Then a media control is created with a placeholder title string
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(statusBarService)
-            .onNotificationError(
-                eq(PACKAGE_NAME),
-                eq(mediaNotification.tag),
-                eq(mediaNotification.id),
-                eq(mediaNotification.uid),
-                eq(mediaNotification.initialPid),
-                eq(MEDIA_TITLE_ERROR_MESSAGE),
-                eq(mediaNotification.user.identifier)
-            )
-        verify(listener, never())
+        verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
                 eq(null),
@@ -635,7 +576,49 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0),
                 eq(false)
             )
-        verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
+        val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
+        assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
+    }
+
+    @Test
+    fun testOnNotificationAdded_emptyMetadata_usesNotificationTitle() {
+        // When the app sets the metadata title fields to empty strings, but does include a
+        // non-blank notification title
+        val mockPackageManager = mock(PackageManager::class.java)
+        context.setMockPackageManager(mockPackageManager)
+        whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_EMPTY_TITLE)
+                    .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, SESSION_EMPTY_TITLE)
+                    .build()
+            )
+        mediaNotification =
+            SbnBuilder().run {
+                setPkg(PACKAGE_NAME)
+                modifyNotification(context).also {
+                    it.setSmallIcon(android.R.drawable.ic_media_pause)
+                    it.setContentTitle(SESSION_TITLE)
+                    it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                }
+                build()
+            }
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        // Then the media control is added using the notification's title
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.song).isEqualTo(SESSION_TITLE)
     }
 
     @Test

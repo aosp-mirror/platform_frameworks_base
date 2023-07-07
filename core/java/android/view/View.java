@@ -7734,13 +7734,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
 
         boolean handled = false;
-        final ListenerInfo li = mListenerInfo;
+        final OnLongClickListener listener =
+                mListenerInfo == null ? null : mListenerInfo.mOnLongClickListener;
         boolean shouldPerformHapticFeedback = true;
-        if (li != null && li.mOnLongClickListener != null) {
-            handled = li.mOnLongClickListener.onLongClick(View.this);
+        if (listener != null) {
+            handled = listener.onLongClick(View.this);
             if (handled) {
-                shouldPerformHapticFeedback =
-                        li.mOnLongClickListener.onLongClickUseDefaultHapticFeedback(View.this);
+                shouldPerformHapticFeedback = listener.onLongClickUseDefaultHapticFeedback(
+                        View.this);
             }
         }
         if (!handled) {
@@ -9845,10 +9846,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p><b>Note:</b> Setting the mode as {@link #IMPORTANT_FOR_AUTOFILL_NO} or
      * {@link #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS} does not guarantee the view (and its
-     * children) will be always be considered not important; for example, when the user explicitly
-     * makes an autofill request, all views are considered important. See
-     * {@link #isImportantForAutofill()} for more details about how the View's importance for
-     * autofill is used.
+     * children) will not be used for autofill purpose; for example, when the user explicitly
+     * makes an autofill request, all views are included in the ViewStructure, and starting in
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} the system uses other factors along
+     * with importance to determine the autofill behavior. See {@link #isImportantForAutofill()}
+     * for more details about how the View's importance for autofill is used.
      *
      * @param mode {@link #IMPORTANT_FOR_AUTOFILL_AUTO}, {@link #IMPORTANT_FOR_AUTOFILL_YES},
      * {@link #IMPORTANT_FOR_AUTOFILL_NO}, {@link #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS},
@@ -9894,21 +9896,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>otherwise, it returns {@code false}.
      * </ol>
      *
-     * <p>When a view is considered important for autofill:
-     * <ul>
-     *   <li>The view might automatically trigger an autofill request when focused on.
-     *   <li>The contents of the view are included in the {@link ViewStructure} used in an autofill
-     *       request.
-     * </ul>
-     *
-     * <p>On the other hand, when a view is considered not important for autofill:
-     * <ul>
-     *   <li>The view never automatically triggers autofill requests, but it can trigger a manual
-     *       request through {@link AutofillManager#requestAutofill(View)}.
-     *   <li>The contents of the view are not included in the {@link ViewStructure} used in an
-     *       autofill request, unless the request has the
-     *       {@link #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} flag.
-     * </ul>
+     * <p> The behavior of importances depends on Android version:
+     * <ol>
+     *   <li>For {@link android.os.Build.VERSION_CODES#TIRAMISU} and below:
+     *     <ol>
+     *       <li>When a view is considered important for autofill:
+     *          <ol>
+     *            <li>The view might automatically trigger an autofill request when focused on.
+     *            <li>The contents of the view are included in the {@link ViewStructure} used in an
+     *                autofill request.
+     *          </ol>
+     *        <li>On the other hand, when a view is considered not important for autofill:
+     *          <ol>
+     *            <li>The view never automatically triggers autofill requests, but it can trigger a
+     *                manual request through {@link AutofillManager#requestAutofill(View)}.
+     *            <li>The contents of the view are not included in the {@link ViewStructure} used in
+     *                an autofill request, unless the request has the
+     *                {@link #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} flag.
+     *          </ol>
+     *      </ol>
+     *  <li>For {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above:
+     *    <ol>
+     *      <li>The system uses importance, along with other view properties and other optimization
+     *          factors, to determine if a view should trigger autofill on focus.
+     *      <li>The contents of {@link #IMPORTANT_FOR_AUTOFILL_AUTO},
+     *        {@link #IMPORTANT_FOR_AUTOFILL_YES}, {@link #IMPORTANT_FOR_AUTOFILL_NO},
+     *        {@link #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS}, and
+     *        {@link #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS} views will be included in the
+     *        {@link ViewStructure} used in an autofill request.
+     *    </ol>
+     * </ol>
      *
      * @return whether the view is considered important for autofill.
      *
@@ -10377,11 +10394,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final AutofillManager afm = getAutofillManager();
         if (afm == null) {
-            return false;
-        }
-
-        // Disable triggering autofill if the view is integrated with CredentialManager.
-        if (afm.shouldIgnoreCredentialViews() && isCredential()) {
             return false;
         }
 
@@ -25079,7 +25091,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int viewStateIndex = 0;
         if ((privateFlags & PFLAG_PRESSED) != 0) viewStateIndex |= StateSet.VIEW_STATE_PRESSED;
         if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= StateSet.VIEW_STATE_ENABLED;
-        if (isFocused() && hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
+        if (isFocused()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
         if ((privateFlags & PFLAG_SELECTED) != 0) viewStateIndex |= StateSet.VIEW_STATE_SELECTED;
         if (hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_WINDOW_FOCUSED;
         if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= StateSet.VIEW_STATE_ACTIVATED;
@@ -32310,7 +32322,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the mode for determining whether this view is a credential.
+     * Sets whether this view is a credential for Credential Manager purposes.
      *
      * <p>See {@link #isCredential()}.
      *

@@ -337,6 +337,17 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+
+        // The activity with fixed orientation should not apply letterbox when entering PiP.
+        final int requestedOrientation = task.getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT
+                ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+        doReturn(requestedOrientation).when(activity).getRequestedConfigurationOrientation();
+        doReturn(false).when(activity).handlesOrientationChangeFromDescendant(anyInt());
+        final Rect bounds = new Rect(task.getBounds());
+        bounds.scale(0.5f);
+        task.setBounds(bounds);
+        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     /**
@@ -1134,7 +1145,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         TaskChangeNotificationController controller = mAtm.getTaskChangeNotificationController();
         spyOn(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller).notifyTaskProfileLocked(any());
+        verify(controller).notifyTaskProfileLocked(any(), eq(profileUserId));
 
         // Create the work lock activity on top of the task
         final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1144,7 +1155,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Make sure the listener won't be notified again.
         clearInvocations(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller, never()).notifyTaskProfileLocked(any());
+        verify(controller, never()).notifyTaskProfileLocked(any(), anyInt());
     }
 
     /**

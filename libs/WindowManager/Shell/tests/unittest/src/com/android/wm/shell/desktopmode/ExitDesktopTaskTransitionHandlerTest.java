@@ -31,6 +31,7 @@ import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
@@ -71,16 +72,11 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     @Mock
     Resources mResources;
     @Mock
-    SurfaceControl.Transaction mStartT;
-    @Mock
-    SurfaceControl.Transaction mFinishT;
-    @Mock
-    SurfaceControl.Transaction mAnimationT;
-    @Mock
     Transitions.TransitionFinishCallback mTransitionFinishCallback;
     @Mock
     ShellExecutor mExecutor;
 
+    private Point mPoint;
     private ExitDesktopTaskTransitionHandler mExitDesktopTaskTransitionHandler;
 
     @Before
@@ -88,7 +84,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
 
         doReturn(mExecutor).when(mTransitions).getMainExecutor();
-        doReturn(mAnimationT).when(mTransactionFactory).get();
+        doReturn(new SurfaceControl.Transaction()).when(mTransactionFactory).get();
         doReturn(mResources).when(mContext).getResources();
         doReturn(mDisplayMetrics).when(mResources).getDisplayMetrics();
         when(mResources.getDisplayMetrics())
@@ -96,6 +92,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
 
         mExitDesktopTaskTransitionHandler = new ExitDesktopTaskTransitionHandler(mTransitions,
                 mContext);
+        mPoint = new Point(0, 0);
     }
 
     @Test
@@ -106,7 +103,8 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mExitDesktopTaskTransitionHandler);
 
-        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct);
+        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct, mPoint,
+                null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FULLSCREEN);
@@ -115,7 +113,9 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         runOnUiThread(() -> {
             try {
                 assertTrue(mExitDesktopTaskTransitionHandler
-                        .startAnimation(mToken, info, mStartT, mFinishT,
+                        .startAnimation(mToken, info,
+                                new SurfaceControl.Transaction(),
+                                new SurfaceControl.Transaction(),
                                 mTransitionFinishCallback));
             } catch (Exception e) {
                 exceptions.add(e);

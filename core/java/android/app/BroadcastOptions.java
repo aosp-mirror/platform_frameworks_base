@@ -351,6 +351,16 @@ public class BroadcastOptions extends ComponentOptions {
         mDeferralPolicy = opts.getInt(KEY_DEFERRAL_POLICY, DEFERRAL_POLICY_DEFAULT);
     }
 
+    /** @hide */
+    @NonNull
+    public static BroadcastOptions makeWithDeferUntilActive(boolean deferUntilActive) {
+        final BroadcastOptions opts = BroadcastOptions.makeBasic();
+        if (deferUntilActive) {
+            opts.setDeferralPolicy(DEFERRAL_POLICY_UNTIL_ACTIVE);
+        }
+        return opts;
+    }
+
     /**
      * Set a duration for which the system should temporary place an application on the
      * power allowlist when this broadcast is being delivered to it.
@@ -772,23 +782,6 @@ public class BroadcastOptions extends ComponentOptions {
     @IntRange(from = 0)
     public long getIdForResponseEvent() {
         return mIdForResponseEvent;
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
-        if (shouldDefer) {
-            setDeferralPolicy(DEFERRAL_POLICY_UNTIL_ACTIVE);
-        } else {
-            setDeferralPolicy(DEFERRAL_POLICY_NONE);
-        }
-        return this;
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public boolean isDeferUntilActive() {
-        return (mDeferralPolicy == DEFERRAL_POLICY_UNTIL_ACTIVE);
     }
 
     /**

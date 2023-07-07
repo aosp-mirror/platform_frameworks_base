@@ -35,7 +35,7 @@ import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockTickRate
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -47,6 +47,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -118,7 +119,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 bouncerRepository = bouncerRepository,
             ),
-            KeyguardTransitionInteractor(repository = transitionRepository),
+            KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
             broadcastDispatcher,
             batteryController,
             keyguardUpdateMonitor,
@@ -136,7 +137,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             underTest.registerListeners(parentView)
 
-            repository.setDozing(true)
+            repository.setIsDozing(true)
             repository.setDozeAmount(1f)
         }
     }

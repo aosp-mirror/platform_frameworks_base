@@ -19,14 +19,14 @@ package com.android.server.soundtrigger_middleware;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.IBinder;
 
 import java.util.HashSet;
@@ -238,13 +238,13 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
         }
 
         @Override
-        public void recognitionCallback(int modelHandle, RecognitionEvent event) {
+        public void recognitionCallback(int modelHandle, RecognitionEventSys event) {
             synchronized (mActiveModels) {
                 if (!mActiveModels.contains(modelHandle)) {
                     // Discard the event.
                     return;
                 }
-                if (!event.recognitionStillActive) {
+                if (!event.recognitionEvent.recognitionStillActive) {
                     mActiveModels.remove(modelHandle);
                 }
                 // A recognition event must be the last one for its model, unless it indicates that
@@ -255,13 +255,13 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
         }
 
         @Override
-        public void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEvent event) {
+        public void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEventSys event) {
             synchronized (mActiveModels) {
                 if (!mActiveModels.contains(modelHandle)) {
                     // Discard the event.
                     return;
                 }
-                if (!event.common.recognitionStillActive) {
+                if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                     mActiveModels.remove(modelHandle);
                 }
                 // A recognition event must be the last one for its model, unless it indicates that

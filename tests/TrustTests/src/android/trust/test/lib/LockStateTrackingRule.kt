@@ -17,7 +17,6 @@
 package android.trust.test.lib
 
 import android.app.trust.TrustManager
-import android.app.trust.TrustManager.TrustListener
 import android.content.Context
 import android.util.Log
 import android.view.WindowManagerGlobal
@@ -60,7 +59,7 @@ class LockStateTrackingRule : TestRule {
         wait("locked per TrustListener") { lockState.locked == false }
     }
 
-    inner class Listener : TrustListener {
+    inner class Listener : TestTrustListener() {
         override fun onTrustChanged(
             enabled: Boolean,
             newlyUnlocked: Boolean,
@@ -70,12 +69,6 @@ class LockStateTrackingRule : TestRule {
         ) {
             Log.d(TAG, "Device became trusted=$enabled")
             lockState = lockState.copy(locked = !enabled)
-        }
-
-        override fun onTrustManagedChanged(enabled: Boolean, userId: Int) {
-        }
-
-        override fun onTrustError(message: CharSequence) {
         }
     }
 

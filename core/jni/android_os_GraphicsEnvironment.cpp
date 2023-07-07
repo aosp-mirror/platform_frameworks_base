@@ -50,7 +50,7 @@ void setGpuStats_native(JNIEnv* env, jobject clazz, jstring driverPackageName,
 }
 
 void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appName,
-                         jboolean angleIsSystemDriver, jstring devOptIn, jobjectArray featuresObj) {
+                         jstring devOptIn, jobjectArray featuresObj) {
     ScopedUtfChars pathChars(env, path);
     ScopedUtfChars appNameChars(env, appName);
     ScopedUtfChars devOptInChars(env, devOptIn);
@@ -74,18 +74,7 @@ void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appNa
     }
 
     android::GraphicsEnv::getInstance().setAngleInfo(pathChars.c_str(), appNameChars.c_str(),
-                                                     angleIsSystemDriver, devOptInChars.c_str(),
-                                                     features);
-}
-
-void setLegacyDriverInfo_native(JNIEnv* env, jobject clazz, jstring appName,
-                                jboolean angleIsSystemDriver, jstring legacyDriverName) {
-    ScopedUtfChars appNameChars(env, appName);
-    ScopedUtfChars legacyDriverNameChars(env, legacyDriverName);
-
-    android::GraphicsEnv::getInstance().setLegacyDriverInfo(appNameChars.c_str(),
-                                                            angleIsSystemDriver,
-                                                            legacyDriverNameChars.c_str());
+                                                     devOptInChars.c_str(), features);
 }
 
 bool shouldUseAngle_native(JNIEnv* env, jobject clazz, jstring appName) {
@@ -135,10 +124,8 @@ const JNINativeMethod g_methods[] = {
         {"setInjectLayersPrSetDumpable", "()Z",
          reinterpret_cast<void*>(setInjectLayersPrSetDumpable_native)},
         {"setAngleInfo",
-         "(Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;[Ljava/lang/String;)V",
+         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V",
          reinterpret_cast<void*>(setAngleInfo_native)},
-        {"setLegacyDriverInfo", "(Ljava/lang/String;ZLjava/lang/String;)V",
-         reinterpret_cast<void*>(setLegacyDriverInfo_native)},
         {"getShouldUseAngle", "(Ljava/lang/String;)Z",
          reinterpret_cast<void*>(shouldUseAngle_native)},
         {"setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V",

@@ -35,12 +35,12 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -82,7 +82,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         bouncerRepository = FakeKeyguardBouncerRepository()
         faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        keyguardTransitionInteractor = KeyguardTransitionInteractor(keyguardTransitionRepository)
+        keyguardTransitionInteractor =
+            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
 
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
@@ -100,7 +101,9 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     mock(DismissCallbackRegistry::class.java),
                     context,
                     keyguardUpdateMonitor,
-                    mock(KeyguardBypassController::class.java),
+                    FakeTrustRepository(),
+                    FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
+                    testScope.backgroundScope,
                 ),
                 AlternateBouncerInteractor(
                     mock(StatusBarStateController::class.java),

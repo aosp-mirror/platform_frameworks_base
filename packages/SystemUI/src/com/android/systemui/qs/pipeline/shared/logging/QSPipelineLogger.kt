@@ -17,8 +17,8 @@
 package com.android.systemui.qs.pipeline.shared.logging
 
 import android.annotation.UserIdInt
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.qs.pipeline.dagger.QSTileListLog
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
@@ -117,6 +117,22 @@ constructor(
                 int1 = user
             },
             { "User changed to $int1 for tile $str1" }
+        )
+    }
+
+    fun logUsingRetailTiles() {
+        tileListLogBuffer.log(TILE_LIST_TAG, LogLevel.DEBUG, {}, { "Using retail tiles" })
+    }
+
+    fun logTilesNotInstalled(tiles: Collection<TileSpec>, user: Int) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = tiles.toString()
+                int1 = user
+            },
+            { "Tiles kept for not installed packages for user $int1: $str1" }
         )
     }
 

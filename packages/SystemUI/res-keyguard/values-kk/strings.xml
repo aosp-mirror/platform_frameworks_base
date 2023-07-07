@@ -31,7 +31,7 @@
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Сымсыз зарядталуда"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядталып жатыр."</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядталуда"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жылдам зарядталуда"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жылдам зарядтау"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Баяу зарядталуда"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны қорғау үшін зарядтау оңтайландырылды"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядтау құрылғысына қатысты мәселе туындады."</string>
@@ -124,5 +124,11 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Әдепкі"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Көпіршік"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналогтық"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Жалғастыру үшін құрылғының құлпын ашыңыз"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Жалғастыру үшін құлыпты ашыңыз"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Жаңа нұсқаны кейінірек орнату үшін PIN кодын енгізіңіз"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Жаңа нұсқаны кейінірек орнату үшін құпия сөзді енгізіңіз"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Жаңа нұсқаны кейінірек орнату үшін өрнекті салыңыз"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Құрылғы жаңартылды. Жалғастыру үшін PIN кодын енгізіңіз."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Құрылғы жаңартылды. Жалғастыру үшін құпия сөзді енгізіңіз."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Құрылғы жаңартылды. Жалғастыру үшін өрнекті салыңыз."</string>
 </resources>

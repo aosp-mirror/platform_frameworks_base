@@ -31,12 +31,19 @@ import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_MOVE_MENU;
 import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_NO_MENU;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Outline;
+import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.PathShape;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -91,6 +98,8 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     private final ImageView mArrowLeft;
     private final TvWindowMenuActionButton mA11yDoneButton;
 
+    private final int mArrowElevation;
+
     private @TvPipMenuController.TvPipMenuMode int mCurrentMenuMode = MODE_NO_MENU;
     private final Rect mCurrentPipBounds = new Rect();
     private int mCurrentPipGravity;
@@ -131,19 +140,68 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         mArrowLeft = findViewById(R.id.tv_pip_menu_arrow_left);
         mA11yDoneButton = findViewById(R.id.tv_pip_menu_done_button);
 
-        mResizeAnimationDuration = context.getResources().getInteger(
-                R.integer.config_pipResizeAnimationDuration);
-        mPipMenuFadeAnimationDuration = context.getResources()
-                .getInteger(R.integer.tv_window_menu_fade_animation_duration);
+        final Resources res = context.getResources();
+        mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
+        mPipMenuFadeAnimationDuration =
+                res.getInteger(R.integer.tv_window_menu_fade_animation_duration);
+        mPipMenuOuterSpace = res.getDimensionPixelSize(R.dimen.pip_menu_outer_space);
+        mPipMenuBorderWidth = res.getDimensionPixelSize(R.dimen.pip_menu_border_width);
+        mArrowElevation = res.getDimensionPixelSize(R.dimen.pip_menu_arrow_elevation);
 
-        mPipMenuOuterSpace = context.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
-        mPipMenuBorderWidth = context.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_border_width);
+        initMoveArrows();
 
         mEduTextDrawer = new TvPipMenuEduTextDrawer(mContext, mainHandler, this);
         mEduTextContainer = (ViewGroup) findViewById(R.id.tv_pip_menu_edu_text_container);
         mEduTextContainer.addView(mEduTextDrawer);
+    }
+
+    private void initMoveArrows() {
+        final int arrowSize =
+                mContext.getResources().getDimensionPixelSize(R.dimen.pip_menu_arrow_size);
+        final Path arrowPath = createArrowPath(arrowSize);
+
+        final ShapeDrawable arrowDrawable = new ShapeDrawable();
+        arrowDrawable.setShape(new PathShape(arrowPath, arrowSize, arrowSize));
+        arrowDrawable.setTint(mContext.getResources().getColor(R.color.tv_pip_menu_arrow_color));
+
+        final ViewOutlineProvider arrowOutlineProvider = new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setPath(createArrowPath(view.getMeasuredHeight()));
+            }
+        };
+
+        initArrow(mArrowRight, arrowOutlineProvider, arrowDrawable, 0);
+        initArrow(mArrowDown, arrowOutlineProvider, arrowDrawable, 90);
+        initArrow(mArrowLeft, arrowOutlineProvider, arrowDrawable, 180);
+        initArrow(mArrowUp, arrowOutlineProvider, arrowDrawable, 270);
+    }
+
+    /**
+     * Creates a Path for a movement arrow in the MODE_MOVE_MENU. The resulting Path is a simple
+     * right-pointing triangle with its tip in the center of a size x size square:
+     *  _ _ _ _ _
+     * |*        |
+     * |* *      |
+     * |*   *    |
+     * |* *      |
+     * |* _ _ _ _|
+     *
+     */
+    private Path createArrowPath(int size) {
+        final Path triangle = new Path();
+        triangle.lineTo(0, size);
+        triangle.lineTo(size / 2, size / 2);
+        triangle.close();
+        return triangle;
+    }
+
+    private void initArrow(View v, ViewOutlineProvider arrowOutlineProvider, Drawable arrowDrawable,
+            int rotation) {
+        v.setOutlineProvider(arrowOutlineProvider);
+        v.setBackground(arrowDrawable);
+        v.setRotation(rotation);
+        v.setElevation(mArrowElevation);
     }
 
     void onPipTransitionToTargetBoundsStarted(Rect targetBounds) {

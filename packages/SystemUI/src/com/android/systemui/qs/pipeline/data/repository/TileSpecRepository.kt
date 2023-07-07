@@ -20,6 +20,7 @@ import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.database.ContentObserver
 import android.provider.Settings
+import com.android.systemui.R
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -27,16 +28,22 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** Repository that tracks the current tiles. */
@@ -84,6 +91,9 @@ interface TileSpecRepository {
  * [Settings.Secure.QS_TILES].
  *
  * All operations against [Settings] will be performed in a background thread.
+ *
+ * If the device is in retail mode, the tiles are fixed to the value of
+ * [R.string.quick_settings_tiles_retail_mode].
  */
 @SysUISingleton
 class TileSpecSettingsRepository
@@ -92,9 +102,33 @@ constructor(
     private val secureSettings: SecureSettings,
     @Main private val resources: Resources,
     private val logger: QSPipelineLogger,
+    private val retailModeRepository: RetailModeRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : TileSpecRepository {
+
+    private val mutex = Mutex()
+
+    private val retailModeTiles by lazy {
+        resources
+            .getString(R.string.quick_settings_tiles_retail_mode)
+            .split(DELIMITER)
+            .map(TileSpec::create)
+            .filter { it !is TileSpec.Invalid }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun tilesSpecs(userId: Int): Flow<List<TileSpec>> {
+        return retailModeRepository.retailMode.flatMapLatest { inRetailMode ->
+            if (inRetailMode) {
+                logger.logUsingRetailTiles()
+                flowOf(retailModeTiles)
+            } else {
+                settingsTiles(userId)
+            }
+        }
+    }
+
+    private fun settingsTiles(userId: Int): Flow<List<TileSpec>> {
         return conflatedCallbackFlow {
                 val observer =
                     object : ContentObserver(null) {
@@ -115,37 +149,40 @@ constructor(
             .flowOn(backgroundDispatcher)
     }
 
-    override suspend fun addTile(userId: Int, tile: TileSpec, position: Int) {
-        if (tile == TileSpec.Invalid) {
-            return
-        }
-        val tilesList = loadTiles(userId).toMutableList()
-        if (tile !in tilesList) {
-            if (position < 0 || position >= tilesList.size) {
-                tilesList.add(tile)
-            } else {
-                tilesList.add(position, tile)
+    override suspend fun addTile(userId: Int, tile: TileSpec, position: Int) =
+        mutex.withLock {
+            if (tile == TileSpec.Invalid) {
+                return
             }
-            storeTiles(userId, tilesList)
+            val tilesList = loadTiles(userId).toMutableList()
+            if (tile !in tilesList) {
+                if (position < 0 || position >= tilesList.size) {
+                    tilesList.add(tile)
+                } else {
+                    tilesList.add(position, tile)
+                }
+                storeTiles(userId, tilesList)
+            }
         }
-    }
 
-    override suspend fun removeTiles(userId: Int, tiles: Collection<TileSpec>) {
-        if (tiles.all { it == TileSpec.Invalid }) {
-            return
+    override suspend fun removeTiles(userId: Int, tiles: Collection<TileSpec>) =
+        mutex.withLock {
+            if (tiles.all { it == TileSpec.Invalid }) {
+                return
+            }
+            val tilesList = loadTiles(userId).toMutableList()
+            if (tilesList.removeAll(tiles)) {
+                storeTiles(userId, tilesList.toList())
+            }
         }
-        val tilesList = loadTiles(userId).toMutableList()
-        if (tilesList.removeAll(tiles)) {
-            storeTiles(userId, tilesList.toList())
-        }
-    }
 
-    override suspend fun setTiles(userId: Int, tiles: List<TileSpec>) {
-        val filtered = tiles.filter { it != TileSpec.Invalid }
-        if (filtered.isNotEmpty()) {
-            storeTiles(userId, filtered)
+    override suspend fun setTiles(userId: Int, tiles: List<TileSpec>) =
+        mutex.withLock {
+            val filtered = tiles.filter { it != TileSpec.Invalid }
+            if (filtered.isNotEmpty()) {
+                storeTiles(userId, filtered)
+            }
         }
-    }
 
     private suspend fun loadTiles(@UserIdInt forUser: Int): List<TileSpec> {
         return withContext(backgroundDispatcher) {
@@ -157,6 +194,10 @@ constructor(
     }
 
     private suspend fun storeTiles(@UserIdInt forUser: Int, tiles: List<TileSpec>) {
+        if (retailModeRepository.inRetailMode) {
+            // No storing tiles when in retail mode
+            return
+        }
         val toStore =
             tiles
                 .filter { it !is TileSpec.Invalid }

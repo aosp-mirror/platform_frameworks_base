@@ -16,11 +16,11 @@
 
 package com.android.server.wm;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.devicestate.DeviceStateManager;
-import android.os.Handler;
-import android.os.HandlerExecutor;
+import android.util.ArrayMap;
+import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -29,16 +29,19 @@ import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Class that registers callbacks with the {@link DeviceStateManager} and responds to device
+ * Class that listens for a callback from display manager and responds to device state
  * changes.
  */
-final class DeviceStateController implements DeviceStateManager.DeviceStateCallback {
+final class DeviceStateController {
 
+    // Used to synchronize WindowManager services call paths with DeviceStateManager's callbacks.
     @NonNull
-    private final DeviceStateManager mDeviceStateManager;
+    private final WindowManagerGlobalLock mWmLock;
     @NonNull
     private final int[] mOpenDeviceStates;
     @NonNull
@@ -50,10 +53,10 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     private final int mConcurrentDisplayDeviceState;
     @NonNull
     private final int[] mReverseRotationAroundZAxisStates;
-    @GuardedBy("this")
+    @GuardedBy("mWmLock")
     @NonNull
     @VisibleForTesting
-    final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
+    final Map<Consumer<DeviceState>, Executor> mDeviceStateCallbacks = new ArrayMap<>();
 
     private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
 
@@ -70,8 +73,8 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         CONCURRENT,
     }
 
-    DeviceStateController(@NonNull Context context, @NonNull Handler handler) {
-        mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
+    DeviceStateController(@NonNull Context context, @NonNull WindowManagerGlobalLock wmLock) {
+        mWmLock = wmLock;
 
         mOpenDeviceStates = context.getResources()
                 .getIntArray(R.array.config_openDeviceStates);
@@ -88,28 +91,34 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         mMatchBuiltInDisplayOrientationToDefaultDisplay = context.getResources()
                 .getBoolean(R.bool
                         .config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay);
-
-        if (mDeviceStateManager != null) {
-            mDeviceStateManager.registerCallback(new HandlerExecutor(handler), this);
-        }
     }
 
-    void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
-        synchronized (this) {
-            mDeviceStateCallbacks.add(callback);
+    /**
+     * Registers a callback to be notified when the device state changes. Callers should always
+     * post the work onto their own worker thread to avoid holding the WindowManagerGlobalLock for
+     * an extended period of time.
+     */
+    void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        synchronized (mWmLock) {
+            mDeviceStateCallbacks.put(callback, executor);
         }
     }
 
     void unregisterDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
-        synchronized (this) {
+        synchronized (mWmLock) {
             mDeviceStateCallbacks.remove(callback);
         }
     }
 
     /**
-     * @return true if the rotation direction on the Z axis should be reversed.
+     * @return true if the rotation direction on the Z axis should be reversed for the default
+     * display.
      */
-    boolean shouldReverseRotationDirectionAroundZAxis() {
+    boolean shouldReverseRotationDirectionAroundZAxis(@NonNull DisplayContent displayContent) {
+        if (!displayContent.isDefaultDisplay) {
+            return false;
+        }
         return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
     }
 
@@ -122,8 +131,19 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         return mMatchBuiltInDisplayOrientationToDefaultDisplay;
     }
 
-    @Override
-    public void onStateChanged(int state) {
+    /**
+     * This event is sent from DisplayManager just before the device state is applied to
+     * the displays. This is needed to make sure that we first receive this callback before
+     * any device state related display updates from the DisplayManager.
+     *
+     * The flow for this event is the following:
+     *  - {@link DeviceStateManager} sends event to {@link android.hardware.display.DisplayManager}
+     *  - {@link android.hardware.display.DisplayManager} sends it to {@link WindowManagerInternal}
+     *  - {@link WindowManagerInternal} eventually calls this method
+     *
+     * @param state device state as defined by {@link DeviceStateManager}
+     */
+    public void onDeviceStateReceivedByDisplayManager(int state) {
         mCurrentState = state;
 
         final DeviceState deviceState;
@@ -144,11 +164,30 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         if (mCurrentDeviceState == null || !mCurrentDeviceState.equals(deviceState)) {
             mCurrentDeviceState = deviceState;
 
-            synchronized (this) {
-                for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
-                    callback.accept(mCurrentDeviceState);
-                }
+            // Make a copy here because it's possible that the consumer tries to remove a callback
+            // while we're still iterating through the list, which would end up in a
+            // ConcurrentModificationException. Note that cannot use a List<Map.Entry> because the
+            // entries are tied to the backing map. So, if a client removes a callback while
+            // we are notifying clients, we will get a NPE.
+            final List<Pair<Consumer<DeviceState>, Executor>> entries = copyDeviceStateCallbacks();
+
+            for (int i = 0; i < entries.size(); i++) {
+                final Pair<Consumer<DeviceState>, Executor> entry = entries.get(i);
+                entry.second.execute(() -> entry.first.accept(deviceState));
             }
         }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    List<Pair<Consumer<DeviceState>, Executor>> copyDeviceStateCallbacks() {
+        final List<Pair<Consumer<DeviceState>, Executor>> entries = new ArrayList<>();
+
+        synchronized (mWmLock) {
+            mDeviceStateCallbacks.forEach((deviceStateConsumer, executor) -> {
+                entries.add(new Pair<>(deviceStateConsumer, executor));
+            });
+        }
+        return entries;
     }
 }

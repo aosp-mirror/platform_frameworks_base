@@ -273,6 +273,16 @@ public class SatelliteManager {
      */
     public static final int SATELLITE_NOT_SUPPORTED = 20;
 
+    /**
+     * The current request is already in-progress.
+     */
+    public static final int SATELLITE_REQUEST_IN_PROGRESS = 21;
+
+    /**
+     * Satellite modem is currently busy due to which current request cannot be processed.
+     */
+    public static final int SATELLITE_MODEM_BUSY = 22;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_"}, value = {
             SATELLITE_ERROR_NONE,
@@ -295,7 +305,9 @@ public class SatelliteManager {
             SATELLITE_NETWORK_TIMEOUT,
             SATELLITE_NOT_REACHABLE,
             SATELLITE_NOT_AUTHORIZED,
-            SATELLITE_NOT_SUPPORTED
+            SATELLITE_NOT_SUPPORTED,
+            SATELLITE_REQUEST_IN_PROGRESS,
+            SATELLITE_MODEM_BUSY
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteError {}
@@ -1499,6 +1511,31 @@ public class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestTimeForNextSatelliteVisibility() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Inform whether the device is aligned with the satellite for demo mode.
+     *
+     * @param isAligned {@true} Device is aligned with the satellite for demo mode
+     *                  {@false} Device is not aligned with the satellite for demo mode
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+
+    public void onDeviceAlignedWithSatellite(boolean isAligned) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.onDeviceAlignedWithSatellite(mSubId, isAligned);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("informDeviceAlignedToSatellite() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
     }

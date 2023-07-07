@@ -18,9 +18,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.SynchronousUserSwitchObserver;
-import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -92,15 +89,7 @@ public class Sensor {
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     @NonNull private final Supplier<AidlSession> mLazySession;
-    @Nullable private AidlSession mCurrentSession;
-
-    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
-        @Override
-        public void onUserSwitching(int newUserId) {
-            mProvider.scheduleInternalCleanup(
-                    mSensorProperties.sensorId, newUserId, null /* callback */);
-        }
-    };
+    @Nullable AidlSession mCurrentSession;
 
     @VisibleForTesting
     public static class HalSessionCallback extends ISessionCallback.Stub {
@@ -497,7 +486,7 @@ public class Sensor {
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricContext biometricContext, AidlSession session) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -558,12 +547,14 @@ public class Sensor {
         mLockoutCache = new LockoutCache();
         mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
+    }
 
-        try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, mTag);
-        } catch (RemoteException e) {
-            Slog.e(mTag, "Unable to register user switch observer");
-        }
+    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext) {
+        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
+                biometricContext, null);
     }
 
     @NonNull Supplier<AidlSession> getLazySession() {
@@ -574,7 +565,7 @@ public class Sensor {
         return mSensorProperties;
     }
 
-    @Nullable AidlSession getSessionForUser(int userId) {
+    @VisibleForTesting @Nullable AidlSession getSessionForUser(int userId) {
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -658,6 +649,8 @@ public class Sensor {
                     BiometricsProtoEnums.MODALITY_FACE,
                     BiometricsProtoEnums.ISSUE_HAL_DEATH,
                     -1 /* sensorId */);
+        } else if (client != null) {
+            client.cancel();
         }
 
         mScheduler.recordCrashState();

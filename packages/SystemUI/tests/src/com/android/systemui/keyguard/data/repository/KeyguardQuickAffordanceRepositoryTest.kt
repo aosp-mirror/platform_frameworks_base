@@ -22,6 +22,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -46,6 +47,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,6 +56,7 @@ import org.mockito.ArgumentMatchers.anyString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
@@ -68,6 +71,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
         context.resources.configuration.setLayoutDirection(Locale.US)
         config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
         config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
@@ -135,6 +139,13 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             )
     }
 
+    @After
+    fun tearDown() {
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.bool.custom_lockscreen_shortcuts_enabled)
+    }
+
     @Test
     fun setSelections() =
         testScope.runTest {
@@ -178,12 +189,12 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                     listOf(
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config1.key,
-                            name = config1.pickerName,
+                            name = config1.pickerName(),
                             iconResourceId = config1.pickerIconResourceId,
                         ),
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config2.key,
-                            name = config2.pickerName,
+                            name = config2.pickerName(),
                             iconResourceId = config2.pickerIconResourceId,
                         ),
                     )

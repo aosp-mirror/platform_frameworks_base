@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.CancellationSignal;
 import android.os.CancellationSignalBeamer;
@@ -28,9 +29,12 @@ import android.os.IBinder;
  */
 @TestApi
 public abstract class CancellableHandwritingGesture extends HandwritingGesture {
+    @NonNull
     CancellationSignal mCancellationSignal;
 
+    @Nullable
     IBinder mCancellationSignalToken;
+
 
     /**
      * Set {@link CancellationSignal} for testing only.
@@ -41,13 +45,20 @@ public abstract class CancellableHandwritingGesture extends HandwritingGesture {
         mCancellationSignal = cancellationSignal;
     }
 
+    @NonNull
     CancellationSignal getCancellationSignal() {
         return mCancellationSignal;
     }
 
-    void unbeamCancellationSignal(CancellationSignalBeamer.Receiver receiver) {
-        mCancellationSignal = receiver.unbeam(mCancellationSignalToken);
-        mCancellationSignalToken = null;
+    /**
+     * Unbeam cancellation token.
+     * @hide
+     */
+    public void unbeamCancellationSignal(@NonNull CancellationSignalBeamer.Receiver receiver) {
+        if (mCancellationSignalToken != null) {
+            mCancellationSignal = receiver.unbeam(mCancellationSignalToken);
+            mCancellationSignalToken = null;
+        }
     }
 
 }

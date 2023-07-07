@@ -19,13 +19,15 @@ import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -48,6 +50,13 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private int mScreenCaptureDisallowedUser = UserHandle.USER_NULL;
 
+    /**
+     * Indicates if screen capture is disallowed on a specific user or all users if
+     * it contains {@link UserHandle#USER_ALL}.
+     */
+    @GuardedBy("mLock")
+    private Set<Integer> mScreenCaptureDisallowedUsers = new HashSet<>();
+
     @GuardedBy("mLock")
     private final SparseIntArray mPasswordQuality = new SparseIntArray();
 
@@ -55,8 +64,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
 
     @GuardedBy("mLock")
-    private List<String> mLauncherShortcutOverrides =
-            new ArrayList<>();
+    private ArrayMap<String, String> mLauncherShortcutOverrides = new ArrayMap<>();
 
 
     /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}. */
@@ -71,9 +79,21 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     @Override
     public boolean isScreenCaptureAllowed(int userHandle) {
+        if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
+            return isScreenCaptureAllowedInPolicyEngine(userHandle);
+        } else {
+            synchronized (mLock) {
+                return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
+                        && mScreenCaptureDisallowedUser != userHandle;
+            }
+        }
+    }
+
+    private boolean isScreenCaptureAllowedInPolicyEngine(int userHandle) {
+        // This won't work if resolution mechanism is not strictest applies, but it's ok for now.
         synchronized (mLock) {
-            return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
-                    && mScreenCaptureDisallowedUser != userHandle;
+            return !mScreenCaptureDisallowedUsers.contains(userHandle)
+                    && !mScreenCaptureDisallowedUsers.contains(UserHandle.USER_ALL);
         }
     }
 
@@ -86,6 +106,16 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     public void setScreenCaptureDisallowedUser(int userHandle) {
         synchronized (mLock) {
             mScreenCaptureDisallowedUser = userHandle;
+        }
+    }
+
+    public void setScreenCaptureDisallowedUser(int userHandle, boolean disallowed) {
+        synchronized (mLock) {
+            if (disallowed) {
+                mScreenCaptureDisallowedUsers.add(userHandle);
+            } else {
+                mScreenCaptureDisallowedUsers.remove(userHandle);
+            }
         }
     }
 
@@ -130,18 +160,20 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public List<String> getLauncherShortcutOverrides() {
+    public Map<String, String> getLauncherShortcutOverrides() {
         synchronized (mLock) {
-            return new ArrayList<>(mLauncherShortcutOverrides);
+            return new ArrayMap<>(mLauncherShortcutOverrides);
         }
     }
 
     /**
-     * Sets a list of packages for which shortcuts should be replaced by their badged version.
+     * Sets a map of packages names to package names, for which all launcher shortcuts which
+     * match a key package name should be modified to launch the corresponding value package
+     * name in the managed profile. The overridden shortcut should be badged accordingly.
      */
-    public void setLauncherShortcutOverrides(List<String> launcherShortcutOverrides) {
+    public void setLauncherShortcutOverrides(ArrayMap<String, String> launcherShortcutOverrides) {
         synchronized (mLock) {
-            mLauncherShortcutOverrides = new ArrayList<>(launcherShortcutOverrides);
+            mLauncherShortcutOverrides = new ArrayMap<>(launcherShortcutOverrides);
         }
     }
 
@@ -150,7 +182,11 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         synchronized (mLock) {
             pw.println("Device policy cache:");
             pw.increaseIndent();
-            pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
+            if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
+                pw.println("Screen capture disallowed users: " + mScreenCaptureDisallowedUsers);
+            } else {
+                pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
+            }
             pw.println("Password quality: " + mPasswordQuality);
             pw.println("Permission policy: " + mPermissionPolicy);
             pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());

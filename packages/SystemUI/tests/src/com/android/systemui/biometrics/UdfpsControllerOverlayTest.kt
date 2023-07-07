@@ -25,7 +25,6 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROL
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -35,11 +34,13 @@ import android.view.Surface.Rotation
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.settingslib.udfps.UdfpsUtils
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
@@ -68,8 +69,8 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private const val REQUEST_ID = 2L
 
@@ -80,6 +81,7 @@ private const val SENSOR_WIDTH = 30
 private const val SENSOR_HEIGHT = 60
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class UdfpsControllerOverlayTest : SysuiTestCase() {
@@ -106,7 +108,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var controllerCallback: IUdfpsOverlayControllerCallback
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var udfpsView: UdfpsView
-    @Mock private lateinit var udfpsKeyguardView: UdfpsKeyguardView
+    @Mock private lateinit var mUdfpsKeyguardViewLegacy: UdfpsKeyguardViewLegacy
     @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
@@ -124,8 +126,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             .thenReturn(udfpsView)
         whenever(inflater.inflate(R.layout.udfps_bp_view, null))
             .thenReturn(mock(UdfpsBpView::class.java))
-        whenever(inflater.inflate(R.layout.udfps_keyguard_view, null))
-            .thenReturn(udfpsKeyguardView)
+        whenever(inflater.inflate(R.layout.udfps_keyguard_view_legacy, null))
+            .thenReturn(mUdfpsKeyguardViewLegacy)
         whenever(inflater.inflate(R.layout.udfps_fpm_empty_view, null))
             .thenReturn(mock(UdfpsFpmEmptyView::class.java))
     }
@@ -153,7 +155,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Test
     fun showUdfpsOverlay_keyguard() = withReason(REASON_AUTH_KEYGUARD) {
         showUdfpsOverlay()
-        verify(udfpsKeyguardView).updateSensorLocation(eq(overlayParams.sensorBounds))
+        verify(mUdfpsKeyguardViewLegacy).updateSensorLocation(eq(overlayParams.sensorBounds))
     }
 
     @Test
@@ -336,6 +338,24 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             val lp = layoutParamsCaptor.value
             assertThat(lp.width).isEqualTo(overlayParams.sensorBounds.width())
             assertThat(lp.height).isEqualTo(overlayParams.sensorBounds.height())
+        }
+    }
+
+    @Test
+    fun fullScreenOverlayWithNewTouchDetectionEnabled() = withRotation(ROTATION_0) {
+        withReason(REASON_AUTH_KEYGUARD) {
+            whenever(featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true)
+
+            controllerOverlay.show(udfpsController, overlayParams)
+            verify(windowManager).addView(
+                    eq(controllerOverlay.overlayView),
+                    layoutParamsCaptor.capture()
+            )
+
+            // Layout params should use natural display width and height
+            val lp = layoutParamsCaptor.value
+            assertThat(lp.width).isEqualTo(overlayParams.naturalDisplayWidth)
+            assertThat(lp.height).isEqualTo(overlayParams.naturalDisplayHeight)
         }
     }
 }

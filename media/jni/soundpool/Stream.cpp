@@ -282,8 +282,6 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
             priority, loop, rate, playerIId);
 
     // initialize track
-    const audio_stream_type_t streamType =
-            AudioSystem::attributesToStreamType(*mStreamManager->getAttributes());
     const int32_t channelCount = sound->getChannelCount();
     const auto sampleRate = (uint32_t)lround(double(sound->getSampleRate()) * rate);
     size_t frameCount = 0;
@@ -328,8 +326,8 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         attributionSource.token = sp<BBinder>::make();
         mCallback =  sp<StreamCallback>::make(this, toggle),
         // TODO b/182469354 make consistent with AudioRecord, add util for native source
-        mAudioTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
-                channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
+        mAudioTrack = new AudioTrack(AUDIO_STREAM_DEFAULT, sampleRate, sound->getFormat(),
+                channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_NONE,
                 mCallback,
                 0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
                 AudioTrack::TRANSFER_DEFAULT,

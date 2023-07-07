@@ -142,6 +142,8 @@ public class WindowMagnificationManager implements
     private boolean mMagnificationFollowTypingEnabled = true;
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
+    @GuardedBy("mLock")
+    private final SparseArray<Float> mLastActivatedScale = new SparseArray<>();
 
     private boolean mReceiverRegistered = false;
     @VisibleForTesting
@@ -528,6 +530,7 @@ public class WindowMagnificationManager implements
                 return;
             }
             magnifier.setScale(scale);
+            mLastActivatedScale.put(displayId, scale);
         }
     }
 
@@ -615,6 +618,9 @@ public class WindowMagnificationManager implements
             previousEnabled = magnifier.mEnabled;
             enabled = magnifier.enableWindowMagnificationInternal(scale, centerX, centerY,
                     animationCallback, windowPosition, id);
+            if (enabled) {
+                mLastActivatedScale.put(displayId, getScale(displayId));
+            }
         }
 
         if (enabled) {
@@ -749,6 +755,15 @@ public class WindowMagnificationManager implements
                 return 1.0f;
             }
             return magnifier.getScale();
+        }
+    }
+
+    protected float getLastActivatedScale(int displayId) {
+        synchronized (mLock) {
+            if (!mLastActivatedScale.contains(displayId)) {
+                return -1.0f;
+            }
+            return mLastActivatedScale.get(displayId);
         }
     }
 

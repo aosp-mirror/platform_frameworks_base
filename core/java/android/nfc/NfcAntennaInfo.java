@@ -85,8 +85,8 @@ public final class NfcAntennaInfo implements Parcelable {
         this.mDeviceHeight = in.readInt();
         this.mDeviceFoldable = in.readByte() != 0;
         this.mAvailableNfcAntennas = new ArrayList<>();
-        in.readParcelableList(this.mAvailableNfcAntennas,
-                AvailableNfcAntenna.class.getClassLoader());
+        in.readTypedList(this.mAvailableNfcAntennas,
+                AvailableNfcAntenna.CREATOR);
     }
 
     public static final @NonNull Parcelable.Creator<NfcAntennaInfo> CREATOR =

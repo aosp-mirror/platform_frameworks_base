@@ -19,6 +19,7 @@ package com.android.systemui.log.table
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
@@ -39,7 +40,8 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogDiffsForTableTest : SysuiTestCase() {
 
-    private val testScope = TestScope(UnconfinedTestDispatcher())
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private lateinit var systemClock: FakeSystemClock
     private lateinit var tableLogBuffer: TableLogBuffer
@@ -47,7 +49,15 @@ class LogDiffsForTableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         systemClock = FakeSystemClock()
-        tableLogBuffer = TableLogBuffer(MAX_SIZE, BUFFER_NAME, systemClock)
+        tableLogBuffer =
+            TableLogBuffer(
+                MAX_SIZE,
+                BUFFER_NAME,
+                systemClock,
+                mock(),
+                testDispatcher,
+                testScope.backgroundScope,
+            )
     }
 
     // ---- Flow<Boolean> tests ----

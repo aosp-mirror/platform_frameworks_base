@@ -1359,7 +1359,7 @@ public class Process {
         String formatSize = MemoryProperties.memory_ddr_size().orElse("0KB");
         long memSize = FileUtils.parseSize(formatSize);
 
-        if (memSize == Long.MIN_VALUE) {
+        if (memSize <= 0) {
             return FileUtils.roundStorageSize(getTotalMemory());
         }
 

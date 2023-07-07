@@ -115,7 +115,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     private var overlayTouchListener: TouchExplorationStateChangeListener? = null
 
     private val coreLayoutParams = WindowManager.LayoutParams(
-        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
+        WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
         0 /* flags set in computeLayoutParams() */,
         PixelFormat.TRANSLUCENT
     ).apply {
@@ -242,8 +242,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 )
             }
             REASON_AUTH_KEYGUARD -> {
-                UdfpsKeyguardViewController(
-                    view.addUdfpsView(R.layout.udfps_keyguard_view) {
+                UdfpsKeyguardViewControllerLegacy(
+                    view.addUdfpsView(R.layout.udfps_keyguard_view_legacy) {
                         updateSensorLocation(sensorBounds)
                     },
                     statusBarStateController,
@@ -364,7 +364,12 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
                     Rect(overlayParams.sensorBounds)
                 } else {
-                    Rect(overlayParams.overlayBounds)
+                    Rect(
+                        0,
+                        0,
+                        overlayParams.naturalDisplayWidth,
+                        overlayParams.naturalDisplayHeight
+                    )
                 }
             } else {
                 Rect(overlayParams.sensorBounds)
@@ -408,7 +413,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     }
 
     private fun shouldRotate(animation: UdfpsAnimationViewController<*>?): Boolean {
-        if (animation !is UdfpsKeyguardViewController) {
+        if (animation !is UdfpsKeyguardViewControllerLegacy) {
             // always rotate view if we're not on the keyguard
             return true
         }

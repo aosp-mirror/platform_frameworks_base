@@ -333,7 +333,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 mLpChanged.preferredMinDisplayRefreshRate = 0;
             }
             Trace.setCounter("display_set_preferred_refresh_rate",
-                    (long) mKeyguardPreferredRefreshRate);
+                    (long) mLpChanged.preferredMaxDisplayRefreshRate);
         } else if (mKeyguardMaxRefreshRate > 0) {
             boolean bypassOnKeyguard = mKeyguardBypassController.getBypassEnabled()
                     && state.statusBarState == StatusBarState.KEYGUARD
@@ -423,12 +423,18 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private boolean isExpanded(NotificationShadeWindowState state) {
-        return !state.forceWindowCollapsed && (state.isKeyguardShowingAndNotOccluded()
+        boolean isExpanded = !state.forceWindowCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
                 || state.headsUpNotificationShowing
                 || state.scrimsVisibility != ScrimController.TRANSPARENT)
                 || state.backgroundBlurRadius > 0
                 || state.launchingActivityFromNotification;
+        mLogger.logIsExpanded(isExpanded, state.forceWindowCollapsed,
+                state.isKeyguardShowingAndNotOccluded(), state.panelVisible,
+                state.keyguardFadingAway, state.bouncerShowing, state.headsUpNotificationShowing,
+                state.scrimsVisibility != ScrimController.TRANSPARENT,
+                state.backgroundBlurRadius > 0, state.launchingActivityFromNotification);
+        return isExpanded;
     }
 
     private void applyFitsSystemWindows(NotificationShadeWindowState state) {

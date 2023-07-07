@@ -118,6 +118,9 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_DEFAULT_SERVICE = "nas_default_service";
 
+    /** (boolean) Whether notify() calls to NMS should acquire and hold WakeLocks. */
+    public static final String NOTIFY_WAKELOCK = "nms_notify_wakelock";
+
     // Flags related to media notifications
 
     /**
@@ -547,11 +550,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP =
             "task_manager_inform_job_scheduler_of_pending_app_stop";
-
-    /**
-     * (boolean) Whether to show notification volume control slider separate from ring.
-     */
-    public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
 
     /**
      * (boolean) Whether widget provider info would be saved to / loaded from system persistence

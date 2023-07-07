@@ -145,7 +145,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
         mSharedPreferencesByUser = new SparseArray<>();
-        when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
+        when(mTileLifecycleManagerFactory
+                .create(any(Intent.class), any(UserHandle.class)))
                 .thenReturn(mTileLifecycleManager);
         when(mUserFileManager.getSharedPreferences(anyString(), anyInt(), anyInt()))
                 .thenAnswer((Answer<SharedPreferences>) invocation -> {
@@ -296,11 +297,20 @@ public class QSTileHostTest extends SysuiTestCase {
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
         mQSTileHost.dump(pw, new String[]{});
-        String output = "QSTileHost:\n"
-                + TestTile1.class.getSimpleName() + ":\n"
-                + "    " + MOCK_STATE_STRING + "\n"
-                + TestTile2.class.getSimpleName() + ":\n"
-                + "    " + MOCK_STATE_STRING + "\n";
+
+        String output = "QSTileHost:" + "\n"
+                + "tile specs: [spec1, spec2]" + "\n"
+                + "current user: 0" + "\n"
+                + "is dirty: false" + "\n"
+                + "tiles:" + "\n"
+                + "TestTile1:" + "\n"
+                + "    MockState" + "\n"
+                + "TestTile2:" + "\n"
+                + "    MockState" + "\n";
+
+        System.out.println(output);
+        System.out.println(w.getBuffer().toString());
+
         assertEquals(output, w.getBuffer().toString());
     }
 

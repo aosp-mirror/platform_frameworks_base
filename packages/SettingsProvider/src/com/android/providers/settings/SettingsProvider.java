@@ -34,7 +34,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OV
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.ACCESSIBILITY_MENU_IN_SYSTEM;
-import static com.android.internal.display.RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE;
 import static com.android.providers.settings.SettingsState.FALLBACK_FILE_SUFFIX;
 import static com.android.providers.settings.SettingsState.getTypeFromKey;
 import static com.android.providers.settings.SettingsState.getUserIdFromKey;
@@ -3559,11 +3558,11 @@ public class SettingsProvider extends ContentProvider {
                 if (isSecureSettingsKey(key)) {
                     maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                             sSecureCloneToManagedSettings);
-                    maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
-                            sSystemCloneFromParentOnDependency.values());
                 } else if (isSystemSettingsKey(key)) {
                     maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                             sSystemCloneToManagedSettings);
+                    maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
+                            sSystemCloneFromParentOnDependency.keySet());
                 }
             }
 
@@ -3749,7 +3748,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 219;
+            private static final int SETTINGS_VERSION = 220;
 
             private final int mUserId;
 
@@ -5657,45 +5656,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 214) {
-                    // Version 214: Set a default value for Credential Manager service.
-
-                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
-                    final Setting currentSetting = secureSettings
-                            .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE);
-                    if (currentSetting.isNull()) {
-                        final int resourceId =
-                            com.android.internal.R.array.config_defaultCredentialProviderService;
-                        final Resources resources = getContext().getResources();
-                        // If the config has not be defined we might get an exception. We also get
-                        // values from both the string array type and the single string in case the
-                        // OEM uses the wrong one.
-                        final List<String> providers = new ArrayList<>();
-                        try {
-                            providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
-                        } catch (Resources.NotFoundException e) {
-                            Slog.w(LOG_TAG,
-                                    "Get default array Cred Provider not found: " + e.toString());
-                        }
-                        try {
-                            final String storedValue = resources.getString(resourceId);
-                            if (!TextUtils.isEmpty(storedValue)) {
-                                providers.add(storedValue);
-                            }
-                        } catch (Resources.NotFoundException e) {
-                            Slog.w(LOG_TAG,
-                                    "Get default Cred Provider not found: " + e.toString());
-                        }
-
-                        if (!providers.isEmpty()) {
-                            final String defaultValue = String.join(":", providers);
-                            Slog.d(LOG_TAG, "Setting [" + defaultValue + "] as CredMan Service "
-                                    + "for user " + userId);
-                            secureSettings.insertSettingOverrideableByRestoreLocked(
-                                    Settings.Secure.CREDENTIAL_SERVICE, defaultValue, null, true,
-                                    SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
-                    }
-
+                    // Version 214: Removed, moved to version 216
                     currentVersion = 215;
                 }
 
@@ -5732,8 +5693,8 @@ public class SettingsProvider extends ContentProvider {
                     final Setting currentSetting = secureSettings
                             .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE);
                     if (currentSetting.isNull()) {
-                        final int resourceId = com.android.internal.R.array
-                                .config_defaultCredentialProviderService;
+                        final int resourceId =
+                            com.android.internal.R.array.config_enabledCredentialProviderService;
                         final Resources resources = getContext().getResources();
                         // If the config has not be defined we might get an exception.
                         final List<String> providers = new ArrayList<>();
@@ -5741,7 +5702,7 @@ public class SettingsProvider extends ContentProvider {
                             providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
                         } catch (Resources.NotFoundException e) {
                             Slog.w(LOG_TAG,
-                                    "Get default array Cred Provider not found: " + e.toString());
+                                "Get default array Cred Provider not found: " + e.toString());
                         }
 
                         if (!providers.isEmpty()) {
@@ -5840,45 +5801,43 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 218;
                 }
 
-                // v218: Convert Smooth Display and Force Peak Refresh Rate to a boolean
                 if (currentVersion == 218) {
-                    final String peakRefreshRateSettingName = "peak_refresh_rate";
-                    final String minRefreshRateSettingName = "min_refresh_rate";
-
-                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
-                    final Setting peakRefreshRateSetting =
-                            systemSettings.getSettingLocked(peakRefreshRateSettingName);
-                    final Setting minRefreshRateSetting =
-                            systemSettings.getSettingLocked(minRefreshRateSettingName);
-
-                    float peakRefreshRate = DEFAULT_REFRESH_RATE;
-                    float minRefreshRate = 0;
-                    try {
-                        if (!peakRefreshRateSetting.isNull()) {
-                            peakRefreshRate = Float.parseFloat(peakRefreshRateSetting.getValue());
-                        }
-                    } catch (NumberFormatException e) {
-                        // Do nothing. Overwrite with default value.
-                    }
-                    try {
-                        if (!minRefreshRateSetting.isNull()) {
-                            minRefreshRate = Float.parseFloat(minRefreshRateSetting.getValue());
-                        }
-                    } catch (NumberFormatException e) {
-                        // Do nothing. Overwrite with default value.
-                    }
-
-                    systemSettings.deleteSettingLocked(peakRefreshRateSettingName);
-                    systemSettings.deleteSettingLocked(minRefreshRateSettingName);
-
-                    systemSettings.insertSettingLocked(Settings.System.SMOOTH_DISPLAY,
-                            peakRefreshRate > DEFAULT_REFRESH_RATE ? "1" : "0", /* tag= */ null,
-                            /* makeDefault= */ false, SettingsState.SYSTEM_PACKAGE_NAME);
-                    systemSettings.insertSettingLocked(Settings.System.FORCE_PEAK_REFRESH_RATE,
-                            minRefreshRate > 0 ? "1" : "0", /* tag= */ null,
-                            /* makeDefault= */ false, SettingsState.SYSTEM_PACKAGE_NAME);
-
+                    // Version 219: Removed
+                    // TODO(b/211737588): Back up the Smooth Display setting
+                    // Future upgrades to the `peak_refresh_rate` and `min_refresh_rate` settings
+                    // should account for the database in a non-upgraded and upgraded (change id:
+                    // Ib2cb2dd100f06f5452083b7606109a486e795a0e) state.
                     currentVersion = 219;
+                }
+
+                if (currentVersion == 219) {
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings
+                            .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
+                    if (currentSetting.isNull()) {
+                        final int resourceId =
+                              com.android.internal.R.array.config_primaryCredentialProviderService;
+                        final Resources resources = getContext().getResources();
+                        // If the config has not be defined we might get an exception.
+                        final List<String> providers = new ArrayList<>();
+                        try {
+                            providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
+                        } catch (Resources.NotFoundException e) {
+                            Slog.w(LOG_TAG,
+                                    "Get default array Cred Provider not found: " + e.toString());
+                        }
+
+                        if (!providers.isEmpty()) {
+                            final String defaultValue = String.join(":", providers);
+                            Slog.d(LOG_TAG, "Setting [" + defaultValue + "] as CredMan Service "
+                                    + "for user " + userId);
+                            secureSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, defaultValue, null,
+                                    true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 220;
                 }
 
                 // vXXX: Add new settings above this point.

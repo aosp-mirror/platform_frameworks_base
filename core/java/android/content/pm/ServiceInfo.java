@@ -168,7 +168,8 @@ public class ServiceInfo extends ComponentInfo
      * <p>Starting foreground service with this type from apps targeting API level
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and later, will require permission
      * {@link android.Manifest.permission#FOREGROUND_SERVICE_PHONE_CALL} and
-     * {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} or holding the default
+     * {@link android.app.role.RoleManager#ROLE_DIALER dialer role}.
      */
     @RequiresPermission(
             allOf = {

@@ -89,6 +89,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -100,8 +101,6 @@ import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -199,7 +198,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
     private final boolean mSimplifiedAppearFraction;
-    private final boolean mUseRoundnessSourceTypes;
     private final boolean mSensitiveRevealAnimEndabled;
     private boolean mAnimatedInsets;
 
@@ -319,6 +317,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     };
     private NotificationStackScrollLogger mLogger;
     private CentralSurfaces mCentralSurfaces;
+    private ActivityStarter mActivityStarter;
     private final int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
     private final HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
@@ -623,7 +622,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
         mSimplifiedAppearFraction = featureFlags.isEnabled(Flags.SIMPLIFIED_APPEAR_FRACTION);
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         setAnimatedInsetsEnabled(featureFlags.isEnabled(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS));
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
@@ -679,7 +677,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onFinishInflate() {
         super.onFinishInflate();
 
@@ -740,7 +737,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
         if (mFooterView == null) {
             return;
@@ -773,12 +769,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Return whether there are any clearable notifications
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     boolean hasActiveClearableNotifications(@SelectedRows int selection) {
         return mController.hasActiveClearableNotifications(selection);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public NotificationSwipeActionHelper getSwipeActionHelper() {
         return mSwipeHelper;
     }
@@ -795,7 +789,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.DECORATOR)
     protected void onDraw(Canvas canvas) {
         if (mShouldDrawNotificationBackground
                 && (mSections[0].getCurrentBounds().top
@@ -892,7 +885,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return textY;
     }
 
-    @ShadeViewRefactor(RefactorComponent.DECORATOR)
     private void drawBackground(Canvas canvas) {
         int lockScreenLeft = mSidePaddings;
         int lockScreenRight = getWidth() - mSidePaddings;
@@ -1020,7 +1012,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void updateBackgroundDimming() {
         // No need to update the background color if it's not being drawn.
         if (!mShouldDrawNotificationBackground) {
@@ -1043,7 +1034,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         initView(getContext(), mSwipeHelper, mNotificationStackSizeCalculator);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void initView(Context context, NotificationSwipeHelper swipeHelper,
                   NotificationStackSizeCalculator notificationStackSizeCalculator) {
         mScroller = new OverScroller(getContext());
@@ -1104,12 +1094,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void notifyHeightChangeListener(ExpandableView view) {
         notifyHeightChangeListener(view, false /* needsAnimation */);
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void notifyHeightChangeListener(ExpandableView view, boolean needsAnimation) {
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onHeightChanged(view, needsAnimation);
@@ -1151,7 +1139,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection("NotificationStackScrollLayout#onMeasure");
         if (SPEW) {
@@ -1185,7 +1172,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         // we layout all our children centered on the top
         float centerX = getWidth() / 2.0f;
@@ -1216,7 +1202,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAnimateStackYForContentHeightChange = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void requestAnimationOnViewResize(ExpandableNotificationRow row) {
         if (mAnimationsEnabled && (mIsExpanded || row != null && row.isPinned())) {
             mNeedViewResizeAnimation = true;
@@ -1224,19 +1209,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setChildLocationsChangedListener(
             NotificationLogger.OnChildLocationsChangedListener listener) {
         mListener = listener;
     }
 
-    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     private void setMaxLayoutHeight(int maxLayoutHeight) {
         mMaxLayoutHeight = maxLayoutHeight;
         updateAlgorithmHeightAndPadding();
     }
 
-    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     private void updateAlgorithmHeightAndPadding() {
         mAmbientState.setLayoutHeight(getLayoutHeight());
         mAmbientState.setLayoutMaxHeight(mMaxLayoutHeight);
@@ -1244,7 +1226,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setTopPadding(mTopPadding);
     }
 
-    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     private void updateAlgorithmLayoutMinHeight() {
         mAmbientState.setLayoutMinHeight(mQsFullScreen || isHeadsUpTransition()
                 ? getLayoutMinHeight() : 0);
@@ -1254,7 +1235,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Updates the children views according to the stack scroll algorithm. Call this whenever
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateChildren() {
         updateScrollStateForAddedChildren();
         mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
@@ -1268,7 +1248,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void onPreDrawDuringAnimation() {
         mShelf.updateAppearance();
         if (!mNeedsAnimation && !mChildrenUpdateRequested) {
@@ -1276,7 +1255,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateScrollStateForAddedChildren() {
         if (mChildrenToAddAnimated.isEmpty()) {
             return;
@@ -1297,7 +1275,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         clampScrollPosition();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateForcedScroll() {
         if (mForcedScroll != null && (!mForcedScroll.hasFocus()
                 || !mForcedScroll.isAttachedToWindow())) {
@@ -1317,7 +1294,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void requestChildrenUpdate() {
         if (!mChildrenUpdateRequested) {
             getViewTreeObserver().addOnPreDrawListener(mChildrenUpdater);
@@ -1326,12 +1302,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean isCurrentlyAnimating() {
         return mStateAnimator.isRunning();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void clampScrollPosition() {
         int scrollRange = getScrollRange();
         if (scrollRange < mOwnScrollY && !mAmbientState.isClearAllInProgress()) {
@@ -1342,12 +1316,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public int getTopPadding() {
         return mTopPadding;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void setTopPadding(int topPadding, boolean animate) {
         if (mTopPadding != topPadding) {
             boolean shouldAnimate = animate || mAnimateNextTopPaddingChange;
@@ -1469,7 +1441,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *
      * @param height the expanded height of the panel
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setExpandedHeight(float height) {
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
         updateStackPosition();
@@ -1563,7 +1534,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void setRequestedClipBounds(Rect clipRect) {
         mRequestedClipBounds = clipRect;
         updateClipping();
@@ -1572,12 +1542,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Return the height of the content ignoring the footer.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getIntrinsicContentHeight() {
         return (int) mIntrinsicContentHeight;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void updateClipping() {
         boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
                 && !mHeadsUpAnimatingAway;
@@ -1603,7 +1571,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return The translation at the beginning when expanding.
      * Measured relative to the resting position.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getExpandTranslationStart() {
         return -mTopPadding + getMinExpansionHeight() - mShelf.getIntrinsicHeight();
     }
@@ -1612,7 +1579,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return the position from where the appear transition starts when expanding.
      * Measured in absolute height.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearStartPosition() {
         if (isHeadsUpTransition()) {
             final NotificationSection firstVisibleSection = getFirstVisibleSection();
@@ -1629,7 +1595,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * intrinsic height, which also includes whether the notification is system expanded and
      * is mainly used when dragging down from a heads up notification.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int getTopHeadsUpPinnedHeight() {
         if (mTopHeadsUpEntry == null) {
             return 0;
@@ -1649,7 +1614,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return the position from where the appear transition ends when expanding.
      * Measured in absolute height.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearEndPosition() {
         int appearPosition = mAmbientState.getStackTopMargin();
         int visibleNotifCount = mController.getVisibleNotificationCount();
@@ -1670,13 +1634,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean isHeadsUpTransition() {
         return mAmbientState.getTrackedHeadsUpRow() != null;
     }
 
     // TODO(b/246353296): remove it when Flags.SIMPLIFIED_APPEAR_FRACTION is removed
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float calculateAppearFractionOld(float height) {
         float appearEndPosition = getAppearEndPosition();
         float appearStartPosition = getAppearStartPosition();
@@ -1718,12 +1680,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getStackTranslation() {
         return mStackTranslation;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void setStackTranslation(float stackTranslation) {
         if (stackTranslation != mStackTranslation) {
             mStackTranslation = stackTranslation;
@@ -1738,17 +1698,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *
      * @return either the layout height or the externally defined height, whichever is smaller
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private int getLayoutHeight() {
         return Math.min(mMaxLayoutHeight, mCurrentStackHeight);
     }
 
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     public void setQsHeader(ViewGroup qsHeader) {
         mQsHeader = qsHeader;
     }
 
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     public static boolean isPinnedHeadsUp(View v) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
@@ -1757,7 +1714,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     private boolean isHeadsUp(View v) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
@@ -1766,7 +1722,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private ExpandableView getChildAtPosition(float touchX, float touchY) {
         return getChildAtPosition(
                 touchX, touchY, true /* requireMinHeight */, true /* ignoreDecors */);
@@ -1781,7 +1736,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param ignoreDecors     Whether decors can be returned
      * @return the child at the given location.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     ExpandableView getChildAtPosition(float touchX, float touchY,
                                       boolean requireMinHeight, boolean ignoreDecors) {
         // find the view under the pointer, accounting for GONE views
@@ -1829,12 +1783,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return getChildAtPosition(touchX - mTempInt2[0], touchY - mTempInt2[1]);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setScrollingEnabled(boolean enable) {
         mScrollingEnabled = enable;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void lockScrollTo(View v) {
         if (mForcedScroll == v) {
             return;
@@ -1847,7 +1799,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean scrollTo(View v) {
         ExpandableView expandableView = (ExpandableView) v;
         int positionInLinearLayout = getPositionInLinearLayout(v);
@@ -1869,7 +1820,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return the scroll necessary to make the bottom edge of {@param v} align with the top of
      * the IME.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int targetScrollForView(ExpandableView v, int positionInLinearLayout) {
         return positionInLinearLayout + v.getIntrinsicHeight() +
                 getImeInset() - getHeight()
@@ -1890,7 +1840,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         if (!mAnimatedInsets) {
             mBottomInset = insets.getInsets(WindowInsets.Type.ime()).bottom;
@@ -1920,7 +1869,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return insets;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private final Runnable mReclamp = new Runnable() {
         @Override
         public void run() {
@@ -1932,23 +1880,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     };
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setExpandingEnabled(boolean enable) {
         mExpandHelper.setEnabled(enable);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean isScrollingEnabled() {
         return mScrollingEnabled;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     boolean onKeyguard() {
         return mStatusBarState == StatusBarState.KEYGUARD;
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Resources res = getResources();
@@ -1961,7 +1905,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         reinitView();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void dismissViewAnimated(
             View child, Consumer<Boolean> endRunnable, int delay, long duration) {
         if (child instanceof SectionHeaderView) {
@@ -1979,7 +1922,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 true /* isClearAll */);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void snapViewIfNeeded(NotificationEntry entry) {
         ExpandableNotificationRow child = entry.getRow();
         boolean animate = mIsExpanded || isPinnedHeadsUp(child);
@@ -1990,7 +1932,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     public ViewGroup getViewParentForNotification(NotificationEntry entry) {
         return this;
     }
@@ -2002,7 +1943,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return The amount of scrolling to be performed by the scroller,
      * not handled by the overScroll amount.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private float overScrollUp(int deltaY, int range) {
         deltaY = Math.max(deltaY, 0);
         float currentTopAmount = getCurrentOverScrollAmount(true);
@@ -2036,7 +1976,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return The amount of scrolling to be performed by the scroller,
      * not handled by the overScroll amount.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private float overScrollDown(int deltaY) {
         deltaY = Math.min(deltaY, 0);
         float currentBottomAmount = getCurrentOverScrollAmount(false);
@@ -2061,14 +2000,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return scrollAmount;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void initVelocityTrackerIfNotExists() {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
@@ -2076,7 +2013,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void initOrResetVelocityTracker() {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
@@ -2085,12 +2021,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setFinishScrollingCallback(Runnable runnable) {
         mFinishScrollingCallback = runnable;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void animateScroll() {
         if (mScroller.computeScrollOffset()) {
             int oldY = mOwnScrollY;
@@ -2139,7 +2073,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param scrollRangeY   The maximum allowable scroll position (absolute scrolling only).
      * @param maxOverScrollY The current (unsigned) limit on number of pixels to overscroll by.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void customOverScrollBy(int deltaY, int scrollY, int scrollRangeY, int maxOverScrollY) {
         int newScrollY = scrollY + deltaY;
         final int top = -maxOverScrollY;
@@ -2167,7 +2100,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param onTop     Should the effect be applied on top of the scroller.
      * @param animate   Should an animation be performed.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setOverScrolledPixels(float numPixels, boolean onTop, boolean animate) {
         setOverScrollAmount(numPixels * getRubberBandFactor(onTop), onTop, animate, true);
     }
@@ -2181,7 +2113,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param animate Should an animation be performed.
      */
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate) {
         setOverScrollAmount(amount, onTop, animate, true);
     }
@@ -2194,7 +2125,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param animate         Should an animation be performed.
      * @param cancelAnimators Should running animations be cancelled.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
                                     boolean cancelAnimators) {
         setOverScrollAmount(amount, onTop, animate, cancelAnimators, isRubberbanded(onTop));
@@ -2210,7 +2140,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param isRubberbanded  The value which will be passed to
      *                        {@link OnOverscrollTopChangedListener#onOverscrollTopChanged}
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
                                     boolean cancelAnimators, boolean isRubberbanded) {
         if (cancelAnimators) {
@@ -2219,7 +2148,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setOverScrollAmountInternal(amount, onTop, animate, isRubberbanded);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void setOverScrollAmountInternal(float amount, boolean onTop, boolean animate,
                                              boolean isRubberbanded) {
         amount = Math.max(0, amount);
@@ -2236,7 +2164,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void notifyOverscrollTopListener(float amount, boolean isRubberbanded) {
         mExpandHelper.onlyObserveMovements(amount > 1.0f);
         if (mDontReportNextOverScroll) {
@@ -2248,23 +2175,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setOverscrollTopChangedListener(
             OnOverscrollTopChangedListener overscrollTopChangedListener) {
         mOverscrollTopChangedListener = overscrollTopChangedListener;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getCurrentOverScrollAmount(boolean top) {
         return mAmbientState.getOverScrollAmount(top);
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getCurrentOverScrolledPixels(boolean top) {
         return top ? mOverScrolledTopPixels : mOverScrolledBottomPixels;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void setOverScrolledPixels(float amount, boolean onTop) {
         if (onTop) {
             mOverScrolledTopPixels = amount;
@@ -2281,7 +2204,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param clampedY Whether this value was clamped by the calling method, meaning we've reached
      *                 the overscroll limit.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void onCustomOverScrolled(int scrollY, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
@@ -2305,7 +2227,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Springs back from an overscroll by stopping the {@link #mScroller} and animating the
      * overscroll amount back to zero.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void springBack() {
         int scrollRange = getScrollRange();
         boolean overScrolledTop = mOwnScrollY <= 0;
@@ -2329,7 +2250,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int getScrollRange() {
         // In current design, it only use the top HUN to treat all of HUNs
         // although there are more than one HUNs
@@ -2346,7 +2266,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return scrollRange;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int getImeInset() {
         // The NotificationStackScrollLayout does not extend all the way to the bottom of the
         // display. Therefore, subtract that space from the mBottomInset, in order to only include
@@ -2358,7 +2277,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @return the first child which has visibility unequal to GONE
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public ExpandableView getFirstChildNotGone() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -2374,7 +2292,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return The first child which has visibility unequal to GONE which is currently below the
      * given translationY or equal to it.
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private View getFirstChildBelowTranlsationY(float translationY, boolean ignoreChildren) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -2406,7 +2323,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @return the last child which has visibility unequal to GONE
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public ExpandableView getLastChildNotGone() {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
@@ -2432,7 +2348,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @return the number of children which have visibility unequal to GONE
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getNotGoneChildCount() {
         int childCount = getChildCount();
         int count = 0;
@@ -2445,7 +2360,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return count;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateContentHeight() {
         final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
@@ -2481,12 +2395,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 previous, mAmbientState.getFractionToShade(), mAmbientState.isOnKeyguard());
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean hasPulsingNotifications() {
         return mPulsing;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateScrollability() {
         boolean scrollable = !mQsFullScreen && getScrollRange() > 0;
         if (scrollable != mScrollable) {
@@ -2496,7 +2408,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateForwardAndBackwardScrollability() {
         boolean forwardScrollable = mScrollable && !mScrollAdapter.isScrolledToBottom();
         boolean backwardsScrollable = mScrollable && !mScrollAdapter.isScrolledToTop();
@@ -2509,7 +2420,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateBackground() {
         // No need to update the background color if it's not being drawn.
         if (!mShouldDrawNotificationBackground) {
@@ -2540,7 +2450,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAnimateNextSectionBoundsChange = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void abortBackgroundAnimators() {
         for (NotificationSection section : mSections) {
             section.cancelAnimators();
@@ -2556,7 +2465,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean areSectionBoundsAnimating() {
         for (NotificationSection section : mSections) {
             if (section.areBoundsAnimating()) {
@@ -2566,7 +2474,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void startBackgroundAnimation() {
         // TODO(kprevas): do we still need separate fields for top/bottom?
         // or can each section manage its own animation state?
@@ -2586,7 +2493,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Update the background bounds to the new desired bounds
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateBackgroundBounds() {
         int left = mSidePaddings;
         int right = getWidth() - mSidePaddings;
@@ -2652,7 +2558,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return null;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private ExpandableView getLastChildWithBackground() {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
@@ -2665,7 +2570,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return null;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private ExpandableView getFirstChildWithBackground() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -2700,7 +2604,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *                  numbers mean that the finger/cursor is moving down the screen,
      *                  which means we want to scroll towards the top.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void fling(int velocityY) {
         if (getChildCount() > 0) {
             float topAmount = getCurrentOverScrollAmount(true);
@@ -2739,7 +2642,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @return Whether a fling performed on the top overscroll edge lead to the expanded
      * overScroll view (i.e QS).
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean shouldOverScrollFling(int initialVelocity) {
         float topOverScroll = getCurrentOverScrollAmount(true);
         return mScrolledToTopOnFirstDown
@@ -2756,7 +2658,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param qsHeight the top padding imposed by the quick settings panel
      * @param animate  whether to animate the change
      */
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void updateTopPadding(float qsHeight, boolean animate) {
         int topPadding = (int) qsHeight;
         int minStackHeight = getLayoutMinHeight();
@@ -2769,12 +2670,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setExpandedHeight(mExpandedHeight);
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setMaxTopPadding(int maxTopPadding) {
         mMaxTopPadding = maxTopPadding;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getLayoutMinHeight() {
         if (isHeadsUpTransition()) {
             ExpandableNotificationRow trackedHeadsUpRow = mAmbientState.getTrackedHeadsUpRow();
@@ -2791,17 +2690,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mShelf.getVisibility() == GONE ? 0 : mShelf.getIntrinsicHeight();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getTopPaddingOverflow() {
         return mTopPaddingOverflow;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int clampPadding(int desiredPadding) {
         return Math.max(desiredPadding, mIntrinsicPadding);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private float getRubberBandFactor(boolean onTop) {
         if (!onTop) {
             return RUBBER_BAND_FACTOR_NORMAL;
@@ -2821,14 +2717,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * rubberbanded, false if it is technically an overscroll but rather a motion to expand the
      * overscroll view (e.g. expand QS).
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean isRubberbanded(boolean onTop) {
         return !onTop || mExpandedInThisMotion || mIsExpansionChanging || mPanelTracking
                 || !mScrolledToTopOnFirstDown;
     }
 
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setChildTransferInProgress(boolean childTransferInProgress) {
         Assert.isMainThread();
         mChildTransferInProgress = childTransferInProgress;
@@ -2843,7 +2737,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mOnNotificationRemovedListener = listener;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
@@ -2864,7 +2757,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void cleanUpViewStateForEntry(NotificationEntry entry) {
         View child = entry.getRow();
         if (child == mSwipeHelper.getTranslatingParentView()) {
@@ -2872,7 +2764,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void onViewRemovedInternal(ExpandableView child, ViewGroup container) {
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
@@ -2909,7 +2800,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return Math.abs(child.getTranslation()) >= Math.abs(getTotalTranslationLength(child));
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void focusNextViewIfFocused(View view) {
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
@@ -2929,7 +2819,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     }
 
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     private boolean isChildInGroup(View child) {
         return child instanceof ExpandableNotificationRow
                 && mGroupMembershipManager.isChildInGroup(
@@ -2942,7 +2831,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param child The view to generate the remove animation for.
      * @return Whether an animation was generated.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     boolean generateRemoveAnimation(ExpandableView child) {
         String key = "";
         if (mDebugRemoveAnimation) {
@@ -2986,7 +2874,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     private boolean isClickedHeadsUp(View child) {
         return HeadsUpUtil.isClickedHeadsUpNotification(child);
     }
@@ -2996,7 +2883,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *
      * @return whether any child was removed from the list to animate and the view was just added
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean removeRemovedChildFromHeadsUpChangeAnimations(View child) {
         boolean hasAddEvent = false;
         for (Pair<ExpandableNotificationRow, Boolean> eventPair : mHeadsUpChangeAnimations) {
@@ -3021,7 +2907,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *
      * @param removedChild the removed child
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateScrollStateForRemovedChild(ExpandableView removedChild) {
         final int startingPosition = getPositionInLinearLayout(removedChild);
         final int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
@@ -3050,7 +2935,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mTopPadding - mQsScrollBoundaryPosition;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int getIntrinsicHeight(View view) {
         if (view instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) view;
@@ -3059,7 +2943,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return view.getHeight();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getPositionInLinearLayout(View requestedView) {
         ExpandableNotificationRow childInGroup = null;
         ExpandableNotificationRow requestedRow = null;
@@ -3100,7 +2983,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onViewAdded(View child) {
         super.onViewAdded(child);
         if (child instanceof ExpandableView) {
@@ -3108,7 +2990,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateFirstAndLastBackgroundViews() {
         NotificationSection firstSection = getFirstVisibleSection();
         NotificationSection lastSection = getLastVisibleSection();
@@ -3132,15 +3013,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimateNextSectionBoundsChange = false;
         }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        if (!mUseRoundnessSourceTypes) {
-            // TODO: Refactor SectionManager and put the RoundnessManager there.
-            mController.getNotificationRoundnessManager().updateRoundedChildren(mSections);
-        }
         mAnimateBottomOnLayout = false;
         invalidate();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void onViewAddedInternal(ExpandableView child) {
         updateHideSensitiveForChild(child);
         child.setOnHeightChangedListener(mOnChildHeightChangedListener);
@@ -3158,12 +3034,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void updateHideSensitiveForChild(ExpandableView child) {
         child.setHideSensitiveForIntrinsicHeight(mAmbientState.isHideSensitive());
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void notifyGroupChildRemoved(ExpandableView row, ViewGroup childrenContainer) {
         onViewRemovedInternal(row, childrenContainer);
     }
@@ -3172,7 +3046,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         onViewAddedInternal(row);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setAnimationsEnabled(boolean animationsEnabled) {
         mAnimationsEnabled = animationsEnabled;
         updateNotificationAnimationStates();
@@ -3183,7 +3056,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateNotificationAnimationStates() {
         boolean running = mAnimationsEnabled || hasPulsingNotifications();
         mShelf.setAnimationsEnabled(running);
@@ -3195,13 +3067,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void updateAnimationState(View child) {
         updateAnimationState((mAnimationsEnabled || hasPulsingNotifications())
                 && (mIsExpanded || isPinnedHeadsUp(child)), child);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setExpandingNotification(ExpandableNotificationRow row) {
         if (mExpandingNotificationRow != null && row == null) {
             // Let's unset the clip path being set during launch
@@ -3220,7 +3090,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return v.getParent() == this;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
         // Modify the clipping for launching notifications
         mLaunchAnimationParams = params;
@@ -3229,7 +3098,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         requestChildrenUpdate();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateAnimationState(boolean running, View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
@@ -3237,13 +3105,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     boolean isAddOrRemoveAnimationPending() {
         return mNeedsAnimation
                 && (!mChildrenToAddAnimated.isEmpty() || !mChildrenToRemoveAnimated.isEmpty());
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
         if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()) {
             // Generate Animations
@@ -3260,7 +3126,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void changeViewPosition(ExpandableView child, int newIndex) {
         Assert.isMainThread();
         if (mChangePositionInProgress) {
@@ -3294,7 +3159,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void startAnimationToState() {
         if (mNeedsAnimation) {
             generateAllAnimationEvents();
@@ -3312,7 +3176,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGoToFullShadeDelay = 0;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateAllAnimationEvents() {
         generateHeadsUpAnimationEvents();
         generateChildRemovalEvents();
@@ -3328,7 +3191,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         generateAnimateEverythingEvent();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateHeadsUpAnimationEvents() {
         for (Pair<ExpandableNotificationRow, Boolean> eventPair : mHeadsUpChangeAnimations) {
             ExpandableNotificationRow row = eventPair.first;
@@ -3392,13 +3254,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAddedHeadsUpChildren.clear();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private boolean shouldHunAppearFromBottom(ExpandableViewState viewState) {
         return viewState.getYTranslation() + viewState.height
                 >= mAmbientState.getMaxHeadsUpTranslation();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateGroupExpansionEvent() {
         // Generate a group expansion/collapsing event if there is such a group at all
         if (mExpandedGroupView != null) {
@@ -3408,7 +3268,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateViewResizeEvent() {
         if (mNeedViewResizeAnimation) {
             boolean hasDisappearAnimation = false;
@@ -3429,7 +3288,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mNeedViewResizeAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateChildRemovalEvents() {
         for (ExpandableView child : mChildrenToRemoveAnimated) {
             boolean childWasSwipedOut = mSwipedOutViews.contains(child);
@@ -3477,7 +3335,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mChildrenToRemoveAnimated.clear();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generatePositionChangeEvents() {
         for (ExpandableView child : mChildrenChangingPositions) {
             Integer duration = null;
@@ -3502,7 +3359,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateChildAdditionEvents() {
         for (ExpandableView child : mChildrenToAddAnimated) {
             if (mFromMoreCardAdditions.contains(child)) {
@@ -3518,7 +3374,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFromMoreCardAdditions.clear();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateTopPaddingEvent() {
         if (mTopPaddingNeedsAnimation) {
             AnimationEvent event;
@@ -3535,7 +3390,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mTopPaddingNeedsAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateActivateEvent() {
         if (mActivateNeedsAnimation) {
             mAnimationEvents.add(
@@ -3544,7 +3398,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mActivateNeedsAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateAnimateEverythingEvent() {
         if (mEverythingNeedsAnimation) {
             mAnimationEvents.add(
@@ -3553,7 +3406,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mEverythingNeedsAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateDimmedEvent() {
         if (mDimmedNeedsAnimation) {
             mAnimationEvents.add(
@@ -3562,7 +3414,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mDimmedNeedsAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateHideSensitiveEvent() {
         if (mHideSensitiveNeedsAnimation) {
             mAnimationEvents.add(
@@ -3571,7 +3422,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mHideSensitiveNeedsAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generateGoToFullShadeEvent() {
         if (mGoToFullShadeNeedsAnimation) {
             mAnimationEvents.add(
@@ -3580,17 +3430,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGoToFullShadeNeedsAnimation = false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     protected StackScrollAlgorithm createStackScrollAlgorithm(Context context) {
-        StackScrollAlgorithm stackScrollAlgorithm = new StackScrollAlgorithm(context, this);
-        stackScrollAlgorithm.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
-        return stackScrollAlgorithm;
+        return new StackScrollAlgorithm(context, this);
     }
 
     /**
      * @return Whether a y coordinate is inside the content.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean isInContentBounds(float y) {
         return y < getHeight() - getEmptyBottomMargin();
     }
@@ -3611,7 +3457,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return super.onTouchEvent(ev);
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     void dispatchDownEventToScroller(MotionEvent ev) {
         MotionEvent downEvent = MotionEvent.obtain(ev);
         downEvent.setAction(MotionEvent.ACTION_DOWN);
@@ -3620,7 +3465,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean onGenericMotionEvent(MotionEvent event) {
         if (!isScrollingEnabled()
                 || !mIsExpanded
@@ -3656,7 +3500,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return super.onGenericMotionEvent(event);
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     boolean onScrollTouch(MotionEvent ev) {
         if (!isScrollingEnabled()) {
             return false;
@@ -3813,7 +3656,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mFlingAfterUpEvent;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     protected boolean isInsideQsHeader(MotionEvent ev) {
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
         /**
@@ -3831,7 +3673,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mQsHeaderBound.contains((int) ev.getRawX(), (int) ev.getRawY());
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     private void onOverScrollFling(boolean open, int initialVelocity) {
         if (mOverscrollTopChangedListener != null) {
             mOverscrollTopChangedListener.flingTopOverscroll(initialVelocity, open);
@@ -3841,7 +3682,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     private void onSecondaryPointerUp(MotionEvent ev) {
         final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
                 MotionEvent.ACTION_POINTER_INDEX_SHIFT;
@@ -3859,7 +3699,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     private void endDrag() {
         setIsBeingDragged(false);
 
@@ -3874,7 +3713,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (mTouchHandler != null && mTouchHandler.onInterceptTouchEvent(ev)) {
             return true;
@@ -3882,7 +3720,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return super.onInterceptTouchEvent(ev);
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     void handleEmptySpaceClick(MotionEvent ev) {
         logEmptySpaceClick(ev, isBelowLastNotification(mInitialTouchX, mInitialTouchY),
                 mStatusBarState, mTouchIsClick);
@@ -3925,7 +3762,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 MotionEvent.actionToString(ev.getActionMasked()));
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     void initDownStates(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mExpandedInThisMotion = false;
@@ -3939,7 +3775,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
         if (disallowIntercept) {
@@ -3947,7 +3782,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     boolean onInterceptTouchEventScroll(MotionEvent ev) {
         if (!isScrollingEnabled()) {
             return false;
@@ -4062,14 +3896,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @return Whether the specified motion event is actually happening over the content.
      */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     private boolean isInContentBounds(MotionEvent event) {
         return isInContentBounds(event.getY());
     }
 
 
     @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     void setIsBeingDragged(boolean isDragged) {
         mIsBeingDragged = isDragged;
         if (isDragged) {
@@ -4079,22 +3911,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public void requestDisallowLongPress() {
         cancelLongPress();
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public void requestDisallowDismiss() {
         mDisallowDismissInThisMotion = true;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public void cancelLongPress() {
         mSwipeHelper.cancelLongPress();
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public void setOnEmptySpaceClickListener(OnEmptySpaceClickListener listener) {
         mOnEmptySpaceClickListener = listener;
     }
@@ -4103,7 +3931,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @hide
      */
     @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
@@ -4138,7 +3965,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         if (!hasWindowFocus) {
@@ -4147,7 +3973,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void clearChildFocus(View child) {
         super.clearChildFocus(child);
         if (mForcedScroll == child) {
@@ -4159,7 +3984,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mScrollAdapter.isScrolledToBottom();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     int getEmptyBottomMargin() {
         int contentHeight;
         if (mShouldUseSplitNotificationShade) {
@@ -4174,13 +3998,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return Math.max(mMaxLayoutHeight - contentHeight, 0);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void onExpansionStarted() {
         mIsExpansionChanging = true;
         mAmbientState.setExpansionChanging(true);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void onExpansionStopped() {
         mIsExpansionChanging = false;
         mAmbientState.setExpansionChanging(false);
@@ -4189,14 +4011,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mCentralSurfaces.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
-            if (mSwipeHelper.isSwiping()) {
-                mSwipeHelper.resetSwipeState();
-                updateContinuousShadowDrawing();
-            }
+            resetAllSwipeState();
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearUserLockedViews() {
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView child = getChildAtIndex(i);
@@ -4207,7 +4025,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearTemporaryViews() {
         // lets make sure nothing is transient anymore
         clearTemporaryViewsInGroup(this);
@@ -4220,7 +4037,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearTemporaryViewsInGroup(ViewGroup viewGroup) {
         while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
             final View transientView = viewGroup.getTransientView(0);
@@ -4231,27 +4047,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void onPanelTrackingStarted() {
         mPanelTracking = true;
         mAmbientState.setPanelTracking(true);
         resetExposedMenuView(true /* animate */, true /* force */);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void onPanelTrackingStopped() {
         mPanelTracking = false;
         mAmbientState.setPanelTracking(false);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void resetScrollPosition() {
         mScroller.abortAnimation();
         setOwnScrollY(0);
     }
 
     @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void setIsExpanded(boolean isExpanded) {
         boolean changed = isExpanded != mIsExpanded;
         mIsExpanded = isExpanded;
@@ -4264,6 +4076,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (!mIsExpanded) {
                 mGroupExpansionManager.collapseGroups();
                 mExpandHelper.cancelImmediately();
+                if (!mIsExpansionChanging) {
+                    resetAllSwipeState();
+                }
+                finalizeClearAllAnimation();
             }
             updateNotificationAnimationStates();
             updateChronometers();
@@ -4273,7 +4089,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void updateChronometers() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -4281,7 +4096,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void updateChronometerForChild(View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
@@ -4322,7 +4136,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateChronometerForChild(view);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
         if (view instanceof ExpandableNotificationRow && !onKeyguard()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
@@ -4351,34 +4164,41 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setOnHeightChangedListener(
             ExpandableView.OnHeightChangedListener onHeightChangedListener) {
         this.mOnHeightChangedListener = onHeightChangedListener;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void onChildAnimationFinished() {
         setAnimationRunning(false);
         requestChildrenUpdate();
         runAnimationFinishedRunnables();
         clearTransient();
         clearHeadsUpDisappearRunning();
+        finalizeClearAllAnimation();
+    }
 
+    private void finalizeClearAllAnimation() {
         if (mAmbientState.isClearAllInProgress()) {
             setClearAllInProgress(false);
             if (mShadeNeedsToClose) {
                 mShadeNeedsToClose = false;
-                postDelayed(
-                        () -> {
-                            mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
-                        },
-                        DELAY_BEFORE_SHADE_CLOSE /* delayMillis */);
+                if (mIsExpanded) {
+                    collapseShadeDelayed();
+                }
             }
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
+    private void collapseShadeDelayed() {
+        postDelayed(
+                () -> {
+                    mShadeController.animateCollapseShade(
+                            CommandQueue.FLAG_EXCLUDE_NONE);
+                },
+                DELAY_BEFORE_SHADE_CLOSE /* delayMillis */);
+    }
+
     private void clearHeadsUpDisappearRunning() {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
@@ -4394,7 +4214,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void clearTransient() {
         for (ExpandableView view : mClearTransientViewsWhenFinished) {
             view.removeFromTransientContainer();
@@ -4402,7 +4221,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mClearTransientViewsWhenFinished.clear();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void runAnimationFinishedRunnables() {
         for (Runnable runnable : mAnimationFinishedRunnables) {
             runnable.run();
@@ -4413,7 +4231,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * See {@link AmbientState#setDimmed}.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setDimmed(boolean dimmed, boolean animate) {
         dimmed &= onKeyguard();
         mAmbientState.setDimmed(dimmed);
@@ -4428,18 +4245,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     boolean isDimmed() {
         return mAmbientState.isDimmed();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void setDimAmount(float dimAmount) {
         mDimAmount = dimAmount;
         updateBackgroundDimming();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void animateDimmed(boolean dimmed) {
         if (mDimAnimator != null) {
             mDimAnimator.cancel();
@@ -4456,7 +4270,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mDimAnimator.start();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void updateSensitiveness(boolean animate, boolean hideSensitive) {
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
@@ -4474,7 +4287,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void applyCurrentState() {
         int numChildren = getChildCount();
         for (int i = 0; i < numChildren; i++) {
@@ -4491,7 +4303,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateViewShadows();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void updateViewShadows() {
         // we need to work around an issue where the shadow would not cast between siblings when
         // their z difference is between 0 and 0.1
@@ -4532,7 +4343,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Update colors of "dismiss" and "empty shade" views.
      */
-    @ShadeViewRefactor(RefactorComponent.DECORATOR)
     void updateDecorViews() {
         final @ColorInt int textColor =
                 Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
@@ -4541,7 +4351,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mEmptyShadeView.setTextColor(textColor);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void goToFullShade(long delay) {
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
@@ -4549,23 +4358,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         requestChildrenUpdate();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void cancelExpandHelper() {
         mExpandHelper.cancel();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void setIntrinsicPadding(int intrinsicPadding) {
         mIntrinsicPadding = intrinsicPadding;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     int getIntrinsicPadding() {
         return mIntrinsicPadding;
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean shouldDelayChildPressedState() {
         return true;
     }
@@ -4573,7 +4378,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * See {@link AmbientState#setDozing}.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setDozing(boolean dozing, boolean animate) {
         if (mAmbientState.isDozing() == dozing) {
             return;
@@ -4592,7 +4396,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param interpolatedHideAmount The hide amount that follows the actual interpolation of the
      *                               animation curve.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setHideAmount(float linearHideAmount, float interpolatedHideAmount) {
         mLinearHideAmount = linearHideAmount;
         mInterpolatedHideAmount = interpolatedHideAmount;
@@ -4603,6 +4406,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean nowHiddenAtAll = mAmbientState.isHiddenAtAll();
         if (nowFullyHidden != wasFullyHidden) {
             updateVisibility();
+            resetAllSwipeState();
         }
         if (!wasHiddenAtAll && nowHiddenAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
@@ -4633,7 +4437,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mController.updateVisibility(!mAmbientState.isFullyHidden() || !onKeyguard());
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void notifyHideAnimationStart(boolean hide) {
         // We only swap the scaling factor if we're fully hidden or fully awake to avoid
         // interpolation issues when playing with the power button.
@@ -4645,7 +4448,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private int getNotGoneIndex(View child) {
         int count = getChildCount();
         int notGoneIndex = 0;
@@ -4669,7 +4471,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mFooterView != null && mFooterView.isHistoryShown();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
         if (mFooterView != null) {
@@ -4683,7 +4484,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
         int index = -1;
         if (mEmptyShadeView != null) {
@@ -4694,7 +4494,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         addView(mEmptyShadeView, index);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
@@ -4737,7 +4536,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mEmptyShadeView.isVisible();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooterView(boolean visible, boolean showDismissView, boolean showHistory) {
         if (mFooterView == null || mNotificationStackSizeCalculator == null) {
             return;
@@ -4749,7 +4547,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    @VisibleForTesting
     public void setClearAllInProgress(boolean clearAllInProgress) {
         mClearAllInProgress = clearAllInProgress;
         mAmbientState.setClearAllInProgress(clearAllInProgress);
@@ -4760,19 +4558,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mClearAllInProgress;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean isFooterViewNotGone() {
         return mFooterView != null
                 && mFooterView.getVisibility() != View.GONE
                 && !mFooterView.willBeGone();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean isFooterViewContentVisible() {
         return mFooterView != null && mFooterView.isContentVisible();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public int getFooterViewHeightWithPadding() {
         return mFooterView == null ? 0 : mFooterView.getHeight()
                 + mPaddingBetweenElements
@@ -4786,12 +4581,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mGapHeight + mPaddingBetweenElements;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public int getEmptyShadeViewHeight() {
         return mEmptyShadeView.getHeight();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getBottomMostNotificationBottom() {
         final int count = getChildCount();
         float max = 0;
@@ -4809,12 +4602,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return max + getStackTranslation();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setCentralSurfaces(CentralSurfaces centralSurfaces) {
         this.mCentralSurfaces = centralSurfaces;
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
+    public void setActivityStarter(ActivityStarter activityStarter) {
+        mActivityStarter = activityStarter;
+    }
+
     void requestAnimateEverything() {
         if (mIsExpanded && mAnimationsEnabled) {
             mEverythingNeedsAnimation = true;
@@ -4823,7 +4618,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public boolean isBelowLastNotification(float touchX, float touchY) {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
@@ -4858,7 +4652,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @hide
      */
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
         event.setScrollable(mScrollable);
@@ -4868,7 +4661,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         if (mScrollable) {
@@ -4887,7 +4679,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         info.setClassName(ScrollView.class.getName());
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void generateChildOrderChangedEvent() {
         if (mIsExpanded && mAnimationsEnabled) {
             mGenerateChildOrderChangedEvent = true;
@@ -4896,35 +4687,33 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public int getContainerChildCount() {
         return getChildCount();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public View getContainerChildAt(int i) {
         return getChildAt(i);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void removeContainerView(View v) {
         Assert.isMainThread();
         removeView(v);
         if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void addContainerView(View v) {
         Assert.isMainThread();
         addView(v);
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -4937,6 +4726,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -4952,7 +4742,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void runAfterAnimationFinished(Runnable runnable) {
         mAnimationFinishedRunnables.add(runnable);
     }
@@ -4962,7 +4751,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         generateHeadsUpAnimation(row, isHeadsUp);
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
         final boolean add = mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
         if (SPEW) {
@@ -4997,7 +4785,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param height          the height of the screen
      * @param bottomBarHeight the height of the bar on the bottom
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setHeadsUpBoundaries(int height, int bottomBarHeight) {
         mAmbientState.setMaxHeadsUpTranslation(height - bottomBarHeight);
         mStateAnimator.setHeadsUpAppearHeightBottom(height);
@@ -5008,23 +4795,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mWillExpand = willExpand;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setTrackingHeadsUp(ExpandableNotificationRow row) {
         mAmbientState.setTrackedHeadsUpRow(row);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void forceNoOverlappingRendering(boolean force) {
         mForceNoOverlappingRendering = force;
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean hasOverlappingRendering() {
         return !mForceNoOverlappingRendering && super.hasOverlappingRendering();
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void setAnimationRunning(boolean animationRunning) {
         if (animationRunning != mAnimationRunning) {
             if (animationRunning) {
@@ -5037,12 +4820,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean isExpanded() {
         return mIsExpanded;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setPulsing(boolean pulsing, boolean animated) {
         if (!mPulsing && !pulsing) {
             return;
@@ -5057,7 +4838,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         notifyHeightChangeListener(null, animated);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setQsFullScreen(boolean qsFullScreen) {
         mQsFullScreen = qsFullScreen;
         updateAlgorithmLayoutMinHeight();
@@ -5068,7 +4848,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mQsFullScreen;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setQsExpansionFraction(float qsExpansionFraction) {
         boolean footerAffected = mQsExpansionFraction != qsExpansionFraction
                 && (mQsExpansionFraction == 1 || qsExpansionFraction == 1);
@@ -5086,12 +4865,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void setOwnScrollY(int ownScrollY) {
         setOwnScrollY(ownScrollY, false /* animateScrollChangeListener */);
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private void setOwnScrollY(int ownScrollY, boolean animateStackYChangeListener) {
         // Avoid Flicking during clear all
         // when the shade finishes closing, onExpansionStopped will call
@@ -5144,7 +4921,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         shelf.bind(mAmbientState, this, mController.getNotificationRoundnessManager());
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setShelfController(NotificationShelfController notificationShelfController) {
         NotificationShelfController.assertRefactorFlagDisabled(mAmbientState.getFeatureFlags());
         int index = -1;
@@ -5159,7 +4935,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         notificationShelfController.bind(mAmbientState, mController);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setMaxDisplayedNotifications(int maxDisplayedNotifications) {
         if (mMaxDisplayedNotifications != maxDisplayedNotifications) {
             mMaxDisplayedNotifications = maxDisplayedNotifications;
@@ -5178,13 +4953,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mKeyguardBottomPadding = keyguardBottomPadding;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setShouldShowShelfOnly(boolean shouldShowShelfOnly) {
         mShouldShowShelfOnly = shouldShowShelfOnly;
         updateAlgorithmLayoutMinHeight();
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getMinExpansionHeight() {
         // shelf height is defined in dp but status bar height can be defined in px, that makes
         // relation between them variable - sometimes one might be bigger than the other when
@@ -5195,19 +4968,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 + mWaterfallTopInset;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setInHeadsUpPinnedMode(boolean inHeadsUpPinnedMode) {
         mInHeadsUpPinnedMode = inHeadsUpPinnedMode;
         updateClipping();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         mHeadsUpAnimatingAway = headsUpAnimatingAway;
         updateClipping();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
     public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
@@ -5240,12 +5010,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateVisibility();
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setExpandingVelocity(float expandingVelocity) {
         mAmbientState.setExpandingVelocity(expandingVelocity);
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public float getOpeningHeight() {
         if (mEmptyShadeView.getVisibility() == GONE) {
             return getMinExpansionHeight();
@@ -5254,12 +5022,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setIsFullWidth(boolean isFullWidth) {
         mAmbientState.setSmallScreen(isFullWidth);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setUnlockHintRunning(boolean running) {
         mAmbientState.setUnlockHintRunning(running);
         if (!running) {
@@ -5268,7 +5034,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setPanelFlinging(boolean flinging) {
         mAmbientState.setFlinging(flinging);
         if (!flinging) {
@@ -5277,12 +5042,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setHeadsUpGoingAwayAnimationsAllowed(boolean headsUpGoingAwayAnimationsAllowed) {
         mHeadsUpGoingAwayAnimationsAllowed = headsUpGoingAwayAnimationsAllowed;
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         pw.println("Internal state:");
@@ -5378,7 +5141,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 });
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public boolean isFullyHidden() {
         return mAmbientState.isFullyHidden();
     }
@@ -5389,7 +5151,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      *
      * @param listener the listener to notify.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
         mExpandedHeightListeners.add(listener);
     }
@@ -5397,18 +5158,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Stop a listener from listening to the expandedHeight.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void removeOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
         mExpandedHeightListeners.remove(listener);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     void setHeadsUpAppearanceController(
             HeadsUpAppearanceController headsUpAppearanceController) {
         mHeadsUpAppearanceController = headsUpAppearanceController;
     }
 
-    private boolean isVisible(View child) {
+    @VisibleForTesting
+    public boolean isVisible(View child) {
         boolean hasClipBounds = child.getClipBounds(mTmpRect);
         return child.getVisibility() == View.VISIBLE
                 && (!hasClipBounds || mTmpRect.height() > 0);
@@ -5494,7 +5254,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Collects a list of visible rows, and animates them away in a staggered fashion as if they
      * were dismissed. Notifications are dismissed in the backend via onClearAllAnimationsEnd.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
     void clearNotifications(@SelectedRows int selection, boolean closeShade) {
         // Animate-swipe all dismissable notifications, then animate the shade closed
@@ -5555,7 +5314,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @VisibleForTesting
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void inflateFooterView() {
         FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_footer, this, false);
@@ -5569,7 +5327,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setFooterView(footerView);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void inflateEmptyShadeView() {
         EmptyShadeView oldView = mEmptyShadeView;
         EmptyShadeView view = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
@@ -5579,7 +5336,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             Intent intent = showHistory
                     ? new Intent(Settings.ACTION_NOTIFICATION_HISTORY)
                     : new Intent(Settings.ACTION_NOTIFICATION_SETTINGS);
-            mCentralSurfaces.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            mActivityStarter.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
         setEmptyShadeView(view);
         updateEmptyShadeView(
@@ -5591,7 +5348,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * Updates expanded, dimmed and locked states of notification rows.
      */
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void onUpdateRowStates() {
 
         // The following views will be moved to the end of mStackScroller. This counter represents
@@ -6063,7 +5819,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * A listener that is notified when the empty space below the notifications is clicked on
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public interface OnEmptySpaceClickListener {
         void onEmptySpaceClicked(float x, float y);
     }
@@ -6071,7 +5826,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * A listener that gets notified when the overscroll at the top has changed.
      */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public interface OnOverscrollTopChangedListener {
 
         /**
@@ -6095,7 +5849,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         void flingTopOverscroll(float velocity, boolean open);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateSpeedBumpIndex() {
         mSpeedBumpIndexDirty = true;
     }
@@ -6113,7 +5866,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
+    private void resetAllSwipeState() {
+        Trace.beginSection("NSSL.resetAllSwipeState()");
+        mSwipeHelper.resetTouchState();
+        for (int i = 0; i < getChildCount(); i++) {
+            mSwipeHelper.forceResetSwipeState(getChildAt(i));
+        }
+        updateContinuousShadowDrawing();
+        Trace.endSection();
+    }
+
     void updateContinuousShadowDrawing() {
         boolean continuousShadowUpdate = mAnimationRunning
                 || mSwipeHelper.isSwiping();
@@ -6127,7 +5889,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void resetExposedMenuView(boolean animate, boolean force) {
         mSwipeHelper.resetExposedMenuView(animate, force);
     }
@@ -6147,7 +5908,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     static class AnimationEvent {
 
         static AnimationFilter[] FILTERS = new AnimationFilter[]{
@@ -6436,7 +6196,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setCheckForLeaveBehind(true);
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private final HeadsUpTouchHelper.Callback mHeadsUpCallback = new HeadsUpTouchHelper.Callback() {
         @Override
         public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
@@ -6475,7 +6234,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         });
     }
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private final ExpandHelper.Callback mExpandHelperCallback = new ExpandHelper.Callback() {
         @Override
         public ExpandableView getChildAtPosition(float touchX, float touchY) {

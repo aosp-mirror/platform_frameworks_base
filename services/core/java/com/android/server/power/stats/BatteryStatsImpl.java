@@ -1675,6 +1675,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     String mLastWakeupReason = null;
     long mLastWakeupUptimeMs = 0;
+    long mLastWakeupElapsedTimeMs = 0;
     private final HashMap<String, SamplingTimer> mWakeupReasonStats = new HashMap<>();
 
     public Map<String, ? extends Timer> getWakeupReasonStats() {
@@ -4745,17 +4746,19 @@ public class BatteryStatsImpl extends BatteryStats {
                 requestWakelockCpuUpdate();
             }
 
-            getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs)
-                    .noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
+            Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
+            uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
+
+            int procState = uidStats.mProcessState;
 
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
                         wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE, procState);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
                         mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE, procState);
             }
         }
     }
@@ -4796,16 +4799,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 requestWakelockCpuUpdate();
             }
 
-            getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs)
-                    .noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
+            Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
+            uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
+
+            int procState = uidStats.mProcessState;
             if (wc != null) {
                 FrameworkStatsLog.write(FrameworkStatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(),
                         wc.getTags(), getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE, procState);
             } else {
                 FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKELOCK_STATE_CHANGED,
                         mapIsolatedUid(uid), null, getPowerManagerWakeLockLevel(type), name,
-                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
+                        FrameworkStatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE, procState);
             }
 
             if (mappedUid != uid) {
@@ -5044,7 +5049,7 @@ public class BatteryStatsImpl extends BatteryStats {
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptimeMs * 1000, 1, elapsedRealtimeMs); // time in in microseconds
             FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason,
-                    /* duration_usec */ deltaUptimeMs * 1000);
+                    /* duration_usec */ deltaUptimeMs * 1000, mLastWakeupElapsedTimeMs);
             mLastWakeupReason = null;
         }
     }
@@ -5055,6 +5060,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mHistory.recordWakeupEvent(elapsedRealtimeMs, uptimeMs, reason);
         mLastWakeupReason = reason;
         mLastWakeupUptimeMs = uptimeMs;
+        mLastWakeupElapsedTimeMs = elapsedRealtimeMs;
     }
 
     @GuardedBy("this")
@@ -14607,17 +14613,13 @@ public class BatteryStatsImpl extends BatteryStats {
 
     // Inform StatsLog of setBatteryState changes.
     private void reportChangesToStatsLog(final int status, final int plugType, final int level) {
-        if (!mHaveBatteryLevel) {
-            return;
-        }
-
-        if (mBatteryStatus != status) {
+        if (!mHaveBatteryLevel || mBatteryStatus != status) {
             FrameworkStatsLog.write(FrameworkStatsLog.CHARGING_STATE_CHANGED, status);
         }
-        if (mBatteryPlugType != plugType) {
+        if (!mHaveBatteryLevel || mBatteryPlugType != plugType) {
             FrameworkStatsLog.write(FrameworkStatsLog.PLUGGED_STATE_CHANGED, plugType);
         }
-        if (mBatteryLevel != level) {
+        if (!mHaveBatteryLevel || mBatteryLevel != level) {
             FrameworkStatsLog.write(FrameworkStatsLog.BATTERY_LEVEL_CHANGED, level);
         }
     }

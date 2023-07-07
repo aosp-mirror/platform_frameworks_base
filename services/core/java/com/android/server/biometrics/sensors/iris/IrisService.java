@@ -16,10 +16,12 @@
 
 package com.android.server.biometrics.sensors.iris;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.iris.IIrisService;
@@ -31,6 +33,7 @@ import android.util.Slog;
 
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.biometrics.Utils;
 
 import java.util.List;
 
@@ -72,12 +75,17 @@ public class IrisService extends SystemService {
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE));
 
                 for (SensorPropertiesInternal hidlSensor : hidlSensors) {
+                    final int sensorId = hidlSensor.sensorId;
+                    final @BiometricManager.Authenticators.Types int strength =
+                            Utils.propertyStrengthToAuthenticatorStrength(
+                                    hidlSensor.sensorStrength);
+                    final IrisAuthenticator authenticator = new IrisAuthenticator(mServiceWrapper,
+                            sensorId);
                     try {
-                        biometricService.registerAuthenticator(TYPE_IRIS, hidlSensor,
-                                new IrisAuthenticator(mServiceWrapper, hidlSensor.sensorId));
+                        biometricService.registerAuthenticator(sensorId, TYPE_IRIS, strength,
+                                authenticator);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "Remote exception when registering sensorId: "
-                                + hidlSensor.sensorId);
+                        Slog.e(TAG, "Remote exception when registering sensorId: " + sensorId);
                     }
                 }
             });

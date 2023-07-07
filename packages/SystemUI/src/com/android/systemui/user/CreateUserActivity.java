@@ -32,11 +32,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.users.EditUserInfoController;
-import com.android.settingslib.users.GrantAdminDialogController;
+import com.android.settingslib.users.CreateUserDialogController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.user.utils.MultiUserActionsEvent;
 
 import javax.inject.Inject;
 
@@ -61,20 +59,18 @@ public class CreateUserActivity extends Activity {
     private static final String EXTRA_IS_KEYGUARD_SHOWING = "extra_is_keyguard_showing";
 
     private final UserCreator mUserCreator;
-    private final EditUserInfoController mEditUserInfoController;
+    private CreateUserDialogController mCreateUserDialogController;
     private final IActivityManager mActivityManager;
     private final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
-    private Dialog mGrantAdminDialog;
     private Dialog mSetupUserDialog;
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
-    private boolean mGrantAdminRights;
     @Inject
     public CreateUserActivity(UserCreator userCreator,
-            EditUserInfoController editUserInfoController, IActivityManager activityManager,
+            CreateUserDialogController createUserDialogController, IActivityManager activityManager,
             ActivityStarter activityStarter, UiEventLogger uiEventLogger) {
         mUserCreator = userCreator;
-        mEditUserInfoController = editUserInfoController;
+        mCreateUserDialogController = createUserDialogController;
         mActivityManager = activityManager;
         mActivityStarter = activityStarter;
         mUiEventLogger = uiEventLogger;
@@ -86,19 +82,10 @@ public class CreateUserActivity extends Activity {
         setShowWhenLocked(true);
         setContentView(R.layout.activity_create_new_user);
         if (savedInstanceState != null) {
-            mEditUserInfoController.onRestoreInstanceState(savedInstanceState);
+            mCreateUserDialogController.onRestoreInstanceState(savedInstanceState);
         }
-        boolean isKeyguardShowing = getIntent().getBooleanExtra(EXTRA_IS_KEYGUARD_SHOWING, true);
-        // Display grant admin dialog only on unlocked device to admin users if multiple admins
-        // are allowed on this device.
-        if (mUserCreator.isMultipleAdminEnabled() && mUserCreator.isUserAdmin()
-                && !isKeyguardShowing) {
-            mGrantAdminDialog = buildGrantAdminDialog();
-            mGrantAdminDialog.show();
-        } else {
-            mSetupUserDialog = createDialog();
-            mSetupUserDialog.show();
-        }
+        mSetupUserDialog = createDialog();
+        mSetupUserDialog.show();
         getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                         OnBackInvokedDispatcher.PRIORITY_DEFAULT,
                         mBackCallback);
@@ -110,7 +97,7 @@ public class CreateUserActivity extends Activity {
             outState.putBundle(DIALOG_STATE_KEY, mSetupUserDialog.onSaveInstanceState());
         }
 
-        mEditUserInfoController.onSaveInstanceState(outState);
+        mCreateUserDialogController.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
 
@@ -125,48 +112,21 @@ public class CreateUserActivity extends Activity {
 
     private Dialog createDialog() {
         String defaultUserName = getString(com.android.settingslib.R.string.user_new_user_name);
-
-        return mEditUserInfoController.createDialog(
+        boolean isKeyguardShowing = getIntent().getBooleanExtra(EXTRA_IS_KEYGUARD_SHOWING, true);
+        return mCreateUserDialogController.createDialog(
                 this,
                 this::startActivity,
-                null,
-                defaultUserName,
-                getString(com.android.settingslib.R.string.user_add_user),
+                (mUserCreator.isMultipleAdminEnabled() && mUserCreator.isUserAdmin()
+                        && !isKeyguardShowing),
                 this::addUserNow,
                 this::finish
-        );
-    }
-
-    /**
-     * Returns dialog that allows to grant user admin rights.
-     */
-    private Dialog buildGrantAdminDialog() {
-        return new GrantAdminDialogController().createDialog(
-                this,
-                (grantAdminRights) -> {
-                    mGrantAdminDialog.dismiss();
-                    mGrantAdminRights = grantAdminRights;
-                    if (mGrantAdminRights) {
-                        mUiEventLogger.log(MultiUserActionsEvent
-                                        .GRANT_ADMIN_FROM_USER_SWITCHER_CREATION_DIALOG);
-                    } else {
-                        mUiEventLogger.log(MultiUserActionsEvent
-                                        .NOT_GRANT_ADMIN_FROM_USER_SWITCHER_CREATION_DIALOG);
-                    }
-                    mSetupUserDialog = createDialog();
-                    mSetupUserDialog.show();
-                },
-                () -> {
-                    mGrantAdminRights = false;
-                    finish();
-                }
         );
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mEditUserInfoController.onActivityResult(requestCode, resultCode, data);
+        mCreateUserDialogController.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -178,9 +138,6 @@ public class CreateUserActivity extends Activity {
         if (mSetupUserDialog != null) {
             mSetupUserDialog.dismiss();
         }
-        if (mGrantAdminDialog != null) {
-            mGrantAdminDialog.dismiss();
-        }
         finish();
     }
 
@@ -190,7 +147,7 @@ public class CreateUserActivity extends Activity {
         super.onDestroy();
     }
 
-    private void addUserNow(String userName, Drawable userIcon) {
+    private void addUserNow(String userName, Drawable userIcon, Boolean isAdmin) {
         mSetupUserDialog.dismiss();
         userName = (userName == null || userName.trim().isEmpty())
                 ? getString(com.android.settingslib.R.string.user_new_user_name)
@@ -198,7 +155,7 @@ public class CreateUserActivity extends Activity {
 
         mUserCreator.createUser(userName, userIcon,
                 userInfo -> {
-                    if (mGrantAdminRights) {
+                    if (isAdmin) {
                         mUserCreator.setUserAdmin(userInfo.id);
                     }
                     switchToUser(userInfo.id);
@@ -230,7 +187,7 @@ public class CreateUserActivity extends Activity {
      */
     private void startActivity(Intent intent, int requestCode) {
         mActivityStarter.dismissKeyguardThenExecute(() -> {
-            mEditUserInfoController.startingActivityForResult();
+            mCreateUserDialogController.startingActivityForResult();
             startActivityForResult(intent, requestCode);
             return true;
         }, /* cancel= */ null, /* afterKeyguardGone= */ true);

@@ -68,6 +68,7 @@ public class RotationLockTile extends QSTileImpl<BooleanState> implements
     private final SensorPrivacyManager mPrivacyManager;
     private final BatteryController mBatteryController;
     private final SettingObserver mSetting;
+    private final boolean mAllowRotationResolver;
 
     @Inject
     public RotationLockTile(
@@ -105,6 +106,8 @@ public class RotationLockTile extends QSTileImpl<BooleanState> implements
             }
         };
         mBatteryController.observe(getLifecycle(), this);
+        mAllowRotationResolver = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowRotationResolver);
     }
 
     @Override
@@ -145,7 +148,7 @@ public class RotationLockTile extends QSTileImpl<BooleanState> implements
 
         final boolean powerSave = mBatteryController.isPowerSave();
         final boolean cameraLocked = mPrivacyManager.isSensorPrivacyEnabled(CAMERA);
-        final boolean cameraRotation =
+        final boolean cameraRotation = mAllowRotationResolver &&
                 !powerSave && !cameraLocked && hasSufficientPermission(mContext)
                         && mController.isCameraRotationEnabled();
         state.value = !rotationLocked;

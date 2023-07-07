@@ -16,12 +16,12 @@
 
 package com.android.server.credentials.metrics;
 
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;
+import com.android.server.credentials.metrics.shared.ResponseCollective;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * The central chosen provider metric object that mimics our defined metric setup. This is used
@@ -29,14 +29,15 @@ import java.util.List;
  * Some types are redundant across these metric collectors, but that has debug use-cases as
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
- * TODO(b/270403549) - iterate on this in V3+
  */
 public class ChosenProviderFinalPhaseMetric {
-
-    // TODO(b/270403549) - applies elsewhere, likely removed or replaced w/ some hashed/count index
     private static final String TAG = "ChosenFinalPhaseMetric";
-    // The session id associated with this API call, used to unite split emits
-    private int mSessionId = -1;
+    // The session id associated with this API call, used to unite split emits, for the flow
+    // where we know the calling app
+    private final int mSessionIdCaller;
+    // The session id associated with this API call, used to unite split emits, for the flow
+    // where we know the provider apps
+    private final int mSessionIdProvider;
     // Reveals if the UI was returned, false by default
     private boolean mUiReturned = false;
     private int mChosenUid = -1;
@@ -69,24 +70,19 @@ public class ChosenProviderFinalPhaseMetric {
     private int mChosenProviderStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
-    // Indicates the number of total entries available, defaults to -1. Not presently emitted, but
-    // left as a utility
-    private int mNumEntriesTotal = -1;
-    // The count of action entries from this provider, defaults to -1
-    private int mActionEntryCount = -1;
-    // The count of credential entries from this provider, defaults to -1
-    private int mCredentialEntryCount = -1;
-    // The *type-count* of the credential entries, defaults to -1
-    private int mCredentialEntryTypeCount = -1;
-    // The count of remote entries from this provider, defaults to -1
-    private int mRemoteEntryCount = -1;
-    // The count of authentication entries from this provider, defaults to -1
-    private int mAuthenticationEntryCount = -1;
-    // Gathered to pass on to chosen provider when required
-    private List<Integer> mAvailableEntries = new ArrayList<>();
+    // Indicates a framework only exception that occurs in the final phase of the flow
+    private String mFrameworkException = "";
+
+    // Stores the response credential information, as well as the response entry information which
+    // by default, contains empty info
+    private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
+    // Indicates if this chosen provider was the primary provider, false by default
+    private boolean mIsPrimary = false;
 
 
-    public ChosenProviderFinalPhaseMetric() {
+    public ChosenProviderFinalPhaseMetric(int sessionIdCaller, int sessionIdProvider) {
+        mSessionIdCaller = sessionIdCaller;
+        mSessionIdProvider = sessionIdProvider;
     }
 
     /* ------------------- UID ------------------- */
@@ -230,7 +226,7 @@ public class ChosenProviderFinalPhaseMetric {
      */
     public int getTimestampFromReferenceStartMicroseconds(long specificTimestamp) {
         if (specificTimestamp < mServiceBeganTimeNanoseconds) {
-            Log.i(TAG, "The timestamp is before service started, falling back to default int");
+            Slog.i(TAG, "The timestamp is before service started, falling back to default int");
             return MetricUtilities.DEFAULT_INT_32;
         }
         return (int) ((specificTimestamp
@@ -249,12 +245,8 @@ public class ChosenProviderFinalPhaseMetric {
 
     /* ----------- Session ID -------------- */
 
-    public void setSessionId(int sessionId) {
-        mSessionId = sessionId;
-    }
-
-    public int getSessionId() {
-        return mSessionId;
+    public int getSessionIdProvider() {
+        return mSessionIdProvider;
     }
 
     /* ----------- UI Returned Successfully -------------- */
@@ -267,87 +259,6 @@ public class ChosenProviderFinalPhaseMetric {
         return mUiReturned;
     }
 
-    /* -------------- Number of Entries ---------------- */
-
-    public void setNumEntriesTotal(int numEntriesTotal) {
-        mNumEntriesTotal = numEntriesTotal;
-    }
-
-    public int getNumEntriesTotal() {
-        return mNumEntriesTotal;
-    }
-
-    /* -------------- Count of Action Entries ---------------- */
-
-    public void setActionEntryCount(int actionEntryCount) {
-        mActionEntryCount = actionEntryCount;
-    }
-
-    public int getActionEntryCount() {
-        return mActionEntryCount;
-    }
-
-    /* -------------- Count of Credential Entries ---------------- */
-
-    public void setCredentialEntryCount(int credentialEntryCount) {
-        mCredentialEntryCount = credentialEntryCount;
-    }
-
-    public int getCredentialEntryCount() {
-        return mCredentialEntryCount;
-    }
-
-    /* -------------- Count of Credential Entry Types ---------------- */
-
-    public void setCredentialEntryTypeCount(int credentialEntryTypeCount) {
-        mCredentialEntryTypeCount = credentialEntryTypeCount;
-    }
-
-    public int getCredentialEntryTypeCount() {
-        return mCredentialEntryTypeCount;
-    }
-
-    /* -------------- Count of Remote Entries ---------------- */
-
-    public void setRemoteEntryCount(int remoteEntryCount) {
-        mRemoteEntryCount = remoteEntryCount;
-    }
-
-    public int getRemoteEntryCount() {
-        return mRemoteEntryCount;
-    }
-
-    /* -------------- Count of Authentication Entries ---------------- */
-
-    public void setAuthenticationEntryCount(int authenticationEntryCount) {
-        mAuthenticationEntryCount = authenticationEntryCount;
-    }
-
-    public int getAuthenticationEntryCount() {
-        return mAuthenticationEntryCount;
-    }
-
-    /* -------------- The Entries Gathered ---------------- */
-
-    /**
-     * Sets the collected list of entries from the candidate phase to be retrievable in the
-     * chosen phase in a semantically correct way.
-     */
-    public void setAvailableEntries(List<Integer> entries) {
-        mAvailableEntries = new ArrayList<>(entries); // no alias copy
-    }
-
-    /**
-     * Returns a list of the entries captured by this metric collector associated
-     * with a particular chosen provider.
-     *
-     * @return the full collection of entries encountered by the chosen provider during the
-     * candidate phase.
-     */
-    public List<Integer> getAvailableEntries() {
-        return new ArrayList<>(mAvailableEntries); // no alias copy
-    }
-
     /* -------------- Has Exception ---------------- */
 
     public void setHasException(boolean hasException) {
@@ -356,5 +267,39 @@ public class ChosenProviderFinalPhaseMetric {
 
     public boolean isHasException() {
         return mHasException;
+    }
+
+    /* -------------- The Entries and Responses Gathered ---------------- */
+
+    public void setResponseCollective(ResponseCollective responseCollective) {
+        mResponseCollective = responseCollective;
+    }
+
+    public ResponseCollective getResponseCollective() {
+        return mResponseCollective;
+    }
+
+    /* -------------- Framework Exception ---------------- */
+
+    public void setFrameworkException(String frameworkException) {
+        mFrameworkException = frameworkException;
+    }
+
+    public String getFrameworkException() {
+        return mFrameworkException;
+    }
+
+    /* -------------- Session ID for Track One (Known Calling App) ---------------- */
+
+    public int getSessionIdCaller() {
+        return mSessionIdCaller;
+    }
+
+    public void setPrimary(boolean primary) {
+        mIsPrimary = primary;
+    }
+
+    public boolean isPrimary() {
+        return mIsPrimary;
     }
 }

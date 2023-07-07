@@ -22,15 +22,12 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
-import android.os.UserManager;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
@@ -39,7 +36,6 @@ import android.util.PluralsMessageFormatter;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,11 +57,9 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.autofill.AutofillManagerService;
 import com.android.server.autofill.Helper;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
@@ -140,29 +134,15 @@ final class FillUi {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
-    FillUi(@NonNull Context context, @UserIdInt int userId, @NonNull FillResponse response,
+    FillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
             @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
-
-        if (UserManager.isVisibleBackgroundUsersEnabled()) {
-            UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-            int displayId = umi.getMainDisplayAssignedToUser(userId);
-            if (sDebug) {
-                Slogf.d(TAG, "Creating context for display %d for user %d", displayId, userId);
-            }
-            Display display = context.getSystemService(DisplayManager.class).getDisplay(displayId);
-            if (display != null) {
-                context = context.createDisplayContext(display);
-            } else {
-                Slogf.d(TAG, "Could not get display with id %d (which is associated with user %d; "
-                        + "FillUi operations will probably fail", displayId, userId);
-            }
-        }
-
         mFullScreen = isFullScreen(context);
         mContext = new ContextThemeWrapper(context, mThemeId);
 

@@ -25,6 +25,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.app.ActivityManager;
+import android.app.BroadcastOptions;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.SystemClock;
@@ -105,6 +107,12 @@ class BroadcastProcessQueue {
     long lastCpuDelayTime;
 
     /**
+     * Snapshotted value of {@link ProcessStateRecord#getCurProcState()} before
+     * dispatching the current broadcast to the receiver in this process.
+     */
+    int lastProcessState;
+
+    /**
      * Ordered collection of broadcasts that are waiting to be dispatched to
      * this process, as a pair of {@link BroadcastRecord} and the index into
      * {@link BroadcastRecord#receivers} that represents the receiver.
@@ -141,6 +149,12 @@ class BroadcastProcessQueue {
      * queue was last idle.
      */
     private int mActiveCountSinceIdle;
+
+    /**
+     * Count of {@link #mActive} broadcasts with assumed delivery that have been dispatched
+     * since this queue was last idle.
+     */
+    private int mActiveAssumedDeliveryCountSinceIdle;
 
     /**
      * Flag indicating that the currently active broadcast is being dispatched
@@ -182,7 +196,7 @@ class BroadcastProcessQueue {
     private int mCountInstrumented;
     private int mCountManifest;
 
-    private boolean mPrioritizeEarliest;
+    private int mCountPrioritizeEarliestRequests;
 
     private @UptimeMillisLong long mRunnableAt = Long.MAX_VALUE;
     private @Reason int mRunnableAtReason = REASON_EMPTY;
@@ -194,7 +208,8 @@ class BroadcastProcessQueue {
      */
     private boolean mLastDeferredStates;
 
-    private boolean mUidCached;
+    private boolean mUidForeground;
+    private boolean mProcessFreezable;
     private boolean mProcessInstrumented;
     private boolean mProcessPersistent;
 
@@ -242,8 +257,7 @@ class BroadcastProcessQueue {
      */
     @Nullable
     public BroadcastRecord enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record,
-            int recordIndex, boolean wouldBeSkipped,
-            @NonNull BroadcastConsumer deferredStatesApplyConsumer) {
+            int recordIndex, @NonNull BroadcastConsumer deferredStatesApplyConsumer) {
         // When updateDeferredStates() has already applied a deferred state to
         // all pending items, apply to this new broadcast too
         if (mLastDeferredStates && record.deferUntilActive
@@ -251,9 +265,11 @@ class BroadcastProcessQueue {
             deferredStatesApplyConsumer.accept(record, recordIndex);
         }
 
-        if (record.isReplacePending()) {
-            final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex,
-                    wouldBeSkipped);
+        // Ignore FLAG_RECEIVER_REPLACE_PENDING if the sender specified the policy using the
+        // BroadcastOptions delivery group APIs.
+        if (record.isReplacePending()
+                && record.getDeliveryGroupPolicy() == BroadcastOptions.DELIVERY_GROUP_POLICY_ALL) {
+            final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex);
             if (replacedBroadcastRecord != null) {
                 return replacedBroadcastRecord;
             }
@@ -264,15 +280,33 @@ class BroadcastProcessQueue {
         SomeArgs newBroadcastArgs = SomeArgs.obtain();
         newBroadcastArgs.arg1 = record;
         newBroadcastArgs.argi1 = recordIndex;
-        newBroadcastArgs.argi2 = (wouldBeSkipped ? 1 : 0);
 
         // Cross-broadcast prioritization policy:  some broadcasts might warrant being
         // issued ahead of others that are already pending, for example if this new
         // broadcast is in a different delivery class or is tied to a direct user interaction
         // with implicit responsiveness expectations.
         getQueueForBroadcast(record).addLast(newBroadcastArgs);
-        onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
+        onBroadcastEnqueued(record, recordIndex);
         return null;
+    }
+
+    /**
+     * Re-enqueue the active broadcast so that it can be made active and delivered again. In order
+     * to keep its previous position same to avoid issues with reordering, insert it at the head
+     * of the queue.
+     *
+     * Callers are responsible for clearing the active broadcast by calling
+     * {@link #makeActiveIdle()} after re-enqueuing it.
+     */
+    public void reEnqueueActiveBroadcast() {
+        final BroadcastRecord record = getActive();
+        final int recordIndex = getActiveIndex();
+
+        final SomeArgs broadcastArgs = SomeArgs.obtain();
+        broadcastArgs.arg1 = record;
+        broadcastArgs.argi1 = recordIndex;
+        getQueueForBroadcast(record).addFirst(broadcastArgs);
+        onBroadcastEnqueued(record, recordIndex);
     }
 
     /**
@@ -285,10 +319,9 @@ class BroadcastProcessQueue {
      *         wasn't any broadcast that was replaced.
      */
     @Nullable
-    private BroadcastRecord replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+    private BroadcastRecord replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex) {
         final ArrayDeque<SomeArgs> queue = getQueueForBroadcast(record);
-        return replaceBroadcastInQueue(queue, record, recordIndex, wouldBeSkipped);
+        return replaceBroadcastInQueue(queue, record, recordIndex);
     }
 
     /**
@@ -302,15 +335,13 @@ class BroadcastProcessQueue {
      */
     @Nullable
     private BroadcastRecord replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
-            @NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+            @NonNull BroadcastRecord record, int recordIndex) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
         while (it.hasNext()) {
             final SomeArgs args = it.next();
             final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
             final int testRecordIndex = args.argi1;
-            final boolean testWouldBeSkipped = (args.argi2 == 1);
             final Object testReceiver = testRecord.receivers.get(testRecordIndex);
             if ((record.callingUid == testRecord.callingUid)
                     && (record.userId == testRecord.userId)
@@ -320,10 +351,9 @@ class BroadcastProcessQueue {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;
-                args.argi2 = (wouldBeSkipped ? 1 : 0);
                 record.copyEnqueueTimeFrom(testRecord);
-                onBroadcastDequeued(testRecord, testRecordIndex, testWouldBeSkipped);
-                onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
+                onBroadcastDequeued(testRecord, testRecordIndex);
+                onBroadcastEnqueued(record, recordIndex);
                 return testRecord;
             }
         }
@@ -383,13 +413,12 @@ class BroadcastProcessQueue {
             final SomeArgs args = it.next();
             final BroadcastRecord record = (BroadcastRecord) args.arg1;
             final int recordIndex = args.argi1;
-            final boolean recordWouldBeSkipped = (args.argi2 == 1);
             if (predicate.test(record, recordIndex)) {
                 consumer.accept(record, recordIndex);
                 if (andRemove) {
                     args.recycle();
                     it.remove();
-                    onBroadcastDequeued(record, recordIndex, recordWouldBeSkipped);
+                    onBroadcastDequeued(record, recordIndex);
                 } else {
                     // Even if we're leaving broadcast in queue, it may have
                     // been mutated in such a way to change our runnable time
@@ -411,7 +440,8 @@ class BroadcastProcessQueue {
      *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
     @CheckResult
-    public boolean setProcessAndUidCached(@Nullable ProcessRecord app, boolean uidCached) {
+    public boolean setProcessAndUidState(@Nullable ProcessRecord app, boolean uidForeground,
+            boolean processFreezable) {
         this.app = app;
 
         // Since we may have just changed our PID, invalidate cached strings
@@ -420,11 +450,13 @@ class BroadcastProcessQueue {
 
         boolean didSomething = false;
         if (app != null) {
-            didSomething |= setUidCached(uidCached);
+            didSomething |= setUidForeground(uidForeground);
+            didSomething |= setProcessFreezable(processFreezable);
             didSomething |= setProcessInstrumented(app.getActiveInstrumentation() != null);
             didSomething |= setProcessPersistent(app.isPersistent());
         } else {
-            didSomething |= setUidCached(uidCached);
+            didSomething |= setUidForeground(false);
+            didSomething |= setProcessFreezable(false);
             didSomething |= setProcessInstrumented(false);
             didSomething |= setProcessPersistent(false);
         }
@@ -432,13 +464,29 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Update if this process is in the "cached" state, typically signaling that
+     * Update if the UID this process is belongs to is in "foreground" state, which signals
+     * broadcast dispatch should prioritize delivering broadcasts to this process to minimize any
+     * delays in UI updates.
+     */
+    @CheckResult
+    private boolean setUidForeground(boolean uidForeground) {
+        if (mUidForeground != uidForeground) {
+            mUidForeground = uidForeground;
+            invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Update if this process is in the "freezable" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
     @CheckResult
-    private boolean setUidCached(boolean uidCached) {
-        if (mUidCached != uidCached) {
-            mUidCached = uidCached;
+    private boolean setProcessFreezable(boolean freezable) {
+        if (mProcessFreezable != freezable) {
+            mProcessFreezable = freezable;
             invalidateRunnableAt();
             return true;
         } else {
@@ -507,6 +555,14 @@ class BroadcastProcessQueue {
         return mActiveCountSinceIdle;
     }
 
+    /**
+     * Count of {@link #mActive} broadcasts with assumed delivery that have been dispatched
+     * since this queue was last idle.
+     */
+    public int getActiveAssumedDeliveryCountSinceIdle() {
+        return mActiveAssumedDeliveryCountSinceIdle;
+    }
+
     public void setActiveViaColdStart(boolean activeViaColdStart) {
         mActiveViaColdStart = activeViaColdStart;
     }
@@ -539,12 +595,13 @@ class BroadcastProcessQueue {
         final SomeArgs next = removeNextBroadcast();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
-        final boolean wouldBeSkipped = (next.argi2 == 1);
         mActiveCountSinceIdle++;
+        mActiveAssumedDeliveryCountSinceIdle +=
+                (mActive.isAssumedDelivered(mActiveIndex) ? 1 : 0);
         mActiveViaColdStart = false;
         mActiveWasStopped = false;
         next.recycle();
-        onBroadcastDequeued(mActive, mActiveIndex, wouldBeSkipped);
+        onBroadcastDequeued(mActive, mActiveIndex);
     }
 
     /**
@@ -554,6 +611,7 @@ class BroadcastProcessQueue {
         mActive = null;
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
+        mActiveAssumedDeliveryCountSinceIdle = 0;
         mActiveViaColdStart = false;
         invalidateRunnableAt();
     }
@@ -561,8 +619,7 @@ class BroadcastProcessQueue {
     /**
      * Update summary statistics when the given record has been enqueued.
      */
-    private void onBroadcastEnqueued(@NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+    private void onBroadcastEnqueued(@NonNull BroadcastRecord record, int recordIndex) {
         mCountEnqueued++;
         if (record.deferUntilActive) {
             mCountDeferred++;
@@ -594,8 +651,7 @@ class BroadcastProcessQueue {
         if (record.callerInstrumented) {
             mCountInstrumented++;
         }
-        if (!wouldBeSkipped
-                && (record.receivers.get(recordIndex) instanceof ResolveInfo)) {
+        if (record.receivers.get(recordIndex) instanceof ResolveInfo) {
             mCountManifest++;
         }
         invalidateRunnableAt();
@@ -604,8 +660,7 @@ class BroadcastProcessQueue {
     /**
      * Update summary statistics when the given record has been dequeued.
      */
-    private void onBroadcastDequeued(@NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+    private void onBroadcastDequeued(@NonNull BroadcastRecord record, int recordIndex) {
         mCountEnqueued--;
         if (record.deferUntilActive) {
             mCountDeferred--;
@@ -637,8 +692,7 @@ class BroadcastProcessQueue {
         if (record.callerInstrumented) {
             mCountInstrumented--;
         }
-        if (!wouldBeSkipped
-                && (record.receivers.get(recordIndex) instanceof ResolveInfo)) {
+        if (record.receivers.get(recordIndex) instanceof ResolveInfo) {
             mCountManifest--;
         }
         invalidateRunnableAt();
@@ -761,7 +815,7 @@ class BroadcastProcessQueue {
         final BroadcastRecord nextLPRecord = (BroadcastRecord) nextLPArgs.arg1;
         final int nextLPRecordIndex = nextLPArgs.argi1;
         final BroadcastRecord nextHPRecord = (BroadcastRecord) highPriorityQueue.peekFirst().arg1;
-        final boolean shouldConsiderLPQueue = (mPrioritizeEarliest
+        final boolean shouldConsiderLPQueue = (mCountPrioritizeEarliestRequests > 0
                 || consecutiveHighPriorityCount >= maxHighPriorityDispatchLimit);
         final boolean isLPQueueEligible = shouldConsiderLPQueue
                 && nextLPRecord.enqueueTime <= nextHPRecord.enqueueTime
@@ -774,10 +828,9 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * When {@code prioritizeEarliest} is set to {@code true}, then earliest enqueued
-     * broadcasts would be prioritized for dispatching, even if there are urgent broadcasts
-     * waiting. This is typically used in case there are callers waiting for "barrier" to be
-     * reached.
+     * Add a request to prioritize dispatching of broadcasts that have been enqueued the earliest,
+     * even if there are urgent broadcasts waiting to be dispatched. This is typically used in
+     * case there are callers waiting for "barrier" to be reached.
      *
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
@@ -785,11 +838,37 @@ class BroadcastProcessQueue {
      */
     @CheckResult
     @VisibleForTesting
-    boolean setPrioritizeEarliest(boolean prioritizeEarliest) {
-        if (mPrioritizeEarliest != prioritizeEarliest) {
-            mPrioritizeEarliest = prioritizeEarliest;
+    boolean addPrioritizeEarliestRequest() {
+        if (mCountPrioritizeEarliestRequests == 0) {
+            mCountPrioritizeEarliestRequests++;
             invalidateRunnableAt();
             return true;
+        } else {
+            mCountPrioritizeEarliestRequests++;
+            return false;
+        }
+    }
+
+    /**
+     * Remove a request to prioritize dispatching of broadcasts that have been enqueued the
+     * earliest, even if there are urgent broadcasts waiting to be dispatched. This is typically
+     * used in case there are callers waiting for "barrier" to be reached.
+     *
+     * <p> Once there are no more remaining requests, the dispatching order reverts back to normal.
+     *
+     * @return if this operation may have changed internal state, indicating
+     *         that the caller is responsible for invoking
+     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     */
+    @CheckResult
+    boolean removePrioritizeEarliestRequest() {
+        mCountPrioritizeEarliestRequests--;
+        if (mCountPrioritizeEarliestRequests == 0) {
+            invalidateRunnableAt();
+            return true;
+        } else if (mCountPrioritizeEarliestRequests < 0) {
+            mCountPrioritizeEarliestRequests = 0;
+            return false;
         } else {
             return false;
         }
@@ -850,7 +929,7 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Quickly determine if this queue has broadcasts enqueued before the given
+     * Quickly determine if this queue has non-deferred broadcasts enqueued before the given
      * barrier timestamp that are still waiting to be delivered.
      */
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
@@ -870,6 +949,41 @@ class BroadcastProcessQueue {
 
         return (activeBeyond && nextBeyond && nextUrgentBeyond && nextOffloadBeyond)
                 || isDeferredUntilActive();
+    }
+
+    /**
+     * Quickly determine if this queue has non-deferred broadcasts waiting to be dispatched,
+     * that match {@code intent}, as defined by {@link Intent#filterEquals(Intent)}.
+     */
+    public boolean isDispatched(@NonNull Intent intent) {
+        final boolean activeDispatched = (mActive == null)
+                || (!intent.filterEquals(mActive.intent));
+        final boolean dispatched = isDispatchedInQueue(mPending, intent);
+        final boolean urgentDispatched = isDispatchedInQueue(mPendingUrgent, intent);
+        final boolean offloadDispatched = isDispatchedInQueue(mPendingOffload, intent);
+
+        return (activeDispatched && dispatched && urgentDispatched && offloadDispatched)
+                || isDeferredUntilActive();
+    }
+
+    /**
+     * Quickly determine if the {@code queue} has non-deferred broadcasts waiting to be dispatched,
+     * that match {@code intent}, as defined by {@link Intent#filterEquals(Intent)}.
+     */
+    private boolean isDispatchedInQueue(@NonNull ArrayDeque<SomeArgs> queue,
+            @NonNull Intent intent) {
+        final Iterator<SomeArgs> it = queue.iterator();
+        while (it.hasNext()) {
+            final SomeArgs args = it.next();
+            if (args == null) {
+                return true;
+            }
+            final BroadcastRecord record = (BroadcastRecord) args.arg1;
+            if (intent.filterEquals(record.intent)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isRunnable() {
@@ -930,7 +1044,9 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_RESULT_TO = 15;
     static final int REASON_CONTAINS_INSTRUMENTED = 16;
     static final int REASON_CONTAINS_MANIFEST = 17;
-    static final int REASON_FOREGROUND_ACTIVITIES = 18;
+    static final int REASON_FOREGROUND = 18;
+    static final int REASON_CORE_UID = 19;
+    static final int REASON_TOP_PROCESS = 20;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -950,7 +1066,9 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_RESULT_TO,
             REASON_CONTAINS_INSTRUMENTED,
             REASON_CONTAINS_MANIFEST,
-            REASON_FOREGROUND_ACTIVITIES,
+            REASON_FOREGROUND,
+            REASON_CORE_UID,
+            REASON_TOP_PROCESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -974,7 +1092,9 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_RESULT_TO: return "CONTAINS_RESULT_TO";
             case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
             case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
-            case REASON_FOREGROUND_ACTIVITIES: return "FOREGROUND_ACTIVITIES";
+            case REASON_FOREGROUND: return "FOREGROUND";
+            case REASON_CORE_UID: return "CORE_UID";
+            case REASON_TOP_PROCESS: return "TOP_PROCESS";
             default: return Integer.toString(reason);
         }
     }
@@ -1013,11 +1133,20 @@ class BroadcastProcessQueue {
             } else if (mProcessInstrumented) {
                 mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
                 mRunnableAtReason = REASON_INSTRUMENTED;
-            } else if (app != null && app.hasForegroundActivities()) {
-                // TODO: Listen for uid state changes to check when an uid goes in and out of
+            } else if (mUidForeground) {
+                mRunnableAt = runnableAt + constants.DELAY_FOREGROUND_PROC_MILLIS;
+                mRunnableAtReason = REASON_FOREGROUND;
+            } else if (app != null && app.getSetProcState() == ActivityManager.PROCESS_STATE_TOP) {
+                // TODO (b/287676625): Use a callback to check when a process goes in and out of
                 // the TOP state.
-                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
-                mRunnableAtReason = REASON_FOREGROUND_ACTIVITIES;
+                mRunnableAt = runnableAt + constants.DELAY_FOREGROUND_PROC_MILLIS;
+                mRunnableAtReason = REASON_TOP_PROCESS;
+            } else if (mProcessPersistent) {
+                mRunnableAt = runnableAt + constants.DELAY_PERSISTENT_PROC_MILLIS;
+                mRunnableAtReason = REASON_PERSISTENT;
+            } else if (UserHandle.isCore(uid)) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CORE_UID;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -1030,10 +1159,7 @@ class BroadcastProcessQueue {
             } else if (mCountManifest > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_MANIFEST;
-            } else if (mProcessPersistent) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_PERSISTENT;
-            } else if (mUidCached) {
+            } else if (mProcessFreezable) {
                 if (r.deferUntilActive) {
                     // All enqueued broadcasts are deferrable, defer
                     if (mCountDeferred == mCountEnqueued) {
@@ -1103,7 +1229,7 @@ class BroadcastProcessQueue {
         // When all we have pending is deferred broadcasts, and we're cached,
         // then we want everything to be marked deferred
         final boolean wantDeferredStates = (mCountDeferred > 0)
-                && (mCountDeferred == mCountEnqueued) && mUidCached;
+                && (mCountDeferred == mCountEnqueued) && mProcessFreezable;
 
         if (mLastDeferredStates != wantDeferredStates) {
             mLastDeferredStates = wantDeferredStates;
@@ -1175,7 +1301,7 @@ class BroadcastProcessQueue {
         BroadcastProcessQueue test = head;
         BroadcastProcessQueue tail = null;
         while (test != null) {
-            if (test.getRunnableAt() >= itemRunnableAt) {
+            if (test.getRunnableAt() > itemRunnableAt) {
                 item.runnableAtNext = test;
                 item.runnableAtPrev = test.runnableAtPrev;
                 if (item.runnableAtNext != null) {
@@ -1287,8 +1413,12 @@ class BroadcastProcessQueue {
     @NeverCompile
     private void dumpProcessState(@NonNull IndentingPrintWriter pw) {
         final StringBuilder sb = new StringBuilder();
-        if (mUidCached) {
-            sb.append("CACHED");
+        if (mUidForeground) {
+            sb.append("FG");
+        }
+        if (mProcessFreezable) {
+            if (sb.length() > 0) sb.append("|");
+            sb.append("FRZ");
         }
         if (mProcessInstrumented) {
             if (sb.length() > 0) sb.append("|");
@@ -1322,6 +1452,7 @@ class BroadcastProcessQueue {
         pw.print(" m:"); pw.print(mCountManifest);
 
         pw.print(" csi:"); pw.print(mActiveCountSinceIdle);
+        pw.print(" adcsi:"); pw.print(mActiveAssumedDeliveryCountSinceIdle);
         pw.print(" ccu:"); pw.print(mActiveCountConsecutiveUrgent);
         pw.print(" ccn:"); pw.print(mActiveCountConsecutiveNormal);
         pw.println();

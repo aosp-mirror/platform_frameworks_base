@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ஆடியோ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ஆடியோ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"செவித்துணை கருவிகள்"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ஆடியோ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ஆடியோ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"செவித்துணை கருவிகளுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ஆடியோவுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"மீடியா ஆடியோவுடன் இணைக்கப்பட்டது"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"சுயவிவரத்தைத் தேர்வு செய்க"</string>
     <string name="category_personal" msgid="6236798763159385225">"தனிப்பட்டவை"</string>
     <string name="category_work" msgid="4014193632325996115">"பணியிடம்"</string>
+    <string name="category_clone" msgid="1554511758987195974">"குளோன்"</string>
     <string name="development_settings_title" msgid="140296922921597393">"டெவெலப்பர் விருப்பங்கள்"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"டெவெலப்பர் விருப்பங்களை இயக்கு"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ஆப்ஸின் மேம்பாட்டிற்காக விருப்பங்களை அமை"</string>
@@ -336,7 +337,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"பிழைதிருத்தம்"</string>
-    <string name="debug_app" msgid="8903350241392391766">"பிழைத்திருத்தப் பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="debug_app" msgid="8903350241392391766">"பிழைத்திருத்த ஆப்ஸைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"பிழைத்திருத்த ஆப்ஸ் அமைக்கப்படவில்லை"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"பிழைதிருத்தும் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
@@ -347,7 +348,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"வரைபொருள்"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"வன்பொருள் முடுக்கத்துடன் கூடிய காட்சியாக்கம்"</string>
     <string name="media_category" msgid="8122076702526144053">"மீடியா"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"கண்காணி"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"கண்காணித்தல்"</string>
     <string name="strict_mode" msgid="889864762140862437">"நிலையான பயன்முறை இயக்கப்பட்டது"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"முக்கியத் தொடரிழையில் நீண்ட நேரம் செயல்படும்போது திரையைக் காட்சிப்படுத்தும்"</string>
     <string name="pointer_location" msgid="7516929526199520173">"குறிப்பான் இடம்"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"நேரத்தை அதிகரிக்கும்."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"நேரத்தைக் குறைக்கும்."</string>
     <string name="cancel" msgid="5665114069455378395">"ரத்துசெய்"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"அடுத்து"</string>
+    <string name="back" msgid="5554327870352703710">"பின்செல்"</string>
+    <string name="save" msgid="3745809743277153149">"சேமி"</string>
     <string name="okay" msgid="949938843324579502">"சரி"</string>
     <string name="done" msgid="381184316122520313">"முடிந்தது"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"அலாரங்களும் நினைவூட்டல்களும்"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"இந்த மொபைல்"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"இந்த டேப்லெட்"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"டாக் ஸ்பீக்கர்"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"வெளிப்புறச் சாதனம்"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"இணைக்கப்பட்டுள்ள சாதனம்"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"இந்த மொபைல்"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"இந்தச் சாதனத்தில் பிளே செய்ய முடியவில்லை"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"மாற்ற, கணக்கை மேம்படுத்துங்கள்"</string>
@@ -579,19 +580,16 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"புதியவரைச் சேர்க்கவா?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"கூடுதல் பயனர்களை உருவாக்குவதன் மூலம், பிறருடன் இந்தச் சாதனத்தைப் பகிர்ந்துகொள்ளலாம். ஒவ்வொரு பயனருக்கும் அவர்களுக்கென ஒரு இடம் இருக்கும், அதில் அவர்கள் ஆப்ஸ், வால்பேப்பர் மற்றும் பலவற்றைப் பயன்படுத்திப் பிரத்தியேகப்படுத்தலாம். வைஃபை போன்ற மற்ற சாதன அமைப்புகளைப் பயனர்கள் மாற்றலாம், இந்த மாற்றம் அனைவருக்கும் பொருந்தும்.\n\nநீங்கள் புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், பிற எல்லாப் பயனர்களுக்குமான ஆப்ஸைப் புதுப்பிக்கலாம். அணுகல்தன்மை அமைப்புகளையும் சேவைகளையும், புதிய பயனருக்கு இடமாற்ற முடியாமல் போகலாம்."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"புதியவரைச் சேர்க்கும் போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஇருக்கும் ஆப்ஸை எவரும் புதுப்பிக்கலாம்."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"இந்தப் பயனரை நிர்வாகியாக்கவா?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"மற்ற பயனர்களுக்கு இல்லாத சிறப்புரிமைகள் நிர்வாகிகளுக்கு உண்டு. நிர்வாகி அனைத்துப் பயனர்களையும் நிர்வகிக்கலாம், இந்தச் சாதனத்தைப் புதுப்பிக்கலாம் அல்லது ரீசெட் செய்யலாம், அமைப்புகளை மாற்றலாம், நிறுவப்பட்ட அனைத்து ஆப்ஸையும் பார்க்கலாம், பிறருக்கு நிர்வாகி சிறப்புரிமைகளை வழங்கலாம் அல்லது அகற்றலாம்."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"நிர்வாகியாக்கு"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"இப்போது பயனரை அமைக்கவா?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"இந்தச் சாதனத்தை இவர் பயன்படுத்தும் நிலையிலும், அவருக்கான அமைப்புகளை அவரே செய்து கொள்பவராகவும் இருக்க வேண்டும்."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"இப்போது சுயவிவரத்தை அமைக்கவா?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"இப்போது அமை"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"இப்போது இல்லை"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"சேர்"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"புதியவர்"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"புதிய பயனர்"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"புதிய சுயவிவரம்"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"பயனர் தகவல்"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"சுயவிவரத் தகவல்"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"புதிய கெஸ்ட் அமர்வு தொடங்கப்படும், மேலும் தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"கெஸ்ட் முறையிலிருந்து வெளியேறவா?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"ஆம். அவரை நிர்வாகியாக்கு"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"இல்லை. அவரை நிர்வாகியாக்காதே"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"வெளியேறு"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"கெஸ்ட் செயல்பாடுகளைச் சேமிக்கவா?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"தற்போதைய அமர்வின் செயல்பாடுகளைச் சேமிக்கலாம் அல்லது ஆப்ஸையும் தரவையும் நீக்கலாம்"</string>

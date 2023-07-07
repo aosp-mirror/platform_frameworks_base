@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"चुकीचा पिन"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"पिन चुकीचा आहे. पुन्हा प्रयत्न करा."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"किंवा फिंगरप्रिंट वापरून अनलॉक करा"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"चेहरा ओळखता आला नाही"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"पुन्हा प्रयत्न करा किंवा पिन एंटर करा"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"पुन्हा प्रयत्न करा किंवा पासवर्ड एंटर करा"</string>
@@ -98,7 +98,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"सिम अनलॉक करत आहे…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 ते 8 अंकांचा पिन टाईप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK कोड 8 अंकी किंवा त्यापेक्षा अधिकचा असावा."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"तुम्ही तुमचा PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"तुम्ही तुमचा पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"अ‍ॅनालॉग"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"पुढे सुरू ठेवण्यासाठी तुमचे डिव्हाइस अनलॉक करा"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"नंतर अपडेट इंस्टॉल करण्यासाठी पिन एंटर करा"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"नंतर अपडेट इंस्टॉल करण्यासाठी पासवर्ड एंटर करा"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"नंतर अपडेट इंस्टॉल करण्यासाठी पॅटर्न ड्रॉ करा"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"डिव्हाइस अपडेट केले आहे. पुढे सुरू ठेवण्यासाठी पिन एंटर करा."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"डिव्हाइस अपडेट केले आहे. पुढे सुरू ठेवण्यासाठी पासवर्ड एंटर करा."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिव्हाइस अपडेट केले आहे. पुढे सुरू ठेवण्यासाठी पॅटर्न ड्रॉ करा."</string>
 </resources>

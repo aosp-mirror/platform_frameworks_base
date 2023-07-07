@@ -63,7 +63,9 @@ constructor(
                     updateResources()
                 }
             })
-        shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
+        val currentState =
+            shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
+        onPanelExpansionChanged(currentState)
         shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
         dumpManager.registerCriticalDumpable("ShadeTransitionController") { printWriter, _ ->
             dump(printWriter)

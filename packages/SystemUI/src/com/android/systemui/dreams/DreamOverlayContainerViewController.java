@@ -31,8 +31,6 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-
 import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.systemui.R;
@@ -46,7 +44,6 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInt
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.util.ViewController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.Arrays;
 
@@ -302,20 +299,15 @@ public class DreamOverlayContainerViewController extends
 
     /**
      * Handle the dream waking up and run any necessary animations.
-     *
-     * @param onAnimationEnd Callback to trigger once animations are finished.
-     * @param callbackExecutor Executor to execute the callback on.
      */
-    public void wakeUp(@NonNull Runnable onAnimationEnd,
-            @NonNull DelayableExecutor callbackExecutor) {
+    public void wakeUp() {
         // When swiping causes wakeup, do not run any animations as the dream should exit as soon
         // as possible.
         if (mWakingUpFromSwipe) {
-            onAnimationEnd.run();
             return;
         }
 
-        mDreamOverlayAnimationsController.wakeUp(onAnimationEnd, callbackExecutor);
+        mDreamOverlayAnimationsController.wakeUp();
     }
 
     @Override

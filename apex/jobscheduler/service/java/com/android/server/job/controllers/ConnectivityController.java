@@ -1774,6 +1774,12 @@ public final class ConnectivityController extends RestrictingController implemen
         }
         pw.println();
 
+        if (mBackgroundMeteredAllowed.size() > 0) {
+            pw.print("Background metered allowed: ");
+            pw.println(mBackgroundMeteredAllowed);
+            pw.println();
+        }
+
         pw.println("Current default network callbacks:");
         pw.increaseIndent();
         for (int i = 0; i < mCurrentDefaultNetworkCallbacks.size(); i++) {

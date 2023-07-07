@@ -39,10 +39,10 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.regionsampling.RegionSampler;
@@ -86,6 +86,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private int mKeyguardSmallClockTopMargin = 0;
     private int mKeyguardLargeClockTopMargin = 0;
+    private int mKeyguardDateWeatherViewInvisibility = View.INVISIBLE;
     private final ClockRegistry.ClockChangeListener mClockChangedListener;
 
     private ViewGroup mStatusArea;
@@ -169,6 +170,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
+     * Used for status view to pass the screen offset from parent view
+     */
+    public void setLockscreenClockY(int clockY) {
+        if (mView.screenOffsetYPadding != clockY) {
+            mView.screenOffsetYPadding = clockY;
+            mView.updateClockTargetRegions();
+        }
+    }
+
+    /**
      * Attach the controller to the view it relates to.
      */
     @Override
@@ -191,6 +202,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
+        mKeyguardDateWeatherViewInvisibility =
+                mView.getResources().getInteger(R.integer.keyguard_date_weather_view_invisibility);
 
         if (mOnlyClock) {
             View ksv = mView.findViewById(R.id.keyguard_slice_view);
@@ -317,17 +330,33 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Apply dp changes on font/scale change
+     * Apply dp changes on configuration change
      */
-    public void onDensityOrFontScaleChanged() {
-        mView.onDensityOrFontScaleChanged();
+    public void onConfigChanged() {
+        mView.onConfigChanged();
         mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
         mKeyguardLargeClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
+        mKeyguardDateWeatherViewInvisibility =
+                mView.getResources().getInteger(R.integer.keyguard_date_weather_view_invisibility);
         mView.updateClockTargetRegions();
+        setDateWeatherVisibility();
     }
 
+    /**
+     * Enable or disable split shade center specific positioning
+     */
+    public void setSplitShadeCentered(boolean splitShadeCentered) {
+        mView.setSplitShadeCentered(splitShadeCentered);
+    }
+
+    /**
+     * Set if the split shade is enabled
+     */
+    public void setSplitShadeEnabled(boolean splitShadeEnabled) {
+        mSmartspaceController.setSplitShadeEnabled(splitShadeEnabled);
+    }
 
     /**
      * Set which clock should be displayed on the keyguard. The other one will be automatically
@@ -391,16 +420,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 scale, props, animate);
 
         if (mStatusArea != null) {
-            PropertyAnimator.setProperty(mStatusArea, AnimatableProperty.TRANSLATION_X,
+            PropertyAnimator.setProperty(mStatusArea, KeyguardStatusAreaView.TRANSLATE_X_AOD,
                     x, props, animate);
         }
-
-    }
-
-    void updateKeyguardStatusViewOffset() {
-        // updateClockTargetRegions will call onTargetRegionChanged
-        // which will require the correct translationY property of keyguardStatusView after updating
-        mView.updateClockTargetRegions();
     }
 
     /**
@@ -494,8 +516,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private void setDateWeatherVisibility() {
         if (mDateWeatherView != null) {
             mUiExecutor.execute(() -> {
-                mDateWeatherView.setVisibility(
-                        clockHasCustomWeatherDataDisplay() ? View.INVISIBLE : View.VISIBLE);
+                mDateWeatherView.setVisibility(clockHasCustomWeatherDataDisplay()
+                        ? mKeyguardDateWeatherViewInvisibility
+                        : View.VISIBLE);
             });
         }
     }

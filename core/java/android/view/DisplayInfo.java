@@ -360,6 +360,14 @@ public final class DisplayInfo implements Parcelable {
     public SparseArray<SurfaceControl.RefreshRateRange> thermalRefreshRateThrottling =
             new SparseArray<>();
 
+    /**
+     * The ID of the brightness throttling data that should be used. This can change e.g. in
+     * concurrent displays mode in which a stricter brightness throttling policy might need to be
+     * used.
+     */
+    @Nullable
+    public String thermalBrightnessThrottlingDataId;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -437,7 +445,9 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(displayShape, other.displayShape)
                 && Objects.equals(layoutLimitedRefreshRate, other.layoutLimitedRefreshRate)
                 && BrightnessSynchronizer.floatEquals(hdrSdrRatio, other.hdrSdrRatio)
-                && thermalRefreshRateThrottling.contentEquals(other.thermalRefreshRateThrottling);
+                && thermalRefreshRateThrottling.contentEquals(other.thermalRefreshRateThrottling)
+                && Objects.equals(
+                thermalBrightnessThrottlingDataId, other.thermalBrightnessThrottlingDataId);
     }
 
     @Override
@@ -495,6 +505,7 @@ public final class DisplayInfo implements Parcelable {
         layoutLimitedRefreshRate = other.layoutLimitedRefreshRate;
         hdrSdrRatio = other.hdrSdrRatio;
         thermalRefreshRateThrottling = other.thermalRefreshRateThrottling;
+        thermalBrightnessThrottlingDataId = other.thermalBrightnessThrottlingDataId;
     }
 
     public void readFromParcel(Parcel source) {
@@ -559,6 +570,7 @@ public final class DisplayInfo implements Parcelable {
         hdrSdrRatio = source.readFloat();
         thermalRefreshRateThrottling = source.readSparseArray(null,
                 SurfaceControl.RefreshRateRange.class);
+        thermalBrightnessThrottlingDataId = source.readString8();
     }
 
     @Override
@@ -620,6 +632,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeTypedObject(layoutLimitedRefreshRate, flags);
         dest.writeFloat(hdrSdrRatio);
         dest.writeSparseArray(thermalRefreshRateThrottling);
+        dest.writeString8(thermalBrightnessThrottlingDataId);
     }
 
     @Override
@@ -634,7 +647,9 @@ public final class DisplayInfo implements Parcelable {
         if (refreshRateOverride > 0) {
             return refreshRateOverride;
         }
-
+        if (supportedModes.length == 0) {
+            return 0;
+        }
         return getMode().getRefreshRate();
     }
 
@@ -652,7 +667,9 @@ public final class DisplayInfo implements Parcelable {
                 return supportedModes[i];
             }
         }
-        throw new IllegalStateException("Unable to locate mode " + id);
+        throw new IllegalStateException(
+                "Unable to locate mode id=" + id + ",supportedModes=" + Arrays.toString(
+                        supportedModes));
     }
 
     /**
@@ -889,6 +906,8 @@ public final class DisplayInfo implements Parcelable {
         }
         sb.append(", thermalRefreshRateThrottling ");
         sb.append(thermalRefreshRateThrottling);
+        sb.append(", thermalBrightnessThrottlingDataId ");
+        sb.append(thermalBrightnessThrottlingDataId);
         sb.append("}");
         return sb.toString();
     }

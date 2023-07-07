@@ -95,9 +95,12 @@ public class RequestSadActionTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService =
                 new HdmiControlService(context, Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        audioFramework.getAudioManager(),
+                        audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isCecControlEnabled() {
                         return true;

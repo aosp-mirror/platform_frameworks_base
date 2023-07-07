@@ -6,9 +6,8 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.dagger.FaceAuthLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.DEBUG
 import javax.inject.Inject
 
 private const val TAG = "DeviceEntryFaceAuthRepositoryLog"
@@ -260,5 +259,9 @@ constructor(
             { int1 = retryCount },
             { "Attempting face auth again because of HW error: retry attempt $int1" }
         )
+    }
+
+    fun watchdogScheduled() {
+        logBuffer.log(TAG, DEBUG, "FaceManager Biometric watchdog scheduled.")
     }
 }

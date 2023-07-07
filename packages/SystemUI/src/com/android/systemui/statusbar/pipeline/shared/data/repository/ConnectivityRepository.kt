@@ -27,6 +27,7 @@ import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.annotation.ArrayRes
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
@@ -50,10 +51,13 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -66,6 +70,16 @@ interface ConnectivityRepository {
 
     /** Observable for which connection(s) are currently default. */
     val defaultConnections: StateFlow<DefaultConnectionModel>
+
+    /**
+     * Subscription ID of the [VcnTransportInfo] for the default connection.
+     *
+     * If the default network has a [VcnTransportInfo], then that transport info contains a subId of
+     * the VCN. When VCN is connected and default, this subId is what SystemUI will care about. In
+     * cases where telephony's activeDataSubscriptionId differs from this value, it is expected to
+     * eventually catch up and reflect what is represented here in the VcnTransportInfo.
+     */
+    val vcnSubId: StateFlow<Int?>
 }
 
 @SuppressLint("MissingPermission")
@@ -118,24 +132,13 @@ constructor(
                 initialValue = defaultHiddenIcons
             )
 
-    @SuppressLint("MissingPermission")
-    override val defaultConnections: StateFlow<DefaultConnectionModel> =
+    private val defaultNetworkCapabilities: SharedFlow<NetworkCapabilities?> =
         conflatedCallbackFlow {
                 val callback =
                     object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
                         override fun onLost(network: Network) {
                             logger.logOnDefaultLost(network)
-                            // The system no longer has a default network, so everything is
-                            // non-default.
-                            trySend(
-                                DefaultConnectionModel(
-                                    Wifi(isDefault = false),
-                                    Mobile(isDefault = false),
-                                    CarrierMerged(isDefault = false),
-                                    Ethernet(isDefault = false),
-                                    isValidated = false,
-                                )
-                            )
+                            trySend(null)
                         }
 
                         override fun onCapabilitiesChanged(
@@ -143,36 +146,68 @@ constructor(
                             networkCapabilities: NetworkCapabilities,
                         ) {
                             logger.logOnDefaultCapabilitiesChanged(network, networkCapabilities)
-
-                            val wifiInfo =
-                                networkCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
-
-                            val isWifiDefault =
-                                networkCapabilities.hasTransport(TRANSPORT_WIFI) || wifiInfo != null
-                            val isMobileDefault =
-                                networkCapabilities.hasTransport(TRANSPORT_CELLULAR)
-                            val isCarrierMergedDefault = wifiInfo?.isCarrierMerged == true
-                            val isEthernetDefault =
-                                networkCapabilities.hasTransport(TRANSPORT_ETHERNET)
-
-                            val isValidated =
-                                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)
-
-                            trySend(
-                                DefaultConnectionModel(
-                                    Wifi(isWifiDefault),
-                                    Mobile(isMobileDefault),
-                                    CarrierMerged(isCarrierMergedDefault),
-                                    Ethernet(isEthernetDefault),
-                                    isValidated,
-                                )
-                            )
+                            trySend(networkCapabilities)
                         }
                     }
 
                 connectivityManager.registerDefaultNetworkCallback(callback)
 
                 awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+            }
+            .shareIn(scope, SharingStarted.WhileSubscribed())
+
+    override val vcnSubId: StateFlow<Int?> =
+        defaultNetworkCapabilities
+            .map { networkCapabilities ->
+                networkCapabilities?.run {
+                    val subId = (transportInfo as? VcnTransportInfo)?.subId
+                    // Never return an INVALID_SUBSCRIPTION_ID (-1)
+                    if (subId != INVALID_SUBSCRIPTION_ID) {
+                        subId
+                    } else {
+                        null
+                    }
+                }
+            }
+            .distinctUntilChanged()
+            /* A note for logging: we use -2 here since -1 == INVALID_SUBSCRIPTION_ID */
+            .onEach { logger.logVcnSubscriptionId(it ?: -2) }
+            .stateIn(scope, SharingStarted.Eagerly, null)
+
+    @SuppressLint("MissingPermission")
+    override val defaultConnections: StateFlow<DefaultConnectionModel> =
+        defaultNetworkCapabilities
+            .map { networkCapabilities ->
+                if (networkCapabilities == null) {
+                    // The system no longer has a default network, so everything is
+                    // non-default.
+                    DefaultConnectionModel(
+                        Wifi(isDefault = false),
+                        Mobile(isDefault = false),
+                        CarrierMerged(isDefault = false),
+                        Ethernet(isDefault = false),
+                        isValidated = false,
+                    )
+                } else {
+                    val wifiInfo =
+                        networkCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+                    val isWifiDefault =
+                        networkCapabilities.hasTransport(TRANSPORT_WIFI) || wifiInfo != null
+                    val isMobileDefault = networkCapabilities.hasTransport(TRANSPORT_CELLULAR)
+                    val isCarrierMergedDefault = wifiInfo?.isCarrierMerged == true
+                    val isEthernetDefault = networkCapabilities.hasTransport(TRANSPORT_ETHERNET)
+
+                    val isValidated = networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)
+
+                    DefaultConnectionModel(
+                        Wifi(isWifiDefault),
+                        Mobile(isMobileDefault),
+                        CarrierMerged(isCarrierMergedDefault),
+                        Ethernet(isEthernetDefault),
+                        isValidated,
+                    )
+                }
             }
             .distinctUntilChanged()
             .onEach { logger.logDefaultConnectionsChanged(it) }

@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.PIN_SHAPES;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -28,6 +30,7 @@ import android.transition.TransitionManager;
 import android.transition.TransitionValues;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -45,14 +48,31 @@ import com.android.systemui.R;
  */
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
 
-    private int mColor = Utils.getColorAttr(getContext(),
-            android.R.attr.textColorPrimary).getDefaultColor();
+    private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES).getDefaultColor();
     private int mPosition = 0;
     private final PinShapeAdapter mPinShapeAdapter;
     private ValueAnimator mValueAnimator = ValueAnimator.ofFloat(1f, 0f);
+    private Rect mFirstChildVisibleRect = new Rect();
     public PinShapeNonHintingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPinShapeAdapter = new PinShapeAdapter(context);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (getChildCount() > 0) {
+            View firstChild = getChildAt(0);
+            boolean isVisible = firstChild.getLocalVisibleRect(mFirstChildVisibleRect);
+            boolean clipped = mFirstChildVisibleRect.left > 0
+                    || mFirstChildVisibleRect.right < firstChild.getWidth();
+            if (!isVisible || clipped) {
+                setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+                return;
+            }
+        }
+
+        setGravity(Gravity.CENTER);
     }
 
     @Override

@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.os.Binder;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -346,7 +347,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                         .build(),
                 null /* data */,
                 null /* keyphraseExtras */,
-                12345678 /* halEventReceivedMillis */);
+                12345678 /* halEventReceivedMillis */,
+                new Binder() /* token */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -379,7 +381,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                         .build(),
                 new byte[1] /* data */,
                 kpExtra,
-                12345678 /* halEventReceivedMillis */);
+                12345678 /* halEventReceivedMillis */,
+                new Binder() /* token */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -428,7 +431,8 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                         .build(),
                 data,
                 kpExtra,
-                12345678 /* halEventReceivedMillis */);
+                12345678 /* halEventReceivedMillis */,
+                new Binder() /* token */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();

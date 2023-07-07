@@ -219,10 +219,6 @@ interface IBatteryStats {
     @EnforcePermission("BATTERY_STATS")
     long getAwakeTimePlugged();
 
-    @EnforcePermission("BLUETOOTH_CONNECT")
-    void noteBluetoothOn(int uid, int reason, String packageName);
-    @EnforcePermission("BLUETOOTH_CONNECT")
-    void noteBluetoothOff(int uid, int reason, String packageName);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteBleScanStarted(in WorkSource ws, boolean isUnoptimized);
     @EnforcePermission("UPDATE_DEVICE_STATS")

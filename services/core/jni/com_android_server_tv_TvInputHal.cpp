@@ -20,6 +20,7 @@
 
 #include "tvinput/JTvInputHal.h"
 
+gBundleClassInfoType gBundleClassInfo;
 gTvInputHalClassInfoType gTvInputHalClassInfo;
 gTvStreamConfigClassInfoType gTvStreamConfigClassInfo;
 gTvStreamConfigBuilderClassInfoType gTvStreamConfigBuilderClassInfo;
@@ -84,23 +85,26 @@ static jobjectArray nativeGetStreamConfigs(JNIEnv* env, jclass clazz,
     return result;
 }
 
+static int nativeSetTvMessageEnabled(JNIEnv* env, jclass clazz, jlong ptr, jint deviceId,
+                                     jint streamId, jint type, jboolean enabled) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    return tvInputHal->setTvMessageEnabled(deviceId, streamId, type, enabled);
+}
+
 static void nativeClose(JNIEnv* env, jclass clazz, jlong ptr) {
     JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
     delete tvInputHal;
 }
 
 static const JNINativeMethod gTvInputHalMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeOpen", "(Landroid/os/MessageQueue;)J",
-            (void*) nativeOpen },
-    { "nativeAddOrUpdateStream", "(JIILandroid/view/Surface;)I",
-            (void*) nativeAddOrUpdateStream },
-    { "nativeRemoveStream", "(JII)I",
-            (void*) nativeRemoveStream },
-    { "nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
-            (void*) nativeGetStreamConfigs },
-    { "nativeClose", "(J)V",
-            (void*) nativeClose },
+        /* name, signature, funcPtr */
+        {"nativeOpen", "(Landroid/os/MessageQueue;)J", (void*)nativeOpen},
+        {"nativeAddOrUpdateStream", "(JIILandroid/view/Surface;)I", (void*)nativeAddOrUpdateStream},
+        {"nativeRemoveStream", "(JII)I", (void*)nativeRemoveStream},
+        {"nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
+         (void*)nativeGetStreamConfigs},
+        {"nativeSetTvMessageEnabled", "(JIIIZ)I", (void*)nativeSetTvMessageEnabled},
+        {"nativeClose", "(J)V", (void*)nativeClose},
 };
 
 #define FIND_CLASS(var, className) \
@@ -130,9 +134,21 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
     GET_METHOD_ID(
             gTvInputHalClassInfo.firstFrameCaptured, clazz,
             "firstFrameCapturedFromNative", "(II)V");
+    GET_METHOD_ID(gTvInputHalClassInfo.tvMessageReceived, clazz, "tvMessageReceivedFromNative",
+                  "(IILandroid/os/Bundle;)V");
 
     FIND_CLASS(gTvStreamConfigClassInfo.clazz, "android/media/tv/TvStreamConfig");
     gTvStreamConfigClassInfo.clazz = jclass(env->NewGlobalRef(gTvStreamConfigClassInfo.clazz));
+
+    FIND_CLASS(gBundleClassInfo.clazz, "android/os/Bundle");
+    gBundleClassInfo.clazz = jclass(env->NewGlobalRef(gBundleClassInfo.clazz));
+    GET_METHOD_ID(gBundleClassInfo.constructor, gBundleClassInfo.clazz, "<init>", "()V");
+    GET_METHOD_ID(gBundleClassInfo.putByteArray, gBundleClassInfo.clazz, "putByteArray",
+                  "(Ljava/lang/String;[B)V");
+    GET_METHOD_ID(gBundleClassInfo.putString, gBundleClassInfo.clazz, "putString",
+                  "(Ljava/lang/String;Ljava/lang/String;)V");
+    GET_METHOD_ID(gBundleClassInfo.putInt, gBundleClassInfo.clazz, "putInt",
+                  "(Ljava/lang/String;I)V");
 
     FIND_CLASS(gTvStreamConfigBuilderClassInfo.clazz, "android/media/tv/TvStreamConfig$Builder");
     gTvStreamConfigBuilderClassInfo.clazz =

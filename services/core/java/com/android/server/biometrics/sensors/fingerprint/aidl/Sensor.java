@@ -18,9 +18,6 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.SynchronousUserSwitchObserver;
-import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -93,16 +90,8 @@ public class Sensor {
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
-    @Nullable private AidlSession mCurrentSession;
+    @Nullable AidlSession mCurrentSession;
     @NonNull private final Supplier<AidlSession> mLazySession;
-
-    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
-        @Override
-        public void onUserSwitching(int newUserId) {
-            mProvider.scheduleInternalCleanup(
-                    mSensorProperties.sensorId, newUserId, null /* callback */);
-        }
-    };
 
     @VisibleForTesting
     public static class HalSessionCallback extends ISessionCallback.Stub {
@@ -450,7 +439,7 @@ public class Sensor {
             @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricContext biometricContext, AidlSession session) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -512,12 +501,16 @@ public class Sensor {
                 });
         mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
+        mCurrentSession = session;
+    }
 
-        try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, mTag);
-        } catch (RemoteException e) {
-            Slog.e(mTag, "Unable to register user switch observer");
-        }
+    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull BiometricContext biometricContext) {
+        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
+                gestureAvailabilityDispatcher, biometricContext, null);
     }
 
     @NonNull Supplier<AidlSession> getLazySession() {
@@ -616,6 +609,8 @@ public class Sensor {
                     BiometricsProtoEnums.MODALITY_FINGERPRINT,
                     BiometricsProtoEnums.ISSUE_HAL_DEATH,
                     -1 /* sensorId */);
+        } else if (client != null) {
+            client.cancel();
         }
 
         mScheduler.recordCrashState();

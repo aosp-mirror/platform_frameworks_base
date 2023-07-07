@@ -30,7 +30,10 @@ android_test {
 
     certificate: "platform",
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     libs: [
         "android.test.runner",

@@ -343,22 +343,24 @@ public class LongScreenshotActivity extends Activity {
         } else {
             String editorPackage = getString(R.string.config_screenshotEditor);
             Intent intent = new Intent(Intent.ACTION_EDIT);
-            if (!TextUtils.isEmpty(editorPackage)) {
-                intent.setComponent(ComponentName.unflattenFromString(editorPackage));
-            }
             intent.setDataAndType(uri, "image/png");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            Bundle options = null;
 
-            mTransitionView.setImageBitmap(mOutputBitmap);
-            mTransitionView.setVisibility(View.VISIBLE);
-            mTransitionView.setTransitionName(
-                    ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
-            // TODO: listen for transition completing instead of finishing onStop
-            mTransitionStarted = true;
-            startActivity(intent,
-                    ActivityOptions.makeSceneTransitionAnimation(this, mTransitionView,
-                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle());
+            // Skip shared element transition for implicit edit intents
+            if (!TextUtils.isEmpty(editorPackage)) {
+                intent.setComponent(ComponentName.unflattenFromString(editorPackage));
+                mTransitionView.setImageBitmap(mOutputBitmap);
+                mTransitionView.setVisibility(View.VISIBLE);
+                mTransitionView.setTransitionName(
+                        ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
+                options = ActivityOptions.makeSceneTransitionAnimation(this, mTransitionView,
+                        ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle();
+                // TODO: listen for transition completing instead of finishing onStop
+                mTransitionStarted = true;
+            }
+            startActivity(intent, options);
         }
     }
 

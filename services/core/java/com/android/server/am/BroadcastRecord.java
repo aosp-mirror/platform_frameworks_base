@@ -17,6 +17,19 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_ALARM;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_BACKGROUND;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_DEFERRABLE_UNTIL_ACTIVE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_FOREGROUND;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_INITIAL_STICKY;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_INTERACTIVE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_NONE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_ORDERED;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_PRIORITIZED;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_PUSH_MESSAGE;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_RESULT_TO;
+import static android.app.AppProtoEnums.BROADCAST_TYPE_STICKY;
 
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_ALL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
@@ -31,10 +44,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.app.ActivityManager.ProcessState;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.app.BroadcastOptions.DeliveryGroupPolicy;
 import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
@@ -79,6 +94,10 @@ final class BroadcastRecord extends Binder {
     final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
+    final @ProcessState int callerProcState; // Procstate of the caller process at enqueue time.
+
+    final int originalStickyCallingUid;
+            // if this is a sticky broadcast, the Uid of the original sender
     final boolean callerInstantApp; // caller is an Instant App?
     final boolean callerInstrumented; // caller is being instrumented?
     final boolean ordered;  // serialize the send to receivers?
@@ -237,11 +256,21 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    /**
+     * Return true if this receiver should be assumed to have been delivered.
+     */
+    boolean isAssumedDelivered(int index) {
+        return (receivers.get(index) instanceof BroadcastFilter) && !ordered
+                && (resultTo == null);
+    }
+
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
     ActivityInfo curReceiver;   // the manifest receiver that is currently running.
     BroadcastFilter curFilter;  // the registered receiver currently running.
     Bundle curFilteredExtras;   // the bundle that has been filtered by the package visibility rules
+
+    int curAppLastProcessState; // The last process state of the current receiver before receiving
 
     boolean mIsReceiverAppRunning; // Was the receiver's app already running.
 
@@ -322,7 +351,8 @@ final class BroadcastRecord extends Binder {
             pw.print(prefix); pw.print("resultAbort="); pw.print(resultAbort);
                     pw.print(" ordered="); pw.print(ordered);
                     pw.print(" sticky="); pw.print(sticky);
-                    pw.print(" initialSticky="); pw.println(initialSticky);
+                    pw.print(" initialSticky="); pw.print(initialSticky);
+                    pw.print(" originalStickyCallingUid="); pw.println(originalStickyCallingUid);
         }
         if (nextReceiver != 0) {
             pw.print(prefix); pw.print("nextReceiver="); pw.println(nextReceiver);
@@ -391,6 +421,28 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    BroadcastRecord(BroadcastQueue queue,
+            Intent intent, ProcessRecord callerApp, String callerPackage,
+            @Nullable String callerFeatureId, int callingPid, int callingUid,
+            boolean callerInstantApp, String resolvedType,
+            String[] requiredPermissions, String[] excludedPermissions,
+            String[] excludedPackages, int appOp,
+            BroadcastOptions options, List receivers,
+            ProcessRecord resultToApp, IIntentReceiver resultTo, int resultCode,
+            String resultData, Bundle resultExtras, boolean serialized, boolean sticky,
+            boolean initialSticky, int userId,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
+            boolean timeoutExempt,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            int callerAppProcessState) {
+        this(queue, intent, callerApp, callerPackage, callerFeatureId, callingPid,
+                callingUid, callerInstantApp, resolvedType, requiredPermissions,
+                excludedPermissions, excludedPackages, appOp, options, receivers, resultToApp,
+                resultTo, resultCode, resultData, resultExtras, serialized, sticky,
+                initialSticky, userId, -1, backgroundStartPrivileges, timeoutExempt,
+                filterExtrasForReceiver, callerAppProcessState);
+    }
+
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
             @Nullable String _callerFeatureId, int _callingPid, int _callingUid,
@@ -400,10 +452,11 @@ final class BroadcastRecord extends Binder {
             BroadcastOptions _options, List _receivers,
             ProcessRecord _resultToApp, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
-            boolean _initialSticky, int _userId,
+            boolean _initialSticky, int _userId, int originalStickyCallingUid,
             @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
             boolean timeoutExempt,
-            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            int callerAppProcessState) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -415,6 +468,7 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = _callerFeatureId;
         callingPid = _callingPid;
         callingUid = _callingUid;
+        callerProcState = callerAppProcessState;
         callerInstantApp = _callerInstantApp;
         callerInstrumented = isCallerInstrumented(_callerApp, _callingUid);
         resolvedType = _resolvedType;
@@ -452,6 +506,7 @@ final class BroadcastRecord extends Binder {
         interactive = options != null && options.isInteractive();
         shareIdentity = options != null && options.isShareIdentityEnabled();
         this.filterExtrasForReceiver = filterExtrasForReceiver;
+        this.originalStickyCallingUid = originalStickyCallingUid;
     }
 
     /**
@@ -467,6 +522,7 @@ final class BroadcastRecord extends Binder {
         callerFeatureId = from.callerFeatureId;
         callingPid = from.callingPid;
         callingUid = from.callingUid;
+        callerProcState = from.callerProcState;
         callerInstantApp = from.callerInstantApp;
         callerInstrumented = from.callerInstrumented;
         ordered = from.ordered;
@@ -516,6 +572,7 @@ final class BroadcastRecord extends Binder {
         shareIdentity = from.shareIdentity;
         urgent = from.urgent;
         filterExtrasForReceiver = from.filterExtrasForReceiver;
+        originalStickyCallingUid = from.originalStickyCallingUid;
     }
 
     /**
@@ -551,7 +608,8 @@ final class BroadcastRecord extends Binder {
                 requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
                 splitReceivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
                 ordered, sticky, initialSticky, userId,
-                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
+                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
+                callerProcState);
         split.enqueueTime = this.enqueueTime;
         split.enqueueRealTime = this.enqueueRealTime;
         split.enqueueClockTime = this.enqueueClockTime;
@@ -631,7 +689,7 @@ final class BroadcastRecord extends Binder {
                     uid2receiverList.valueAt(i), null /* _resultToApp */, null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
                     mBackgroundStartPrivileges, timeoutExempt,
-                    filterExtrasForReceiver);
+                    filterExtrasForReceiver, callerProcState);
             br.enqueueTime = this.enqueueTime;
             br.enqueueRealTime = this.enqueueRealTime;
             br.enqueueClockTime = this.enqueueClockTime;
@@ -664,6 +722,9 @@ final class BroadcastRecord extends Binder {
                 break;
         }
         switch (newDeliveryState) {
+            case DELIVERY_PENDING:
+                scheduledTime[index] = 0;
+                break;
             case DELIVERY_SCHEDULED:
                 scheduledTime[index] = SystemClock.uptimeMillis();
                 break;
@@ -980,6 +1041,46 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    int calculateTypeForLogging() {
+        int type = BROADCAST_TYPE_NONE;
+        if (isForeground()) {
+            type |= BROADCAST_TYPE_FOREGROUND;
+        } else {
+            type |= BROADCAST_TYPE_BACKGROUND;
+        }
+        if (alarm) {
+            type |= BROADCAST_TYPE_ALARM;
+        }
+        if (interactive) {
+            type |= BROADCAST_TYPE_INTERACTIVE;
+        }
+        if (ordered) {
+            type |= BROADCAST_TYPE_ORDERED;
+        }
+        if (prioritized) {
+            type |= BROADCAST_TYPE_PRIORITIZED;
+        }
+        if (resultTo != null) {
+            type |= BROADCAST_TYPE_RESULT_TO;
+        }
+        if (deferUntilActive) {
+            type |= BROADCAST_TYPE_DEFERRABLE_UNTIL_ACTIVE;
+        }
+        if (pushMessage) {
+            type |= BROADCAST_TYPE_PUSH_MESSAGE;
+        }
+        if (pushMessageOverQuota) {
+            type |= BROADCAST_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+        }
+        if (sticky) {
+            type |= BROADCAST_TYPE_STICKY;
+        }
+        if (initialSticky) {
+            type |= BROADCAST_TYPE_INITIAL_STICKY;
+        }
+        return type;
+    }
+
     public BroadcastRecord maybeStripForHistory() {
         if (!intent.canStripForHistory()) {
             return this;
@@ -1055,6 +1156,30 @@ final class BroadcastRecord extends Binder {
                 }
             }
         }
+    }
+
+    boolean containsReceiver(@NonNull Object receiver) {
+        for (int i = receivers.size() - 1; i >= 0; --i) {
+            if (isReceiverEquals(receiver, receivers.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean containsAllReceivers(@NonNull List<Object> otherReceivers) {
+        for (int i = otherReceivers.size() - 1; i >= 0; --i) {
+            if (!containsReceiver(otherReceivers.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @DeliveryGroupPolicy
+    int getDeliveryGroupPolicy() {
+        return (options != null) ? options.getDeliveryGroupPolicy()
+                : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
     }
 
     boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {

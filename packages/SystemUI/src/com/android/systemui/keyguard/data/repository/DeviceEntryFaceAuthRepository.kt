@@ -32,6 +32,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -42,7 +44,7 @@ import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailedAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
@@ -63,6 +65,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -135,6 +138,7 @@ constructor(
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val featureFlags: FeatureFlags,
     dumpManager: DumpManager,
 ) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
@@ -212,15 +216,21 @@ constructor(
                 .collect(Collectors.toSet())
         dumpManager.registerCriticalDumpable("DeviceEntryFaceAuthRepositoryImpl", this)
 
-        observeFaceAuthGatingChecks()
-        observeFaceDetectGatingChecks()
-        observeFaceAuthResettingConditions()
-        listenForSchedulingWatchdog()
+        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
+            observeFaceAuthGatingChecks()
+            observeFaceDetectGatingChecks()
+            observeFaceAuthResettingConditions()
+            listenForSchedulingWatchdog()
+        }
     }
 
     private fun listenForSchedulingWatchdog() {
         keyguardTransitionInteractor.anyStateToGoneTransition
-            .onEach { faceManager?.scheduleWatchdog() }
+            .filter { it.transitionState == TransitionState.FINISHED }
+            .onEach {
+                faceAuthLogger.watchdogScheduled()
+                faceManager?.scheduleWatchdog()
+            }
             .launchIn(applicationScope)
     }
 
@@ -228,9 +238,7 @@ constructor(
         // Clear auth status when keyguard is going away or when the user is switching or device
         // starts going to sleep.
         merge(
-                keyguardRepository.wakefulness.map {
-                    WakefulnessModel.isSleepingOrStartingToSleep(it)
-                },
+                keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() },
                 keyguardRepository.isKeyguardGoingAway,
                 userRepository.userSwitchingInProgress
             )
@@ -304,9 +312,7 @@ constructor(
                     tableLogBuffer
                 ),
                 logAndObserve(
-                    keyguardRepository.wakefulness
-                        .map { WakefulnessModel.isSleepingOrStartingToSleep(it) }
-                        .isFalse(),
+                    keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() }.isFalse(),
                     "deviceNotSleepingOrNotStartingToSleep",
                     tableLogBuffer
                 ),

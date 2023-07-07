@@ -1566,7 +1566,7 @@ public class ExifInterface {
         FileInputStream in = null;
         try {
             in = new FileInputStream(fileDescriptor);
-            loadAttributes(in, fileDescriptor);
+            loadAttributes(in);
         } finally {
             closeQuietly(in);
             if (isFdDuped) {
@@ -1637,7 +1637,7 @@ public class ExifInterface {
                 mSeekableFileDescriptor = null;
             }
         }
-        loadAttributes(inputStream, null);
+        loadAttributes(inputStream);
     }
 
     /**
@@ -1963,7 +1963,7 @@ public class ExifInterface {
      * This function decides which parser to read the image data according to the given input stream
      * type and the content of the input stream.
      */
-    private void loadAttributes(@NonNull InputStream in, @Nullable FileDescriptor fd) {
+    private void loadAttributes(@NonNull InputStream in) {
         if (in == null) {
             throw new NullPointerException("inputstream shouldn't be null");
         }
@@ -1993,7 +1993,7 @@ public class ExifInterface {
                         break;
                     }
                     case IMAGE_TYPE_HEIF: {
-                        getHeifAttributes(inputStream, fd);
+                        getHeifAttributes(inputStream);
                         break;
                     }
                     case IMAGE_TYPE_ORF: {
@@ -2580,7 +2580,7 @@ public class ExifInterface {
             } else if (isSeekableFD(in.getFD())) {
                 mSeekableFileDescriptor = in.getFD();
             }
-            loadAttributes(in, null);
+            loadAttributes(in);
         } finally {
             closeQuietly(in);
             if (modernFd != null) {
@@ -3068,66 +3068,59 @@ public class ExifInterface {
         }
     }
 
-    private void getHeifAttributes(ByteOrderedDataInputStream in, @Nullable FileDescriptor fd)
-            throws IOException {
+    private void getHeifAttributes(ByteOrderedDataInputStream in) throws IOException {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
-            if (fd != null) {
-                retriever.setDataSource(fd);
-            } else {
-                retriever.setDataSource(new MediaDataSource() {
-                    long mPosition;
+            retriever.setDataSource(new MediaDataSource() {
+                long mPosition;
 
-                    @Override
-                    public void close() throws IOException {}
+                @Override
+                public void close() throws IOException {}
 
-                    @Override
-                    public int readAt(long position, byte[] buffer, int offset, int size)
-                            throws IOException {
-                        if (size == 0) {
-                            return 0;
-                        }
-                        if (position < 0) {
-                            return -1;
-                        }
-                        try {
-                            if (mPosition != position) {
-                                // We don't allow seek to positions after the available bytes,
-                                // the input stream won't be able to seek back then.
-                                // However, if we hit an exception before (mPosition set to -1),
-                                // let it try the seek in hope it might recover.
-                                if (mPosition >= 0 && position >= mPosition + in.available()) {
-                                    return -1;
-                                }
-                                in.seek(position);
-                                mPosition = position;
-                            }
-
-                            // If the read will cause us to go over the available bytes,
-                            // reduce the size so that we stay in the available range.
-                            // Otherwise the input stream may not be able to seek back.
-                            if (size > in.available()) {
-                                size = in.available();
-                            }
-
-                            int bytesRead = in.read(buffer, offset, size);
-                            if (bytesRead >= 0) {
-                                mPosition += bytesRead;
-                                return bytesRead;
-                            }
-                        } catch (IOException e) {
-                            // absorb the exception and fall through to the 'failed read' path below
-                        }
-                        mPosition = -1; // need to seek on next read
+                @Override
+                public int readAt(long position, byte[] buffer, int offset, int size)
+                        throws IOException {
+                    if (size == 0) {
+                        return 0;
+                    }
+                    if (position < 0) {
                         return -1;
                     }
+                    try {
+                        if (mPosition != position) {
+                            // We don't allow seek to positions after the available bytes,
+                            // the input stream won't be able to seek back then.
+                            // However, if we hit an exception before (mPosition set to -1),
+                            // let it try the seek in hope it might recover.
+                            if (mPosition >= 0 && position >= mPosition + in.available()) {
+                                return -1;
+                            }
+                            in.seek(position);
+                            mPosition = position;
+                        }
 
-                    @Override
-                    public long getSize() throws IOException {
-                        return -1;
-                    }
-                });
-            }
+                        // If the read will cause us to go over the available bytes,
+                        // reduce the size so that we stay in the available range.
+                        // Otherwise the input stream may not be able to seek back.
+                        if (size > in.available()) {
+                            size = in.available();
+                        }
+
+                        int bytesRead = in.read(buffer, offset, size);
+                        if (bytesRead >= 0) {
+                            mPosition += bytesRead;
+                            return bytesRead;
+                        }
+                    } catch (IOException e) {}
+                    mPosition = -1; // need to seek on next read
+                    return -1;
+                }
+
+                @Override
+                public long getSize() throws IOException {
+                    return -1;
+                }
+            });
 
             String exifOffsetStr = retriever.extractMetadata(
                     MediaMetadataRetriever.METADATA_KEY_EXIF_OFFSET);

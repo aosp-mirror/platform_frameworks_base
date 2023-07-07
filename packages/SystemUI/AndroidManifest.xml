@@ -82,6 +82,7 @@
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
+    <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -361,7 +362,7 @@
         android:killAfterRestore="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@drawable/icon"
+        android:icon="@drawable/android14_patch_adaptive"
         android:process="com.android.systemui"
         android:supportsRtl="true"
         android:theme="@style/Theme.SystemUI"
@@ -695,7 +696,9 @@
             android:relinquishTaskIdentity="true"
             android:configChanges=
                 "screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-            android:visibleToInstantApps="true"/>
+            android:visibleToInstantApps="true"
+            android:exported="false"
+            android:permission="android.permission.MANAGE_MEDIA_PROJECTION"/>
 
         <!-- started from TvNotificationPanel -->
         <activity
@@ -713,8 +716,11 @@
             android:exported="true" />
 
         <!-- started from Telecomm(CallsManager) -->
+        <!-- Sets an empty label to avoid an announcement from TalkBack,
+             the dialog contents are sufficient and will still be read by TalkBack -->
         <activity
             android:name=".telephony.ui.activity.SwitchToManagedProfileForCallActivity"
+            android:label=" "
             android:excludeFromRecents="true"
             android:exported="true"
             android:finishOnCloseSystemDialogs="true"
@@ -907,8 +913,9 @@
                   android:excludeFromRecents="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                  android:visibleToInstantApps="true">
-        </activity>
+                  android:visibleToInstantApps="true"
+                  android:exported="true"
+                  />
 
         <activity android:name=".controls.management.ControlsEditingActivity"
                   android:label="@string/controls_menu_edit"
@@ -941,8 +948,9 @@
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|orientation"
-                  android:visibleToInstantApps="true">
-        </activity>
+                  android:visibleToInstantApps="true"
+                  android:exported="true"
+                  />
 
         <activity android:name=".wallet.ui.WalletActivity"
                   android:label="@string/wallet_title"
@@ -988,7 +996,6 @@
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
 
             <intent-filter>
@@ -1004,8 +1011,19 @@
             android:exported="false"
             android:enabled="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" />
+
+        <activity
+            android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:resizeableActivity="false"
+            android:theme="@android:style/Theme.NoDisplay" >
+            <intent-filter>
+                <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <!-- endregion -->
 
         <!-- started from ControlsRequestReceiver -->
@@ -1099,5 +1117,16 @@
             android:exported="true"
             android:permission="android.permission.CUSTOMIZE_SYSTEM_UI"
             />
+
+        <!-- TODO(b/278897602): Disable EmojiCompatInitializer until threading issues are fixed.
+             https://developer.android.com/reference/androidx/emoji2/text/EmojiCompatInitializer -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                tools:node="remove" />
+        </provider>
     </application>
 </manifest>

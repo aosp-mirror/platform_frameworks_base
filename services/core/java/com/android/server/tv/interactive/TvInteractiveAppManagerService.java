@@ -2007,6 +2007,10 @@ public class TvInteractiveAppManagerService extends SystemService {
                         getSessionLocked(sessionState).notifyAdBufferConsumed(buffer);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slogf.e(TAG, "error in notifyAdBufferConsumed", e);
+                    } finally {
+                        if (buffer != null) {
+                            buffer.getSharedMemory().close();
+                        }
                     }
                 }
             } finally {
@@ -2340,6 +2344,10 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @Override
         public void binderDied() {
+            synchronized (mLock) {
+                mSession = null;
+                clearSessionAndNotifyClientLocked(this);
+            }
         }
     }
 
@@ -3059,6 +3067,10 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onAdBufferReady(buffer, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onAdBuffer", e);
+                } finally {
+                    if (buffer != null) {
+                        buffer.getSharedMemory().close();
+                    }
                 }
             }
         }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard;
 
+import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
+
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -23,10 +25,12 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -74,7 +78,10 @@ public class KeyguardIndicationRotateTextViewController extends
 
     // Executor that will show the next message after a delay
     private final DelayableExecutor mExecutor;
-    @Nullable private ShowNextIndication mShowNextIndicationRunnable;
+    private final FeatureFlags mFeatureFlags;
+
+    @VisibleForTesting
+    @Nullable ShowNextIndication mShowNextIndicationRunnable;
 
     // List of indication types to show. The next indication to show is always at index 0
     private final List<Integer> mIndicationQueue = new ArrayList<>();
@@ -88,7 +95,8 @@ public class KeyguardIndicationRotateTextViewController extends
             KeyguardIndicationTextView view,
             @Main DelayableExecutor executor,
             StatusBarStateController statusBarStateController,
-            KeyguardLogger logger
+            KeyguardLogger logger,
+            FeatureFlags flags
     ) {
         super(view);
         mMaxAlpha = view.getAlpha();
@@ -97,18 +105,26 @@ public class KeyguardIndicationRotateTextViewController extends
                 ? mView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mStatusBarStateController = statusBarStateController;
         mLogger = logger;
+        mFeatureFlags = flags;
         init();
     }
 
     @Override
     protected void onViewAttached() {
         mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mView.setAlwaysAnnounceEnabled(mFeatureFlags.isEnabled(KEYGUARD_TALKBACK_FIX));
     }
 
     @Override
     protected void onViewDetached() {
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         cancelScheduledIndication();
+    }
+
+    /** Destroy ViewController, removing any listeners. */
+    public void destroy() {
+        super.destroy();
+        onViewDetached();
     }
 
     /**

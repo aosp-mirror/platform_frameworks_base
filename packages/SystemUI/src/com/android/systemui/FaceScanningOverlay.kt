@@ -31,10 +31,10 @@ import android.graphics.RectF
 import android.hardware.biometrics.BiometricSourceType
 import android.view.View
 import androidx.core.graphics.ColorUtils
+import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
-import com.android.app.animation.Interpolators
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -63,7 +63,7 @@ class FaceScanningOverlay(
     private var cameraProtectionColor = Color.BLACK
 
     var faceScanningAnimColor = Utils.getColorAttrDefaultColor(context,
-            R.attr.wallpaperTextColorAccent)
+        com.android.internal.R.attr.materialColorPrimaryFixed)
     private var cameraProtectionAnimator: ValueAnimator? = null
     var hideOverlayRunnable: Runnable? = null
     var faceAuthSucceeded = false
@@ -110,6 +110,10 @@ class FaceScanningOverlay(
         if (showScanningAnimNow == showScanningAnim) {
             return
         }
+        logger.cameraProtectionShownOrHidden(keyguardUpdateMonitor.isFaceDetectionRunning,
+                authController.isShowing,
+                show,
+                showScanningAnim)
         showScanningAnim = showScanningAnimNow
         updateProtectionBoundingPath()
         // Delay the relayout until the end of the animation when hiding,
@@ -352,6 +356,7 @@ class FaceScanningOverlay(
             if (biometricSourceType == BiometricSourceType.FACE) {
                 post {
                     faceAuthSucceeded = true
+                    logger.biometricEvent("biometricAuthenticated")
                     enableShowProtection(true)
                 }
             }
@@ -372,6 +377,7 @@ class FaceScanningOverlay(
             if (biometricSourceType == BiometricSourceType.FACE) {
                 post {
                     faceAuthSucceeded = false
+                    logger.biometricEvent("biometricFailed")
                     enableShowProtection(false)
                 }
             }
@@ -385,6 +391,7 @@ class FaceScanningOverlay(
             if (biometricSourceType == BiometricSourceType.FACE) {
                 post {
                     faceAuthSucceeded = false
+                    logger.biometricEvent("biometricError")
                     enableShowProtection(false)
                 }
             }

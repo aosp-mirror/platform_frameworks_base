@@ -27,6 +27,8 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
@@ -144,7 +146,7 @@ constructor(
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.statusBarState,
                         keyguardInteractor.isKeyguardUnlocked,
-                        ::toTriple
+                        ::Triple
                     ),
                     ::toQuad
                 )

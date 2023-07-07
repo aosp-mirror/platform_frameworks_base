@@ -1834,13 +1834,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mPolicyVisibility & POLICY_VISIBILITY_ALL) == POLICY_VISIBILITY_ALL;
     }
 
-    boolean providesNonDecorInsets() {
+    boolean providesDisplayDecorInsets() {
         if (mInsetsSourceProviders == null) {
             return false;
         }
         for (int i = mInsetsSourceProviders.size() - 1; i >= 0; i--) {
             final InsetsSource source = mInsetsSourceProviders.valueAt(i).getSource();
-            if (source.getType() == WindowInsets.Type.navigationBars()) {
+            if ((source.getType() & DisplayPolicy.DecorInsets.CONFIG_TYPES) != 0) {
                 return true;
             }
         }
@@ -1932,7 +1932,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         if (atoken != null) {
             return ((!isParentWindowHidden() && atoken.isVisible())
-                    || isAnimating(TRANSITION | PARENTS));
+                    || isAnimationRunningSelfOrParent());
         }
         final WallpaperWindowToken wtoken = mToken.asWallpaperToken();
         if (wtoken != null) {
@@ -1980,19 +1980,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Like isOnScreen(), but we don't return true if the window is part
-     * of a transition but has not yet started animating.
+     * of a transition that has not yet been started.
      */
     boolean isReadyForDisplay() {
-        if (!mHasSurface || mDestroying || !isVisibleByPolicy()) {
-            return false;
-        }
-        if (mToken.waitingToShow && getDisplayContent().mAppTransition.isTransitionSet()
-                && !isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
+        if (mToken.waitingToShow && getDisplayContent().mAppTransition.isTransitionSet()) {
             return false;
         }
         final boolean parentAndClientVisible = !isParentWindowHidden()
                 && mViewVisibility == View.VISIBLE && mToken.isVisible();
-        return parentAndClientVisible || isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_ALL);
+        return mHasSurface && isVisibleByPolicy() && !mDestroying
+                && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
 
     boolean isFullyTransparent() {
@@ -2352,7 +2349,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.removeImmediately();
 
         if (isImeOverlayLayeringTarget()) {
-            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(),
+            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(), mAttrs.type,
                     false /* visible */, true /* removed */);
         }
         final DisplayContent dc = getDisplayContent();
@@ -2507,13 +2504,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             // Check if window provides non decor insets before clearing its provided insets.
-            final boolean windowProvidesNonDecorInsets = providesNonDecorInsets();
+            final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
 
             removeImmediately();
             // Removing a visible window may affect the display orientation so just update it if
             // needed. Also recompute configuration if it provides screen decor insets.
             boolean needToSendNewConfiguration = wasVisible && displayContent.updateOrientation();
-            if (windowProvidesNonDecorInsets) {
+            if (windowProvidesDisplayDecorInsets) {
                 needToSendNewConfiguration |=
                         displayContent.getDisplayPolicy().updateDecorInsetsInfo();
             }
@@ -2986,10 +2983,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean canShowWhenLocked() {
-        final boolean showBecauseOfActivity =
-                mActivityRecord != null && mActivityRecord.canShowWhenLocked();
-        final boolean showBecauseOfWindow = (getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
-        return showBecauseOfActivity || showBecauseOfWindow;
+        if (mActivityRecord != null) {
+            // It will also check if its windows contain FLAG_SHOW_WHEN_LOCKED.
+            return mActivityRecord.canShowWhenLocked();
+        }
+        return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
     /**
@@ -3391,10 +3389,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // apps won't always be considered as foreground state.
         // Exclude private presentations as they can only be shown on private virtual displays and
         // shouldn't be the cause of an app be considered foreground.
-        if (mAttrs.type >= FIRST_SYSTEM_WINDOW && mAttrs.type != TYPE_TOAST
-                && mAttrs.type != TYPE_PRIVATE_PRESENTATION) {
+        // Exclude presentations on virtual displays as they are not actually visible.
+        if (mAttrs.type >= FIRST_SYSTEM_WINDOW
+                && mAttrs.type != TYPE_TOAST
+                && mAttrs.type != TYPE_PRIVATE_PRESENTATION
+                && !(mAttrs.type == TYPE_PRESENTATION && isOnVirtualDisplay())
+        ) {
             mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
         }
+    }
+
+    private boolean isOnVirtualDisplay() {
+        return getDisplayContent().mDisplay.getType() == Display.TYPE_VIRTUAL;
     }
 
     private void logExclusionRestrictions(int side) {
@@ -3886,7 +3892,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @return true if activity bounds are letterboxed or letterboxed for diplay cutout.
+     * Returns {@code true} if activity bounds are letterboxed or letterboxed for display cutout.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
      * LetterboxUiController#shouldShowLetterboxUi} for more context.
@@ -5122,12 +5128,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void applyDims() {
         if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
-                   && isVisibleNow() && !mHidden) {
+                   && isVisibleNow() && !mHidden && mTransitionController.canApplyDim(getTask())) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
+            // 5. The window is not in a transition or is in a transition that allows to dim.
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
             final int blurRadius = shouldDrawBlurBehind() ? mAttrs.getBlurBehindRadius() : 0;
@@ -5638,6 +5645,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
+    protected boolean shouldUpdateSyncOnReparent() {
+        // Keep the sync state in case the client is drawing for the latest conifguration or the
+        // configuration is not changed after reparenting. This avoids a redundant redraw request.
+        return mSyncState != SYNC_STATE_NONE && !mLastConfigReportedToClient;
+    }
+
+    @Override
     boolean prepareSync() {
         if (!mDrawHandlers.isEmpty()) {
             Slog.w(TAG, "prepareSync with mDrawHandlers, " + this + ", " + Debug.getCallers(8));
@@ -5678,7 +5692,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    boolean isSyncFinished() {
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
         if (!isVisibleRequested() || isFullyTransparent()) {
             // Don't wait for invisible windows. However, we don't alter the state in case the
             // window becomes visible while the sync group is still active.
@@ -5689,11 +5703,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Complete the sync state immediately for a drawn window that doesn't need to redraw.
             onSyncFinishedDrawing();
         }
-        return super.isSyncFinished();
+        return super.isSyncFinished(group);
     }
 
     @Override
-    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+            boolean cancel) {
+        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
+        if (syncGroup != null && group != syncGroup) return;
         mPrepareSyncSeqId = 0;
         if (cancel) {
             // This is leaving sync so any buffers left in the sync have a chance of
@@ -5701,7 +5718,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // window. To prevent this, drop the buffer.
             dropBufferFrom(mSyncTransaction);
         }
-        super.finishSync(outMergedTransaction, cancel);
+        super.finishSync(outMergedTransaction, group, cancel);
     }
 
     boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction, int syncSeqId) {

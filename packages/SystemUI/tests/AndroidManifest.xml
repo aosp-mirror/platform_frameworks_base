@@ -196,6 +196,17 @@
             android:exported="false"
             android:permission="com.android.systemui.permission.SELF"
             android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" >
+            <intent-filter>
+                <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"

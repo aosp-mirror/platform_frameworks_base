@@ -33,6 +33,7 @@ import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.notification.NotificationManagerInternal;
@@ -114,11 +115,39 @@ class JobNotificationCoordinator {
             @JobService.JobEndNotificationPolicy int jobEndNotificationPolicy) {
         validateNotification(packageName, callingUid, notification, jobEndNotificationPolicy);
         final JobStatus jobStatus = hostingContext.getRunningJobLocked();
+        if (jobStatus == null) {
+            Slog.wtfStack(TAG, "enqueueNotification called with no running job");
+            return;
+        }
         final NotificationDetails oldDetails = mNotificationDetails.get(hostingContext);
-        if (oldDetails != null && oldDetails.notificationId != notificationId) {
-            // App is switching notification IDs. Remove association with the old one.
-            removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED,
-                    jobStatus);
+        if (oldDetails == null) {
+            if (jobStatus.startedAsUserInitiatedJob) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_initial_set_notification_call_required",
+                        jobStatus.getUid());
+            } else {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_initial_set_notification_call_optional",
+                        jobStatus.getUid());
+            }
+        } else {
+            if (jobStatus.startedAsUserInitiatedJob) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_subsequent_set_notification_call_required",
+                        jobStatus.getUid());
+            } else {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_subsequent_set_notification_call_optional",
+                        jobStatus.getUid());
+            }
+            if (oldDetails.notificationId != notificationId) {
+                // App is switching notification IDs. Remove association with the old one.
+                removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED,
+                        jobStatus);
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_set_notification_changed_notification_ids",
+                        jobStatus.getUid());
+            }
         }
         final int userId = UserHandle.getUserId(callingUid);
         if (jobStatus != null && jobStatus.startedAsUserInitiatedJob) {
@@ -171,7 +200,10 @@ class JobNotificationCoordinator {
             // No more jobs using this notification. Apply the final job stop policy.
             // If the user attempted to stop the job/app, then always remove the notification
             // so the user doesn't get confused about the app state.
+            // Similarly, if the user background restricted the app, remove the notification so
+            // the user doesn't think the app is continuing to run in the background.
             if (details.jobEndNotificationPolicy == JOB_END_NOTIFICATION_POLICY_REMOVE
+                    || stopReason == JobParameters.STOP_REASON_BACKGROUND_RESTRICTION
                     || stopReason == JobParameters.STOP_REASON_USER) {
                 mNotificationManagerInternal.cancelNotification(
                         packageName, packageName, details.appUid, details.appPid, /* tag */ null,

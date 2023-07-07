@@ -57,7 +57,7 @@ public class LocaleStoreTest {
         Set<String> expectedLanguageTag = Set.of("en-US", "zh-TW", "ja-JP");
         assertEquals(localeSet.size(), expectedLanguageTag.size());
         for (LocaleInfo info : localeSet) {
-            assertEquals(info.mSuggestionFlags, LocaleInfo.SUGGESTION_TYPE_OTHER_APP_LANGUAGE);
+            assertEquals(info.mSuggestionFlags, LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE);
             assertTrue(expectedLanguageTag.contains(info.getId()));
         }
     }

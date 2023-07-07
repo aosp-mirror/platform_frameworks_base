@@ -997,10 +997,61 @@ public final class Bitmap implements Parcelable {
         canvas.concat(m);
         canvas.drawBitmap(source, srcR, dstR, paint);
         canvas.setBitmap(null);
+
+        // If the source has a gainmap, apply the same set of transformations to the gainmap
+        // and set it on the output
+        if (source.hasGainmap()) {
+            Bitmap newMapContents = transformGainmap(source, m, neww, newh, paint, srcR, dstR,
+                    deviceR);
+            if (newMapContents != null) {
+                bitmap.setGainmap(new Gainmap(source.getGainmap(), newMapContents));
+            }
+        }
+
         if (isHardware) {
             return bitmap.copy(Config.HARDWARE, false);
         }
         return bitmap;
+    }
+
+    private static Bitmap transformGainmap(Bitmap source, Matrix m, int neww, int newh, Paint paint,
+            Rect srcR, RectF dstR, RectF deviceR) {
+        Canvas canvas;
+        Bitmap sourceGainmap = source.getGainmap().getGainmapContents();
+        // Gainmaps can be scaled relative to the base image (eg, 1/4th res)
+        // Preserve that relative scaling between the base & gainmap in the output
+        float scaleX = (sourceGainmap.getWidth() / (float) source.getWidth());
+        float scaleY = (sourceGainmap.getHeight() / (float) source.getHeight());
+        int mapw = Math.round(neww * scaleX);
+        int maph = Math.round(newh * scaleY);
+
+        if (mapw == 0 || maph == 0) {
+            // The gainmap has been scaled away entirely, drop it
+            return null;
+        }
+
+        // Scale the computed `srcR` used for rendering the source bitmap to the destination
+        // to be in gainmap dimensions
+        Rect gSrcR = new Rect((int) (srcR.left * scaleX),
+                (int) (srcR.top * scaleY), (int) (srcR.right * scaleX),
+                (int) (srcR.bottom * scaleY));
+
+        // Note: createBitmap isn't used as that requires a non-null colorspace, however
+        // gainmaps don't have a colorspace. So use `nativeCreate` directly to bypass
+        // that colorspace enforcement requirement (#getColorSpace() allows a null return)
+        Bitmap newMapContents = nativeCreate(null, 0, mapw, mapw, maph,
+                sourceGainmap.getConfig().nativeInt, true, 0);
+        newMapContents.eraseColor(0);
+        canvas = new Canvas(newMapContents);
+        // Scale the translate & matrix to be in gainmap-relative dimensions
+        canvas.scale(scaleX, scaleY);
+        canvas.translate(-deviceR.left, -deviceR.top);
+        canvas.concat(m);
+        canvas.drawBitmap(sourceGainmap, gSrcR, dstR, paint);
+        canvas.setBitmap(null);
+        // Create a new gainmap using a copy of the metadata information from the source but
+        // with the transformed bitmap created above
+        return newMapContents;
     }
 
     /**

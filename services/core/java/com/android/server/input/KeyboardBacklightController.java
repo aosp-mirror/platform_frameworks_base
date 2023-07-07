@@ -199,8 +199,11 @@ final class KeyboardBacklightController implements
         }
         if (brightness.isPresent()) {
             int brightnessValue = Math.max(0, Math.min(MAX_BRIGHTNESS, brightness.getAsInt()));
-            int brightnessLevel = Arrays.binarySearch(BRIGHTNESS_VALUE_FOR_LEVEL, brightnessValue);
-            updateBacklightState(inputDevice.getId(), keyboardBacklight, brightnessLevel,
+            int index = Arrays.binarySearch(BRIGHTNESS_VALUE_FOR_LEVEL, brightnessValue);
+            if (index < 0) {
+                index = Math.min(NUM_BRIGHTNESS_CHANGE_STEPS, -(index + 1));
+            }
+            updateBacklightState(inputDevice.getId(), keyboardBacklight, index,
                     false /* isTriggeredByKeyPress */);
             if (DEBUG) {
                 Slog.d(TAG, "Restoring brightness level " + brightness.getAsInt());

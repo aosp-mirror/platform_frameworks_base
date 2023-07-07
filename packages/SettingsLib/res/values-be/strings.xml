@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Аўдыя ў HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Аўдыя ў HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слыхавыя апараты"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Le audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Падключана да слыхавых апаратаў"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Падключана да LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Падключана да аўдыё медыа"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Выбраць профіль"</string>
     <string name="category_personal" msgid="6236798763159385225">"Асабісты"</string>
     <string name="category_work" msgid="4014193632325996115">"Працоўны"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Параметры распрацоўшчыка"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Уключыць параметры распрацоўшчыка"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Налада параметраў для распрацоўкі прыкладанняў"</string>
@@ -303,7 +304,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Калі ўключаны гэты рэжым, MAC-адрас гэтай прылады можа змяняцца падчас кожнага падключэння да сеткі з актыўнай рандамізацыяй MAC-адрасоў."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з падлікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Выберыце памеры сродку вядзення журнала для буфераў журнала"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Больш часу."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Менш часу."</string>
     <string name="cancel" msgid="5665114069455378395">"Скасаваць"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Далей"</string>
+    <string name="back" msgid="5554327870352703710">"Назад"</string>
+    <string name="save" msgid="3745809743277153149">"Захаваць"</string>
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="done" msgid="381184316122520313">"Гатова"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будзільнікі і напаміны"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Толькі што"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Гэты тэлефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Гэты планшэт"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Дынамік док-станцыі"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Знешняя прылада"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Падключаная прылада"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Гэты тэлефон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не ўдаецца прайграць на гэтай прыладзе"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Для пераключэння перайдзіце на іншую версію ўліковага запісу"</string>
@@ -577,14 +578,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Карыстальнік"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Абмежаваны профiль"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Дадаць новага карыстальніка?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Вы можаце адкрыць доступ да гэтай прылады іншым людзям шляхам стварэння дадатковых карыстальнікаў. Кожны карыстальнік мае свой уласны раздзел, на якім ён можа наладзіць свае праграмы, шпалеры і іншае. Карыстальнікі таксама могуць наладжваць параметры прылады, напрыклад Wi-Fi, якія ўплываюць на ўсіх.\n\nКалі вы дадаяце новага карыстальніка, ён павінен наладзіць свой раздзел.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў. Спецыяльныя магчымасці наладжваюцца асабіста кожным карыстальнікам."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Пасля стварэння профіля яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Вы можаце адкрыць доступ да гэтай прылады іншым карыстальнікам шляхам стварэння дадатковых профіляў. Кожны карыстальнік будзе мець свой уласны профіль, на якім ён зможа наладзіць свае праграмы, шпалеры і іншае. Карыстальнікі таксама змогуць наладжваць параметры прылады, напрыклад Wi-Fi, якія ўплываюць на ўсіх.\n\nКалі вы дадаяце новага карыстальніка, ён павінен наладзіць свой профіль.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў. Спецыяльныя магчымасці наладжваюцца асабіста кожным карыстальнікам."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Пасля стварэння профілю яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Зрабіць гэтага карыстальніка адміністратарам?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Адміністратары маюць спецыяльныя правы, якіх няма ў звычайных карыстальнікаў. Адмінстратар можа кіраваць усімі карыстальнікамі, абнаўляць або скідваць ПЗ прылады, змяняць налады, праглядаць усталяваныя праграмы, даваць іншым карыстальнікам або адклікаць правы адміністратара."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Зрабіць адміністратарам"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Наладзіць профіль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пераканайцеся, што чалавек мае магчымасць узяць прыладу і наладзіць свой раздзел"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Наладзiць профiль?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Будзе запушчаны новы гасцявы сеанс. Усе праграмы і даныя бягучага сеанса будуць выдалены"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Выйсці з гасцявога рэжыму?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Будуць выдалены праграмы і даныя бягучага гасцявога сеанса"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Так, зрабіць адміністратарам"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Не рабіць адміністратарам"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Выйсці"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Захаваць дзеянні госця?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можна захаваць даныя пра дзеянні ў бягучым сеансе ці выдаліць праграмы і даныя"</string>

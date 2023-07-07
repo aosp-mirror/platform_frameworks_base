@@ -771,6 +771,7 @@ public class ActivityManager {
 
     /**
      * The set of flags for process capability.
+     * Keep it in sync with ProcessCapability in atoms.proto.
      * @hide
      */
     @IntDef(flag = true, prefix = { "PROCESS_CAPABILITY_" }, value = {
@@ -4429,6 +4430,21 @@ public class ActivityManager {
     @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void forceStopPackage(String packageName) {
         forceStopPackageAsUser(packageName, mContext.getUserId());
+    }
+
+    /**
+     * Similar to {@link #forceStopPackageAsUser(String, int)} but will also stop the package even
+     * when the user is in the stopping state.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
+    public void forceStopPackageAsUserEvenWhenStopping(String packageName, @UserIdInt int userId) {
+        try {
+            getService().forceStopPackageEvenWhenStopping(packageName, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

@@ -232,8 +232,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final BLASTSyncEngine.SyncGroup syncGroup = prepareSyncWithOrganizer(callback);
                 final int syncId = syncGroup.mSyncId;
                 if (mTransitionController.isShellTransitionsEnabled()) {
-                    mTransitionController.startLegacySyncOrQueue(syncGroup, () -> {
-                        applyTransaction(t, syncId, null /*transition*/, caller);
+                    mTransitionController.startLegacySyncOrQueue(syncGroup, (deferred) -> {
+                        applyTransaction(t, syncId, null /* transition */, caller, deferred);
                         setSyncReady(syncId);
                     });
                 } else {
@@ -299,11 +299,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final boolean needsSetReady = t != null;
                     final Transition nextTransition = new Transition(type, 0 /* flags */,
                             mTransitionController, mService.mWindowManager.mSyncEngine);
+                    nextTransition.calcParallelCollectType(wct);
                     mTransitionController.startCollectOrQueue(nextTransition,
                             (deferred) -> {
                                 nextTransition.start();
                                 nextTransition.mLogger.mStartWCT = wct;
-                                applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                                applyTransaction(wct, -1 /* syncId */, nextTransition, caller,
+                                        deferred);
                                 if (needsSetReady) {
                                     nextTransition.setAllReady();
                                 }
@@ -455,7 +457,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     transition.abort();
                     return;
                 }
-                if (applyTransaction(wct, -1 /* syncId */, transition, caller)
+                if (applyTransaction(wct, -1 /* syncId */, transition, caller, deferred)
                         == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
                     transition.abort();
                     return;
@@ -473,6 +475,23 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller) {
         return applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
+    }
+
+    private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+            @Nullable Transition transition, @NonNull CallerInfo caller, boolean deferred) {
+        if (deferred) {
+            try {
+                return applyTransaction(t, syncId, transition, caller);
+            } catch (RuntimeException e) {
+                // If the transaction is deferred, the caller could be from TransitionController
+                // #tryStartCollectFromQueue that executes on system's worker thread rather than
+                // binder thread. And the operation in the WCT may be outdated that violates the
+                // current state. So catch the exception to avoid crashing the system.
+                Slog.e(TAG, "Failed to execute deferred applyTransaction", e);
+            }
+            return TRANSACT_EFFECTS_NONE;
+        }
+        return applyTransaction(t, syncId, transition, caller);
     }
 
     /**
@@ -837,24 +856,39 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         switch (type) {
             case HIERARCHY_OP_TYPE_REMOVE_TASK: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                final Task task = wc != null ? wc.asTask() : null;
+                if (wc == null || wc.asTask() == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to remove invalid task: " + wc);
+                    break;
+                }
+                final Task task = wc.asTask();
                 task.remove(true, "Applying remove task Hierarchy Op");
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                final Task task = wc != null ? wc.asTask() : null;
-                if (task != null) {
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to set launch root to a detached container: " + wc);
+                    break;
+                }
+                final Task task = wc.asTask();
+                if (task == null) {
+                    throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
+                } else if (task.getTaskDisplayArea() == null) {
+                    throw new IllegalArgumentException("Cannot set a task without display area as "
+                            + "launch root: " + wc);
+                } else {
                     task.getDisplayArea().setLaunchRootTask(task,
                             hop.getWindowingModes(), hop.getActivityTypes());
-                } else {
-                    throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
                 }
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: {
                 final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                final Task task = wc != null ? wc.asTask() : null;
+                if (wc == null || !wc.isAttached()) {
+                    Slog.e(TAG, "Attempt to set launch adjacent to a detached container: " + wc);
+                    break;
+                }
+                final Task task = wc.asTask();
                 final boolean clearRoot = hop.getToTop();
                 if (task == null) {
                     throw new IllegalArgumentException("Cannot set non-task as launch root: " + wc);
@@ -956,6 +990,44 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         errorCallbackToken, organizer);
                 break;
             }
+            case HIERARCHY_OP_TYPE_PENDING_INTENT: {
+                final Bundle launchOpts = hop.getLaunchOptions();
+                ActivityOptions activityOptions = launchOpts != null
+                        ? new ActivityOptions(launchOpts) : null;
+                if (activityOptions != null && activityOptions.getTransientLaunch()
+                        && mService.isCallerRecents(hop.getPendingIntent().getCreatorUid())) {
+                    if (mService.getActivityStartController().startExistingRecentsIfPossible(
+                            hop.getActivityIntent(), activityOptions)) {
+                        // Start recents successfully.
+                        break;
+                    }
+                }
+
+                String resolvedType = hop.getActivityIntent() != null
+                        ? hop.getActivityIntent().resolveTypeIfNeeded(
+                        mService.mContext.getContentResolver())
+                        : null;
+
+                if (hop.getPendingIntent().isActivity()) {
+                    // Set the context display id as preferred for this activity launches, so that
+                    // it can land on caller's display. Or just brought the task to front at the
+                    // display where it was on since it has higher preference.
+                    if (activityOptions == null) {
+                        activityOptions = ActivityOptions.makeBasic();
+                    }
+                    activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
+                }
+                final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
+                int res = waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
+                        hop.getPendingIntent().getTarget(),
+                        hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
+                        hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
+                        null /* requiredPermission */, options));
+                if (ActivityManager.isStartResultSuccessful(res)) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+                break;
+            }
             default: {
                 // The other operations may change task order so they are skipped while in lock
                 // task mode. The above operations are still allowed because they don't move
@@ -970,33 +1042,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         switch (type) {
-            case HIERARCHY_OP_TYPE_PENDING_INTENT: {
-                String resolvedType = hop.getActivityIntent() != null
-                        ? hop.getActivityIntent().resolveTypeIfNeeded(
-                        mService.mContext.getContentResolver())
-                        : null;
-
-                ActivityOptions activityOptions = null;
-                if (hop.getPendingIntent().isActivity()) {
-                    // Set the context display id as preferred for this activity launches, so that
-                    // it can land on caller's display. Or just brought the task to front at the
-                    // display where it was on since it has higher preference.
-                    activityOptions = hop.getLaunchOptions() != null
-                            ? new ActivityOptions(hop.getLaunchOptions())
-                            : ActivityOptions.makeBasic();
-                    activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
-                }
-                final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
-                int res = waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
-                        hop.getPendingIntent().getTarget(),
-                        hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
-                        hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
-                        null /* requiredPermission */, options));
-                if (ActivityManager.isStartResultSuccessful(res)) {
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
-                }
-                break;
-            }
             case HIERARCHY_OP_TYPE_START_SHORTCUT: {
                 final Bundle launchOpts = hop.getLaunchOptions();
                 final String callingPackage = launchOpts.getString(

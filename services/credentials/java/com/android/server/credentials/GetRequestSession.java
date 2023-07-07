@@ -16,9 +16,11 @@
 
 package com.android.server.credentials;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
@@ -26,9 +28,11 @@ import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
+import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
+import android.service.credentials.PermissionUtils;
 import android.util.Slog;
 
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
@@ -52,9 +56,20 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
-                RequestInfo.TYPE_GET, callingAppInfo, enabledProviders, cancellationSignal,
-                startedTimestamp);
+                getRequestInfoFromRequest(request), callingAppInfo, enabledProviders,
+                cancellationSignal, startedTimestamp);
         mRequestSessionMetric.collectGetFlowInitialMetricInfo(request);
+    }
+
+    private static String getRequestInfoFromRequest(GetCredentialRequest request) {
+        for (CredentialOption option : request.getCredentialOptions()) {
+            if (option.getCredentialRetrievalData().getStringArrayList(
+                    CredentialOption
+                            .SUPPORTED_ELEMENT_KEYS) != null) {
+                return RequestInfo.TYPE_GET_VIA_REGISTRY;
+            }
+        }
+        return RequestInfo.TYPE_GET;
     }
 
     /**
@@ -72,7 +87,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerGetSession != null) {
-            Slog.d(TAG, "In startProviderSession - provider session created and "
+            Slog.i(TAG, "Provider session created and "
                     + "being added for: " + providerInfo.getComponentName());
             mProviders.put(providerGetSession.getComponentName().flattenToString(),
                     providerGetSession);
@@ -84,19 +99,24 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
         mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
-        cancelExistingPendingIntent();
+        Binder.withCleanCallingIdentity(()-> {
         try {
+                cancelExistingPendingIntent();
             mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
-                            mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
+                            mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
+                            PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
+                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
                     providerDataList);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
             mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
-            respondToClientWithErrorAndFinish(
-                    GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
-        }
+            String exception = GetCredentialException.TYPE_UNKNOWN;
+            mRequestSessionMetric.collectFrameworkException(exception);
+                respondToClientWithErrorAndFinish(exception, "Unable to instantiate selector");
+            }
+        });
     }
 
     @Override
@@ -114,11 +134,10 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
-        Slog.d(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
+        Slog.i(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
-        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
-                mProviders.get(componentName.flattenToString())
-                        .mProviderSessionMetric.getCandidatePhasePerProviderMetric());
+        mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
+                isPrimaryProviderViaProviderInfo(componentName));
         if (response != null) {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
@@ -126,7 +145,9 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         } else {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
-            respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+            String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+            mRequestSessionMetric.collectFrameworkException(exception);
+            respondToClientWithErrorAndFinish(exception,
                     "Invalid response from provider");
         }
     }
@@ -140,25 +161,28 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        if (isUserCancellation) {
-            respondToClientWithErrorAndFinish(GetCredentialException.TYPE_USER_CANCELED,
-                    "User cancelled the selector");
-        } else {
-            respondToClientWithErrorAndFinish(GetCredentialException.TYPE_INTERRUPTED,
-                    "The UI was interrupted - please try again.");
+        String exception = GetCredentialException.TYPE_USER_CANCELED;
+        String message = "User cancelled the selector";
+        if (!isUserCancellation) {
+            exception = GetCredentialException.TYPE_INTERRUPTED;
+            message = "The UI was interrupted - please try again.";
         }
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception, message);
     }
 
     @Override
     public void onUiSelectorInvocationFailure() {
-        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+        String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception,
                 "No credentials available.");
     }
 
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Slog.d(TAG, "in onStatusChanged for: " + componentName + ", with status: "
+        Slog.i(TAG, "Status changed for: " + componentName + ", with status: "
                 + status + ", and source: " + source);
 
         // Auth entry was selected, and it did not have any underlying credentials
@@ -172,10 +196,12 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             // or we need to respond with error. The only other case is the entry being
             // selected after the UI has been invoked which has a separate code path.
             if (isUiInvocationNeeded()) {
-                Slog.d(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                Slog.i(TAG, "Provider status changed - ui invocation is needed");
                 getProviderDataAndInitiateUi();
             } else {
-                respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+                String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+                mRequestSessionMetric.collectFrameworkException(exception);
+                respondToClientWithErrorAndFinish(exception,
                         "No credentials available");
             }
         }
@@ -196,7 +222,9 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
         // Respond to client if all auth entries are empty and nothing else to show on the UI
         if (providerDataContainsEmptyAuthEntriesOnly()) {
-            respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+            String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+            mRequestSessionMetric.collectFrameworkException(exception);
+            respondToClientWithErrorAndFinish(exception,
                     "No credentials available");
         }
     }

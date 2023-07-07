@@ -144,6 +144,13 @@ public abstract class ActivityTaskManagerInternal {
         void acquire(int displayId);
 
         /**
+         * Acquires a sleep token.
+         * @param displayId The display to apply to.
+         * @param isSwappingDisplay Whether the display is swapping to another physical display.
+         */
+        void acquire(int displayId, boolean isSwappingDisplay);
+
+        /**
          * Releases the sleep token.
          * @param displayId The display to apply to.
          */
@@ -171,6 +178,9 @@ public abstract class ActivityTaskManagerInternal {
     /**
      * Returns the top activity from each of the currently visible root tasks, and the related task
      * id. The first entry will be the focused activity.
+     *
+     * <p>NOTE: If the top activity is in the split screen, the other activities in the same split
+     * screen will also be returned.
      */
     public abstract List<ActivityAssistInfo> getTopVisibleActivities();
 
@@ -253,12 +263,14 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
 
     /**
-     * Set focus on an activity.
-     * @param token The activity token.
+     * Registers a {@link ScreenObserver}.
      */
-    public abstract void setFocusedActivity(IBinder token);
-
     public abstract void registerScreenObserver(ScreenObserver observer);
+
+    /**
+     * Unregisters the given {@link ScreenObserver}.
+     */
+    public abstract void unregisterScreenObserver(ScreenObserver observer);
 
     /**
      * Returns is the caller has the same uid as the Recents component
@@ -465,7 +477,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
 
     /** @see IActivityManager#notifyLockedProfile(int) */
-    public abstract void notifyLockedProfile(@UserIdInt int userId, int currentUserId);
+    public abstract void notifyLockedProfile(@UserIdInt int userId);
 
     /** @see IActivityManager#startConfirmDeviceCredentialIntent(Intent, Bundle) */
     public abstract void startConfirmDeviceCredentialIntent(Intent intent, Bundle options);
@@ -573,6 +585,11 @@ public abstract class ActivityTaskManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uids of the profile owners.
+     */
+    public abstract void setProfileOwnerUids(Set<Integer> uids);
 
     /**
      * Set all associated companion app that belongs to a userId.
@@ -748,4 +765,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Unregister a task stack listener so that it stops receiving callbacks. */;
     public abstract void unregisterTaskStackListener(ITaskStackListener listener);
+
+    /**
+     * Gets the id of the display the activity was launched on.
+     * @param token The activity token.
+     */
+    public abstract int getDisplayId(IBinder token);
 }

@@ -29,31 +29,28 @@ class KeyguardStatusViewTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        keyguardStatusView = LayoutInflater.from(context)
-                .inflate(R.layout.keyguard_status_view, /* root= */ null) as KeyguardStatusView
+        keyguardStatusView =
+            LayoutInflater.from(context).inflate(R.layout.keyguard_status_view, /* root= */ null)
+                as KeyguardStatusView
     }
 
     @Test
     fun setChildrenTranslationYExcludingMediaView_mediaViewIsNotTranslated() {
         val translationY = 1234f
 
-        keyguardStatusView.setChildrenTranslationY(translationY, /* excludeMedia= */true)
+        keyguardStatusView.setChildrenTranslationY(translationY, /* excludeMedia= */ true)
 
         assertThat(mediaView.translationY).isEqualTo(0)
 
-        childrenExcludingMedia.forEach {
-            assertThat(it.translationY).isEqualTo(translationY)
-        }
+        childrenExcludingMedia.forEach { assertThat(it.translationY).isEqualTo(translationY) }
     }
 
     @Test
     fun setChildrenTranslationYIncludeMediaView() {
         val translationY = 1234f
 
-        keyguardStatusView.setChildrenTranslationY(translationY, /* excludeMedia= */false)
+        keyguardStatusView.setChildrenTranslationY(translationY, /* excludeMedia= */ false)
 
-        statusViewContainer.children.forEach {
-            assertThat(it.translationY).isEqualTo(translationY)
-        }
+        statusViewContainer.children.forEach { assertThat(it.translationY).isEqualTo(translationY) }
     }
 }

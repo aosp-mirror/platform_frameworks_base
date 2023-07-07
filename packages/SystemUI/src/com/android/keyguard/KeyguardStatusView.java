@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static java.util.Collections.emptySet;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
@@ -47,6 +48,7 @@ public class KeyguardStatusView extends GridLayout {
     private KeyguardSliceView mKeyguardSlice;
     private View mMediaHostContainer;
 
+    private int mDrawAlpha = 255;
     private float mDarkAmount = 0;
 
     public KeyguardStatusView(Context context) {
@@ -134,5 +136,21 @@ public class KeyguardStatusView extends GridLayout {
         Trace.beginSection("KeyguardStatusView#onMeasure");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Trace.endSection();
+    }
+
+    @Override
+    protected boolean onSetAlpha(int alpha) {
+        mDrawAlpha = alpha;
+        return true;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        KeyguardClockFrame.saveCanvasAlpha(
+                this, canvas, mDrawAlpha,
+                c -> {
+                    super.dispatchDraw(c);
+                    return kotlin.Unit.INSTANCE;
+                });
     }
 }

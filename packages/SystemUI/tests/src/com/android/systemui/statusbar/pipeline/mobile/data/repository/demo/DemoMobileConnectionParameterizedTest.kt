@@ -61,10 +61,17 @@ import org.junit.runners.Parameterized.Parameters
 internal class DemoMobileConnectionParameterizedTest(private val testCase: TestCase) :
     SysuiTestCase() {
 
-    private val logFactory = TableLogBufferFactory(mock(), FakeSystemClock())
-
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+
+    private val logFactory =
+        TableLogBufferFactory(
+            mock(),
+            FakeSystemClock(),
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)

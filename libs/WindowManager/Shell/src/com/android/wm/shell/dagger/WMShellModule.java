@@ -60,7 +60,7 @@ import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
-import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
+import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -171,7 +171,7 @@ public abstract class WMShellModule {
             BubblePositioner positioner,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -200,6 +200,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
+            Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<SplitScreenController> splitScreenController) {
@@ -211,6 +212,7 @@ public abstract class WMShellModule {
                     taskOrganizer,
                     displayController,
                     syncQueue,
+                    transitions,
                     desktopModeController,
                     desktopTasksController,
                     splitScreenController);
@@ -320,7 +322,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -532,9 +534,12 @@ public abstract class WMShellModule {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             Optional<RecentsTransitionHandler> recentsTransitionHandler,
+            KeyguardTransitionHandler keyguardTransitionHandler,
+            Optional<UnfoldTransitionHandler> unfoldHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
-                pipTouchHandlerOptional, recentsTransitionHandler);
+                pipTouchHandlerOptional, recentsTransitionHandler, keyguardTransitionHandler,
+                unfoldHandler);
     }
 
     @WMSingleton
@@ -634,14 +639,8 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static UnfoldBackgroundController provideUnfoldBackgroundController(
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Context context
-    ) {
-        return new UnfoldBackgroundController(
-                context,
-                rootTaskDisplayAreaOrganizer
-        );
+    static UnfoldBackgroundController provideUnfoldBackgroundController(Context context) {
+        return new UnfoldBackgroundController(context);
     }
 
     //
@@ -713,28 +712,6 @@ public abstract class WMShellModule {
     }
 
     //
-    // Kids mode
-    //
-    @WMSingleton
-    @Provides
-    static KidsModeTaskOrganizer provideKidsModeTaskOrganizer(
-            Context context,
-            ShellInit shellInit,
-            ShellCommandHandler shellCommandHandler,
-            SyncTransactionQueue syncTransactionQueue,
-            DisplayController displayController,
-            DisplayInsetsController displayInsetsController,
-            Optional<UnfoldAnimationController> unfoldAnimationController,
-            Optional<RecentTasksController> recentTasksOptional,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler
-    ) {
-        return new KidsModeTaskOrganizer(context, shellInit, shellCommandHandler,
-                syncTransactionQueue, displayController, displayInsetsController,
-                unfoldAnimationController, recentTasksOptional, mainExecutor, mainHandler);
-    }
-
-    //
     // Misc
     //
 
@@ -745,7 +722,6 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DefaultMixedHandler defaultMixedHandler,
-            KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<DesktopModeController> desktopModeController) {
         return new Object();
     }

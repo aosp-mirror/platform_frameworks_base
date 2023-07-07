@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Mga Hearing Aid"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Nakakonekta sa Mga Hearing Aid"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Nakakonekta sa LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Konektado sa media audio"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Pumili ng profile"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
     <string name="category_work" msgid="4014193632325996115">"Trabaho"</string>
+    <string name="category_clone" msgid="1554511758987195974">"I-clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Mga opsyon ng developer"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"I-enable ang mga opsyon ng developer"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Magtakda ng mga pagpipilian para sa pagbuo ng app"</string>
@@ -380,7 +381,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Rendering ng Profile HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"I-enable ang GPU debug layer"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Payagang i-load ang GPU debug layer sa debug app"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"I-enable ang verbose vendor logging"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Magsama sa mga ulat ng bug ng mga karagdagang log ng vendor na partikular sa device, na posibleng may pribadong impormasyon, gumamit ng mas maraming baterya, at/o gumamit ng mas malaking storage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scale ng window animation"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scale ng transition animation"</string>
@@ -479,7 +480,7 @@
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Nakakonekta, hindi nagcha-charge"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Nasingil"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Charged"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Puno ang Baterya"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pinapamahalaan ng admin"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kinokontrol ng Pinaghihigpitang Setting"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Dagdagan ang oras."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Bawasan ang oras."</string>
     <string name="cancel" msgid="5665114069455378395">"Kanselahin"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Susunod"</string>
+    <string name="back" msgid="5554327870352703710">"Bumalik"</string>
+    <string name="save" msgid="3745809743277153149">"I-save"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Tapos na"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Mga alarm at paalala"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ngayon lang"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ang teleponong ito"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ang tablet na ito"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Speaker ng dock"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"External na Device"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Nakakonektang device"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ang teleponong ito"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Hindi ma-play sa device na ito"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"I-upgrade ang account para lumipat"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Magdagdag ng bagong user?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puwede mong ibahagi ang device na ito sa ibang tao sa pamamagitan ng paggawa ng mga karagdagang user. May sariling espasyo ang bawat user na maaari nilang i-customize gamit ang mga app, wallpaper, at iba pa. Puwede ring isaayos ng mga user ang mga setting ng device tulad ng Wi‑Fi na nakakaapekto sa lahat.\n\nKapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nMaaaring mag-update ng mga app ang sinumang user para sa lahat ng iba pang user. Maaaring hindi malipat sa bagong user ang mga setting at serbisyo sa pagiging naa-access."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay puwedeng mag-update ng mga app para sa lahat ng iba pang user."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Gawing admin ang user na ito?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"May mga espesyal na pribilehiyo ang mga admin na wala ang ibang user. Magagawa ng isang admin na pamahalaan ang lahat ng user, i-update o i-reset ang device na ito, baguhin ang mga settng, tingnan ang lahat ng naka-install na app, at magbigay o magbawi ng mga pribilehiyo ng admin sa iba."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Gawing admin"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"I-set up ang user ngayon?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Tiyaking available ang tao na kunin ang device at i-set up ang kanyang space"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Mag-set up ng profile ngayon?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Magsisimula ito ng bagong session ng bisita at made-delete ang lahat ng app at data mula sa kasalukuyang session"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Umalis sa guest mode?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ide-delete nito ang mga app at data mula sa kasalukuyang session ng bisita"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Oo, gawin siyang admin"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Hindi, huwag siyang gawing admin"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Umalis"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"I-save ang aktibidad ng bisita?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puwedeng i-save ang aktibidad ng session ngayon o i-delete lahat ng app at data"</string>

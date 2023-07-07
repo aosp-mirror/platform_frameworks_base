@@ -90,6 +90,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlin.Pair;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,8 +99,6 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import kotlin.Pair;
 
 /**
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
@@ -254,11 +254,13 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             new CameraAvailabilityListener.CameraTransitionCallback() {
         @Override
         public void onApplyCameraProtection(@NonNull Path protectionPath, @NonNull Rect bounds) {
+            mLogger.cameraProtectionEvent("onApplyCameraProtection");
             showCameraProtection(protectionPath, bounds);
         }
 
         @Override
         public void onHideCameraProtection() {
+            mLogger.cameraProtectionEvent("onHideCameraProtection");
             hideCameraProtection();
         }
     };

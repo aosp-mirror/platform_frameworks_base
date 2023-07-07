@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController
@@ -39,6 +40,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
@@ -51,7 +53,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(controller.intent).thenReturn(INTENT_1)
 
-        underTest = QrCodeScannerKeyguardQuickAffordanceConfig(mock(), controller)
+        underTest = QrCodeScannerKeyguardQuickAffordanceConfig(context, controller)
     }
 
     @Test
@@ -75,22 +77,21 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() =
-        runBlockingTest {
-            whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
-            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
-            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
-            val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
-            verify(controller).addCallback(callbackCaptor.capture())
+    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() = runBlockingTest {
+        whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
+        verify(controller).addCallback(callbackCaptor.capture())
 
-            whenever(controller.intent).thenReturn(INTENT_2)
-            callbackCaptor.value.onQRCodeScannerActivityChanged()
+        whenever(controller.intent).thenReturn(INTENT_2)
+        callbackCaptor.value.onQRCodeScannerActivityChanged()
 
-            assertVisibleState(latest)
+        assertVisibleState(latest)
 
-            job.cancel()
-            verify(controller).removeCallback(callbackCaptor.value)
-        }
+        job.cancel()
+        verify(controller).removeCallback(callbackCaptor.value)
+    }
 
     @Test
     fun affordance_scannerPreferenceChanged_deliversVisibleModel() = runBlockingTest {

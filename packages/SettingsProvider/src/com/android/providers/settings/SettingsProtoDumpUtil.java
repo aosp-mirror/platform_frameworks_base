@@ -785,12 +785,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ANGLE_EGL_FEATURES,
                 GlobalSettingsProto.Gpu.ANGLE_EGL_FEATURES);
         dumpSetting(s, p,
-                Settings.Global.ANGLE_DEFERLIST,
-                GlobalSettingsProto.Gpu.ANGLE_DEFERLIST);
-        dumpSetting(s, p,
-                Settings.Global.ANGLE_DEFERLIST_MODE,
-                GlobalSettingsProto.Gpu.ANGLE_DEFERLIST_MODE);
-        dumpSetting(s, p,
                 Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX,
                 GlobalSettingsProto.Gpu.SHOW_ANGLE_IN_USE_DIALOG);
         dumpSetting(s, p,
@@ -2777,6 +2771,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.SHOW_TOUCHES,
                 SystemSettingsProto.DevOptions.SHOW_TOUCHES);
+        dumpSetting(s, p,
+                Settings.System.SHOW_KEY_PRESSES,
+                SystemSettingsProto.DevOptions.SHOW_KEY_PRESSES);
         dumpSetting(s, p,
                 Settings.System.POINTER_LOCATION,
                 SystemSettingsProto.DevOptions.POINTER_LOCATION);

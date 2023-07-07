@@ -34,6 +34,7 @@ import android.view.WindowInsets
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.doOnLayout
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
@@ -41,6 +42,7 @@ import com.android.systemui.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
@@ -52,14 +54,13 @@ import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_H
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
-import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SHADE_HEADER
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.NextAlarmController
@@ -79,7 +80,7 @@ import javax.inject.Named
  * * [LARGE_SCREEN_HEADER_TRANSITION_ID]: [LARGE_SCREEN_HEADER_CONSTRAINT] for all other
  *   configurations
  */
-@CentralSurfacesScope
+@SysUISingleton
 class ShadeHeaderController
 @Inject
 constructor(
@@ -220,6 +221,7 @@ constructor(
             override fun demoCommands() = listOf(DemoMode.COMMAND_CLOCK)
             override fun dispatchDemoCommand(command: String, args: Bundle) =
                 clock.dispatchDemoCommand(command, args)
+
             override fun onDemoModeStarted() = clock.onDemoModeStarted()
             override fun onDemoModeFinished() = clock.onDemoModeFinished()
         }
@@ -259,6 +261,7 @@ constructor(
                     resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height)
                 lastInsets?.let { updateConstraintsForInsets(header, it) }
                 updateResources()
+                updateCarrierGroupPadding()
             }
         }
 
@@ -291,6 +294,7 @@ constructor(
         privacyIconsController.chipVisibilityListener = chipVisibilityListener
         updateVisibility()
         updateTransition()
+        updateCarrierGroupPadding()
 
         header.setOnApplyWindowInsetsListener(insetListener)
 
@@ -298,8 +302,6 @@ constructor(
             val newPivot = if (v.isLayoutRtl) v.width.toFloat() else 0f
             v.pivotX = newPivot
             v.pivotY = v.height.toFloat() / 2
-
-            mShadeCarrierGroup.setPaddingRelative((v.width * v.scaleX).toInt(), 0, 0, 0)
         }
         clock.setOnClickListener { launchClockActivity() }
 
@@ -357,6 +359,14 @@ constructor(
         header
             .getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT)
             .load(context, resources.getXml(R.xml.large_screen_shade_header))
+    }
+
+    private fun updateCarrierGroupPadding() {
+        clock.doOnLayout {
+            val maxClockWidth =
+                (clock.width * resources.getFloat(R.dimen.qqs_expand_clock_scale)).toInt()
+            mShadeCarrierGroup.setPaddingRelative(maxClockWidth, 0, 0, 0)
+        }
     }
 
     private fun updateConstraintsForInsets(view: MotionLayout, insets: WindowInsets) {

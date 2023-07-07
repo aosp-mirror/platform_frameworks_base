@@ -26,7 +26,7 @@ import android.hardware.HardwareBuffer;
 import android.os.RemoteException;
 import android.view.Display;
 import android.window.ScreenCapture.ScreenshotHardwareBuffer;
-import android.window.ScreenCapture.ScreenshotSync;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -58,7 +58,7 @@ public final class AppClipsScreenshotHelperServiceTest extends SysuiTestCase {
     @Mock private Optional<Bubbles> mBubblesOptional;
     @Mock private Bubbles mBubbles;
     @Mock private ScreenshotHardwareBuffer mScreenshotHardwareBuffer;
-    @Mock private ScreenshotSync mScreenshotSync;
+    @Mock private SynchronousScreenCaptureListener mScreenshotSync;
 
     private AppClipsScreenshotHelperService mAppClipsScreenshotHelperService;
 
@@ -80,7 +80,7 @@ public final class AppClipsScreenshotHelperServiceTest extends SysuiTestCase {
         when(mBubblesOptional.isEmpty()).thenReturn(false);
         when(mBubblesOptional.get()).thenReturn(mBubbles);
         when(mBubbles.getScreenshotExcludingBubble(DEFAULT_DISPLAY)).thenReturn(mScreenshotSync);
-        when(mScreenshotSync.get()).thenReturn(null);
+        when(mScreenshotSync.getBuffer()).thenReturn(null);
 
         assertThat(getInterface().takeScreenshot(DEFAULT_DISPLAY)).isNull();
     }
@@ -90,7 +90,7 @@ public final class AppClipsScreenshotHelperServiceTest extends SysuiTestCase {
         when(mBubblesOptional.isEmpty()).thenReturn(false);
         when(mBubblesOptional.get()).thenReturn(mBubbles);
         when(mBubbles.getScreenshotExcludingBubble(DEFAULT_DISPLAY)).thenReturn(mScreenshotSync);
-        when(mScreenshotSync.get()).thenReturn(mScreenshotHardwareBuffer);
+        when(mScreenshotSync.getBuffer()).thenReturn(mScreenshotHardwareBuffer);
         when(mScreenshotHardwareBuffer.getHardwareBuffer()).thenReturn(FAKE_HARDWARE_BUFFER);
         when(mScreenshotHardwareBuffer.getColorSpace()).thenReturn(FAKE_COLOR_SPACE);
 

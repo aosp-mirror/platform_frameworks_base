@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
@@ -26,6 +25,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesVisible
@@ -33,9 +33,7 @@ import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import com.android.wm.shell.flicker.splitScreenEntered
-import org.junit.Assume
-import org.junit.Before
+import com.android.wm.shell.flicker.splitscreen.benchmark.EnterSplitScreenByDragFromNotificationBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,38 +50,15 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenByDragFromNotification(flicker: FlickerTest) : SplitScreenBase(flicker) {
-
-    private val sendNotificationApp = SplitScreenUtils.getSendNotification(instrumentation)
-
-    @Before
-    fun before() {
-        Assume.assumeTrue(tapl.isTablet)
-    }
-
+class EnterSplitScreenByDragFromNotification(override val flicker: FlickerTest) :
+    EnterSplitScreenByDragFromNotificationBenchmark(flicker), ICommonAssertions {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup {
-                // Send a notification
-                sendNotificationApp.launchViaIntent(wmHelper)
-                sendNotificationApp.postNotification(wmHelper)
-                tapl.goHome()
-                primaryApp.launchViaIntent(wmHelper)
-            }
-            transitions {
-                SplitScreenUtils.dragFromNotificationToSplit(instrumentation, device, wmHelper)
-                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, sendNotificationApp)
-            }
-            teardown { sendNotificationApp.exit(wmHelper) }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
-
-    @IwTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    fun cujCompleted() =
-        flicker.splitScreenEntered(primaryApp, sendNotificationApp, fromOtherApp = false)
 
     @FlakyTest(bugId = 245472831)
     @Test

@@ -22,13 +22,20 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class TableLogBufferFactoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
     private val systemClock = FakeSystemClock()
-    private val underTest = TableLogBufferFactory(dumpManager, systemClock)
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+    private val underTest =
+        TableLogBufferFactory(dumpManager, systemClock, mock(), testDispatcher, testScope)
 
     @Test
     fun create_alwaysCreatesNewInstance() {

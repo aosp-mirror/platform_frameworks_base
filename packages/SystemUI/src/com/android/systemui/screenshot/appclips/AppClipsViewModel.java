@@ -26,7 +26,7 @@ import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Process;
+import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -110,16 +110,14 @@ final class AppClipsViewModel extends ViewModel {
      * Saves the provided {@link Drawable} to storage then informs the result {@link Uri} to
      * {@link LiveData}.
      */
-    void saveScreenshotThenFinish(Drawable screenshotDrawable, Rect bounds) {
+    void saveScreenshotThenFinish(Drawable screenshotDrawable, Rect bounds, UserHandle user) {
         mBgExecutor.execute(() -> {
             // Render the screenshot bitmap in background.
             Bitmap screenshotBitmap = renderBitmap(screenshotDrawable, bounds);
 
             // Export and save the screenshot in background.
-            // TODO(b/267310185): Save to work profile UserHandle.
             ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
-                    mBgExecutor, UUID.randomUUID(), screenshotBitmap,
-                    Process.myUserHandle());
+                    mBgExecutor, UUID.randomUUID(), screenshotBitmap, user);
 
             // Get the result and update state on main thread.
             exportFuture.addListener(() -> {

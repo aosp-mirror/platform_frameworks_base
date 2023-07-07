@@ -502,6 +502,8 @@ interface IPackageManager {
 
     boolean hasSystemFeature(String name, int version);
 
+    List<String> getInitialNonStoppedSystemPackages();
+
     void enterSafeMode();
     @UnsupportedAppUsage
     boolean isSafeMode();
@@ -789,4 +791,6 @@ interface IPackageManager {
     void setKeepUninstalledPackages(in List<String> packageList);
 
     boolean[] canPackageQuery(String sourcePackageName, in String[] targetPackageNames, int userId);
+
+    boolean waitForHandler(long timeoutMillis, boolean forBackgroundHandler);
 }

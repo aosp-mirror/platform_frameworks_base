@@ -526,6 +526,11 @@ static jlong android_view_RenderNode_getUniqueId(CRITICAL_JNI_PARAMS_COMMA jlong
     return reinterpret_cast<RenderNode*>(renderNodePtr)->uniqueId();
 }
 
+static void android_view_RenderNode_setIsTextureView(
+        CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr) {
+    reinterpret_cast<RenderNode*>(renderNodePtr)->setIsTextureView();
+}
+
 // ----------------------------------------------------------------------------
 // RenderProperties - Animations
 // ----------------------------------------------------------------------------
@@ -844,6 +849,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetAllowForceDark", "(JZ)Z", (void*)android_view_RenderNode_setAllowForceDark},
         {"nGetAllowForceDark", "(J)Z", (void*)android_view_RenderNode_getAllowForceDark},
         {"nGetUniqueId", "(J)J", (void*)android_view_RenderNode_getUniqueId},
+        {"nSetIsTextureView", "(J)V", (void*)android_view_RenderNode_setIsTextureView},
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {

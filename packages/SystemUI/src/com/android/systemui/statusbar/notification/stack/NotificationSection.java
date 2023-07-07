@@ -27,7 +27,6 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 /**
@@ -90,7 +89,6 @@ public class NotificationSection {
     }
 
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.STATE_RESOLVER)
     private void startTopAnimation(boolean animate) {
         int previousEndValue = mEndAnimationRect.top;
         int newEndValue = mBounds.top;
@@ -139,7 +137,6 @@ public class NotificationSection {
         mTopAnimator = animator;
     }
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.STATE_RESOLVER)
     private void startBottomAnimation(boolean animate) {
         int previousStartValue = mStartAnimationRect.bottom;
         int previousEndValue = mEndAnimationRect.bottom;
@@ -188,13 +185,11 @@ public class NotificationSection {
         mBottomAnimator = animator;
     }
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.SHADE_VIEW)
     private void setBackgroundTop(int top) {
         mCurrentBounds.top = top;
         mOwningView.invalidate();
     }
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.SHADE_VIEW)
     private void setBackgroundBottom(int bottom) {
         mCurrentBounds.bottom = bottom;
         mOwningView.invalidate();

@@ -31,12 +31,15 @@ import java.lang.Math.max
 class TextInterpolator(
     layout: Layout,
     var typefaceCache: TypefaceVariantCache,
+    numberOfAnimationSteps: Int? = null,
 ) {
     /**
      * Returns base paint used for interpolation.
      *
      * Once you modified the style parameters, you have to call reshapeText to recalculate base text
      * layout.
+     *
+     * Do not bypass the cache and update the typeface or font variation directly.
      *
      * @return a paint object
      */
@@ -47,6 +50,8 @@ class TextInterpolator(
      *
      * Once you modified the style parameters, you have to call reshapeText to recalculate target
      * text layout.
+     *
+     * Do not bypass the cache and update the typeface or font variation directly.
      *
      * @return a paint object
      */
@@ -81,7 +86,7 @@ class TextInterpolator(
     private class Line(val runs: List<Run>)
 
     private var lines = listOf<Line>()
-    private val fontInterpolator = FontInterpolator()
+    private val fontInterpolator = FontInterpolator(numberOfAnimationSteps)
 
     // Recycling object for glyph drawing and tweaking.
     private val tmpPaint = TextPaint()
@@ -217,12 +222,8 @@ class TextInterpolator(
                 run.fontRuns.forEach { fontRun ->
                     fontRun.baseFont =
                         fontInterpolator.lerp(fontRun.baseFont, fontRun.targetFont, progress)
-                    val tmpFontVariationsArray = mutableListOf<FontVariationAxis>()
-                    fontRun.baseFont.axes.forEach {
-                        tmpFontVariationsArray.add(FontVariationAxis(it.tag, it.styleValue))
-                    }
-                    basePaint.fontVariationSettings =
-                        FontVariationAxis.toFontVariationSettings(tmpFontVariationsArray)
+                    val fvar = FontVariationAxis.toFontVariationSettings(fontRun.baseFont.axes)
+                    basePaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
                 }
             }
         }

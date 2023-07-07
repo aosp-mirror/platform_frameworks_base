@@ -87,7 +87,6 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -272,6 +271,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
+    private boolean mIsInlineReplyAnimationFlagEnabled = false;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -556,6 +556,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void onNotificationUpdated() {
+        if (mIsSummaryWithChildren) {
+            Trace.beginSection("ExpNotRow#onNotifUpdated (summary)");
+        } else {
+            Trace.beginSection("ExpNotRow#onNotifUpdated (leaf)");
+        }
         for (NotificationContentView l : mLayouts) {
             l.onNotificationUpdated(mEntry);
         }
@@ -591,6 +596,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mUpdateSelfBackgroundOnUpdate = false;
             updateBackgroundColorsOfSelf();
         }
+        Trace.endSection();
     }
 
     private void updateBackgroundColorsOfSelf() {
@@ -866,9 +872,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         onAttachedChildrenCountChanged();
         row.setIsChildInGroup(false, null);
-        if (!mUseRoundnessSourceTypes) {
-            row.requestBottomRoundness(0.0f, LegacySourceType.DefaultValue, /* animate = */ false);
-        }
     }
 
     /**
@@ -884,10 +887,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (child.keepInParentForDismissAnimation()) {
                 mChildrenContainer.removeNotification(child);
                 child.setIsChildInGroup(false, null);
-                if (!mUseRoundnessSourceTypes) {
-                    LegacySourceType sourceType = LegacySourceType.DefaultValue;
-                    child.requestBottomRoundness(0f, sourceType, /* animate = */ false);
-                }
                 child.setKeepInParentForDismissAnimation(false);
                 logKeepInParentChildDetached(child);
                 childCountChanged = true;
@@ -942,9 +941,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateBackgroundClipping();
-        if (mUseRoundnessSourceTypes) {
-            updateBaseRoundness();
-        }
+        updateBaseRoundness();
     }
 
     @Override
@@ -1054,15 +1051,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
-        if (mUseRoundnessSourceTypes) {
-            if (pinned) {
-                // Should be animated if someone explicitly set it to 0 and the row is shown.
-                boolean animated = mAnimatePinnedRoundness && isShown();
-                requestRoundness(/* top = */ 1f, /* bottom = */ 1f, PINNED, animated);
-            } else {
-                requestRoundnessReset(PINNED);
-                mAnimatePinnedRoundness = true;
-            }
+        if (pinned) {
+            // Should be animated if someone explicitly set it to 0 and the row is shown.
+            boolean animated = mAnimatePinnedRoundness && isShown();
+            requestRoundness(/* top = */ 1f, /* bottom = */ 1f, PINNED, animated);
+        } else {
+            requestRoundnessReset(PINNED);
+            mAnimatePinnedRoundness = true;
         }
     }
 
@@ -1879,7 +1874,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setIsLowPriority(mIsLowPriority);
             mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
             mChildrenContainer.onNotificationUpdated();
-            mChildrenContainer.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
 
             mTranslateableViews.add(mChildrenContainer);
         });
@@ -2308,24 +2302,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBackgroundNormal.setExpandAnimationSize(params.getWidth(), actualHeight);
     }
 
-    @Override
-    public float getTopRoundness() {
-        if (!mUseRoundnessSourceTypes && mExpandAnimationRunning) {
-            return mTopRoundnessDuringLaunchAnimation;
-        }
-
-        return super.getTopRoundness();
-    }
-
-    @Override
-    public float getBottomRoundness() {
-        if (!mUseRoundnessSourceTypes && mExpandAnimationRunning) {
-            return mBottomRoundnessDuringLaunchAnimation;
-        }
-
-        return super.getBottomRoundness();
-    }
-
     public void setExpandAnimationRunning(boolean expandAnimationRunning) {
         if (expandAnimationRunning) {
             setAboveShelf(true);
@@ -2618,6 +2594,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mIsSummaryWithChildren = mChildrenContainer != null
                 && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren) {
+            Trace.beginSection("ExpNotRow#onChildCountChanged (summary)");
             NotificationViewWrapper wrapper = mChildrenContainer.getNotificationViewWrapper();
             if (wrapper == null || wrapper.getNotificationHeader() == null) {
                 mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
@@ -2629,6 +2606,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateChildrenAppearance();
         updateChildrenVisibility();
         applyChildrenRoundness();
+        if (mIsSummaryWithChildren) {
+            Trace.endSection();
+        }
     }
 
     protected void expandNotification() {
@@ -3085,6 +3065,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
     }
 
+    public void setInlineReplyAnimationFlagEnabled(boolean isEnabled) {
+        mIsInlineReplyAnimationFlagEnabled = isEnabled;
+    }
+
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         boolean changed = height != getActualHeight();
@@ -3104,7 +3088,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         int contentHeight = Math.max(getMinHeight(), height);
         for (NotificationContentView l : mLayouts) {
-            l.setContentHeight(height);
+            if (mIsInlineReplyAnimationFlagEnabled) {
+                l.setContentHeight(height);
+            } else {
+                l.setContentHeight(contentHeight);
+            }
         }
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setActualHeight(height);
@@ -3481,18 +3469,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private void applyChildrenRoundness() {
         if (mIsSummaryWithChildren) {
-            if (mUseRoundnessSourceTypes) {
-                mChildrenContainer.requestRoundness(
-                        /* top = */ getTopRoundness(),
-                        /* bottom = */ getBottomRoundness(),
-                        /* sourceType = */ FROM_PARENT,
-                        /* animate = */ false);
-            } else {
-                mChildrenContainer.requestBottomRoundness(
-                        getBottomRoundness(),
-                        LegacySourceType.DefaultValue,
-                        /* animate = */ false);
-            }
+            mChildrenContainer.requestRoundness(
+                    /* top = */ getTopRoundness(),
+                    /* bottom = */ getBottomRoundness(),
+                    /* sourceType = */ FROM_PARENT,
+                    /* animate = */ false);
         }
     }
 
@@ -3631,6 +3612,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Skip super call; dump viewState ourselves
         pw.println("Notification: " + mEntry.getKey());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            pw.println(this);
             pw.print("visibility: " + getVisibility());
             pw.print(", alpha: " + getAlpha());
             pw.print(", translation: " + getTranslation());
@@ -3650,6 +3632,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.println("no viewState!!!");
             }
             pw.println(getRoundableState().debugString());
+            dumpBackgroundView(pw, args);
 
             int transientViewCount = mChildrenContainer == null
                     ? 0 : mChildrenContainer.getTransientViewCount();
@@ -3709,24 +3692,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    /**
-     * Enable the support for rounded corner based on the SourceType
-     * @param enabled true if is supported
-     */
-    @Override
-    public void useRoundnessSourceTypes(boolean enabled) {
-        super.useRoundnessSourceTypes(enabled);
-        if (mChildrenContainer != null) {
-            mChildrenContainer.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
-        }
-    }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mUseRoundnessSourceTypes) {
-            updateBaseRoundness();
-        }
+        updateBaseRoundness();
     }
 
     /** Set whether this notification may show a snooze action. */

@@ -26,7 +26,9 @@ import static com.android.server.credentials.ProviderGetSession.AUTHENTICATION_A
 import static com.android.server.credentials.ProviderGetSession.CREDENTIAL_ENTRY_KEY;
 import static com.android.server.credentials.ProviderGetSession.REMOTE_ENTRY_KEY;
 
-import android.util.Log;
+import android.util.Slog;
+
+import com.android.server.credentials.ProviderCreateSession;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -52,6 +54,8 @@ public enum EntryEnum {
             new AbstractMap.SimpleEntry<>(REMOTE_ENTRY_KEY,
                     REMOTE_ENTRY.mInnerMetricCode),
             new AbstractMap.SimpleEntry<>(CREDENTIAL_ENTRY_KEY,
+                    CREDENTIAL_ENTRY.mInnerMetricCode),
+            new AbstractMap.SimpleEntry<>(ProviderCreateSession.SAVE_ENTRY_KEY,
                     CREDENTIAL_ENTRY.mInnerMetricCode)
     );
 
@@ -77,7 +81,7 @@ public enum EntryEnum {
      */
     public static int getMetricCodeFromString(String stringKey) {
         if (!sKeyToEntryCode.containsKey(stringKey)) {
-            Log.w(TAG, "Attempted to use an unsupported string key entry type");
+            Slog.i(TAG, "Attempted to use an unsupported string key entry type");
             return UNKNOWN.mInnerMetricCode;
         }
         return sKeyToEntryCode.get(stringKey);

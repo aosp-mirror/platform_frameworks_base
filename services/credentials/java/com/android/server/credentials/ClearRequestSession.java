@@ -19,6 +19,7 @@ package com.android.server.credentials;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
@@ -67,7 +68,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerClearSession != null) {
-            Slog.d(TAG, "In startProviderSession - provider session created "
+            Slog.i(TAG, "Provider session created "
                     + "and being added for: " + providerInfo.getComponentName());
             mProviders.put(providerClearSession.getComponentName().flattenToString(),
                     providerClearSession);
@@ -78,12 +79,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     @Override // from provider session
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Slog.d(TAG, "in onStatusChanged with status: " + status + ", and source: " + source);
+        Slog.i(TAG, "Provider changed with status: " + status + ", and source: " + source);
         if (ProviderSession.isTerminatingStatus(status)) {
-            Slog.d(TAG, "in onProviderStatusChanged terminating status");
+            Slog.i(TAG, "Provider terminating status");
             onProviderTerminated(componentName);
         } else if (ProviderSession.isCompletionStatus(status)) {
-            Slog.d(TAG, "in onProviderStatusChanged isCompletionStatus status");
+            Slog.i(TAG, "Provider has completion status");
             onProviderResponseComplete(componentName);
         }
     }
@@ -92,9 +93,9 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public void onFinalResponseReceived(
             ComponentName componentName,
             Void response) {
-        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
-                mProviders.get(componentName.flattenToString()).mProviderSessionMetric
-                        .getCandidatePhasePerProviderMetric());
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
+        mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
+                isPrimaryProviderViaProviderInfo(componentName));
         respondToClientWithResponseAndFinish(null);
     }
 
@@ -141,8 +142,9 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
                 return;
             }
         }
-        // TODO: Replace with properly defined error type
-        respondToClientWithErrorAndFinish("UNKNOWN", "All providers failed");
+        String exception = ClearCredentialStateException.TYPE_UNKNOWN;
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception, "All providers failed");
     }
 
     @Override

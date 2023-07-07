@@ -23,9 +23,10 @@ import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.Typeface
 import android.graphics.fonts.Font
+import android.graphics.fonts.FontVariationAxis
 import android.text.Layout
-import android.text.TextPaint
 import android.util.LruCache
+import kotlin.math.roundToInt
 
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
 private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
@@ -33,18 +34,39 @@ private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
 typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
 
 interface TypefaceVariantCache {
-    fun getTypefaceForVariant(fvar: String, targetPaint: TextPaint): Typeface?
+    fun getTypefaceForVariant(fvar: String?): Typeface?
+
+    companion object {
+        fun createVariantTypeface(baseTypeface: Typeface, fVar: String?): Typeface {
+            if (fVar.isNullOrEmpty()) {
+                return baseTypeface
+            }
+
+            val axes = FontVariationAxis.fromFontVariationSettings(fVar).toMutableList()
+            axes.removeIf { !baseTypeface.isSupportedAxes(it.getOpenTypeTagValue()) }
+            if (axes.isEmpty()) {
+                return baseTypeface
+            }
+            return Typeface.createFromTypefaceWithVariation(baseTypeface, axes)
+        }
+    }
 }
 
-class TypefaceVariantCacheImpl() : TypefaceVariantCache {
+class TypefaceVariantCacheImpl(
+    var baseTypeface: Typeface,
+) : TypefaceVariantCache {
     private val cache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
-    override fun getTypefaceForVariant(fvar: String, targetPaint: TextPaint): Typeface? {
+    override fun getTypefaceForVariant(fvar: String?): Typeface? {
+        if (fvar == null) {
+            return baseTypeface
+        }
         cache.get(fvar)?.let {
             return it
         }
 
-        targetPaint.fontVariationSettings = fvar
-        return targetPaint.typeface?.also { cache.put(fvar, it) }
+        return TypefaceVariantCache.createVariantTypeface(baseTypeface, fvar).also {
+            cache.put(fvar, it)
+        }
     }
 }
 
@@ -53,7 +75,6 @@ class TypefaceVariantCacheImpl() : TypefaceVariantCache {
  *
  * Currently this class can provide text style animation for text weight and text size. For example
  * the simple view that draws text with animating text size is like as follows:
- *
  * <pre> <code>
  * ```
  *     class SimpleTextAnimation : View {
@@ -76,9 +97,10 @@ class TypefaceVariantCacheImpl() : TypefaceVariantCache {
  */
 class TextAnimator(
     layout: Layout,
+    numberOfAnimationSteps: Int? = null, // Only do this number of discrete animation steps.
     private val invalidateCallback: () -> Unit,
 ) {
-    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl()
+    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl(layout.paint.typeface)
         get() = field
         set(value) {
             field = value
@@ -86,12 +108,14 @@ class TextAnimator(
         }
 
     // Following two members are for mutable for testing purposes.
-    public var textInterpolator: TextInterpolator = TextInterpolator(layout, typefaceCache)
+    public var textInterpolator: TextInterpolator =
+        TextInterpolator(layout, typefaceCache, numberOfAnimationSteps)
     public var animator: ValueAnimator =
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
             addUpdateListener {
-                textInterpolator.progress = it.animatedValue as Float
+                textInterpolator.progress =
+                    calculateProgress(it.animatedValue as Float, numberOfAnimationSteps)
                 invalidateCallback()
             }
             addListener(
@@ -101,6 +125,17 @@ class TextAnimator(
                 }
             )
         }
+
+    private fun calculateProgress(animProgress: Float, numberOfAnimationSteps: Int?): Float {
+        if (numberOfAnimationSteps != null) {
+            // This clamps the progress to the nearest value of "numberOfAnimationSteps"
+            // discrete values between 0 and 1f.
+            return (animProgress * numberOfAnimationSteps).roundToInt() /
+                numberOfAnimationSteps.toFloat()
+        }
+
+        return animProgress
+    }
 
     sealed class PositionedGlyph {
 
@@ -244,8 +279,7 @@ class TextAnimator(
         }
 
         if (!fvar.isNullOrBlank()) {
-            textInterpolator.targetPaint.typeface =
-                typefaceCache.getTypefaceForVariant(fvar, textInterpolator.targetPaint)
+            textInterpolator.targetPaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
         }
 
         if (color != null) {
@@ -339,4 +373,3 @@ class TextAnimator(
         )
     }
 }
-

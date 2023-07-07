@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -54,24 +53,27 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 238367575)
-class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
-    /** Defines the transition used to run the test */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                pipApp.launchViaIntent(wmHelper)
-                pipApp.enableAutoEnterForPipActivity()
-            }
-            teardown {
-                // close gracefully so that onActivityUnpinned() can be called before force exit
-                pipApp.closePipWindow(wmHelper)
-                pipApp.exit(wmHelper)
-            }
-            transitions { tapl.goHome() }
-        }
+open class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { tapl.goHome() }
+    }
 
-    @FlakyTest(bugId = 256863309)
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntent(wmHelper)
+            pipApp.enableAutoEnterForPipActivity()
+        }
+    }
+
+    override val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            // close gracefully so that onActivityUnpinned() can be called before force exit
+            pipApp.closePipWindow(wmHelper)
+            pipApp.exit(wmHelper)
+        }
+    }
+
+    @Presubmit
     @Test
     override fun pipLayerReduces() {
         flicker.assertLayers {

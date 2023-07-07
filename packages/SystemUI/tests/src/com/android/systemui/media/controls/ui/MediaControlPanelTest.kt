@@ -40,6 +40,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
+import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -73,6 +74,7 @@ import com.android.systemui.media.controls.models.player.MediaButton
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
+import com.android.systemui.media.controls.models.player.SeekBarObserver
 import com.android.systemui.media.controls.models.player.SeekBarViewModel
 import com.android.systemui.media.controls.models.recommendation.KEY_SMARTSPACE_APP_NAME
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
@@ -97,6 +99,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
@@ -230,10 +233,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         FakeFeatureFlags().apply {
             this.set(Flags.UMO_SURFACE_RIPPLE, false)
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
-            this.set(Flags.MEDIA_FALSING_PENALTY, true)
             this.set(Flags.MEDIA_EXPLICIT_INDICATOR, true)
             this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
+    @Mock private lateinit var globalSettings: GlobalSettings
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -274,7 +277,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     activityIntentHelper,
                     lockscreenUserManager,
                     broadcastDialogController,
-                    fakeFeatureFlag
+                    fakeFeatureFlag,
+                    globalSettings
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -530,6 +534,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(collapsedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.VISIBLE)
 
         assertThat(actionNext.isEnabled()).isTrue()
+        assertThat(actionNext.isFocusable()).isTrue()
+        assertThat(actionNext.isClickable()).isTrue()
         assertThat(actionNext.contentDescription).isEqualTo("next")
         verify(collapsedSet).setVisibility(R.id.actionNext, ConstraintSet.VISIBLE)
 
@@ -576,6 +582,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(actionPrev.isEnabled()).isFalse()
         assertThat(actionPrev.drawable).isNull()
+        assertThat(actionPrev.isFocusable()).isFalse()
+        assertThat(actionPrev.isClickable()).isFalse()
         verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.INVISIBLE)
 
         assertThat(actionNext.isEnabled()).isFalse()
@@ -610,6 +618,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(actionNext.isEnabled()).isFalse()
         assertThat(actionNext.drawable).isNull()
+        assertThat(actionNext.isFocusable()).isFalse()
+        assertThat(actionNext.isClickable()).isFalse()
         verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
     }
 
@@ -947,6 +957,30 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state, PACKAGE)
 
         verify(seekBarViewModel).updateStaticProgress(progress)
+    }
+
+    @Test
+    fun animationSettingChange_updateSeekbar() {
+        // When animations are enabled
+        globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+        val progress = 0.5
+        val state = mediaData.copy(resumption = true, resumeProgress = progress)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        val captor = argumentCaptor<SeekBarObserver>()
+        verify(seekBarData).observeForever(captor.capture())
+        val seekBarObserver = captor.value!!
+
+        // Then the seekbar is set to animate
+        assertThat(seekBarObserver.animationEnabled).isTrue()
+
+        // When the setting changes,
+        globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
+        player.updateAnimatorDurationScale()
+
+        // Then the seekbar is set to not animate
+        assertThat(seekBarObserver.animationEnabled).isFalse()
     }
 
     @Test
@@ -2376,35 +2410,26 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onButtonClick_turbulenceNoiseFlagEnabled_createsRipplesFinishedListener() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
-        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
-
-        player.attachPlayer(viewHolder)
-
-        assertThat(player.mRipplesFinishedListener).isNotNull()
-    }
-
-    @Test
-    fun onButtonClick_turbulenceNoiseFlagDisabled_doesNotCreateRipplesFinishedListener() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
-        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, false)
-
-        player.attachPlayer(viewHolder)
-
-        assertThat(player.mRipplesFinishedListener).isNull()
-    }
-
-    @Test
     fun playTurbulenceNoise_finishesAfterDuration() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
         fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
 
+        val semanticActions =
+            MediaButton(
+                playOrPause =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "play",
+                        background = null
+                    )
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPlayPause.callOnClick()
 
         mainExecutor.execute {
-            player.mRipplesFinishedListener.onRipplesFinish()
-
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.VISIBLE)
 
             clock.advanceTime(
@@ -2414,6 +2439,29 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
         }
+    }
+
+    @Test
+    fun playTurbulenceNoise_whenPlaybackStateIsNotPlaying_doesNotPlayTurbulence() {
+        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
+
+        val semanticActions =
+            MediaButton(
+                custom0 =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "custom0",
+                        background = null
+                    ),
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action0.callOnClick()
+
+        assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
     }
 
     @Test

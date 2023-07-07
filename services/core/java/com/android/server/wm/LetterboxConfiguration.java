@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW_IGNORE_ORIENTATION_REQUEST;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_CAMERA_COMPAT_TREATMENT;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_COMPAT_FAKE_FOCUS;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
@@ -52,6 +51,9 @@ final class LetterboxConfiguration {
      * if it is <= this value.
      */
     static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
+
+    /** The default aspect ratio for a letterboxed app in multi-window mode. */
+    static final float DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW = 1.01f;
 
     /** Letterboxed app window position multiplier indicating center position. */
     static final float LETTERBOX_POSITION_MULTIPLIER_CENTER = 0.5f;
@@ -215,7 +217,7 @@ final class LetterboxConfiguration {
     // otherwise the apps get blacked out when they are resumed and do not have focus yet.
     private boolean mIsCompatFakeFocusEnabled;
 
-    // Whether should use split screen aspect ratio for the activity when camera compat treatment
+    // Whether we should use split screen aspect ratio for the activity when camera compat treatment
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
 
@@ -330,9 +332,6 @@ final class LetterboxConfiguration {
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mTranslucentLetterboxingEnabled,
                 /* key */ KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ true,
-                /* key */ KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP);
 
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
@@ -344,16 +343,6 @@ final class LetterboxConfiguration {
      */
     boolean isIgnoreOrientationRequestAllowed() {
         return mDeviceConfig.getFlag(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
-    }
-
-    /**
-     * Whether size compat mode is disabled after an orientation change request comes from the app.
-     * This value is controlled via {@link android.provider.DeviceConfig}.
-     */
-    // TODO(b/270356567) Clean up this flag
-    boolean isSizeCompatModeDisabledAfterOrientationChangeFromApp() {
-        return mDeviceConfig.getFlag(
-                KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP);
     }
 
     /**
@@ -1132,7 +1121,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Whether should use split screen aspect ratio for the activity when camera compat treatment
+     * Whether we should use split screen aspect ratio for the activity when camera compat treatment
      * is enabled and activity is connected to the camera in fullscreen.
      */
     boolean isCameraCompatSplitScreenAspectRatioEnabled() {

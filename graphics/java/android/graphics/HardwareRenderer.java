@@ -144,6 +144,32 @@ public class HardwareRenderer {
     public @interface DumpFlags {
     }
 
+
+    /**
+     * Trims all Skia caches.
+     * @hide
+     */
+    public static final int CACHE_TRIM_ALL = 0;
+    /**
+     * Trims Skia font caches.
+     * @hide
+     */
+    public static final int CACHE_TRIM_FONT = 1;
+    /**
+     * Trims Skia resource caches.
+     * @hide
+     */
+    public static final int CACHE_TRIM_RESOURCES = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"CACHE_TRIM_"}, value = {
+            CACHE_TRIM_ALL,
+            CACHE_TRIM_FONT,
+            CACHE_TRIM_RESOURCES
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CacheTrimLevel {}
+
     /**
      * Name of the file that holds the shaders cache.
      */
@@ -1131,6 +1157,20 @@ public class HardwareRenderer {
         nTrimMemory(level);
     }
 
+    /**
+     * Invoke this when all font caches should be flushed. This can cause jank on next render
+     * commands so use it only after expensive font allocation operations which would
+     * allocate large amount of temporary memory.
+     *
+     * @param level Hint about which caches to trim. See {@link #CACHE_TRIM_ALL},
+     *              {@link #CACHE_TRIM_FONT}, {@link #CACHE_TRIM_RESOURCES}
+     *
+     * @hide
+     */
+    public static void trimCaches(@CacheTrimLevel int level) {
+        nTrimCaches(level);
+    }
+
     /** @hide */
     public static void overrideProperty(@NonNull String name, @NonNull String value) {
         if (name == null || value == null) {
@@ -1496,6 +1536,8 @@ public class HardwareRenderer {
     private static native void nDestroyHardwareResources(long nativeProxy);
 
     private static native void nTrimMemory(int level);
+
+    private static native void nTrimCaches(int level);
 
     private static native void nOverrideProperty(String name, String value);
 

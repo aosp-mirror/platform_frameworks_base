@@ -110,6 +110,8 @@ import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.StubTransaction;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -1388,7 +1390,8 @@ public class WindowStateTests extends WindowTestsBase {
         private boolean mIsVisibleForImeInputTarget;
 
         @Override
-        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken, boolean visible,
+        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
+                @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
                 boolean removed) {
             mImeTargetToken = overlayWindowToken;
             mIsVisibleForImeTargetOverlay = visible;

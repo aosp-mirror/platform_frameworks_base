@@ -123,6 +123,7 @@ public class DisplayRotation {
 
     public final boolean isDefaultDisplay;
     private final boolean mSupportAutoRotation;
+    private final boolean mAllowRotationResolver;
     private final int mLidOpenRotation;
     private final int mCarDockRotation;
     private final int mDeskDockRotation;
@@ -272,6 +273,8 @@ public class DisplayRotation {
 
         mSupportAutoRotation =
                 mContext.getResources().getBoolean(R.bool.config_supportAutoRotation);
+        mAllowRotationResolver =
+                mContext.getResources().getBoolean(R.bool.config_allowRotationResolver);
         mLidOpenRotation = readRotation(R.integer.config_lidOpenRotation);
         mCarDockRotation = readRotation(R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(R.integer.config_deskDockRotation);
@@ -510,6 +513,7 @@ public class DisplayRotation {
             }
 
             if (mDisplayContent.inTransition()
+                    && mDisplayContent.getDisplayPolicy().isScreenOnFully()
                     && !mDisplayContent.mTransitionController.useShellTransitionsRotation()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
@@ -946,6 +950,10 @@ public class DisplayRotation {
     }
 
     void freezeRotation(int rotation) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
+            rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
+        }
+
         rotation = (rotation == -1) ? mRotation : rotation;
         setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation);
     }
@@ -1217,7 +1225,7 @@ public class DisplayRotation {
         if (mFoldController != null && mFoldController.shouldIgnoreSensorRotation()) {
             sensorRotation = -1;
         }
-        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
             sensorRotation = RotationUtils.reverseRotationDirectionAroundZAxis(sensorRotation);
         }
         mLastSensorRotation = sensorRotation;
@@ -1232,10 +1240,6 @@ public class DisplayRotation {
                 mDisplayPolicy.isCarDockEnablesAccelerometer();
         final boolean deskDockEnablesAccelerometer =
                 mDisplayPolicy.isDeskDockEnablesAccelerometer();
-        final boolean deskDockRespectsNoSensorAndLockedWithoutAccelerometer =
-                mDisplayPolicy.isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer()
-                        && (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED
-                                || orientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
         @Surface.Rotation
         final int preferredRotation;
@@ -1256,10 +1260,10 @@ public class DisplayRotation {
                 || dockMode == Intent.EXTRA_DOCK_STATE_LE_DESK
                 || dockMode == Intent.EXTRA_DOCK_STATE_HE_DESK)
                 && (deskDockEnablesAccelerometer || mDeskDockRotation >= 0)
-                && !deskDockRespectsNoSensorAndLockedWithoutAccelerometer) {
+                && !(orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                        || orientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR)) {
             // Ignore sensor when in desk dock unless explicitly enabled.
-            // This case can override the behavior of NOSENSOR, and can also
-            // enable 180 degree rotation while docked.
+            // This case can enable 180 degree rotation while docked.
             preferredRotation = deskDockEnablesAccelerometer ? sensorRotation : mDeskDockRotation;
         } else if (hdmiPlugged && mDemoHdmiRotationLock) {
             // Ignore sensor when plugged into HDMI when demo HDMI rotation lock enabled.
@@ -1726,7 +1730,9 @@ public class DisplayRotation {
     }
 
     /**
-     * Called by the DeviceStateManager callback when the device state changes.
+     * Called by the display manager just before it applied the device state, it is guaranteed
+     * that in case of physical display change the {@link DisplayRotation#physicalDisplayChanged}
+     * method will be invoked *after* this one.
      */
     void foldStateChanged(DeviceStateController.DeviceState deviceState) {
         if (mFoldController != null) {
@@ -2037,7 +2043,8 @@ public class DisplayRotation {
 
         @Override
         public boolean isRotationResolverEnabled() {
-            return mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
+            return mAllowRotationResolver
+                    && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                     && mCameraRotationMode == CAMERA_ROTATION_ENABLED
                     && !mService.mPowerManager.isPowerSaveMode();
         }

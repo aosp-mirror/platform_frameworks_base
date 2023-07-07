@@ -189,12 +189,7 @@ class NotificationShadeDepthController @Inject constructor(
             scheduleUpdate()
         }
 
-    /**
-     * Callback that updates the window blur value and is called only once per frame.
-     */
-    @VisibleForTesting
-    val updateBlurCallback = Choreographer.FrameCallback {
-        updateScheduled = false
+    private fun computeBlurAndZoomOut(): Pair<Int, Float> {
         val animationRadius = MathUtils.constrain(shadeAnimation.radius,
                 blurUtils.minBlurRadius.toFloat(), blurUtils.maxBlurRadius.toFloat())
         val expansionRadius = blurUtils.blurRadiusOfRatio(
@@ -232,6 +227,16 @@ class NotificationShadeDepthController @Inject constructor(
         // Brightness slider removes blur, but doesn't affect zooms
         blur = (blur * (1f - brightnessMirrorSpring.ratio)).toInt()
 
+        return Pair(blur, zoomOut)
+    }
+
+    /**
+     * Callback that updates the window blur value and is called only once per frame.
+     */
+    @VisibleForTesting
+    val updateBlurCallback = Choreographer.FrameCallback {
+        updateScheduled = false
+        val (blur, zoomOut) = computeBlurAndZoomOut()
         val opaque = scrimsVisible && !blursDisabledForAppLaunch
         Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
         blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
@@ -441,6 +446,8 @@ class NotificationShadeDepthController @Inject constructor(
             return
         }
         updateScheduled = true
+        val (blur, _) = computeBlurAndZoomOut()
+        blurUtils.prepareBlur(root.viewRootImpl, blur)
         choreographer.postFrameCallback(updateBlurCallback)
     }
 

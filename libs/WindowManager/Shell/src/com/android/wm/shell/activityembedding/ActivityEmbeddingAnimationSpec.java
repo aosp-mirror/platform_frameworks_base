@@ -77,6 +77,15 @@ class ActivityEmbeddingAnimationSpec {
         return new AlphaAnimation(alpha, alpha);
     }
 
+    /**
+     * Animation that intended to show snapshot for closing animation because the closing end bounds
+     * are changed.
+     */
+    @NonNull
+    static Animation createShowSnapshotForClosingAnimation() {
+        return new AlphaAnimation(1f, 1f);
+    }
+
     /** Animation for window that is opening in a change transition. */
     @NonNull
     Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo.Change change,
@@ -246,7 +255,7 @@ class ActivityEmbeddingAnimationSpec {
     private boolean shouldShowBackdrop(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         final Animation a = loadAttributeAnimation(info, change, WALLPAPER_TRANSITION_NONE,
-                mTransitionAnimation);
+                mTransitionAnimation, false);
         return a != null && a.getShowBackdrop();
     }
 }

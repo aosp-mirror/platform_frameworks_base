@@ -100,6 +100,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.expresslog.Counter;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.deviceidle.ConstraintController;
 import com.android.server.deviceidle.DeviceIdleConstraintTracker;
@@ -300,6 +301,12 @@ public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
     private static final String TAG = "DeviceIdleController";
 
+    private static final String USER_ALLOWLIST_ADDITION_METRIC_ID =
+            "battery.value_app_added_to_power_allowlist";
+
+    private static final String USER_ALLOWLIST_REMOVAL_METRIC_ID =
+            "battery.value_app_removed_from_power_allowlist";
+
     private static final boolean DEBUG = false;
 
     private static final boolean COMPRESS_TIME = false;
@@ -319,6 +326,8 @@ public class DeviceIdleController extends SystemService
     private SensorManager mSensorManager;
     private final boolean mUseMotionSensor;
     private Sensor mMotionSensor;
+    private final boolean mIsLocationPrefetchEnabled;
+    @Nullable
     private LocationRequest mLocationRequest;
     private Intent mIdleIntent;
     private Bundle mIdleIntentOptions;
@@ -2460,6 +2469,11 @@ public class DeviceIdleController extends SystemService
             return null;
         }
 
+        boolean isLocationPrefetchEnabled() {
+            return mContext.getResources().getBoolean(
+                   com.android.internal.R.bool.config_autoPowerModePrefetchLocation);
+        }
+
         boolean useMotionSensor() {
             return mContext.getResources().getBoolean(
                    com.android.internal.R.bool.config_autoPowerModeUseMotionSensor);
@@ -2489,6 +2503,7 @@ public class DeviceIdleController extends SystemService
         mAppStateTracker = mInjector.getAppStateTracker(context,
                 AppSchedulingModuleThread.get().getLooper());
         LocalServices.addService(AppStateTracker.class, mAppStateTracker);
+        mIsLocationPrefetchEnabled = mInjector.isLocationPrefetchEnabled();
         mUseMotionSensor = mInjector.useMotionSensor();
     }
 
@@ -2602,8 +2617,7 @@ public class DeviceIdleController extends SystemService
                     mMotionSensor = mInjector.getMotionSensor();
                 }
 
-                if (getContext().getResources().getBoolean(
-                        com.android.internal.R.bool.config_autoPowerModePrefetchLocation)) {
+                if (mIsLocationPrefetchEnabled) {
                     mLocationRequest = new LocationRequest.Builder(/*intervalMillis=*/ 0)
                         .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
                         .setMaxUpdates(1)
@@ -2798,6 +2812,7 @@ public class DeviceIdleController extends SystemService
                     if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid))
                             == null) {
                         numAdded++;
+                        Counter.logIncrement(USER_ALLOWLIST_ADDITION_METRIC_ID);
                     }
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.e(TAG, "Tried to add unknown package to power save whitelist: " + name);
@@ -2819,6 +2834,7 @@ public class DeviceIdleController extends SystemService
                 reportPowerSaveWhitelistChangedLocked();
                 updateWhitelistAppIdsLocked();
                 writeConfigFileLocked();
+                Counter.logIncrement(USER_ALLOWLIST_REMOVAL_METRIC_ID);
                 return true;
             }
         }
@@ -3779,34 +3795,40 @@ public class DeviceIdleController extends SystemService
             case STATE_SENSING:
                 cancelSensingTimeoutAlarmLocked();
                 moveToStateLocked(STATE_LOCATING, reason);
-                scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT);
-                LocationManager locationManager = mInjector.getLocationManager();
-                if (locationManager != null
-                        && locationManager.getProvider(LocationManager.FUSED_PROVIDER) != null) {
-                    locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                            mLocationRequest,
-                            AppSchedulingModuleThread.getExecutor(),
-                            mGenericLocationListener);
-                    mLocating = true;
+                if (mIsLocationPrefetchEnabled) {
+                    scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT);
+                    LocationManager locationManager = mInjector.getLocationManager();
+                    if (locationManager != null
+                            && locationManager.getProvider(LocationManager.FUSED_PROVIDER)
+                                    != null) {
+                        locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
+                                mLocationRequest,
+                                AppSchedulingModuleThread.getExecutor(),
+                                mGenericLocationListener);
+                        mLocating = true;
+                    } else {
+                        mHasFusedLocation = false;
+                    }
+                    if (locationManager != null
+                            && locationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
+                        mHasGps = true;
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                                1000, 5, mGpsLocationListener, mHandler.getLooper());
+                        mLocating = true;
+                    } else {
+                        mHasGps = false;
+                    }
+                    // If we have a location provider, we're all set, the listeners will move state
+                    // forward.
+                    if (mLocating) {
+                        break;
+                    }
+                    // Otherwise, we have to move from locating into idle maintenance.
                 } else {
-                    mHasFusedLocation = false;
-                }
-                if (locationManager != null
-                        && locationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
-                    mHasGps = true;
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5,
-                            mGpsLocationListener, mHandler.getLooper());
-                    mLocating = true;
-                } else {
-                    mHasGps = false;
-                }
-                // If we have a location provider, we're all set, the listeners will move state
-                // forward.
-                if (mLocating) {
-                    break;
+                    mLocating = false;
                 }
 
-                // Otherwise, we have to move from locating into idle maintenance.
+                // We're not doing any locating work, so move on to the next state.
             case STATE_LOCATING:
                 cancelAlarmLocked();
                 cancelLocatingLocked();
@@ -5303,15 +5325,19 @@ public class DeviceIdleController extends SystemService
                 pw.print("  "); pw.print(mStationaryListeners.size());
                 pw.println(" stationary listeners registered");
             }
-            pw.print("  mLocating="); pw.print(mLocating);
-            pw.print(" mHasGps="); pw.print(mHasGps);
-            pw.print(" mHasFused="); pw.print(mHasFusedLocation);
-            pw.print(" mLocated="); pw.println(mLocated);
-            if (mLastGenericLocation != null) {
-                pw.print("  mLastGenericLocation="); pw.println(mLastGenericLocation);
-            }
-            if (mLastGpsLocation != null) {
-                pw.print("  mLastGpsLocation="); pw.println(mLastGpsLocation);
+            if (mIsLocationPrefetchEnabled) {
+                pw.print("  mLocating="); pw.print(mLocating);
+                pw.print(" mHasGps="); pw.print(mHasGps);
+                pw.print(" mHasFused="); pw.print(mHasFusedLocation);
+                pw.print(" mLocated="); pw.println(mLocated);
+                if (mLastGenericLocation != null) {
+                    pw.print("  mLastGenericLocation="); pw.println(mLastGenericLocation);
+                }
+                if (mLastGpsLocation != null) {
+                    pw.print("  mLastGpsLocation="); pw.println(mLastGpsLocation);
+                }
+            } else {
+                pw.println("  Location prefetching disabled");
             }
             pw.print("  mState="); pw.print(stateToString(mState));
             pw.print(" mLightState=");

@@ -55,6 +55,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -156,7 +157,7 @@ public class VirtualDeviceManagerService extends SystemService {
             VirtualDeviceImpl virtualDevice = virtualDevicesSnapshot.get(i);
             virtualDevice.showToastWhereUidIsRunning(appUid,
                     getContext().getString(
-                            com.android.internal.R.string.vdm_camera_access_denied,
+                            R.string.vdm_camera_access_denied,
                             virtualDevice.getDisplayName()),
                     Toast.LENGTH_LONG, Looper.myLooper());
         }
@@ -619,6 +620,18 @@ public class VirtualDeviceManagerService extends SystemService {
                         listener.onAppsOnAnyVirtualDeviceChanged(latestRunningUids);
                     }
                 });
+            }
+        }
+
+        @Override
+        public void onAuthenticationPrompt(int uid) {
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mVirtualDevices.size(); i++) {
+                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
+                    device.showToastWhereUidIsRunning(uid,
+                            R.string.app_streaming_blocked_message_for_fingerprint_dialog,
+                            Toast.LENGTH_LONG, Looper.getMainLooper());
+                }
             }
         }
 

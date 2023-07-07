@@ -19,11 +19,11 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
-import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.utils.Slogf;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -67,9 +67,8 @@ final class PolicyState<V> {
     /**
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
-    boolean addPolicy(@NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy) {
+    boolean addPolicy(@NonNull EnforcingAdmin admin, @Nullable PolicyValue<V> policy) {
         Objects.requireNonNull(admin);
-        Objects.requireNonNull(policy);
 
         //LinkedHashMap doesn't update the insertion order of existing keys, removing the existing
         // key will cause it to update.
@@ -89,9 +88,9 @@ final class PolicyState<V> {
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
     boolean addPolicy(
-            @NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy,
+            @NonNull EnforcingAdmin admin, @Nullable PolicyValue<V> policy,
             LinkedHashMap<EnforcingAdmin, PolicyValue<V>> globalPoliciesSetByAdmins) {
-        mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), Objects.requireNonNull(policy));
+        mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), policy);
 
         return resolvePolicy(globalPoliciesSetByAdmins);
     }
@@ -210,10 +209,12 @@ final class PolicyState<V> {
         for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
             serializer.startTag(/* namespace= */ null, TAG_ADMIN_POLICY_ENTRY);
 
-            serializer.startTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
-            mPolicyDefinition.savePolicyValueToXml(
-                    serializer, mPoliciesSetByAdmins.get(admin).getValue());
-            serializer.endTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
+            if (mPoliciesSetByAdmins.get(admin) != null) {
+                serializer.startTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
+                mPolicyDefinition.savePolicyValueToXml(
+                        serializer, mPoliciesSetByAdmins.get(admin).getValue());
+                serializer.endTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
+            }
 
             serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMIN_ENTRY);
             admin.saveToXml(serializer);
@@ -223,6 +224,7 @@ final class PolicyState<V> {
         }
     }
 
+    @Nullable
     static <V> PolicyState<V> readFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
 
@@ -244,33 +246,55 @@ final class PolicyState<V> {
                         switch (adminPolicyTag) {
                             case TAG_ENFORCING_ADMIN_ENTRY:
                                 admin = EnforcingAdmin.readFromXml(parser);
+                                if (admin == null) {
+                                    Slogf.wtf(TAG, "Error Parsing TAG_ENFORCING_ADMIN_ENTRY, "
+                                            + "EnforcingAdmin is null");
+                                }
                                 break;
                             case TAG_POLICY_VALUE_ENTRY:
                                 value = policyDefinition.readPolicyValueFromXml(parser);
+                                if (value == null) {
+                                    Slogf.wtf(TAG, "Error Parsing TAG_POLICY_VALUE_ENTRY, "
+                                            + "PolicyValue is null");
+                                }
                                 break;
                         }
                     }
-                    if (admin != null && value != null) {
+                    if (admin != null) {
                         policiesSetByAdmins.put(admin, value);
                     } else {
-                        Log.e(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY");
+                        Slogf.wtf(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY, EnforcingAdmin "
+                                + "is null");
                     }
                     break;
                 case TAG_POLICY_DEFINITION_ENTRY:
                     policyDefinition = PolicyDefinition.readFromXml(parser);
+                    if (policyDefinition == null) {
+                        Slogf.wtf(TAG, "Error Parsing TAG_POLICY_DEFINITION_ENTRY, "
+                                + "PolicyDefinition is null");
+                    }
                     break;
 
                 case TAG_RESOLVED_VALUE_ENTRY:
+                    if (policyDefinition == null) {
+                        Slogf.wtf(TAG, "Error Parsing TAG_RESOLVED_VALUE_ENTRY, "
+                                + "policyDefinition is null");
+                        break;
+                    }
                     currentResolvedPolicy = policyDefinition.readPolicyValueFromXml(parser);
+                    if (currentResolvedPolicy == null) {
+                        Slogf.wtf(TAG, "Error Parsing TAG_RESOLVED_VALUE_ENTRY, "
+                                + "currentResolvedPolicy is null");
+                    }
                     break;
                 default:
-                    Log.e(TAG, "Unknown tag: " + tag);
+                    Slogf.wtf(TAG, "Unknown tag: " + tag);
             }
         }
         if (policyDefinition != null) {
             return new PolicyState<V>(policyDefinition, policiesSetByAdmins, currentResolvedPolicy);
         } else {
-            Log.e("PolicyState", "Error parsing policyState");
+            Slogf.wtf(TAG, "Error parsing policyState, policyDefinition is null");
             return null;
         }
     }

@@ -47,6 +47,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,6 +79,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     BluetoothDevice mDevice;
     private HearingAidInfo mHearingAidInfo;
     private int mGroupId;
+    private Timestamp mBondTimestamp;
 
     // Need this since there is no method for getting RSSI
     short mRssi;
@@ -581,9 +583,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public void setName(String name) {
         // Prevent getName() to be set to null if setName(null) is called
-        if (name != null && !TextUtils.equals(name, getName())) {
-            mDevice.setAlias(name);
-            dispatchAttributesChanged();
+        if (name == null || TextUtils.equals(name, getName())) {
+            return;
+        }
+        mDevice.setAlias(name);
+        dispatchAttributesChanged();
+
+        for (CachedBluetoothDevice cbd : mMemberDevices) {
+            cbd.setName(name);
         }
     }
 
@@ -884,13 +891,23 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
             mDevice.setMessageAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
             mDevice.setSimAccessPermission(BluetoothDevice.ACCESS_UNKNOWN);
+
+            mBondTimestamp = null;
         }
 
         refresh();
 
-        if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
-            connect();
+        if (bondState == BluetoothDevice.BOND_BONDED) {
+            mBondTimestamp = new Timestamp(System.currentTimeMillis());
+
+            if (mDevice.isBondingInitiatedLocally()) {
+                connect();
+            }
         }
+    }
+
+    public Timestamp getBondTimestamp() {
+        return mBondTimestamp;
     }
 
     public BluetoothClass getBtClass() {
@@ -1543,8 +1560,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             refresh();
         }
 
-        return new Pair<>(BluetoothUtils.buildBtRainbowDrawable(
-                        mContext, pair.first, getAddress().hashCode()), pair.second);
+        return BluetoothUtils.getBtRainbowDrawableWithDescription(mContext, this);
     }
 
     void releaseLruCache() {

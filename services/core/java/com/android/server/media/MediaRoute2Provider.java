@@ -31,6 +31,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 abstract class MediaRoute2Provider {
     final ComponentName mComponentName;
@@ -56,7 +57,9 @@ abstract class MediaRoute2Provider {
     public abstract void requestCreateSession(long requestId, String packageName, String routeId,
             @Nullable Bundle sessionHints);
     public abstract void releaseSession(long requestId, String sessionId);
-    public abstract void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference);
+
+    public abstract void updateDiscoveryPreference(
+            Set<String> activelyScanningPackages, RouteDiscoveryPreference discoveryPreference);
 
     public abstract void selectRoute(long requestId, String sessionId, String routeId);
     public abstract void deselectRoute(long requestId, String sessionId, String routeId);

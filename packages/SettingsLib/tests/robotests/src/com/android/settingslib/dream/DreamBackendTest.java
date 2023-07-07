@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.provider.Settings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,6 +85,7 @@ public final class DreamBackendTest {
 
     @Test
     public void testComplicationsEnabledByDefault() {
+        setControlsEnabledOnLockscreen(true);
         assertThat(mBackend.getComplicationsEnabled()).isTrue();
         assertThat(mBackend.getEnabledComplications()).containsExactlyElementsIn(
                 SUPPORTED_DREAM_COMPLICATIONS_LIST);
@@ -91,6 +93,7 @@ public final class DreamBackendTest {
 
     @Test
     public void testEnableComplicationExplicitly() {
+        setControlsEnabledOnLockscreen(true);
         mBackend.setComplicationsEnabled(true);
         assertThat(mBackend.getEnabledComplications()).containsExactlyElementsIn(
                 SUPPORTED_DREAM_COMPLICATIONS_LIST);
@@ -99,6 +102,7 @@ public final class DreamBackendTest {
 
     @Test
     public void testDisableComplications() {
+        setControlsEnabledOnLockscreen(true);
         mBackend.setComplicationsEnabled(false);
         assertThat(mBackend.getEnabledComplications())
                 .containsExactly(COMPLICATION_TYPE_HOME_CONTROLS);
@@ -107,6 +111,7 @@ public final class DreamBackendTest {
 
     @Test
     public void testHomeControlsDisabled_ComplicationsEnabled() {
+        setControlsEnabledOnLockscreen(true);
         mBackend.setComplicationsEnabled(true);
         mBackend.setHomeControlsEnabled(false);
         // Home controls should not be enabled, only date and time.
@@ -118,6 +123,7 @@ public final class DreamBackendTest {
 
     @Test
     public void testHomeControlsDisabled_ComplicationsDisabled() {
+        setControlsEnabledOnLockscreen(true);
         mBackend.setComplicationsEnabled(false);
         mBackend.setHomeControlsEnabled(false);
         assertThat(mBackend.getEnabledComplications()).isEmpty();
@@ -125,9 +131,9 @@ public final class DreamBackendTest {
 
     @Test
     public void testHomeControlsEnabled_ComplicationsDisabled() {
+        setControlsEnabledOnLockscreen(true);
         mBackend.setComplicationsEnabled(false);
         mBackend.setHomeControlsEnabled(true);
-        // Home controls should not be enabled, only date and time.
         final List<Integer> enabledComplications =
                 Collections.singletonList(COMPLICATION_TYPE_HOME_CONTROLS);
         assertThat(mBackend.getEnabledComplications())
@@ -136,9 +142,9 @@ public final class DreamBackendTest {
 
     @Test
     public void testHomeControlsEnabled_ComplicationsEnabled() {
+        setControlsEnabledOnLockscreen(true);
         mBackend.setComplicationsEnabled(true);
         mBackend.setHomeControlsEnabled(true);
-        // Home controls should not be enabled, only date and time.
         final List<Integer> enabledComplications =
                 Arrays.asList(
                         COMPLICATION_TYPE_HOME_CONTROLS,
@@ -147,5 +153,27 @@ public final class DreamBackendTest {
                 );
         assertThat(mBackend.getEnabledComplications())
                 .containsExactlyElementsIn(enabledComplications);
+    }
+
+    @Test
+    public void testHomeControlsEnabled_lockscreenDisabled() {
+        setControlsEnabledOnLockscreen(false);
+        mBackend.setComplicationsEnabled(true);
+        mBackend.setHomeControlsEnabled(true);
+        // Home controls should not be enabled, only date and time.
+        final List<Integer> enabledComplications =
+                Arrays.asList(
+                        COMPLICATION_TYPE_DATE,
+                        COMPLICATION_TYPE_TIME
+                );
+        assertThat(mBackend.getEnabledComplications())
+                .containsExactlyElementsIn(enabledComplications);
+    }
+
+    private void setControlsEnabledOnLockscreen(boolean enabled) {
+        Settings.Secure.putInt(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
+                enabled ? 1 : 0);
     }
 }

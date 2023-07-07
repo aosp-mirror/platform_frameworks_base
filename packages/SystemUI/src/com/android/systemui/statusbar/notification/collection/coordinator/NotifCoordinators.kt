@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable
 import com.android.systemui.statusbar.notification.collection.PipelineDumper
@@ -32,7 +31,6 @@ interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-        notifPipelineFlags: NotifPipelineFlags,
         sectionStyleProvider: SectionStyleProvider,
         dataStoreCoordinator: DataStoreCoordinator,
         hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
@@ -61,6 +59,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         dismissibilityCoordinator: DismissibilityCoordinator,
 ) : NotifCoordinators {
 
+    private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
     private val mOrderedSections: MutableList<NotifSectioner> = ArrayList()
 
@@ -68,11 +67,8 @@ class NotifCoordinatorsImpl @Inject constructor(
      * Creates all the coordinators.
      */
     init {
-        // TODO(b/208866714): formalize the system by which some coordinators may be required by the
-        //  pipeline, such as this DataStoreCoordinator which cannot be removed, as it's a critical
-        //  glue between the pipeline and parts of SystemUI which depend on pipeline output via the
-        //  NotifLiveDataStore.
-        mCoordinators.add(dataStoreCoordinator)
+        // Attach core coordinators.
+        mCoreCoordinators.add(dataStoreCoordinator)
 
         // Attach normal coordinators.
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
@@ -122,6 +118,9 @@ class NotifCoordinatorsImpl @Inject constructor(
      * [Pluggable]s, [NotifCollectionListener]s and [NotifLifetimeExtender]s.
      */
     override fun attach(pipeline: NotifPipeline) {
+        for (c in mCoreCoordinators) {
+            c.attach(pipeline)
+        }
         for (c in mCoordinators) {
             c.attach(pipeline)
         }
@@ -133,7 +132,8 @@ class NotifCoordinatorsImpl @Inject constructor(
      * as they are dumped in the RenderStageManager instead.
      */
     override fun dumpPipeline(d: PipelineDumper) = with(d) {
-        dump("coordinators", mCoordinators)
+        dump("core coordinators", mCoreCoordinators)
+        dump("normal coordinators", mCoordinators)
     }
 
     companion object {

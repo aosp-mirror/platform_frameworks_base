@@ -149,7 +149,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -290,6 +289,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runKillAll(pw);
                 case "make-uid-idle":
                     return runMakeIdle(pw);
+                case "set-deterministic-uid-idle":
+                    return runSetDeterministicUidIdle(pw);
                 case "monitor":
                     return runMonitor(pw);
                 case "watch-uids":
@@ -368,6 +369,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWaitForBroadcastBarrier(pw);
                 case "wait-for-application-barrier":
                     return runWaitForApplicationBarrier(pw);
+                case "wait-for-broadcast-dispatch":
+                    return runWaitForBroadcastDispatch(pw);
                 case "set-ignore-delivery-group-policy":
                     return runSetIgnoreDeliveryGroupPolicy(pw);
                 case "clear-ignore-delivery-group-policy":
@@ -605,15 +608,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        AtomicReference<String> mimeType = new AtomicReference<>(intent.getType());
-
-        if (mimeType.get() == null && intent.getData() != null
-                && "content".equals(intent.getData().getScheme())) {
-            mInterface.getMimeTypeFilterAsync(intent.getData(), mUserId,
-                    new RemoteCallback(result -> {
-                        mimeType.set(result.getPairValue());
-                    }));
-        }
+        final String mimeType = intent.resolveType(mInternal.mContext);
 
         do {
             if (mStopOption) {
@@ -625,7 +620,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     int userIdForQuery = mInternal.mUserController.handleIncomingUser(
                             Binder.getCallingPid(), Binder.getCallingUid(), mUserId, false,
                             ALLOW_NON_FULL, "ActivityManagerShellCommand", null);
-                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType.get(),
+                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType,
                             0, userIdForQuery).getList();
                     if (activities == null || activities.size() <= 0) {
                         getErrPrintWriter().println("Error: Intent does not match any activities: "
@@ -722,12 +717,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
-                        mimeType.get(), null, null, 0, mStartFlags, profilerInfo,
+                        mimeType, null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
                 res = mInternal.startActivityAsUserWithFeature(null, SHELL_PACKAGE_NAME, null,
-                        intent, mimeType.get(), null, null, 0, mStartFlags, profilerInfo,
+                        intent, mimeType, null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
             final long endTime = SystemClock.uptimeMillis();
@@ -916,6 +911,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSendBroadcast(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         Intent intent;
         try {
             intent = makeIntent(UserHandle.USER_CURRENT);
@@ -929,10 +925,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Broadcasting: " + intent);
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
-        mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, bundle, true,
-                false, mUserId);
-        if (!mAsync) {
+        final int result = mInterface.broadcastIntentWithFeature(null, null, intent, null,
+                receiver, 0, null, null, requiredPermissions, null, null,
+                android.app.AppOpsManager.OP_NONE, bundle, true, false, mUserId);
+        Slogf.i(TAG, "Enqueued broadcast %s: " + result, intent);
+        if (result == ActivityManager.BROADCAST_SUCCESS && !mAsync) {
             receiver.waitForFinish();
         }
         return 0;
@@ -1513,6 +1510,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.makePackageIdle(getNextArgRequired(), userId);
+        return 0;
+    }
+
+    int runSetDeterministicUidIdle(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        boolean deterministic = Boolean.parseBoolean(getNextArgRequired());
+        mInterface.setDeterministicUidIdle(deterministic);
         return 0;
     }
 
@@ -3443,7 +3457,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
         pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
-        mInternal.waitForBroadcastIdle(pw);
+        boolean flushBroadcastLoopers = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--flush-broadcast-loopers")) {
+                flushBroadcastLoopers = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInternal.waitForBroadcastIdle(pw, flushBroadcastLoopers);
         return 0;
     }
 
@@ -3469,6 +3493,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runWaitForApplicationBarrier(PrintWriter pw) throws RemoteException {
         pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         mInternal.waitForApplicationBarrier(pw);
+        return 0;
+    }
+
+    int runWaitForBroadcastDispatch(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
+        final Intent intent;
+        try {
+            intent = makeIntent(UserHandle.USER_CURRENT);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        mInternal.waitForBroadcastDispatch(pw, intent);
         return 0;
     }
 
@@ -4245,6 +4281,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      If the given application's uid is in the background and waiting to");
             pw.println("      become idle (not allowing background services), do that now.");
+            pw.println(
+                    "  set-deterministic-uid-idle [--user <USER_ID> | all | current] <true|false>");
+            pw.println("      If true, sets the timing of making UIDs idle consistent and");
+            pw.println("      deterministic. If false, the timing will be variable depending on");
+            pw.println("      other activity on the device. The default is false.");
             pw.println("  monitor [--gdb <port>] [-p <TARGET>] [-s] [-c] [-k]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");

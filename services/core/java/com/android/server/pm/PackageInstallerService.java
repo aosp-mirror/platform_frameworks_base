@@ -104,6 +104,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.utils.RequestThrottle;
 
 import libcore.io.IoUtils;
@@ -510,7 +511,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         } catch (FileNotFoundException e) {
             // Missing sessions are okay, probably first boot
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException e) {
             Slog.wtf(TAG, "Failed reading install sessions", e);
         } finally {
             IoUtils.closeQuietly(fis);
@@ -724,7 +725,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
-            params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
         if (mDisableVerificationForUid != INVALID_UID) {
@@ -1293,8 +1293,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public void installExistingPackage(String packageName, int installFlags, int installReason,
             IntentSender statusReceiver, int userId, List<String> allowListedPermissions) {
         final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
-        installPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
-                installReason, allowListedPermissions, statusReceiver);
+
+        var result = installPackageHelper.installExistingPackageAsUser(packageName, userId,
+                installFlags, installReason, allowListedPermissions, statusReceiver);
+
+        int returnCode = result.first;
+        IntentSender onCompleteSender = result.second;
+        if (onCompleteSender != null) {
+            InstallPackageHelper.onInstallComplete(returnCode, mContext, onCompleteSender);
+        }
     }
 
     @Override
@@ -1309,6 +1316,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
+    private boolean isValidForInstallConstraints(PackageStateInternal ps,
+            String installerPackageName) {
+        return TextUtils.equals(ps.getInstallSource().mInstallerPackageName, installerPackageName)
+                || TextUtils.equals(ps.getInstallSource().mUpdateOwnerPackageName,
+                installerPackageName);
+    }
+
     private CompletableFuture<InstallConstraintsResult> checkInstallConstraintsInternal(
             String installerPackageName, List<String> packageNames,
             InstallConstraints constraints, long timeoutMillis) {
@@ -1317,11 +1331,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         final var snapshot = mPm.snapshotComputer();
         final int callingUid = Binder.getCallingUid();
+        final var callingPackageName = snapshot.getNameForUid(callingUid);
+        if (!TextUtils.equals(callingPackageName, installerPackageName)) {
+            throw new SecurityException("The installerPackageName set by the caller doesn't match "
+                    + "the caller's own package name.");
+        }
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)) {
             for (var packageName : packageNames) {
                 var ps = snapshot.getPackageStateInternal(packageName);
-                if (ps == null || !TextUtils.equals(
-                        ps.getInstallSource().mInstallerPackageName, installerPackageName)) {
+                if (ps == null || !isValidForInstallConstraints(ps, installerPackageName)) {
                     throw new SecurityException("Caller has no access to package " + packageName);
                 }
             }
@@ -1821,6 +1839,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.decreaseIndent();
         }
         mSilentUpdatePolicy.dump(pw);
+        mGentleUpdateHelper.dump(pw);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)

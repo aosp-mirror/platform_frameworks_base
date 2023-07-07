@@ -38,7 +38,6 @@ public final class CredentialManagerServiceImpl extends
         AbstractPerUserSystemService<CredentialManagerServiceImpl, CredentialManagerService> {
     private static final String TAG = "CredManSysServiceImpl";
 
-    // TODO(b/210531) : Make final when update flow is fixed
     @GuardedBy("mLock")
     @NonNull
     private CredentialProviderInfo mInfo;
@@ -48,7 +47,7 @@ public final class CredentialManagerServiceImpl extends
             @NonNull Object lock, int userId, String serviceName)
             throws PackageManager.NameNotFoundException {
         super(master, lock, userId);
-        Slog.d(TAG, "CredentialManagerServiceImpl constructed for: " + serviceName);
+        Slog.i(TAG, "CredentialManagerServiceImpl constructed for: " + serviceName);
         synchronized (mLock) {
             newServiceInfoLocked(ComponentName.unflattenFromString(serviceName));
         }
@@ -63,7 +62,7 @@ public final class CredentialManagerServiceImpl extends
             @NonNull CredentialManagerService master,
             @NonNull Object lock, int userId, CredentialProviderInfo providerInfo) {
         super(master, lock, userId);
-        Slog.d(TAG, "CredentialManagerServiceImpl constructed for: "
+        Slog.i(TAG, "CredentialManagerServiceImpl constructed for: "
                 + providerInfo.getServiceInfo().getComponentName().flattenToString());
         mInfo = providerInfo;
     }
@@ -72,13 +71,12 @@ public final class CredentialManagerServiceImpl extends
     @GuardedBy("mLock")
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws PackageManager.NameNotFoundException {
-        // TODO : Test update flows with multiple providers
         if (mInfo != null) {
-            Slog.d(TAG, "newServiceInfoLocked, mInfo not null : "
+            Slog.i(TAG, "newServiceInfoLocked, mInfo not null : "
                     + mInfo.getServiceInfo().getComponentName().flattenToString() + " , "
                     + serviceComponent.flattenToString());
         } else {
-            Slog.d(TAG, "newServiceInfoLocked, mInfo null, "
+            Slog.i(TAG, "newServiceInfoLocked, mInfo null, "
                     + serviceComponent.flattenToString());
         }
         mInfo = CredentialProviderInfoFactory.create(
@@ -95,11 +93,11 @@ public final class CredentialManagerServiceImpl extends
     public ProviderSession initiateProviderSessionForRequestLocked(
             RequestSession requestSession, List<String> requestOptions) {
         if (!requestOptions.isEmpty() && !isServiceCapableLocked(requestOptions)) {
-            Slog.d(TAG, "Service does not have the required capabilities");
+            Slog.i(TAG, "Service does not have the required capabilities");
             return null;
         }
         if (mInfo == null) {
-            Slog.w(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl, "
+            Slog.w(TAG, "Initiating provider session for request "
                     + "but mInfo is null. This shouldn't happen");
             return null;
         }

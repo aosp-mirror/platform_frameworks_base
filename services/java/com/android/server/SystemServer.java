@@ -593,8 +593,8 @@ public final class SystemServer implements Dumpable {
      * Spawn a thread that monitors for fd leaks.
      */
     private static void spawnFdLeakCheckThread() {
-        final int enableThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ENABLE_THRESHOLD, 1024);
-        final int abortThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ABORT_THRESHOLD, 2048);
+        final int enableThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ENABLE_THRESHOLD, 1600);
+        final int abortThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ABORT_THRESHOLD, 3000);
         final int checkInterval = SystemProperties.getInt(SYSPROP_FDTRACK_INTERVAL, 120);
 
         new Thread(() -> {
@@ -735,7 +735,7 @@ public final class SystemServer implements Dumpable {
                     final String name = args[1];
                     final Dumpable dumpable = mDumpables.get(name);
                     if (dumpable == null) {
-                        pw.printf("No dummpable named %s\n", name);
+                        pw.printf("No dumpable named %s\n", name);
                         return;
                     }
 
@@ -2644,7 +2644,11 @@ public final class SystemServer implements Dumpable {
 
         // AdServicesManagerService (PP API service)
         t.traceBegin("StartAdServicesManagerService");
-        mSystemServiceManager.startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
+        SystemService adServices = mSystemServiceManager
+                .startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
+        if (adServices instanceof Dumpable) {
+            mDumper.addDumpable((Dumpable) adServices);
+        }
         t.traceEnd();
 
         // OnDevicePersonalizationSystemService

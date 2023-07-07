@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.app.Activity.FULLSCREEN_MODE_REQUEST_ENTER;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.FullscreenRequestHandler.REMOTE_CALLBACK_RESULT_KEY;
@@ -807,11 +808,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (under != null) {
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
-                // Create a transition if the activity is playing in case the current activity
-                // didn't commit invisible. That's because if this activity has changed its
-                // visibility while playing transition, there won't able to commit visibility until
-                // the running transition finish.
-                final Transition transition = r.mTransitionController.inPlayingTransition(r)
+                // Create a transition to make sure the activity change is collected.
+                final Transition transition = r.mTransitionController.isShellTransitionsEnabled()
                         && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
                 final boolean changed = r.setOccludesParent(false);
@@ -821,6 +819,13 @@ class ActivityClientController extends IActivityClientController.Stub {
                                 null /*startTask */, null /* remoteTransition */,
                                 null /* displayChange */);
                         r.mTransitionController.setReady(r.getDisplayContent());
+                        if (under != null && under.returningOptions != null
+                                && under.returningOptions.getAnimationType()
+                                        == ANIM_SCENE_TRANSITION) {
+                            // Pass along the scene-transition animation-type
+                            transition.setOverrideAnimation(TransitionInfo.AnimationOptions
+                                    .makeSceneTransitionAnimOptions(), null, null);
+                        }
                     } else {
                         transition.abort();
                     }
@@ -1162,9 +1167,10 @@ class ActivityClientController extends IActivityClientController.Stub {
             }
             return;
         }
+        transition.collect(topFocusedRootTask);
+        executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
         r.mTransitionController.requestStartTransition(transition, topFocusedRootTask,
                 null /* remoteTransition */, null /* displayChange */);
-        executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
         transition.setReady(topFocusedRootTask, true);
     }
 

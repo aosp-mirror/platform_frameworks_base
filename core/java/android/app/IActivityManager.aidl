@@ -102,6 +102,43 @@ interface IActivityManager {
     void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
             String callingPackage);
     void unregisterUidObserver(in IUidObserver observer);
+
+    /**
+     * Registers a UidObserver with a uid filter.
+     *
+     * @param observer The UidObserver implementation to register.
+     * @param which    A bitmask of events to observe. See ActivityManager.UID_OBSERVER_*.
+     * @param cutpoint The cutpoint for onUidStateChanged events. When the state crosses this
+     *                 threshold in either direction, onUidStateChanged will be called.
+     * @param callingPackage The name of the calling package.
+     * @param uids     A list of uids to watch. If all uids are to be watched, use
+     *                 registerUidObserver instead.
+     * @throws RemoteException
+     * @return Returns A binder token identifying the UidObserver registration.
+     */
+    IBinder registerUidObserverForUids(in IUidObserver observer, int which, int cutpoint,
+            String callingPackage, in int[] uids);
+
+    /**
+     * Adds a uid to the list of uids that a UidObserver will receive updates about.
+     *
+     * @param observerToken  The binder token identifying the UidObserver registration.
+     * @param callingPackage The name of the calling package.
+     * @param uid            The uid to watch.
+     * @throws RemoteException
+     */
+    void addUidToObserver(in IBinder observerToken, String callingPackage, int uid);
+
+    /**
+     * Removes a uid from the list of uids that a UidObserver will receive updates about.
+     *
+     * @param observerToken  The binder token identifying the UidObserver registration.
+     * @param callingPackage The name of the calling package.
+     * @param uid            The uid to stop watching.
+     * @throws RemoteException
+     */
+    void removeUidFromObserver(in IBinder observerToken, String callingPackage, int uid);
+
     boolean isUidActive(int uid, String callingPackage);
     @JavaPassthrough(annotation=
             "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)")
@@ -110,13 +147,13 @@ interface IActivityManager {
     int checkPermission(in String permission, int pid, int uid);
 
     /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiBegin(int apiType, int appUid, int appPid);
+    oneway void logFgsApiBegin(int apiType, int appUid, int appPid);
 
     /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiEnd(int apiType, int appUid, int appPid);
+    oneway void logFgsApiEnd(int apiType, int appUid, int appPid);
 
     /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
+    oneway void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -299,6 +336,7 @@ interface IActivityManager {
     boolean registerForegroundServiceObserver(in IForegroundServiceObserver callback);
     @UnsupportedAppUsage
     void forceStopPackage(in String packageName, int userId);
+    void forceStopPackageEvenWhenStopping(in String packageName, int userId);
     boolean killPids(in int[] pids, in String reason, boolean secure);
     @UnsupportedAppUsage
     List<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags);
@@ -569,6 +607,7 @@ interface IActivityManager {
 
     void killPackageDependents(in String packageName, int userId);
     void makePackageIdle(String packageName, int userId);
+    void setDeterministicUidIdle(boolean deterministic);
     int getMemoryTrimLevel();
     boolean isVrModePackageEnabled(in ComponentName packageName);
     void notifyLockedProfile(int userId);
@@ -594,7 +633,6 @@ interface IActivityManager {
     void setHasTopUi(boolean hasTopUi);
 
     // Start of O transactions
-    int restartUserInBackground(int userId);
     /** Cancels the window transitions for the given task. */
     @UnsupportedAppUsage
     void cancelTaskWindowTransition(int taskId);
@@ -868,6 +906,8 @@ interface IActivityManager {
      * progress.
      */
     boolean startProfileWithListener(int userid, IProgressListener unlockProgressListener);
+
+    int restartUserInBackground(int userId, int userStartMode);
 
     /**
      * Gets the ids of displays that can be used on {@link #startUserInBackgroundVisibleOnDisplay(int userId, int displayId)}.

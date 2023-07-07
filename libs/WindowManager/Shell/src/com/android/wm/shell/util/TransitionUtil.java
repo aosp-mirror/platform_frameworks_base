@@ -66,6 +66,12 @@ public class TransitionUtil {
         return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
     }
 
+    /** Returns {@code true} if the transition is opening or closing mode. */
+    public static boolean isOpenOrCloseMode(@TransitionInfo.TransitionMode int mode) {
+        return mode == TRANSIT_OPEN || mode == TRANSIT_CLOSE
+                || mode == TRANSIT_TO_FRONT || mode == TRANSIT_TO_BACK;
+    }
+
     /** Returns {@code true} if the transition has a display change. */
     public static boolean hasDisplayChange(@NonNull TransitionInfo info) {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
@@ -91,6 +97,11 @@ public class TransitionUtil {
                 && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
     }
 
+    /** Returns `true` if `change` is the divider. */
+    public static boolean isDividerBar(TransitionInfo.Change change) {
+        return isNonApp(change) && change.hasFlags(FLAG_IS_DIVIDER_BAR);
+    }
+
     /** Returns `true` if `change` is only re-ordering. */
     public static boolean isOrderOnly(TransitionInfo.Change change) {
         return change.getMode() == TRANSIT_CHANGE
@@ -110,15 +121,14 @@ public class TransitionUtil {
         @Override
         public boolean test(TransitionInfo.Change change) {
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo == null) return false;
             // Children always come before parent since changes are in top-to-bottom z-order.
-            if ((taskInfo == null) || mChildTaskTargets.get(taskInfo.taskId)) {
-                // has children, so not a leaf. Skip.
-                return false;
-            }
+            boolean hasChildren = mChildTaskTargets.get(taskInfo.taskId);
             if (taskInfo.hasParentTask()) {
                 mChildTaskTargets.put(taskInfo.parentTaskId, true);
             }
-            return true;
+            // If it has children, it's not a leaf.
+            return !hasChildren;
         }
     }
 
@@ -156,8 +166,26 @@ public class TransitionUtil {
         t.setPosition(leash, absBounds.left - info.getRoot(rootIdx).getOffset().x,
                 absBounds.top - info.getRoot(rootIdx).getOffset().y);
 
+        if (isDividerBar(change)) {
+            if (isOpeningType(mode)) {
+                t.setAlpha(leash, 0.f);
+            }
+            // Set the transition leash position to 0 in case the divider leash position being
+            // taking down.
+            t.setPosition(leash, 0, 0);
+            t.setLayer(leash, Integer.MAX_VALUE);
+            return;
+        }
+
         // Put all the OPEN/SHOW on top
-        if (TransitionUtil.isOpeningType(mode)) {
+        if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+            // Wallpaper is always at the bottom, opening wallpaper on top of closing one.
+            if (mode == WindowManager.TRANSIT_OPEN || mode == WindowManager.TRANSIT_TO_FRONT) {
+                t.setLayer(leash, -zSplitLine + info.getChanges().size() - layer);
+            } else {
+                t.setLayer(leash, -zSplitLine - layer);
+            }
+        } else if (TransitionUtil.isOpeningType(mode)) {
             if (isOpening) {
                 t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
                 if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
@@ -203,7 +231,11 @@ public class TransitionUtil {
         t.reparent(change.getLeash(), leashSurface);
         t.setAlpha(change.getLeash(), 1.0f);
         t.show(change.getLeash());
-        t.setPosition(change.getLeash(), 0, 0);
+        if (!isDividerBar(change)) {
+            // For divider, don't modify its inner leash position when creating the outer leash
+            // for the transition. In case the position being wrong after the transition finished.
+            t.setPosition(change.getLeash(), 0, 0);
+        }
         t.setLayer(change.getLeash(), 0);
         return leashSurface;
     }
@@ -214,11 +246,20 @@ public class TransitionUtil {
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             TransitionInfo info, SurfaceControl.Transaction t,
             @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
+        return newTarget(change, order, false /* forceTranslucent */, info, t, leashMap);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change info
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            boolean forceTranslucent, TransitionInfo info, SurfaceControl.Transaction t,
+            @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final SurfaceControl leash = createLeash(info, change, order, t);
         if (leashMap != null) {
             leashMap.put(change.getLeash(), leash);
         }
-        return newTarget(change, order, leash);
+        return newTarget(change, order, leash, forceTranslucent);
     }
 
     /**
@@ -226,6 +267,18 @@ public class TransitionUtil {
      */
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             SurfaceControl leash) {
+        return newTarget(change, order, leash, false /* forceTranslucent */);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change and leash
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            SurfaceControl leash, boolean forceTranslucent) {
+        if (isDividerBar(change)) {
+            return getDividerTarget(change, leash);
+        }
+
         int taskId;
         boolean isNotInRecents;
         ActivityManager.RunningTaskInfo taskInfo;
@@ -251,7 +304,7 @@ public class TransitionUtil {
                 // TODO: once we can properly sync transactions across process,
                 // then get rid of this leash.
                 leash,
-                (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
+                forceTranslucent || (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
                 null,
                 // TODO(shell-transitions): we need to send content insets? evaluate how its used.
                 new Rect(0, 0, 0, 0),
@@ -265,13 +318,24 @@ public class TransitionUtil {
                 new Rect(change.getStartAbsBounds()),
                 taskInfo,
                 change.getAllowEnterPip(),
-                (change.getFlags() & FLAG_IS_DIVIDER_BAR) != 0
-                        ? TYPE_DOCK_DIVIDER : INVALID_WINDOW_TYPE
+                INVALID_WINDOW_TYPE
         );
         target.setWillShowImeOnTarget(
                 (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0);
         target.setRotationChange(change.getEndRotation() - change.getStartRotation());
+        target.backgroundColor = change.getBackgroundColor();
         return target;
+    }
+
+    private static RemoteAnimationTarget getDividerTarget(TransitionInfo.Change change,
+            SurfaceControl leash) {
+        return new RemoteAnimationTarget(-1 /* taskId */, newModeToLegacyMode(change.getMode()),
+                leash, false /* isTranslucent */, null /* clipRect */,
+                null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
+                new android.graphics.Point(0, 0) /* position */, change.getStartAbsBounds(),
+                change.getStartAbsBounds(), new WindowConfiguration(), true, null /* startLeash */,
+                null /* startBounds */, null /* taskInfo */, false /* allowEnterPip */,
+                TYPE_DOCK_DIVIDER);
     }
 
     /**
@@ -286,5 +350,15 @@ public class TransitionUtil {
         rootIdx = info.findRootIndex(change.getStartDisplayId());
         if (rootIdx >= 0) return rootIdx;
         return 0;
+    }
+
+    /**
+     * Gets the {@link TransitionInfo.Root} for the given {@link TransitionInfo.Change}.
+     * @see #rootIndexFor(TransitionInfo.Change, TransitionInfo)
+     */
+    @NonNull
+    public static TransitionInfo.Root getRootFor(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
+        return info.getRoot(rootIndexFor(change, info));
     }
 }

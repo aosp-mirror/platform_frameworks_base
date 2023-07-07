@@ -18,8 +18,10 @@ package com.android.systemui.qs.pipeline.dagger
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
+import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepositoryImpl
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecSettingsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -43,6 +45,11 @@ abstract class QSPipelineModule {
     abstract fun bindCurrentTilesInteractor(
         impl: CurrentTilesInteractorImpl
     ): CurrentTilesInteractor
+
+    @Binds
+    abstract fun provideInstalledTilesPackageRepository(
+        impl: InstalledTilesComponentRepositoryImpl
+    ): InstalledTilesComponentRepository
 
     @Binds
     @IntoMap

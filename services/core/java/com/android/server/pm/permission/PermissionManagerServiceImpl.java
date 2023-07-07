@@ -23,7 +23,6 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DEFAULT;
-import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DENIED;
 import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
@@ -142,6 +141,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionGroup;
@@ -2811,29 +2811,55 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                 + pkg.getPackageName());
                     }
 
-                    if ((bp.isNormal() && shouldGrantNormalPermission)
-                            || (bp.isSignature()
-                                    && (!bp.isPrivileged() || CollectionUtils.contains(
-                                            isPrivilegedPermissionAllowlisted, permName))
-                                    && (CollectionUtils.contains(shouldGrantSignaturePermission,
-                                            permName)
-                                            || (((bp.isPrivileged() && CollectionUtils.contains(
-                                                    shouldGrantPrivilegedPermissionIfWasGranted,
-                                                    permName)) || bp.isDevelopment() || bp.isRole())
-                                                    && origState.isPermissionGranted(permName))))
-                            || (bp.isInternal()
-                                    && (!bp.isPrivileged() || CollectionUtils.contains(
-                                            isPrivilegedPermissionAllowlisted, permName))
-                                    && (CollectionUtils.contains(shouldGrantInternalPermission,
-                                            permName)
-                                            || (((bp.isPrivileged() && CollectionUtils.contains(
-                                                    shouldGrantPrivilegedPermissionIfWasGranted,
-                                                    permName)) || bp.isDevelopment() || bp.isRole())
-                                                    && origState.isPermissionGranted(permName))))) {
-                        // Grant an install permission.
-                        if (uidState.grantPermission(bp)) {
-                            installPermissionsChangedForUser = true;
+                    if (bp.isNormal() || bp.isSignature() || bp.isInternal()) {
+                        if ((bp.isNormal() && shouldGrantNormalPermission)
+                                || (bp.isSignature()
+                                        && (!bp.isPrivileged() || CollectionUtils.contains(
+                                                isPrivilegedPermissionAllowlisted, permName))
+                                        && (CollectionUtils.contains(shouldGrantSignaturePermission,
+                                                permName)
+                                                || (((bp.isPrivileged() && CollectionUtils.contains(
+                                                        shouldGrantPrivilegedPermissionIfWasGranted,
+                                                        permName)) || bp.isDevelopment()
+                                                                || bp.isRole())
+                                                        && origState.isPermissionGranted(
+                                                                permName))))
+                                || (bp.isInternal()
+                                        && (!bp.isPrivileged() || CollectionUtils.contains(
+                                                isPrivilegedPermissionAllowlisted, permName))
+                                        && (CollectionUtils.contains(shouldGrantInternalPermission,
+                                                permName)
+                                                || (((bp.isPrivileged() && CollectionUtils.contains(
+                                                        shouldGrantPrivilegedPermissionIfWasGranted,
+                                                        permName)) || bp.isDevelopment()
+                                                                || bp.isRole())
+                                                        && origState.isPermissionGranted(
+                                                                permName))))) {
+                            // Grant an install permission.
+                            if (uidState.grantPermission(bp)) {
+                                installPermissionsChangedForUser = true;
+                            }
+                        } else {
+                            if (DEBUG_PERMISSIONS) {
+                                boolean wasGranted = uidState.isPermissionGranted(bp.getName());
+                                if (wasGranted || bp.isAppOp()) {
+                                    Slog.i(TAG, (wasGranted ? "Un-granting" : "Not granting")
+                                            + " permission " + perm
+                                            + " from package " + friendlyName
+                                            + " (protectionLevel=" + bp.getProtectionLevel()
+                                            + " flags=0x"
+                                            + Integer.toHexString(PackageInfoUtils.appInfoFlags(pkg,
+                                            ps))
+                                            + ")");
+                                }
+                            }
+                            if (uidState.revokePermission(bp)) {
+                                installPermissionsChangedForUser = true;
+                            }
                         }
+                        PermissionState origPermState = origState.getPermissionState(perm);
+                        int flags = origPermState != null ? origPermState.getFlags() : 0;
+                        uidState.updatePermissionFlags(bp, MASK_PERMISSION_FLAGS_ALL, flags);
                     } else if (bp.isRuntime()) {
                         boolean hardRestricted = bp.isHardRestricted();
                         boolean softRestricted = bp.isSoftRestricted();
@@ -2957,22 +2983,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         uidState.updatePermissionFlags(bp, MASK_PERMISSION_FLAGS_ALL,
                                 flags);
                     } else {
-                        if (DEBUG_PERMISSIONS) {
-                            boolean wasGranted = uidState.isPermissionGranted(bp.getName());
-                            if (wasGranted || bp.isAppOp()) {
-                                Slog.i(TAG, (wasGranted ? "Un-granting" : "Not granting")
-                                        + " permission " + perm
-                                        + " from package " + friendlyName
-                                        + " (protectionLevel=" + bp.getProtectionLevel()
-                                        + " flags=0x"
-                                        + Integer.toHexString(PackageInfoUtils.appInfoFlags(pkg,
-                                                ps))
-                                        + ")");
-                            }
-                        }
-                        if (uidState.removePermissionState(bp.getName())) {
-                            installPermissionsChangedForUser = true;
-                        }
+                        Slog.wtf(LOG_TAG, "Unknown permission protection " + bp.getProtection()
+                                + " for permission " + bp.getName());
                     }
                 }
 
@@ -3656,25 +3668,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         for (String permission : pkg.getRequestedPermissions()) {
             Integer permissionState = permissionStates.get(permission);
-
-            if (Objects.equals(permission, Manifest.permission.USE_FULL_SCREEN_INTENT)
-                    && permissionState == null) {
-                final PackageStateInternal ps;
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    ps = mPackageManagerInt.getPackageStateInternal(pkg.getPackageName());
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-                final String[] useFullScreenIntentPackageNames =
-                        mContext.getResources().getStringArray(
-                                com.android.internal.R.array.config_useFullScreenIntentPackages);
-                final boolean canUseFullScreenIntent = (ps != null && ps.isSystem())
-                        || ArrayUtils.contains(useFullScreenIntentPackageNames,
-                                pkg.getPackageName());
-                permissionState = canUseFullScreenIntent ? PERMISSION_STATE_GRANTED
-                        : PERMISSION_STATE_DENIED;
-            }
 
             if (permissionState == null || permissionState == PERMISSION_STATE_DEFAULT) {
                 continue;
@@ -4546,8 +4539,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             final int appId = ps.getAppId();
             final LegacyPermissionState legacyState;
             if (ps.hasSharedUser()) {
-                legacyState = mPackageManagerInt.getSharedUserApi(
-                        ps.getSharedUserAppId()).getSharedUserLegacyPermissionState();
+                final int sharedUserId = ps.getSharedUserAppId();
+                SharedUserApi sharedUserApi = mPackageManagerInt.getSharedUserApi(sharedUserId);
+                if (sharedUserApi == null) {
+                    Slog.wtf(TAG, "Missing shared user Api for " + sharedUserId);
+                    return;
+                }
+                legacyState = sharedUserApi.getSharedUserLegacyPermissionState();
             } else {
                 legacyState = ps.getLegacyPermissionState();
             }
@@ -4592,8 +4590,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             ps.setInstallPermissionsFixed(false);
             final LegacyPermissionState legacyState;
             if (ps.hasSharedUser()) {
-                legacyState = mPackageManagerInt.getSharedUserApi(
-                        ps.getSharedUserAppId()).getSharedUserLegacyPermissionState();
+                final int sharedUserId = ps.getSharedUserAppId();
+                SharedUserApi sharedUserApi = mPackageManagerInt.getSharedUserApi(sharedUserId);
+                if (sharedUserApi == null) {
+                    Slog.wtf(TAG, "Missing shared user Api for " + sharedUserId);
+                    return;
+                }
+                legacyState = sharedUserApi.getSharedUserLegacyPermissionState();
             } else {
                 legacyState = ps.getLegacyPermissionState();
             }

@@ -649,9 +649,9 @@ public class LogicalDisplayMapperTest {
         assertEquals(0, mLogicalDisplayMapper.getDisplayLocked(device2)
                 .getLeadDisplayIdLocked());
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device1)
-                .getThermalBrightnessThrottlingDataIdLocked());
+                .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device2)
-                .getThermalBrightnessThrottlingDataIdLocked());
+                .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
 
         mLogicalDisplayMapper.setDeviceStateLocked(1, false);
         advanceTime(1000);
@@ -661,10 +661,10 @@ public class LogicalDisplayMapperTest {
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device1)
-                        .getThermalBrightnessThrottlingDataIdLocked());
+                        .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device2)
-                        .getThermalBrightnessThrottlingDataIdLocked());
+                        .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
 
         mLogicalDisplayMapper.setDeviceStateLocked(2, false);
         advanceTime(1000);
@@ -674,10 +674,10 @@ public class LogicalDisplayMapperTest {
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device1)
-                        .getThermalBrightnessThrottlingDataIdLocked());
+                        .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device2)
-                        .getThermalBrightnessThrottlingDataIdLocked());
+                        .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
     }
 
     @Test

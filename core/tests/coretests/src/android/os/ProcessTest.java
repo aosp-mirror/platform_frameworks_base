@@ -73,6 +73,7 @@ public class ProcessTest extends TestCase {
     }
 
     public void testGetAdvertisedMem() {
+        assertTrue(Process.getAdvertisedMem() > 0);
         assertTrue(Process.getTotalMemory() <= Process.getAdvertisedMem());
     }
 }

@@ -46,6 +46,10 @@ interface NoteTaskModule {
     @[Binds IntoMap ClassKey(LaunchNoteTaskManagedProfileProxyActivity::class)]
     fun LaunchNoteTaskManagedProfileProxyActivity.bindNoteTaskLauncherProxyActivity(): Activity
 
+    @[Binds IntoMap ClassKey(LaunchNotesRoleSettingsTrampolineActivity::class)]
+    fun LaunchNotesRoleSettingsTrampolineActivity.bindLaunchNotesRoleSettingsTrampolineActivity():
+        Activity
+
     @[Binds IntoMap ClassKey(CreateNoteTaskShortcutActivity::class)]
     fun CreateNoteTaskShortcutActivity.bindNoteTaskShortcutActivity(): Activity
 
