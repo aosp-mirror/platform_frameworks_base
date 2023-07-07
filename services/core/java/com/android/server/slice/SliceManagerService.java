@@ -65,7 +65,6 @@ import com.android.internal.app.AssistUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -226,12 +225,18 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @Override
-    public int checkSlicePermission(Uri uri, String callingPkg, String pkg, int pid, int uid,
+    public int checkSlicePermission(Uri uri, String callingPkg, int pid, int uid,
             String[] autoGrantPermissions) {
+        return checkSlicePermissionInternal(uri, callingPkg, null /* pkg */, pid, uid,
+                autoGrantPermissions);
+    }
+
+    private int checkSlicePermissionInternal(Uri uri, String callingPkg, String pkg, int pid,
+            int uid, String[] autoGrantPermissions) {
         int userId = UserHandle.getUserId(uid);
         if (pkg == null) {
             for (String p : mContext.getPackageManager().getPackagesForUid(uid)) {
-                if (checkSlicePermission(uri, callingPkg, p, pid, uid, autoGrantPermissions)
+                if (checkSlicePermissionInternal(uri, callingPkg, p, pid, uid, autoGrantPermissions)
                         == PERMISSION_GRANTED) {
                     return PERMISSION_GRANTED;
                 }
@@ -395,7 +400,8 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     protected int checkAccess(String pkg, Uri uri, int uid, int pid) {
-        return checkSlicePermission(uri, null, pkg, pid, uid, null);
+        return checkSlicePermissionInternal(uri, null /* callingPkg */, pkg, pid, uid,
+                null /* autoGrantPermissions */);
     }
 
     private String getProviderPkg(Uri uri, int user) {
@@ -404,7 +410,7 @@ public class SliceManagerService extends ISliceManager.Stub {
             String providerName = getUriWithoutUserId(uri).getAuthority();
             ProviderInfo provider = mContext.getPackageManager().resolveContentProviderAsUser(
                     providerName, 0, getUserIdFromUri(uri, user));
-            return provider.packageName;
+            return provider == null ? null : provider.packageName;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -629,7 +635,7 @@ public class SliceManagerService extends ISliceManager.Stub {
                 .scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority)
                 .build(), 0);
-        return mPermissions.getAllPackagesGranted(pkg);
+        return pkg == null ? new String[0] : mPermissions.getAllPackagesGranted(pkg);
     }
 
     /**

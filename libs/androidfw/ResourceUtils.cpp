@@ -18,7 +18,7 @@
 
 namespace android {
 
-bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, StringPiece* out_type,
+bool ExtractResourceName(StringPiece str, StringPiece* out_package, StringPiece* out_type,
                          StringPiece* out_entry) {
   *out_package = "";
   *out_type = "";
@@ -33,16 +33,16 @@ bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, Strin
   while (current != end) {
     if (out_type->size() == 0 && *current == '/') {
       has_type_separator = true;
-      out_type->assign(start, current - start);
+      *out_type = StringPiece(start, current - start);
       start = current + 1;
     } else if (out_package->size() == 0 && *current == ':') {
       has_package_separator = true;
-      out_package->assign(start, current - start);
+      *out_package = StringPiece(start, current - start);
       start = current + 1;
     }
     current++;
   }
-  out_entry->assign(start, end - start);
+  *out_entry = StringPiece(start, end - start);
 
   return !(has_package_separator && out_package->empty()) &&
          !(has_type_separator && out_type->empty());
@@ -50,7 +50,7 @@ bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, Strin
 
 base::expected<AssetManager2::ResourceName, NullOrIOError> ToResourceName(
     const StringPoolRef& type_string_ref, const StringPoolRef& entry_string_ref,
-    const StringPiece& package_name) {
+    StringPiece package_name) {
   AssetManager2::ResourceName name{
     .package = package_name.data(),
     .package_len = package_name.size(),

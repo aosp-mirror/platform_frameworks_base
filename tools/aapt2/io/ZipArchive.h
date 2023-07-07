@@ -32,17 +32,17 @@ namespace io {
 // and copied into memory when opened. Otherwise it is mmapped from the ZIP archive.
 class ZipFile : public IFile {
  public:
-  ZipFile(::ZipArchiveHandle handle, const ::ZipEntry& entry, const Source& source);
+  ZipFile(::ZipArchiveHandle handle, const ::ZipEntry& entry, const android::Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
   std::unique_ptr<io::InputStream> OpenInputStream() override;
-  const Source& GetSource() const override;
+  const android::Source& GetSource() const override;
   bool WasCompressed() override;
 
  private:
   ::ZipArchiveHandle zip_handle_;
   ::ZipEntry zip_entry_;
-  Source source_;
+  android::Source source_;
 };
 
 class ZipFileCollection;
@@ -61,10 +61,10 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
 // An IFileCollection that represents a ZIP archive and the entries within it.
 class ZipFileCollection : public IFileCollection {
  public:
-  static std::unique_ptr<ZipFileCollection> Create(const android::StringPiece& path,
+  static std::unique_ptr<ZipFileCollection> Create(android::StringPiece path,
                                                    std::string* outError);
 
-  io::IFile* FindFile(const android::StringPiece& path) override;
+  io::IFile* FindFile(android::StringPiece path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
   char GetDirSeparator() override;
 
@@ -76,7 +76,7 @@ class ZipFileCollection : public IFileCollection {
 
   ZipArchiveHandle handle_;
   std::vector<std::unique_ptr<IFile>> files_;
-  std::map<std::string, IFile*> files_by_name_;
+  std::map<std::string, IFile*, std::less<>> files_by_name_;
 };
 
 }  // namespace io

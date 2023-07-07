@@ -22,6 +22,7 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 
 import com.android.internal.util.Preconditions;
 
@@ -65,6 +66,12 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
     @Override
     public long getDuration() {
         return -1;
+    }
+
+    /** @hide */
+    @Override
+    public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
+        return vibrator.areAllPrimitivesSupported(mPrimitiveId);
     }
 
     /** @hide */

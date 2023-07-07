@@ -482,6 +482,17 @@ static void android_location_gnss_hal_GnssNative_agps_set_id(JNIEnv* env, jclass
     agnssRilIface->setSetId(type, setid_string);
 }
 
+static void android_location_gnss_hal_GnssNative_inject_ni_supl_message_data(JNIEnv* env, jclass,
+                                                                             jbyteArray data,
+                                                                             jint length,
+                                                                             jint slotIndex) {
+    if (agnssRilIface == nullptr) {
+        ALOGE("%s: IAGnssRil interface not available.", __func__);
+        return;
+    }
+    agnssRilIface->injectNiSuplMessageData(data, length, slotIndex);
+}
+
 static jint android_location_gnss_hal_GnssNative_read_nmea(JNIEnv* env, jclass,
                                                            jbyteArray nmeaArray, jint buffer_size) {
     return gnssHal->readNmea(nmeaArray, buffer_size);
@@ -974,6 +985,8 @@ static const JNINativeMethod sLocationProviderMethods[] = {
                  android_location_gnss_hal_GnssNative_agps_set_reference_location_cellid)},
         {"native_set_agps_server", "(ILjava/lang/String;I)V",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_set_agps_server)},
+        {"native_inject_ni_supl_message_data", "([BII)V",
+         reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_inject_ni_supl_message_data)},
         {"native_send_ni_response", "(II)V",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_send_ni_response)},
         {"native_get_internal_state", "()Ljava/lang/String;",

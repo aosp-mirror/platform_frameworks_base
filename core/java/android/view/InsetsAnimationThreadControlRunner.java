@@ -34,6 +34,7 @@ import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.animation.Interpolator;
+import android.view.inputmethod.ImeTracker;
 
 /**
  * Insets animation runner that uses {@link InsetsAnimationThread} to run the animation off from the
@@ -112,12 +113,13 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
             Interpolator interpolator, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
-            CompatibilityInfo.Translator translator, Handler mainThreadHandler) {
+            CompatibilityInfo.Translator translator, Handler mainThreadHandler,
+            @Nullable ImeTracker.Token statsToken) {
         mMainThreadHandler = mainThreadHandler;
         mOuterCallbacks = controller;
         mControl = new InsetsAnimationControlImpl(controls, frame, state, listener, types,
                 mCallbacks, durationMs, interpolator, animationType, layoutInsetsDuringAnimation,
-                translator);
+                translator, statsToken);
         InsetsAnimationThread.getHandler().post(() -> {
             if (mControl.isCancelled()) {
                 return;
@@ -138,6 +140,11 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     @UiThread
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         mControl.dumpDebug(proto, fieldId);
+    }
+
+    @Override
+    public ImeTracker.Token getStatsToken() {
+        return mControl.getStatsToken();
     }
 
     @Override

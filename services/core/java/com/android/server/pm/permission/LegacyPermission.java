@@ -21,9 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PermissionInfo;
 import android.util.Log;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
 

@@ -16,7 +16,6 @@
 package com.android.server.notification;
 
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationChannel.ALLOW_BUBBLE_OFF;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
@@ -81,7 +80,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
                 && !mActivityManager.isLowRamDevice()
                 && record.isConversation()
                 && record.getShortcutInfo() != null
-                && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
+                && !record.getNotification().isFgsOrUij();
 
         boolean userEnabledBubbles = mConfig.bubblesEnabled(record.getUser());
         int appPreference =
@@ -182,7 +181,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
 
     /**
      * Whether an intent is properly configured to display in an {@link
-     * com.android.wm.shell.TaskView} for bubbling.
+     * TaskView} for bubbling.
      *
      * @param context       the context to use.
      * @param pendingIntent the pending intent of the bubble.

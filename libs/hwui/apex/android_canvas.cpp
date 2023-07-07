@@ -23,7 +23,9 @@
 #include <utils/Color.h>
 
 #include <SkBitmap.h>
+#include <SkColorSpace.h>
 #include <SkSurface.h>
+#include <SkRefCnt.h>
 
 using namespace android;
 

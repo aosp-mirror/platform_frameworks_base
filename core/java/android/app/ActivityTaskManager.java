@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -58,6 +60,12 @@ public class ActivityTaskManager {
      * @hide
      */
     public static final int INVALID_TASK_ID = -1;
+
+    /**
+     * Invalid windowing mode.
+     * @hide
+     */
+    public static final int INVALID_WINDOWING_MODE = -1;
 
     /**
      * Input parameter to {@link IActivityTaskManager#resizeTask} which indicates
@@ -369,7 +377,8 @@ public class ActivityTaskManager {
      * @hide
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getTasks(maxNum, false /* filterForVisibleRecents */);
+        return getTasks(maxNum, false /* filterForVisibleRecents */, false /* keepIntentExtra */,
+                INVALID_DISPLAY);
     }
 
     /**
@@ -378,7 +387,8 @@ public class ActivityTaskManager {
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(
             int maxNum, boolean filterOnlyVisibleRecents) {
-        return getTasks(maxNum, filterOnlyVisibleRecents, false /* keepIntentExtra */);
+        return getTasks(maxNum, filterOnlyVisibleRecents, false /* keepIntentExtra */,
+                INVALID_DISPLAY);
     }
 
     /**
@@ -388,8 +398,20 @@ public class ActivityTaskManager {
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(
             int maxNum, boolean filterOnlyVisibleRecents, boolean keepIntentExtra) {
+        return getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra, INVALID_DISPLAY);
+    }
+
+    /**
+     * @return List of running tasks that can be filtered by visibility and displayId in recents
+     * and keep intent extra.
+     * @param displayId the target display id, or {@link INVALID_DISPLAY} not to filter by displayId
+     * @hide
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(
+            int maxNum, boolean filterOnlyVisibleRecents, boolean keepIntentExtra, int displayId) {
         try {
-            return getService().getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra);
+            return getService().getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra,
+                    displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -475,6 +497,16 @@ public class ActivityTaskManager {
     public void detachNavigationBarFromApp(@NonNull IBinder transition) {
         try {
             getService().detachNavigationBarFromApp(transition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Update the list of packages allowed in lock task mode. */
+    @RequiresPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES)
+    public void updateLockTaskPackages(@NonNull Context context, @NonNull String[] packages) {
+        try {
+            getService().updateLockTaskPackages(context.getUserId(), packages);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

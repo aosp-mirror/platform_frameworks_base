@@ -23,8 +23,11 @@ import android.util.AttributeSet
 import android.view.View
 
 open class BaseDrawingView : View {
+    val sRGB = ColorSpace.get(ColorSpace.Named.SRGB)
+    val displayP3 = ColorSpace.get(ColorSpace.Named.DISPLAY_P3)
     val scRGB = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB)
     val bt2020 = ColorSpace.get(ColorSpace.Named.BT2020)
+    val bt2020_pq = ColorSpace.get(ColorSpace.Named.BT2020_PQ)
     val lab = ColorSpace.get(ColorSpace.Named.CIE_LAB)
 
     val density: Float

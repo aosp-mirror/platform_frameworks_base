@@ -24,14 +24,19 @@ import java.io.PrintWriter;
 
 abstract class TintController {
 
-    private ColorDisplayService.TintValueAnimator mAnimator;
+    /**
+     * The default transition time, in milliseconds, for color transforms to turn on/off.
+     */
+    private static final long TRANSITION_DURATION = 3000L;
+
+    private ValueAnimator mAnimator;
     private Boolean mIsActivated;
 
-    public ColorDisplayService.TintValueAnimator getAnimator() {
+    public ValueAnimator getAnimator() {
         return mAnimator;
     }
 
-    public void setAnimator(ColorDisplayService.TintValueAnimator animator) {
+    public void setAnimator(ValueAnimator animator) {
         mAnimator = animator;
     }
 
@@ -64,6 +69,10 @@ abstract class TintController {
 
     public boolean isActivatedStateNotSet() {
         return mIsActivated == null;
+    }
+
+    public long getTransitionDurationMilliseconds() {
+        return TRANSITION_DURATION;
     }
 
     /**

@@ -23,6 +23,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.IntentSender;
+import android.os.RemoteCallback;
 
 import android.graphics.Bitmap;
 
@@ -64,6 +65,13 @@ interface IPackageInstaller {
 
     void bypassNextAllowedApexUpdateCheck(boolean value);
 
+    void disableVerificationForUid(int uid);
+
     void setAllowUnlimitedSilentUpdates(String installerPackageName);
     void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
+    void checkInstallConstraints(String installerPackageName, in List<String> packageNames,
+            in PackageInstaller.InstallConstraints constraints, in RemoteCallback callback);
+    void waitForInstallConstraints(String installerPackageName, in List<String> packageNames,
+            in PackageInstaller.InstallConstraints constraints, in IntentSender callback,
+            long timeout);
 }

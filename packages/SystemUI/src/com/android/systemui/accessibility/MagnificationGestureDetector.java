@@ -23,6 +23,7 @@ import android.graphics.PointF;
 import android.os.Handler;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewConfiguration;
 
 /**
@@ -41,7 +42,7 @@ class MagnificationGestureDetector {
          *
          * @return {@code true} if this gesture is handled.
          */
-        boolean onSingleTap();
+        boolean onSingleTap(View view);
 
         /**
          * Called when the user is performing dragging gesture. It is started after the offset
@@ -52,7 +53,7 @@ class MagnificationGestureDetector {
          * @param offsetY The Y offset in screen coordinate.
          * @return {@code true} if this gesture is handled.
          */
-        boolean onDrag(float offsetX, float offsetY);
+        boolean onDrag(View view, float offsetX, float offsetY);
 
         /**
          * Notified when a tap occurs with the down {@link MotionEvent} that triggered it. This will
@@ -109,7 +110,7 @@ class MagnificationGestureDetector {
      * @param event The current motion event.
      * @return {@code True} if the {@link OnGestureListener} consumes the event, else false.
      */
-    boolean onTouch(MotionEvent event) {
+    boolean onTouch(View view, MotionEvent event) {
         final float rawX = event.getRawX();
         final float rawY = event.getRawY();
         boolean handled = false;
@@ -125,12 +126,12 @@ class MagnificationGestureDetector {
                 break;
             case MotionEvent.ACTION_MOVE:
                 stopSingleTapDetectionIfNeeded(rawX, rawY);
-                handled |= notifyDraggingGestureIfNeeded(rawX, rawY);
+                handled |= notifyDraggingGestureIfNeeded(view, rawX, rawY);
                 break;
             case MotionEvent.ACTION_UP:
                 stopSingleTapDetectionIfNeeded(rawX, rawY);
                 if (mDetectSingleTap) {
-                    handled |= mOnGestureListener.onSingleTap();
+                    handled |= mOnGestureListener.onSingleTap(view);
                 }
                 // Fall through
             case MotionEvent.ACTION_CANCEL:
@@ -163,7 +164,7 @@ class MagnificationGestureDetector {
         mDetectSingleTap = false;
     }
 
-    private boolean notifyDraggingGestureIfNeeded(float x, float y) {
+    private boolean notifyDraggingGestureIfNeeded(View view, float x, float y) {
         if (!mDraggingDetected) {
             return false;
         }
@@ -173,7 +174,7 @@ class MagnificationGestureDetector {
         final float offsetX = x - mPointerLocation.x;
         final float offsetY = y - mPointerLocation.y;
         mPointerLocation.set(x, y);
-        return mOnGestureListener.onDrag(offsetX, offsetY);
+        return mOnGestureListener.onDrag(view, offsetX, offsetY);
     }
 
     private void reset() {

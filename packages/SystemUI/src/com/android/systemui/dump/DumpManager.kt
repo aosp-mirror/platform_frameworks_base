@@ -16,10 +16,12 @@
 
 package com.android.systemui.dump
 
-import android.util.ArrayMap
 import com.android.systemui.Dumpable
+import com.android.systemui.ProtoDumpable
+import com.android.systemui.dump.nano.SystemUIProtoDump
 import com.android.systemui.log.LogBuffer
 import java.io.PrintWriter
+import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,24 +36,69 @@ import javax.inject.Singleton
  */
 @Singleton
 open class DumpManager @Inject constructor() {
-    private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
-    private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()
+    // NOTE: Using TreeMap ensures that iteration is in a predictable & alphabetical order.
+    private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = TreeMap()
+    private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = TreeMap()
+
+    /** See [registerCriticalDumpable]. */
+    fun registerCriticalDumpable(module: Dumpable) {
+        registerCriticalDumpable(module::class.java.simpleName, module)
+    }
 
     /**
-     * Register a dumpable to be called during a bug report. The dumpable will be called during the
-     * CRITICAL section of the bug report, so don't dump an excessive amount of stuff here.
+     * Registers a dumpable to be called during the CRITICAL section of the bug report.
+     *
+     * The CRITICAL section gets very high priority during a dump, but also a very limited amount of
+     * time to do the dumping. So, please don't dump an excessive amount of stuff using CRITICAL.
+     *
+     * See [registerDumpable].
+     */
+    fun registerCriticalDumpable(name: String, module: Dumpable) {
+        registerDumpable(name, module, DumpPriority.CRITICAL)
+    }
+
+    /** See [registerNormalDumpable]. */
+    fun registerNormalDumpable(module: Dumpable) {
+        registerNormalDumpable(module::class.java.simpleName, module)
+    }
+
+    /**
+     * Registers a dumpable to be called during the NORMAL section of the bug report.
+     *
+     * The NORMAL section gets a lower priority during a dump, but also more time. This should be
+     * used by [LogBuffer] instances, [ProtoDumpable] instances, and any [Dumpable] instances that
+     * dump a lot of information.
+     */
+    fun registerNormalDumpable(name: String, module: Dumpable) {
+        registerDumpable(name, module, DumpPriority.NORMAL)
+    }
+
+    /**
+     * Register a dumpable to be called during a bug report.
      *
      * @param name The name to register the dumpable under. This is typically the qualified class
      * name of the thing being dumped (getClass().getName()), but can be anything as long as it
      * doesn't clash with an existing registration.
+     * @param priority the priority level of this dumpable, which affects at what point in the bug
+     * report this gets dump. By default, the dumpable will be called during the CRITICAL section of
+     * the bug report, so don't dump an excessive amount of stuff here.
+     *
+     * TODO(b/259973758): Replace all calls to this method with calls to [registerCriticalDumpable]
+     * or [registerNormalDumpable] instead.
      */
     @Synchronized
-    fun registerDumpable(name: String, module: Dumpable) {
+    @JvmOverloads
+    @Deprecated("Use registerCriticalDumpable or registerNormalDumpable instead")
+    fun registerDumpable(
+        name: String,
+        module: Dumpable,
+        priority: DumpPriority = DumpPriority.CRITICAL,
+    ) {
         if (!canAssignToNameLocked(name, module)) {
             throw IllegalArgumentException("'$name' is already registered")
         }
 
-        dumpables[name] = RegisteredDumpable(name, module)
+        dumpables[name] = RegisteredDumpable(name, module, priority)
     }
 
     /**
@@ -79,36 +126,90 @@ open class DumpManager @Inject constructor() {
         if (!canAssignToNameLocked(name, buffer)) {
             throw IllegalArgumentException("'$name' is already registered")
         }
-        buffers[name] = RegisteredDumpable(name, buffer)
+
+        // All buffers must be priority NORMAL, not CRITICAL, because they often contain a lot of
+        // data.
+        buffers[name] = RegisteredDumpable(name, buffer, DumpPriority.NORMAL)
     }
 
     /**
-     * Dumps the first dumpable or buffer whose registered name ends with [target]
+     * Dumps the alphabetically first, shortest-named dumpable or buffer whose registered name ends
+     * with [target].
      */
     @Synchronized
     fun dumpTarget(
         target: String,
         pw: PrintWriter,
         args: Array<String>,
-        tailLength: Int
+        tailLength: Int,
+    ) {
+        sequence {
+            findBestTargetMatch(dumpables, target)?.let {
+                yield(it.name to { dumpDumpable(it, pw, args) })
+            }
+            findBestTargetMatch(buffers, target)?.let {
+                yield(it.name to { dumpBuffer(it, pw, tailLength) })
+            }
+        }.sortedBy { it.first }.minByOrNull { it.first.length }?.second?.invoke()
+    }
+
+    @Synchronized
+    fun dumpProtoTarget(
+        target: String,
+        protoDump: SystemUIProtoDump,
+        args: Array<String>
+    ) {
+        findBestProtoTargetMatch(dumpables, target)?.let {
+            dumpProtoDumpable(it, protoDump, args)
+        }
+    }
+
+    @Synchronized
+    fun dumpProtoDumpables(
+        systemUIProtoDump: SystemUIProtoDump,
+        args: Array<String>
     ) {
         for (dumpable in dumpables.values) {
-            if (dumpable.name.endsWith(target)) {
-                dumpDumpable(dumpable, pw, args)
-                return
-            }
-        }
-
-        for (buffer in buffers.values) {
-            if (buffer.name.endsWith(target)) {
-                dumpBuffer(buffer, pw, tailLength)
-                return
+            if (dumpable.dumpable is ProtoDumpable) {
+                dumpProtoDumpable(
+                    dumpable.dumpable,
+                    systemUIProtoDump,
+                    args
+                )
             }
         }
     }
 
     /**
-     * Dumps all registered dumpables to [pw]
+     * Dumps all registered dumpables with critical priority to [pw]
+     */
+    @Synchronized
+    fun dumpCritical(pw: PrintWriter, args: Array<String>) {
+        for (dumpable in dumpables.values) {
+            if (dumpable.priority == DumpPriority.CRITICAL) {
+                dumpDumpable(dumpable, pw, args)
+            }
+        }
+    }
+
+    /**
+     * To [pw], dumps (1) all registered dumpables with normal priority; and (2) all [LogBuffer]s.
+     */
+    @Synchronized
+    fun dumpNormal(pw: PrintWriter, args: Array<String>, tailLength: Int = 0) {
+        for (dumpable in dumpables.values) {
+            if (dumpable.priority == DumpPriority.NORMAL) {
+                dumpDumpable(dumpable, pw, args)
+            }
+        }
+
+        for (buffer in buffers.values) {
+            dumpBuffer(buffer, pw, tailLength)
+        }
+    }
+
+    /**
+     * Dump all the instances of [Dumpable].
      */
     @Synchronized
     fun dumpDumpables(pw: PrintWriter, args: Array<String>) {
@@ -184,15 +285,47 @@ open class DumpManager @Inject constructor() {
         buffer.dumpable.dump(pw, tailLength)
     }
 
+    private fun dumpProtoDumpable(
+        protoDumpable: ProtoDumpable,
+        systemUIProtoDump: SystemUIProtoDump,
+        args: Array<String>
+    ) {
+        protoDumpable.dumpProto(systemUIProtoDump, args)
+    }
+
     private fun canAssignToNameLocked(name: String, newDumpable: Any): Boolean {
         val existingDumpable = dumpables[name]?.dumpable ?: buffers[name]?.dumpable
         return existingDumpable == null || newDumpable == existingDumpable
     }
+
+    private fun <V : Any> findBestTargetMatch(map: Map<String, V>, target: String): V? = map
+        .asSequence()
+        .filter { it.key.endsWith(target) }
+        .minByOrNull { it.key.length }
+        ?.value
+
+    private fun findBestProtoTargetMatch(
+        map: Map<String, RegisteredDumpable<Dumpable>>,
+        target: String
+    ): ProtoDumpable? = map
+        .asSequence()
+        .filter { it.key.endsWith(target) }
+        .filter { it.value.dumpable is ProtoDumpable }
+        .minByOrNull { it.key.length }
+        ?.value?.dumpable as? ProtoDumpable
 }
 
 private data class RegisteredDumpable<T>(
     val name: String,
-    val dumpable: T
+    val dumpable: T,
+    val priority: DumpPriority,
 )
 
-private const val TAG = "DumpManager"
+/**
+ * The priority level for a given dumpable, which affects at what point in the bug report this gets
+ * dumped.
+ */
+enum class DumpPriority {
+    CRITICAL,
+    NORMAL,
+}

@@ -18,11 +18,9 @@ package com.android.wm.shell.transition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityTaskManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
@@ -65,7 +63,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (mTransition != transition) return false;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
-                + " transition %s for %s.", mRemote, transition);
+                + " transition %s for #%d.", mRemote, info.getDebugId());
 
         final IBinder.DeathRecipient remoteDied = () -> {
             Log.e(Transitions.TAG, "Remote transition died, finishing");
@@ -79,26 +77,28 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                 if (mRemote.asBinder() != null) {
                     mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
+                if (sct != null) {
+                    finishTransaction.merge(sct);
+                }
                 mMainExecutor.execute(() -> {
-                    if (sct != null) {
-                        finishTransaction.merge(sct);
-                    }
                     finishCallback.onTransitionFinished(wct, null /* wctCB */);
                 });
             }
         };
+        Transitions.setRunningRemoteTransitionDelegate(mRemote.getAppThread());
         try {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            try {
-                ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
-                        mRemote.getAppThread());
-            } catch (SecurityException e) {
-                Slog.e(Transitions.TAG, "Unable to boost animation thread. This should only happen"
-                        + " during unit tests");
-            }
-            mRemote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteStartT = RemoteTransitionHandler.copyIfLocal(
+                    startTransaction, mRemote.getRemoteTransition());
+            final TransitionInfo remoteInfo =
+                    remoteStartT == startTransaction ? info : info.localRemoteCopy();
+            mRemote.getRemoteTransition().startAnimation(transition, remoteInfo, remoteStartT, cb);
+            // assume that remote will apply the start transaction.
+            startTransaction.clear();
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (mRemote.asBinder() != null) {
@@ -113,19 +113,27 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
-                + " transition %s for %s.", mRemote, transition);
-
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
+                // We have merged, since we sent the transaction over binder, the one in this
+                // process won't be cleared if the remote applied it. We don't actually know if the
+                // remote applied the transaction, but applying twice will break surfaceflinger
+                // so just assume the worst-case and clear the local transaction.
+                t.clear();
                 mMainExecutor.execute(
                         () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
             }
         };
         try {
-            mRemote.getRemoteTransition().mergeAnimation(transition, info, t, mergeTarget, cb);
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteT =
+                    RemoteTransitionHandler.copyIfLocal(t, mRemote.getRemoteTransition());
+            final TransitionInfo remoteInfo = remoteT == t ? info : info.localRemoteCopy();
+            mRemote.getRemoteTransition().mergeAnimation(
+                    transition, remoteInfo, remoteT, mergeTarget, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error merging remote transition.", e);
         }
@@ -142,5 +150,11 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);
         return new WindowContainerTransaction();
+    }
+
+    @Override
+    public String toString() {
+        return "OneShotRemoteHandler:" + mRemote.getDebugName() + ":"
+                + mRemote.getRemoteTransition();
     }
 }

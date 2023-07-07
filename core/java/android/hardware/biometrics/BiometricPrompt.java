@@ -142,6 +142,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         private PromptInfo mPromptInfo;
         private ButtonInfo mNegativeButtonInfo;
         private Context mContext;
+        private IAuthService mService;
 
         /**
          * Creates a builder for a {@link BiometricPrompt} dialog.
@@ -188,6 +189,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * Shows a default subtitle for the prompt if the subtitle would otherwise be
+         * null or empty. Currently for internal use only.
+         * @return This builder.
+         * @hide
+         */
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        @NonNull
+        public Builder setUseDefaultSubtitle() {
+            mPromptInfo.setUseDefaultSubtitle(true);
+            return this;
+        }
+
+        /**
          * Optional: Sets a description that will be shown on the prompt.
          * @param description The description to display.
          * @return This builder.
@@ -195,6 +209,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public Builder setDescription(@NonNull CharSequence description) {
             mPromptInfo.setDescription(description);
+            return this;
+        }
+
+        /**
+         * @param service
+         * @return This builder.
+         * @hide
+         */
+        @RequiresPermission(TEST_BIOMETRIC)
+        @NonNull
+        public Builder setService(@NonNull IAuthService service) {
+            mService = service;
             return this;
         }
 
@@ -459,7 +485,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 throw new IllegalArgumentException("Can't have both negative button behavior"
                         + " and device credential enabled");
             }
-            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo);
+            mService = (mService == null) ? IAuthService.Stub.asInterface(
+                    ServiceManager.getService(Context.AUTH_SERVICE)) : mService;
+            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo, mService);
         }
     }
 
@@ -472,6 +500,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
         @Override
         public void onCancel() {
+            if (!mIsPromptShowing) {
+                Log.w(TAG, "BP is not showing");
+                return;
+            }
             Log.d(TAG, "Cancel BP authentication requested for: " + mAuthRequestId);
             cancelAuthentication(mAuthRequestId);
         }
@@ -496,6 +528,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 final AuthenticationResult result =
                         new AuthenticationResult(mCryptoObject, authenticationType);
                 mAuthenticationCallback.onAuthenticationSucceeded(result);
+                mIsPromptShowing = false;
             });
         }
 
@@ -550,6 +583,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final String stringToSend = errorMessage;
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationError(error, stringToSend);
+                mIsPromptShowing = false;
             });
         }
 
@@ -566,8 +600,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             if (reason == DISMISSED_REASON_NEGATIVE) {
                 mNegativeButtonInfo.executor.execute(() -> {
                     mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
+                    mIsPromptShowing = false;
                 });
             } else {
+                mIsPromptShowing = false;
                 Log.e(TAG, "Unknown reason: " + reason);
             }
         }
@@ -580,12 +616,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
     };
 
-    private BiometricPrompt(Context context, PromptInfo promptInfo, ButtonInfo negativeButtonInfo) {
+    private boolean mIsPromptShowing;
+
+    private BiometricPrompt(Context context, PromptInfo promptInfo, ButtonInfo negativeButtonInfo,
+            IAuthService service) {
         mContext = context;
         mPromptInfo = promptInfo;
         mNegativeButtonInfo = negativeButtonInfo;
-        mService = IAuthService.Stub.asInterface(
-                ServiceManager.getService(Context.AUTH_SERVICE));
+        mService = service;
+        mIsPromptShowing = false;
     }
 
     /**
@@ -614,6 +653,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @Nullable
     public CharSequence getSubtitle() {
         return mPromptInfo.getSubtitle();
+    }
+
+    /**
+     * Whether to use a default subtitle. For internal use only.
+     * @return See {@link Builder#setUseDefaultSubtitle()}.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean shouldUseDefaultSubtitle() {
+        return mPromptInfo.isUseDefaultSubtitle();
     }
 
     /**
@@ -1095,7 +1144,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
             int userId) {
-
         // Ensure we don't return the wrong crypto object as an auth result.
         if (mCryptoObject != null && mCryptoObject.getOpId() != operationId) {
             Log.w(TAG, "CryptoObject operation ID does not match argument; setting field to null");
@@ -1110,6 +1158,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
             mExecutor = executor;
             mAuthenticationCallback = callback;
+            if (mIsPromptShowing) {
+                final String stringToSend = mContext.getString(R.string.biometric_error_canceled);
+                mExecutor.execute(() -> {
+                    mAuthenticationCallback.onAuthenticationError(BIOMETRIC_ERROR_CANCELED,
+                            stringToSend);
+                });
+                return -1;
+            }
 
             final PromptInfo promptInfo;
             if (operationId != 0L) {
@@ -1131,6 +1187,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final long authId = mService.authenticate(mToken, operationId, userId,
                     mBiometricServiceReceiver, mContext.getPackageName(), promptInfo);
             cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
+            mIsPromptShowing = true;
+
             return authId;
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);

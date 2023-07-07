@@ -31,18 +31,19 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 
 @SysUISingleton
-public class VolumeUI extends CoreStartable {
+public class VolumeUI implements CoreStartable {
     private static final String TAG = "VolumeUI";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Handler mHandler = new Handler();
 
     private boolean mEnabled;
+    private final Context mContext;
     private VolumeDialogComponent mVolumeComponent;
 
     @Inject
     public VolumeUI(Context context, VolumeDialogComponent volumeDialogComponent) {
-        super(context);
+        mContext = context;
         mVolumeComponent = volumeDialogComponent;
     }
 
@@ -59,8 +60,7 @@ public class VolumeUI extends CoreStartable {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void onConfigurationChanged(Configuration newConfig) {
         if (!mEnabled) return;
         mVolumeComponent.onConfigurationChanged(newConfig);
     }

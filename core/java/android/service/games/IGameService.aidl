@@ -23,7 +23,12 @@ import android.service.games.IGameServiceController;
  * @hide
  */
 oneway interface IGameService {
+    @RequiresNoPermission
     void connected(in IGameServiceController gameServiceController);
+
+    @RequiresNoPermission
     void disconnected();
+
+    @RequiresNoPermission
     void gameStarted(in GameStartedEvent gameStartedEvent);
 }

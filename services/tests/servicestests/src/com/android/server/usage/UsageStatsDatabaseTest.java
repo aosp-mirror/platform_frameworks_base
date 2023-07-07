@@ -22,8 +22,8 @@ import static junit.framework.TestCase.fail;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
-import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
+import android.util.TimeSparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -440,11 +441,17 @@ public class UsageStatsDatabaseTest {
         prevDB.readMappingsLocked();
         prevDB.init(1);
         prevDB.putUsageStats(UsageStatsManager.INTERVAL_DAILY, mIntervalStats);
+        Set<String> prevDBApps = mIntervalStats.packageStats.keySet();
         // Create a backup with a specific version
         byte[] blob = prevDB.getBackupPayload(KEY_USAGE_STATS, version);
         if (version >= 1 && version <= 3) {
             assertFalse(blob != null && blob.length != 0,
                     "UsageStatsDatabase shouldn't be able to write backups as XML");
+            return;
+        }
+        if (version < 1 || version > UsageStatsDatabase.BACKUP_VERSION) {
+            assertFalse(blob != null && blob.length != 0,
+                    "UsageStatsDatabase shouldn't be able to write backups for unknown versions");
             return;
         }
 
@@ -454,9 +461,11 @@ public class UsageStatsDatabaseTest {
         newDB.readMappingsLocked();
         newDB.init(1);
         // Attempt to restore the usage stats from the backup
-        newDB.applyRestoredPayload(KEY_USAGE_STATS, blob);
-        List<IntervalStats> stats = newDB.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0, mEndTime,
-                mIntervalStatsVerifier);
+        Set<String> restoredApps = newDB.applyRestoredPayload(KEY_USAGE_STATS, blob);
+        assertTrue(restoredApps.containsAll(prevDBApps),
+                "List of restored apps does not match list backed-up apps list.");
+        List<IntervalStats> stats = newDB.queryUsageStats(
+                UsageStatsManager.INTERVAL_DAILY, 0, mEndTime, mIntervalStatsVerifier);
 
         if (version > UsageStatsDatabase.BACKUP_VERSION || version < 1) {
             assertFalse(stats != null && !stats.isEmpty(),

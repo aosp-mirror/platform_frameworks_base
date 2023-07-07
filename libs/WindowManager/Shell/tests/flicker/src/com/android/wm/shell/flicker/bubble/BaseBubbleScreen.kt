@@ -17,40 +17,38 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.app.INotificationManager
-import android.app.Instrumentation
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.ServiceManager
-import android.view.Surface
-import androidx.test.platform.app.InstrumentationRegistry
+import android.tools.common.Rotation
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.helpers.SYSTEMUI_PACKAGE
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.Flicker
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
-import com.android.wm.shell.flicker.helpers.LaunchBubbleHelper
+import com.android.server.wm.flicker.helpers.LaunchBubbleHelper
+import com.android.wm.shell.flicker.BaseTest
 import org.junit.runners.Parameterized
 
-/**
- * Base configurations for Bubble flicker tests
- */
-abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
+/** Base configurations for Bubble flicker tests */
+abstract class BaseBubbleScreen(flicker: FlickerTest) : BaseTest(flicker) {
 
-    protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected val context: Context = instrumentation.context
     protected val testApp = LaunchBubbleHelper(instrumentation)
 
-    protected val notifyManager = INotificationManager.Stub.asInterface(
-            ServiceManager.getService(Context.NOTIFICATION_SERVICE))
+    private val notifyManager =
+        INotificationManager.Stub.asInterface(
+            ServiceManager.getService(Context.NOTIFICATION_SERVICE)
+        )
 
-    protected val uid = context.packageManager.getApplicationInfo(
-            testApp.component.packageName, 0).uid
-
-    protected abstract val transition: FlickerBuilder.() -> Unit
+    private val uid =
+        context.packageManager
+            .getApplicationInfo(testApp.`package`, PackageManager.ApplicationInfoFlags.of(0))
+            .uid
 
     @JvmOverloads
     protected open fun buildTransition(
@@ -58,46 +56,41 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
     ): FlickerBuilder.() -> Unit {
         return {
             setup {
-                test {
-                    notifyManager.setBubblesAllowed(testApp.component.packageName,
-                            uid, NotificationManager.BUBBLE_PREFERENCE_ALL)
-                    testApp.launchViaIntent(wmHelper)
-                    waitAndGetAddBubbleBtn()
-                    waitAndGetCancelAllBtn()
-                }
+                notifyManager.setBubblesAllowed(
+                    testApp.`package`,
+                    uid,
+                    NotificationManager.BUBBLE_PREFERENCE_ALL
+                )
+                testApp.launchViaIntent(wmHelper)
+                waitAndGetAddBubbleBtn()
+                waitAndGetCancelAllBtn()
             }
 
             teardown {
-                test {
-                    notifyManager.setBubblesAllowed(testApp.component.packageName,
-                        uid, NotificationManager.BUBBLE_PREFERENCE_NONE)
-                    testApp.exit()
-                }
+                notifyManager.setBubblesAllowed(
+                    testApp.`package`,
+                    uid,
+                    NotificationManager.BUBBLE_PREFERENCE_NONE
+                )
+                testApp.exit()
             }
 
             extraSpec(this)
         }
     }
 
-    protected fun Flicker.waitAndGetAddBubbleBtn(): UiObject2? = device.wait(Until.findObject(
-            By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
-    protected fun Flicker.waitAndGetCancelAllBtn(): UiObject2? = device.wait(Until.findObject(
-            By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
-
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            transition(this)
-        }
-    }
+    protected fun IFlickerTestData.waitAndGetAddBubbleBtn(): UiObject2? =
+        device.wait(Until.findObject(By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
+    protected fun IFlickerTestData.waitAndGetCancelAllBtn(): UiObject2? =
+        device.wait(Until.findObject(By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 3)
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_0)
+            )
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L

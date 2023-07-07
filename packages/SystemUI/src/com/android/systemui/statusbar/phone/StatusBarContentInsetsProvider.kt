@@ -123,7 +123,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
         val point = Point()
         context.display.getRealSize(point)
 
-        return topBounds.left <= 0 || topBounds.right >= point.y
+        return topBounds.left <= 0 || topBounds.right >= point.x
     }
 
     /**

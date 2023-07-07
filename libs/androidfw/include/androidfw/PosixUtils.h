@@ -25,12 +25,18 @@ struct ProcResult {
   int status;
   std::string stdout_str;
   std::string stderr_str;
+
+  explicit ProcResult(int status) : status(status) {}
+  ProcResult(ProcResult&&) noexcept = default;
+  ProcResult& operator=(ProcResult&&) noexcept = default;
+
+  explicit operator bool() const { return status >= 0; }
 };
 
-// Fork, exec and wait for an external process. Return nullptr if the process could not be launched,
-// otherwise a ProcResult containing the external process' exit status and captured stdout and
-// stderr.
-std::unique_ptr<ProcResult> ExecuteBinary(const std::vector<std::string>& argv);
+// Fork, exec and wait for an external process. Returns status < 0 if the process could not be
+// launched, otherwise a ProcResult containing the external process' exit status and captured
+// stdout and stderr.
+ProcResult ExecuteBinary(const std::vector<std::string>& argv);
 
 } // namespace util
 } // namespace android

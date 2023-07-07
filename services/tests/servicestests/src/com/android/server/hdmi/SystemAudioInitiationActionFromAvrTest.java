@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -68,8 +67,11 @@ public class SystemAudioInitiationActionFromAvrTest {
 
         Context context = InstrumentationRegistry.getTargetContext();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         HdmiControlService hdmiControlService = new HdmiControlService(context,
-                Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
+                Collections.emptyList(), audioFramework.getAudioManager(),
+                audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     void sendCecCommand(
                             HdmiCecMessage command, @Nullable SendMessageCallback callback) {
@@ -97,36 +99,6 @@ public class SystemAudioInitiationActionFromAvrTest {
                             case Constants.MESSAGE_INITIATE_ARC:
                                 break;
                         }
-                    }
-
-                    @Override
-                    AudioManager getAudioManager() {
-                        return new AudioManager() {
-
-                            @Override
-                            public int setHdmiSystemAudioSupported(boolean on) {
-                                return 0;
-                            }
-
-                            @Override
-                            public int getStreamVolume(int streamType) {
-                                return 0;
-                            }
-
-                            @Override
-                            public boolean isStreamMute(int streamType) {
-                                return false;
-                            }
-
-                            @Override
-                            public int getStreamMaxVolume(int streamType) {
-                                return 100;
-                            }
-
-                            @Override
-                            public void adjustStreamVolume(
-                                    int streamType, int direction, int flags) {}
-                        };
                     }
 
                     @Override
@@ -168,6 +140,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
         hdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
+        hdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         HdmiCecController.NativeWrapper nativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());

@@ -149,7 +149,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         }
 
         mTextFontWeight = a.getInt(com.android.internal.R.styleable
-                .TextAppearance_textFontWeight, -1);
+                .TextAppearance_textFontWeight, /*defValue*/ FontStyle.FONT_WEIGHT_UNSPECIFIED);
 
         final String localeString = a.getString(com.android.internal.R.styleable
                 .TextAppearance_textLocale);
@@ -215,7 +215,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         mTextColorLink = linkColor;
         mTypeface = null;
 
-        mTextFontWeight = -1;
+        mTextFontWeight = FontStyle.FONT_WEIGHT_UNSPECIFIED;
         mTextLocales = null;
 
         mShadowRadius = 0.0f;
@@ -359,8 +359,8 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
     }
 
     /**
-     * Returns the text font weight specified by this span, or <code>-1</code>
-     * if it does not specify one.
+     * Returns the text font weight specified by this span, or
+     * <code>FontStyle.FONT_WEIGHT_UNSPECIFIED</code> if it does not specify one.
      */
     public int getTextFontWeight() {
         return mTextFontWeight;
@@ -440,6 +440,14 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
      */
     public boolean isElegantTextHeight() {
         return mElegantTextHeight;
+    }
+
+    /**
+     * Returns the value of letter spacing to be added in em unit.
+     * @return a letter spacing amount
+     */
+    public float getLetterSpacing() {
+        return mLetterSpacing;
     }
 
     @Override
@@ -533,5 +541,27 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         if (mFontVariationSettings != null) {
             ds.setFontVariationSettings(mFontVariationSettings);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "TextAppearanceSpan{"
+                + "familyName='" + getFamily() + '\''
+                + ", style=" + getTextStyle()
+                + ", textSize=" + getTextSize()
+                + ", textColor=" + getTextColor()
+                + ", textColorLink=" + getLinkTextColor()
+                + ", typeface=" + getTypeface()
+                + ", textFontWeight=" + getTextFontWeight()
+                + ", textLocales=" + getTextLocales()
+                + ", shadowRadius=" + getShadowRadius()
+                + ", shadowDx=" + getShadowDx()
+                + ", shadowDy=" + getShadowDy()
+                + ", shadowColor=" + String.format("#%08X", getShadowColor())
+                + ", elegantTextHeight=" + isElegantTextHeight()
+                + ", letterSpacing=" + getLetterSpacing()
+                + ", fontFeatureSettings='" + getFontFeatureSettings() + '\''
+                + ", fontVariationSettings='" + getFontVariationSettings() + '\''
+                + '}';
     }
 }

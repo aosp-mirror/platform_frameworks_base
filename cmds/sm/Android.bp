@@ -20,6 +20,6 @@ license {
 
 java_binary {
     name: "sm",
-    wrapper: "sm",
+    wrapper: "sm.sh",
     srcs: ["**/*.java"],
 }

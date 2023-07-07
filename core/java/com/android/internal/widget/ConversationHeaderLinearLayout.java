@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -96,7 +97,7 @@ public class ConversationHeaderLinearLayout extends LinearLayout {
                 continue;
             }
             if (visibleChildrenToShorten == null) {
-                visibleChildrenToShorten = new LinkedList<>();
+                visibleChildrenToShorten = new ArrayList<>(count);
             }
             visibleChildrenToShorten.add(new ViewInfo(child));
             remainingWeight += Math.max(0, weight);

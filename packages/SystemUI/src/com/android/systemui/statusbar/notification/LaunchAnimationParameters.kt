@@ -3,7 +3,7 @@ package com.android.systemui.statusbar.notification
 import android.util.MathUtils
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
 
@@ -27,8 +27,10 @@ class LaunchAnimationParameters(
     /**
      * The top position of the notification at the start of the animation. This is needed in order
      * to keep the notification at its place when launching a notification that is clipped rounded.
+     * This value is in absolute screen coordinates.
      */
-    var startNotificationTop = 0f
+    var startNotificationTop = 0
+    var notificationParentTop = 0
     var startClipTopAmount = 0
     var parentStartClipTopAmount = 0
     var progress = 0f

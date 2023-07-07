@@ -404,16 +404,11 @@ Lcom/android/internal/R$raw;->nodomain:I
 Lcom/android/internal/R$string;->byteShort:I
 Lcom/android/internal/R$string;->cancel:I
 Lcom/android/internal/R$string;->enable_explore_by_touch_warning_title:I
-Lcom/android/internal/R$string;->gigabyteShort:I
-Lcom/android/internal/R$string;->kilobyteShort:I
-Lcom/android/internal/R$string;->megabyteShort:I
 Lcom/android/internal/R$string;->notification_title:I
 Lcom/android/internal/R$string;->no_matches:I
 Lcom/android/internal/R$string;->ok:I
-Lcom/android/internal/R$string;->petabyteShort:I
 Lcom/android/internal/R$string;->redo:I
 Lcom/android/internal/R$string;->share:I
-Lcom/android/internal/R$string;->terabyteShort:I
 Lcom/android/internal/R$string;->whichApplication:I
 Lcom/android/internal/R$style;->Animation_DropDownDown:I
 Lcom/android/internal/R$style;->Animation_DropDownUp:I

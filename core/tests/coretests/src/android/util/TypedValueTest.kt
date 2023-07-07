@@ -16,10 +16,14 @@
 
 package android.util
 
+import android.content.res.FontScaleConverterFactory
+import android.platform.test.annotations.Presubmit
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -27,6 +31,7 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+@Presubmit
 @RunWith(AndroidJUnit4::class)
 class TypedValueTest {
     @LargeTest
@@ -151,5 +156,133 @@ class TypedValueTest {
         )
         val widthPx = TypedValue.complexToDimensionPixelSize(widthDimen, metrics)
         assertEquals(widthFloat.roundToInt(), widthPx)
+    }
+
+    @SmallTest
+    @Test
+    fun testNonLinearFontScaling_nullLookupFallsBackToScaledDensity() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        val fontScale = 2f
+        metrics.density = 1f
+        metrics.xdpi = 2f
+        metrics.scaledDensity = fontScale * metrics.density
+        metrics.fontScaleConverter = null
+
+        assertThat(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10f, metrics))
+                .isEqualTo(20f)
+        assertThat(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 50f, metrics))
+                .isEqualTo(100f)
+        assertThat(TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_SP, 20f, metrics))
+                .isEqualTo(10f)
+        assertThat(TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_SP, 100f, metrics))
+                .isEqualTo(50f)
+    }
+
+    @LargeTest
+    @Test
+    fun testNonLinearFontScalingIsNull_deriveDimensionInversesApplyDimension() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        val fontScale = 2f
+        metrics.density = 1f
+        metrics.xdpi = 2f
+        metrics.scaledDensity = fontScale * metrics.density
+        metrics.fontScaleConverter = null
+
+        verifyRoundTripsForEachUnitType(metrics)
+    }
+
+    @LargeTest
+    @Test
+    fun testNonLinearFontScalingIs2_deriveDimensionInversesApplyDimension() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        val fontScale = 2f
+        metrics.density = 1f
+        metrics.xdpi = 2f
+        metrics.scaledDensity = fontScale * metrics.density
+        metrics.fontScaleConverter = FontScaleConverterFactory.forScale(fontScale)
+
+        verifyRoundTripsForEachUnitType(metrics)
+    }
+
+    @Test
+    fun invalidUnitThrows() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        val fontScale = 2f
+        metrics.density = 1f
+        metrics.xdpi = 2f
+        metrics.scaledDensity = fontScale * metrics.density
+
+        assertThrows(IllegalArgumentException::class.java) {
+            TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_MM + 1, 23f, metrics)
+        }
+    }
+
+    @Test
+    fun density0_deriveDoesNotCrash() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        metrics.density = 0f
+        metrics.xdpi = 0f
+        metrics.scaledDensity = 0f
+
+        listOf(
+            TypedValue.COMPLEX_UNIT_DIP,
+            TypedValue.COMPLEX_UNIT_SP,
+            TypedValue.COMPLEX_UNIT_PT,
+            TypedValue.COMPLEX_UNIT_IN,
+            TypedValue.COMPLEX_UNIT_MM
+        )
+            .forEach { dimenType ->
+                assertThat(TypedValue.deriveDimension(dimenType, 23f, metrics))
+                    .isEqualTo(0)
+            }
+    }
+
+    @Test
+    fun scaledDensity0_deriveSpDoesNotCrash() {
+        val metrics: DisplayMetrics = mock(DisplayMetrics::class.java)
+        metrics.density = 1f
+        metrics.xdpi = 2f
+        metrics.scaledDensity = 0f
+
+        assertThat(TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_SP, 23f, metrics))
+            .isEqualTo(0)
+    }
+
+    private fun verifyRoundTripsForEachUnitType(metrics: DisplayMetrics) {
+        listOf(
+            TypedValue.COMPLEX_UNIT_PX,
+            TypedValue.COMPLEX_UNIT_DIP,
+            TypedValue.COMPLEX_UNIT_SP,
+            TypedValue.COMPLEX_UNIT_PT,
+            TypedValue.COMPLEX_UNIT_IN,
+            TypedValue.COMPLEX_UNIT_MM
+        )
+            .forEach { dimenType ->
+                for (i: Int in -10000 until 10000) {
+                    assertRoundTripIsEqual(i.toFloat(), dimenType, metrics)
+                    assertRoundTripIsEqual(i - .1f, dimenType, metrics)
+                    assertRoundTripIsEqual(i + .5f, dimenType, metrics)
+                }
+            }
+    }
+
+    private fun assertRoundTripIsEqual(
+        dimenValueToTest: Float,
+        @TypedValue.ComplexDimensionUnit dimenType: Int,
+        metrics: DisplayMetrics,
+    ) {
+        val actualPx = TypedValue.applyDimension(dimenType, dimenValueToTest, metrics)
+        val actualDimenValue = TypedValue.deriveDimension(dimenType, actualPx, metrics)
+        assertThat(dimenValueToTest)
+            .isWithin(0.05f)
+            .of(actualDimenValue)
+
+        // Also test the alias functions
+        assertThat(TypedValue.convertDimensionToPixels(dimenType, dimenValueToTest, metrics))
+            .isWithin(0.05f)
+            .of(actualPx)
+        assertThat(TypedValue.convertPixelsToDimension(dimenType, actualPx, metrics))
+            .isWithin(0.05f)
+            .of(actualDimenValue)
     }
 }

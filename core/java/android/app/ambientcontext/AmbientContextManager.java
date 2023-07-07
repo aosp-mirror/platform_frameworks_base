@@ -117,7 +117,8 @@ public final class AmbientContextManager {
      */
     @NonNull public static List<AmbientContextEvent> getEventsFromIntent(@NonNull Intent intent) {
         if (intent.hasExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENTS)) {
-            return intent.getParcelableArrayListExtra(EXTRA_AMBIENT_CONTEXT_EVENTS);
+            return intent.getParcelableArrayListExtra(EXTRA_AMBIENT_CONTEXT_EVENTS,
+                    android.app.ambientcontext.AmbientContextEvent.class);
         } else {
             return new ArrayList<>();
         }
@@ -143,6 +144,9 @@ public final class AmbientContextManager {
      * If any of the events are not consented by user, the response has
      * {@link AmbientContextManager#STATUS_ACCESS_DENIED}, and the app can
      * call {@link #startConsentActivity} to redirect the user to the consent screen.
+     * If the AmbientContextRequest contains a mixed set of events containing values both greater
+     * than and less than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request
+     * will be rejected with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      * <p />
      *
      * Example:
@@ -153,7 +157,7 @@ public final class AmbientContextManager {
      *   eventTypes.add(AmbientContextEvent.EVENT_SNORE);
      *
      *   // Create Consumer
-     *   Consumer<Integer> statusConsumer = response -> {
+     *   Consumer<Integer> statusConsumer = status -> {
      *     int status = status.getStatusCode();
      *     if (status == AmbientContextManager.STATUS_SUCCESS) {
      *       // Show user it's enabled
@@ -197,6 +201,9 @@ public final class AmbientContextManager {
 
     /**
      * Requests the consent data host to open an activity that allows users to modify consent.
+     * If the eventTypes contains a mixed set of events containing values both greater than and less
+     * than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request will be rejected
+     * with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      *
      * @param eventTypes The set of event codes to be consented.
      */
@@ -226,6 +233,9 @@ public final class AmbientContextManager {
      * observer receives a callback on the provided {@link PendingIntent} when the requested
      * event is detected. Registering another observer from the same package that has already been
      * registered will override the previous observer.
+     * If the AmbientContextRequest contains a mixed set of events containing values both greater
+     * than and less than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request
+     * will be rejected with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      * <p />
      *
      * Example:
@@ -282,7 +292,7 @@ public final class AmbientContextManager {
         Preconditions.checkArgument(!resultPendingIntent.isImmutable());
         try {
             RemoteCallback callback = new RemoteCallback(result -> {
-                int statusCode =  result.getInt(STATUS_RESPONSE_BUNDLE_KEY);
+                int statusCode = result.getInt(STATUS_RESPONSE_BUNDLE_KEY);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> statusConsumer.accept(statusCode));
@@ -291,6 +301,75 @@ public final class AmbientContextManager {
                 }
             });
             mService.registerObserver(request, resultPendingIntent, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allows app to register as a {@link AmbientContextEvent} observer. Same as {@link
+     * #registerObserver(AmbientContextEventRequest, PendingIntent, Executor, Consumer)},
+     * but use {@link AmbientContextCallback} instead of {@link PendingIntent} as a callback on
+     * detected events.
+     * Registering another observer from the same package that has already been
+     * registered will override the previous observer. If the same app previously calls
+     * {@link #registerObserver(AmbientContextEventRequest, AmbientContextCallback, Executor)},
+     * and now calls
+     * {@link #registerObserver(AmbientContextEventRequest, PendingIntent, Executor, Consumer)},
+     * the previous observer will be replaced with the new observer with the PendingIntent callback.
+     * Or vice versa.
+     * If the AmbientContextRequest contains a mixed set of events containing values both greater
+     * than and less than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request
+     * will be rejected with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
+     *
+     * When the registration completes, a status will be returned to client through
+     * {@link AmbientContextCallback#onRegistrationComplete(int)}.
+     * If the AmbientContextManager service is not enabled yet, or the underlying detection service
+     * is not running yet, {@link AmbientContextManager#STATUS_SERVICE_UNAVAILABLE} will be
+     * returned, and the detection won't be really started.
+     * If the underlying detection service feature is not enabled, or the requested event type is
+     * not enabled yet, {@link AmbientContextManager#STATUS_NOT_SUPPORTED} will be returned, and the
+     * detection won't be really started.
+     * If there is no user consent,  {@link AmbientContextManager#STATUS_ACCESS_DENIED} will be
+     * returned, and the detection won't be really started.
+     * Otherwise, it will try to start the detection. And if it starts successfully, it will return
+     * {@link AmbientContextManager#STATUS_SUCCESS}. If it fails to start the detection, then
+     * it will return {@link AmbientContextManager#STATUS_SERVICE_UNAVAILABLE}
+     * After registerObserver succeeds and when the service detects an event, the service will
+     * trigger {@link AmbientContextCallback#onEvents(List)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT)
+    public void registerObserver(
+            @NonNull AmbientContextEventRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AmbientContextCallback ambientContextCallback) {
+        try {
+            IAmbientContextObserver observer = new IAmbientContextObserver.Stub() {
+                @Override
+                public void onEvents(List<AmbientContextEvent> events) throws RemoteException {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> ambientContextCallback.onEvents(events));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+
+                @Override
+                public void onRegistrationComplete(int statusCode) throws RemoteException {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(
+                                () -> ambientContextCallback.onRegistrationComplete(statusCode));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+            };
+
+            mService.registerObserverWithCallback(request, mContext.getPackageName(), observer);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

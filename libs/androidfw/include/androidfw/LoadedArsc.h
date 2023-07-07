@@ -99,8 +99,8 @@ enum : package_property_t {
 };
 
 struct OverlayableInfo {
-  std::string name;
-  std::string actor;
+  std::string_view name;
+  std::string_view actor;
   uint32_t policy_flags;
 };
 
@@ -166,14 +166,14 @@ class LoadedPackage {
   base::expected<uint32_t, NullOrIOError> FindEntryByName(const std::u16string& type_name,
                                                           const std::u16string& entry_name) const;
 
-  static base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> GetEntry(
-      incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
+  static base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+      GetEntry(incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
 
   static base::expected<uint32_t, NullOrIOError> GetEntryOffset(
       incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
 
-  static base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> GetEntryFromOffset(
-      incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset);
+  static base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+      GetEntryFromOffset(incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset);
 
   // Returns the string pool where type names are stored.
   const ResStringPool* GetTypeStringPool() const {
@@ -275,7 +275,7 @@ class LoadedPackage {
     return overlayable_map_;
   }
 
-  const std::map<uint32_t, uint32_t>& GetAliasResourceIdMap() const {
+  const std::vector<std::pair<uint32_t, uint32_t>>& GetAliasResourceIdMap() const {
     return alias_id_map_;
   }
 
@@ -295,8 +295,8 @@ class LoadedPackage {
   std::unordered_map<uint8_t, TypeSpec> type_specs_;
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
-  std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
-  std::map<uint32_t, uint32_t> alias_id_map_;
+  std::vector<std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
+  std::vector<std::pair<uint32_t, uint32_t>> alias_id_map_;
 
   // A map of overlayable name to actor
   std::unordered_map<std::string, std::string> overlayable_map_;
@@ -313,6 +313,8 @@ class LoadedArsc {
                                           size_t length,
                                           const LoadedIdmap* loaded_idmap = nullptr,
                                           package_property_t property_flags = 0U);
+
+  static std::unique_ptr<LoadedArsc> Load(const LoadedIdmap* loaded_idmap = nullptr);
 
   // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
   static std::unique_ptr<LoadedArsc> CreateEmpty();
@@ -338,6 +340,7 @@ class LoadedArsc {
   LoadedArsc() = default;
   bool LoadTable(
       const Chunk& chunk, const LoadedIdmap* loaded_idmap, package_property_t property_flags);
+  bool LoadStringPool(const LoadedIdmap* loaded_idmap);
 
   std::unique_ptr<ResStringPool> global_string_pool_ = util::make_unique<ResStringPool>();
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;

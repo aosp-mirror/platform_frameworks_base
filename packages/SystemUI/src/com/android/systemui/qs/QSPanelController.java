@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
@@ -26,11 +26,10 @@ import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHierarchyManager;
-import com.android.systemui.media.MediaHost;
-import com.android.systemui.media.MediaHostState;
+import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHostState;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
@@ -60,13 +59,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
-    private boolean mGridContentVisible = true;
-
     private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                mFalsingManager.isFalseTouch(QS_SWIPE);
+                mFalsingManager.isFalseTouch(QS_SWIPE_SIDE);
             }
             return false;
         }
@@ -74,7 +71,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Inject
     QSPanelController(QSPanel view, TunerService tunerService,
-            QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
+            QSHost qsHost, QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
@@ -83,7 +80,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             BrightnessSliderController.Factory brightnessSliderFactory,
             FalsingManager falsingManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
-        super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
+        super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
@@ -121,9 +118,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         }
         switchTileLayout(true);
         mBrightnessMirrorHandler.onQsPanelAttached();
-
-        ((PagedTileLayout) mView.getOrCreateTileLayout())
-                .setOnTouchListener(mTileLayoutTouchListener);
+        PagedTileLayout pagedTileLayout= ((PagedTileLayout) mView.getOrCreateTileLayout());
+        pagedTileLayout.setOnTouchListener(mTileLayoutTouchListener);
     }
 
     @Override
@@ -145,6 +141,13 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mView.isListening()) {
             refreshAllTiles();
         }
+    }
+
+    @Override
+    protected void onSplitShadeChanged(boolean shouldUseSplitNotificationShade) {
+        ((PagedTileLayout) mView.getOrCreateTileLayout())
+                .forceTilesRedistribution("Split shade state changed");
+        mView.setCanCollapse(!shouldUseSplitNotificationShade);
     }
 
     /** */
@@ -169,12 +172,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
 
-    /** Get the QSTileHost this panel uses. */
-    public QSTileHost getHost() {
-        return mHost;
-    }
-
-
     /** Update appearance of QSPanel. */
     public void updateResources() {
         mView.updateResources();
@@ -196,16 +193,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
                 mQsCustomizerController.show(x, y, false);
             }
         });
-    }
-
-    /** */
-    public void setGridContentVisibility(boolean visible) {
-        int newVis = visible ? View.VISIBLE : View.INVISIBLE;
-        setVisibility(newVis);
-        if (mGridContentVisible != visible) {
-            mMetricsLogger.visibility(MetricsEvent.QS_PANEL, newVis);
-        }
-        mGridContentVisible = visible;
     }
 
     public boolean isLayoutRtl() {
@@ -246,7 +233,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
      * @return if bouncer is in transit
      */
     public boolean isBouncerInTransit() {
-        return mStatusBarKeyguardViewManager.isBouncerInTransit();
+        return mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
+    }
+
+    public int getPaddingBottom() {
+        return mView.getPaddingBottom();
     }
 }
 

@@ -141,6 +141,11 @@ static bool validateFile(const char* filename) {
             }
             base::Result<std::shared_ptr<KeyLayoutMap>> ret = KeyLayoutMap::load(filename);
             if (!ret.ok()) {
+                if (ret.error().message() == "Missing kernel config") {
+                    // It means the layout is valid, but won't be loaded on this device because
+                    // this layout requires a certain kernel config.
+                    return true;
+                }
                 error("Error %s parsing key layout file.\n\n", ret.error().message().c_str());
                 return false;
             }
@@ -162,8 +167,8 @@ static bool validateFile(const char* filename) {
             android::base::Result<std::unique_ptr<PropertyMap>> propertyMap =
                     PropertyMap::load(String8(filename));
             if (!propertyMap.ok()) {
-                error("Error %d parsing input device configuration file.\n\n",
-                      propertyMap.error().code());
+                error("Error parsing input device configuration file: %s.\n\n",
+                      propertyMap.error().message().c_str());
                 return false;
             }
             break;

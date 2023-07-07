@@ -18,6 +18,7 @@ package com.android.server.testing.shadows;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.os.UserHandle;
 import android.os.UserManager;
 
 import org.robolectric.annotation.Implementation;
@@ -48,6 +49,12 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
             return new int[] {userId};
         }
         return profileIds.get(userId).stream().mapToInt(Number::intValue).toArray();
+    }
+
+    /** @see UserManager#getMainUser() */
+    @Implementation
+    public UserHandle getMainUser() {
+        return null;
     }
 
     /** Add a collection of profile IDs, all within the same profile group. */

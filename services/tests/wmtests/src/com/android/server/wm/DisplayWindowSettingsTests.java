@@ -41,8 +41,9 @@ import static org.mockito.Matchers.eq;
 
 import android.annotation.NonNull;
 import android.app.WindowConfiguration;
-import android.content.res.Configuration;
+import android.content.ContentResolver;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -110,7 +111,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -120,7 +121,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -131,7 +132,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -141,7 +142,8 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        assertEquals(WINDOWING_MODE_FREEFORM, mPrimaryDisplay.getWindowingMode());
+        assertEquals(WINDOWING_MODE_FREEFORM,
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -154,7 +156,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.updateSettingsForDisplay(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
-                mPrimaryDisplay.getWindowingMode());
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -162,7 +164,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -172,7 +174,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -183,7 +185,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WINDOWING_MODE_FREEFORM,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -194,7 +196,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WINDOWING_MODE_FREEFORM,
-                mSecondaryDisplay.getWindowingMode());
+                mSecondaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
     }
 
     @Test
@@ -235,8 +237,8 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSetForcedDensity() {
-        mDisplayWindowSettings.setForcedDensity(mSecondaryDisplay, 600 /* density */,
-                0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(mSecondaryDisplay.getDisplayInfo(),
+                600 /* density */, 0 /* userId */);
         mDisplayWindowSettings.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(600 /* density */, mSecondaryDisplay.mBaseDisplayDensity);
@@ -438,8 +440,10 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testDisplayWindowSettingsAppliedOnDisplayReady() {
         // Set forced densities for two displays in DisplayWindowSettings
         final DisplayContent dc = createMockSimulatedDisplay();
-        mDisplayWindowSettings.setForcedDensity(mPrimaryDisplay, 123, 0 /* userId */);
-        mDisplayWindowSettings.setForcedDensity(dc, 456, 0 /* userId */);
+        final ContentResolver contentResolver = useFakeSettingsProvider();
+        mDisplayWindowSettings.setForcedDensity(mPrimaryDisplay.getDisplayInfo(), 123,
+                0 /* userId */);
+        mDisplayWindowSettings.setForcedDensity(dc.getDisplayInfo(), 456, 0 /* userId */);
 
         // Apply settings to displays - the settings will be stored, but config will not be
         // recalculated immediately.
@@ -448,15 +452,21 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertFalse(mPrimaryDisplay.mWaitingForConfig);
         assertFalse(dc.mWaitingForConfig);
 
+        final int invalidW = Integer.MAX_VALUE;
+        final int invalidH = Integer.MAX_VALUE;
+        // Verify that applyForcedPropertiesForDefaultDisplay() handles invalid size request.
+        Settings.Global.putString(contentResolver, Settings.Global.DISPLAY_SIZE_FORCED,
+                invalidW + "," + invalidH);
         // Notify WM that the displays are ready and check that they are reconfigured.
         mWm.displayReady();
         waitUntilHandlersIdle();
 
-        final Configuration config = new Configuration();
-        mPrimaryDisplay.computeScreenConfiguration(config);
-        assertEquals(123, config.densityDpi);
-        dc.computeScreenConfiguration(config);
-        assertEquals(456, config.densityDpi);
+        // Density is set successfully.
+        assertEquals(123, mPrimaryDisplay.getConfiguration().densityDpi);
+        assertEquals(456, dc.getConfiguration().densityDpi);
+        // Invalid size won't be applied.
+        assertNotEquals(invalidW, mPrimaryDisplay.mBaseDisplayWidth);
+        assertNotEquals(invalidH, mPrimaryDisplay.mBaseDisplayHeight);
     }
 
     @Test

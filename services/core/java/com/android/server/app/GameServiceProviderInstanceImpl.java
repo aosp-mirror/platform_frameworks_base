@@ -16,10 +16,13 @@
 
 package com.android.server.app;
 
-import android.Manifest;
+import static android.Manifest.permission.MANAGE_GAME_ACTIVITY;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER;
+import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
+
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
@@ -33,7 +36,6 @@ import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.games.CreateGameSessionRequest;
@@ -50,7 +52,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost.SurfacePackage;
-import android.view.WindowManager;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -59,6 +61,7 @@ import com.android.internal.infra.ServiceConnector;
 import com.android.internal.infra.ServiceConnector.ServiceLifecycleCallbacks;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.util.ScreenshotRequest;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
@@ -181,10 +184,10 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameServiceController mGameServiceController =
             new IGameServiceController.Stub() {
                 @Override
-                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void createGameSession(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "createGameSession()");
+                    super.createGameSession_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.createGameSession(taskId);
                     });
@@ -194,11 +197,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameSessionController mGameSessionController =
             new IGameSessionController.Stub() {
                 @Override
-                @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void takeScreenshot(int taskId,
                         @NonNull AndroidFuture gameScreenshotResultFuture) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "takeScreenshot()");
+                    super.takeScreenshot_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
                                 gameScreenshotResultFuture);
@@ -206,10 +209,10 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 }
 
                 @Override
-                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void restartGame(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "restartGame()");
+                    super.restartGame_enforcePermission();
+
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.restartGame(taskId);
                     });
@@ -848,8 +851,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         final SurfaceControl overlaySurfaceControl =
                 overlaySurfacePackage != null ? overlaySurfacePackage.getSurfaceControl() : null;
         mBackgroundExecutor.execute(() -> {
-            final SurfaceControl.LayerCaptureArgs.Builder layerCaptureArgsBuilder =
-                    new SurfaceControl.LayerCaptureArgs.Builder(/* layer */ null);
+            final ScreenCapture.LayerCaptureArgs.Builder layerCaptureArgsBuilder =
+                    new ScreenCapture.LayerCaptureArgs.Builder(/* layer */ null);
             if (overlaySurfaceControl != null) {
                 SurfaceControl[] excludeLayers = new SurfaceControl[1];
                 excludeLayers[0] = overlaySurfaceControl;
@@ -861,8 +864,6 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 Slog.w(TAG, "Could not get bitmap for id: " + taskId);
                 callback.complete(GameScreenshotResult.createInternalErrorResult());
             } else {
-                final Bundle bundle = ScreenshotHelper.HardwareBitmapBundler.hardwareBitmapToBundle(
-                        bitmap);
                 final RunningTaskInfo runningTaskInfo =
                         mGameTaskInfoProvider.getRunningTaskInfo(taskId);
                 if (runningTaskInfo == null) {
@@ -877,11 +878,17 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                         callback.complete(GameScreenshotResult.createSuccessResult());
                     }
                 };
-                mScreenshotHelper.provideScreenshot(bundle, crop, Insets.NONE, taskId,
-                        mUserHandle.getIdentifier(), gameSessionRecord.getComponentName(),
-                        WindowManager.ScreenshotSource.SCREENSHOT_OTHER,
-                        BackgroundThread.getHandler(),
-                        completionConsumer);
+                ScreenshotRequest request = new ScreenshotRequest.Builder(
+                        TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER)
+                        .setTopComponent(gameSessionRecord.getComponentName())
+                        .setTaskId(taskId)
+                        .setUserId(mUserHandle.getIdentifier())
+                        .setBitmap(bitmap)
+                        .setBoundsOnScreen(crop)
+                        .setInsets(Insets.NONE)
+                        .build();
+                mScreenshotHelper.takeScreenshot(
+                        request, BackgroundThread.getHandler(), completionConsumer);
             }
         });
     }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.media.soundtrigger_middleware;
 
 import android.media.soundtrigger.ModelParameter;
@@ -78,8 +79,9 @@ interface ISoundTriggerModule {
      *
      * May throw a ServiceSpecificException with an RESOURCE_CONTENTION status to indicate that
      * resources required for starting the model are currently consumed by other clients.
+     * @return - A token delivered along with future recognition events.
      */
-    void startRecognition(int modelHandle, in RecognitionConfig config);
+    IBinder startRecognition(int modelHandle, in RecognitionConfig config);
 
     /**
      * Stop a recognition of a previously active recognition. Will NOT generate a recognition event.

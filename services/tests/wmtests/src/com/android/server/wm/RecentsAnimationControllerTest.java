@@ -104,7 +104,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY));
-        mController.mShouldAttachNavBarToAppDuringTransition = false;
         mRootHomeTask = mDefaultDisplay.getDefaultTaskDisplayArea().getRootHomeTask();
         assertNotNull(mRootHomeTask);
     }
@@ -172,12 +171,12 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // executed.
         final ActivityRecord activity1 = createActivityRecord(task);
         activity1.setVisible(true);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
         activity1.addWindow(createWindowState(new LayoutParams(TYPE_BASE_APPLICATION), activity1));
 
         final ActivityRecord activity2 = createActivityRecord(task);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
                 mDefaultDisplay.getRotation());
@@ -281,7 +280,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
 
         // Simulate the app transition finishing
-        mController.mAppTransitionListener.onAppTransitionStartingLocked(false, false, 0, 0, 0);
+        mController.mAppTransitionListener.onAppTransitionStartingLocked(0, 0);
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, false);
     }
 
@@ -299,8 +298,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertTrue(mController.isAnimatingTask(activity.getTask()));
 
         spyOn(mWm.mTaskSnapshotController);
-        doNothing().when(mWm.mTaskSnapshotController).notifyAppVisibilityChanged(any(),
-                anyBoolean());
         doReturn(mMockTaskSnapshot).when(mWm.mTaskSnapshotController).getSnapshot(anyInt(),
                 anyInt(), eq(false) /* restoreFromDisk */, eq(false) /* isLowResolution */);
         mController.setDeferredCancel(true /* deferred */, true /* screenshot */);
@@ -468,7 +465,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         spyOn(mDisplayContent.mFixedRotationTransitionListener);
         final ActivityRecord recents = mock(ActivityRecord.class);
-        recents.mOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        recents.setOverrideOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         doReturn(ORIENTATION_PORTRAIT).when(recents)
                 .getRequestedConfigurationOrientation(anyBoolean());
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recents);
@@ -814,13 +811,13 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     private void setupForShouldAttachNavBarDuringTransition() {
-        mController.mShouldAttachNavBarToAppDuringTransition = true;
         final WindowState navBar = spy(createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar"));
         mDefaultDisplay.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
         mWm.setRecentsAnimationController(mController);
         doReturn(navBar).when(mController).getNavigationBarWindow();
         final DisplayPolicy displayPolicy = spy(mDefaultDisplay.getDisplayPolicy());
         doReturn(displayPolicy).when(mDefaultDisplay).getDisplayPolicy();
+        doReturn(true).when(displayPolicy).shouldAttachNavBarToAppDuringTransition();
     }
 
     private static void initializeRecentsAnimationController(RecentsAnimationController controller,

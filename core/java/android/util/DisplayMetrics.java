@@ -18,13 +18,25 @@ package android.util;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.res.FontScaleConverter;
 import android.os.SystemProperties;
+import android.view.WindowManager;
 
 /**
  * A structure describing general information about a display, such as its
  * size, density, and font scaling.
  * <p>To access the DisplayMetrics members, retrieve display metrics like this:</p>
  * <pre>context.getResources().getDisplayMetrics();</pre>
+ *
+ * <p>
+ * For UI layout, obtain {@link android.view.WindowMetrics} from
+ * {@link WindowManager#getCurrentWindowMetrics()}. {@code DisplayMetrics} should only be used for
+ * obtaining display related properties, such as {@link #xdpi} and {@link #ydpi}
+ * </p><p>
+ * See {@link #density} for more information about the differences between {@link #xdpi},
+ * {@link #ydpi} and {@link #density}.
+ * </p>
+ *
  */
 public class DisplayMetrics {
     /**
@@ -174,6 +186,14 @@ public class DisplayMetrics {
      * This is not a density that applications should target, instead relying
      * on the system to scale their {@link #DENSITY_XXXHIGH} assets for them.
      */
+    public static final int DENSITY_520 = 520;
+
+    /**
+     * Intermediate density for screens that sit somewhere between
+     * {@link #DENSITY_XXHIGH} (480 dpi) and {@link #DENSITY_XXXHIGH} (640 dpi).
+     * This is not a density that applications should target, instead relying
+     * on the system to scale their {@link #DENSITY_XXXHIGH} assets for them.
+     */
     public static final int DENSITY_560 = 560;
 
     /**
@@ -263,8 +283,23 @@ public class DisplayMetrics {
      * A scaling factor for fonts displayed on the display.  This is the same
      * as {@link #density}, except that it may be adjusted in smaller
      * increments at runtime based on a user preference for the font size.
+     *
+     * @deprecated this scalar factor is no longer accurate due to adaptive non-linear font scaling.
+     *  Please use {@link TypedValue#applyDimension(int, float, DisplayMetrics)} or
+     *  {@link TypedValue#deriveDimension(int, float, DisplayMetrics)} to convert between SP font
+     *  sizes and pixels.
      */
+    @Deprecated
     public float scaledDensity;
+
+    /**
+     * If non-null, this will be used to calculate font sizes instead of {@link #scaledDensity}.
+     *
+     * @hide
+     */
+    @Nullable
+    public FontScaleConverter fontScaleConverter;
+
     /**
      * The exact physical pixels per inch of the screen in the X dimension.
      */
@@ -342,6 +377,7 @@ public class DisplayMetrics {
         noncompatScaledDensity = o.noncompatScaledDensity;
         noncompatXdpi = o.noncompatXdpi;
         noncompatYdpi = o.noncompatYdpi;
+        fontScaleConverter = o.fontScaleConverter;
     }
     
     public void setToDefaults() {
@@ -359,6 +395,7 @@ public class DisplayMetrics {
         noncompatScaledDensity = scaledDensity;
         noncompatXdpi = xdpi;
         noncompatYdpi = ydpi;
+        fontScaleConverter = null;
     }
 
     @Override

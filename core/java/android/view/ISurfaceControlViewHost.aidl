@@ -19,13 +19,19 @@ package android.view;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.InsetsState;
+import android.window.ISurfaceSyncGroup;
 
 /**
  * API from content embedder back to embedded content in SurfaceControlViewHost
  * {@hide}
  */
-oneway interface ISurfaceControlViewHost {
-    void onConfigurationChanged(in Configuration newConfig);
-    void onDispatchDetachedFromWindow();
-    void onInsetsChanged(in InsetsState state, in Rect insetFrame);
+interface ISurfaceControlViewHost {
+    /**
+     * TODO (b/263273252): Investigate the need for these to be blocking calls or add additional
+     * APIs that are blocking
+     */
+    oneway void onConfigurationChanged(in Configuration newConfig);
+    oneway void onDispatchDetachedFromWindow();
+    oneway void onInsetsChanged(in InsetsState state, in Rect insetFrame);
+    ISurfaceSyncGroup getSurfaceSyncGroup();
 }

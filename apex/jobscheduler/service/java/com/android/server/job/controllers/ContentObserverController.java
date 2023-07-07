@@ -33,6 +33,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 import com.android.server.job.StateControllerProto.ContentObserverController.Observer.TriggerContentData;
@@ -70,7 +71,7 @@ public final class ContentObserverController extends StateController {
 
     public ContentObserverController(JobSchedulerService service) {
         super(service);
-        mHandler = new Handler(mContext.getMainLooper());
+        mHandler = new Handler(AppSchedulingModuleThread.get().getLooper());
     }
 
     @Override
@@ -159,8 +160,7 @@ public final class ContentObserverController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_CONTENT)) {
             mTrackedTasks.remove(taskStatus);
             if (taskStatus.contentObserverJobInstance != null) {

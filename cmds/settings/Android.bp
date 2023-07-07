@@ -14,5 +14,5 @@ package {
 
 sh_binary {
     name: "settings",
-    src: "settings",
+    src: "settings.sh",
 }

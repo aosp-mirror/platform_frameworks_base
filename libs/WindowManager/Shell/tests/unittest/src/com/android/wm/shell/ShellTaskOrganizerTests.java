@@ -26,19 +26,21 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_WINDOW;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
-import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
@@ -46,6 +48,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
@@ -55,9 +58,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,19 +79,19 @@ import java.util.Optional;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ShellTaskOrganizerTests {
+public class ShellTaskOrganizerTests extends ShellTestCase {
 
     @Mock
     private ITaskOrganizerController mTaskOrganizerController;
     @Mock
-    private Context mContext;
-    @Mock
     private CompatUIController mCompatUI;
+    @Mock
+    private ShellExecutor mTestExecutor;
+    @Mock
+    private ShellCommandHandler mShellCommandHandler;
 
-    ShellTaskOrganizer mOrganizer;
-    private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
-    private final TransactionPool mTransactionPool = mock(TransactionPool.class);
-    private final ShellExecutor mTestExecutor = mock(ShellExecutor.class);
+    private ShellTaskOrganizer mOrganizer;
+    private ShellInit mShellInit;
 
     private class TrackingTaskListener implements ShellTaskOrganizer.TaskListener {
         final ArrayList<RunningTaskInfo> appeared = new ArrayList<>();
@@ -132,15 +135,39 @@ public class ShellTaskOrganizerTests {
             doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
-        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mCompatUI, Optional.empty()));
+        mShellInit = spy(new ShellInit(mTestExecutor));
+        mOrganizer = spy(new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
+                mTaskOrganizerController, mCompatUI, Optional.empty(), Optional.empty(),
+                mTestExecutor));
+        mShellInit.init();
     }
 
     @Test
-    public void registerOrganizer_sendRegisterTaskOrganizer() throws RemoteException {
-        mOrganizer.registerOrganizer();
+    public void instantiate_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
 
+    @Test
+    public void instantiate_addDumpCallback() {
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(), any());
+    }
+
+    @Test
+    public void testInit_sendRegisterTaskOrganizer() throws RemoteException {
         verify(mTaskOrganizerController).registerTaskOrganizer(any(ITaskOrganizer.class));
+    }
+
+    @Test
+    public void testTaskLeashReleasedAfterVanished() throws RemoteException {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
+        RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
+        SurfaceControl taskLeash = new SurfaceControl.Builder(new SurfaceSession())
+                .setName("task").build();
+        mOrganizer.registerOrganizer();
+        mOrganizer.onTaskAppeared(taskInfo, taskLeash);
+        assertTrue(taskLeash.isValid());
+        mOrganizer.onTaskVanished(taskInfo);
+        assertTrue(!taskLeash.isValid());
     }
 
     @Test
@@ -607,5 +634,4 @@ public class ShellTaskOrganizerTests {
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         return taskInfo;
     }
-
 }

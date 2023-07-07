@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import static com.android.systemui.media.MediaDataManagerKt.isMediaNotification;
+import static com.android.systemui.media.controls.pipeline.MediaDataManagerKt.isMediaNotification;
 
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.media.MediaFeatureFlag;
+import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;

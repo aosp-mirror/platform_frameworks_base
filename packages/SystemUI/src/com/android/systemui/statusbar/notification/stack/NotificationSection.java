@@ -26,8 +26,7 @@ import android.graphics.Rect;
 import android.view.View;
 import android.view.animation.Interpolator;
 
-import com.android.systemui.animation.Interpolators;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor;
+import com.android.app.animation.Interpolators;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 /**
@@ -35,12 +34,12 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
  * bounds change.
  */
 public class NotificationSection {
-    private @PriorityBucket int mBucket;
-    private View mOwningView;
-    private Rect mBounds = new Rect();
-    private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
-    private Rect mStartAnimationRect = new Rect();
-    private Rect mEndAnimationRect = new Rect();
+    private @PriorityBucket final int mBucket;
+    private final View mOwningView;
+    private final Rect mBounds = new Rect();
+    private final Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
+    private final Rect mStartAnimationRect = new Rect();
+    private final Rect mEndAnimationRect = new Rect();
     private ObjectAnimator mTopAnimator = null;
     private ObjectAnimator mBottomAnimator = null;
     private ExpandableView mFirstVisibleChild;
@@ -90,7 +89,6 @@ public class NotificationSection {
     }
 
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.STATE_RESOLVER)
     private void startTopAnimation(boolean animate) {
         int previousEndValue = mEndAnimationRect.top;
         int newEndValue = mBounds.top;
@@ -139,7 +137,6 @@ public class NotificationSection {
         mTopAnimator = animator;
     }
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.STATE_RESOLVER)
     private void startBottomAnimation(boolean animate) {
         int previousStartValue = mStartAnimationRect.bottom;
         int previousEndValue = mEndAnimationRect.bottom;
@@ -188,13 +185,11 @@ public class NotificationSection {
         mBottomAnimator = animator;
     }
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.SHADE_VIEW)
     private void setBackgroundTop(int top) {
         mCurrentBounds.top = top;
         mOwningView.invalidate();
     }
 
-    @ShadeViewRefactor(ShadeViewRefactor.RefactorComponent.SHADE_VIEW)
     private void setBackgroundBottom(int bottom) {
         mCurrentBounds.bottom = bottom;
         mOwningView.invalidate();
@@ -277,7 +272,6 @@ public class NotificationSection {
                 }
             }
         }
-        top = Math.max(minTopPosition, top);
         ExpandableView lastView = getLastVisibleChild();
         if (lastView != null) {
             float finalTranslationY = ViewState.getFinalTranslationY(lastView);

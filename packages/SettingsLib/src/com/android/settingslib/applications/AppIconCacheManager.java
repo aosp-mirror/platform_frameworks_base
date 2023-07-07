@@ -22,13 +22,16 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.LruCache;
 
+import androidx.annotation.VisibleForTesting;
+
 /**
  * Cache app icon for management.
  */
 public class AppIconCacheManager {
     private static final String TAG = "AppIconCacheManager";
     private static final float CACHE_RATIO = 0.1f;
-    private static final int MAX_CACHE_SIZE_IN_KB = getMaxCacheInKb();
+    @VisibleForTesting
+    static final int MAX_CACHE_SIZE_IN_KB = getMaxCacheInKb();
     private static final String DELIMITER = ":";
     private static AppIconCacheManager sAppIconCacheManager;
     private final LruCache<String, Drawable> mDrawableCache;
@@ -108,5 +111,26 @@ public class AppIconCacheManager {
 
     private static int getMaxCacheInKb() {
         return Math.round(CACHE_RATIO * Runtime.getRuntime().maxMemory() / 1024);
+    }
+
+    /**
+     * Clears as much memory as possible.
+     *
+     * @see android.content.ComponentCallbacks2#onTrimMemory(int)
+     */
+    public void trimMemory(int level) {
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+            // Time to clear everything
+            if (sAppIconCacheManager != null) {
+                sAppIconCacheManager.mDrawableCache.trimToSize(0);
+            }
+        } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
+                || level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+            // Tough time but still affordable, clear half of the cache
+            if (sAppIconCacheManager != null) {
+                final int maxSize = sAppIconCacheManager.mDrawableCache.maxSize();
+                sAppIconCacheManager.mDrawableCache.trimToSize(maxSize / 2);
+            }
+        }
     }
 }

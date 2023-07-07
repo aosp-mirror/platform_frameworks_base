@@ -43,12 +43,16 @@ import com.android.server.ServiceThread;
  */
 @SuppressLint("LongLogTag")
 class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDeviceService> {
-    private static final String TAG = "CompanionDevice_ServiceConnector";
+    private static final String TAG = "CDM_CompanionServiceConnector";
     private static final boolean DEBUG = false;
+
+    /* Unbinding before executing the callbacks can cause problems. Wait 5-seconds before unbind. */
+    private static final long UNBIND_POST_DELAY_MS = 5_000;
 
     /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */
     interface Listener {
-        void onBindingDied(@UserIdInt int userId, @NonNull String packageName);
+        void onBindingDied(@UserIdInt int userId, @NonNull String packageName,
+                @NonNull CompanionDeviceServiceConnector serviceConnector);
     }
 
     private final @UserIdInt int mUserId;
@@ -57,6 +61,7 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
     // installs a listener to the primary ServiceConnector), hence we should always null-check the
     // reference before calling on it.
     private @Nullable Listener mListener;
+    private boolean mIsPrimary;
 
     /**
      * Create a CompanionDeviceServiceConnector instance.
@@ -74,17 +79,20 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * service importance level should be higher than 125.
      */
     static CompanionDeviceServiceConnector newInstance(@NonNull Context context,
-            @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged) {
+            @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged,
+            boolean isPrimary) {
         final int bindingFlags = isSelfManaged ? BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
                 : BIND_ALMOST_PERCEPTIBLE;
-        return new CompanionDeviceServiceConnector(context, userId, componentName, bindingFlags);
+        return new CompanionDeviceServiceConnector(
+                context, userId, componentName, bindingFlags, isPrimary);
     }
 
     private CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
-            @NonNull ComponentName componentName, int bindingFlags) {
+            @NonNull ComponentName componentName, int bindingFlags, boolean isPrimary) {
         super(context, buildIntent(componentName), bindingFlags, userId, null);
         mUserId = userId;
         mComponentName = componentName;
+        mIsPrimary = isPrimary;
     }
 
     void setListener(@Nullable Listener listener) {
@@ -105,9 +113,23 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * IMPORTANT: use this method instead of invoking {@link ServiceConnector#unbind()} directly,
      * because the latter may cause previously posted callback, such as
      * {@link ICompanionDeviceService#onDeviceDisappeared(AssociationInfo)} to be dropped.
+     *
+     * {@link ICompanionDeviceService} is a non-blocking interface and doesn't wait for job
+     * completion, which makes {@link ServiceConnector#post(VoidJob)} obsolete for ensuring the
+     * order of execution. Give 5 seconds for all the callbacks to finish before unbinding. They
+     * may or may not have finished executing, but we shouldn't let user-overridden methods block
+     * the service from unbinding indefinitely.
      */
     void postUnbind() {
-        post(it -> unbind());
+        getJobHandler().postDelayed(this::unbind, UNBIND_POST_DELAY_MS);
+    }
+
+    boolean isPrimary() {
+        return mIsPrimary;
+    }
+
+    ComponentName getComponentName() {
+        return mComponentName;
     }
 
     @Override
@@ -119,16 +141,6 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         }
     }
 
-    // This method is only called when app is force-closed via settings,
-    // but does not handle crashes. Binder death should be handled in #binderDied()
-    @Override
-    public void onBindingDied(@NonNull ComponentName name) {
-        // IMPORTANT: call super! this will also invoke binderDied()
-        super.onBindingDied(name);
-
-        if (DEBUG) Log.d(TAG, "onBindingDied() " + mComponentName.toShortString());
-    }
-
     @Override
     public void binderDied() {
         super.binderDied();
@@ -137,7 +149,7 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
         // Handle primary process being killed
         if (mListener != null) {
-            mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+            mListener.onBindingDied(mUserId, mComponentName.getPackageName(), this);
         }
     }
 

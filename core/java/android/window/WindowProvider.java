@@ -15,8 +15,10 @@
  */
 package android.window;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.WindowManager.LayoutParams.WindowType;
 
 /**
@@ -36,4 +38,11 @@ public interface WindowProvider {
     /** Gets the launch options of this provider */
     @Nullable
     Bundle getWindowContextOptions();
+
+    /**
+     * Gets the WindowContextToken of this provider.
+     * @see android.content.Context#getWindowContextToken
+     */
+    @NonNull
+    IBinder getWindowContextToken();
 }

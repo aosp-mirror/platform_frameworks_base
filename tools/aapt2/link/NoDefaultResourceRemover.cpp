@@ -76,15 +76,15 @@ bool NoDefaultResourceRemover::Consume(IAaptContext* context, ResourceTable* tab
       });
 
       for (auto iter = remove_iter; iter != end_iter; ++iter) {
-        const ResourceName name(pkg->name, type->type, (*iter)->name);
-        IDiagnostics* diag = context->GetDiagnostics();
-        diag->Warn(DiagMessage() << "removing resource " << name
-                                 << " without required default value");
+        const ResourceName name(pkg->name, type->named_type, (*iter)->name);
+        android::IDiagnostics* diag = context->GetDiagnostics();
+        diag->Warn(android::DiagMessage()
+                   << "removing resource " << name << " without required default value");
         if (context->IsVerbose()) {
-          diag->Note(DiagMessage() << "  did you forget to remove all definitions?");
+          diag->Note(android::DiagMessage() << "  did you forget to remove all definitions?");
           for (const auto& config_value : (*iter)->values) {
             if (config_value->value != nullptr) {
-              diag->Note(DiagMessage(config_value->value->GetSource()) << "defined here");
+              diag->Note(android::DiagMessage(config_value->value->GetSource()) << "defined here");
             }
           }
         }

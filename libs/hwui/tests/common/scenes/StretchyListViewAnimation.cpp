@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkCanvas.h>
+#include <SkColor.h>
 #include <SkFont.h>
+#include <SkFontTypes.h>
+#include <SkPaint.h>
+#include <SkPoint.h>
+#include <SkRefCnt.h>
+#include <SkRRect.h>
 #include <cstdio>
 #include "TestSceneBase.h"
 #include "hwui/Paint.h"
@@ -130,7 +139,7 @@ private:
         roundRectPaint.setColor(Color::White);
         if (addHolePunch) {
             // Punch a hole but then cover it up, we don't want to actually see it
-            canvas.punchHole(SkRRect::MakeRect(SkRect::MakeWH(itemWidth, itemHeight)));
+            canvas.punchHole(SkRRect::MakeRect(SkRect::MakeWH(itemWidth, itemHeight)), 1.f);
         }
         canvas.drawRoundRect(0, 0, itemWidth, itemHeight, dp(6), dp(6), roundRectPaint);
 

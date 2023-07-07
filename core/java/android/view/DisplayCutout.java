@@ -23,6 +23,7 @@ import static android.view.DisplayCutoutProto.BOUND_LEFT;
 import static android.view.DisplayCutoutProto.BOUND_RIGHT;
 import static android.view.DisplayCutoutProto.BOUND_TOP;
 import static android.view.DisplayCutoutProto.INSETS;
+import static android.view.DisplayCutoutProto.WATERFALL_INSETS;
 import static android.view.Surface.ROTATION_0;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
@@ -830,7 +831,7 @@ public final class DisplayCutout {
         mBounds.getRect(BOUNDS_POSITION_TOP).dumpDebug(proto, BOUND_TOP);
         mBounds.getRect(BOUNDS_POSITION_RIGHT).dumpDebug(proto, BOUND_RIGHT);
         mBounds.getRect(BOUNDS_POSITION_BOTTOM).dumpDebug(proto, BOUND_BOTTOM);
-        mWaterfallInsets.toRect().dumpDebug(proto, INSETS);
+        mWaterfallInsets.toRect().dumpDebug(proto, WATERFALL_INSETS);
         proto.end(token);
     }
 

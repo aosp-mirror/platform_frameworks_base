@@ -16,7 +16,7 @@
 
 package com.android.server.display;
 
-import static com.android.server.wm.utils.RotationAnimationUtils.hasProtectedContent;
+import static com.android.internal.policy.TransitionAnimation.hasProtectedContent;
 
 import android.content.Context;
 import android.graphics.BLASTBufferQueue;
@@ -31,7 +31,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.os.IBinder;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -39,6 +38,7 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.window.ScreenCapture;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
@@ -169,19 +169,11 @@ final class ColorFade {
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
 
-        final IBinder token = SurfaceControl.getInternalDisplayToken();
-        if (token == null) {
-            Slog.e(TAG,
-                    "Failed to take screenshot because internal display is disconnected");
-            return false;
-        }
-        final boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
-                == Display.COLOR_MODE_DISPLAY_P3;
-
+        final boolean isWideColor = displayInfo.colorMode == Display.COLOR_MODE_DISPLAY_P3;
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
         mPrepared = true;
 
-        final SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
+        final ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
         if (hardwareBuffer == null) {
             dismiss();
             return false;
@@ -199,7 +191,7 @@ final class ColorFade {
         }
 
         if (!(createEglContext(isProtected) && createEglSurface(isProtected, isWideColor)
-                && setScreenshotTextureAndSetViewport(hardwareBuffer))) {
+                && setScreenshotTextureAndSetViewport(hardwareBuffer, displayInfo.rotation))) {
             dismiss();
             return false;
         }
@@ -508,7 +500,8 @@ final class ColorFade {
     }
 
     private boolean setScreenshotTextureAndSetViewport(
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer,
+            @Surface.Rotation int rotation) {
         if (!attachEglContext()) {
             return false;
         }
@@ -533,14 +526,22 @@ final class ColorFade {
                 s.release();
                 st.release();
             }
+            // if screen is rotated, map texture starting different corner
+            int indexDelta = (rotation == Surface.ROTATION_90) ? 2
+                            : (rotation == Surface.ROTATION_180) ? 4
+                            : (rotation == Surface.ROTATION_270) ? 6 : 0;
 
             // Set up texture coordinates for a quad.
             // We might need to change this if the texture ends up being
             // a different size from the display for some reason.
-            mTexCoordBuffer.put(0, 0f); mTexCoordBuffer.put(1, 0f);
-            mTexCoordBuffer.put(2, 0f); mTexCoordBuffer.put(3, 1f);
-            mTexCoordBuffer.put(4, 1f); mTexCoordBuffer.put(5, 1f);
-            mTexCoordBuffer.put(6, 1f); mTexCoordBuffer.put(7, 0f);
+            mTexCoordBuffer.put(indexDelta, 0f);
+            mTexCoordBuffer.put(indexDelta + 1, 0f);
+            mTexCoordBuffer.put((indexDelta + 2) % 8, 0f);
+            mTexCoordBuffer.put((indexDelta + 3) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 4) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 5) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 6) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 7) % 8, 0f);
 
             // Set up our viewport.
             GLES20.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
@@ -559,8 +560,8 @@ final class ColorFade {
         }
     }
 
-    private SurfaceControl.ScreenshotHardwareBuffer captureScreen() {
-        SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+    private ScreenCapture.ScreenshotHardwareBuffer captureScreen() {
+        ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                 mDisplayManagerInternal.systemScreenshot(mDisplayId);
         if (screenshotBuffer == null) {
             Slog.e(TAG, "Failed to take screenshot. Buffer is null");

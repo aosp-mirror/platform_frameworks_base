@@ -88,6 +88,7 @@ cc_library_shared {
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
         "android.hardware.drm-V1-ndk",
+        "android.hardware.tv.tuner-V2-ndk",
     ],
 
     header_libs: [
@@ -129,6 +130,7 @@ cc_library_shared {
 cc_library_shared {
     name: "libmedia_jni_utils",
     srcs: [
+        ":libgui_frame_event_aidl",
         "android_media_Utils.cpp",
     ],
 
@@ -159,7 +161,7 @@ cc_library_shared {
 
 cc_library_shared {
     name: "libmedia_tv_tuner",
-
+    min_sdk_version: "",
     srcs: [
         "android_media_tv_Tuner.cpp",
         "tuner/DemuxClient.cpp",
@@ -174,7 +176,7 @@ cc_library_shared {
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
-        "android.hardware.tv.tuner-V1-ndk",
+        "android.hardware.tv.tuner-V2-ndk",
         "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",

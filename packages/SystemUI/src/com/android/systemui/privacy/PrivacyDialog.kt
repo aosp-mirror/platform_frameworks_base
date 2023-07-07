@@ -90,8 +90,7 @@ class PrivacyDialog(
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun stop() {
         dismissed.set(true)
         val iterator = dismissListeners.iterator()
         while (iterator.hasNext()) {

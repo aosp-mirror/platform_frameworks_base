@@ -22,6 +22,11 @@
 #include "SkiaDisplayList.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
+class SkBitmap;
+class SkMatrix;
+class SkPaint;
+class SkRRect;
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
@@ -45,7 +50,7 @@ public:
         initDisplayList(renderNode, width, height);
     }
 
-    virtual void punchHole(const SkRRect& rect) override;
+    virtual void punchHole(const SkRRect& rect, float alpha) override;
 
     virtual void finishRecording(uirenderer::RenderNode* destination) override;
     std::unique_ptr<SkiaDisplayList> finishRecording();
@@ -76,6 +81,7 @@ public:
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
     virtual void enableZ(bool enableZ) override;
+    virtual void drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) override;
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
 
@@ -96,6 +102,8 @@ private:
      *  @param height used to calculate recording bounds.
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
+
+    void handleMutableImages(Bitmap& bitmap, DrawImagePayload& payload);
 
     using INHERITED = SkiaCanvas;
 };

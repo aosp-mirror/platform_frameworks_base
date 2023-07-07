@@ -417,6 +417,21 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
     }
 
     /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     * @hide
+     */
+    @Override
+    public void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        // no-op; not supported in compat layer.
+    }
+
+    /**
      * There are two different ImsCallSessionListeners that need to reconciled here, we need to
      * convert the "old" version of the com.android.ims.internal.IImsCallSessionListener to the
      * "new" version of the Listener android.telephony.ims.ImsCallSessionListener when calling
@@ -661,6 +676,12 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
         @Override
         public void callQualityChanged(CallQuality callQuality) throws RemoteException {
             mNewListener.callQualityChanged(callQuality);
+        }
+
+        @Override
+        public void callSessionSendAnbrQuery(int mediaType, int direction,
+                int bitsPerSecond) throws RemoteException {
+            mNewListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
         }
     }
 }

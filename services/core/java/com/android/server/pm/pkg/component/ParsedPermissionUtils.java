@@ -25,6 +25,7 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
@@ -55,8 +56,7 @@ public class ParsedPermissionUtils {
         String tag = "<" + parser.getName() + ">";
         ParseResult<ParsedPermissionImpl> result;
 
-        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermission);
-        try {
+        try (TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermission)) {
             result = ParsedComponentUtils.parseComponent(
                     permission, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermission_banner,
@@ -68,6 +68,11 @@ public class ParsedPermissionUtils {
                     R.styleable.AndroidManifestPermission_roundIcon);
             if (result.isError()) {
                 return input.error(result);
+            }
+
+            int maxSdkVersion = sa.getInt(R.styleable.AndroidManifestPermission_maxSdkVersion, -1);
+            if ((maxSdkVersion != -1) && (maxSdkVersion < Build.VERSION.SDK_INT)) {
+                return input.success(null);
             }
 
             if (sa.hasValue(
@@ -137,8 +142,6 @@ public class ParsedPermissionUtils {
                             + " restricted: " + permission.getName());
                 }
             }
-        } finally {
-            sa.recycle();
         }
 
         permission.setProtectionLevel(

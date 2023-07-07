@@ -17,86 +17,63 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-open class ImeAppHelper @JvmOverloads constructor(
+open class ImeAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.IME_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-        ActivityOptions.IME_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    launcherName: String = ActivityOptions.Ime.Default.LABEL,
+    component: ComponentNameMatcher = ActivityOptions.Ime.Default.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component) {
     /**
      * Opens the IME and wait for it to be displayed
      *
-     * @param device UIDevice instance to interact with the device
      * @param wmHelper Helper used to wait for WindowManager states
      */
-    @JvmOverloads
-    open fun openIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
-        val editText = device.wait(
-            Until.findObject(By.res(getPackage(), "plain_text_input")),
-            FIND_TIMEOUT)
+    open fun openIME(wmHelper: WindowManagerStateHelper) {
+        val editText =
+            uiDevice.wait(Until.findObject(By.res(getPackage(), "plain_text_input")), FIND_TIMEOUT)
 
-        require(editText != null) {
+        requireNotNull(editText) {
             "Text field not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)"
         }
         editText.click()
-        waitIMEShown(device, wmHelper)
+        waitIMEShown(wmHelper)
     }
 
-    protected fun waitIMEShown(
-        device: UiDevice,
-        wmHelper: WindowManagerStateHelper? = null
-    ) {
-        if (wmHelper == null) {
-            device.waitForIdle()
-        } else {
-            wmHelper.waitImeShown()
-        }
+    protected fun waitIMEShown(wmHelper: WindowManagerStateHelper) {
+        wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
     }
 
     /**
      * Opens the IME and wait for it to be gone
      *
-     * @param device UIDevice instance to interact with the device
      * @param wmHelper Helper used to wait for WindowManager states
      */
-    @JvmOverloads
-    open fun closeIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
-        device.pressBack()
-        // Using only the AccessibilityInfo it is not possible to identify if the IME is active
-        if (wmHelper == null) {
-            device.waitForIdle()
-        } else {
-            wmHelper.waitImeGone()
-        }
+    open fun closeIME(wmHelper: WindowManagerStateHelper) {
+        uiDevice.pressBack()
+        wmHelper.StateSyncBuilder().withImeGone().waitForAndVerify()
     }
 
-    @JvmOverloads
-    open fun finishActivity(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
-        val finishButton = device.wait(
+    open fun finishActivity(wmHelper: WindowManagerStateHelper) {
+        val finishButton =
+            uiDevice.wait(
                 Until.findObject(By.res(getPackage(), "finish_activity_btn")),
-                FIND_TIMEOUT)
-        require(finishButton != null) {
-            "Finish activity button not found, probably IME activity is not on the screen ?"
+                FIND_TIMEOUT
+            )
+        requireNotNull(finishButton) {
+            "Finish activity button not found, probably IME activity is not on the screen?"
         }
         finishButton.click()
-        if (wmHelper == null) {
-            device.waitForIdle()
-        } else {
-            wmHelper.waitForActivityRemoved(component)
-        }
+        wmHelper.StateSyncBuilder().withActivityRemoved(this).waitForAndVerify()
     }
 }

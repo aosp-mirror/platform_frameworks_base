@@ -20,6 +20,6 @@ license {
 
 java_binary {
     name: "vr",
-    wrapper: "vr",
+    wrapper: "vr.sh",
     srcs: ["**/*.java"],
 }

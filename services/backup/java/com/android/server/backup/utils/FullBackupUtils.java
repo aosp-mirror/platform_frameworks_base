@@ -21,6 +21,8 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.server.backup.BackupAndRestoreFeatureFlags;
+
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
@@ -31,8 +33,9 @@ import java.io.OutputStream;
  * Low-level utility methods for full backup.
  */
 public class FullBackupUtils {
+
     /**
-     * Reads data from pipe and writes it to the stream in chunks of up to 32KB.
+     * Reads data from pipe and writes it to the stream.
      *
      * @param inPipe - pipe to read the data from.
      * @param out - stream to write the data to.
@@ -43,8 +46,9 @@ public class FullBackupUtils {
         // We do not take close() responsibility for the pipe FD
         FileInputStream raw = new FileInputStream(inPipe.getFileDescriptor());
         DataInputStream in = new DataInputStream(raw);
-
-        byte[] buffer = new byte[32 * 1024];
+        final int chunkSizeInBytes =
+                BackupAndRestoreFeatureFlags.getFullBackupUtilsRouteBufferSizeBytes();
+        byte[] buffer = new byte[chunkSizeInBytes];
         int chunkTotal;
         while ((chunkTotal = in.readInt()) > 0) {
             while (chunkTotal > 0) {

@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -47,8 +48,8 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
     private AlarmManager mAlarm;
     private PowerManager mPowerManager;
 
-    // After construction, mutations of idle/screen-on state will only happen
-    // on the main looper thread, either in onReceive() or in an alarm callback.
+    // After construction, mutations of idle/screen-on/projection states will only happen
+    // on the JobScheduler thread, either in onReceive(), in an alarm callback, or in on.*Changed.
     private long mInactivityIdleThreshold;
     private long mIdleWindowSlop;
     private boolean mIdle;
@@ -101,12 +102,10 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         filter.addAction(Intent.ACTION_DOCK_IDLE);
         filter.addAction(Intent.ACTION_DOCK_ACTIVE);
 
-        context.registerReceiver(this, filter);
+        context.registerReceiver(this, filter, null, AppSchedulingModuleThread.getHandler());
 
-        // TODO(b/172579710): Move the callbacks off the main executor and on to
-        //  JobSchedulerBackgroundThread.getExecutor() once synchronization is fixed in this class.
         context.getSystemService(UiModeManager.class).addOnProjectionStateChangedListener(
-                UiModeManager.PROJECTION_TYPE_ALL, context.getMainExecutor(),
+                UiModeManager.PROJECTION_TYPE_ALL, AppSchedulingModuleThread.getExecutor(),
                 mOnProjectionStateChangedListener);
     }
 
@@ -226,7 +225,8 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
                 Slog.v(TAG, "Scheduling idle : " + reason + " now:" + nowElapsed + " when=" + when);
             }
             mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    when, mIdleWindowSlop, "JS idleness", mIdleAlarmListener, null);
+                    when, mIdleWindowSlop, "JS idleness",
+                    AppSchedulingModuleThread.getExecutor(), mIdleAlarmListener);
         }
     }
 

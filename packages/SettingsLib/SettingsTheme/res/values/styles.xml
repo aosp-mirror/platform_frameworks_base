@@ -28,9 +28,23 @@
     </style>
 
     <style name="TextAppearance.TopIntroText"
-        parent="@android:style/TextAppearance.DeviceDefault">
+           parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.EntityHeaderTitle"
+           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TextAppearance.EntityHeaderSummary"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
     </style>
 
 </resources>

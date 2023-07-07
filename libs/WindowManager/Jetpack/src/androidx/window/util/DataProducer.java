@@ -18,26 +18,27 @@ package androidx.window.util;
 
 import android.annotation.NonNull;
 
-import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
- * Produces data through {@link #getData()} and provides a mechanism for receiving a callback when
- * the data managed by the produces has changed.
+ * Produces data through {@link DataProducer#getData} and provides a mechanism for receiving
+ * a callback when the data managed by the produces has changed.
  *
- * @param <T> The type of data this producer returns through {@link #getData()}.
+ * @param <T> The type of data this producer returns through {@link DataProducer#getData}.
  */
 public interface DataProducer<T> {
     /**
-     * Returns the data currently stored in the provider, or {@link Optional#empty()} if the
-     * provider has no data.
+     * Emits the first available data at that point in time.
+     * @param dataConsumer a {@link Consumer} that will receive one value.
      */
-    Optional<T> getData();
+    void getData(@NonNull Consumer<T> dataConsumer);
 
     /**
-     * Adds a callback to be notified when the data returned from {@link #getData()} has changed.
+     * Adds a callback to be notified when the data returned
+     * from {@link DataProducer#getData} has changed.
      */
-    void addDataChangedCallback(@NonNull Runnable callback);
+    void addDataChangedCallback(@NonNull Consumer<T> callback);
 
-    /** Removes a callback previously added with {@link #addDataChangedCallback(Runnable)}.  */
-    void removeDataChangedCallback(@NonNull Runnable callback);
+    /** Removes a callback previously added with {@link #addDataChangedCallback(Consumer)}. */
+    void removeDataChangedCallback(@NonNull Consumer<T> callback);
 }

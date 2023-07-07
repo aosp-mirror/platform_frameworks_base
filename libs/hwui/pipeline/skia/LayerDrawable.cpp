@@ -25,6 +25,7 @@
 #include "SkColorFilter.h"
 #include "SkRuntimeEffect.h"
 #include "SkSurface.h"
+#include "Tonemapper.h"
 #include "gl/GrGLTypes.h"
 #include "math/mat4.h"
 #include "system/graphics-base-v1.0.h"
@@ -76,35 +77,30 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
              isIntegerAligned(dstDevRect.y()));
 }
 
-static sk_sp<SkShader> createLinearEffectShader(sk_sp<SkShader> shader,
-                                                const shaders::LinearEffect& linearEffect,
-                                                float maxDisplayLuminance,
-                                                float currentDisplayLuminanceNits,
-                                                float maxLuminance) {
-    auto shaderString = SkString(shaders::buildLinearEffectSkSL(linearEffect));
-    auto [runtimeEffect, error] = SkRuntimeEffect::MakeForShader(std::move(shaderString));
-    if (!runtimeEffect) {
-        LOG_ALWAYS_FATAL("LinearColorFilter construction error: %s", error.c_str());
+static void adjustCropForYUV(uint32_t format, int bufferWidth, int bufferHeight, SkRect* cropRect) {
+    // Chroma channels of YUV420 images are subsampled we may need to shrink the crop region by
+    // a whole texel on each side. Since skia still adds its own 0.5 inset, we apply an
+    // additional 0.5 inset. See GLConsumer::computeTransformMatrix for details.
+    float shrinkAmount = 0.0f;
+    switch (format) {
+        // Use HAL formats since some AHB formats are only available in vndk
+        case HAL_PIXEL_FORMAT_YCBCR_420_888:
+        case HAL_PIXEL_FORMAT_YV12:
+        case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+            shrinkAmount = 0.5f;
+            break;
+        default:
+            break;
     }
 
-    SkRuntimeShaderBuilder effectBuilder(std::move(runtimeEffect));
-
-    effectBuilder.child("child") = std::move(shader);
-
-    const auto uniforms = shaders::buildLinearEffectUniforms(
-            linearEffect, mat4(), maxDisplayLuminance, currentDisplayLuminanceNits, maxLuminance);
-
-    for (const auto& uniform : uniforms) {
-        effectBuilder.uniform(uniform.name.c_str()).set(uniform.value.data(), uniform.value.size());
+    // Shrink the crop if it has more than 1-px and differs from the buffer size.
+    if (cropRect->width() > 1 && cropRect->width() < bufferWidth) {
+        cropRect->inset(shrinkAmount, 0);
     }
 
-    return effectBuilder.makeShader();
-}
-
-static bool isHdrDataspace(ui::Dataspace dataspace) {
-    const auto transfer = dataspace & HAL_DATASPACE_TRANSFER_MASK;
-
-    return transfer == HAL_DATASPACE_TRANSFER_ST2084 || transfer == HAL_DATASPACE_TRANSFER_HLG;
+    if (cropRect->height() > 1 && cropRect->height() < bufferHeight) {
+        cropRect->inset(0, shrinkAmount);
+    }
 }
 
 // TODO: Context arg probably doesn't belong here – do debug check at callsite instead.
@@ -142,6 +138,7 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
         SkRect skiaSrcRect;
         if (srcRect && !srcRect->isEmpty()) {
             skiaSrcRect = *srcRect;
+            adjustCropForYUV(layer->getBufferFormat(), imageWidth, imageHeight, &skiaSrcRect);
         } else {
             skiaSrcRect = SkRect::MakeIWH(imageWidth, imageHeight);
         }
@@ -188,31 +185,10 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
             sampling = SkSamplingOptions(SkFilterMode::kLinear);
         }
 
-        const auto sourceDataspace = static_cast<ui::Dataspace>(
-                ColorSpaceToADataSpace(layerImage->colorSpace(), layerImage->colorType()));
-        const SkImageInfo& imageInfo = canvas->imageInfo();
-        const auto destinationDataspace = static_cast<ui::Dataspace>(
-                ColorSpaceToADataSpace(imageInfo.colorSpace(), imageInfo.colorType()));
-
-        if (isHdrDataspace(sourceDataspace) || isHdrDataspace(destinationDataspace)) {
-            const auto effect = shaders::LinearEffect{
-                    .inputDataspace = sourceDataspace,
-                    .outputDataspace = destinationDataspace,
-                    .undoPremultipliedAlpha = layerImage->alphaType() == kPremul_SkAlphaType,
-                    .fakeInputDataspace = destinationDataspace};
-            auto shader = layerImage->makeShader(sampling,
-                                                 SkMatrix::RectToRect(skiaSrcRect, skiaDestRect));
-            constexpr float kMaxDisplayBrightess = 1000.f;
-            constexpr float kCurrentDisplayBrightness = 500.f;
-            shader = createLinearEffectShader(std::move(shader), effect, kMaxDisplayBrightess,
-                                              kCurrentDisplayBrightness,
-                                              layer->getMaxLuminanceNits());
-            paint.setShader(shader);
-            canvas->drawRect(skiaDestRect, paint);
-        } else {
-            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
-                                  constraint);
-        }
+        tonemapPaint(layerImage->imageInfo(), canvas->imageInfo(), layer->getMaxLuminanceNits(),
+                     paint);
+        canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
+                              constraint);
 
         canvas->restore();
         // restore the original matrix

@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import android.platform.test.annotations.RootPermissionTest;
 
 import com.android.blockdevicewriter.BlockDeviceWriter;
-import com.android.fsverity.AddFsVerityCertRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -36,7 +35,6 @@ import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -44,6 +42,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This test makes sure app installs with fs-verity signature, and on-access verification works.
@@ -90,10 +89,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     /** Only 4K page is supported by fs-verity currently. */
     private static final int FSVERITY_PAGE_SIZE = 4096;
 
-    @Rule
-    public final AddFsVerityCertRule mAddFsVerityCertRule =
-            new AddFsVerityCertRule(this, CERT_PATH);
-
     private ITestDevice mDevice;
     private boolean mDmRequireFsVerity;
 
@@ -103,11 +98,13 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         mDmRequireFsVerity = "true".equals(
                 mDevice.getProperty("pm.dexopt.dm.require_fsverity"));
 
+        expectRemoteCommandToSucceed("cmd file_integrity append-cert " + CERT_PATH);
         uninstallPackage(TARGET_PACKAGE);
     }
 
     @After
     public void tearDown() throws DeviceNotAvailableException {
+        expectRemoteCommandToSucceed("cmd file_integrity remove-last-cert");
         uninstallPackage(TARGET_PACKAGE);
     }
 
@@ -469,16 +466,45 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                     break;
                 }
                 try {
-                    CLog.d("lsof: " + expectRemoteCommandToSucceed("lsof " + apkPath));
+                    String openFiles = expectRemoteCommandToSucceed("lsof " + apkPath);
+                    CLog.d("lsof: " + openFiles);
                     Thread.sleep(1000);
-                    String pid = expectRemoteCommandToSucceed("pidof system_server");
-                    mDevice.executeShellV2Command("kill -10 " + pid);  // force GC
+                    forceGCOnOpenFilesProcess(getOpenFilesPIDs(openFiles));
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return;
                 }
             }
             assertTrue("Read from " + path + " should fail", retry > 0);
+        }
+    }
+
+    /**
+     * This is a helper method that parses the lsof output to get PIDs of process holding FD.
+     * Here is an example output of lsof. This method extracts the second columns(PID).
+     *
+     * Example lsof output:
+     *  COMMAND      PID     USER    FD     TYPE   DEVICE   SIZE/OFF  NODE   NAME
+     * .example.app  1063    u0_a38  mem    REG    253,6    8599      12826  example.apk
+     * .example.app  1063    u0_a38  99r    REG    253,6    8599      12826  example.apk
+     */
+    private Set<String> getOpenFilesPIDs(String lsof) {
+        Set<String> openFilesPIDs = new HashSet<>();
+        String[] lines = lsof.split("\n");
+        for (int i = 1; i < lines.length; i++) {
+            openFilesPIDs.add(lines[i].split("\\s+")[1]);
+        }
+        return openFilesPIDs;
+    }
+
+    /**
+     * This is a helper method that forces GC on processes given their PIDs.
+     * That is to execute shell command "kill -10" on PIDs.
+     */
+    private void forceGCOnOpenFilesProcess(Set<String> openFilesPIDs)
+            throws DeviceNotAvailableException {
+        for (String openFilePID : openFilesPIDs) {
+            mDevice.executeShellV2Command("kill -10 " + openFilePID);
         }
     }
 

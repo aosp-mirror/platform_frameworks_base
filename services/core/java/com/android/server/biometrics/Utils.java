@@ -54,6 +54,7 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -65,6 +66,7 @@ import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
@@ -86,6 +88,40 @@ public class Utils {
             return false;
         }
         return true;
+    }
+
+    /** If virtualized biometrics are supported (requires debug build). */
+    public static boolean isVirtualEnabled(@NonNull Context context) {
+        return Build.isDebuggable()
+                && Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Get the enabled HAL instances. If virtual is enabled and available it will be returned as
+     * the only instance, otherwise all other instances will be returned.
+     *
+     * @param context system context
+     * @param declaredInstances known instances
+     * @return filtered list of enabled instances
+     */
+    @NonNull
+    public static List<String> filterAvailableHalInstances(@NonNull Context context,
+            @NonNull List<String> declaredInstances) {
+        if (declaredInstances.size() <= 1) {
+            return declaredInstances;
+        }
+
+        final int virtualAt = declaredInstances.indexOf("virtual");
+        if (isVirtualEnabled(context) && virtualAt != -1) {
+            return List.of(declaredInstances.get(virtualAt));
+        }
+
+        declaredInstances = new ArrayList<>(declaredInstances);
+        if (virtualAt != -1) {
+            declaredInstances.remove(virtualAt);
+        }
+        return declaredInstances;
     }
 
     /**
@@ -374,6 +410,15 @@ public class Utils {
         }
         return false;
     }
+
+    /** Same as checkPermission but also allows shell. */
+    public static void checkPermissionOrShell(Context context, String permission) {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            return;
+        }
+        checkPermission(context, permission);
+    }
+
 
     public static void checkPermission(Context context, String permission) {
         context.enforceCallingOrSelfPermission(permission,

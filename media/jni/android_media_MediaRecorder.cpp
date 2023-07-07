@@ -30,7 +30,6 @@
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
 #include <media/MediaMetricsItem.h>
-#include <media/MicrophoneInfo.h>
 #include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
 
@@ -774,7 +773,7 @@ android_media_MediaRecord_getActiveMicrophones(JNIEnv *env,
     }
 
     jint jStatus = AUDIO_JAVA_SUCCESS;
-    std::vector<media::MicrophoneInfo> activeMicrophones;
+    std::vector<media::MicrophoneInfoFw> activeMicrophones;
     status_t status = mr->getActiveMicrophones(&activeMicrophones);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "MediaRecorder::getActiveMicrophones error %d", status);

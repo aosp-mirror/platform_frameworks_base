@@ -21,17 +21,21 @@
         <option name="cleanup" value="true" />
         <option name="push-file" key="SimpleServiceTestApp3.apk"
                 value="/data/local/tmp/cts/content/SimpleServiceTestApp3.apk" />
+        <option name="push-file" key="broken_shortcut.xml"
+                value="/data/local/tmp/cts/content/broken_shortcut.xml" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
+        <option name="test-file-name" value="BstatsTestApp.apk" />
         <option name="test-file-name" value="FrameworksServicesTests.apk" />
         <option name="test-file-name" value="JobTestApp.apk" />
         <option name="test-file-name" value="SuspendTestApp.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp1.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp2.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp3.apk" />
+        <option name="test-file-name" value="MediaButtonReceiverHolderTestHelperApp.apk" />
     </target_preparer>
 
     <!-- Create place to store apks -->
@@ -40,15 +44,11 @@
         <option name="teardown-command" value="rm -rf /data/local/tmp/servicestests"/>
     </target_preparer>
 
-    <!-- Load additional APKs onto device -->
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="push" value="StubTestApp.apk->/data/local/tmp/servicestests/StubTestApp.apk"/>
-    </target_preparer>
-
     <option name="test-tag" value="FrameworksServicesTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.servicestests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false"/>
+        <option name="exclude-annotation" value="androidx.test.filters.FlakyTest" />
     </test>
 </configuration>

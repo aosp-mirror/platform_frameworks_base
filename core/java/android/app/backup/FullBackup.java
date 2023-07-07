@@ -16,10 +16,9 @@
 
 package android.app.backup;
 
-import static android.app.backup.BackupManager.OperationType;
-
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -123,20 +122,20 @@ public class FullBackup {
 
     /**
      * Identify {@link BackupScheme} object by package and operation type
-     * (see {@link OperationType}) it corresponds to.
+     * (see {@link BackupDestination}) it corresponds to.
      */
     private static class BackupSchemeId {
         final String mPackageName;
-        @OperationType final int mOperationType;
+        @BackupDestination final int mBackupDestination;
 
-        BackupSchemeId(String packageName, @OperationType int operationType) {
+        BackupSchemeId(String packageName, @BackupDestination int backupDestination) {
             mPackageName = packageName;
-            mOperationType = operationType;
+            mBackupDestination = backupDestination;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mPackageName, mOperationType);
+            return Objects.hash(mPackageName, mBackupDestination);
         }
 
         @Override
@@ -149,7 +148,7 @@ public class FullBackup {
             }
             BackupSchemeId that = (BackupSchemeId) object;
             return Objects.equals(mPackageName, that.mPackageName) &&
-                    Objects.equals(mOperationType, that.mOperationType);
+                    Objects.equals(mBackupDestination, that.mBackupDestination);
         }
     }
 
@@ -164,19 +163,20 @@ public class FullBackup {
             new ArrayMap<>();
 
     static synchronized BackupScheme getBackupScheme(Context context,
-            @OperationType int operationType) {
-        BackupSchemeId backupSchemeId = new BackupSchemeId(context.getPackageName(), operationType);
+            @BackupDestination int backupDestination) {
+        BackupSchemeId backupSchemeId = new BackupSchemeId(context.getPackageName(),
+                backupDestination);
         BackupScheme backupSchemeForPackage =
                 kPackageBackupSchemeMap.get(backupSchemeId);
         if (backupSchemeForPackage == null) {
-            backupSchemeForPackage = new BackupScheme(context, operationType);
+            backupSchemeForPackage = new BackupScheme(context, backupDestination);
             kPackageBackupSchemeMap.put(backupSchemeId, backupSchemeForPackage);
         }
         return backupSchemeForPackage;
     }
 
     public static BackupScheme getBackupSchemeForTest(Context context) {
-        BackupScheme testing = new BackupScheme(context, OperationType.BACKUP);
+        BackupScheme testing = new BackupScheme(context, BackupDestination.CLOUD);
         testing.mExcludes = new ArraySet();
         testing.mIncludes = new ArrayMap();
         return testing;
@@ -303,7 +303,7 @@ public class FullBackup {
 
         final int mDataExtractionRules;
         final int mFullBackupContent;
-        @OperationType final int mOperationType;
+        @BackupDestination final int mBackupDestination;
         final PackageManager mPackageManager;
         final StorageManager mStorageManager;
         final String mPackageName;
@@ -426,12 +426,12 @@ public class FullBackup {
          */
         ArraySet<PathWithRequiredFlags> mExcludes;
 
-        BackupScheme(Context context, @OperationType int operationType) {
+        BackupScheme(Context context, @BackupDestination int backupDestination) {
             ApplicationInfo applicationInfo = context.getApplicationInfo();
 
             mDataExtractionRules = applicationInfo.dataExtractionRulesRes;
             mFullBackupContent = applicationInfo.fullBackupContent;
-            mOperationType = operationType;
+            mBackupDestination = backupDestination;
             mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
             mPackageManager = context.getPackageManager();
             mPackageName = context.getPackageName();
@@ -568,7 +568,7 @@ public class FullBackup {
                 }
 
                 try {
-                    parseSchemeForOperationType(mOperationType);
+                    parseSchemeForBackupDestination(mBackupDestination);
                 } catch (PackageManager.NameNotFoundException e) {
                     // Throw it as an IOException
                     throw new IOException(e);
@@ -576,12 +576,12 @@ public class FullBackup {
             }
         }
 
-        private void parseSchemeForOperationType(@OperationType int operationType)
+        private void parseSchemeForBackupDestination(@BackupDestination int backupDestination)
                 throws PackageManager.NameNotFoundException, IOException, XmlPullParserException {
-            String configSection = getConfigSectionForOperationType(operationType);
+            String configSection = getConfigSectionForBackupDestination(backupDestination);
             if (configSection == null) {
-                Slog.w(TAG, "Given operation type isn't supported by backup scheme: "
-                        + operationType);
+                Slog.w(TAG, "Given backup destination isn't supported by backup scheme: "
+                        + backupDestination);
                 return;
             }
 
@@ -600,7 +600,7 @@ public class FullBackup {
                 }
             }
 
-            if (operationType == OperationType.MIGRATION
+            if (backupDestination == BackupDestination.DEVICE_TRANSFER
                     && CompatChanges.isChangeEnabled(IGNORE_FULL_BACKUP_CONTENT_IN_D2D)) {
                 mIsUsingNewScheme = true;
                 return;
@@ -615,11 +615,12 @@ public class FullBackup {
         }
 
         @Nullable
-        private String getConfigSectionForOperationType(@OperationType int operationType)  {
-            switch (operationType) {
-                case OperationType.BACKUP:
+        private String getConfigSectionForBackupDestination(
+                @BackupDestination int backupDestination)  {
+            switch (backupDestination) {
+                case BackupDestination.CLOUD:
                     return ConfigSection.CLOUD_BACKUP;
-                case OperationType.MIGRATION:
+                case BackupDestination.DEVICE_TRANSFER:
                     return ConfigSection.DEVICE_TRANSFER;
                 default:
                     return null;

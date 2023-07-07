@@ -12,6 +12,9 @@
       "name": "OverlayDeviceTests"
     },
     {
+      "name": "SelfTargetingOverlayDeviceTests"
+    },
+    {
       "name": "OverlayHostTests"
     },
     {
@@ -35,6 +38,9 @@
         },
         {
           "include-filter": "android.content.om.cts"
+        },
+        {
+          "include-filter": "android.content.res.loader.cts"
         }
       ]
     }

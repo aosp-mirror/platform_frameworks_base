@@ -81,12 +81,13 @@ public class A2dpProfile implements LocalBluetoothProfile {
                 device.onProfileStateChanged(A2dpProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
             }
-            mIsProfileReady=true;
+            mIsProfileReady = true;
             mProfileManager.callServiceConnectedListeners();
         }
 
         public void onServiceDisconnected(int profile) {
-            mIsProfileReady=false;
+            mIsProfileReady = false;
+            mProfileManager.callServiceDisconnectedListeners();
         }
     }
 
@@ -328,6 +329,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
                index = 5;
                break;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
+                index = 6;
+                break;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
+                index = 7;
+                break;
            }
 
         if (index < 0) {

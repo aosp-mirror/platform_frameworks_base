@@ -259,7 +259,7 @@ public class HdmiCecNetwork {
             // The addition of a local device should not notify listeners
             return;
         }
-        mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
+        mHdmiControlService.checkAndUpdateAbsoluteVolumeBehavior();
         if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
             // Don't notify listeners of devices that haven't reported their physical address yet
             return;
@@ -384,7 +384,7 @@ public class HdmiCecNetwork {
     final void removeCecDevice(HdmiCecLocalDevice localDevice, int address) {
         assertRunOnServiceThread();
         HdmiDeviceInfo info = removeDeviceInfo(HdmiDeviceInfo.idForCecDevice(address));
-        mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
+        mHdmiControlService.checkAndUpdateAbsoluteVolumeBehavior();
         localDevice.mCecMessageCache.flushMessagesFrom(address);
         if (info.getPhysicalAddress() == HdmiDeviceInfo.PATH_INVALID) {
             // Don't notify listeners of devices that haven't reported their physical address yet
@@ -469,8 +469,12 @@ public class HdmiCecNetwork {
         ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
         for (HdmiPortInfo info : cecPortInfo) {
             if (mhlSupportedPorts.contains(info.getId())) {
-                result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
-                        info.isCecSupported(), true, info.isArcSupported()));
+                result.add(new HdmiPortInfo.Builder(info.getId(), info.getType(), info.getAddress())
+                        .setCecSupported(info.isCecSupported())
+                        .setMhlSupported(true)
+                        .setArcSupported(info.isArcSupported())
+                        .setEarcSupported(info.isEarcSupported())
+                        .build());
             } else {
                 result.add(info);
             }
@@ -588,7 +592,7 @@ public class HdmiCecNetwork {
 
         updateCecDevice(newDeviceInfo);
 
-        mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
+        mHdmiControlService.checkAndUpdateAbsoluteVolumeBehavior();
     }
 
     @ServiceThreadOnly
@@ -621,7 +625,7 @@ public class HdmiCecNetwork {
                     .build();
             updateCecDevice(newDeviceInfo);
 
-            mHdmiControlService.checkAndUpdateAbsoluteVolumeControlState();
+            mHdmiControlService.checkAndUpdateAbsoluteVolumeBehavior();
         }
     }
 

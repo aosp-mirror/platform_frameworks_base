@@ -1,0 +1,79 @@
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="
+    This is a HTML page that calls and verifies responses from the @JavascriptInterface functions of
+    SlicePurchaseWebInterface. Test slice purchase application behavior using ADB shell commands and
+    the APIs below:
+
+    FROM TERMINAL:
+    Allow device to override carrier configs:
+    $ adb root
+    Set PREMIUM_CAPABILITY_PRIORITIZE_LATENCY enabled:
+    $ adb shell cmd phone cc set-value -p supported_premium_capabilities_int_array 34
+    Set the carrier purchase URL to this test HTML file:
+    $ adb shell cmd phone cc set-value -p premium_capability_purchase_url_string \
+      file:///android_asset/slice_purchase_test.html
+    OPTIONAL: Allow premium capability purchase on LTE:
+    $ adb shell cmd phone cc set-value -p premium_capability_supported_on_lte_bool true
+    OPTIONAL: Override ServiceState to fake a NR SA connection:
+    $ adb shell am broadcast -a com.android.internal.telephony.TestServiceState --ei data_rat 20
+
+    FROM TEST ACTIVITY:
+    TelephonyManager tm = getApplicationContext().getSystemService(TelephonyManager.class)
+    tm.isPremiumCapabilityAvailable(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY);
+    LinkedBlockingQueue<Integer> purchaseRequests = new LinkedBlockingQueue<>();
+    tm.purchasePremiumCapability(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY,
+            this.getMainExecutor(), request::offer);
+
+    When the test application starts, this HTML will be loaded into the WebView along with the
+    associated JavaScript functions in file:///android_asset/slice_purchase_test.js.
+    Click on the buttons in the HTML to call the corresponding @JavascriptInterface APIs.
+
+    RESET DEVICE STATE:
+    Clear carrier configurations that were set:
+    $ adb shell cmd phone cc clear-values
+    Clear ServiceState override that was set:
+    $ adb shell am broadcast -a com.android.internal.telephony.TestServiceState --es action reset
+    ">
+    <title>Test SlicePurchaseActivity</title>
+    <script type="text/javascript" src="slice_purchase_test.js"></script>
+</head>
+<body>
+    <h1>Test SlicePurchaseActivity</h1>
+    <h2>Get requested premium capability</h2>
+    <button type="button" onclick="testGetRequestedCapability()">
+        Get requested premium capability
+    </button>
+    <p id="requested_capability"></p>
+
+    <h2>Notify purchase successful</h2>
+    <button type="button" onclick="testNotifyPurchaseSuccessful(60000)">
+        Notify purchase successful for 1 minute
+    </button>
+    <p id="purchase_successful"></p>
+
+    <h2>Notify purchase failed</h2>
+    <button type="button" onclick="testNotifyPurchaseFailed(2, 'FAILURE_CODE_SERVER_UNREACHABLE')">
+        Notify purchase failed
+    </button>
+    <p id="purchase_failed"></p>
+</body>
+</html>

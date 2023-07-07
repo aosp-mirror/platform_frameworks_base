@@ -222,6 +222,28 @@ public abstract class Vibrator {
     }
 
     /**
+     * Checks whether or not the vibrator supports all components of a given {@link VibrationEffect}
+     * (i.e. the vibrator can play the given effect as intended).
+     *
+     * <p>If this method returns {@code true}, then the VibrationEffect should play as expected.
+     * If {@code false}, playing the VibrationEffect might still make a vibration, but the vibration
+     * may be significantly degraded from the intention.
+     *
+     * <p>This method aggregates the results of feature check methods such as
+     * {@link #hasAmplitudeControl}, {@link #areAllPrimitivesSupported(int...)}, etc, depending
+     * on the features that are actually used by the VibrationEffect.
+     *
+     * @param effect the {@link VibrationEffect} to check if it is supported
+     * @return {@code true} if the vibrator can play the given {@code effect} as intended,
+     *         {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean areVibrationFeaturesSupported(@NonNull VibrationEffect effect) {
+        return effect.areVibrationFeaturesSupported(this);
+    }
+
+    /**
      * Check whether the vibrator can be controlled by an external service with the
      * {@link IExternalVibratorService}.
      *
@@ -238,9 +260,7 @@ public abstract class Vibrator {
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * frequencies.
-     * @hide
      */
-    @TestApi
     public float getResonantFrequency() {
         return getInfo().getResonantFrequencyHz();
     }
@@ -251,9 +271,7 @@ public abstract class Vibrator {
      * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
      * applicable, or if this vibrator is a composite of multiple physical devices with different
      * Q factors.
-     * @hide
      */
-    @TestApi
     public float getQFactor() {
         return getInfo().getQFactor();
     }
@@ -527,7 +545,8 @@ public abstract class Vibrator {
     }
 
     /**
-     * Query whether the vibrator supports all the given effects.
+     * Query whether the vibrator supports all the given effects. If no argument is provided this
+     * method will always return {@link #VIBRATION_EFFECT_SUPPORT_YES}.
      *
      * <p>If an effect is not supported, the system may still automatically fall back to a simpler
      * vibration instead, which is not optimised for the specific device, however vibration isn't
@@ -549,7 +568,8 @@ public abstract class Vibrator {
      * <p>Use {@link #areEffectsSupported(int...)} to get individual results for each effect.
      *
      * @param effectIds Which effects to query for.
-     * @return Whether all the effects are natively supported by the device.
+     * @return Whether all specified effects are natively supported by the device. Empty query
+     * defaults to {@link #VIBRATION_EFFECT_SUPPORT_YES}.
      */
     @VibrationEffectSupport
     public final int areAllEffectsSupported(
@@ -598,7 +618,8 @@ public abstract class Vibrator {
     }
 
     /**
-     * Query whether the vibrator supports all of the given primitives.
+     * Query whether the vibrator supports all of the given primitives.  If no argument is provided
+     * this method will always return {@code true}.
      *
      * <p>If a primitive is not supported by the device, then <em>no vibration</em> will occur if
      * it is played.
@@ -606,7 +627,7 @@ public abstract class Vibrator {
      * <p>Use {@link #arePrimitivesSupported(int...)} to get individual results for each primitive.
      *
      * @param primitiveIds Which primitives to query for.
-     * @return Whether all specified primitives are supported.
+     * @return Whether all specified primitives are supported. Empty query defaults to {@code true}.
      */
     public final boolean areAllPrimitivesSupported(
             @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {

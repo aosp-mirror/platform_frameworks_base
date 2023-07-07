@@ -16,7 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -30,7 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.android.internal.app.AlertActivity;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.util.List;
@@ -53,6 +52,8 @@ public class InstallSuccess extends AlertActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setFinishOnTouchOutside(true);
 
         if (getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
             // Return result if requested

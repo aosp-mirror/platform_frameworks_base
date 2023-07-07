@@ -56,7 +56,6 @@ public class AlarmStoreTest {
     public static Object[] stores() {
         return new AlarmStore[]{
                 new LazyAlarmStore(),
-                new BatchingAlarmStore(),
         };
     }
 

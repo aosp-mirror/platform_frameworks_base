@@ -101,7 +101,10 @@ public class AnnouncementAggregator extends ICloseHandle.Stub {
 
     public void watchModule(@NonNull RadioModule module, @NonNull int[] enabledTypes) {
         synchronized (mLock) {
-            if (mIsClosed) throw new IllegalStateException();
+            if (mIsClosed) {
+                throw new IllegalStateException("Failed to watch module"
+                        + "since announcement aggregator has already been closed");
+            }
 
             ModuleWatcher watcher = new ModuleWatcher();
             ICloseHandle closeHandle;

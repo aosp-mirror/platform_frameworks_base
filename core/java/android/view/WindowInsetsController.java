@@ -23,7 +23,6 @@ import android.graphics.Insets;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.CancellationSignal;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
@@ -201,6 +200,21 @@ public interface WindowInsetsController {
             @NonNull WindowInsetsAnimationControlListener listener);
 
     /**
+     * Lets the application add non-controllable listener object that can be called back
+     * when animation is invoked by the system by host calling methods such as {@link #show} or
+     * {@link #hide}.
+     *
+     * The listener is supposed to be used for logging only, using the control or
+     * relying on the timing of the callback in any other way is not supported.
+     *
+     * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when
+     *                 the animation is driven by the system and not the host
+     * @hide
+     */
+    void setSystemDrivenInsetsAnimationLoggingListener(
+            @Nullable WindowInsetsAnimationControlListener listener);
+
+    /**
      * Controls the appearance of system bars.
      * <p>
      * For example, the following statement adds {@link #APPEARANCE_LIGHT_STATUS_BARS}:
@@ -264,11 +278,10 @@ public interface WindowInsetsController {
     InsetsState getState();
 
     /**
-     * @return Whether the specified insets source is currently requested to be visible by the
-     *         application.
+     * @return Insets types that have been requested to be visible.
      * @hide
      */
-    boolean isRequestedVisible(@InternalInsetsType int type);
+    @InsetsType int getRequestedVisibleTypes();
 
     /**
      * Adds a {@link OnControllableInsetsChangedListener} to the window insets controller.

@@ -1,0 +1,40 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_fuzz {
+    name: "java_binder_parcel_fuzzer",
+    srcs: [
+        "ParcelFuzzer.java",
+        "ReadUtils.java",
+        "FuzzUtils.java",
+        "FuzzOperation.java",
+        "ReadOperation.java",
+        ":framework-core-sources-for-fuzzers",
+    ],
+    static_libs: [
+        "jazzer",
+        "random_parcel_lib",
+        "binderReadParcelIface-java",
+    ],
+    jni_libs: [
+        "librandom_parcel_jni",
+        "libc++",
+        "libandroid_runtime",
+    ],
+    libs: [
+        "framework",
+        "unsupportedappusage",
+        "ext",
+        "framework-res",
+    ],
+    native_bridge_supported: true,
+    fuzz_config: {
+        cc: [
+            "smoreland@google.com",
+            "waghpawan@google.com",
+        ],
+        // Adds bugs to hotlist "AIDL fuzzers bugs" on buganizer
+        hotlists: ["4637097"],
+    },
+}

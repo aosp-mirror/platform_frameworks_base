@@ -38,8 +38,21 @@ package com.android.server {
 package com.android.server.am {
 
   public interface ActivityManagerLocal {
-    method public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull String, @NonNull String, int) throws android.os.RemoteException;
+    method public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.IBinder, @NonNull String, @NonNull String, int) throws android.os.RemoteException;
+    method public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.IBinder, @NonNull String, @NonNull String, @NonNull android.content.Context.BindServiceFlags) throws android.os.RemoteException;
+    method @Deprecated public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull String, @NonNull String, int) throws android.os.RemoteException;
     method public boolean canStartForegroundService(int, int, @NonNull String);
+    method public void killSdkSandboxClientAppProcess(@NonNull android.os.IBinder);
+    method @Nullable public android.content.ComponentName startSdkSandboxService(@NonNull android.content.Intent, int, @NonNull String, @NonNull String) throws android.os.RemoteException;
+    method public boolean stopSdkSandboxService(@NonNull android.content.Intent, int, @NonNull String, @NonNull String);
+  }
+
+}
+
+package com.android.server.appop {
+
+  public interface AppOpsManagerLocal {
+    method public boolean isUidInForeground(int);
   }
 
 }
@@ -48,8 +61,160 @@ package com.android.server.pm {
 
   public interface PackageManagerLocal {
     method public void reconcileSdkData(@Nullable String, @NonNull String, @NonNull java.util.List<java.lang.String>, int, int, int, @NonNull String, int) throws java.io.IOException;
+    method @NonNull public com.android.server.pm.PackageManagerLocal.FilteredSnapshot withFilteredSnapshot();
+    method @NonNull public com.android.server.pm.PackageManagerLocal.FilteredSnapshot withFilteredSnapshot(int, @NonNull android.os.UserHandle);
+    method @NonNull public com.android.server.pm.PackageManagerLocal.UnfilteredSnapshot withUnfilteredSnapshot();
     field public static final int FLAG_STORAGE_CE = 2; // 0x2
     field public static final int FLAG_STORAGE_DE = 1; // 0x1
+  }
+
+  public static interface PackageManagerLocal.FilteredSnapshot extends java.lang.AutoCloseable {
+    method public void close();
+    method @Nullable public com.android.server.pm.pkg.PackageState getPackageState(@NonNull String);
+    method @NonNull public java.util.Map<java.lang.String,com.android.server.pm.pkg.PackageState> getPackageStates();
+  }
+
+  public static interface PackageManagerLocal.UnfilteredSnapshot extends java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public com.android.server.pm.PackageManagerLocal.FilteredSnapshot filtered(int, @NonNull android.os.UserHandle);
+    method @NonNull public java.util.Map<java.lang.String,com.android.server.pm.pkg.PackageState> getPackageStates();
+  }
+
+}
+
+package com.android.server.pm.pkg {
+
+  public interface AndroidPackage {
+    method @Nullable public String getAppComponentFactory();
+    method @Nullable public String getApplicationClassName();
+    method @Nullable public String getBackupAgentName();
+    method @DrawableRes public int getBannerResourceId();
+    method public int getBaseRevisionCode();
+    method public int getCategory();
+    method @Nullable public String getClassLoaderName();
+    method @Dimension(unit=android.annotation.Dimension.DP) public int getCompatibleWidthLimitDp();
+    method @XmlRes public int getDataExtractionRulesResourceId();
+    method @StringRes public int getDescriptionResourceId();
+    method @XmlRes public int getFullBackupContentResourceId();
+    method public int getGwpAsanMode();
+    method @DrawableRes public int getIconResourceId();
+    method @StringRes public int getLabelResourceId();
+    method @Dimension(unit=android.annotation.Dimension.DP) public int getLargestWidthLimitDp();
+    method @NonNull public java.util.List<java.lang.String> getLibraryNames();
+    method @XmlRes public int getLocaleConfigResourceId();
+    method @DrawableRes public int getLogoResourceId();
+    method public long getLongVersionCode();
+    method public float getMaxAspectRatio();
+    method public float getMinAspectRatio();
+    method public int getNativeHeapZeroInitialized();
+    method @XmlRes public int getNetworkSecurityConfigResourceId();
+    method @Nullable public String getRequiredAccountType();
+    method @Dimension(unit=android.annotation.Dimension.DP) public int getRequiresSmallestWidthDp();
+    method @Nullable public String getRestrictedAccountType();
+    method @DrawableRes public int getRoundIconResourceId();
+    method @Nullable public String getSdkLibraryName();
+    method @Nullable public String getSharedUserId();
+    method @StringRes public int getSharedUserLabelResourceId();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.AndroidPackageSplit> getSplits();
+    method @Nullable public String getStaticSharedLibraryName();
+    method @NonNull public java.util.UUID getStorageUuid();
+    method public int getTargetSdkVersion();
+    method @StyleRes public int getThemeResourceId();
+    method public int getUiOptions();
+    method @Nullable public String getVersionName();
+    method @Nullable public String getZygotePreloadName();
+    method public boolean is32BitAbiPreferred();
+    method public boolean isAllowAudioPlaybackCapture();
+    method public boolean isAllowNativeHeapPointerTagging();
+    method public boolean isAnyDensity();
+    method public boolean isAttributionsUserVisible();
+    method public boolean isBackupAllowed();
+    method public boolean isBackupInForeground();
+    method public boolean isClearUserDataAllowed();
+    method public boolean isClearUserDataOnFailedRestoreAllowed();
+    method public boolean isCleartextTrafficAllowed();
+    method public boolean isCoreApp();
+    method public boolean isCrossProfile();
+    method public boolean isDebuggable();
+    method public boolean isDeclaredHavingCode();
+    method public boolean isDefaultToDeviceProtectedStorage();
+    method public boolean isDirectBootAware();
+    method public boolean isExtraLargeScreensSupported();
+    method public boolean isExtractNativeLibrariesRequested();
+    method public boolean isFactoryTest();
+    method public boolean isForceQueryable();
+    method public boolean isFullBackupOnly();
+    method public boolean isHardwareAccelerated();
+    method public boolean isIsolatedSplitLoading();
+    method public boolean isKillAfterRestoreAllowed();
+    method public boolean isLargeHeap();
+    method public boolean isLargeScreensSupported();
+    method public boolean isLeavingSharedUser();
+    method public boolean isMultiArch();
+    method public boolean isNativeLibraryRootRequiresIsa();
+    method public boolean isNonSdkApiRequested();
+    method public boolean isNormalScreensSupported();
+    method public boolean isOnBackInvokedCallbackEnabled();
+    method public boolean isPersistent();
+    method public boolean isProfileable();
+    method public boolean isProfileableByShell();
+    method public boolean isRequestLegacyExternalStorage();
+    method public boolean isRequiredForAllUsers();
+    method public boolean isResetEnabledSettingsOnAppDataCleared();
+    method public boolean isResourceOverlay();
+    method public boolean isRestoreAnyVersion();
+    method public boolean isRtlSupported();
+    method public boolean isSaveStateDisallowed();
+    method public boolean isSignedWithPlatformKey();
+    method public boolean isSmallScreensSupported();
+    method public boolean isTaskReparentingAllowed();
+    method public boolean isTestOnly();
+    method public boolean isUseEmbeddedDex();
+    method public boolean isUserDataFragile();
+    method public boolean isVmSafeMode();
+  }
+
+  public interface AndroidPackageSplit {
+    method @Nullable public String getClassLoaderName();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.AndroidPackageSplit> getDependencies();
+    method @Nullable public String getName();
+    method @NonNull public String getPath();
+    method public int getRevisionCode();
+    method public boolean isHasCode();
+  }
+
+  public interface PackageState {
+    method @Nullable public com.android.server.pm.pkg.AndroidPackage getAndroidPackage();
+    method public int getAppId();
+    method public int getHiddenApiEnforcementPolicy();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getPrimaryCpuAbi();
+    method @Nullable public String getSeInfo();
+    method @Nullable public String getSecondaryCpuAbi();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getSharedLibraryDependencies();
+    method @NonNull public com.android.server.pm.pkg.PackageUserState getStateForUser(@NonNull android.os.UserHandle);
+    method public boolean isApex();
+    method public boolean isPrivileged();
+    method public boolean isSystem();
+    method public boolean isUpdatedSystemApp();
+  }
+
+  public interface PackageUserState {
+    method public long getFirstInstallTimeMillis();
+    method public boolean isInstalled();
+  }
+
+  public interface SharedLibrary {
+    method @NonNull public java.util.List<java.lang.String> getAllCodePaths();
+    method @NonNull public android.content.pm.VersionedPackage getDeclaringPackage();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getDependencies();
+    method @NonNull public java.util.List<android.content.pm.VersionedPackage> getDependentPackages();
+    method @Nullable public String getName();
+    method @Nullable public String getPackageName();
+    method @Nullable public String getPath();
+    method public int getType();
+    method public long getVersion();
+    method public boolean isNative();
   }
 
 }
@@ -59,6 +224,15 @@ package com.android.server.role {
   public interface RoleServicePlatformHelper {
     method @NonNull public String computePackageStateHash(int);
     method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getLegacyRoleState(int);
+  }
+
+}
+
+package com.android.server.security {
+
+  public final class FileIntegrity {
+    method public static void setUpFsVerity(@NonNull java.io.File) throws java.io.IOException;
+    method public static void setUpFsVerity(@NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }
@@ -90,6 +264,55 @@ package com.android.server.wifi {
   public class SupplicantManager {
     method public static void start();
     method public static void stop();
+  }
+
+}
+
+package com.android.server.wm {
+
+  public interface ActivityInterceptorCallback {
+    method public default void onActivityLaunched(@NonNull android.app.TaskInfo, @NonNull android.content.pm.ActivityInfo, @NonNull com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo);
+    method @Nullable public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult onInterceptActivityLaunch(@NonNull com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo);
+    field public static final int MAINLINE_SDK_SANDBOX_ORDER_ID = 1001; // 0x3e9
+  }
+
+  public static final class ActivityInterceptorCallback.ActivityInterceptResult {
+    ctor public ActivityInterceptorCallback.ActivityInterceptResult(@NonNull android.content.Intent, @NonNull android.app.ActivityOptions, boolean);
+    method @NonNull public android.app.ActivityOptions getActivityOptions();
+    method @NonNull public android.content.Intent getIntent();
+    method public boolean isActivityResolved();
+  }
+
+  public static final class ActivityInterceptorCallback.ActivityInterceptorInfo {
+    method @NonNull public android.content.pm.ActivityInfo getActivityInfo();
+    method @Nullable public String getCallingFeatureId();
+    method @Nullable public String getCallingPackage();
+    method public int getCallingPid();
+    method public int getCallingUid();
+    method @Nullable public android.app.ActivityOptions getCheckedOptions();
+    method @Nullable public Runnable getClearOptionsAnimationRunnable();
+    method @NonNull public android.content.Intent getIntent();
+    method public int getRealCallingPid();
+    method public int getRealCallingUid();
+    method @NonNull public android.content.pm.ResolveInfo getResolveInfo();
+    method @Nullable public String getResolvedType();
+    method public int getUserId();
+  }
+
+  public static final class ActivityInterceptorCallback.ActivityInterceptorInfo.Builder {
+    ctor public ActivityInterceptorCallback.ActivityInterceptorInfo.Builder(int, int, int, int, int, @NonNull android.content.Intent, @NonNull android.content.pm.ResolveInfo, @NonNull android.content.pm.ActivityInfo);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo build();
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingFeatureId(@Nullable String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingPackage(@Nullable String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCheckedOptions(@Nullable android.app.ActivityOptions);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setClearOptionsAnimationRunnable(@Nullable Runnable);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setResolvedType(@Nullable String);
+  }
+
+  public class ActivityInterceptorCallbackRegistry {
+    method @NonNull public static com.android.server.wm.ActivityInterceptorCallbackRegistry getInstance();
+    method public void registerActivityInterceptorCallback(int, @NonNull com.android.server.wm.ActivityInterceptorCallback);
+    method public void unregisterActivityInterceptorCallback(int);
   }
 
 }

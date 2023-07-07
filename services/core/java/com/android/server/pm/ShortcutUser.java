@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchSession;
 import android.content.pm.ShortcutManager;
+import android.content.pm.UserPackage;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.FileUtils;
@@ -30,14 +31,14 @@ import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.FgThread;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;
@@ -52,7 +53,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -82,44 +82,6 @@ class ShortcutUser {
     private static final String KEY_LAUNCHERS = "launchers";
     private static final String KEY_PACKAGES = "packages";
 
-    static final class PackageWithUser {
-        final int userId;
-        final String packageName;
-
-        private PackageWithUser(int userId, String packageName) {
-            this.userId = userId;
-            this.packageName = Objects.requireNonNull(packageName);
-        }
-
-        public static PackageWithUser of(int userId, String packageName) {
-            return new PackageWithUser(userId, packageName);
-        }
-
-        public static PackageWithUser of(ShortcutPackageItem spi) {
-            return new PackageWithUser(spi.getPackageUserId(), spi.getPackageName());
-        }
-
-        @Override
-        public int hashCode() {
-            return packageName.hashCode() ^ userId;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof PackageWithUser)) {
-                return false;
-            }
-            final PackageWithUser that = (PackageWithUser) obj;
-
-            return userId == that.userId && packageName.equals(that.packageName);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("[Package: %d, %s]", userId, packageName);
-        }
-    }
-
     final ShortcutService mService;
     final AppSearchManager mAppSearchManager;
     final Executor mExecutor;
@@ -129,7 +91,7 @@ class ShortcutUser {
 
     private final ArrayMap<String, ShortcutPackage> mPackages = new ArrayMap<>();
 
-    private final ArrayMap<PackageWithUser, ShortcutLauncher> mLaunchers = new ArrayMap<>();
+    private final ArrayMap<UserPackage, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
     /** In-memory-cached default launcher. */
     private String mCachedLauncher;
@@ -204,20 +166,20 @@ class ShortcutUser {
     // We don't expose this directly to non-test code because only ShortcutUser should add to/
     // remove from it.
     @VisibleForTesting
-    ArrayMap<PackageWithUser, ShortcutLauncher> getAllLaunchersForTest() {
+    ArrayMap<UserPackage, ShortcutLauncher> getAllLaunchersForTest() {
         return mLaunchers;
     }
 
     private void addLauncher(ShortcutLauncher launcher) {
         launcher.replaceUser(this);
-        mLaunchers.put(PackageWithUser.of(launcher.getPackageUserId(),
+        mLaunchers.put(UserPackage.of(launcher.getPackageUserId(),
                 launcher.getPackageName()), launcher);
     }
 
     @Nullable
     public ShortcutLauncher removeLauncher(
             @UserIdInt int packageUserId, @NonNull String packageName) {
-        return mLaunchers.remove(PackageWithUser.of(packageUserId, packageName));
+        return mLaunchers.remove(UserPackage.of(packageUserId, packageName));
     }
 
     @Nullable
@@ -242,7 +204,7 @@ class ShortcutUser {
     @NonNull
     public ShortcutLauncher getLauncherShortcuts(@NonNull String packageName,
             @UserIdInt int launcherUserId) {
-        final PackageWithUser key = PackageWithUser.of(launcherUserId, packageName);
+        final UserPackage key = UserPackage.of(launcherUserId, packageName);
         ShortcutLauncher ret = mLaunchers.get(key);
         if (ret == null) {
             ret = new ShortcutLauncher(this, mUserId, packageName, launcherUserId);

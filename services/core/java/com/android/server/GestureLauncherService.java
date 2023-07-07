@@ -79,7 +79,7 @@ public class GestureLauncherService extends SystemService {
      * completed faster than this, we assume it's not performed by human and the
      * event gets ignored.
      */
-    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 160;
+    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 200;
 
     /**
      * Interval in milliseconds in which the power button must be depressed in succession to be
@@ -466,7 +466,8 @@ public class GestureLauncherService extends SystemService {
     public static boolean isEmergencyGestureSettingEnabled(Context context, int userId) {
         return isEmergencyGestureEnabled(context.getResources())
                 && Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.EMERGENCY_GESTURE_ENABLED, 1, userId) != 0;
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED,
+                isDefaultEmergencyGestureEnabled(context.getResources()) ? 1 : 0, userId) != 0;
     }
 
     /**
@@ -511,6 +512,11 @@ public class GestureLauncherService extends SystemService {
      */
     private static boolean isEmergencyGestureEnabled(Resources resources) {
         return resources.getBoolean(com.android.internal.R.bool.config_emergencyGestureEnabled);
+    }
+
+    private static boolean isDefaultEmergencyGestureEnabled(Resources resources) {
+        return resources.getBoolean(
+                com.android.internal.R.bool.config_defaultEmergencyGestureEnabled);
     }
 
     /**

@@ -29,10 +29,20 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 public class HandwritingTestUtil {
     public static View createView(Rect handwritingArea) {
-        return createView(handwritingArea, true);
+        return createView(handwritingArea, true /* autoHandwritingEnabled */,
+                true /* isStylusHandwritingAvailable */);
     }
 
-    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled) {
+    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+            boolean isStylusHandwritingAvailable) {
+        return createView(handwritingArea, autoHandwritingEnabled, isStylusHandwritingAvailable,
+                0, 0, 0, 0);
+    }
+
+    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+            boolean isStylusHandwritingAvailable,
+            float handwritingBoundsOffsetLeft, float handwritingBoundsOffsetTop,
+            float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         final Context context = instrumentation.getTargetContext();
         // mock a parent so that HandwritingInitiator can get
@@ -51,7 +61,12 @@ public class HandwritingTestUtil {
         View view = spy(new View(context));
         when(view.isAttachedToWindow()).thenReturn(true);
         when(view.isAggregatedVisible()).thenReturn(true);
+        when(view.isStylusHandwritingAvailable()).thenReturn(isStylusHandwritingAvailable);
         when(view.getHandwritingArea()).thenReturn(handwritingArea);
+        when(view.getHandwritingBoundsOffsetLeft()).thenReturn(handwritingBoundsOffsetLeft);
+        when(view.getHandwritingBoundsOffsetTop()).thenReturn(handwritingBoundsOffsetTop);
+        when(view.getHandwritingBoundsOffsetRight()).thenReturn(handwritingBoundsOffsetRight);
+        when(view.getHandwritingBoundsOffsetBottom()).thenReturn(handwritingBoundsOffsetBottom);
         view.setAutoHandwritingEnabled(autoHandwritingEnabled);
         parent.addView(view);
         return view;

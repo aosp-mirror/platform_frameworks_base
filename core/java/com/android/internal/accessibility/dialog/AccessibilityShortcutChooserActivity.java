@@ -28,6 +28,7 @@ import static com.android.internal.accessibility.util.AccessibilityUtils.isUserS
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -94,6 +95,13 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
     private void onTargetSelected(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityTarget target = mTargets.get(position);
+        if (target instanceof AccessibilityServiceTarget
+                || target instanceof AccessibilityActivityTarget) {
+            if (sendRestrictedDialogIntentIfNeeded(target)) {
+                return;
+            }
+        }
+
         target.onSelected();
         mMenuDialog.dismiss();
     }
@@ -101,22 +109,57 @@ public class AccessibilityShortcutChooserActivity extends Activity {
     private void onTargetChecked(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityTarget target = mTargets.get(position);
 
-        if ((target instanceof AccessibilityServiceTarget) && !target.isShortcutEnabled()) {
-            mPermissionDialog = new AlertDialog.Builder(this)
-                    .setView(createEnableDialogContentView(this,
-                            (AccessibilityServiceTarget) target,
-                            v -> {
-                                mPermissionDialog.dismiss();
-                                mTargetAdapter.notifyDataSetChanged();
-                            },
-                            v -> mPermissionDialog.dismiss()))
-                    .create();
-            mPermissionDialog.show();
-            return;
+        if (!target.isShortcutEnabled()) {
+            if (target instanceof AccessibilityServiceTarget
+                    || target instanceof AccessibilityActivityTarget) {
+                if (sendRestrictedDialogIntentIfNeeded(target)) {
+                    return;
+                }
+            }
+
+            if (target instanceof AccessibilityServiceTarget) {
+                showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
+                        mTargetAdapter);
+                return;
+            }
         }
 
         target.onCheckedChanged(!target.isShortcutEnabled());
         mTargetAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Sends restricted dialog intent if the accessibility target is disallowed.
+     *
+     * @return true if sends restricted dialog intent, otherwise false.
+     */
+    private boolean sendRestrictedDialogIntentIfNeeded(AccessibilityTarget target) {
+        if (AccessibilityTargetHelper.isAccessibilityTargetAllowed(this,
+                target.getComponentName().getPackageName(), target.getUid())) {
+            return false;
+        }
+
+        AccessibilityTargetHelper.sendRestrictedDialogIntent(this,
+                target.getComponentName().getPackageName(), target.getUid());
+        return true;
+    }
+
+    private void showPermissionDialogIfNeeded(Context context,
+            AccessibilityServiceTarget serviceTarget, ShortcutTargetAdapter targetAdapter) {
+        if (mPermissionDialog != null) {
+            return;
+        }
+
+        mPermissionDialog = new AlertDialog.Builder(context)
+                .setView(createEnableDialogContentView(context, serviceTarget,
+                        v -> {
+                            mPermissionDialog.dismiss();
+                            targetAdapter.notifyDataSetChanged();
+                        },
+                        v -> mPermissionDialog.dismiss()))
+                .setOnDismissListener(dialog -> mPermissionDialog = null)
+                .create();
+        mPermissionDialog.show();
     }
 
     private void onDoneButtonClicked() {

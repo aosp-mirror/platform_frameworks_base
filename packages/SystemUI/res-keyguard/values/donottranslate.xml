@@ -23,11 +23,5 @@
     <!-- Skeleton string format for displaying the date shorter. -->
     <string name="abbrev_month_day_no_year">MMMd</string>
 
-    <!-- Skeleton string format for displaying the time in 12-hour format. -->
-    <string name="clock_12hr_format">hm</string>
-
-    <!-- Skeleton string format for displaying the time in 24-hour format. -->
-    <string name="clock_24hr_format">Hm</string>
-
     <string name="num_pad_key_ratio">1</string>
 </resources>

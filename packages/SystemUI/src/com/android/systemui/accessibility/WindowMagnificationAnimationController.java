@@ -50,9 +50,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     @interface MagnificationState {}
 
     // The window magnification is disabled.
-    private static final int STATE_DISABLED = 0;
+    @VisibleForTesting static final int STATE_DISABLED = 0;
     // The window magnification is enabled.
-    private static final int STATE_ENABLED = 1;
+    @VisibleForTesting static final int STATE_ENABLED = 1;
     // The window magnification is going to be disabled when the animation is end.
     private static final int STATE_DISABLING = 2;
     // The animation is running for enabling the window magnification.
@@ -151,7 +151,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
             }
             mController.enableWindowMagnificationInternal(scale, centerX, centerY,
                     mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
-            setState(STATE_ENABLED);
+            updateState();
             return;
         }
         mAnimationCallback = animationCallback;
@@ -165,7 +165,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
                 mValueAnimator.cancel();
             }
             sendAnimationCallback(true);
-            setState(STATE_ENABLED);
+            updateState();
         } else {
             if (mState == STATE_DISABLING) {
                 mValueAnimator.reverse();
@@ -254,7 +254,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
                 mValueAnimator.cancel();
             }
             mController.deleteWindowMagnification();
-            setState(STATE_DISABLED);
+            updateState();
             return;
         }
 
@@ -272,11 +272,24 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         setState(STATE_DISABLING);
     }
 
+    private void updateState() {
+        if (Float.isNaN(mController.getScale())) {
+            setState(STATE_DISABLED);
+        } else {
+            setState(STATE_ENABLED);
+        }
+    }
+
     private void setState(@MagnificationState int state) {
         if (DEBUG) {
             Log.d(TAG, "setState from " + mState + " to " + state);
         }
         mState = state;
+    }
+
+    @VisibleForTesting
+    @MagnificationState int getState() {
+        return mState;
     }
 
     @Override
@@ -289,11 +302,10 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         if (mEndAnimationCanceled || mController == null) {
             return;
         }
-        if (Float.isNaN(mController.getScale())) {
-            setState(STATE_DISABLED);
-        } else {
-            setState(STATE_ENABLED);
+        if (mState == STATE_DISABLING) {
+            mController.deleteWindowMagnification();
         }
+        updateState();
         sendAnimationCallback(true);
         // We reset the duration to config_longAnimTime
         mValueAnimator.setDuration(mContext.getResources()

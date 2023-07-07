@@ -25,7 +25,7 @@ android_library {
     name: "app_prediction",
 
     sdk_version: "system_current",
-    min_sdk_version: "system_current",
+    min_sdk_version: "current",
 
     srcs: [
         "src/**/*.java",

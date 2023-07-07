@@ -19,6 +19,7 @@ package android.service.contentcapture;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.assist.ActivityId;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.os.Parcel;
@@ -80,11 +81,22 @@ public final class ActivityEvent implements Parcelable {
 
     private final @NonNull ComponentName mComponentName;
     private final @ActivityEventType int mType;
+    private final @NonNull ActivityId mActivityId;
 
     /** @hide */
-    public ActivityEvent(@NonNull ComponentName componentName, @ActivityEventType int type) {
+    public ActivityEvent(@NonNull ActivityId activityId,
+            @NonNull ComponentName componentName, @ActivityEventType int type) {
+        mActivityId = activityId;
         mComponentName = componentName;
         mType = type;
+    }
+
+    /**
+     * Gets the ActivityId of the activity associated with the event.
+     */
+    @NonNull
+    public ActivityId getActivityId() {
+        return mActivityId;
     }
 
     /**
@@ -129,6 +141,7 @@ public final class ActivityEvent implements Parcelable {
     @Override
     public String toString() {
         return new StringBuilder("ActivityEvent[").append(mComponentName.toShortString())
+                .append(", ActivityId: ").append(mActivityId)
                 .append("]:").append(getTypeAsString(mType)).toString();
     }
 
@@ -141,6 +154,7 @@ public final class ActivityEvent implements Parcelable {
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeParcelable(mComponentName, flags);
         parcel.writeInt(mType);
+        parcel.writeParcelable(mActivityId, flags);
     }
 
     public static final @android.annotation.NonNull Creator<ActivityEvent> CREATOR =
@@ -149,9 +163,12 @@ public final class ActivityEvent implements Parcelable {
         @Override
         @NonNull
         public ActivityEvent createFromParcel(@NonNull Parcel parcel) {
-            final ComponentName componentName = parcel.readParcelable(null, android.content.ComponentName.class);
+            final ComponentName componentName =
+                    parcel.readParcelable(null, ComponentName.class);
             final int eventType = parcel.readInt();
-            return new ActivityEvent(componentName, eventType);
+            final ActivityId activityId =
+                    parcel.readParcelable(null, ActivityId.class);
+            return new ActivityEvent(activityId, componentName, eventType);
         }
 
         @Override

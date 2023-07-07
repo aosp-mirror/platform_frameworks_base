@@ -18,10 +18,12 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.UnixEpochTime;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.TimestampedValue;
+import android.os.ShellCommand;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +67,7 @@ public final class TelephonyTimeSuggestion implements Parcelable {
             };
 
     private final int mSlotIndex;
-    @Nullable private final TimestampedValue<Long> mUnixEpochTime;
+    @Nullable private final UnixEpochTime mUnixEpochTime;
     @Nullable private ArrayList<String> mDebugInfo;
 
     private TelephonyTimeSuggestion(Builder builder) {
@@ -76,18 +78,73 @@ public final class TelephonyTimeSuggestion implements Parcelable {
 
     private static TelephonyTimeSuggestion createFromParcel(Parcel in) {
         int slotIndex = in.readInt();
-        TimestampedValue<Long> unixEpochTime =
-                in.readParcelable(null /* classLoader */, android.os.TimestampedValue.class);
+        UnixEpochTime unixEpochTime =
+                in.readParcelable(null /* classLoader */, UnixEpochTime.class);
         TelephonyTimeSuggestion suggestion = new TelephonyTimeSuggestion.Builder(slotIndex)
                 .setUnixEpochTime(unixEpochTime)
                 .build();
         @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(
+        ArrayList<String> debugInfo = in.readArrayList(
                 null /* classLoader */, java.lang.String.class);
         if (debugInfo != null) {
             suggestion.addDebugInfo(debugInfo);
         }
         return suggestion;
+    }
+
+    /** @hide */
+    public static TelephonyTimeSuggestion parseCommandLineArg(@NonNull ShellCommand cmd)
+            throws IllegalArgumentException {
+        Integer slotIndex = null;
+        Long elapsedRealtimeMillis = null;
+        Long unixEpochTimeMillis = null;
+        String opt;
+        while ((opt = cmd.getNextArg()) != null) {
+            switch (opt) {
+                case "--slot_index": {
+                    slotIndex = Integer.parseInt(cmd.getNextArgRequired());
+                    break;
+                }
+                case "--reference_time":
+                case "--elapsed_realtime": {
+                    elapsedRealtimeMillis = Long.parseLong(cmd.getNextArgRequired());
+                    break;
+                }
+                case "--unix_epoch_time": {
+                    unixEpochTimeMillis = Long.parseLong(cmd.getNextArgRequired());
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+                }
+            }
+        }
+
+        if (slotIndex == null) {
+            throw new IllegalArgumentException("No slotIndex specified.");
+        }
+        if (elapsedRealtimeMillis == null) {
+            throw new IllegalArgumentException("No elapsedRealtimeMillis specified.");
+        }
+        if (unixEpochTimeMillis == null) {
+            throw new IllegalArgumentException("No unixEpochTimeMillis specified.");
+        }
+
+        UnixEpochTime timeSignal = new UnixEpochTime(elapsedRealtimeMillis, unixEpochTimeMillis);
+        Builder builder = new Builder(slotIndex)
+                .setUnixEpochTime(timeSignal)
+                .addDebugInfo("Command line injection");
+        return builder.build();
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(PrintWriter pw) {
+        pw.println("Telephony suggestion options:");
+        pw.println("  --slot_index <number>");
+        pw.println("  --elapsed_realtime <elapsed realtime millis>");
+        pw.println("  --unix_epoch_time <Unix epoch time millis>");
+        pw.println();
+        pw.println("See " + TelephonyTimeSuggestion.class.getName() + " for more information");
     }
 
     @Override
@@ -117,7 +174,7 @@ public final class TelephonyTimeSuggestion implements Parcelable {
      * <p>See {@link TelephonyTimeSuggestion} for more information about {@code unixEpochTime}.
      */
     @Nullable
-    public TimestampedValue<Long> getUnixEpochTime() {
+    public UnixEpochTime getUnixEpochTime() {
         return mUnixEpochTime;
     }
 
@@ -190,7 +247,7 @@ public final class TelephonyTimeSuggestion implements Parcelable {
      */
     public static final class Builder {
         private final int mSlotIndex;
-        @Nullable private TimestampedValue<Long> mUnixEpochTime;
+        @Nullable private UnixEpochTime mUnixEpochTime;
         @Nullable private List<String> mDebugInfo;
 
         /**
@@ -208,12 +265,7 @@ public final class TelephonyTimeSuggestion implements Parcelable {
          * <p>See {@link TelephonyTimeSuggestion} for more information about {@code unixEpochTime}.
          */
         @NonNull
-        public Builder setUnixEpochTime(@Nullable TimestampedValue<Long> unixEpochTime) {
-            if (unixEpochTime != null) {
-                // unixEpochTime can be null, but the value it holds cannot.
-                Objects.requireNonNull(unixEpochTime.getValue());
-            }
-
+        public Builder setUnixEpochTime(@Nullable UnixEpochTime unixEpochTime) {
             mUnixEpochTime = unixEpochTime;
             return this;
         }

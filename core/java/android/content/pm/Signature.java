@@ -21,9 +21,9 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

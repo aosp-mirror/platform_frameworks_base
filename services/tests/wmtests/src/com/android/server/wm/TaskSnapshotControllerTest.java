@@ -75,7 +75,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        getClosingTasks(closingApps, closingTasks);
         assertEquals(1, closingTasks.size());
         assertEquals(closingWindow.mActivityRecord.getTask(), closingTasks.valueAt(0));
     }
@@ -93,7 +93,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }
 
@@ -108,8 +108,21 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<Task> closingTasks = new ArraySet<>();
         mWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
                 Sets.newArraySet(closingWindow.mActivityRecord.getTask()));
-        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
+    }
+
+    /** Retrieves all closing tasks based on the list of closing apps during an app transition. */
+    private void getClosingTasks(ArraySet<ActivityRecord> closingApps,
+            ArraySet<Task> outClosingTasks) {
+        outClosingTasks.clear();
+        for (int i = closingApps.size() - 1; i >= 0; i--) {
+            final ActivityRecord activity = closingApps.valueAt(i);
+            final Task task = activity.getTask();
+            if (task == null) continue;
+
+            mWm.mTaskSnapshotController.getClosingTasksInner(task, outClosingTasks);
+        }
     }
 
     @Test
@@ -190,7 +203,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testCreateTaskSnapshotWithExcludingIme() {
         Task task = mAppWindow.mActivityRecord.getTask();
@@ -202,14 +215,14 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         // Verify no NPE happens when calling createTaskSnapshot.
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
-            mWm.mTaskSnapshotController.createTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
+            mWm.mTaskSnapshotController.createSnapshot(mAppWindow.mActivityRecord.getTask(),
                     1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
         } catch (NullPointerException e) {
             fail("There should be no exception when calling createTaskSnapshot");
         }
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testCreateTaskSnapshotWithIncludingIme() {
         Task task = mAppWindow.mActivityRecord.getTask();
@@ -223,7 +236,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
             spyOn(builder);
-            mWm.mTaskSnapshotController.createTaskSnapshot(
+            mWm.mTaskSnapshotController.createSnapshot(
                     mAppWindow.mActivityRecord.getTask(), 1f /* scaleFraction */,
                     PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
             // Verify the builder should includes IME surface.
@@ -237,7 +250,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testPrepareTaskSnapshot() {
         mAppWindow.mWinAnimator.mLastAlpha = 1f;

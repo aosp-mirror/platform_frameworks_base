@@ -48,6 +48,12 @@ final class CecMessageBuffer {
             case Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST:
                 bufferSystemAudioModeRequest(message);
                 return true;
+            case Constants.MESSAGE_ROUTING_CHANGE:
+                bufferRoutingChange(message);
+                return true;
+            case Constants.MESSAGE_SET_STREAM_PATH:
+                bufferSetStreamPath(message);
+                return true;
             // Add here if new message that needs to buffer
             default:
                 // Do not need to buffer messages other than above
@@ -87,6 +93,22 @@ final class CecMessageBuffer {
         if (!replaceMessageIfBuffered(message, Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST)) {
             mBuffer.add(message);
         }
+    }
+
+    private void bufferRoutingChange(HdmiCecMessage message) {
+        if (!replaceMessageIfBuffered(message, Constants.MESSAGE_ROUTING_CHANGE)) {
+            mBuffer.add(message);
+        }
+    }
+
+    private void bufferSetStreamPath(HdmiCecMessage message) {
+        if (!replaceMessageIfBuffered(message, Constants.MESSAGE_SET_STREAM_PATH)) {
+            mBuffer.add(message);
+        }
+    }
+
+    public List<HdmiCecMessage> getBuffer() {
+        return new ArrayList<>(mBuffer);
     }
 
     // Returns true if the message is replaced

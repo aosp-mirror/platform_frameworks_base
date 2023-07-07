@@ -33,6 +33,7 @@ public class CompanionTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(BluetoothDeviceFilterUtilsTest.class);
+        suite.addTestSuite(SystemDataTransportTest.class);
         return suite;
     }
 

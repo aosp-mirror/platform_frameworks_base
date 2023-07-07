@@ -17,11 +17,14 @@
 #pragma once
 
 #include <GrContextOptions.h>
+#include <SkRefCnt.h>
 #include <cutils/compiler.h>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
+
+class SkData;
 
 namespace android {
 
@@ -45,7 +48,7 @@ public:
      * and puts the ShaderCache into an initialized state, such that it is
      * able to insert and retrieve entries from the cache. If identity is
      * non-null and validation fails, the cache is initialized but contains
-     * no data. If size is less than zero, the cache is initilaized but
+     * no data. If size is less than zero, the cache is initialized but
      * contains no data.
      *
      * This should be called when HWUI pipeline is initialized. When not in
@@ -153,7 +156,8 @@ private:
      * pending.  Each time a key/value pair is inserted into the cache via
      * load, a deferred save is initiated if one is not already pending.
      * This will wait some amount of time and then trigger a save of the cache
-     * contents to disk.
+     * contents to disk, unless mDeferredSaveDelayMs is 0 in which case saving
+     * is disabled.
      */
     bool mSavePending = false;
 
@@ -163,9 +167,11 @@ private:
     size_t mObservedBlobValueSize = 20 * 1024;
 
     /**
-     *  The time in seconds to wait before saving newly inserted cache entries.
+     *  The time in milliseconds to wait before saving newly inserted cache entries.
+     *
+     *  WARNING: setting this to 0 will disable writing the cache to disk.
      */
-    unsigned int mDeferredSaveDelay = 4;
+    unsigned int mDeferredSaveDelayMs = 4 * 1000;
 
     /**
      * "mMutex" is the mutex used to prevent concurrent access to the member

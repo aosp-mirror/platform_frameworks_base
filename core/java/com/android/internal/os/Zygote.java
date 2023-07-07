@@ -178,7 +178,14 @@ public final class Zygote {
      * GWP-ASan is activated unconditionally (but still, only a small subset of
      * allocations is protected).
      */
-    public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+
+    /**
+     * GWP-ASan's `gwpAsanMode` manifest flag was unspecified. Currently, this
+     * means GWP_ASAN_LEVEL_LOTTERY for system apps, and GWP_ASAN_LEVEL_NONE for
+     * non-system apps.
+     */
+    public static final int GWP_ASAN_LEVEL_DEFAULT = 3 << 21;
 
     /** Enable automatic zero-initialization of native heap memory allocations. */
     public static final int NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23;
@@ -1001,16 +1008,24 @@ public final class Zygote {
     }
 
     /**
+     * This will enable jdwp by default for all apps. It is OK to cache this property
+     * because we expect to reboot the system whenever this property changes
+     */
+    private static final boolean ENABLE_JDWP = SystemProperties.get(
+                          "persist.debug.dalvik.vm.jdwp.enabled").equals("1");
+
+    /**
      * Applies debugger system properties to the zygote arguments.
      *
-     * If "ro.debuggable" is "1", all apps are debuggable. Otherwise,
-     * the debugger state is specified via the "--enable-jdwp" flag
-     * in the spawn request.
+     * For eng builds all apps are debuggable. On userdebug and user builds
+     * if persist.debug.dalvik.vm.jdwp.enabled is 1 all apps are
+     * debuggable. Otherwise, the debugger state is specified via the
+     * "--enable-jdwp" flag in the spawn request.
      *
      * @param args non-null; zygote spawner args
      */
     static void applyDebuggerSystemProperty(ZygoteArguments args) {
-        if (RoSystemProperties.DEBUGGABLE) {
+        if (Build.IS_ENG || ENABLE_JDWP) {
             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
         }
     }
@@ -1255,6 +1270,15 @@ public final class Zygote {
             @NonNull ApplicationInfo info,
             @Nullable ProcessInfo processInfo,
             @Nullable IPlatformCompat platformCompat) {
+        String appOverride = SystemProperties.get("persist.arm64.memtag.app." + info.packageName);
+        if ("sync".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_SYNC;
+        } else if ("async".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_ASYNC;
+        } else if ("off".equals(appOverride)) {
+            return MEMORY_TAG_LEVEL_NONE;
+        }
+
         // Look at the process attribute first.
         if (processInfo != null && processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
             return memtagModeToZygoteMemtagLevel(processInfo.memtagMode);
@@ -1320,6 +1344,15 @@ public final class Zygote {
             level = MEMORY_TAG_LEVEL_NONE;
         }
 
+        // If we requested "sync" mode for the whole platform, upgrade mode for apps that enable
+        // MTE.
+        // This makes debugging a lot easier.
+        if (level == MEMORY_TAG_LEVEL_ASYNC
+                && (Build.IS_USERDEBUG || Build.IS_ENG)
+                && "sync".equals(SystemProperties.get("persist.arm64.memtag.default"))) {
+            level = MEMORY_TAG_LEVEL_SYNC;
+        }
+
         return level;
     }
 
@@ -1339,15 +1372,13 @@ public final class Zygote {
                     ? GWP_ASAN_LEVEL_ALWAYS
                     : GWP_ASAN_LEVEL_NEVER;
         }
-        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
-        // system apps, and disabled for user apps, unless overwritten by the compat feature.
         if (isCompatChangeEnabled(GWP_ASAN, info, platformCompat, 0)) {
             return GWP_ASAN_LEVEL_ALWAYS;
         }
         if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
             return GWP_ASAN_LEVEL_LOTTERY;
         }
-        return GWP_ASAN_LEVEL_NEVER;
+        return GWP_ASAN_LEVEL_DEFAULT;
     }
 
     private static boolean enableNativeHeapZeroInit(

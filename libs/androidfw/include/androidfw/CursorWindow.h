@@ -90,6 +90,9 @@ public:
     inline uint32_t getNumRows() { return mNumRows; }
     inline uint32_t getNumColumns() { return mNumColumns; }
 
+    inline size_t sizeOfSlots() const { return mSize - mSlotsOffset; }
+    inline size_t sizeInUse() const { return mAllocOffset + sizeOfSlots(); }
+
     status_t clear();
     status_t setNumColumns(uint32_t numColumns);
 

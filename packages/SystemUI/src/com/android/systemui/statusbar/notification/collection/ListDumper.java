@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
 
@@ -52,7 +53,7 @@ public class ListDumper {
                     sb,
                     true,
                     includeRecordKeeping,
-                    interactionTracker.hasUserInteractedWith(entry.getKey()));
+                    interactionTracker.hasUserInteractedWith(logKey(entry)));
             if (entry instanceof GroupEntry) {
                 GroupEntry ge = (GroupEntry) entry;
                 NotificationEntry summary = ge.getSummary();
@@ -63,7 +64,7 @@ public class ListDumper {
                             sb,
                             true,
                             includeRecordKeeping,
-                            interactionTracker.hasUserInteractedWith(summary.getKey()));
+                            interactionTracker.hasUserInteractedWith(logKey(summary)));
                 }
                 List<NotificationEntry> children = ge.getChildren();
                 for (int childIndex = 0;  childIndex < children.size(); childIndex++) {
@@ -74,7 +75,7 @@ public class ListDumper {
                             sb,
                             true,
                             includeRecordKeeping,
-                            interactionTracker.hasUserInteractedWith(child.getKey()));
+                            interactionTracker.hasUserInteractedWith(logKey(child)));
                 }
             }
         }
@@ -115,12 +116,19 @@ public class ListDumper {
     ) {
         sb.append(indent)
                 .append("[").append(index).append("] ")
-                .append(entry.getKey());
+                .append(index.length() == 1 ? " " : "")
+                .append(logKey(entry));
 
         if (includeParent) {
             sb.append(" (parent=")
-                    .append(entry.getParent() != null ? entry.getParent().getKey() : null)
+                    .append(logKey(entry.getParent()))
                     .append(")");
+
+            NotificationEntry notifEntry = entry.getRepresentativeEntry();
+            if (notifEntry != null) {
+                sb.append(" rank=")
+                        .append(notifEntry.getRanking().getRank());
+            }
         }
 
         if (entry.getSection() != null) {
@@ -178,15 +186,15 @@ public class ListDumper {
 
             if (notifEntry.getAttachState().getSuppressedChanges().getParent() != null) {
                 rksb.append("suppressedParent=")
-                        .append(notifEntry.getAttachState().getSuppressedChanges()
-                                .getParent().getKey())
+                        .append(logKey(notifEntry.getAttachState().getSuppressedChanges()
+                                .getParent()))
                         .append(" ");
             }
 
             if (notifEntry.getAttachState().getSuppressedChanges().getSection() != null) {
                 rksb.append("suppressedSection=")
                         .append(notifEntry.getAttachState().getSuppressedChanges()
-                                .getSection())
+                                .getSection().getLabel())
                         .append(" ");
             }
 

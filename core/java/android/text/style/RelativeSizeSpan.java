@@ -97,4 +97,9 @@ public class RelativeSizeSpan extends MetricAffectingSpan implements ParcelableS
     public void updateMeasureState(@NonNull TextPaint ds) {
         ds.setTextSize(ds.getTextSize() * mProportion);
     }
+
+    @Override
+    public String toString() {
+        return "RelativeSizeSpan{proportion=" + getSizeChange() + '}';
+    }
 }

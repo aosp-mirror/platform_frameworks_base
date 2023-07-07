@@ -186,7 +186,7 @@ public class ChooseTypeAndAccountActivity extends Activity
             mExistingAccounts = null;
             // If the selected account as specified in the intent matches one in the list we will
             // show is as pre-selected.
-            Account selectedAccount = (Account) intent.getParcelableExtra(EXTRA_SELECTED_ACCOUNT);
+            Account selectedAccount = (Account) intent.getParcelableExtra(EXTRA_SELECTED_ACCOUNT, android.accounts.Account.class);
             if (selectedAccount != null) {
                 mSelectedAccountName = selectedAccount.name;
             }
@@ -396,7 +396,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         try {
             final Bundle accountManagerResult = accountManagerFuture.getResult();
             final Intent intent = (Intent)accountManagerResult.getParcelable(
-                    AccountManager.KEY_INTENT);
+                    AccountManager.KEY_INTENT, android.content.Intent.class);
             if (intent != null) {
                 mPendingRequest = REQUEST_ADD_ACCOUNT;
                 mExistingAccounts = AccountManager.get(this).getAccountsForPackage(mCallingPackage,

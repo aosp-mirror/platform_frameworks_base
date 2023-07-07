@@ -34,6 +34,7 @@ interface IPreviewExtenderImpl
     void init(in String cameraId, in CameraMetadataNative chars);
     boolean isExtensionAvailable(in String cameraId, in CameraMetadataNative chars);
     @nullable CaptureStageImpl getCaptureStage();
+    int getSessionType();
 
     const int PROCESSOR_TYPE_REQUEST_UPDATE_ONLY = 0;
     const int PROCESSOR_TYPE_IMAGE_PROCESSOR = 1;

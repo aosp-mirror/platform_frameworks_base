@@ -17,6 +17,7 @@
 package com.android.systemui.controls.controller
 
 interface ControlsTileResourceConfiguration {
+    fun getPackageName(): String?
     fun getTileTitleId(): Int
     fun getTileImageId(): Int
 }

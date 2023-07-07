@@ -15,6 +15,8 @@
  */
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 
 /**
@@ -27,10 +29,14 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
     private static final int STATE_ARC_TERMINATED = 2;
 
     // the required maximum response time specified in CEC 9.2
-    private static final int TIMEOUT_MS = 1000;
+    public static final int TIMEOUT_MS = 1000;
 
     ArcTerminationActionFromAvr(HdmiCecLocalDevice source) {
         super(source);
+    }
+
+    ArcTerminationActionFromAvr(HdmiCecLocalDevice source, IHdmiControlCallback callback) {
+        super(source, callback);
     }
 
     @Override
@@ -47,10 +53,19 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
             return false;
         }
         switch (cmd.getOpcode()) {
+            case Constants.MESSAGE_FEATURE_ABORT:
+                int originalOpcode = cmd.getParams()[0] & 0xFF;
+                if (originalOpcode == Constants.MESSAGE_TERMINATE_ARC) {
+                    mState = STATE_ARC_TERMINATED;
+                    audioSystem().processArcTermination();
+                    finishWithCallback(HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
+                    return true;
+                }
+                return false;
             case Constants.MESSAGE_REPORT_ARC_TERMINATED:
                 mState = STATE_ARC_TERMINATED;
                 audioSystem().processArcTermination();
-                finish();
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 return true;
         }
         return false;
@@ -79,13 +94,15 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
                         audioSystem().setArcStatus(false);
                     }
                     HdmiLogger.debug("Terminate ARC was not successfully sent.");
-                    finish();
+                    finishWithCallback(HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
                 }
             });
     }
 
     private void handleTerminateArcTimeout() {
+        // Disable ARC if TV didn't respond with <Report ARC Terminated> in time.
+        audioSystem().setArcStatus(false);
         HdmiLogger.debug("handleTerminateArcTimeout");
-        finish();
+        finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
     }
 }

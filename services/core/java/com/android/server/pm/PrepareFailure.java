@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageManager;
 import android.util.ExceptionUtils;
 
 final class PrepareFailure extends PackageManagerException {
@@ -29,6 +30,15 @@ final class PrepareFailure extends PackageManagerException {
 
     PrepareFailure(int error, String detailMessage) {
         super(error, detailMessage);
+    }
+
+    public static PrepareFailure ofInternalError(String detailMessage, int internalErrorCode) {
+        return new PrepareFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, detailMessage,
+                internalErrorCode);
+    }
+
+    private PrepareFailure(int error, String message, int internalErrorCode) {
+        super(error, message, internalErrorCode);
     }
 
     PrepareFailure(String message, Exception e) {

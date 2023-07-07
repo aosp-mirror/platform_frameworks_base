@@ -55,5 +55,20 @@
             android:exported="true">
         </activity>
 
+        <activity android:name=".app.HdrImageViewer"
+            android:label="HDR Gainmap Image Viewer"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+
     </application>
 </manifest>

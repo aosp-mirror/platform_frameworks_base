@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.util.MathUtils
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.assisted.Assisted

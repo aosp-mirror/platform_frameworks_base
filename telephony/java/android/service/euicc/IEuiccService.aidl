@@ -38,8 +38,10 @@ oneway interface IEuiccService {
     void downloadSubscription(int slotId, int portIndex, in DownloadableSubscription subscription,
                 boolean switchAfterDownload, boolean forceDeactivateSim, in Bundle resolvedBundle,
                 in IDownloadSubscriptionCallback callback);
-    void getDownloadableSubscriptionMetadata(int slotId, in DownloadableSubscription subscription,
-            boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
+    void getDownloadableSubscriptionMetadata(
+            int slotId, int portIndex, in DownloadableSubscription subscription,
+            boolean switchAfterDownload, boolean forceDeactivateSim,
+            in IGetDownloadableSubscriptionMetadataCallback callback);
     void getEid(int slotId, in IGetEidCallback callback);
     void getOtaStatus(int slotId, in IGetOtaStatusCallback callback);
     void startOtaIfNecessary(int slotId, in IOtaStatusChangedCallback statusChangedCallback);

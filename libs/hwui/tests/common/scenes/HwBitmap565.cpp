@@ -18,6 +18,12 @@
 #include "tests/common/BitmapAllocationTestUtils.h"
 #include "utils/Color.h"
 
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkCanvas.h>
+#include <SkPaint.h>
+#include <SkRefCnt.h>
+
 class HwBitmap565;
 
 static TestScene::Registrar _HwBitmap565(TestScene::Info{

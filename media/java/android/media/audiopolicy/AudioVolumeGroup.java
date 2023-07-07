@@ -51,7 +51,7 @@ public final class AudioVolumeGroup implements Parcelable {
     /**
      * human-readable name of this volume group.
      */
-    private final String mName;
+    private final @NonNull String mName;
 
     private final AudioAttributes[] mAudioAttributes;
     private int[] mLegacyStreamTypes;
@@ -113,8 +113,8 @@ public final class AudioVolumeGroup implements Parcelable {
 
         AudioVolumeGroup thatAvg = (AudioVolumeGroup) o;
 
-        return mName == thatAvg.mName && mId == thatAvg.mId
-                && mAudioAttributes.equals(thatAvg.mAudioAttributes);
+        return mName.equals(thatAvg.mName) && mId == thatAvg.mId
+                && Arrays.equals(mAudioAttributes, thatAvg.mAudioAttributes);
     }
 
     /**

@@ -1,3 +1,6 @@
 per-file gnss.proto = file:/services/core/java/com/android/server/location/OWNERS
 per-file wifi.proto = file:/wifi/OWNERS
 per-file camera.proto = file:/services/core/java/com/android/server/camera/OWNERS
+per-file system_messages.proto = file:/core/res/OWNERS
+per-file altitude.proto = file:/location/OWNERS
+per-file am_capabilities.proto = rpaquay@google.com, sanglardf@google.com

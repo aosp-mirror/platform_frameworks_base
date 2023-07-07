@@ -26,7 +26,7 @@ import android.os.Process;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.power.stats.BatteryStatsImpl;
 
 import org.junit.After;
 import org.junit.Before;

@@ -55,18 +55,15 @@ public class CloudPrintPlugin implements PrintServicePlugin {
     private static final String PRIVET_SERVICE = "_privet._tcp";
 
     /** The required mDNS service types */
-    private static final Set<String> PRINTER_SERVICE_TYPE = new HashSet<String>() {{
-        // Not checking _printer_._sub
-        add(PRIVET_SERVICE);
-    }};
+    private static final Set<String> PRINTER_SERVICE_TYPE = Set.of(
+            PRIVET_SERVICE); // Not checking _printer_._sub
 
     /** All possible connection states */
-    private static final Set<String> POSSIBLE_CONNECTION_STATES = new HashSet<String>() {{
-        add("online");
-        add("offline");
-        add("connecting");
-        add("not-configured");
-    }};
+    private static final Set<String> POSSIBLE_CONNECTION_STATES = Set.of(
+            "online",
+            "offline",
+            "connecting",
+            "not-configured");
 
     private static final byte SUPPORTED_TXTVERS = '1';
 

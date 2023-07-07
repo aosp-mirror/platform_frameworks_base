@@ -20,6 +20,7 @@
 <com.android.systemui.statusbar.policy.RemoteInputView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/remote_input"
+        android:forceHasOverlappingRendering="false"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
     <LinearLayout

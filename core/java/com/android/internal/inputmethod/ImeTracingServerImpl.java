@@ -19,8 +19,7 @@ package com.android.internal.inputmethod;
 import static android.os.Build.IS_USER;
 
 import android.annotation.Nullable;
-import android.os.RemoteException;
-import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
@@ -34,6 +33,7 @@ import com.android.internal.util.TraceBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation of {@link ImeTracing} for the system_server process.
@@ -69,7 +69,7 @@ class ImeTracingServerImpl extends ImeTracing {
 
     private final Object mEnabledLock = new Object();
 
-    ImeTracingServerImpl() throws ServiceNotFoundException {
+    ImeTracingServerImpl() {
         mBufferClients = new TraceBuffer<>(BUFFER_CAPACITY);
         mTraceFileClients = new File(TRACE_DIRNAME + TRACE_FILENAME_CLIENTS);
         mBufferIms = new TraceBuffer<>(BUFFER_CAPACITY);
@@ -130,8 +130,6 @@ class ImeTracingServerImpl extends ImeTracing {
 
         try {
             sendToService(null, IME_TRACING_FROM_IMMS, where);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception while sending ime-related manager service dump to server", e);
         } finally {
             mDumpInProgress = false;
         }
@@ -139,18 +137,30 @@ class ImeTracingServerImpl extends ImeTracing {
 
     private void writeTracesToFilesLocked() {
         try {
+            long timeOffsetNs =
+                    TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                    - SystemClock.elapsedRealtimeNanos();
+
             ProtoOutputStream clientsProto = new ProtoOutputStream();
             clientsProto.write(InputMethodClientsTraceFileProto.MAGIC_NUMBER,
                     MAGIC_NUMBER_CLIENTS_VALUE);
+            clientsProto.write(InputMethodClientsTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS,
+                    timeOffsetNs);
             mBufferClients.writeTraceToFile(mTraceFileClients, clientsProto);
 
             ProtoOutputStream imsProto = new ProtoOutputStream();
-            imsProto.write(InputMethodServiceTraceFileProto.MAGIC_NUMBER, MAGIC_NUMBER_IMS_VALUE);
+            imsProto.write(InputMethodServiceTraceFileProto.MAGIC_NUMBER,
+                    MAGIC_NUMBER_IMS_VALUE);
+            imsProto.write(InputMethodServiceTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS,
+                    timeOffsetNs);
             mBufferIms.writeTraceToFile(mTraceFileIms, imsProto);
 
             ProtoOutputStream immsProto = new ProtoOutputStream();
             immsProto.write(InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER,
                     MAGIC_NUMBER_IMMS_VALUE);
+            immsProto.write(
+                    InputMethodManagerServiceTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS,
+                    timeOffsetNs);
             mBufferImms.writeTraceToFile(mTraceFileImms, immsProto);
 
             resetBuffers();

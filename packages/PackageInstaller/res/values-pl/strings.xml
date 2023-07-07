@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikacja została zainstalowana."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Zainstalować tę aplikację?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Zaktualizować tę aplikację?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Zastosować do aplikacji aktualizację pochodzącą z tego źródła (<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>)?\n\nAktualizacje dla tej aplikacji zwykle dostarcza <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Jeśli zastosujesz aplikację pochodzącą z innego źródła, możesz w przyszłości otrzymywać na telefonie aktualizacje z dowolnych źródeł. Funkcje aplikacji mogą się zmienić."</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikacja nie została zainstalowana."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalacja pakietu została zablokowana."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacja nie została zainstalowana, bo powoduje konflikt z istniejącym pakietem."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ten użytkownik nie może instalować nieznanych aplikacji"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ten użytkownik nie może instalować aplikacji"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Zaktualizuj mimo to"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Zarządzaj aplikacjami"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Brak miejsca"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Nie można zainstalować aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>. Zwolnij trochę miejsca i spróbuj ponownie."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Przywrócić fabryczną wersję tej aplikacji? Wszystkie dane zostaną usunięte."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Przywrócić fabryczną wersję tej aplikacji? Wszystkie dane zostaną usunięte. Dotyczy to wszystkich użytkowników tego urządzenia, również tych korzystających z profilu służbowego."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Zachowaj <xliff:g id="SIZE">%1$s</xliff:g> danych aplikacji."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Chcesz usunąć tę aplikację?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Chcesz odinstalować tę aplikację? Klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> również zostanie usunięty."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Aktywne odinstalowania"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nieudane odinstalowania"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Odinstalowuję…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Odinstalowuję <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Odinstalowywanie zakończone."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Odinstalowano aplikację <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Usunięto klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Nie udało się odinstalować."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Nie udało się odinstalować pakietu <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Usuwam klona aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nie można odinstalować aktywnej aplikacji do administrowania urządzeniem"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Nie można odinstalować aplikacji do administrowania urządzeniem aktywnej dla użytkownika <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Niektórzy użytkownicy i niektóre profile wymagają tej aplikacji, a w innych przypadkach została odinstalowana"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Inny"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Ze względów bezpieczeństwa na Twoim tablecie nie można obecnie instalować nieznanych aplikacji z tego źródła. Możesz to zmienić w Ustawieniach."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Ze względów bezpieczeństwa na Twoim telewizorze nie można obecnie instalować nieznanych aplikacji z tego źródła. Możesz to zmienić w Ustawieniach."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Ze względów bezpieczeństwa na Twoim zegarku nie można obecnie instalować nieznanych aplikacji z tego źródła. Możesz to zmienić w Ustawieniach."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Ze względów bezpieczeństwa na Twoim telefonie nie można obecnie instalować nieznanych aplikacji z tego źródła. Możesz to zmienić w Ustawieniach."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Dane na telefonie i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie telefonu lub utratę danych w wyniku jej używania."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Dane na tablecie i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie tabletu lub utratę danych w wyniku jej używania."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Dane na telewizorze i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie telewizora lub utratę danych w wyniku jej używania."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Dalej"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ustawienia"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalacja/usuwanie aplikacji na Wear"</string>

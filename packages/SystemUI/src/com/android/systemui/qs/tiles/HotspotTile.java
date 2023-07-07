@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,6 +41,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -49,8 +52,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot);
-
+    public static final String TILE_SPEC = "hotspot";
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
 
@@ -60,6 +62,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     @Inject
     public HotspotTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -70,7 +73,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             HotspotController hotspotController,
             DataSaverController dataSaverController
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mHotspotController = hotspotController;
         mDataSaverController = dataSaverController;
@@ -127,9 +130,6 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
 
         final int numConnectedDevices;
         final boolean isTransient = transientEnabling || mHotspotController.isHotspotTransient();
@@ -148,13 +148,14 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             isDataSaverEnabled = mDataSaverController.isDataSaverEnabled();
         }
 
-        state.icon = mEnabledStatic;
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
         state.isTransient = isTransient;
-        state.slash.isSlashed = !state.value && !state.isTransient;
         if (state.isTransient) {
             state.icon = ResourceIcon.get(
-                    com.android.internal.R.drawable.ic_hotspot_transient_animation);
+                    R.drawable.qs_hotspot_icon_search);
+        } else {
+            state.icon = ResourceIcon.get(state.value
+                    ? R.drawable.qs_hotspot_icon_on : R.drawable.qs_hotspot_icon_off);
         }
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
@@ -186,9 +187,8 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             return mContext.getString(
                     R.string.quick_settings_hotspot_secondary_label_data_saver_enabled);
         } else if (numConnectedDevices > 0 && isActive) {
-            return mContext.getResources().getQuantityString(
-                    R.plurals.quick_settings_hotspot_secondary_label_num_devices,
-                    numConnectedDevices,
+            return icuMessageFormat(mContext.getResources(),
+                    R.string.quick_settings_hotspot_secondary_label_num_devices,
                     numConnectedDevices);
         }
 

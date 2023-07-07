@@ -22,18 +22,18 @@ import android.database.Cursor;
 import android.database.CursorWindow;
 import android.util.Range;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
-import com.android.internal.os.PowerCalculator;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.Closeable;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -277,7 +277,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     /**
      * Returns a battery consumer for the specified battery consumer type.
      */
-    public BatteryConsumer getAggregateBatteryConsumer(
+    public AggregateBatteryConsumer getAggregateBatteryConsumer(
             @AggregateBatteryConsumerScope int scope) {
         return mAggregateBatteryConsumers[scope];
     }
@@ -449,9 +449,19 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         return proto.getBytes();
     }
 
+    /**
+     * Writes contents in a binary protobuffer format, using
+     * the android.os.BatteryUsageStatsAtomsProto proto.
+     */
+    public void dumpToProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        writeStatsProto(proto, /* max size */ Integer.MAX_VALUE);
+        proto.flush();
+    }
+
     @NonNull
     private void writeStatsProto(ProtoOutputStream proto, int maxRawSize) {
-        final BatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
+        final AggregateBatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
                 AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
 
         proto.write(BatteryUsageStatsAtomsProto.SESSION_START_MILLIS, getStatsStartTimestamp());
@@ -463,6 +473,9 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 getDischargeDurationMs());
         deviceBatteryConsumer.writeStatsProto(proto,
                 BatteryUsageStatsAtomsProto.DEVICE_BATTERY_CONSUMER);
+        if (mIncludesPowerModels) {
+            deviceBatteryConsumer.writePowerComponentModelProto(proto);
+        }
         writeUidBatteryConsumersProto(proto, maxRawSize);
     }
 
@@ -539,15 +552,15 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         pw.println("  Estimated power use (mAh):");
         pw.print(prefix);
         pw.print("    Capacity: ");
-        PowerCalculator.printPowerMah(pw, getBatteryCapacity());
+        pw.print(BatteryStats.formatCharge(getBatteryCapacity()));
         pw.print(", Computed drain: ");
-        PowerCalculator.printPowerMah(pw, getConsumedPower());
+        pw.print(BatteryStats.formatCharge(getConsumedPower()));
         final Range<Double> dischargedPowerRange = getDischargedPowerRange();
         pw.print(", actual drain: ");
-        PowerCalculator.printPowerMah(pw, dischargedPowerRange.getLower());
+        pw.print(BatteryStats.formatCharge(dischargedPowerRange.getLower()));
         if (!dischargedPowerRange.getLower().equals(dischargedPowerRange.getUpper())) {
             pw.print("-");
-            PowerCalculator.printPowerMah(pw, dischargedPowerRange.getUpper());
+            pw.print(BatteryStats.formatCharge(dischargedPowerRange.getUpper()));
         }
         pw.println();
 

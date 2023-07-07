@@ -32,6 +32,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.biometrics.BiometricSchedulerProto;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
@@ -54,7 +55,7 @@ import java.util.function.Consumer;
  * interactions with the HAL before finishing.
  *
  * We currently assume (and require) that each biometric sensor have its own instance of a
- * {@link BiometricScheduler}. See {@link CoexCoordinator}.
+ * {@link BiometricScheduler}.
  */
 @MainThread
 public class BiometricScheduler {
@@ -156,7 +157,6 @@ public class BiometricScheduler {
     private int mTotalOperationsHandled;
     private final int mRecentOperationsLimit;
     @NonNull private final List<Integer> mRecentOperations;
-    @NonNull private final CoexCoordinator mCoexCoordinator;
 
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
@@ -165,11 +165,6 @@ public class BiometricScheduler {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.d(getTag(), "[Started] " + clientMonitor);
-
-            if (clientMonitor instanceof AuthenticationClient) {
-                mCoexCoordinator.addAuthenticationClient(mSensorType,
-                        (AuthenticationClient<?>) clientMonitor);
-            }
         }
 
         @Override
@@ -189,10 +184,6 @@ public class BiometricScheduler {
                 }
 
                 Slog.d(getTag(), "[Finishing] " + clientMonitor + ", success: " + success);
-                if (clientMonitor instanceof AuthenticationClient) {
-                    mCoexCoordinator.removeAuthenticationClient(mSensorType,
-                            (AuthenticationClient<?>) clientMonitor);
-                }
 
                 if (mGestureAvailabilityDispatcher != null) {
                     mGestureAvailabilityDispatcher.markSensorActive(
@@ -216,8 +207,7 @@ public class BiometricScheduler {
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull IBiometricService biometricService,
-            int recentOperationsLimit,
-            @NonNull CoexCoordinator coexCoordinator) {
+            int recentOperationsLimit) {
         mBiometricTag = tag;
         mHandler = handler;
         mSensorType = sensorType;
@@ -227,7 +217,6 @@ public class BiometricScheduler {
         mCrashStates = new ArrayDeque<>();
         mRecentOperationsLimit = recentOperationsLimit;
         mRecentOperations = new ArrayList<>();
-        mCoexCoordinator = coexCoordinator;
     }
 
     /**
@@ -244,7 +233,7 @@ public class BiometricScheduler {
         this(tag, new Handler(Looper.getMainLooper()), sensorType, gestureAvailabilityDispatcher,
                 IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
-                LOG_NUM_RECENT_OPERATIONS, CoexCoordinator.getInstance());
+                LOG_NUM_RECENT_OPERATIONS);
     }
 
     @VisibleForTesting
@@ -554,5 +543,39 @@ public class BiometricScheduler {
         Slog.d(getTag(), "Resetting scheduler");
         mPendingOperations.clear();
         mCurrentOperation = null;
+    }
+
+    /**
+     * Marks all pending operations as canceling and cancels the current
+     * operation.
+     */
+    private void clearScheduler() {
+        if (mCurrentOperation == null) {
+            return;
+        }
+        for (BiometricSchedulerOperation pendingOperation : mPendingOperations) {
+            Slog.d(getTag(), "[Watchdog cancelling pending] "
+                    + pendingOperation.getClientMonitor());
+            pendingOperation.markCancelingForWatchdog();
+        }
+        Slog.d(getTag(), "[Watchdog cancelling current] "
+                + mCurrentOperation.getClientMonitor());
+        mCurrentOperation.cancel(mHandler, getInternalCallback());
+    }
+
+    /**
+     * Start the timeout for the watchdog.
+     */
+    public void startWatchdog() {
+        if (mCurrentOperation == null) {
+            return;
+        }
+        final BiometricSchedulerOperation operation = mCurrentOperation;
+        mHandler.postDelayed(() -> {
+            if (operation == mCurrentOperation) {
+                Counter.logIncrement("biometric.value_scheduler_watchdog_triggered_count");
+                clearScheduler();
+            }
+        }, 10000);
     }
 }

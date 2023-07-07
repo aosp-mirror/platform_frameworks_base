@@ -98,12 +98,17 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
     }
 
     private String getCallingPackageName() {
-        final String[] packages = mContext.getPackageManager().getPackagesForUid(
-                Binder.getCallingUid());
+        final PackageManager pm = mContext.getPackageManager();
+        final int uid = Binder.getCallingUid();
+        final String[] packages = pm.getPackagesForUid(uid);
         if (packages != null && packages.length > 0) {
            return packages[0];
         }
-        return "unknown";
+        final String name = pm.getNameForUid(uid);
+        if (name != null) {
+            return name;
+        }
+        return String.valueOf(uid);
     }
 
     private void dumpTempValues(String pkg, PrintWriter pw, int type,

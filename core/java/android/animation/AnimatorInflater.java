@@ -120,6 +120,7 @@ public class AnimatorInflater {
         } else if (DBG_ANIMATOR_INFLATER) {
             Log.d(TAG, "cache miss for animator " + resources.getResourceName(id));
         }
+        int cacheGeneration = animatorCache.getGeneration();
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
@@ -131,7 +132,7 @@ public class AnimatorInflater {
                     if (DBG_ANIMATOR_INFLATER) {
                         Log.d(TAG, "caching animator for res " + resources.getResourceName(id));
                     }
-                    animatorCache.put(id, theme, constantState);
+                    animatorCache.put(id, theme, constantState, cacheGeneration);
                     // create a new animator so that cached version is never used by the user
                     animator = constantState.newInstance(resources, theme);
                 }
@@ -164,16 +165,18 @@ public class AnimatorInflater {
         if (animator != null) {
             return animator;
         }
+        int cacheGeneration = cache.getGeneration();
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
-            animator = createStateListAnimatorFromXml(context, parser, Xml.asAttributeSet(parser));
+            animator =
+                    createStateListAnimatorFromXml(context, parser, Xml.asAttributeSet(parser));
             if (animator != null) {
                 animator.appendChangingConfigurations(getChangingConfigs(resources, id));
                 final ConstantState<StateListAnimator> constantState = animator
                         .createConstantState();
                 if (constantState != null) {
-                    cache.put(id, theme, constantState);
+                    cache.put(id, theme, constantState, cacheGeneration);
                     // return a clone so that the animator in constant state is never used.
                     animator = constantState.newInstance(resources, theme);
                 }

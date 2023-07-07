@@ -17,6 +17,7 @@
 package com.android.systemui.decor
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.DisplayCutout
 import android.view.Gravity
 import android.view.Surface
@@ -38,12 +39,13 @@ class RoundedCornerDecorProviderImpl(
     override fun inflateView(
         context: Context,
         parent: ViewGroup,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ): View {
         return ImageView(context).also { view ->
             // View
             view.id = viewId
-            initView(view, rotation)
+            initView(view, rotation, tintColor)
 
             // LayoutParams
             val layoutSize = if (isTop) {
@@ -52,31 +54,36 @@ class RoundedCornerDecorProviderImpl(
                 roundedCornerResDelegate.bottomRoundedSize
             }
             val params = FrameLayout.LayoutParams(
-                    layoutSize.width,
-                    layoutSize.height,
-                    alignedBound1.toLayoutGravity(rotation) or
-                            alignedBound2.toLayoutGravity(rotation))
+                layoutSize.width,
+                layoutSize.height,
+                alignedBound1.toLayoutGravity(rotation) or alignedBound2.toLayoutGravity(rotation)
+            )
 
             // AddView
             parent.addView(view, params)
         }
     }
 
-    private fun initView(view: ImageView, @Surface.Rotation rotation: Int) {
+    private fun initView(
+        view: ImageView,
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
+    ) {
         view.setRoundedCornerImage(roundedCornerResDelegate, isTop)
         view.adjustRotation(alignedBounds, rotation)
-        view.imageTintList = roundedCornerResDelegate.colorTintList
+        view.imageTintList = ColorStateList.valueOf(tintColor)
     }
 
     override fun onReloadResAndMeasure(
         view: View,
         reloadToken: Int,
         @Surface.Rotation rotation: Int,
+        tintColor: Int,
         displayUniqueId: String?
     ) {
         roundedCornerResDelegate.updateDisplayUniqueId(displayUniqueId, reloadToken)
 
-        initView((view as ImageView), rotation)
+        initView((view as ImageView), rotation, tintColor)
 
         val layoutSize = if (isTop) {
             roundedCornerResDelegate.topRoundedSize
@@ -87,7 +94,7 @@ class RoundedCornerDecorProviderImpl(
             it.width = layoutSize.width
             it.height = layoutSize.height
             it.gravity = alignedBound1.toLayoutGravity(rotation) or
-                    alignedBound2.toLayoutGravity(rotation)
+                alignedBound2.toLayoutGravity(rotation)
             view.setLayoutParams(it)
         }
     }
@@ -134,10 +141,10 @@ private fun ImageView.setRoundedCornerImage(
         setImageDrawable(drawable)
     } else {
         setImageResource(
-                if (isTop)
-                    R.drawable.rounded_corner_top
-                else
-                    R.drawable.rounded_corner_bottom
+            if (isTop)
+                R.drawable.rounded_corner_top
+            else
+                R.drawable.rounded_corner_bottom
         )
     }
 }

@@ -16,12 +16,16 @@
 
 package com.android.wm.shell.bubbles.animation;
 
+import static android.view.View.LAYOUT_DIRECTION_RTL;
+
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.BubbleStackView.ENABLE_FLING_TO_DISMISS_BUBBLE;
 
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.view.View;
+import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,7 +65,10 @@ public class ExpandedAnimationController
     private static final float DAMPING_RATIO_MEDIUM_LOW_BOUNCY = 0.65f;
 
     /** Stiffness for the expand/collapse path-following animation. */
-    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
+    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 400;
+
+    /** Stiffness for the expand/collapse animation when home gesture handling is off */
+    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS_WITHOUT_HOME_GESTURE = 1000;
 
     /**
      * Velocity required to dismiss an individual bubble without dragging it into the dismiss
@@ -233,6 +240,11 @@ public class ExpandedAnimationController
             };
         }
 
+        boolean showBubblesVertically = mPositioner.showBubblesVertically();
+        final boolean isRtl =
+                mLayout.getContext().getResources().getConfiguration().getLayoutDirection()
+                        == LAYOUT_DIRECTION_RTL;
+
         // Animate each bubble individually, since each path will end in a different spot.
         animationsForChildrenFromIndex(0, (index, animation) -> {
             final View bubble = mLayout.getChildAt(index);
@@ -267,9 +279,20 @@ public class ExpandedAnimationController
             // right side, the first bubble is traveling to the top left, so it leads. During
             // collapse to the left, the first bubble has the shortest travel time back to the stack
             // position, so it leads (and vice versa).
-            final boolean firstBubbleLeads =
-                    (expanding && !mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
+            final boolean firstBubbleLeads;
+            if (showBubblesVertically || !isRtl) {
+                firstBubbleLeads =
+                        (expanding && !mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
                             || (!expanding && mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x));
+            } else {
+                // For RTL languages, when showing bubbles horizontally, it is reversed. The bubbles
+                // are positioned right to left. This means that when expanding from left, the top
+                // bubble will lead as it will be positioned on the right. And when expanding from
+                // right, the top bubble will have the least travel distance.
+                firstBubbleLeads =
+                        (expanding && mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
+                            || (!expanding && !mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x));
+            }
             final int startDelay = firstBubbleLeads
                     ? (index * 10)
                     : ((mLayout.getChildCount() - index) * 10);
@@ -278,11 +301,14 @@ public class ExpandedAnimationController
                     (firstBubbleLeads && index == 0)
                             || (!firstBubbleLeads && index == mLayout.getChildCount() - 1);
 
+            Interpolator interpolator = expanding
+                    ? Interpolators.EMPHASIZED_ACCELERATE : Interpolators.EMPHASIZED_DECELERATE;
+
             animation
                     .followAnimatedTargetAlongPath(
                             path,
                             EXPAND_COLLAPSE_TARGET_ANIM_DURATION /* targetAnimDuration */,
-                            Interpolators.LINEAR /* targetAnimInterpolator */,
+                            interpolator /* targetAnimInterpolator */,
                             isLeadBubble ? mLeadBubbleEndAction : null /* endAction */,
                             () -> mLeadBubbleEndAction = null /* endAction */)
                     .withStartDelay(startDelay)
@@ -329,6 +355,7 @@ public class ExpandedAnimationController
         mMagnetizedBubbleDraggingOut.setMagnetListener(listener);
         mMagnetizedBubbleDraggingOut.setHapticsEnabled(true);
         mMagnetizedBubbleDraggingOut.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
+        mMagnetizedBubbleDraggingOut.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_BUBBLE);
     }
 
     private void springBubbleTo(View bubble, float x, float y) {
@@ -431,7 +458,7 @@ public class ExpandedAnimationController
     }
 
     /** Description of current animation controller state. */
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw) {
         pw.println("ExpandedAnimationController state:");
         pw.print("  isActive:          "); pw.println(isActiveController());
         pw.print("  animatingExpand:   "); pw.println(mAnimatingExpand);

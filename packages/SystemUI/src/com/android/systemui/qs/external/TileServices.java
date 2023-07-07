@@ -15,6 +15,7 @@
  */
 package com.android.systemui.qs.external;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -29,18 +30,25 @@ import android.service.quicksettings.IQSService;
 import android.service.quicksettings.Tile;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArrayMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,33 +61,42 @@ import javax.inject.Provider;
 /**
  * Runs the day-to-day operations of which tiles should be bound and when.
  */
+@SysUISingleton
 public class TileServices extends IQSService.Stub {
     static final int DEFAULT_MAX_BOUND = 3;
     static final int REDUCED_MAX_BOUND = 1;
     private static final String TAG = "TileServices";
 
     private final ArrayMap<CustomTile, TileServiceManager> mServices = new ArrayMap<>();
-    private final ArrayMap<ComponentName, CustomTile> mTiles = new ArrayMap<>();
+    private final SparseArrayMap<ComponentName, CustomTile> mTiles = new SparseArrayMap<>();
     private final ArrayMap<IBinder, CustomTile> mTokenMap = new ArrayMap<>();
     private final Context mContext;
     private final Handler mMainHandler;
     private final Provider<Handler> mHandlerProvider;
-    private final QSTileHost mHost;
+    private final QSHost mHost;
     private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
+    private final StatusBarIconController mStatusBarIconController;
+    private final PanelInteractor mPanelInteractor;
+    private final CustomTileAddedRepository mCustomTileAddedRepository;
+    private final DelayableExecutor mBackgroundExecutor;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
     @Inject
     public TileServices(
-            QSTileHost host,
+            QSHost host,
             @Main Provider<Handler> handlerProvider,
             BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker,
             KeyguardStateController keyguardStateController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            StatusBarIconController statusBarIconController,
+            PanelInteractor panelInteractor,
+            CustomTileAddedRepository customTileAddedRepository,
+            @Background DelayableExecutor backgroundExecutor) {
         mHost = host;
         mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
@@ -88,23 +105,28 @@ public class TileServices extends IQSService.Stub {
         mMainHandler = mHandlerProvider.get();
         mUserTracker = userTracker;
         mCommandQueue = commandQueue;
+        mStatusBarIconController = statusBarIconController;
         mCommandQueue.addCallback(mRequestListeningCallback);
+        mPanelInteractor = panelInteractor;
+        mCustomTileAddedRepository = customTileAddedRepository;
+        mBackgroundExecutor = backgroundExecutor;
     }
 
     public Context getContext() {
         return mContext;
     }
 
-    public QSTileHost getHost() {
+    public QSHost getHost() {
         return mHost;
     }
 
     public TileServiceManager getTileWrapper(CustomTile tile) {
         ComponentName component = tile.getComponent();
+        int userId = tile.getUser();
         TileServiceManager service = onCreateTileService(component, mBroadcastDispatcher);
         synchronized (mServices) {
             mServices.put(tile, service);
-            mTiles.put(component, tile);
+            mTiles.add(userId, component, tile);
             mTokenMap.put(service.getToken(), tile);
         }
         // Makes sure binding only happens after the maps have been populated
@@ -115,7 +137,7 @@ public class TileServices extends IQSService.Stub {
     protected TileServiceManager onCreateTileService(ComponentName component,
             BroadcastDispatcher broadcastDispatcher) {
         return new TileServiceManager(this, mHandlerProvider.get(), component,
-                broadcastDispatcher, mUserTracker);
+                broadcastDispatcher, mUserTracker, mCustomTileAddedRepository, mBackgroundExecutor);
     }
 
     public void freeService(CustomTile tile, TileServiceManager service) {
@@ -124,11 +146,9 @@ public class TileServices extends IQSService.Stub {
             service.handleDestroy();
             mServices.remove(tile);
             mTokenMap.remove(service.getToken());
-            mTiles.remove(tile.getComponent());
-            final String slot = tile.getComponent().getClassName();
-            // TileServices doesn't know how to add more than 1 icon per slot, so remove all
-            mMainHandler.post(() -> mHost.getIconController()
-                    .removeAllIconsForSlot(slot));
+            mTiles.delete(tile.getUser(), tile.getComponent());
+            final String slot = getStatusBarIconSlotName(tile.getComponent());
+            mMainHandler.post(() -> mStatusBarIconController.removeIconForTile(slot));
         }
     }
 
@@ -179,9 +199,10 @@ public class TileServices extends IQSService.Stub {
 
     private void requestListening(ComponentName component) {
         synchronized (mServices) {
-            CustomTile customTile = getTileForComponent(component);
+            int userId = mUserTracker.getUserId();
+            CustomTile customTile = getTileForUserAndComponent(userId, component);
             if (customTile == null) {
-                Log.d("TileServices", "Couldn't find tile for " + component);
+                Log.d(TAG, "Couldn't find tile for " + component + "(" + userId + ")");
                 return;
             }
             TileServiceManager service = mServices.get(customTile);
@@ -249,7 +270,7 @@ public class TileServices extends IQSService.Stub {
         if (customTile != null) {
             verifyCaller(customTile);
             customTile.onDialogShown();
-            mHost.forceCollapsePanels();
+            mPanelInteractor.forceCollapsePanels();
             Objects.requireNonNull(mServices.get(customTile)).setShowingDialog(true);
         }
     }
@@ -269,7 +290,20 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
             verifyCaller(customTile);
-            mHost.forceCollapsePanels();
+            mPanelInteractor.forceCollapsePanels();
+        }
+    }
+
+    @Override
+    public void startActivity(IBinder token, PendingIntent pendingIntent) {
+        startActivity(getTileForToken(token), pendingIntent);
+    }
+
+    @VisibleForTesting
+    protected void startActivity(CustomTile customTile, PendingIntent pendingIntent) {
+        if (customTile != null) {
+            verifyCaller(customTile);
+            customTile.startActivityAndCollapse(pendingIntent);
         }
     }
 
@@ -289,12 +323,11 @@ public class TileServices extends IQSService.Stub {
                             ? new StatusBarIcon(userHandle, packageName, icon, 0, 0,
                                     contentDescription)
                             : null;
+                    final String slot = getStatusBarIconSlotName(componentName);
                     mMainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            StatusBarIconController iconController = mHost.getIconController();
-                            iconController.setIcon(componentName.getClassName(), statusIcon);
-                            iconController.setExternalIcon(componentName.getClassName());
+                            mStatusBarIconController.setIconFromTile(slot, statusIcon);
                         }
                     });
                 }
@@ -311,7 +344,24 @@ public class TileServices extends IQSService.Stub {
             verifyCaller(customTile);
             return customTile.getQsTile();
         }
+        Log.e(TAG, "Tile for token " + token + "not found. "
+                + "Tiles in map: " + availableTileComponents());
         return null;
+    }
+
+    private String availableTileComponents() {
+        StringBuilder sb = new StringBuilder("[");
+        synchronized (mServices) {
+            mTokenMap.forEach((iBinder, customTile) ->
+                    sb.append(iBinder.toString())
+                    .append(":")
+                    .append(customTile.getComponent().flattenToShortString())
+                    .append(":")
+                    .append(customTile.getUser())
+                    .append(","));
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override
@@ -334,16 +384,16 @@ public class TileServices extends IQSService.Stub {
     }
 
     @Nullable
-    private CustomTile getTileForToken(IBinder token) {
+    public CustomTile getTileForToken(IBinder token) {
         synchronized (mServices) {
             return mTokenMap.get(token);
         }
     }
 
     @Nullable
-    private CustomTile getTileForComponent(ComponentName component) {
+    private CustomTile getTileForUserAndComponent(int userId, ComponentName component) {
         synchronized (mServices) {
-            return mTiles.get(component);
+            return mTiles.get(userId, component);
         }
     }
 
@@ -353,6 +403,12 @@ public class TileServices extends IQSService.Stub {
         }
         mCommandQueue.removeCallback(mRequestListeningCallback);
     }
+
+    /** Returns the slot name that should be used when adding or removing status bar icons. */
+    private String getStatusBarIconSlotName(ComponentName componentName) {
+        return componentName.getClassName();
+    }
+
 
     private final CommandQueue.Callbacks mRequestListeningCallback = new CommandQueue.Callbacks() {
         @Override
@@ -368,4 +424,5 @@ public class TileServices extends IQSService.Stub {
             return -Integer.compare(left.getBindPriority(), right.getBindPriority());
         }
     };
+
 }

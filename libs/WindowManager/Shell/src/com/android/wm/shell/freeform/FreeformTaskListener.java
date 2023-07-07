@@ -16,33 +16,35 @@
 
 package com.android.wm.shell.freeform;
 
-import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.content.Context;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.provider.Settings;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * {@link ShellTaskOrganizer.TaskListener} for {@link
  * ShellTaskOrganizer#TASK_LISTENER_TYPE_FREEFORM}.
  */
-public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
+public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
+        ShellTaskOrganizer.FocusListener {
     private static final String TAG = "FreeformTaskListener";
 
-    private final SyncTransactionQueue mSyncQueue;
+    private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
+    private final WindowDecorViewModel mWindowDecorationViewModel;
 
     private final SparseArray<State> mTasks = new SparseArray<>();
 
@@ -51,14 +53,30 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
         SurfaceControl mLeash;
     }
 
-    public FreeformTaskListener(SyncTransactionQueue syncQueue) {
-        mSyncQueue = syncQueue;
+    public FreeformTaskListener(
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            WindowDecorViewModel windowDecorationViewModel) {
+        mShellTaskOrganizer = shellTaskOrganizer;
+        mWindowDecorationViewModel = windowDecorationViewModel;
+        mDesktopModeTaskRepository = desktopModeTaskRepository;
+        if (shellInit != null) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
+    }
+
+    private void onInit() {
+        mShellTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_FREEFORM);
+        if (DesktopModeStatus.isAnyEnabled()) {
+            mShellTaskOrganizer.addFocusListener(this);
+        }
     }
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         if (mTasks.get(taskInfo.taskId) != null) {
-            throw new RuntimeException("Task appeared more than once: #" + taskInfo.taskId);
+            throw new IllegalStateException("Task appeared more than once: #" + taskInfo.taskId);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Appeared: #%d",
                 taskInfo.taskId);
@@ -66,47 +84,81 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
         state.mTaskInfo = taskInfo;
         state.mLeash = leash;
         mTasks.put(taskInfo.taskId, state);
+        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            mWindowDecorationViewModel.onTaskOpening(taskInfo, leash, t, t);
+            t.apply();
+        }
 
-        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
-        mSyncQueue.runInSync(t -> {
-            Point taskPosition = taskInfo.positionInParent;
-            t.setPosition(leash, taskPosition.x, taskPosition.y)
-                    .setWindowCrop(leash, taskBounds.width(), taskBounds.height())
-                    .show(leash);
-        });
+        if (DesktopModeStatus.isAnyEnabled()) {
+            mDesktopModeTaskRepository.ifPresent(repository -> {
+                repository.addOrMoveFreeformTaskToTop(taskInfo.taskId);
+                if (taskInfo.isVisible) {
+                    if (repository.addActiveTask(taskInfo.displayId, taskInfo.taskId)) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                                "Adding active freeform task: #%d", taskInfo.taskId);
+                    }
+                    repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
+                            true);
+                }
+            });
+        }
     }
 
     @Override
     public void onTaskVanished(RunningTaskInfo taskInfo) {
-        State state = mTasks.get(taskInfo.taskId);
-        if (state == null) {
-            Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
-            return;
-        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Vanished: #%d",
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
+
+        if (DesktopModeStatus.isAnyEnabled()) {
+            mDesktopModeTaskRepository.ifPresent(repository -> {
+                repository.removeFreeformTask(taskInfo.taskId);
+                if (repository.removeActiveTask(taskInfo.taskId)) {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                            "Removing active freeform task: #%d", taskInfo.taskId);
+                }
+                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId, false);
+            });
+        }
+
+        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mWindowDecorationViewModel.destroyWindowDecoration(taskInfo);
+        }
     }
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
-        State state = mTasks.get(taskInfo.taskId);
-        if (state == null) {
-            throw new RuntimeException(
-                    "Task info changed before appearing: #" + taskInfo.taskId);
-        }
+        final State state = mTasks.get(taskInfo.taskId);
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Info Changed: #%d",
                 taskInfo.taskId);
+        mWindowDecorationViewModel.onTaskInfoChanged(taskInfo);
         state.mTaskInfo = taskInfo;
+        if (DesktopModeStatus.isAnyEnabled()) {
+            mDesktopModeTaskRepository.ifPresent(repository -> {
+                if (taskInfo.isVisible) {
+                    if (repository.addActiveTask(taskInfo.displayId, taskInfo.taskId)) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                                "Adding active freeform task: #%d", taskInfo.taskId);
+                    }
+                }
+                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
+                        taskInfo.isVisible);
+            });
+        }
+    }
 
-        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
-        final SurfaceControl leash = state.mLeash;
-        mSyncQueue.runInSync(t -> {
-            Point taskPosition = taskInfo.positionInParent;
-            t.setPosition(leash, taskPosition.x, taskPosition.y)
-                    .setWindowCrop(leash, taskBounds.width(), taskBounds.height())
-                    .show(leash);
-        });
+    @Override
+    public void onFocusTaskChanged(RunningTaskInfo taskInfo) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG,
+                "Freeform Task Focus Changed: #%d focused=%b",
+                taskInfo.taskId, taskInfo.isFocused);
+        if (DesktopModeStatus.isAnyEnabled() && taskInfo.isFocused) {
+            mDesktopModeTaskRepository.ifPresent(repository -> {
+                repository.addOrMoveFreeformTaskToTop(taskInfo.taskId);
+            });
+        }
     }
 
     @Override
@@ -137,17 +189,5 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     public String toString() {
         return TAG;
-    }
-
-    /**
-     * Checks if freeform support is enabled in system.
-     *
-     * @param context context used to check settings and package manager.
-     * @return {@code true} if freeform is enabled, {@code false} if not.
-     */
-    public static boolean isFreeformEnabled(Context context) {
-        return context.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
-                || Settings.Global.getInt(context.getContentResolver(),
-                DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
     }
 }

@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Instalatu da aplikazioa."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Aplikazioa instalatu nahi duzu?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Aplikazioa eguneratu nahi duzu?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Aplikazioa <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> zerbitzutik eguneratu nahi duzu?\n\nAplikazioak <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> zerbitzutik jaso ohi ditu eguneratzeak. Beste iturburu batetik eguneratuz gero, baliteke aurrerantzeko eguneratzeak telefonoko edozein iturburutatik jasotzea. Baliteke aplikazioaren funtzioak aldatzea."</string>
     <string name="install_failed" msgid="5777824004474125469">"Ez da instalatu aplikazioa."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketea instalatzeko aukera blokeatu egin da."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Ez da instalatu aplikazioa, gatazka bat sortu delako lehendik dagoen pakete batekin."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Erabiltzaile honek ezin ditu instalatu aplikazio ezezagunak"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Erabiltzaile honek ez du baimenik aplikazioak instalatzeko"</string>
     <string name="ok" msgid="7871959885003339302">"Ados"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Eguneratu halere"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Kudeatu aplikazioak"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Ez dago behar adina toki"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Ezin izan da instalatu <xliff:g id="APP_NAME">%1$s</xliff:g>. Egin toki pixka bat eta saiatu berriro."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira. Gailuaren erabiltzaile guztiengan izango du eragina, laneko profilak dituztenak barne."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Mantendu aplikazioetako datuen <xliff:g id="SIZE">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Aplikazioa ezabatu nahi duzu?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Aplikazioa desinstalatu nahi duzu? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona ere ezabatuko da."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Abian diren desinstalatze-eragiketak"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalatu ezin izan direnak"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstalatzen…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> desinstalatzen…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Desinstalatu da."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Desinstalatu da <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Ezabatu da <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Ezin izan da desinstalatu."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Ezin izan da desinstalatu <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona ezabatzen…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Ezin da desinstalatu gailua administratzeko aplikazio aktiboa"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Ezin da desinstalatu <xliff:g id="USERNAME">%1$s</xliff:g> erabiltzailearen gailua administratzeko aplikazio aktiboa"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Erabiltzaile edo profil batzuek aplikazio hau behar dute, baina desinstalatu egin da gainerakoentzat"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Ezezaguna"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak tableta honetan. Hori aldatzeko, joan Ezarpenak atalera."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak telebista honetan. Hori aldatzeko, joan Ezarpenak atalera."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak erloju honetan. Hori aldatzeko, joan Ezarpenak atalera."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak telefono honetan. Hori aldatzeko, joan Ezarpenak atalera."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Baliteke telefonoak eta datu pertsonalek aplikazio ezezagunen erasoak jasatea. Aplikazio hau instalatzen baduzu, onartu egingo duzu zeu zarela hura erabiltzeagatik telefonoari agian gertatuko zaizkion kalteen edo datu-galeren erantzulea."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Baliteke tabletak eta datu pertsonalek aplikazio ezezagunen erasoak jasatea. Aplikazio hau instalatzen baduzu, onartu egingo duzu hura erabiltzeagatik tabletari agian gertatuko zaizkion kalteen edo datu-galeren erantzulea zeu izango zarela."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Baliteke telebistak eta datu pertsonalek aplikazio ezezagunen erasoak jasatea. Aplikazio hau instalatzen baduzu, onartu egingo duzu hura erabiltzeagatik telebistari agian gertatuko zaizkion kalteen edo datu-galeren erantzulea zeu izango zarela."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Egin aurrera"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ezarpenak"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear aplikazioak instalatzea/desinstalatzea"</string>

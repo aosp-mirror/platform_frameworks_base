@@ -23,7 +23,7 @@ namespace aapt {
 
 ProductFilter::ResourceConfigValueIter ProductFilter::SelectProductToKeep(
     const ResourceNameRef& name, const ResourceConfigValueIter begin,
-    const ResourceConfigValueIter end, IDiagnostics* diag) {
+    const ResourceConfigValueIter end, android::IDiagnostics* diag) {
   ResourceConfigValueIter default_product_iter = end;
   ResourceConfigValueIter selected_product_iter = end;
 
@@ -32,16 +32,15 @@ ProductFilter::ResourceConfigValueIter ProductFilter::SelectProductToKeep(
     if (products_.find(config_value->product) != products_.end()) {
       if (selected_product_iter != end) {
         // We have two possible values for this product!
-        diag->Error(DiagMessage(config_value->value->GetSource())
-                    << "selection of product '" << config_value->product
-                    << "' for resource " << name << " is ambiguous");
+        diag->Error(android::DiagMessage(config_value->value->GetSource())
+                    << "selection of product '" << config_value->product << "' for resource "
+                    << name << " is ambiguous");
 
         ResourceConfigValue* previously_selected_config_value =
             selected_product_iter->get();
-        diag->Note(
-            DiagMessage(previously_selected_config_value->value->GetSource())
-            << "product '" << previously_selected_config_value->product
-            << "' is also a candidate");
+        diag->Note(android::DiagMessage(previously_selected_config_value->value->GetSource())
+                   << "product '" << previously_selected_config_value->product
+                   << "' is also a candidate");
         return end;
       }
 
@@ -52,15 +51,13 @@ ProductFilter::ResourceConfigValueIter ProductFilter::SelectProductToKeep(
     if (config_value->product.empty() || config_value->product == "default") {
       if (default_product_iter != end) {
         // We have two possible default values.
-        diag->Error(DiagMessage(config_value->value->GetSource())
-                    << "multiple default products defined for resource "
-                    << name);
+        diag->Error(android::DiagMessage(config_value->value->GetSource())
+                    << "multiple default products defined for resource " << name);
 
         ResourceConfigValue* previously_default_config_value =
             default_product_iter->get();
-        diag->Note(
-            DiagMessage(previously_default_config_value->value->GetSource())
-            << "default product also defined here");
+        diag->Note(android::DiagMessage(previously_default_config_value->value->GetSource())
+                   << "default product also defined here");
         return end;
       }
 
@@ -70,8 +67,7 @@ ProductFilter::ResourceConfigValueIter ProductFilter::SelectProductToKeep(
   }
 
   if (default_product_iter == end) {
-    diag->Error(DiagMessage() << "no default product defined for resource "
-                              << name);
+    diag->Error(android::DiagMessage() << "no default product defined for resource " << name);
     return end;
   }
 
@@ -98,7 +94,7 @@ bool ProductFilter::Consume(IAaptContext* context, ResourceTable* table) {
             // End of the array, or we saw a different config,
             // so this must be the end of a range of products.
             // Select the product to keep from the set of products defined.
-            ResourceNameRef name(pkg->name, type->type, entry->name);
+            ResourceNameRef name(pkg->name, type->named_type, entry->name);
             auto value_to_keep = SelectProductToKeep(
                 name, start_range_iter, iter, context->GetDiagnostics());
             if (value_to_keep == iter) {

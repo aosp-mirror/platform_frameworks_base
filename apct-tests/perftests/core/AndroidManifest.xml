@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.android.perftests.core">
 
     <permission android:name="com.android.perftests.core.TestPermission" />
@@ -10,10 +11,14 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <application>
         <uses-library android:name="android.test.runner" />
+        <profileable android:shell="true" />
         <activity android:name="android.perftests.utils.PerfTestActivity"
             android:exported="true">
           <intent-filter>
@@ -31,6 +36,17 @@
             android:authorities="android.os.SomeProvider"
             android:exported="false"
             android:process=":some_provider" />
+
+        <!-- We remove EmojiCompat initializer here because it may crash the test process
+             if the initializer runs while TypefaceSerializationPerfTest is running. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                tools:node="remove" />
+        </provider>
 
         <service
             android:name="android.view.autofill.MyAutofillService"

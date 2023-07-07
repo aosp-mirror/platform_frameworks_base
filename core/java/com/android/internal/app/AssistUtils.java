@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -56,6 +57,8 @@ public class AssistUtils {
     public static final int INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS = 5;
     /** value for INVOCATION_TYPE_KEY: long press on physical power button */
     public static final int INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS = 6;
+    /** value for INVOCATION_TYPE_KEY: press on physcial assistant button */
+    public static final int INVOCATION_TYPE_ASSIST_BUTTON = 7;
 
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
@@ -67,12 +70,53 @@ public class AssistUtils {
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
     }
 
-    public boolean showSessionForActiveService(Bundle args, int sourceFlags,
-            IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
+    /**
+     * Shows the session for the currently active service. Used to start a new session from system
+     * affordances.
+     *
+     * @param args the bundle to pass as arguments to the voice interaction session
+     * @param sourceFlags flags indicating the source of this show
+     * @param showCallback optional callback to be notified when the session was shown
+     * @param activityToken optional token of activity that needs to be on top
+     *
+     * @deprecated Use {@link #showSessionForActiveService(Bundle, int, String,
+     *             IVoiceInteractionSessionShowCallback, IBinder)} instead
+     */
+    @Deprecated
+    public boolean showSessionForActiveService(@Nullable Bundle args, int sourceFlags,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
+        return showSessionForActiveServiceInternal(args, sourceFlags, /* attributionTag */ null,
+                showCallback, activityToken);
+    }
+
+    /**
+     * Shows the session for the currently active service. Used to start a new session from system
+     * affordances.
+     *
+     * @param args the bundle to pass as arguments to the voice interaction session
+     * @param sourceFlags flags indicating the source of this show
+     * @param attributionTag the attribution tag of the calling context or {@code null} for default
+     *                       attribution
+     * @param showCallback optional callback to be notified when the session was shown
+     * @param activityToken optional token of activity that needs to be on top
+     */
+    public boolean showSessionForActiveService(@Nullable Bundle args, int sourceFlags,
+            @Nullable String attributionTag,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
+        return showSessionForActiveServiceInternal(args, sourceFlags, attributionTag, showCallback,
+                activityToken);
+    }
+
+    private boolean showSessionForActiveServiceInternal(@Nullable Bundle args, int sourceFlags,
+            @Nullable String attributionTag,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
         try {
             if (mVoiceInteractionManagerService != null) {
                 return mVoiceInteractionManagerService.showSessionForActiveService(args,
-                        sourceFlags, showCallback, activityToken);
+                        sourceFlags, attributionTag, showCallback, activityToken);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);
@@ -184,6 +228,35 @@ public class AssistUtils {
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to register voice interaction listener", e);
+        }
+    }
+
+    /**
+     * Enables visual detection service.
+     *
+     * @param listener to receive visual attention gained/lost events.
+     */
+    public void enableVisualQueryDetection(
+            IVisualQueryDetectionAttentionListener listener) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.enableVisualQueryDetection(listener);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register visual query detection attention listener", e);
+        }
+    }
+
+    /**
+     * Disables visual query detection.
+     */
+    public void disableVisualQueryDetection() {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.disableVisualQueryDetection();
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register visual query detection attention listener", e);
         }
     }
 

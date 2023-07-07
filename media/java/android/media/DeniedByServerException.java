@@ -24,4 +24,11 @@ public final class DeniedByServerException extends MediaDrmException {
     public DeniedByServerException(String detailMessage) {
         super(detailMessage);
     }
+
+    /**
+     * @hide
+     */
+    public DeniedByServerException(String message, int vendorError, int oemError, int context) {
+        super(message, vendorError, oemError, context);
+    }
 }

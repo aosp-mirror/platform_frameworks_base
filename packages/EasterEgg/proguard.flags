@@ -1,0 +1,4 @@
+# Note: This is a very conservative keep rule, but as the amount of app
+# code is small, this minimizes any maintenance risks while providing
+# most of the shrinking benefits for referenced libraries.
+-keep class com.android.egg.** { *; }

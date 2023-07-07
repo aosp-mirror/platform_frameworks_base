@@ -26,44 +26,48 @@ using ::google::protobuf::io::ZeroCopyOutputStream;
 namespace aapt {
 namespace io {
 
-bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std::string& out_path,
+bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, std::string_view out_path,
                               uint32_t compression_flags, IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
+    context->GetDiagnostics()->Note(android::DiagMessage()
+                                    << "writing " << out_path << " to archive");
   }
 
   if (!writer->WriteFile(out_path, compression_flags, in)) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
-                                                   << " to archive: " << writer->GetError());
+    context->GetDiagnostics()->Error(android::DiagMessage()
+                                     << "failed to write " << out_path
+                                     << " to archive: " << writer->GetError());
     return false;
   }
   return true;
 }
 
-bool CopyFileToArchive(IAaptContext* context, io::IFile* file, const std::string& out_path,
+bool CopyFileToArchive(IAaptContext* context, io::IFile* file, std::string_view out_path,
                        uint32_t compression_flags, IArchiveWriter* writer) {
   TRACE_CALL();
   std::unique_ptr<io::IData> data = file->OpenAsData();
   if (!data) {
-    context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "failed to open file");
+    context->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
+                                     << "failed to open file");
     return false;
   }
   return CopyInputStreamToArchive(context, data.get(), out_path, compression_flags, writer);
 }
 
 bool CopyFileToArchivePreserveCompression(IAaptContext* context, io::IFile* file,
-                                          const std::string& out_path, IArchiveWriter* writer) {
+                                          std::string_view out_path, IArchiveWriter* writer) {
   uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
   return CopyFileToArchive(context, file, out_path, compression_flags, writer);
 }
 
 bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* proto_msg,
-                        const std::string& out_path, uint32_t compression_flags,
+                        std::string_view out_path, uint32_t compression_flags,
                         IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
+    context->GetDiagnostics()->Note(android::DiagMessage()
+                                    << "writing " << out_path << " to archive");
   }
 
   if (writer->StartEntry(out_path, compression_flags)) {
@@ -72,8 +76,8 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
       // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
       ::google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
       if (!proto_msg->SerializeToZeroCopyStream(&adaptor)) {
-        context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
-                                                       << " to archive");
+        context->GetDiagnostics()->Error(android::DiagMessage()
+                                         << "failed to write " << out_path << " to archive");
         return false;
       }
     }
@@ -82,8 +86,8 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
       return true;
     }
   }
-  context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
-                                                 << " to archive: " << writer->GetError());
+  context->GetDiagnostics()->Error(android::DiagMessage() << "failed to write " << out_path
+                                                          << " to archive: " << writer->GetError());
   return false;
 }
 
@@ -106,7 +110,7 @@ bool Copy(OutputStream* out, InputStream* in) {
   return !in->HadError();
 }
 
-bool Copy(OutputStream* out, const StringPiece& in) {
+bool Copy(OutputStream* out, StringPiece in) {
   const char* in_buffer = in.data();
   size_t in_len = in.size();
   while (in_len != 0) {

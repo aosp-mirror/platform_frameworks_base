@@ -40,9 +40,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
-import android.os.Bundle;
 import android.os.RecoverySystem;
-import android.os.RemoteCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -69,6 +67,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test RescueParty.
@@ -95,6 +95,9 @@ public class RescuePartyTest {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
+    private static final String PROP_LAST_FACTORY_RESET_TIME_MS = "persist.sys.last_factory_reset";
+
+    private static final int THROTTLING_DURATION_MIN = 10;
 
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
@@ -111,7 +114,7 @@ public class RescuePartyTest {
     private PackageManager mPackageManager;
 
     @Captor
-    private ArgumentCaptor<RemoteCallback> mMonitorCallbackCaptor;
+    private ArgumentCaptor<DeviceConfig.MonitorCallback> mMonitorCallbackCaptor;
     @Captor
     private ArgumentCaptor<List<String>> mPackageListCaptor;
 
@@ -125,7 +128,6 @@ public class RescuePartyTest {
                         .spyStatic(SystemProperties.class)
                         .spyStatic(Settings.Global.class)
                         .spyStatic(Settings.Secure.class)
-                        .spyStatic(Settings.Config.class)
                         .spyStatic(SettingsToPropertiesMapper.class)
                         .spyStatic(RecoverySystem.class)
                         .spyStatic(RescueParty.class)
@@ -222,7 +224,8 @@ public class RescuePartyTest {
     @Test
     public void testBootLoopDetectionWithExecutionForAllRescueLevels() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
         HashMap<String, Integer> verifiedTimesMap = new HashMap<String, Integer>();
 
@@ -233,9 +236,9 @@ public class RescuePartyTest {
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
 
         final String[] expectedAllResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
 
@@ -252,6 +255,7 @@ public class RescuePartyTest {
         noteBoot(4);
         assertTrue(RescueParty.isRebootPropertySet());
 
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
         noteBoot(5);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
@@ -276,6 +280,7 @@ public class RescuePartyTest {
         noteAppCrash(4, true);
         assertTrue(RescueParty.isRebootPropertySet());
 
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
         noteAppCrash(5, true);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
@@ -307,25 +312,27 @@ public class RescuePartyTest {
     @Test
     public void testNonPersistentAppCrashDetectionWithScopedResets() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE3);
+
         // Fake DeviceConfig value changes
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
+        monitorCallback.onNamespaceUpdate(NAMESPACE1);
         verify(mMockPackageWatchdog).startObservingHealth(observer,
                 Arrays.asList(CALLING_PACKAGE1), RescueParty.DEFAULT_OBSERVING_DURATION_MS);
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
+        monitorCallback.onNamespaceUpdate(NAMESPACE2);
         verify(mMockPackageWatchdog, times(2)).startObservingHealth(eq(observer),
                 mPackageListCaptor.capture(),
                 eq(RescueParty.DEFAULT_OBSERVING_DURATION_MS));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
+        monitorCallback.onNamespaceUpdate(NAMESPACE3);
         verify(mMockPackageWatchdog).startObservingHealth(observer,
                 Arrays.asList(CALLING_PACKAGE2), RescueParty.DEFAULT_OBSERVING_DURATION_MS);
         assertTrue(mPackageListCaptor.getValue().containsAll(
@@ -362,20 +369,21 @@ public class RescuePartyTest {
     @Test
     public void testNonDeviceConfigSettingsOnlyResetOncePerLevel() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE3);
         // Fake DeviceConfig value changes
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
+        monitorCallback.onNamespaceUpdate(NAMESPACE1);
+        monitorCallback.onNamespaceUpdate(NAMESPACE2);
+        monitorCallback.onNamespaceUpdate(NAMESPACE3);
         // Perform and verify scoped resets
         final String[] expectedPackage1ResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
         final String[] expectedPackage2ResetNamespaces = new String[]{NAMESPACE2, NAMESPACE3};
@@ -429,8 +437,76 @@ public class RescuePartyTest {
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
             noteBoot(i + 1);
         }
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        noteBoot(LEVEL_FACTORY_RESET + 1);
         assertTrue(RescueParty.isAttemptingFactoryReset());
         assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testIsAttemptingFactoryResetOnlyAfterRebootCompleted() {
+        for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i + 1);
+        }
+        int mitigationCount = LEVEL_FACTORY_RESET + 1;
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        noteBoot(mitigationCount + 1);
+        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testThrottlingOnBootFailures() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i);
+        }
+        assertFalse(RescueParty.isAttemptingFactoryReset());
+    }
+
+    @Test
+    public void testThrottlingOnAppCrash() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
+            noteAppCrash(i + 1, true);
+        }
+        assertFalse(RescueParty.isAttemptingFactoryReset());
+    }
+
+    @Test
+    public void testNotThrottlingAfterTimeoutOnBootFailures() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i);
+        }
+        assertTrue(RescueParty.isAttemptingFactoryReset());
+    }
+    @Test
+    public void testNotThrottlingAfterTimeoutOnAppCrash() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
+            noteAppCrash(i + 1, true);
+        }
+        assertTrue(RescueParty.isAttemptingFactoryReset());
     }
 
     @Test
@@ -491,55 +567,56 @@ public class RescuePartyTest {
 
         // Ensure that no action is taken for cases where the failure reason is unknown
         assertEquals(observer.onHealthCheckFailed(null, PackageWatchdog.FAILURE_REASON_UNKNOWN, 1),
-                PackageHealthObserverImpact.USER_IMPACT_NONE);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
 
         // Ensure the correct user impact is returned for each mitigation count.
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
-                PackageHealthObserverImpact.USER_IMPACT_LOW);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
 
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 2),
-                PackageHealthObserverImpact.USER_IMPACT_LOW);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
 
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 3),
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
 
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4),
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
     }
 
     @Test
     public void testBootLoopLevels() {
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
-        assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_NONE);
-        assertEquals(observer.onBootLoop(1), PackageHealthObserverImpact.USER_IMPACT_LOW);
-        assertEquals(observer.onBootLoop(2), PackageHealthObserverImpact.USER_IMPACT_LOW);
-        assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_HIGH);
-        assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_HIGH);
-        assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
+        assertEquals(observer.onBootLoop(1), PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
+        assertEquals(observer.onBootLoop(2), PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
+        assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
+        assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
+        assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
     }
 
     @Test
     public void testResetDeviceConfigForPackagesOnlyRuntimeMap() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE3);
         // Fake DeviceConfig value changes
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
+        monitorCallback.onNamespaceUpdate(NAMESPACE1);
+        monitorCallback.onNamespaceUpdate(NAMESPACE2);
+        monitorCallback.onNamespaceUpdate(NAMESPACE3);
 
         doReturn("").when(() -> DeviceConfig.getString(
                 eq(RescueParty.NAMESPACE_CONFIGURATION),
@@ -555,7 +632,8 @@ public class RescuePartyTest {
     @Test
     public void testResetDeviceConfigForPackagesOnlyPresetMap() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
 
         String presetMapping = NAMESPACE1 + ":" + CALLING_PACKAGE1 + ","
@@ -575,22 +653,23 @@ public class RescuePartyTest {
     @Test
     public void testResetDeviceConfigForPackagesBothMaps() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE3, NAMESPACE4));
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE2);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE3);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE3, NAMESPACE4);
         // Fake DeviceConfig value changes
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE4));
+        monitorCallback.onNamespaceUpdate(NAMESPACE1);
+        monitorCallback.onNamespaceUpdate(NAMESPACE2);
+        monitorCallback.onNamespaceUpdate(NAMESPACE3);
+        monitorCallback.onNamespaceUpdate(NAMESPACE4);
 
         String presetMapping = NAMESPACE1 + ":" + CALLING_PACKAGE1 + ","
                 + NAMESPACE2 + ":" + CALLING_PACKAGE2 + ","
@@ -610,20 +689,21 @@ public class RescuePartyTest {
     @Test
     public void testResetDeviceConfigNoExceptionWhenFlagMalformed() {
         RescueParty.onSettingsProviderPublished(mMockContext);
-        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
                 mMonitorCallbackCaptor.capture()));
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
-        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
-        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE3, NAMESPACE4));
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE2, NAMESPACE3);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE3, NAMESPACE4);
         // Fake DeviceConfig value changes
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
-        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE4));
+        monitorCallback.onNamespaceUpdate(NAMESPACE1);
+        monitorCallback.onNamespaceUpdate(NAMESPACE2);
+        monitorCallback.onNamespaceUpdate(NAMESPACE3);
+        monitorCallback.onNamespaceUpdate(NAMESPACE4);
 
         String invalidPresetMapping = NAMESPACE2 + ":" + CALLING_PACKAGE2 + ","
                 + NAMESPACE1 + "." + CALLING_PACKAGE2;
@@ -672,21 +752,5 @@ public class RescuePartyTest {
         String packageName = isPersistent ? PERSISTENT_PACKAGE : NON_PERSISTENT_PACKAGE;
         RescuePartyObserver.getInstance(mMockContext).execute(new VersionedPackage(
                 packageName, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH, mitigationCount);
-    }
-
-    private Bundle getConfigAccessBundle(String callingPackage, String namespace) {
-        Bundle result = new Bundle();
-        result.putString(Settings.EXTRA_MONITOR_CALLBACK_TYPE, Settings.EXTRA_ACCESS_CALLBACK);
-        result.putString(Settings.EXTRA_CALLING_PACKAGE, callingPackage);
-        result.putString(Settings.EXTRA_NAMESPACE, namespace);
-        return result;
-    }
-
-    private Bundle getConfigNamespaceUpdateBundle(String updatedNamespace) {
-        Bundle result = new Bundle();
-        result.putString(Settings.EXTRA_MONITOR_CALLBACK_TYPE,
-                Settings.EXTRA_NAMESPACE_UPDATED_CALLBACK);
-        result.putString(Settings.EXTRA_NAMESPACE, updatedNamespace);
-        return result;
     }
 }

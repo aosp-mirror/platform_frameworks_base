@@ -282,8 +282,9 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
-                if (Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
+                if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.BUGREPORT_IN_POWER_MENU, 0, mContext.getUserId()) != 0
+                        && isCurrentUserAdmin()) {
                     mItems.add(new BugReportAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
@@ -535,9 +536,9 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         }
     }
 
-    private boolean isCurrentUserOwner() {
+    private boolean isCurrentUserAdmin() {
         UserInfo currentUser = getCurrentUser();
-        return currentUser == null || currentUser.isPrimary();
+        return currentUser != null && currentUser.isAdmin();
     }
 
     private void addUsersToMenu(ArrayList<Action> items) {

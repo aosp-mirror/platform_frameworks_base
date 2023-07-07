@@ -106,6 +106,30 @@ public abstract class CredentialDataResult {
     public abstract @Nullable byte[] getDeviceMac();
 
     /**
+     * Returns a signature over the {@code DeviceAuthenticationBytes} CBOR
+     * specified in {@link #getDeviceNameSpaces()}, to prove to the reader that the data
+     * is from a trusted credential.
+     *
+     * <p>The signature is made using the authentication private key. See section 9.1.3.4 of
+     * ISO/IEC 18013-5:2021 for details of this operation.
+     *
+     * <p>If the session transcript or reader ephemeral key wasn't set on the {@link
+     * PresentationSession} used to obtain this data no signature will be produced and this method
+     * will return {@code null}.
+     *
+     * <p>This is only implemented in feature version 202301 or later. If not implemented, the call
+     * fails with {@link UnsupportedOperationException}. See
+     * {@link android.content.pm.PackageManager#FEATURE_IDENTITY_CREDENTIAL_HARDWARE} for known
+     * feature versions.
+     *
+     * @return A COSE_Sign1 structure as described above or {@code null} if the conditions
+     *     specified above are not met.
+     */
+    public @Nullable byte[] getDeviceSignature() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Returns the static authentication data associated with the dynamic authentication
      * key used to MAC the data returned by {@link #getDeviceNameSpaces()}.
      *

@@ -156,7 +156,7 @@
       Sample Font
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
-      SampleFont-Regular
+      c3em
     </namerecord>
     <namerecord nameID="13" platformID="3" platEncID="1" langID="0x409">
       Licensed under the Apache License, Version 2.0 (the "License");

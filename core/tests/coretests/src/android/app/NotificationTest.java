@@ -16,7 +16,6 @@
 
 package android.app;
 
-import static android.app.Notification.Builder.ensureColorSpanContrast;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_READ;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_REPLY;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_REMOTE_INPUT;
@@ -31,8 +30,11 @@ import static android.app.Notification.EXTRA_LARGE_ICON_BIG;
 import static android.app.Notification.EXTRA_MEDIA_REMOTE_INTENT;
 import static android.app.Notification.EXTRA_MEDIA_SESSION;
 import static android.app.Notification.EXTRA_MESSAGING_PERSON;
+import static android.app.Notification.EXTRA_PEOPLE_LIST;
 import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
+import static android.app.Notification.EXTRA_SUMMARY_TEXT;
+import static android.app.Notification.EXTRA_TITLE;
 import static android.app.Notification.MessagingStyle.Message.KEY_DATA_URI;
 import static android.app.Notification.MessagingStyle.Message.KEY_SENDER_PERSON;
 import static android.app.Notification.MessagingStyle.Message.KEY_TEXT;
@@ -48,6 +50,7 @@ import static com.android.internal.util.ContrastColorUtilTest.assertContrastIsWi
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertEquals;
@@ -56,29 +59,34 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
+import android.util.Pair;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
@@ -88,10 +96,13 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.internal.util.ContrastColorUtil;
 
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
@@ -103,6 +114,9 @@ public class NotificationTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
+        // TODO(b/169435530): remove this flag set once resolved.
+        SystemProperties.set("persist.sysui.notification.builder_extras_override",
+                Boolean.toString(false));
     }
 
     @Test
@@ -216,8 +230,10 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_recollectedAfterReusingBuilder() {
-        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
-        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent1 = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent intent2 = PendingIntent.getActivity(
+                mContext, 0, new Intent("test2"), PendingIntent.FLAG_IMMUTABLE);
 
         Notification.Builder builder = new Notification.Builder(mContext, "channel");
         builder.setContentIntent(intent1);
@@ -236,7 +252,9 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_containsCustomRemoteViews() {
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0,
+                new Intent("test").setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
 
         RemoteViews contentView = new RemoteViews(mContext.getPackageName(), 0 /* layoutId */);
         contentView.setOnClickPendingIntent(1 /* id */, intent);
@@ -422,93 +440,7 @@ public class NotificationTest {
         assertThat(Notification.Builder.getFullLengthSpanColor(text)).isEqualTo(expectedTextColor);
     }
 
-    @Test
-    public void testBuilder_ensureColorSpanContrast_removesAllFullLengthColorSpans() {
-        Spannable text = new SpannableString("blue text with yellow and green");
-        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
-                R.style.TextAppearance_DeviceDefault_Notification_Title);
-        assertThat(taSpan.getTextColor()).isNotNull();  // it must be set to prove it is cleared.
-        text.setSpan(taSpan, 0, text.length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        Spannable result = (Spannable) ensureColorSpanContrast(text, Color.BLACK);
-        Object[] spans = result.getSpans(0, result.length(), Object.class);
-        assertThat(spans).hasLength(3);
 
-        assertThat(result.getSpanStart(spans[0])).isEqualTo(15);
-        assertThat(result.getSpanEnd(spans[0])).isEqualTo(21);
-        assertThat(((ForegroundColorSpan) spans[0]).getForegroundColor()).isEqualTo(Color.YELLOW);
-
-        assertThat(result.getSpanStart(spans[1])).isEqualTo(0);
-        assertThat(result.getSpanEnd(spans[1])).isEqualTo(31);
-        assertThat(spans[1]).isNotSameInstanceAs(taSpan);  // don't mutate the existing span
-        assertThat(((TextAppearanceSpan) spans[1]).getFamily()).isEqualTo(taSpan.getFamily());
-        assertThat(((TextAppearanceSpan) spans[1]).getTextColor()).isNull();
-
-        assertThat(result.getSpanStart(spans[2])).isEqualTo(26);
-        assertThat(result.getSpanEnd(spans[2])).isEqualTo(31);
-        assertThat(((ForegroundColorSpan) spans[2]).getForegroundColor()).isEqualTo(Color.GREEN);
-    }
-
-    @Test
-    public void testBuilder_ensureColorSpanContrast_partialLength_adjusted() {
-        int background = 0xFFFF0101;  // Slightly lighter red
-        CharSequence text = new SpannableStringBuilder()
-                .append("text with ")
-                .append("some red", new ForegroundColorSpan(Color.RED),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        CharSequence result = ensureColorSpanContrast(text, background);
-
-        // ensure the span has been updated to have > 1.3:1 contrast ratio with fill color
-        Object[] spans = ((Spannable) result).getSpans(0, result.length(), Object.class);
-        assertThat(spans).hasLength(1);
-        int foregroundColor = ((ForegroundColorSpan) spans[0]).getForegroundColor();
-        assertContrastIsWithinRange(foregroundColor, background, 3, 3.2);
-    }
-
-    @Test
-    public void testBuilder_ensureColorSpanContrast_worksWithComplexInput() {
-        Spannable text = new SpannableString("blue text with yellow and green and cyan");
-        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        // cyan TextAppearanceSpan
-        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
-                R.style.TextAppearance_DeviceDefault_Notification_Title);
-        taSpan = new TextAppearanceSpan(taSpan.getFamily(), taSpan.getTextStyle(),
-                taSpan.getTextSize(), ColorStateList.valueOf(Color.CYAN), null);
-        text.setSpan(taSpan, 36, 40,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        Spannable result = (Spannable) ensureColorSpanContrast(text, Color.GRAY);
-        Object[] spans = result.getSpans(0, result.length(), Object.class);
-        assertThat(spans).hasLength(3);
-
-        assertThat(result.getSpanStart(spans[0])).isEqualTo(15);
-        assertThat(result.getSpanEnd(spans[0])).isEqualTo(21);
-        assertThat(((ForegroundColorSpan) spans[0]).getForegroundColor()).isEqualTo(Color.YELLOW);
-
-        assertThat(result.getSpanStart(spans[1])).isEqualTo(36);
-        assertThat(result.getSpanEnd(spans[1])).isEqualTo(40);
-        assertThat(spans[1]).isNotSameInstanceAs(taSpan);  // don't mutate the existing span
-        assertThat(((TextAppearanceSpan) spans[1]).getFamily()).isEqualTo(taSpan.getFamily());
-        ColorStateList newCyanList = ((TextAppearanceSpan) spans[1]).getTextColor();
-        assertThat(newCyanList).isNotNull();
-        assertContrastIsWithinRange(newCyanList.getDefaultColor(), Color.GRAY, 3, 3.2);
-
-        assertThat(result.getSpanStart(spans[2])).isEqualTo(26);
-        assertThat(result.getSpanEnd(spans[2])).isEqualTo(31);
-        int newGreen = ((ForegroundColorSpan) spans[2]).getForegroundColor();
-        assertThat(newGreen).isNotEqualTo(Color.GREEN);
-        assertContrastIsWithinRange(newGreen, Color.GRAY, 3, 3.2);
-    }
 
     @Test
     public void testBuilder_ensureButtonFillContrast_adjustsDarker() {
@@ -528,6 +460,108 @@ public class NotificationTest {
         assertContrastIsWithinRange(result, background, 1.3, 1.5);
         assertThat(ContrastColorUtil.calculateLuminance(result))
                 .isGreaterThan(ContrastColorUtil.calculateLuminance(background));
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forIncomingCall() {
+        PendingIntent answerIntent = createPendingIntent("answer");
+        PendingIntent declineIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forIncomingCall(
+                new Person.Builder().setName("A Caller").build(),
+                declineIntent,
+                answerIntent
+        );
+        style.setBuilder(new Notification.Builder(mContext, "Channel"));
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(2, actions.size());
+        assertEquals(declineIntent, actions.get(0).actionIntent);
+        assertEquals(answerIntent, actions.get(1).actionIntent);
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forOngoingCall() {
+        PendingIntent hangUpIntent = createPendingIntent("hangUp");
+        Notification.CallStyle style = Notification.CallStyle.forOngoingCall(
+                new Person.Builder().setName("A Caller").build(),
+                hangUpIntent
+        );
+        style.setBuilder(new Notification.Builder(mContext, "Channel"));
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(1, actions.size());
+        assertEquals(hangUpIntent, actions.get(0).actionIntent);
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forIncomingCallWithOtherActions() {
+        PendingIntent answerIntent = createPendingIntent("answer");
+        PendingIntent declineIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forIncomingCall(
+                new Person.Builder().setName("A Caller").build(),
+                declineIntent,
+                answerIntent
+        );
+        Notification.Action actionToKeep = makeNotificationAction(null);
+        Notification.Action actionToDrop = makeNotificationAction(null);
+        Notification.Builder notifBuilder = new Notification.Builder(mContext, "Channel")
+                .addAction(actionToKeep)
+                .addAction(actionToDrop); //expect to move this action to the end
+        style.setBuilder(notifBuilder); //add a builder with actions
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(4, actions.size());
+        assertEquals(declineIntent, actions.get(0).actionIntent);
+        assertEquals(actionToKeep, actions.get(1));
+        assertEquals(answerIntent, actions.get(2).actionIntent);
+        assertEquals(actionToDrop, actions.get(3));
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_forOngoingCallWithOtherActions() {
+        PendingIntent hangUpIntent = createPendingIntent("hangUp");
+        Notification.CallStyle style = Notification.CallStyle.forOngoingCall(
+                new Person.Builder().setName("A Caller").build(),
+                hangUpIntent
+        );
+        Notification.Action firstAction = makeNotificationAction(null);
+        Notification.Action secondAction = makeNotificationAction(null);
+        Notification.Builder notifBuilder = new Notification.Builder(mContext, "Channel")
+                .addAction(firstAction)
+                .addAction(secondAction);
+        style.setBuilder(notifBuilder); //add a builder with actions
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertEquals(3, actions.size());
+        assertEquals(hangUpIntent, actions.get(0).actionIntent);
+        assertEquals(firstAction, actions.get(1));
+        assertEquals(secondAction, actions.get(2));
+    }
+
+    @Test
+    public void testCallStyle_getSystemActions_dropsOldSystemActions() {
+        PendingIntent hangUpIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forOngoingCall(
+                new Person.Builder().setName("A Caller").build(),
+                hangUpIntent
+        );
+        Bundle actionExtras = new Bundle();
+        actionExtras.putBoolean("key_action_priority", true);
+        Notification.Action oldSystemAction = makeNotificationAction(
+                builder -> builder.addExtras(actionExtras)
+        );
+        Notification.Builder notifBuilder = new Notification.Builder(mContext, "Channel")
+                .addAction(oldSystemAction);
+        style.setBuilder(notifBuilder); //add a builder with actions
+
+        List<Notification.Action> actions = style.getActionsListWithSystemActions();
+
+        assertFalse("Old versions of system actions should be dropped.",
+                actions.contains(oldSystemAction));
     }
 
     @Test
@@ -565,30 +599,23 @@ public class NotificationTest {
         Notification notification = new Notification.Builder(mContext, "Channel").setStyle(
                 style).build();
 
+        int targetSize = mContext.getResources().getDimensionPixelSize(
+                ActivityManager.isLowRamDeviceStatic()
+                        ? R.dimen.notification_person_icon_max_size_low_ram
+                        : R.dimen.notification_person_icon_max_size);
+
         Bitmap personIcon = style.getUser().getIcon().getBitmap();
-        assertThat(personIcon.getWidth()).isEqualTo(
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_person_icon_max_size));
-        assertThat(personIcon.getHeight()).isEqualTo(
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_person_icon_max_size));
+        assertThat(personIcon.getWidth()).isEqualTo(targetSize);
+        assertThat(personIcon.getHeight()).isEqualTo(targetSize);
 
         Bitmap avatarIcon = style.getMessages().get(0).getSenderPerson().getIcon().getBitmap();
-        assertThat(avatarIcon.getWidth()).isEqualTo(
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_person_icon_max_size));
-        assertThat(avatarIcon.getHeight()).isEqualTo(
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_person_icon_max_size));
+        assertThat(avatarIcon.getWidth()).isEqualTo(targetSize);
+        assertThat(avatarIcon.getHeight()).isEqualTo(targetSize);
 
         Bitmap historicAvatarIcon = style.getHistoricMessages().get(
                 0).getSenderPerson().getIcon().getBitmap();
-        assertThat(historicAvatarIcon.getWidth()).isEqualTo(
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_person_icon_max_size));
-        assertThat(historicAvatarIcon.getHeight()).isEqualTo(
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_person_icon_max_size));
+        assertThat(historicAvatarIcon.getWidth()).isEqualTo(targetSize);
+        assertThat(historicAvatarIcon.getHeight()).isEqualTo(targetSize);
     }
 
     @Test
@@ -676,7 +703,6 @@ public class NotificationTest {
         assertFalse(notification.isMediaNotification());
     }
 
-    @Test
     public void validateColorizedPaletteForColor(int rawColor) {
         Notification.Colors cDay = new Notification.Colors();
         Notification.Colors cNight = new Notification.Colors();
@@ -706,6 +732,23 @@ public class NotificationTest {
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
         }
+    }
+
+    @Test
+    public void testRecoverBuilder_nullExtraPeopleList_noCrash() {
+        Bundle extras = new Bundle();
+        extras.putParcelable(EXTRA_PEOPLE_LIST, null);
+
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .addExtras(extras)
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, new Bundle());
+
+        Notification.Builder.recoverBuilder(mContext, n);
+
+        // no crash, good
     }
 
     @Test
@@ -757,19 +800,22 @@ public class NotificationTest {
         Bundle fakeTypes = new Bundle();
         fakeTypes.putParcelable(EXTRA_LARGE_ICON_BIG, new Bundle());
 
-        style.restoreFromExtras(fakeTypes);
 
         // no crash, good
     }
 
     @Test
     public void testRestoreFromExtras_Messaging_invalidExtra_noCrash() {
-        Notification.Style style = new Notification.MessagingStyle();
+        Notification.Style style = new Notification.MessagingStyle("test");
         Bundle fakeTypes = new Bundle();
         fakeTypes.putParcelable(EXTRA_MESSAGING_PERSON, new Bundle());
         fakeTypes.putParcelable(EXTRA_CONVERSATION_ICON, new Bundle());
 
-        style.restoreFromExtras(fakeTypes);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setStyle(style)
+                .setExtras(fakeTypes)
+                .build();
+        Notification.Builder.recoverBuilder(mContext, n);
 
         // no crash, good
     }
@@ -781,22 +827,33 @@ public class NotificationTest {
         fakeTypes.putParcelable(EXTRA_MEDIA_SESSION, new Bundle());
         fakeTypes.putParcelable(EXTRA_MEDIA_REMOTE_INTENT, new Bundle());
 
-        style.restoreFromExtras(fakeTypes);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setStyle(style)
+                .setExtras(fakeTypes)
+                .build();
+        Notification.Builder.recoverBuilder(mContext, n);
 
         // no crash, good
     }
 
     @Test
     public void testRestoreFromExtras_Call_invalidExtra_noCrash() {
-        Notification.Style style = new Notification.CallStyle();
+        PendingIntent intent1 = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);
+        Notification.Style style = Notification.CallStyle.forIncomingCall(
+                new Person.Builder().setName("hi").build(), intent1, intent1);
+
         Bundle fakeTypes = new Bundle();
         fakeTypes.putParcelable(EXTRA_CALL_PERSON, new Bundle());
         fakeTypes.putParcelable(EXTRA_ANSWER_INTENT, new Bundle());
         fakeTypes.putParcelable(EXTRA_DECLINE_INTENT, new Bundle());
         fakeTypes.putParcelable(EXTRA_HANG_UP_INTENT, new Bundle());
 
-        style.restoreFromExtras(fakeTypes);
-
+        Notification n = new Notification.Builder(mContext, "test")
+                .setStyle(style)
+                .setExtras(fakeTypes)
+                .build();
+        Notification.Builder.recoverBuilder(mContext, n);
         // no crash, good
     }
 
@@ -858,7 +915,11 @@ public class NotificationTest {
         fakeTypes.putParcelable(KEY_ON_READ, new Bundle());
         fakeTypes.putParcelable(KEY_ON_REPLY, new Bundle());
         fakeTypes.putParcelable(KEY_REMOTE_INPUT, new Bundle());
-        Notification.CarExtender.UnreadConversation.getUnreadConversationFromBundle(fakeTypes);
+
+        Notification n = new Notification.Builder(mContext, "test")
+                .setExtras(fakeTypes)
+                .build();
+        Notification.CarExtender extender = new Notification.CarExtender(n);
 
         // no crash, good
     }
@@ -874,6 +935,657 @@ public class NotificationTest {
         Notification.MessagingStyle.Message.getMessageFromBundle(fakeTypes);
 
         // no crash, good
+    }
+
+
+    @Test
+    public void testDoesNotStripsExtenders() {
+        Notification.Builder nb = new Notification.Builder(mContext, "channel");
+        nb.extend(new Notification.CarExtender().setColor(Color.RED));
+        nb.extend(new Notification.TvExtender().setChannelId("different channel"));
+        nb.extend(new Notification.WearableExtender().setDismissalId("dismiss"));
+        Notification before = nb.build();
+        Notification after = Notification.Builder.maybeCloneStrippedForDelivery(before);
+
+        assertTrue(before == after);
+
+        Assert.assertEquals("different channel",
+                new Notification.TvExtender(before).getChannelId());
+        Assert.assertEquals(Color.RED, new Notification.CarExtender(before).getColor());
+        Assert.assertEquals("dismiss", new Notification.WearableExtender(before).getDismissalId());
+    }
+
+    @Test
+    public void areIconsDifferent_sameSmallIcon_false() {
+        Notification n1 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+        Notification n2 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isFalse();
+    }
+
+    @Test
+    public void areIconsDifferent_differentSmallIcon_true() {
+        Notification n1 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+        Notification n2 = new Notification.Builder(mContext, "test").setSmallIcon(2).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void areIconsDifferent_sameLargeIcon_false() {
+        Icon icon1 = Icon.createWithContentUri("uri");
+        Icon icon2 = Icon.createWithContentUri("uri");
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon1).build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon2).build();
+
+        // Note that this will almost certainly not happen for Icons created from Bitmaps, since
+        // their serialization/deserialization of Bitmaps (app -> system_process) results in a
+        // different getGenerationId() value. :(
+        assertThat(Notification.areIconsDifferent(n1, n2)).isFalse();
+    }
+
+    @Test
+    public void areIconsDifferent_differentLargeIcon_true() {
+        Icon icon1 = Icon.createWithContentUri("uri1");
+        Icon icon2 = Icon.createWithContentUri("uri2");
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon1).build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(2).setLargeIcon(icon2).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void areIconsDifferent_addedLargeIcon_true() {
+        Icon icon = Icon.createWithContentUri("uri");
+        Notification n1 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(2).setLargeIcon(icon).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void areIconsDifferent_removedLargeIcon_true() {
+        Icon icon = Icon.createWithContentUri("uri");
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon).build();
+        Notification n2 = new Notification.Builder(mContext, "test").setSmallIcon(2).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void testStyleChangeVisiblyDifferent_noStyles() {
+        Notification.Builder n1 = new Notification.Builder(mContext, "test");
+        Notification.Builder n2 = new Notification.Builder(mContext, "test");
+
+        assertFalse(Notification.areStyledNotificationsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testStyleChangeVisiblyDifferent_noStyleToStyle() {
+        Notification.Builder n1 = new Notification.Builder(mContext, "test");
+        Notification.Builder n2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigTextStyle());
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testStyleChangeVisiblyDifferent_styleToNoStyle() {
+        Notification.Builder n2 = new Notification.Builder(mContext, "test");
+        Notification.Builder n1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigTextStyle());
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testStyleChangeVisiblyDifferent_changeStyle() {
+        Notification.Builder n1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.InboxStyle());
+        Notification.Builder n2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigTextStyle());
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testInboxTextChange() {
+        Notification.Builder nInbox1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.InboxStyle().addLine("a").addLine("b"));
+        Notification.Builder nInbox2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.InboxStyle().addLine("b").addLine("c"));
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nInbox1, nInbox2));
+    }
+
+    @Test
+    public void testBigTextTextChange() {
+        Notification.Builder nBigText1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigTextStyle().bigText("something"));
+        Notification.Builder nBigText2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigTextStyle().bigText("else"));
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nBigText1, nBigText2));
+    }
+
+    @Test
+    public void testBigPictureChange() {
+        Bitmap bitA = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        Bitmap bitB = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+
+        Notification.Builder nBigPic1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigPictureStyle().bigPicture(bitA));
+        Notification.Builder nBigPic2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigPictureStyle().bigPicture(bitB));
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nBigPic1, nBigPic2));
+    }
+
+    @Test
+    public void testMessagingChange_text() {
+        Notification.Builder nM1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "a", 100, new Person.Builder().setName("hi").build())));
+        Notification.Builder nM2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "a", 100, new Person.Builder().setName("hi").build()))
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "b", 100, new Person.Builder().setName("hi").build()))
+                );
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
+    }
+
+    @Test
+    public void testMessagingChange_data() {
+        Notification.Builder nM1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "a", 100, new Person.Builder().setName("hi").build())
+                                .setData("text", mock(Uri.class))));
+        Notification.Builder nM2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "a", 100, new Person.Builder().setName("hi").build())));
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
+    }
+
+    @Test
+    public void testMessagingChange_sender() {
+        Person a = new Person.Builder().setName("A").build();
+        Person b = new Person.Builder().setName("b").build();
+        Notification.Builder nM1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message("a", 100, b)));
+        Notification.Builder nM2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message("a", 100, a)));
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
+    }
+
+    @Test
+    public void testMessagingChange_key() {
+        Person a = new Person.Builder().setName("hi").setKey("A").build();
+        Person b = new Person.Builder().setName("hi").setKey("b").build();
+        Notification.Builder nM1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message("a", 100, a)));
+        Notification.Builder nM2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message("a", 100, b)));
+
+        assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
+    }
+
+    @Test
+    public void testMessagingChange_ignoreTimeChange() {
+        Notification.Builder nM1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "a", 100, new Person.Builder().setName("hi").build())));
+        Notification.Builder nM2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                "a", 1000, new Person.Builder().setName("hi").build()))
+                );
+
+        assertFalse(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
+    }
+
+    @Test
+    public void testRemoteViews_nullChange() {
+        Notification.Builder n1 = new Notification.Builder(mContext, "test")
+                .setContent(mock(RemoteViews.class));
+        Notification.Builder n2 = new Notification.Builder(mContext, "test");
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test");
+        n2 = new Notification.Builder(mContext, "test")
+                .setContent(mock(RemoteViews.class));
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test")
+                .setCustomBigContentView(mock(RemoteViews.class));
+        n2 = new Notification.Builder(mContext, "test");
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test");
+        n2 = new Notification.Builder(mContext, "test")
+                .setCustomBigContentView(mock(RemoteViews.class));
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test");
+        n2 = new Notification.Builder(mContext, "test");
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_layoutChange() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(189);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_layoutSame() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(234);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_sequenceChange() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        when(a.getSequenceNumber()).thenReturn(1);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(234);
+        when(b.getSequenceNumber()).thenReturn(2);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertTrue(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testRemoteViews_sequenceSame() {
+        RemoteViews a = mock(RemoteViews.class);
+        when(a.getLayoutId()).thenReturn(234);
+        when(a.getSequenceNumber()).thenReturn(1);
+        RemoteViews b = mock(RemoteViews.class);
+        when(b.getLayoutId()).thenReturn(234);
+        when(b.getSequenceNumber()).thenReturn(1);
+
+        Notification.Builder n1 = new Notification.Builder(mContext, "test").setContent(a);
+        Notification.Builder n2 = new Notification.Builder(mContext, "test").setContent(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomBigContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomBigContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+
+        n1 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(a);
+        n2 = new Notification.Builder(mContext, "test").setCustomHeadsUpContentView(b);
+        assertFalse(Notification.areRemoteViewsChanged(n1, n2));
+    }
+
+    @Test
+    public void testActionsDifferent_null() {
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .build();
+
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testActionsDifferentSame() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent).build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent).build())
+                .build();
+
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testActionsDifferentText() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent).build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 2", intent).build())
+                .build();
+
+        assertTrue(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testActionsDifferentSpannables() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon,
+                        new SpannableStringBuilder().append("test1",
+                                new StyleSpan(Typeface.BOLD),
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE),
+                        intent).build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "test1", intent).build())
+                .build();
+
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testActionsDifferentNumber() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent).build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent).build())
+                .addAction(new Notification.Action.Builder(icon, "TEXT 2", intent).build())
+                .build();
+
+        assertTrue(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testActionsDifferentIntent() {
+        PendingIntent intent1 = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent intent2 = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent1).build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent2).build())
+                .build();
+
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testActionsIgnoresRemoteInputs() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent)
+                        .addRemoteInput(new RemoteInput.Builder("a")
+                                .setChoices(new CharSequence[] {"i", "m"})
+                                .build())
+                        .build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent)
+                        .addRemoteInput(new RemoteInput.Builder("a")
+                                .setChoices(new CharSequence[] {"t", "m"})
+                                .build())
+                        .build())
+                .build();
+
+        assertFalse(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
+    public void testFreeformRemoteInputActionPair_noRemoteInput() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent)
+                        .build())
+                .build();
+        Assert.assertNull(notification.findRemoteInputActionPair(false));
+    }
+
+    @Test
+    public void testFreeformRemoteInputActionPair_hasRemoteInput() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        RemoteInput remoteInput = new RemoteInput.Builder("a").build();
+
+        Notification.Action actionWithRemoteInput =
+                new Notification.Action.Builder(icon, "TEXT 1", intent)
+                        .addRemoteInput(remoteInput)
+                        .addRemoteInput(remoteInput)
+                        .build();
+
+        Notification.Action actionWithoutRemoteInput =
+                new Notification.Action.Builder(icon, "TEXT 2", intent)
+                        .build();
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addAction(actionWithoutRemoteInput)
+                .addAction(actionWithRemoteInput)
+                .build();
+
+        Pair<RemoteInput, Notification.Action> remoteInputActionPair =
+                notification.findRemoteInputActionPair(false);
+
+        assertNotNull(remoteInputActionPair);
+        Assert.assertEquals(remoteInput, remoteInputActionPair.first);
+        Assert.assertEquals(actionWithRemoteInput, remoteInputActionPair.second);
+    }
+
+    @Test
+    public void testFreeformRemoteInputActionPair_requestFreeform_noFreeformRemoteInput() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent)
+                        .addRemoteInput(
+                                new RemoteInput.Builder("a")
+                                        .setAllowFreeFormInput(false).build())
+                        .build())
+                .build();
+        Assert.assertNull(notification.findRemoteInputActionPair(true));
+    }
+
+    @Test
+    public void testFreeformRemoteInputActionPair_requestFreeform_hasFreeformRemoteInput() {
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, 0, new Intent("test1"), PendingIntent.FLAG_IMMUTABLE);;
+        Icon icon = Icon.createWithBitmap(Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        RemoteInput remoteInput =
+                new RemoteInput.Builder("a").setAllowFreeFormInput(false).build();
+        RemoteInput freeformRemoteInput =
+                new RemoteInput.Builder("b").setAllowFreeFormInput(true).build();
+
+        Notification.Action actionWithFreeformRemoteInput =
+                new Notification.Action.Builder(icon, "TEXT 1", intent)
+                        .addRemoteInput(remoteInput)
+                        .addRemoteInput(freeformRemoteInput)
+                        .build();
+
+        Notification.Action actionWithoutFreeformRemoteInput =
+                new Notification.Action.Builder(icon, "TEXT 2", intent)
+                        .addRemoteInput(remoteInput)
+                        .build();
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addAction(actionWithoutFreeformRemoteInput)
+                .addAction(actionWithFreeformRemoteInput)
+                .build();
+
+        Pair<RemoteInput, Notification.Action> remoteInputActionPair =
+                notification.findRemoteInputActionPair(true);
+
+        assertNotNull(remoteInputActionPair);
+        Assert.assertEquals(freeformRemoteInput, remoteInputActionPair.first);
+        Assert.assertEquals(actionWithFreeformRemoteInput, remoteInputActionPair.second);
+    }
+
+    // Ensures that extras in a Notification Builder can be updated.
+    @Test
+    public void testExtras_cachedExtrasOverwrittenByUserProvided() {
+        // Sets the flag to new state.
+        // TODO(b/169435530): remove this set value once resolved.
+        SystemProperties.set("persist.sysui.notification.builder_extras_override",
+                Boolean.toString(true));
+        Bundle extras = new Bundle();
+        extras.putCharSequence(EXTRA_TITLE, "test title");
+        extras.putCharSequence(EXTRA_SUMMARY_TEXT, "summary text");
+
+        Notification.Builder builder = new Notification.Builder(mContext, "test id")
+                .addExtras(extras);
+
+        Notification notification = builder.build();
+        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
+                "test title");
+        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
+                "summary text");
+
+        extras.putCharSequence(EXTRA_TITLE, "new title");
+        builder.addExtras(extras);
+        notification = builder.build();
+        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
+                "new title");
+        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
+                "summary text");
+    }
+
+    // Ensures that extras in a Notification Builder can be updated by an extender.
+    @Test
+    public void testExtras_cachedExtrasOverwrittenByExtender() {
+        // Sets the flag to new state.
+        // TODO(b/169435530): remove this set value once resolved.
+        SystemProperties.set("persist.sysui.notification.builder_extras_override",
+                Boolean.toString(true));
+        Notification.CarExtender extender = new Notification.CarExtender().setColor(1234);
+
+        Notification notification = new Notification.Builder(mContext, "test id")
+                .extend(extender).build();
+
+        extender.setColor(5678);
+
+        Notification.Builder.recoverBuilder(mContext, notification).extend(extender).build();
+
+        Notification.CarExtender recoveredExtender = new Notification.CarExtender(notification);
+        assertThat(recoveredExtender.getColor()).isEqualTo(5678);
+    }
+
+    // Validates pre-flag flip behavior, that extras in a Notification Builder cannot be updated.
+    // TODO(b/169435530): remove this test once resolved.
+    @Test
+    public void testExtras_cachedExtrasOverwrittenByUserProvidedOld() {
+        // Sets the flag to old state.
+        SystemProperties.set("persist.sysui.notification.builder_extras_override",
+                Boolean.toString(false));
+
+        Bundle extras = new Bundle();
+        extras.putCharSequence(EXTRA_TITLE, "test title");
+        extras.putCharSequence(EXTRA_SUMMARY_TEXT, "summary text");
+
+        Notification.Builder builder = new Notification.Builder(mContext, "test id")
+                .addExtras(extras);
+
+        Notification notification = builder.build();
+        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
+                "test title");
+        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
+                "summary text");
+
+        extras.putCharSequence(EXTRA_TITLE, "new title");
+        builder.addExtras(extras);
+        notification = builder.build();
+        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
+                "test title");
+        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
+                "summary text");
+    }
+
+    // Validates pre-flag flip behavior, that extras in a Notification Builder cannot be updated
+    // by an extender.
+    // TODO(b/169435530): remove this test once resolved.
+    @Test
+    public void testExtras_cachedExtrasOverwrittenByExtenderOld() {
+        // Sets the flag to old state.
+        SystemProperties.set("persist.sysui.notification.builder_extras_override",
+                Boolean.toString(false));
+
+        Notification.CarExtender extender = new Notification.CarExtender().setColor(1234);
+
+        Notification notification = new Notification.Builder(mContext, "test id")
+                .extend(extender).build();
+
+        extender.setColor(5678);
+
+        Notification.Builder.recoverBuilder(mContext, notification).extend(extender).build();
+
+        Notification.CarExtender recoveredExtender = new Notification.CarExtender(notification);
+        assertThat(recoveredExtender.getColor()).isEqualTo(1234);
     }
 
     private void assertValid(Notification.Colors c) {
@@ -961,5 +1673,14 @@ public class NotificationTest {
             transformation.accept(actionBuilder);
         }
         return actionBuilder.build();
+    }
+
+    /**
+     * Creates a PendingIntent with the given action.
+     */
+    private PendingIntent createPendingIntent(String action) {
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent(action).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
     }
 }

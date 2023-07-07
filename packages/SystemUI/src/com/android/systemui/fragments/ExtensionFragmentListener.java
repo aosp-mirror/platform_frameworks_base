@@ -37,9 +37,14 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
     private final int mId;
     private String mOldClass;
 
-    private ExtensionFragmentListener(View view, String tag, int id, Extension<T> extension) {
+    private ExtensionFragmentListener(
+            FragmentService fragmentService,
+            View view,
+            String tag,
+            int id,
+            Extension<T> extension) {
         mTag = tag;
-        mFragmentHostManager = FragmentHostManager.get(view);
+        mFragmentHostManager = fragmentService.getFragmentHostManager(view);
         mExtension = extension;
         mId = id;
         mFragmentHostManager.getFragmentManager().beginTransaction()
@@ -50,19 +55,23 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
 
     @Override
     public void accept(T extension) {
-        try {
-            Fragment.class.cast(extension);
+        if (Fragment.class.isInstance(extension)) {
             mFragmentHostManager.getExtensionManager().setCurrentExtension(mId, mTag,
                     mOldClass, extension.getClass().getName(), mExtension.getContext());
             mOldClass = extension.getClass().getName();
-        } catch (ClassCastException e) {
-            Log.e(TAG, extension.getClass().getName() + " must be a Fragment", e);
+        } else {
+            Log.e(TAG, extension.getClass().getName() + " must be a Fragment");
         }
         mExtension.clearItem(true);
     }
 
-    public static <T> void attachExtensonToFragment(View view, String tag, int id,
+    public static <T> void attachExtensonToFragment(
+            FragmentService fragmentService,
+            View view,
+            String tag,
+            int id,
             Extension<T> extension) {
-        extension.addCallback(new ExtensionFragmentListener(view, tag, id, extension));
+        extension.addCallback(
+                new ExtensionFragmentListener(fragmentService, view, tag, id, extension));
     }
 }

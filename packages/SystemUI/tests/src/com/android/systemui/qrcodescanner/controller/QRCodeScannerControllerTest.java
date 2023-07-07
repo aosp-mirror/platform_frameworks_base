@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -133,7 +132,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails(null);
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isFalse();
+        assertThat(mController.isAbleToOpenCameraApp()).isFalse();
     }
 
     @Test
@@ -152,7 +151,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
     }
 
     @Test
@@ -162,7 +161,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
     }
 
     @Test
@@ -172,7 +171,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
     }
 
     @Test
@@ -182,7 +181,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/abc.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
     }
 
     @Test
@@ -192,7 +191,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails(null);
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isFalse();
+        assertThat(mController.isAbleToOpenCameraApp()).isFalse();
     }
 
     @Test
@@ -202,21 +201,21 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         mProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER,
                 "def/.ijk", false);
         verifyActivityDetails("def/.ijk");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         mProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER,
                 null, false);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         // Once from setup + twice from this function
         verify(mCallback, times(3)).onQRCodeScannerActivityChanged();
@@ -229,7 +228,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails(null);
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isFalse();
+        assertThat(mController.isAbleToOpenCameraApp()).isFalse();
 
         mProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER,
@@ -237,14 +236,14 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
 
         verifyActivityDetails("def/.ijk");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         mProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER,
                 null, false);
         verifyActivityDetails(null);
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isFalse();
+        assertThat(mController.isAbleToOpenCameraApp()).isFalse();
         verify(mCallback, times(2)).onQRCodeScannerActivityChanged();
     }
 
@@ -296,19 +295,19 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         mSecureSettings.putStringForUser(LOCK_SCREEN_SHOW_QR_CODE_SCANNER, "0",
                 UserHandle.USER_CURRENT);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         mSecureSettings.putStringForUser(LOCK_SCREEN_SHOW_QR_CODE_SCANNER, "1",
                 UserHandle.USER_CURRENT);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
         // Once from setup + twice from this function
         verify(mCallback, times(3)).onQRCodeScannerPreferenceChanged();
     }
@@ -320,13 +319,13 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ true);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
 
         mController.unregisterQRCodeScannerChangeObservers(DEFAULT_QR_CODE_SCANNER_CHANGE,
                 QR_CODE_SCANNER_PREFERENCE_CHANGE);
         verifyActivityDetails(null);
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isFalse();
+        assertThat(mController.isAbleToOpenCameraApp()).isFalse();
 
         // Unregister once again and make sure it affects the next register event
         mController.unregisterQRCodeScannerChangeObservers(DEFAULT_QR_CODE_SCANNER_CHANGE,
@@ -335,7 +334,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 QR_CODE_SCANNER_PREFERENCE_CHANGE);
         verifyActivityDetails("abc/.def");
         assertThat(mController.isEnabledForLockScreenButton()).isTrue();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
     }
 
     @Test
@@ -345,7 +344,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
                 /* enableOnLockScreen */ false);
         assertThat(mController.getIntent()).isNotNull();
         assertThat(mController.isEnabledForLockScreenButton()).isFalse();
-        assertThat(mController.isEnabledForQuickSettings()).isTrue();
+        assertThat(mController.isAbleToOpenCameraApp()).isTrue();
         assertThat(getSettingsQRCodeDefaultComponent()).isNull();
     }
 }

@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -107,6 +108,7 @@ public final class RemoteFloatingToolbarPopup implements FloatingToolbarPopup {
     private int mSuggestedWidth;
     private final Rect mScreenViewPort = new Rect();
     private boolean mWidthChanged = true;
+    private final boolean mIsLightTheme;
 
     private final int[] mCoordsOnScreen = new int[2];
     private final int[] mCoordsOnWindow = new int[2];
@@ -116,7 +118,15 @@ public final class RemoteFloatingToolbarPopup implements FloatingToolbarPopup {
         mPopupWindow = createPopupWindow(context);
         mSelectionToolbarManager = context.getSystemService(SelectionToolbarManager.class);
         mSelectionToolbarCallback = new SelectionToolbarCallbackImpl(this);
+        mIsLightTheme = isLightTheme(context);
         mFloatingToolbarToken = NO_TOOLBAR_ID;
+    }
+
+    private boolean isLightTheme(Context context) {
+        TypedArray a = context.obtainStyledAttributes(new int[]{R.attr.isLightTheme});
+        boolean isLightTheme = a.getBoolean(0, true);
+        a.recycle();
+        return isLightTheme;
     }
 
     @UiThread
@@ -155,7 +165,7 @@ public final class RemoteFloatingToolbarPopup implements FloatingToolbarPopup {
                 contentRect,
                 suggestWidth,
                 mScreenViewPort,
-                mParent.getViewRootImpl().getInputToken());
+                mParent.getViewRootImpl().getInputToken(), mIsLightTheme);
         if (DEBUG) {
             Log.v(FloatingToolbar.FLOATING_TOOLBAR_TAG,
                     "RemoteFloatingToolbarPopup.show() for " + showInfo);

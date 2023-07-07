@@ -45,6 +45,30 @@ import java.util.List;
 public abstract class ViewStructure {
 
     /**
+     * Key used for writing active child view information to the content capture bundle.
+     *
+     * The value stored under this key will be an ordered list of Autofill IDs of child views.
+     *
+     * TODO(b/241498401): Add @TestApi in Android U
+     * @hide
+     */
+    public static final String EXTRA_ACTIVE_CHILDREN_IDS =
+            "android.view.ViewStructure.extra.ACTIVE_CHILDREN_IDS";
+
+    /**
+     * Key used for writing the first active child's position to the content capture bundle.
+     *
+     * When active child view information is provided under the
+     * {@link #EXTRA_ACTIVE_CHILDREN_IDS}, the value stored under this key will be the
+     * 0-based position of the first child view in the list relative to the positions of child views
+     * in the containing View's dataset.
+     *
+     * TODO(b/241498401): Add @TestApi in Android U
+     * @hide */
+    public static final String EXTRA_FIRST_ACTIVE_POSITION =
+            "android.view.ViewStructure.extra.FIRST_ACTIVE_POSITION";
+
+    /**
      * Set the identifier for this view.
      *
      * @param id The view's identifier, as per {@link View#getId View.getId()}.

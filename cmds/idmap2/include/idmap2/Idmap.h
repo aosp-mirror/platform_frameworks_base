@@ -21,42 +21,51 @@
  * header                     := magic version target_crc overlay_crc fulfilled_policies
  *                               enforce_overlayable target_path overlay_path overlay_name
  *                               debug_info
- * data                       := data_header target_entry* target_inline_entry* overlay_entry*
- *                               string_pool
- * data_header                := target_entry_count target_inline_entry_count overlay_entry_count
+ * data                       := data_header target_entry* target_inline_entry*
+                                 target_inline_entry_value* config* overlay_entry* string_pool
+ * data_header                := target_entry_count target_inline_entry_count
+                                 target_inline_entry_value_count config_count overlay_entry_count
  *                               string_pool_index
  * target_entry               := target_id overlay_id
- * target_inline_entry        := target_id Res_value::size padding(1) Res_value::type
+ * target_inline_entry        := target_id start_value_index value_count
+ * target_inline_entry_value  := config_index Res_value::size padding(1) Res_value::type
+ *                               Res_value::value
+ * config                     := target_id Res_value::size padding(1) Res_value::type
  *                               Res_value::value
  * overlay_entry              := overlay_id target_id
  *
- * debug_info                 := string
- * enforce_overlayable        := <uint32_t>
- * fulfilled_policies         := <uint32_t>
- * magic                      := <uint32_t>
- * overlay_crc                := <uint32_t>
- * overlay_entry_count        := <uint32_t>
- * overlay_id                 := <uint32_t>
- * overlay_package_id         := <uint8_t>
- * overlay_name               := string
- * overlay_path               := string
- * padding(n)                 := <uint8_t>[n]
- * Res_value::size            := <uint16_t>
- * Res_value::type            := <uint8_t>
- * Res_value::value           := <uint32_t>
- * string                     := <uint32_t> <uint8_t>+ padding(n)
- * string_pool                := string
- * string_pool_index          := <uint32_t>
- * string_pool_length         := <uint32_t>
- * target_crc                 := <uint32_t>
- * target_entry_count         := <uint32_t>
- * target_inline_entry_count  := <uint32_t>
- * target_id                  := <uint32_t>
- * target_package_id          := <uint8_t>
- * target_path                := string
- * value_type                 := <uint8_t>
- * value_data                 := <uint32_t>
- * version                    := <uint32_t>
+ * debug_info                       := string
+ * enforce_overlayable              := <uint32_t>
+ * fulfilled_policies               := <uint32_t>
+ * magic                            := <uint32_t>
+ * overlay_crc                      := <uint32_t>
+ * overlay_entry_count              := <uint32_t>
+ * overlay_id                       := <uint32_t>
+ * overlay_package_id               := <uint8_t>
+ * overlay_name                     := string
+ * overlay_path                     := string
+ * padding(n)                       := <uint8_t>[n]
+ * Res_value::size                  := <uint16_t>
+ * Res_value::type                  := <uint8_t>
+ * Res_value::value                 := <uint32_t>
+ * string                           := <uint32_t> <uint8_t>+ padding(n)
+ * string_pool                      := string
+ * string_pool_index                := <uint32_t>
+ * string_pool_length               := <uint32_t>
+ * target_crc                       := <uint32_t>
+ * target_entry_count               := <uint32_t>
+ * target_inline_entry_count        := <uint32_t>
+ * target_inline_entry_value_count  := <uint32_t>
+ * config_count                     := <uint32_t>
+ * config_index                     := <uint32_t>
+ * start_value_index                := <uint32_t>
+ * value_count                      := <uint32_t>
+ * target_id                        := <uint32_t>
+ * target_package_id                := <uint8_t>
+ * target_path                      := string
+ * value_type                       := <uint8_t>
+ * value_data                       := <uint32_t>
+ * version                          := <uint32_t>
  */
 
 #ifndef IDMAP2_INCLUDE_IDMAP2_IDMAP_H_
@@ -70,6 +79,7 @@
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
+#include "androidfw/ConfigDescription.h"
 #include "idmap2/ResourceContainer.h"
 #include "idmap2/ResourceMapping.h"
 
@@ -165,19 +175,27 @@ class IdmapData {
    public:
     static std::unique_ptr<const Header> FromBinaryStream(std::istream& stream);
 
-    inline uint32_t GetTargetEntryCount() const {
+    [[nodiscard]] inline uint32_t GetTargetEntryCount() const {
       return target_entry_count;
     }
 
-    inline uint32_t GetTargetInlineEntryCount() const {
+    [[nodiscard]] inline uint32_t GetTargetInlineEntryCount() const {
       return target_entry_inline_count;
     }
 
-    inline uint32_t GetOverlayEntryCount() const {
+    [[nodiscard]] inline uint32_t GetTargetInlineEntryValueCount() const {
+      return target_entry_inline_value_count;
+    }
+
+    [[nodiscard]] inline uint32_t GetConfigCount() const {
+      return config_count;
+    }
+
+    [[nodiscard]] inline uint32_t GetOverlayEntryCount() const {
       return overlay_entry_count;
     }
 
-    inline uint32_t GetStringPoolIndexOffset() const {
+    [[nodiscard]] inline uint32_t GetStringPoolIndexOffset() const {
       return string_pool_index_offset;
     }
 
@@ -186,6 +204,8 @@ class IdmapData {
    private:
     uint32_t target_entry_count;
     uint32_t target_entry_inline_count;
+    uint32_t target_entry_inline_value_count;
+    uint32_t config_count;
     uint32_t overlay_entry_count;
     uint32_t string_pool_index_offset;
     Header() = default;
@@ -202,7 +222,7 @@ class IdmapData {
 
   struct TargetInlineEntry {
     ResourceId target_id;
-    TargetValue value;
+    std::map<ConfigDescription, TargetValue> values;
   };
 
   struct OverlayEntry {
@@ -227,11 +247,11 @@ class IdmapData {
     return target_inline_entries_;
   }
 
-  const std::vector<OverlayEntry>& GetOverlayEntries() const {
+  [[nodiscard]] const std::vector<OverlayEntry>& GetOverlayEntries() const {
     return overlay_entries_;
   }
 
-  const std::string& GetStringPoolData() const {
+  [[nodiscard]] const std::string& GetStringPoolData() const {
     return string_pool_data_;
   }
 

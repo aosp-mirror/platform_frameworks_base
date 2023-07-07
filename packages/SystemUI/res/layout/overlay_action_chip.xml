@@ -16,12 +16,12 @@
   -->
 <com.android.systemui.screenshot.OverlayActionChip
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/overlay_action_chip"
     android:theme="@style/FloatingOverlay"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/overlay_action_chip_margin_start"
-    android:paddingVertical="@dimen/overlay_action_chip_margin_vertical"
     android:layout_gravity="center"
     android:gravity="center"
     android:alpha="0.0">
@@ -33,7 +33,7 @@
         android:gravity="center">
         <ImageView
             android:id="@+id/overlay_action_chip_icon"
-            android:tint="?attr/overlayButtonTextColor"
+            android:tint="?androidprv:attr/materialColorOnSecondary"
             android:layout_width="@dimen/overlay_action_chip_icon_size"
             android:layout_height="@dimen/overlay_action_chip_icon_size"/>
         <TextView
@@ -42,6 +42,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             android:textSize="@dimen/overlay_action_chip_text_size"
-            android:textColor="?attr/overlayButtonTextColor"/>
+            android:textColor="?androidprv:attr/materialColorOnSecondary"/>
     </LinearLayout>
 </com.android.systemui.screenshot.OverlayActionChip>

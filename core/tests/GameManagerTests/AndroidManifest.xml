@@ -17,7 +17,9 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.app.gamemanagertests"
-          android:sharedUserId="android.uid.system" >
+          android:sharedUserId="com.android.uid.test" >
+
+    <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
 
     <application android:appCategory="game">
         <uses-library android:name="android.test.runner" />

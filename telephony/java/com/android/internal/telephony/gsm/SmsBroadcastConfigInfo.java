@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.gsm;
 
+import java.util.Objects;
+
 /**
  * SmsBroadcastConfigInfo defines one configuration of Cell Broadcast
  * Message (CBM) to be received by the ME
@@ -129,5 +131,25 @@ public final class SmsBroadcastConfigInfo {
                 mFromServiceId + ',' + mToServiceId + "] Code [" +
                 mFromCodeScheme + ',' + mToCodeScheme + "] " +
             (mSelected ? "ENABLED" : "DISABLED");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mFromServiceId, mToServiceId,
+                mFromCodeScheme, mToCodeScheme, mSelected);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SmsBroadcastConfigInfo)) {
+            return false;
+        }
+
+        SmsBroadcastConfigInfo other = (SmsBroadcastConfigInfo) obj;
+
+        return mFromServiceId == other.mFromServiceId
+                && mToServiceId == other.mToServiceId
+                && mFromCodeScheme == other.mFromCodeScheme
+                && mToCodeScheme == other.mToCodeScheme && mSelected == other.mSelected;
     }
 }

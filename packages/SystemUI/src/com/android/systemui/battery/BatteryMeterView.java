@@ -24,6 +24,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -37,7 +38,6 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,10 +45,9 @@ import android.widget.TextView;
 import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.settingslib.graph.ThemedBatteryDrawable;
+import com.android.app.animation.Interpolators;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -68,7 +67,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     public static final int MODE_OFF = 2;
     public static final int MODE_ESTIMATE = 3;
 
-    private final ThemedBatteryDrawable mDrawable;
+    private final AccessorizedBatteryDrawable mDrawable;
     private final ImageView mBatteryIconView;
     private TextView mBatteryPercentView;
 
@@ -77,7 +76,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private int mLevel;
     private int mShowPercentMode = MODE_DEFAULT;
     private boolean mShowPercentAvailable;
+    private String mEstimateText = null;
     private boolean mCharging;
+    private boolean mIsBatteryDefender;
+    private boolean mDisplayShieldEnabled;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
     // Lazily-loaded since this is expected to be a rare-if-ever state
@@ -106,7 +108,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.meter_background_color));
         mPercentageStyleId = atts.getResourceId(R.styleable.BatteryMeterView_textAppearance, 0);
-        mDrawable = new ThemedBatteryDrawable(context, frameColor);
+        mDrawable = new AccessorizedBatteryDrawable(context, frameColor);
         atts.recycle();
 
         mShowPercentAvailable = context.getResources().getBoolean(
@@ -170,12 +172,14 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         if (mode == mShowPercentMode) return;
         mShowPercentMode = mode;
         updateShowPercent();
+        updatePercentText();
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updatePercentView();
+        mDrawable.notifyDensityChanged();
     }
 
     public void setColorsFromContext(Context context) {
@@ -191,7 +195,13 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         return false;
     }
 
-    void onBatteryLevelChanged(int level, boolean pluggedIn) {
+    /**
+     * Update battery level
+     *
+     * @param level     int between 0 and 100 (representing percentage value)
+     * @param pluggedIn whether the device is plugged in or not
+     */
+    public void onBatteryLevelChanged(@IntRange(from = 0, to = 100) int level, boolean pluggedIn) {
         mDrawable.setCharging(pluggedIn);
         mDrawable.setBatteryLevel(level);
         mCharging = pluggedIn;
@@ -201,6 +211,17 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
     void onPowerSaveChanged(boolean isPowerSave) {
         mDrawable.setPowerSaveEnabled(isPowerSave);
+    }
+
+    void onIsBatteryDefenderChanged(boolean isBatteryDefender) {
+        boolean valueChanged = mIsBatteryDefender != isBatteryDefender;
+        mIsBatteryDefender = isBatteryDefender;
+        if (valueChanged) {
+            updateContentDescription();
+            // The battery drawable is a different size depending on whether it's currently
+            // overheated or not, so we need to re-scale the view when overheated changes.
+            scaleBatteryMeterViews();
+        }
     }
 
     private TextView loadPercentView() {
@@ -227,13 +248,17 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         mBatteryEstimateFetcher = fetcher;
     }
 
+    void setDisplayShieldEnabled(boolean displayShieldEnabled) {
+        mDisplayShieldEnabled = displayShieldEnabled;
+    }
+
     void updatePercentText() {
         if (mBatteryStateUnknown) {
-            setContentDescription(getContext().getString(R.string.accessibility_battery_unknown));
             return;
         }
 
         if (mBatteryEstimateFetcher == null) {
+            setPercentTextAtCurrentLevel();
             return;
         }
 
@@ -245,10 +270,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                         return;
                     }
                     if (estimate != null && mShowPercentMode == MODE_ESTIMATE) {
+                        mEstimateText = estimate;
                         mBatteryPercentView.setText(estimate);
-                        setContentDescription(getContext().getString(
-                                R.string.accessibility_battery_level_with_estimate,
-                                mLevel, estimate));
+                        updateContentDescription();
                     } else {
                         setPercentTextAtCurrentLevel();
                     }
@@ -257,28 +281,49 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 setPercentTextAtCurrentLevel();
             }
         } else {
-            setContentDescription(
-                    getContext().getString(mCharging ? R.string.accessibility_battery_level_charging
-                            : R.string.accessibility_battery_level, mLevel));
+            updateContentDescription();
         }
     }
 
     private void setPercentTextAtCurrentLevel() {
-        if (mBatteryPercentView == null) {
-            return;
+        if (mBatteryPercentView != null) {
+            mEstimateText = null;
+            String percentText = NumberFormat.getPercentInstance().format(mLevel / 100f);
+            // Setting text actually triggers a layout pass (because the text view is set to
+            // wrap_content width and TextView always relayouts for this). Avoid needless
+            // relayout if the text didn't actually change.
+            if (!TextUtils.equals(mBatteryPercentView.getText(), percentText)) {
+                mBatteryPercentView.setText(percentText);
+            }
         }
 
-        String percentText = NumberFormat.getPercentInstance().format(mLevel / 100f);
-        // Setting text actually triggers a layout pass (because the text view is set to
-        // wrap_content width and TextView always relayouts for this). Avoid needless
-        // relayout if the text didn't actually change.
-        if (!TextUtils.equals(mBatteryPercentView.getText(), percentText)) {
-            mBatteryPercentView.setText(percentText);
+        updateContentDescription();
+    }
+
+    private void updateContentDescription() {
+        Context context = getContext();
+
+        String contentDescription;
+        if (mBatteryStateUnknown) {
+            contentDescription = context.getString(R.string.accessibility_battery_unknown);
+        } else if (mShowPercentMode == MODE_ESTIMATE && !TextUtils.isEmpty(mEstimateText)) {
+            contentDescription = context.getString(
+                    mIsBatteryDefender
+                            ? R.string.accessibility_battery_level_charging_paused_with_estimate
+                            : R.string.accessibility_battery_level_with_estimate,
+                    mLevel,
+                    mEstimateText);
+        } else if (mIsBatteryDefender) {
+            contentDescription =
+                    context.getString(R.string.accessibility_battery_level_charging_paused, mLevel);
+        } else if (mCharging) {
+            contentDescription =
+                    context.getString(R.string.accessibility_battery_level_charging, mLevel);
+        } else {
+            contentDescription = context.getString(R.string.accessibility_battery_level, mLevel);
         }
 
-        setContentDescription(
-                getContext().getString(mCharging ? R.string.accessibility_battery_level_charging
-                        : R.string.accessibility_battery_level, mLevel));
+        setContentDescription(contentDescription);
     }
 
     void updateShowPercent() {
@@ -301,10 +346,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 }
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
                 updatePercentText();
-                addView(mBatteryPercentView,
-                        new ViewGroup.LayoutParams(
-                                LayoutParams.WRAP_CONTENT,
-                                LayoutParams.MATCH_PARENT));
+                addView(mBatteryPercentView, new LayoutParams(
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.MATCH_PARENT));
             }
         } else {
             if (showing) {
@@ -329,6 +373,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
 
         mBatteryStateUnknown = isUnknown;
+        updateContentDescription();
 
         if (mBatteryStateUnknown) {
             mBatteryIconView.setImageDrawable(getUnknownStateDrawable());
@@ -349,15 +394,41 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         float iconScaleFactor = typedValue.getFloat();
 
-        int batteryHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
-        int batteryWidth = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width);
+        float mainBatteryHeight =
+                res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height) * iconScaleFactor;
+        float mainBatteryWidth =
+                res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width) * iconScaleFactor;
+
+        boolean displayShield = mDisplayShieldEnabled && mIsBatteryDefender;
+        float fullBatteryIconHeight =
+                BatterySpecs.getFullBatteryHeight(mainBatteryHeight, displayShield);
+        float fullBatteryIconWidth =
+                BatterySpecs.getFullBatteryWidth(mainBatteryWidth, displayShield);
+
+        int marginTop;
+        if (displayShield) {
+            // If the shield is displayed, we need some extra marginTop so that the bottom of the
+            // main icon is still aligned with the bottom of all the other system icons.
+            int shieldHeightAddition = Math.round(fullBatteryIconHeight - mainBatteryHeight);
+            // However, the other system icons have some embedded bottom padding that the battery
+            // doesn't have, so we shouldn't move the battery icon down by the full amount.
+            // See b/258672854.
+            marginTop = shieldHeightAddition
+                    - res.getDimensionPixelSize(R.dimen.status_bar_battery_extra_vertical_spacing);
+        } else {
+            marginTop = 0;
+        }
+
         int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
-                (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
-        scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
+                Math.round(fullBatteryIconWidth),
+                Math.round(fullBatteryIconHeight));
+        scaledLayoutParams.setMargins(0, marginTop, 0, marginBottom);
 
+        mDrawable.setDisplayShield(displayShield);
         mBatteryIconView.setLayoutParams(scaledLayoutParams);
+        mBatteryIconView.invalidateDrawable(mDrawable);
     }
 
     @Override

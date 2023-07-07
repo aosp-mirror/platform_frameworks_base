@@ -15,6 +15,8 @@
  */
 package android.app.admin;
 
+import android.annotation.UserIdInt;
+
 import com.android.server.LocalServices;
 
 /**
@@ -43,6 +45,19 @@ public abstract class DeviceStateCache {
     public abstract boolean isDeviceProvisioned();
 
     /**
+     * True if either the entire device or the user is organization managed.
+     */
+    public abstract boolean isUserOrganizationManaged(@UserIdInt int userHandle);
+
+    /**
+     * Returns whether a user has affiliated IDs.
+     */
+
+    public boolean hasAffiliationWithDevice(int userId) {
+        return false;
+    }
+
+    /**
      * Empty implementation.
      */
     private static class EmptyDeviceStateCache extends DeviceStateCache {
@@ -50,6 +65,11 @@ public abstract class DeviceStateCache {
 
         @Override
         public boolean isDeviceProvisioned() {
+            return false;
+        }
+
+        @Override
+        public boolean isUserOrganizationManaged(int userHandle) {
             return false;
         }
     }

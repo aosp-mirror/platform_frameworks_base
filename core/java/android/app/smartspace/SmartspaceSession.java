@@ -83,7 +83,6 @@ public final class SmartspaceSession implements AutoCloseable {
     private final SmartspaceSessionId mSessionId;
     private final ArrayMap<OnTargetsAvailableListener, CallbackWrapper> mRegisteredCallbacks =
             new ArrayMap<>();
-    private final IBinder mToken = new Binder();
 
     /**
      * Creates a new Smartspace ui client.
@@ -101,7 +100,7 @@ public final class SmartspaceSession implements AutoCloseable {
         mSessionId = new SmartspaceSessionId(
                 context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUser());
         try {
-            mInterface.createSmartspaceSession(smartspaceConfig, mSessionId, mToken);
+            mInterface.createSmartspaceSession(smartspaceConfig, mSessionId, getToken());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create Smartspace session", e);
             e.rethrowFromSystemServer();
@@ -282,5 +281,13 @@ public final class SmartspaceSession implements AutoCloseable {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+    }
+
+    private static class Token {
+        static final IBinder sBinder = new Binder(TAG);
+    }
+
+    private static IBinder getToken() {
+        return Token.sBinder;
     }
 }

@@ -530,6 +530,25 @@ interface ISms {
             int subId, String callingPkg, String prefixes, in PendingIntent intent);
 
     /**
+     * set Memory Status in SmsStorageMonitor
+     *
+     * @param subId the subscription Id.
+     * @param callingPackage the package name of the calling app.
+     * @param isStorageAvailable sets StorageAvailable to false or true
+     *   for testing behaviour of SmsStorageMonitor
+     */
+    void setStorageMonitorMemoryStatusOverride(int subId, boolean isStorageAvailable);
+
+     /**
+     * reset Memory Status change made by TestApi setStorageMonitorMemoryStatusOverride
+     * in SmsStorageMonitor
+     *
+     * @param subId the subscription Id.
+     * @param callingPackage the package name of the calling app.
+     */
+    void clearStorageMonitorMemoryStatusOverride(int subId);
+
+    /**
      * Check if the destination is a possible premium short code.
      *
      * @param destAddress the destination address to test for possible short code

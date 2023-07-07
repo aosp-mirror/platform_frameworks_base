@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.CrossProfileIntentFilter.FLAG_IS_PACKAGE_FOR_FILTER;
+
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
@@ -37,7 +39,7 @@ class CrossProfileIntentResolver
 
     @Override
     protected boolean isPackageForFilter(String packageName, CrossProfileIntentFilter filter) {
-        return false;
+        return (FLAG_IS_PACKAGE_FOR_FILTER & filter.mFlags) != 0;
     }
 
     @Override

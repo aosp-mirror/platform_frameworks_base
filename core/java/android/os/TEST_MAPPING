@@ -53,8 +53,7 @@
       "name": "FrameworksServicesTests",
       "options": [
         { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
-        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
       ]
     },
     {
@@ -83,6 +82,15 @@
       "options": [
         {
           "include-filter": "android.os.cts.SharedMemoryTest"
+        }
+      ]
+    },
+    {
+      "file_patterns": ["Environment[^/]*\\.java"],
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.os.EnvironmentTest"
         }
       ]
     }

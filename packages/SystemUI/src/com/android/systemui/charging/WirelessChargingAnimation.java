@@ -16,8 +16,6 @@
 
 package com.android.systemui.charging;
 
-import static com.android.systemui.charging.WirelessChargingLayout.UNKNOWN_BATTERY_LEVEL;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -32,13 +30,14 @@ import android.view.WindowManager;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
 
 /**
  * A WirelessChargingAnimation is a view containing view + animation for wireless charging.
  * @hide
  */
 public class WirelessChargingAnimation {
-
+    public static final int UNKNOWN_BATTERY_LEVEL = -1;
     public static final long DURATION = 1500;
     private static final String TAG = "WirelessChargingView";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -58,11 +57,12 @@ public class WirelessChargingAnimation {
      * before calling {@link #show} - can be done through {@link #makeWirelessChargingAnimation}.
      * @hide
      */
-    public WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper,
+    private WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper,
             int transmittingBatteryLevel, int batteryLevel, Callback callback, boolean isDozing,
-            UiEventLogger uiEventLogger) {
+            RippleShape rippleShape, UiEventLogger uiEventLogger) {
         mCurrentWirelessChargingView = new WirelessChargingView(context, looper,
-                transmittingBatteryLevel, batteryLevel, callback, isDozing, uiEventLogger);
+                transmittingBatteryLevel, batteryLevel, callback, isDozing,
+                rippleShape, uiEventLogger);
     }
 
     /**
@@ -72,9 +72,10 @@ public class WirelessChargingAnimation {
      */
     public static WirelessChargingAnimation makeWirelessChargingAnimation(@NonNull Context context,
             @Nullable Looper looper, int transmittingBatteryLevel, int batteryLevel,
-            Callback callback, boolean isDozing, UiEventLogger uiEventLogger) {
+            Callback callback, boolean isDozing, RippleShape rippleShape,
+            UiEventLogger uiEventLogger) {
         return new WirelessChargingAnimation(context, looper, transmittingBatteryLevel,
-                batteryLevel, callback, isDozing, uiEventLogger);
+                batteryLevel, callback, isDozing, rippleShape, uiEventLogger);
     }
 
     /**
@@ -82,9 +83,10 @@ public class WirelessChargingAnimation {
      * battery level without charging number shown.
      */
     public static WirelessChargingAnimation makeChargingAnimationWithNoBatteryLevel(
-            @NonNull Context context, UiEventLogger uiEventLogger) {
+            @NonNull Context context, RippleShape rippleShape, UiEventLogger uiEventLogger) {
         return makeWirelessChargingAnimation(context, null,
-                UNKNOWN_BATTERY_LEVEL, UNKNOWN_BATTERY_LEVEL, null, false, uiEventLogger);
+                UNKNOWN_BATTERY_LEVEL, UNKNOWN_BATTERY_LEVEL, null, false,
+                rippleShape, uiEventLogger);
     }
 
     /**
@@ -121,10 +123,10 @@ public class WirelessChargingAnimation {
 
         public WirelessChargingView(Context context, @Nullable Looper looper,
                 int transmittingBatteryLevel, int batteryLevel, Callback callback,
-                boolean isDozing, UiEventLogger uiEventLogger) {
+                boolean isDozing, RippleShape rippleShape, UiEventLogger uiEventLogger) {
             mCallback = callback;
             mNextView = new WirelessChargingLayout(context, transmittingBatteryLevel, batteryLevel,
-                    isDozing);
+                    isDozing, rippleShape);
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
             mUiEventLogger = uiEventLogger;
 

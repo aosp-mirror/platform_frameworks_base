@@ -31,4 +31,5 @@ interface IImsRegistration {
    oneway void triggerFullNetworkRegistration(int sipCode, String sipReason);
    oneway void triggerUpdateSipDelegateRegistration();
    oneway void triggerSipDelegateDeregistration();
+   oneway void triggerDeregistration(int reason);
 }

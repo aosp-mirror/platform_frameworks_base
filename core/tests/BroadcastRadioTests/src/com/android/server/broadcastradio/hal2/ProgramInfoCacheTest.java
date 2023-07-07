@@ -25,6 +25,8 @@ import android.test.suitebuilder.annotation.MediumTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,7 +39,7 @@ import java.util.Set;
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
-public class ProgramInfoCacheTest {
+public class ProgramInfoCacheTest extends ExtendedRadioMockitoTestCase {
     private static final String TAG = "BroadcastRadioTests.ProgramInfoCache";
 
     private final ProgramSelector.Identifier mAmFmIdentifier =

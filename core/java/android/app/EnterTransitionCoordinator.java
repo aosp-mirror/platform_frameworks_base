@@ -650,7 +650,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (decorView != null) {
                 Drawable drawable = decorView.getBackground();
                 if (drawable != null) {
-                    drawable.setAlpha(1);
+                    drawable.setAlpha(255);
                 }
             }
         }

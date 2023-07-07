@@ -17,6 +17,10 @@
     package="com.android.perftests.wm">
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <!-- For perfetto trace files -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application>
         <uses-library android:name="android.test.runner" />
@@ -26,6 +30,9 @@
             <action android:name="com.android.perftests.core.PERFTEST" />
           </intent-filter>
         </activity>
+
+        <activity android:name="android.wm.InTaskTransitionTest$TestActivity"
+            android:process=":test" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

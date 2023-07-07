@@ -88,34 +88,44 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
         return nativeIsSupported();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public String[] getSupportedActivities() {
-        checkPermissions();
+        super.getSupportedActivities_enforcePermission();
+
         return mSupportedActivities;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public boolean isActivitySupported(String activity) {
-        checkPermissions();
+        super.isActivitySupported_enforcePermission();
+
         int activityType = getActivityType(activity);
         return activityType != INVALID_ACTIVITY_TYPE;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public boolean registerSink(IActivityRecognitionHardwareSink sink) {
-        checkPermissions();
+        super.registerSink_enforcePermission();
+
         return mSinks.register(sink);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public boolean unregisterSink(IActivityRecognitionHardwareSink sink) {
-        checkPermissions();
+        super.unregisterSink_enforcePermission();
+
         return mSinks.unregister(sink);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public boolean enableActivityEvent(String activity, int eventType, long reportLatencyNs) {
-        checkPermissions();
+
+        super.enableActivityEvent_enforcePermission();
 
         int activityType = getActivityType(activity);
         if (activityType == INVALID_ACTIVITY_TYPE) {
@@ -130,9 +140,11 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
         return false;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public boolean disableActivityEvent(String activity, int eventType) {
-        checkPermissions();
+
+        super.disableActivityEvent_enforcePermission();
 
         int activityType = getActivityType(activity);
         if (activityType == INVALID_ACTIVITY_TYPE) {
@@ -147,9 +159,11 @@ public class ActivityRecognitionHardware extends IActivityRecognitionHardware.St
         return false;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public boolean flush() {
-        checkPermissions();
+        super.flush_enforcePermission();
+
         int result = nativeFlush();
         return result == NATIVE_SUCCESS_RESULT;
     }

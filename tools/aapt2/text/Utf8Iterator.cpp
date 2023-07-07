@@ -24,7 +24,7 @@ using ::android::StringPiece;
 namespace aapt {
 namespace text {
 
-Utf8Iterator::Utf8Iterator(const StringPiece& str)
+Utf8Iterator::Utf8Iterator(StringPiece str)
     : str_(str), current_pos_(0), next_pos_(0), current_codepoint_(0) {
   DoNext();
 }

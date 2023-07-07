@@ -77,14 +77,14 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setForcedDensity(DisplayContent displayContent, int density, int userId) {
-        if (displayContent.isDefaultDisplay) {
+    void setForcedDensity(DisplayInfo info, int density, int userId) {
+        if (info.displayId == Display.DEFAULT_DISPLAY) {
             final String densityString = density == 0 ? "" : Integer.toString(density);
             Settings.Secure.putStringForUser(mService.mContext.getContentResolver(),
                     Settings.Secure.DISPLAY_DENSITY_FORCED, densityString, userId);
         }
 
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final DisplayInfo displayInfo = info;
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mForcedDensity = density;
@@ -150,7 +150,10 @@ class DisplayWindowSettings {
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mWindowingMode = mode;
-        dc.setWindowingMode(mode);
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null) {
+            defaultTda.setWindowingMode(mode);
+        }
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
@@ -253,8 +256,10 @@ class DisplayWindowSettings {
 
         // Setting windowing mode first, because it may override overscan values later.
         final int windowingMode = getWindowingModeLocked(settings, dc);
-        dc.setWindowingMode(windowingMode);
-
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null) {
+            defaultTda.setWindowingMode(windowingMode);
+        }
         final int userRotationMode = settings.mUserRotationMode != null
                 ? settings.mUserRotationMode : WindowManagerPolicy.USER_ROTATION_FREE;
         final int userRotation = settings.mUserRotation != null
@@ -276,7 +281,7 @@ class DisplayWindowSettings {
         final int width = hasSizeOverride ? settings.mForcedWidth : dc.mInitialDisplayWidth;
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
         final int density = hasDensityOverride ? settings.mForcedDensity
-                : dc.mInitialDisplayDensity;
+                : dc.getInitialDisplayDensity();
         dc.updateBaseDisplayMetrics(width, height, density, dc.mBaseDisplayPhysicalXDpi,
                 dc.mBaseDisplayPhysicalYDpi);
 
@@ -286,7 +291,7 @@ class DisplayWindowSettings {
 
         boolean dontMoveToTop = settings.mDontMoveToTop != null
                 ? settings.mDontMoveToTop : false;
-        dc.mDontMoveToTop = dontMoveToTop;
+        dc.mDontMoveToTop = !dc.canStealTopFocus() || dontMoveToTop;
 
         if (includeRotationSettings) applyRotationSettingsToDisplayLocked(dc);
     }
@@ -311,10 +316,11 @@ class DisplayWindowSettings {
      * changed.
      */
     boolean updateSettingsForDisplay(DisplayContent dc) {
-        if (dc.getWindowingMode() != getWindowingModeLocked(dc)) {
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null && defaultTda.getWindowingMode() != getWindowingModeLocked(dc)) {
             // For the time being the only thing that may change is windowing mode, so just update
             // that.
-            dc.setWindowingMode(getWindowingModeLocked(dc));
+            defaultTda.setWindowingMode(getWindowingModeLocked(dc));
             return true;
         }
         return false;
@@ -436,11 +442,12 @@ class DisplayWindowSettings {
                     mRemoveContentMode = other.mRemoveContentMode;
                     changed = true;
                 }
-                if (other.mShouldShowWithInsecureKeyguard != mShouldShowWithInsecureKeyguard) {
+                if (!Objects.equals(
+                        other.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
                     mShouldShowWithInsecureKeyguard = other.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (other.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                if (!Objects.equals(other.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = other.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -452,15 +459,15 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = other.mFixedToUserRotation;
                     changed = true;
                 }
-                if (other.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                if (!Objects.equals(other.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
                     mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                if (!Objects.equals(other.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
                     mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (other.mDontMoveToTop != mDontMoveToTop) {
+                if (!Objects.equals(other.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = other.mDontMoveToTop;
                     changed = true;
                 }
@@ -516,14 +523,13 @@ class DisplayWindowSettings {
                     mRemoveContentMode = delta.mRemoveContentMode;
                     changed = true;
                 }
-                if (delta.mShouldShowWithInsecureKeyguard != null
-                        && delta.mShouldShowWithInsecureKeyguard
-                        != mShouldShowWithInsecureKeyguard) {
+                if (delta.mShouldShowWithInsecureKeyguard != null && !Objects.equals(
+                        delta.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
                     mShouldShowWithInsecureKeyguard = delta.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (delta.mShouldShowSystemDecors != null
-                        && delta.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                if (delta.mShouldShowSystemDecors != null && !Objects.equals(
+                        delta.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = delta.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -537,18 +543,18 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = delta.mFixedToUserRotation;
                     changed = true;
                 }
-                if (delta.mIgnoreOrientationRequest != null
-                        && delta.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                if (delta.mIgnoreOrientationRequest != null && !Objects.equals(
+                        delta.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
                     mIgnoreOrientationRequest = delta.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (delta.mIgnoreDisplayCutout != null
-                        && delta.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                if (delta.mIgnoreDisplayCutout != null && !Objects.equals(
+                        delta.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
                     mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (delta.mDontMoveToTop != null
-                        && delta.mDontMoveToTop != mDontMoveToTop) {
+                if (delta.mDontMoveToTop != null && !Objects.equals(
+                        delta.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = delta.mDontMoveToTop;
                     changed = true;
                 }

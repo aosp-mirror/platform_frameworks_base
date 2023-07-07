@@ -51,11 +51,13 @@ android_test {
         "kotlin-test",
         "mockingservicestests-utils-mockito",
         "mockito-target-extended-minus-junit4",
+        "platform-compat-test-rules",
         "platform-test-annotations",
         "service-blobstore",
         "service-jobscheduler",
         "service-permission.impl",
         "service-sdksandbox.impl",
+        "services.backup",
         "services.companion",
         "services.core",
         "services.devicepolicy",
@@ -78,13 +80,22 @@ android_test {
         "servicestests-core-utils",
     ],
 
+    java_resources: [
+        ":apex.test",
+        ":test.rebootless_apex_v1",
+        ":test.rebootless_apex_v2",
+    ],
+
     jni_libs: [
         "libpsi",
     ],
 
     certificate: "platform",
     platform_apis: true,
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     optimize: {
         enabled: false,

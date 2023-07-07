@@ -75,7 +75,7 @@ class HdmiCecPowerStatusController {
     }
 
     private void sendReportPowerStatus(int powerStatus) {
-        for (HdmiCecLocalDevice localDevice : mHdmiControlService.getAllLocalDevices()) {
+        for (HdmiCecLocalDevice localDevice : mHdmiControlService.getAllCecLocalDevices()) {
             mHdmiControlService.sendCecCommand(
                     HdmiCecMessageBuilder.buildReportPowerStatus(
                             localDevice.getDeviceInfo().getLogicalAddress(),

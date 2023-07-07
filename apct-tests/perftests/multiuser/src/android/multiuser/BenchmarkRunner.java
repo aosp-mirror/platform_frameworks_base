@@ -80,7 +80,7 @@ public class BenchmarkRunner {
 
     private void prepareForNextRun() {
         SystemClock.sleep(COOL_OFF_PERIOD_MS);
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle --flush-broadcast-loopers");
         mStartTimeNs = System.nanoTime();
         mPausedDurationNs = 0;
     }
@@ -102,7 +102,7 @@ public class BenchmarkRunner {
      * to avoid unnecessary waiting.
      */
     public void resumeTiming() {
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle --flush-broadcast-loopers");
         resumeTimer();
     }
 

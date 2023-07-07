@@ -19,6 +19,10 @@ package android.view.contentcapture;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.RemoteCallback;
+import android.view.Choreographer;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,6 +35,8 @@ import com.android.perftests.contentcapture.R;
 public class CustomTestActivity extends Activity {
     public static final String INTENT_EXTRA_LAYOUT_ID = "layout_id";
     public static final String INTENT_EXTRA_CUSTOM_VIEWS = "custom_view_number";
+    static final String INTENT_EXTRA_FINISH_ON_IDLE = "finish";
+    static final String INTENT_EXTRA_DRAW_CALLBACK = "draw_callback";
     public static final int MAX_VIEWS = 500;
     private static final int CUSTOM_CONTAINER_LAYOUT_ID = R.layout.test_container_activity;
 
@@ -46,6 +52,34 @@ public class CustomTestActivity extends Activity {
                 createCustomViews(findViewById(R.id.root_view),
                         getIntent().getIntExtra(INTENT_EXTRA_CUSTOM_VIEWS, MAX_VIEWS));
             }
+        }
+
+        final RemoteCallback drawCallback = getIntent().getParcelableExtra(
+                INTENT_EXTRA_DRAW_CALLBACK, RemoteCallback.class);
+        if (drawCallback != null) {
+            getWindow().getDecorView().addOnAttachStateChangeListener(
+                    new View.OnAttachStateChangeListener() {
+                        @Override
+                        public void onViewAttachedToWindow(View v) {
+                            Choreographer.getInstance().postCallback(
+                                    Choreographer.CALLBACK_COMMIT,
+                                    // Report that the first frame is drawn.
+                                    () -> drawCallback.sendResult(null), null /* token */);
+                        }
+
+                        @Override
+                        public void onViewDetachedFromWindow(View v) {
+                        }
+                    });
+        }
+
+        if (getIntent().getBooleanExtra(INTENT_EXTRA_FINISH_ON_IDLE, false)) {
+            Looper.myQueue().addIdleHandler(() -> {
+                // Finish without animation.
+                finish();
+                overridePendingTransition(0 /* enterAnim */, 0 /* exitAnim */);
+                return false;
+            });
         }
     }
 

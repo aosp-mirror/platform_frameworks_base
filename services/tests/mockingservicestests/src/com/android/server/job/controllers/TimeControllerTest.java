@@ -137,7 +137,7 @@ public class TimeControllerTest {
     private JobStatus createJobStatus(String testTag, JobInfo.Builder job) {
         JobInfo jobInfo = job.build();
         return JobStatus.createFromJobInfo(
-                jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, "TCTest", testTag);
     }
 
     @Test

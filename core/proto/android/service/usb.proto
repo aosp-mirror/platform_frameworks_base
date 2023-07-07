@@ -45,7 +45,7 @@ message UsbDeviceManagerProto {
 message UsbHandlerProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    /* Same as android.hardware.usb.gadget.V1_0.GadgetFunction.* */
+    /* Same as android.hardware.usb.gadget.GadgetFunction.* */
     enum Function {
         FUNCTION_ADB = 1;
         FUNCTION_ACCESSORY = 2;
@@ -54,6 +54,7 @@ message UsbHandlerProto {
         FUNCTION_PTP = 16;
         FUNCTION_RNDIS = 32;
         FUNCTION_AUDIO_SOURCE = 64;
+        FUNCTION_UVC = 128;
     }
 
     repeated Function current_functions = 1;
@@ -240,6 +241,7 @@ message UsbPortProto {
     // ID of the port. A device (eg: Chromebooks) might have multiple ports.
     optional string id = 1;
     repeated Mode supported_modes = 2;
+    optional bool supports_compliance_warnings = 3;
 }
 
 message UsbPortStatusProto {
@@ -268,6 +270,7 @@ message UsbPortStatusProto {
     optional string usb_data_status = 7;
     optional bool is_power_transfer_limited = 8;
     optional string usb_power_brick_status = 9;
+    optional string compliance_warnings_string = 10;
 }
 
 message UsbPortStatusRoleCombinationProto {
@@ -282,7 +285,8 @@ message UsbAlsaManagerProto {
 
     optional int32 cards_parser = 1;
     repeated UsbAlsaDeviceProto alsa_devices = 2;
-    repeated UsbMidiDeviceProto midi_devices = 3;
+    reserved 3; // previously midi_devices, now unused
+    repeated UsbAlsaMidiDeviceProto alsa_midi_devices = 4;
 }
 
 message UsbAlsaDeviceProto {
@@ -297,7 +301,7 @@ message UsbAlsaDeviceProto {
     optional string address = 6;
 }
 
-message UsbMidiDeviceProto {
+message UsbAlsaMidiDeviceProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 card = 1;

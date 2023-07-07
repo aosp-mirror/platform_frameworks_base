@@ -1,0 +1,13 @@
+# See system/logging/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.server.contentcapture
+
+# ContentCaptureService connection state change, refer to ContentCapturePerUserService
+# for type definition
+53200 cc_connect_state_changed (user|1|5),(type|1|5),(package_count|1|1)
+# Set the package and activity allowlist
+53201 cc_set_allowlist (user|1|5),(package_count|1|1),(activity_count|1|1)
+# Get the current allowlist
+53202 cc_current_allowlist (user|1|5),(count|1|1)
+# update content capture client option with new allow list count
+53203 cc_update_options (user|1|5),(count|1)

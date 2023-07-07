@@ -32,19 +32,19 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
-import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -150,6 +150,10 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_CONTENT_TYPE = "content_type";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
+    /**
+     * This attribute represents both foreground services and user initiated jobs in U+.
+     * It was not renamed in U on purpose, in order to avoid creating an unnecessary migration path.
+     */
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
@@ -243,13 +247,14 @@ public final class NotificationChannel implements Parcelable {
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
     private Uri mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
+    private boolean mSoundRestored = false;
     private boolean mLights;
     private int mLightColor = DEFAULT_LIGHT_COLOR;
     private long[] mVibration;
     // Bitwise representation of fields that have been changed by the user, preventing the app from
     // making changes to these fields.
     private int mUserLockedFields;
-    private boolean mFgServiceShown;
+    private boolean mUserVisibleTaskShown;
     private boolean mVibrationEnabled;
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
@@ -317,7 +322,7 @@ public final class NotificationChannel implements Parcelable {
             mVibration = Arrays.copyOf(mVibration, MAX_VIBRATION_LENGTH);
         }
         mUserLockedFields = in.readInt();
-        mFgServiceShown = in.readByte() != 0;
+        mUserVisibleTaskShown = in.readByte() != 0;
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
         mDeleted = in.readByte() != 0;
@@ -371,7 +376,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
         dest.writeLongArray(mVibration);
         dest.writeInt(mUserLockedFields);
-        dest.writeByte(mFgServiceShown ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserVisibleTaskShown ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
         dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
         dest.writeByte(mDeleted ? (byte) 1 : (byte) 0);
@@ -418,8 +423,8 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setFgServiceShown(boolean shown) {
-        mFgServiceShown = shown;
+    public void setUserVisibleTaskShown(boolean shown) {
+        mUserVisibleTaskShown = shown;
     }
 
     /**
@@ -573,8 +578,10 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets the vibration pattern for notifications posted to this channel. If the provided
-     * pattern is valid (non-null, non-empty), will {@link #enableVibration(boolean)} enable
-     * vibration} as well. Otherwise, vibration will be disabled.
+     * pattern is valid (non-null, non-empty), will enable vibration on this channel
+     * (equivalent to calling {@link #enableVibration(boolean)} with {@code true}).
+     * Otherwise, vibration will be disabled unless {@link #enableVibration(boolean)} is
+     * used with {@code true}, in which case the default vibration will be used.
      *
      * Only modifiable before the channel is submitted to
      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
@@ -751,7 +758,7 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Returns the vibration pattern for notifications posted to this channel. Will be ignored if
-     * vibration is not enabled ({@link #shouldVibrate()}.
+     * vibration is not enabled ({@link #shouldVibrate()}).
      */
     public long[] getVibrationPattern() {
         return mVibration;
@@ -843,8 +850,8 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    public boolean isFgServiceShown() {
-        return mFgServiceShown;
+    public boolean isUserVisibleTaskShown() {
+        return mUserVisibleTaskShown;
     }
 
     /**
@@ -924,8 +931,9 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    public void populateFromXmlForRestore(XmlPullParser parser, Context context) {
-        populateFromXml(XmlUtils.makeTyped(parser), true, context);
+    public void populateFromXmlForRestore(XmlPullParser parser, boolean pkgInstalled,
+            Context context) {
+        populateFromXml(XmlUtils.makeTyped(parser), true, pkgInstalled, context);
     }
 
     /**
@@ -933,14 +941,14 @@ public final class NotificationChannel implements Parcelable {
      */
     @SystemApi
     public void populateFromXml(XmlPullParser parser) {
-        populateFromXml(XmlUtils.makeTyped(parser), false, null);
+        populateFromXml(XmlUtils.makeTyped(parser), false, true, null);
     }
 
     /**
      * If {@param forRestore} is true, {@param Context} MUST be non-null.
      */
     private void populateFromXml(TypedXmlPullParser parser, boolean forRestore,
-            @Nullable Context context) {
+            boolean pkgInstalled, @Nullable Context context) {
         Preconditions.checkArgument(!forRestore || context != null,
                 "forRestore is true but got null context");
 
@@ -951,7 +959,8 @@ public final class NotificationChannel implements Parcelable {
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
 
         Uri sound = safeUri(parser, ATT_SOUND);
-        setSound(forRestore ? restoreSoundUri(context, sound) : sound, safeAudioAttributes(parser));
+        setSound(forRestore ? restoreSoundUri(context, sound, pkgInstalled) : sound,
+                safeAudioAttributes(parser));
 
         enableLights(safeBool(parser, ATT_LIGHTS, false));
         setLightColor(safeInt(parser, ATT_LIGHT_COLOR, DEFAULT_LIGHT_COLOR));
@@ -963,7 +972,7 @@ public final class NotificationChannel implements Parcelable {
                 parser, ATT_DELETED_TIME_MS, DEFAULT_DELETION_TIME_MS));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
-        setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
+        setUserVisibleTaskShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockable(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
         setAllowBubbles(safeInt(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
@@ -973,8 +982,58 @@ public final class NotificationChannel implements Parcelable {
         setImportantConversation(safeBool(parser, ATT_IMP_CONVERSATION, false));
     }
 
+    /**
+     * Returns whether the sound for this channel was successfully restored
+     *  from backup.
+     * @return false if the sound was not restored successfully. true otherwise (default value)
+     * @hide
+     */
+    public boolean isSoundRestored() {
+        return mSoundRestored;
+    }
+
     @Nullable
-    private Uri restoreSoundUri(Context context, @Nullable Uri uri) {
+    private Uri getCanonicalizedSoundUri(ContentResolver contentResolver, @NonNull Uri uri) {
+        if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(uri)) {
+            return uri;
+        }
+
+        if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(uri.getScheme())) {
+            try {
+                contentResolver.getResourceId(uri);
+                return uri;
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        }
+
+        if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
+            return uri;
+        }
+
+        return contentResolver.canonicalize(uri);
+    }
+
+    @Nullable
+    private Uri getUncanonicalizedSoundUri(ContentResolver contentResolver, @NonNull Uri uri) {
+        if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(uri)
+                || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(uri.getScheme())
+                || ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
+            return uri;
+        }
+        return contentResolver.uncanonicalize(uri);
+    }
+
+    /**
+     * Restore/validate sound Uri from backup
+     * @param context The Context
+     * @param uri The sound Uri to restore
+     * @param pkgInstalled If the parent package is installed
+     * @return restored and validated Uri
+     * @hide
+     */
+    @Nullable
+    public Uri restoreSoundUri(Context context, @Nullable Uri uri, boolean pkgInstalled) {
         if (uri == null || Uri.EMPTY.equals(uri)) {
             return null;
         }
@@ -986,12 +1045,22 @@ public final class NotificationChannel implements Parcelable {
         // the uri and in the case of not having the resource we end up with the default - better
         // than broken. As a side effect we'll canonicalize already canonicalized uris, this is fine
         // according to the docs because canonicalize method has to handle canonical uris as well.
-        Uri canonicalizedUri = contentResolver.canonicalize(uri);
+        Uri canonicalizedUri = getCanonicalizedSoundUri(contentResolver, uri);
         if (canonicalizedUri == null) {
-            // We got a null because the uri in the backup does not exist here, so we return default
-            return Settings.System.DEFAULT_NOTIFICATION_URI;
+            // Uri failed to restore with package installed
+            if (!mSoundRestored && pkgInstalled) {
+                mSoundRestored = true;
+                // We got a null because the uri in the backup does not exist here, so we return
+                // default
+                return Settings.System.DEFAULT_NOTIFICATION_URI;
+            } else {
+                // Flag as unrestored and try again later (on package install)
+                mSoundRestored = false;
+                return uri;
+            }
         }
-        return contentResolver.uncanonicalize(canonicalizedUri);
+        mSoundRestored = true;
+        return getUncanonicalizedSoundUri(contentResolver, canonicalizedUri);
     }
 
     /**
@@ -1014,7 +1083,7 @@ public final class NotificationChannel implements Parcelable {
         if (sound == null || Uri.EMPTY.equals(sound)) {
             return null;
         }
-        Uri canonicalSound = context.getContentResolver().canonicalize(sound);
+        Uri canonicalSound = getCanonicalizedSoundUri(context.getContentResolver(), sound);
         if (canonicalSound == null) {
             // The content provider does not support canonical uris so we backup the default
             return Settings.System.DEFAULT_NOTIFICATION_URI;
@@ -1070,8 +1139,8 @@ public final class NotificationChannel implements Parcelable {
         if (getUserLockedFields() != 0) {
             out.attributeInt(null, ATT_USER_LOCKED, getUserLockedFields());
         }
-        if (isFgServiceShown()) {
-            out.attributeBoolean(null, ATT_FG_SERVICE_SHOWN, isFgServiceShown());
+        if (isUserVisibleTaskShown()) {
+            out.attributeBoolean(null, ATT_FG_SERVICE_SHOWN, isUserVisibleTaskShown());
         }
         if (canShowBadge()) {
             out.attributeBoolean(null, ATT_SHOW_BADGE, canShowBadge());
@@ -1145,7 +1214,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
-        record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
+        record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isUserVisibleTaskShown()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
@@ -1237,7 +1306,7 @@ public final class NotificationChannel implements Parcelable {
                 && mLights == that.mLights
                 && getLightColor() == that.getLightColor()
                 && getUserLockedFields() == that.getUserLockedFields()
-                && isFgServiceShown() == that.isFgServiceShown()
+                && isUserVisibleTaskShown() == that.isUserVisibleTaskShown()
                 && mVibrationEnabled == that.mVibrationEnabled
                 && mShowBadge == that.mShowBadge
                 && isDeleted() == that.isDeleted()
@@ -1263,8 +1332,8 @@ public final class NotificationChannel implements Parcelable {
     public int hashCode() {
         int result = Objects.hash(getId(), getName(), mDesc, getImportance(), mBypassDnd,
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
-                getUserLockedFields(),
-                isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
+                getUserLockedFields(), isUserVisibleTaskShown(),
+                mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
                 getGroup(), getAudioAttributes(), isBlockable(), mAllowBubbles,
                 mImportanceLockedDefaultApp, mOriginalImportance,
                 mParentId, mConversationId, mDemoted, mImportantConvo);
@@ -1302,7 +1371,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mLightColor=" + mLightColor
                 + ", mVibration=" + Arrays.toString(mVibration)
                 + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
-                + ", mFgServiceShown=" + mFgServiceShown
+                + ", mUserVisibleTaskShown=" + mUserVisibleTaskShown
                 + ", mVibrationEnabled=" + mVibrationEnabled
                 + ", mShowBadge=" + mShowBadge
                 + ", mDeleted=" + mDeleted
@@ -1340,7 +1409,7 @@ public final class NotificationChannel implements Parcelable {
             }
         }
         proto.write(NotificationChannelProto.USER_LOCKED_FIELDS, mUserLockedFields);
-        proto.write(NotificationChannelProto.FG_SERVICE_SHOWN, mFgServiceShown);
+        proto.write(NotificationChannelProto.USER_VISIBLE_TASK_SHOWN, mUserVisibleTaskShown);
         proto.write(NotificationChannelProto.IS_VIBRATION_ENABLED, mVibrationEnabled);
         proto.write(NotificationChannelProto.SHOW_BADGE, mShowBadge);
         proto.write(NotificationChannelProto.IS_DELETED, mDeleted);

@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.widget.ImageView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -61,6 +63,7 @@ public class WorkLockActivity extends Activity {
     private UserManager mUserManager;
     private PackageManager mPackageManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     @Inject
     public WorkLockActivity(BroadcastDispatcher broadcastDispatcher, UserManager userManager,
@@ -95,6 +98,10 @@ public class WorkLockActivity extends Activity {
         if (badgedIcon != null) {
             ((ImageView) findViewById(R.id.icon)).setImageDrawable(badgedIcon);
         }
+
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                mBackCallback);
     }
 
     @VisibleForTesting
@@ -134,11 +141,16 @@ public class WorkLockActivity extends Activity {
     @Override
     public void onDestroy() {
         unregisterBroadcastReceiver();
+        getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
+        onBackInvoked();
+    }
+
+    private void onBackInvoked() {
         // Ignore back presses.
     }
 
@@ -164,10 +176,10 @@ public class WorkLockActivity extends Activity {
             return;
         }
 
-        final Intent credential = getKeyguardManager()
+        final Intent confirmCredentialIntent = getKeyguardManager()
                 .createConfirmDeviceCredentialIntent(null, null, getTargetUserId(),
                 true /* disallowBiometricsIfPolicyExists */);
-        if (credential == null) {
+        if (confirmCredentialIntent == null) {
             return;
         }
 
@@ -181,14 +193,18 @@ public class WorkLockActivity extends Activity {
                 PendingIntent.FLAG_IMMUTABLE, options.toBundle());
 
         if (target != null) {
-            credential.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
+            confirmCredentialIntent.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
         }
 
+        // WorkLockActivity is started as a task overlay, so unless credential confirmation is also
+        // started as an overlay, it won't be visible.
         final ActivityOptions launchOptions = ActivityOptions.makeBasic();
         launchOptions.setLaunchTaskId(getTaskId());
         launchOptions.setTaskOverlay(true /* taskOverlay */, true /* canResume */);
+        // Propagate it in case more than one activity is launched.
+        confirmCredentialIntent.putExtra(KeyguardManager.EXTRA_FORCE_TASK_OVERLAY, true);
 
-        startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS,
+        startActivityForResult(confirmCredentialIntent, REQUEST_CODE_CONFIRM_CREDENTIALS,
                 launchOptions.toBundle());
     }
 

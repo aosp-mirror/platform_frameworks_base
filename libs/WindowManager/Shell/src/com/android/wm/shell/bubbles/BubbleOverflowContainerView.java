@@ -167,7 +167,10 @@ public class BubbleOverflowContainerView extends LinearLayout {
 
     void updateOverflow() {
         Resources res = getResources();
-        final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
+        int columns = (int) Math.round(getWidth()
+                / (res.getDimension(R.dimen.bubble_name_width)));
+        columns = columns > 0 ? columns : res.getInteger(R.integer.bubbles_overflow_columns);
+
         mRecyclerView.setLayoutManager(
                 new OverflowGridLayoutManager(getContext(), columns));
         if (mRecyclerView.getItemDecorationCount() == 0) {
@@ -217,8 +220,8 @@ public class BubbleOverflowContainerView extends LinearLayout {
                         : res.getColor(R.color.bubbles_light));
 
         final TypedArray typedArray = getContext().obtainStyledAttributes(new int[] {
-                android.R.attr.colorBackgroundFloating,
-                android.R.attr.textColorSecondary});
+                com.android.internal.R.attr.materialColorSurfaceBright,
+                com.android.internal.R.attr.materialColorOnSurface});
         int bgColor = typedArray.getColor(0, isNightMode ? Color.BLACK : Color.WHITE);
         int textColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
         textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, isNightMode);

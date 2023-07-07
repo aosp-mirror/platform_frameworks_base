@@ -17,5 +17,6 @@
 <shape
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <corners android:radius="20dp"/>
+    <!-- preview radius should be equal to [overlay border radius - overlay border width] -->
+    <corners android:radius="12dp"/>
 </shape>

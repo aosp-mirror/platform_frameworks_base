@@ -179,8 +179,9 @@ public class CountryDetectorServiceTest {
         mCountryDetectorService.systemRunning();
         mCountryDetectorService.addCountryListener(countryListenerA);
         mCountryDetectorService.addCountryListener(countryListenerB);
-        expect.that(countryListenerA.isNotified()).isFalse();
-        expect.that(countryListenerB.isNotified()).isFalse();
+        //Immediate Callback Info support at ag/20470367
+        expect.that(countryListenerA.isNotified()).isTrue();
+        expect.that(countryListenerB.isNotified()).isTrue();
         mCountryDetectorService.notifyReceivers(country);
 
         expect.that(countryListenerA.isNotified()).isTrue();

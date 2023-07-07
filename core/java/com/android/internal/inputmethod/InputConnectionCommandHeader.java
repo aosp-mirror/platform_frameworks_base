@@ -21,18 +21,19 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A common IPC header used behind {@link RemoteInputConnectionImpl} and
+ * A common IPC header used behind {@link android.view.inputmethod.RemoteInputConnectionImpl} and
  * {@link android.inputmethodservice.RemoteInputConnection}.
  */
 public final class InputConnectionCommandHeader implements Parcelable {
     /**
      * An identifier that is to be used when multiplexing multiple sessions into a single
-     * {@link com.android.internal.view.IInputContext}.
+     * {@link com.android.internal.inputmethod.IRemoteInputConnection}.
      *
      * <p>This ID is considered to belong to an implicit namespace defined for each
-     * {@link com.android.internal.view.IInputContext} instance.  Uniqueness of the session ID
-     * across multiple instances of {@link com.android.internal.view.IInputContext} is not
-     * guaranteed unless explicitly noted in a higher layer.</p>
+     * {@link com.android.internal.inputmethod.IRemoteInputConnection} instance.  Uniqueness of the
+     * session ID across multiple instances of
+     * {@link com.android.internal.inputmethod.IRemoteInputConnection} is not guaranteed unless
+     * explicitly noted in a higher layer.</p>
      */
     public final int mSessionId;
 

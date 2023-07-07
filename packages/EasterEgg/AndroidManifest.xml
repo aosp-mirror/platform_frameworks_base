@@ -1,4 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+    Copyright (C) 2023 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.egg"
     android:versionCode="12"
@@ -18,8 +33,27 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:icon="@drawable/icon"
+        android:icon="@drawable/android14_patch_adaptive"
         android:label="@string/app_name">
+
+        <!-- Android U easter egg -->
+
+        <activity
+            android:name=".landroid.MainActivity"
+            android:exported="true"
+            android:label="@string/u_egg_name"
+            android:icon="@drawable/android14_patch_adaptive"
+            android:configChanges="orientation|screenLayout|screenSize|density"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.android.internal.category.PLATLOGO" />
+            </intent-filter>
+        </activity>
+
+
+        <!-- Android Q easter egg -->
         <activity
             android:name=".quares.QuaresActivity"
             android:exported="true"
@@ -69,7 +103,7 @@
             android:exported="true"
             android:showOnLockScreen="true"
             android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar" />
-        <!-- Used to enable easter egg -->
+        <!-- Used to enable easter egg components for earlier easter eggs. -->
         <activity
             android:name=".ComponentActivationActivity"
             android:excludeFromRecents="true"
@@ -79,7 +113,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="com.android.internal.category.PLATLOGO" />
             </intent-filter>
         </activity>
 

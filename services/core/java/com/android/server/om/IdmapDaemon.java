@@ -217,6 +217,7 @@ class IdmapDaemon {
     synchronized List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
         final ArrayList<FabricatedOverlayInfo> allInfos = new ArrayList<>();
         Connection c = null;
+        int iteratorId = -1;
         try {
             c = connect();
             final IIdmap2 service = c.getIdmap2();
@@ -225,9 +226,9 @@ class IdmapDaemon {
                 return Collections.emptyList();
             }
 
-            service.acquireFabricatedOverlayIterator();
+            iteratorId = service.acquireFabricatedOverlayIterator();
             List<FabricatedOverlayInfo> infos;
-            while (!(infos = service.nextFabricatedOverlayInfos()).isEmpty()) {
+            while (!(infos = service.nextFabricatedOverlayInfos(iteratorId)).isEmpty()) {
                 allInfos.addAll(infos);
             }
             return allInfos;
@@ -235,8 +236,8 @@ class IdmapDaemon {
             Slog.wtf(TAG, "failed to get all fabricated overlays", e);
         } finally {
             try {
-                if (c.getIdmap2() != null) {
-                    c.getIdmap2().releaseFabricatedOverlayIterator();
+                if (c.getIdmap2() != null && iteratorId != -1) {
+                    c.getIdmap2().releaseFabricatedOverlayIterator(iteratorId);
                 }
             } catch (RemoteException e) {
                 // ignore
@@ -267,26 +268,22 @@ class IdmapDaemon {
         try {
             SystemService.start(IDMAP_DAEMON);
         } catch (RuntimeException e) {
+            Slog.wtf(TAG, "Failed to enable idmap2 daemon", e);
             if (e.getMessage().contains("failed to set system property")) {
-                Slog.w(TAG, "Failed to enable idmap2 daemon", e);
                 return null;
             }
         }
 
-        final long endMillis = SystemClock.elapsedRealtime() + SERVICE_CONNECT_TIMEOUT_MS;
-        while (SystemClock.elapsedRealtime() <= endMillis) {
+        final long endMillis = SystemClock.uptimeMillis() + SERVICE_CONNECT_TIMEOUT_MS;
+        do {
             final IBinder binder = ServiceManager.getService(IDMAP_SERVICE);
             if (binder != null) {
                 binder.linkToDeath(
                         () -> Slog.w(TAG, String.format("service '%s' died", IDMAP_SERVICE)), 0);
                 return binder;
             }
-
-            try {
-                Thread.sleep(SERVICE_CONNECT_INTERVAL_SLEEP_MS);
-            } catch (InterruptedException ignored) {
-            }
-        }
+            SystemClock.sleep(SERVICE_CONNECT_INTERVAL_SLEEP_MS);
+        } while (SystemClock.uptimeMillis() <= endMillis);
 
         throw new TimeoutException(
             String.format("Failed to connect to '%s' in %d milliseconds", IDMAP_SERVICE,

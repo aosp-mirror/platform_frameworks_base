@@ -17,3 +17,4 @@
 package android.view;
 
 parcelable InsetsSourceControl;
+parcelable InsetsSourceControl.Array;

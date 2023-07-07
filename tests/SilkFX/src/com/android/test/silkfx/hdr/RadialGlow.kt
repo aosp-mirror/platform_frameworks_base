@@ -26,9 +26,7 @@ import android.util.AttributeSet
 import com.android.test.silkfx.common.BaseDrawingView
 import kotlin.math.min
 
-class RadialGlow : BaseDrawingView {
-
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+class RadialGlow(context: Context, attrs: AttributeSet?) : BaseDrawingView(context, attrs) {
 
     var glowToggle = false
 

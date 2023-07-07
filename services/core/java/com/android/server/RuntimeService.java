@@ -20,21 +20,13 @@ import android.content.Context;
 import android.os.Binder;
 import android.service.runtime.DebugEntryProto;
 import android.service.runtime.RuntimeServiceInfoProto;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.i18n.timezone.DebugInfo;
 import com.android.i18n.timezone.I18nModuleDebug;
-import com.android.i18n.timezone.TimeZoneDataFiles;
 import com.android.internal.util.DumpUtils;
-import com.android.timezone.distro.DistroException;
-import com.android.timezone.distro.DistroVersion;
-import com.android.timezone.distro.FileUtils;
-import com.android.timezone.distro.TimeZoneDistro;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -61,7 +53,6 @@ public class RuntimeService extends Binder {
         ProtoOutputStream proto = null;
 
         DebugInfo i18nLibraryDebugInfo = I18nModuleDebug.getDebugInfo();
-        addTimeZoneApkDebugInfo(i18nLibraryDebugInfo);
 
         if (protoFormat) {
             proto = new ProtoOutputStream(fd);
@@ -83,20 +74,6 @@ public class RuntimeService extends Binder {
             }
         }
         return false;
-    }
-
-    /**
-     * Add information to {@link DebugInfo} about the time zone data supplied by the
-     * "Time zone updates via APK" feature.
-     */
-    private static void addTimeZoneApkDebugInfo(DebugInfo coreLibraryDebugInfo) {
-        // Add /data tz data set using the DistroVersion class (which libcore cannot use).
-        // This update mechanism will be removed after the time zone APEX is launched so this
-        // untidiness will disappear with it.
-        String debugKeyPrefix = "core_library.timezone.source.data_";
-        String versionFileName = TimeZoneDataFiles.getDataTimeZoneFile(
-                TimeZoneDistro.DISTRO_VERSION_FILE_NAME);
-        addDistroVersionDebugInfo(versionFileName, debugKeyPrefix, coreLibraryDebugInfo);
     }
 
     /**
@@ -130,43 +107,5 @@ public class RuntimeService extends Binder {
             protoStream.write(DebugEntryProto.STRING_VALUE, debugEntry.getStringValue());
             protoStream.end(entryToken);
         }
-    }
-
-    /**
-     * Adds version information to {@code debugInfo} from the distro_version file that may exist
-     * at {@code distroVersionFileName}. If the file does not exist or cannot be read this is
-     * reported as debug information too.
-     */
-    private static void addDistroVersionDebugInfo(String distroVersionFileName,
-            String debugKeyPrefix, DebugInfo debugInfo) {
-        File file = new File(distroVersionFileName);
-        String statusKey = debugKeyPrefix + "status";
-        if (file.exists()) {
-            try {
-                byte[] versionBytes =
-                        FileUtils.readBytes(file, DistroVersion.DISTRO_VERSION_FILE_LENGTH);
-                DistroVersion distroVersion = DistroVersion.fromBytes(versionBytes);
-                String formatVersionString = distroVersion.formatMajorVersion + "."
-                        + distroVersion.formatMinorVersion;
-                debugInfo.addStringEntry(statusKey, "OK")
-                        .addStringEntry(debugKeyPrefix + "formatVersion", formatVersionString)
-                        .addStringEntry(debugKeyPrefix + "rulesVersion",
-                                distroVersion.rulesVersion)
-                        .addStringEntry(debugKeyPrefix + "revision",
-                                distroVersion.revision);
-            } catch (IOException | DistroException e) {
-                debugInfo.addStringEntry(statusKey, "ERROR");
-                debugInfo.addStringEntry(debugKeyPrefix + "exception_class",
-                        e.getClass().getName());
-                debugInfo.addStringEntry(debugKeyPrefix + "exception_msg", e.getMessage());
-                logMessage("Error reading " + file, e);
-            }
-        } else {
-            debugInfo.addStringEntry(statusKey, "NOT_FOUND");
-        }
-    }
-
-    private static void logMessage(String msg, Throwable t) {
-        Slog.v(TAG, msg, t);
     }
 }

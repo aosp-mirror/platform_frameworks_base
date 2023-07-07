@@ -19,12 +19,16 @@ package android.telecom;
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.OutcomeReceiver;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 
 import com.android.internal.telecom.IInCallAdapter;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Receives commands from {@link InCallService} implementations which should be executed by
@@ -223,6 +227,39 @@ public final class InCallAdapter {
         try {
             mAdapter.setAudioRoute(CallAudioState.ROUTE_BLUETOOTH, bluetoothAddress);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Request audio routing to a specific CallEndpoint.. See {@link CallEndpoint}.
+     *
+     * @param endpoint The call endpoint to use.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of the endpoint change.
+     */
+    public void requestCallEndpointChange(CallEndpoint endpoint, Executor executor,
+            OutcomeReceiver<Void, CallEndpointException> callback) {
+        try {
+            mAdapter.requestCallEndpointChange(endpoint, new ResultReceiver(null) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle result) {
+                    super.onReceiveResult(resultCode, result);
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        if (resultCode == CallEndpoint.ENDPOINT_OPERATION_SUCCESS) {
+                            executor.execute(() -> callback.onResult(null));
+                        } else {
+                            executor.execute(() -> callback.onError(
+                                    result.getParcelable(CallEndpointException.CHANGE_ERROR,
+                                            CallEndpointException.class)));
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+            });
+        } catch (RemoteException e) {
+            Log.d(this, "Remote exception calling requestCallEndpointChange");
         }
     }
 

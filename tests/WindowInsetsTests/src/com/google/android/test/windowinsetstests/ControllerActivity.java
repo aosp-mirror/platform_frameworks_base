@@ -83,7 +83,12 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
         final View contentView = findViewById(R.id.content);
         contentView.setOnApplyWindowInsetsListener(this);
         contentView.getWindowInsetsController().addOnControllableInsetsChangedListener(
-                (c, types) -> mTextControllableInsets.setText("ControllableInsetsTypes=" + types));
+                (c, types) -> mTextControllableInsets.setText(
+                        "ControllableInsetsTypes:\n" + insetsTypesToString(types)));
+    }
+
+    private static String insetsTypesToString(int types) {
+        return types == 0 ? "none" : WindowInsets.Type.toString(types);
     }
 
     @Override

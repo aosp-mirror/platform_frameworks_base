@@ -16,16 +16,16 @@
 
 #include "test/Fixture.h"
 
-#include <dirent.h>
-
 #include <android-base/errors.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
 #include <android-base/utf8.h>
 #include <androidfw/StringPiece.h>
+#include <dirent.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "Diagnostics.h"
 #include "cmd/Compile.h"
 #include "cmd/Link.h"
 #include "io/FileStream.h"
@@ -38,11 +38,12 @@ namespace aapt {
 
 const char* CommandTestFixture::kDefaultPackageName = "com.aapt.command.test";
 
-void ClearDirectory(const android::StringPiece& path) {
-  const std::string root_dir = path.to_string();
+void ClearDirectory(android::StringPiece path) {
+  const std::string root_dir(path);
   std::unique_ptr<DIR, decltype(closedir)*> dir(opendir(root_dir.data()), closedir);
   if (!dir) {
-    StdErrDiagnostics().Error(DiagMessage() << android::base::SystemErrorCodeToString(errno));
+    StdErrDiagnostics().Error(android::DiagMessage()
+                              << android::base::SystemErrorCodeToString(errno));
     return;
   }
 
@@ -90,38 +91,38 @@ void TestDirectoryFixture::WriteFile(const std::string& path, const std::string&
 }
 
 bool CommandTestFixture::CompileFile(const std::string& path, const std::string& contents,
-                                     const android::StringPiece& out_dir, IDiagnostics* diag) {
+                                     android::StringPiece out_dir, android::IDiagnostics* diag) {
   WriteFile(path, contents);
   CHECK(file::mkdirs(out_dir.data()));
   return CompileCommand(diag).Execute({path, "-o", out_dir, "-v"}, &std::cerr) == 0;
 }
 
-bool CommandTestFixture::Link(const std::vector<std::string>& args, IDiagnostics* diag) {
+bool CommandTestFixture::Link(const std::vector<std::string>& args, android::IDiagnostics* diag) {
   std::vector<android::StringPiece> link_args;
   for(const std::string& arg : args) {
     link_args.emplace_back(arg);
   }
 
   // Link against the android SDK
-  std::string android_sdk = file::BuildPath({android::base::GetExecutableDirectory(),
-                                             "integration-tests", "CommandTests",
-                                             "android-28.jar"});
+  std::string android_sdk =
+      file::BuildPath({android::base::GetExecutableDirectory(), "integration-tests", "CommandTests",
+                       "android-33.jar"});
   link_args.insert(link_args.end(), {"-I", android_sdk});
 
   return LinkCommand(diag).Execute(link_args, &std::cerr) == 0;
 }
 
-bool CommandTestFixture::Link(const std::vector<std::string>& args,
-                              const android::StringPiece& flat_dir, IDiagnostics* diag) {
+bool CommandTestFixture::Link(const std::vector<std::string>& args, android::StringPiece flat_dir,
+                              android::IDiagnostics* diag) {
   std::vector<android::StringPiece> link_args;
   for(const std::string& arg : args) {
     link_args.emplace_back(arg);
   }
 
   // Link against the android SDK
-  std::string android_sdk = file::BuildPath({android::base::GetExecutableDirectory(),
-                                             "integration-tests", "CommandTests",
-                                             "android-28.jar"});
+  std::string android_sdk =
+      file::BuildPath({android::base::GetExecutableDirectory(), "integration-tests", "CommandTests",
+                       "android-33.jar"});
   link_args.insert(link_args.end(), {"-I", android_sdk});
 
   // Add the files from the compiled resources directory to the link file arguments
@@ -146,7 +147,7 @@ std::string CommandTestFixture::GetDefaultManifest(const char* package_name) {
 }
 
 std::unique_ptr<io::IData> CommandTestFixture::OpenFileAsData(LoadedApk* apk,
-                                                              const android::StringPiece& path) {
+                                                              android::StringPiece path) {
   return apk
       ->GetFileCollection()
       ->FindFile(path)
@@ -210,7 +211,7 @@ LinkCommandBuilder& LinkCommandBuilder::AddFlag(const std::string& flag) {
 }
 
 LinkCommandBuilder& LinkCommandBuilder::AddCompiledResDir(const std::string& dir,
-                                                          IDiagnostics* diag) {
+                                                          android::IDiagnostics* diag) {
   if (auto files = file::FindFiles(dir, diag)) {
     for (std::string& compile_file : files.value()) {
       args_.emplace_back(file::BuildPath({dir, compile_file}));

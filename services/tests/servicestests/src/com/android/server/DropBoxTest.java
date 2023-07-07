@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Looper;
 import android.os.Parcel;
@@ -66,7 +67,7 @@ public class DropBoxTest extends AndroidTestCase {
         mContext = new ContextWrapper(super.getContext()) {
             @Override
             public void sendBroadcastAsUser(Intent intent,
-                    UserHandle user, String receiverPermission) {
+                    UserHandle user, String receiverPermission, Bundle options) {
                 // Don't actually send broadcasts.
             }
         };

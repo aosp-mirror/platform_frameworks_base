@@ -79,6 +79,8 @@ public final class ClientProfile {
      */
     private Set<Integer> mShareFeClientIds = new HashSet<>();
 
+    private Set<Integer> mUsingDemuxHandles = new HashSet<>();
+
     /**
      * List of the Lnb handles that are used by the current client.
      */
@@ -230,6 +232,31 @@ public final class ClientProfile {
         mUsingFrontendHandles.clear();
         mShareFeClientIds.clear();
         mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+    }
+
+    /**
+     * Set when the client starts to use a Demux.
+     *
+     * @param demuxHandle the demux being used.
+     */
+    public void useDemux(int demuxHandle) {
+        mUsingDemuxHandles.add(demuxHandle);
+    }
+
+    /**
+     * Get the set of demux handles in use.
+     */
+    public Set<Integer> getInUseDemuxHandles() {
+        return mUsingDemuxHandles;
+    }
+
+    /**
+     * Called when the client released a Demux.
+     *
+     * @param demuxHandle the demux handl being released.
+     */
+    public void releaseDemux(int demuxHandle) {
+        mUsingDemuxHandles.remove(demuxHandle);
     }
 
     /**

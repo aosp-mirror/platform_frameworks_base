@@ -35,11 +35,11 @@ import android.view.WindowMetrics;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Switch;
-import android.window.SurfaceSyncer;
+import android.window.SurfaceSyncGroup;
 
 /**
  * Test app that allows the user to resize the SurfaceView and have the new buffer sync with the
- * main window. This tests that {@link SurfaceSyncer} is working correctly.
+ * main window. This tests that {@link SurfaceSyncGroup} is working correctly.
  */
 public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.Callback {
     private static final String TAG = "SurfaceViewSyncActivity";
@@ -49,12 +49,10 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
 
     private RenderingThread mRenderingThread;
 
-    private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
-
     private Button mExpandButton;
     private Switch mEnableSyncSwitch;
 
-    private int mLastSyncId = -1;
+    private SurfaceSyncGroup mSyncGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +74,7 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
     }
 
     private void updateSurfaceViewSize(Rect bounds, View container) {
-        if (mLastSyncId >= 0) {
+        if (mSyncGroup != null) {
             return;
         }
 
@@ -91,8 +89,8 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
         mLastExpanded = !mLastExpanded;
 
         if (mEnableSyncSwitch.isChecked()) {
-            mLastSyncId = mSurfaceSyncer.setupSync(() -> { });
-            mSurfaceSyncer.addToSync(mLastSyncId, container);
+            mSyncGroup = new SurfaceSyncGroup(TAG);
+            mSyncGroup.add(container.getRootSurfaceControl(), null /* runnable */);
         }
 
         ViewGroup.LayoutParams svParams = mSurfaceView.getLayoutParams();
@@ -112,14 +110,14 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
         if (mEnableSyncSwitch.isChecked()) {
-            if (mLastSyncId < 0) {
+            if (mSyncGroup == null) {
                 mRenderingThread.renderFrame(null, width, height);
                 return;
             }
-            mSurfaceSyncer.addToSync(mLastSyncId, mSurfaceView, frameCallback ->
+            mSyncGroup.add(mSurfaceView, frameCallback ->
                     mRenderingThread.renderFrame(frameCallback, width, height));
-            mSurfaceSyncer.markSyncReady(mLastSyncId);
-            mLastSyncId = -1;
+            mSyncGroup.markSyncReady();
+            mSyncGroup = null;
         } else {
             mRenderingThread.renderFrame(null, width, height);
         }
@@ -133,7 +131,7 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
     private static class RenderingThread extends HandlerThread {
         private final SurfaceHolder mSurfaceHolder;
         private Handler mHandler;
-        private SurfaceSyncer.SurfaceViewFrameCallback mFrameCallback;
+        private SurfaceSyncGroup.SurfaceViewFrameCallback mFrameCallback;
         private final Point mSurfaceSize = new Point();
 
         int mColorValue = 0;
@@ -147,7 +145,7 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
             mPaint.setTextSize(100);
         }
 
-        public void renderFrame(SurfaceSyncer.SurfaceViewFrameCallback frameCallback, int width,
+        public void renderFrame(SurfaceSyncGroup.SurfaceViewFrameCallback frameCallback, int width,
                 int height) {
             if (mHandler != null) {
                 mHandler.post(() -> {
