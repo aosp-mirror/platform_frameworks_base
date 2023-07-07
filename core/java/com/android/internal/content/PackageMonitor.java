@@ -99,12 +99,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 (thread == null) ? BackgroundThread.getHandler() : new Handler(thread));
     }
 
-    public void register(Context context, UserHandle user,
-            boolean externalStorage, Handler handler) {
-        // Remove until all using code are updated to new method.
-        register(context, user, handler);
-    }
-
 
     /**
      * Register for notifications of package changes such as install, removal and other events.
