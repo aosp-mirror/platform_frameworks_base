@@ -20,6 +20,7 @@ import android.app.ActivityManager
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
+import android.content.pm.UserInfo
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
@@ -47,6 +48,7 @@ import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -92,6 +94,23 @@ class ShadeInteractorTest : SysuiTestCase() {
                 mainDispatcher = testDispatcher,
                 repository = userRepository,
             )
+
+        runBlocking {
+            val userInfos =
+                listOf(
+                    UserInfo(
+                        /* id= */ 0,
+                        /* name= */ "zero",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_PRIMARY or
+                            UserInfo.FLAG_ADMIN or
+                            UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
+                    ),
+                )
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+        }
         userInteractor =
             UserInteractor(
                 applicationContext = context,

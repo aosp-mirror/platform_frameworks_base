@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -237,6 +238,10 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
+        runBlocking {
+            userRepository.setUserInfos(listOf(USER_0))
+            userRepository.setSelectedUserInfo(USER_0)
+        }
         return StatusBarUserChipViewModel(
             context = context,
             interactor =
