@@ -34,4 +34,9 @@ interface IShellTransitions {
      * Unregisters a remote transition handler.
      */
     oneway void unregisterRemote(in RemoteTransition remoteTransition) = 2;
+
+    /**
+     * Retrieves the apply-token used by transactions in Shell
+     */
+    IBinder getShellApplyToken() = 3;
 }

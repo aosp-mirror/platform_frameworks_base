@@ -147,4 +147,18 @@ public class SystemConfigManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Return the components that are enabled by default as VR mode listener services.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.QUERY_ALL_PACKAGES)
+    public List<ComponentName> getDefaultVrComponents() {
+        try {
+            return mInterface.getDefaultVrComponents();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return Collections.emptyList();
+    }
 }

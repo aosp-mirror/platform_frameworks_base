@@ -15,50 +15,51 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.Dumpable
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable
+import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
-import java.io.PrintWriter
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import javax.inject.Inject
 
 /**
  * Handles the attachment of [Coordinator]s to the [NotifPipeline] so that the
  * Coordinators can register their respective callbacks.
  */
-interface NotifCoordinators : Coordinator, Dumpable
+interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-    dumpManager: DumpManager,
-    notifPipelineFlags: NotifPipelineFlags,
-    dataStoreCoordinator: DataStoreCoordinator,
-    hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
-    hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
-    keyguardCoordinator: KeyguardCoordinator,
-    rankingCoordinator: RankingCoordinator,
-    appOpsCoordinator: AppOpsCoordinator,
-    deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
-    bubbleCoordinator: BubbleCoordinator,
-    headsUpCoordinator: HeadsUpCoordinator,
-    gutsCoordinator: GutsCoordinator,
-    conversationCoordinator: ConversationCoordinator,
-    debugModeCoordinator: DebugModeCoordinator,
-    groupCountCoordinator: GroupCountCoordinator,
-    mediaCoordinator: MediaCoordinator,
-    preparationCoordinator: PreparationCoordinator,
-    remoteInputCoordinator: RemoteInputCoordinator,
-    rowAppearanceCoordinator: RowAppearanceCoordinator,
-    stackCoordinator: StackCoordinator,
-    shadeEventCoordinator: ShadeEventCoordinator,
-    smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
-    viewConfigCoordinator: ViewConfigCoordinator,
-    visualStabilityCoordinator: VisualStabilityCoordinator,
-    sensitiveContentCoordinator: SensitiveContentCoordinator,
+        sectionStyleProvider: SectionStyleProvider,
+        dataStoreCoordinator: DataStoreCoordinator,
+        hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
+        hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
+        keyguardCoordinator: KeyguardCoordinator,
+        rankingCoordinator: RankingCoordinator,
+        appOpsCoordinator: AppOpsCoordinator,
+        deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
+        bubbleCoordinator: BubbleCoordinator,
+        headsUpCoordinator: HeadsUpCoordinator,
+        gutsCoordinator: GutsCoordinator,
+        conversationCoordinator: ConversationCoordinator,
+        debugModeCoordinator: DebugModeCoordinator,
+        groupCountCoordinator: GroupCountCoordinator,
+        groupWhenCoordinator: GroupWhenCoordinator,
+        mediaCoordinator: MediaCoordinator,
+        preparationCoordinator: PreparationCoordinator,
+        remoteInputCoordinator: RemoteInputCoordinator,
+        rowAppearanceCoordinator: RowAppearanceCoordinator,
+        stackCoordinator: StackCoordinator,
+        shadeEventCoordinator: ShadeEventCoordinator,
+        smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
+        viewConfigCoordinator: ViewConfigCoordinator,
+        visualStabilityCoordinator: VisualStabilityCoordinator,
+        sensitiveContentCoordinator: SensitiveContentCoordinator,
+        dismissibilityCoordinator: DismissibilityCoordinator,
 ) : NotifCoordinators {
 
+    private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
     private val mOrderedSections: MutableList<NotifSectioner> = ArrayList()
 
@@ -66,15 +67,8 @@ class NotifCoordinatorsImpl @Inject constructor(
      * Creates all the coordinators.
      */
     init {
-        dumpManager.registerDumpable(TAG, this)
-
-        // TODO(b/208866714): formalize the system by which some coordinators may be required by the
-        //  pipeline, such as this DataStoreCoordinator which cannot be removed, as it's a critical
-        //  glue between the pipeline and parts of SystemUI which depend on pipeline output via the
-        //  NotifLiveDataStore.
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            mCoordinators.add(dataStoreCoordinator)
-        }
+        // Attach core coordinators.
+        mCoreCoordinators.add(dataStoreCoordinator)
 
         // Attach normal coordinators.
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
@@ -87,6 +81,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(debugModeCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(groupCountCoordinator)
+        mCoordinators.add(groupWhenCoordinator)
         mCoordinators.add(mediaCoordinator)
         mCoordinators.add(rowAppearanceCoordinator)
         mCoordinators.add(stackCoordinator)
@@ -94,26 +89,28 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
-        if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
-            mCoordinators.add(smartspaceDedupingCoordinator)
-        }
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            mCoordinators.add(headsUpCoordinator)
-            mCoordinators.add(gutsCoordinator)
-            mCoordinators.add(preparationCoordinator)
-            mCoordinators.add(remoteInputCoordinator)
-        }
+        mCoordinators.add(smartspaceDedupingCoordinator)
+        mCoordinators.add(headsUpCoordinator)
+        mCoordinators.add(gutsCoordinator)
+        mCoordinators.add(preparationCoordinator)
+        mCoordinators.add(remoteInputCoordinator)
+        mCoordinators.add(dismissibilityCoordinator)
 
         // Manually add Ordered Sections
-        // HeadsUp > FGS > People > Alerting > Silent > Minimized > Unknown/Default
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        }
+        mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
         mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
-        mOrderedSections.add(conversationCoordinator.sectioner) // People
+        mOrderedSections.add(conversationCoordinator.peopleAlertingSectioner) // People Alerting
+        mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
         mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
+
+        sectionStyleProvider.setMinimizedSections(setOf(rankingCoordinator.minimizedSectioner))
+        sectionStyleProvider.setSilentSections(listOf(
+                conversationCoordinator.peopleSilentSectioner,
+                rankingCoordinator.silentSectioner,
+                rankingCoordinator.minimizedSectioner,
+        ))
     }
 
     /**
@@ -121,21 +118,22 @@ class NotifCoordinatorsImpl @Inject constructor(
      * [Pluggable]s, [NotifCollectionListener]s and [NotifLifetimeExtender]s.
      */
     override fun attach(pipeline: NotifPipeline) {
+        for (c in mCoreCoordinators) {
+            c.attach(pipeline)
+        }
         for (c in mCoordinators) {
             c.attach(pipeline)
         }
         pipeline.setSections(mOrderedSections)
     }
 
-    override fun dump(pw: PrintWriter, args: Array<String>) {
-        pw.println()
-        pw.println("$TAG:")
-        for (c in mCoordinators) {
-            pw.println("\t${c.javaClass}")
-        }
-        for (s in mOrderedSections) {
-            pw.println("\t${s.name}")
-        }
+    /*
+     * As part of the NotifPipeline dumpable, dumps the list of coordinators; sections are omitted
+     * as they are dumped in the RenderStageManager instead.
+     */
+    override fun dumpPipeline(d: PipelineDumper) = with(d) {
+        dump("core coordinators", mCoreCoordinators)
+        dump("normal coordinators", mCoordinators)
     }
 
     companion object {

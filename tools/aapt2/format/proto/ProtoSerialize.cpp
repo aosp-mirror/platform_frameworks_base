@@ -17,7 +17,8 @@
 #include "format/proto/ProtoSerialize.h"
 
 #include "ValueVisitor.h"
-#include "util/BigBuffer.h"
+#include "androidfw/BigBuffer.h"
+#include "optimize/Obfuscator.h"
 
 using android::ConfigDescription;
 
@@ -25,22 +26,24 @@ using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace aapt {
 
-void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag) {
-  BigBuffer buffer(1024);
-  StringPool::FlattenUtf8(&buffer, pool, diag);
+void SerializeStringPoolToPb(const android::StringPool& pool, pb::StringPool* out_pb_pool,
+                             android::IDiagnostics* diag) {
+  android::BigBuffer buffer(1024);
+  android::StringPool::FlattenUtf8(&buffer, pool, diag);
 
   std::string* data = out_pb_pool->mutable_data();
   data->reserve(buffer.size());
 
   size_t offset = 0;
-  for (const BigBuffer::Block& block : buffer) {
+  for (const android::BigBuffer::Block& block : buffer) {
     data->insert(data->begin() + offset, block.buffer.get(), block.buffer.get() + block.size);
     offset += block.size;
   }
 }
 
-void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source* out_pb_source) {
-  StringPool::Ref ref = src_pool->MakeRef(source.path);
+void SerializeSourceToPb(const android::Source& source, android::StringPool* src_pool,
+                         pb::Source* out_pb_source) {
+  android::StringPool::Ref ref = src_pool->MakeRef(source.path);
   out_pb_source->set_path_idx(static_cast<uint32_t>(ref.index()));
   if (source.line) {
     out_pb_source->mutable_position()->set_line_number(static_cast<uint32_t>(source.line.value()));
@@ -272,11 +275,15 @@ void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_
   }
 
   out_pb_config->set_sdk_version(config.sdkVersion);
+
+  // The constant values are the same across the structs.
+  out_pb_config->set_grammatical_gender(
+      static_cast<pb::Configuration_GrammaticalGender>(config.grammaticalInflection));
 }
 
 static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item,
                                          std::vector<Overlayable*>& serialized_overlayables,
-                                         StringPool* source_pool, pb::Entry* pb_entry,
+                                         android::StringPool* source_pool, pb::Entry* pb_entry,
                                          pb::ResourceTable* pb_table) {
   // Retrieve the index of the overlayable in the list of groups that have already been serialized.
   size_t i;
@@ -337,13 +344,17 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
 }
 
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
-                        IDiagnostics* diag, SerializeTableOptions options) {
-  auto source_pool = (options.exclude_sources) ? nullptr : util::make_unique<StringPool>();
+                        android::IDiagnostics* diag, SerializeTableOptions options) {
+  auto source_pool = (options.exclude_sources) ? nullptr : util::make_unique<android::StringPool>();
 
   pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
   pb_fingerprint->set_tool(util::GetToolName());
   pb_fingerprint->set_version(util::GetToolFingerprint());
-
+  for (auto it = table.included_packages_.begin(); it != table.included_packages_.end(); ++it) {
+    pb::DynamicRefTable* pb_dynamic_ref = out_table->add_dynamic_ref_table();
+    pb_dynamic_ref->mutable_package_id()->set_id(it->first);
+    pb_dynamic_ref->set_package_name(it->second);
+  }
   std::vector<Overlayable*> overlayables;
   auto table_view = table.GetPartitionedView();
   for (const auto& package : table_view.packages) {
@@ -358,23 +369,23 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       if (type.id) {
         pb_type->mutable_type_id()->set_id(type.id.value());
       }
-      pb_type->set_name(to_string(type.type).to_string());
+      pb_type->set_name(type.named_type.to_string());
 
-      // hardcoded string uses characters which make it an invalid resource name
-      static const char* obfuscated_resource_name = "0_resource_name_obfuscated";
       for (const auto& entry : type.entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
         if (entry.id) {
           pb_entry->mutable_entry_id()->set_id(entry.id.value());
         }
-        ResourceName resource_name({}, type.type, entry.name);
-        if (options.collapse_key_stringpool &&
-            options.name_collapse_exemptions.find(resource_name) ==
-            options.name_collapse_exemptions.end()) {
-          pb_entry->set_name(obfuscated_resource_name);
-        } else {
-          pb_entry->set_name(entry.name);
-        }
+        auto onObfuscate = [pb_entry, &entry](Obfuscator::Result obfuscatedResult,
+                                              const ResourceName& resource_name) {
+          pb_entry->set_name(obfuscatedResult == Obfuscator::Result::Obfuscated
+                                 ? Obfuscator::kObfuscatedResourceName
+                                 : entry.name);
+        };
+
+        Obfuscator::ObfuscateResourceName(options.collapse_key_stringpool,
+                                          options.name_collapse_exemptions, type.named_type, entry,
+                                          onObfuscate);
 
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
@@ -482,7 +493,7 @@ static void SerializeMacroToPb(const Macro& ref, pb::MacroBody* pb_macro) {
 }
 
 template <typename T>
-static void SerializeItemMetaDataToPb(const Item& item, T* pb_item, StringPool* src_pool) {
+static void SerializeItemMetaDataToPb(const Item& item, T* pb_item, android::StringPool* src_pool) {
   if (src_pool != nullptr) {
     SerializeSourceToPb(item.GetSource(), src_pool, pb_item->mutable_source());
   }
@@ -526,7 +537,7 @@ class ValueSerializer : public ConstValueVisitor {
  public:
   using ConstValueVisitor::Visit;
 
-  ValueSerializer(pb::Value* out_value, StringPool* src_pool)
+  ValueSerializer(pb::Value* out_value, android::StringPool* src_pool)
       : out_value_(out_value), src_pool_(src_pool) {
   }
 
@@ -545,7 +556,7 @@ class ValueSerializer : public ConstValueVisitor {
   void Visit(const StyledString* str) override {
     pb::StyledString* pb_str = out_value_->mutable_item()->mutable_styled_str();
     pb_str->set_value(str->value->value);
-    for (const StringPool::Span& span : str->value->spans) {
+    for (const android::StringPool::Span& span : str->value->spans) {
       pb::StyledString::Span* pb_span = pb_str->add_span();
       pb_span->set_tag(*span.name);
       pb_span->set_first_char(span.first_char);
@@ -693,12 +704,12 @@ class ValueSerializer : public ConstValueVisitor {
 
  private:
   pb::Value* out_value_;
-  StringPool* src_pool_;
+  android::StringPool* src_pool_;
 };
 
 }  // namespace
 
-void SerializeValueToPb(const Value& value, pb::Value* out_value, StringPool* src_pool) {
+void SerializeValueToPb(const Value& value, pb::Value* out_value, android::StringPool* src_pool) {
   ValueSerializer serializer(out_value, src_pool);
   value.Accept(&serializer);
 

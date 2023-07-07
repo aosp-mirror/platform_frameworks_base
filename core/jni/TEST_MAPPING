@@ -1,0 +1,39 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.util.CharsetUtilsTest"
+        },
+        {
+          "include-filter": "com.android.internal.util.FastDataTest"
+        }
+      ],
+      "file_patterns": ["CharsetUtils|FastData"]
+    },
+    {
+      "name": "SelfTargetingOverlayDeviceTests",
+      "file_patterns": ["Overlay"]
+    }
+  ],
+  "presubmit-large": [
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.om.cts"
+        },
+        {
+          "include-filter": "android.content.res.loader.cts"
+        }
+      ]
+    }
+  ]
+}

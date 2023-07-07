@@ -23,8 +23,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.animation.Interpolators;
 
 import java.util.function.Consumer;
 
@@ -74,11 +74,6 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         mSecondaryView = findSecondaryView();
         setVisible(false /* nowVisible */, false /* animate */);
         setSecondaryVisible(false /* nowVisible */, false /* animate */);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
         setOutlineProvider(null);
     }
 

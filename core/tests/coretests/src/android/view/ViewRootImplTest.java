@@ -297,6 +297,20 @@ public class ViewRootImplTest {
         }
     }
 
+    @Test
+    public void whenDispatchFakeFocus_focusDoesNotPersist() throws Exception {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        view.clearFocus();
+
+        assertThat(view.hasWindowFocus()).isFalse();
+
+        mViewRootImpl = view.getViewRootImpl();
+
+        mViewRootImpl.dispatchCompatFakeFocus();
+        assertThat(view.hasWindowFocus()).isFalse();
+    }
+
     /**
      * When window doesn't have focus, keys should be dropped.
      */

@@ -78,6 +78,7 @@ public abstract class KeyStore2ParameterUtils {
                 kp.value = KeyParameterValue.blockMode(v);
                 break;
             case Tag.DIGEST:
+            case Tag.RSA_OAEP_MGF_DIGEST:
                 kp.value = KeyParameterValue.digest(v);
                 break;
             case Tag.EC_CURVE:

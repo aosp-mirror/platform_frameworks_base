@@ -2,29 +2,42 @@
 #define LOG_TAG "BitmapFactory"
 
 #include "BitmapFactory.h"
+
+#include <Gainmap.h>
+#include <HardwareBitmapUploader.h>
+#include <androidfw/Asset.h>
+#include <androidfw/ResourceTypes.h>
+#include <cutils/compiler.h>
+#include <fcntl.h>
+#include <nativehelper/JNIPlatformHelp.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/stat.h>
+
+#include <memory>
+
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "FrontBufferedStream.h"
 #include "GraphicsJNI.h"
 #include "MimeType.h"
 #include "NinePatchPeeker.h"
 #include "SkAndroidCodec.h"
+#include "SkBitmap.h"
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
-#include "SkMath.h"
+#include "SkColorSpace.h"
+#include "SkEncodedImageFormat.h"
+#include "SkGainmapInfo.h"
+#include "SkImageInfo.h"
+#include "SkPaint.h"
 #include "SkPixelRef.h"
+#include "SkRect.h"
+#include "SkRefCnt.h"
+#include "SkSamplingOptions.h"
+#include "SkSize.h"
 #include "SkStream.h"
 #include "SkString.h"
-#include "SkUtils.h"
 #include "Utils.h"
-
-#include <HardwareBitmapUploader.h>
-#include <nativehelper/JNIPlatformHelp.h>
-#include <androidfw/Asset.h>
-#include <androidfw/ResourceTypes.h>
-#include <cutils/compiler.h>
-#include <fcntl.h>
-#include <memory>
-#include <stdio.h>
-#include <sys/stat.h>
 
 jfieldID gOptions_justBoundsFieldID;
 jfieldID gOptions_sampleSizeFieldID;
@@ -132,7 +145,7 @@ public:
         }
 
         const size_t size = info.computeByteSize(bitmap->rowBytes());
-        if (size > SK_MaxS32) {
+        if (size > INT32_MAX) {
             ALOGW("bitmap is too large");
             return false;
         }
@@ -171,6 +184,123 @@ static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
                            const int sampleSize) {
     return needsFineScale(fullSize.width(), decodedSize.width(), sampleSize) ||
            needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
+}
+
+static bool decodeGainmap(std::unique_ptr<SkStream> gainmapStream, const SkGainmapInfo& gainmapInfo,
+                          sp<uirenderer::Gainmap>* outGainmap, const int sampleSize, float scale) {
+    std::unique_ptr<SkAndroidCodec> codec;
+    codec = SkAndroidCodec::MakeFromStream(std::move(gainmapStream), nullptr);
+    if (!codec) {
+        ALOGE("Can not create a codec for Gainmap.");
+        return false;
+    }
+    SkColorType decodeColorType = kN32_SkColorType;
+    if (codec->getInfo().colorType() == kGray_8_SkColorType) {
+        decodeColorType = kGray_8_SkColorType;
+    }
+    decodeColorType = codec->computeOutputColorType(decodeColorType);
+    sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(decodeColorType, nullptr);
+
+    SkISize size = codec->getSampledDimensions(sampleSize);
+
+    int scaledWidth = size.width();
+    int scaledHeight = size.height();
+    bool willScale = false;
+
+    // Apply a fine scaling step if necessary.
+    if (needsFineScale(codec->getInfo().dimensions(), size, sampleSize) || scale != 1.0f) {
+        willScale = true;
+        // The operation below may loose precision (integer division), but it is put this way to
+        // mimic main image scale calculation
+        scaledWidth = static_cast<int>((codec->getInfo().width() / sampleSize) * scale + 0.5f);
+        scaledHeight = static_cast<int>((codec->getInfo().height() / sampleSize) * scale + 0.5f);
+    }
+
+    SkAlphaType alphaType = codec->computeOutputAlphaType(false);
+
+    const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(), decodeColorType,
+                                                     alphaType, decodeColorSpace);
+
+    SkImageInfo bitmapInfo = decodeInfo;
+    if (decodeColorType == kGray_8_SkColorType) {
+        // We treat gray8 as alpha8 in Bitmap's API surface
+        bitmapInfo = bitmapInfo.makeColorType(kAlpha_8_SkColorType);
+    }
+    SkBitmap decodeBitmap;
+    sk_sp<Bitmap> nativeBitmap = nullptr;
+
+    if (!decodeBitmap.setInfo(bitmapInfo)) {
+        ALOGE("Failed to setInfo.");
+        return false;
+    }
+
+    if (willScale) {
+        if (!decodeBitmap.tryAllocPixels(nullptr)) {
+            ALOGE("OOM allocating gainmap pixels.");
+            return false;
+        }
+    } else {
+        nativeBitmap = android::Bitmap::allocateHeapBitmap(&decodeBitmap);
+        if (!nativeBitmap) {
+            ALOGE("OOM allocating gainmap pixels.");
+            return false;
+        }
+    }
+
+    // Use SkAndroidCodec to perform the decode.
+    SkAndroidCodec::AndroidOptions codecOptions;
+    codecOptions.fZeroInitialized = SkCodec::kYes_ZeroInitialized;
+    codecOptions.fSampleSize = sampleSize;
+    SkCodec::Result result = codec->getAndroidPixels(decodeInfo, decodeBitmap.getPixels(),
+                                                     decodeBitmap.rowBytes(), &codecOptions);
+    switch (result) {
+        case SkCodec::kSuccess:
+        case SkCodec::kIncompleteInput:
+            break;
+        default:
+            ALOGE("Error decoding gainmap.");
+            return false;
+    }
+
+    if (willScale) {
+        SkBitmap gainmapBitmap;
+        const float scaleX = scaledWidth / float(decodeBitmap.width());
+        const float scaleY = scaledHeight / float(decodeBitmap.height());
+
+        SkColorType scaledColorType = decodeBitmap.colorType();
+        gainmapBitmap.setInfo(
+                bitmapInfo.makeWH(scaledWidth, scaledHeight).makeColorType(scaledColorType));
+
+        nativeBitmap = android::Bitmap::allocateHeapBitmap(&gainmapBitmap);
+        if (!nativeBitmap) {
+            ALOGE("OOM allocating gainmap pixels.");
+            return false;
+        }
+
+        SkPaint paint;
+        // kSrc_Mode instructs us to overwrite the uninitialized pixels in
+        // outputBitmap.  Otherwise we would blend by default, which is not
+        // what we want.
+        paint.setBlendMode(SkBlendMode::kSrc);
+
+        SkCanvas canvas(gainmapBitmap, SkCanvas::ColorBehavior::kLegacy);
+        canvas.scale(scaleX, scaleY);
+        decodeBitmap.setImmutable();  // so .asImage() doesn't make a copy
+        canvas.drawImage(decodeBitmap.asImage(), 0.0f, 0.0f,
+                         SkSamplingOptions(SkFilterMode::kLinear), &paint);
+    }
+
+    auto gainmap = sp<uirenderer::Gainmap>::make();
+    if (!gainmap) {
+        ALOGE("OOM allocating Gainmap");
+        return false;
+    }
+
+    gainmap->info = gainmapInfo;
+    gainmap->bitmap = std::move(nativeBitmap);
+    *outGainmap = std::move(gainmap);
+
+    return true;
 }
 
 static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
@@ -276,6 +406,14 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
     if (decodeColorType == kRGBA_F16_SkColorType && isHardware &&
             !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        decodeColorType = kN32_SkColorType;
+    }
+
+    // b/276879147, fallback to RGBA_8888 when decoding HEIF and P010 is not supported.
+    if (decodeColorType == kRGBA_1010102_SkColorType &&
+        codec->getEncodedFormat() == SkEncodedImageFormat::kHEIF &&
+        env->CallStaticBooleanMethod(gImageDecoder_class,
+                                     gImageDecoder_isP010SupportedForHEVCMethodID) == JNI_FALSE) {
         decodeColorType = kN32_SkColorType;
     }
 
@@ -476,6 +614,19 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         return nullObjectReturn("Got null SkPixelRef");
     }
 
+    bool hasGainmap = false;
+    SkGainmapInfo gainmapInfo;
+    std::unique_ptr<SkStream> gainmapStream = nullptr;
+    sp<uirenderer::Gainmap> gainmap = nullptr;
+    if (result == SkCodec::kSuccess) {
+        hasGainmap = codec->getAndroidGainmap(&gainmapInfo, &gainmapStream);
+    }
+
+    if (hasGainmap) {
+        hasGainmap =
+                decodeGainmap(std::move(gainmapStream), gainmapInfo, &gainmap, sampleSize, scale);
+    }
+
     if (!isMutable && javaBitmap == NULL) {
         // promise we will never change our pixels (great for sharing and pictures)
         outputBitmap.setImmutable();
@@ -483,6 +634,9 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     bool isPremultiplied = !requireUnpremultiplied;
     if (javaBitmap != nullptr) {
+        if (hasGainmap) {
+            reuseBitmap->setGainmap(std::move(gainmap));
+        }
         bitmap::reinitBitmap(env, javaBitmap, outputBitmap.info(), isPremultiplied);
         outputBitmap.notifyPixelsChanged();
         // If a java bitmap was passed in for reuse, pass it back
@@ -498,13 +652,25 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         if (!hardwareBitmap.get()) {
             return nullObjectReturn("Failed to allocate a hardware bitmap");
         }
+        if (hasGainmap) {
+            auto gm = uirenderer::Gainmap::allocateHardwareGainmap(gainmap);
+            if (gm) {
+                hardwareBitmap->setGainmap(std::move(gm));
+            }
+        }
+
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
                 ninePatchChunk, ninePatchInsets, -1);
     }
 
+    Bitmap* heapBitmap = defaultAllocator.getStorageObjAndReset();
+    if (hasGainmap && heapBitmap != nullptr) {
+        heapBitmap->setGainmap(std::move(gainmap));
+    }
+
     // now create the java bitmap
-    return bitmap::createBitmap(env, defaultAllocator.getStorageObjAndReset(),
-            bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
+    return bitmap::createBitmap(env, heapBitmap, bitmapCreateFlags, ninePatchChunk, ninePatchInsets,
+                                -1);
 }
 
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,

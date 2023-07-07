@@ -96,7 +96,7 @@ class LoaderAssetsProvider : public AssetsProvider {
   }
 
   bool ForEachFile(const std::string& /* root_path */,
-                   const std::function<void(const StringPiece&, FileType)>& /* f */) const {
+                   android::base::function_ref<void(StringPiece, FileType)> /* f */) const {
     return true;
   }
 
@@ -402,7 +402,7 @@ static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) 
     return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
 }
 
-static jboolean NativeIsUpToDate(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
+static jboolean NativeIsUpToDate(jlong ptr) {
     auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
     auto apk_assets = scoped_apk_assets->get();
     return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
@@ -500,24 +500,28 @@ static jboolean NativeDefinesOverlayable(JNIEnv* env, jclass /*clazz*/, jlong pt
 
 // JNI registration.
 static const JNINativeMethod gApkAssetsMethods[] = {
-    {"nativeLoad", "(ILjava/lang/String;ILandroid/content/res/loader/AssetsProvider;)J",
-     (void*)NativeLoad},
-    {"nativeLoadEmpty", "(ILandroid/content/res/loader/AssetsProvider;)J", (void*)NativeLoadEmpty},
-    {"nativeLoadFd",
-     "(ILjava/io/FileDescriptor;Ljava/lang/String;ILandroid/content/res/loader/AssetsProvider;)J",
-     (void*)NativeLoadFromFd},
-    {"nativeLoadFdOffsets",
-     "(ILjava/io/FileDescriptor;Ljava/lang/String;JJILandroid/content/res/loader/AssetsProvider;)J",
-     (void*)NativeLoadFromFdOffset},
-    {"nativeDestroy", "(J)V", (void*)NativeDestroy},
-    {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
-    {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
-    {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
-    {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
-    {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
-    {"nativeGetOverlayableInfo", "(JLjava/lang/String;)Landroid/content/om/OverlayableInfo;",
-     (void*)NativeGetOverlayableInfo},
-    {"nativeDefinesOverlayable", "(J)Z", (void*)NativeDefinesOverlayable},
+        {"nativeLoad", "(ILjava/lang/String;ILandroid/content/res/loader/AssetsProvider;)J",
+         (void*)NativeLoad},
+        {"nativeLoadEmpty", "(ILandroid/content/res/loader/AssetsProvider;)J",
+         (void*)NativeLoadEmpty},
+        {"nativeLoadFd",
+         "(ILjava/io/FileDescriptor;Ljava/lang/String;ILandroid/content/res/loader/"
+         "AssetsProvider;)J",
+         (void*)NativeLoadFromFd},
+        {"nativeLoadFdOffsets",
+         "(ILjava/io/FileDescriptor;Ljava/lang/String;JJILandroid/content/res/loader/"
+         "AssetsProvider;)J",
+         (void*)NativeLoadFromFdOffset},
+        {"nativeDestroy", "(J)V", (void*)NativeDestroy},
+        {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
+        {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
+        {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
+        // @CriticalNative
+        {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
+        {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
+        {"nativeGetOverlayableInfo", "(JLjava/lang/String;)Landroid/content/om/OverlayableInfo;",
+         (void*)NativeGetOverlayableInfo},
+        {"nativeDefinesOverlayable", "(J)Z", (void*)NativeDefinesOverlayable},
 };
 
 int register_android_content_res_ApkAssets(JNIEnv* env) {

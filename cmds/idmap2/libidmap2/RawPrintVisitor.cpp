@@ -89,22 +89,30 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
       print(target_entry.target_id, "target id");
     }
 
+
     pad(sizeof(Res_value::size) + sizeof(Res_value::res0));
 
-    print(target_entry.value.data_type, "type: %s",
-          utils::DataTypeToString(target_entry.value.data_type).data());
+    for (auto& target_entry_value : target_entry.values) {
+      auto value = target_entry_value.second;
 
-    Result<std::string> overlay_name(Error(""));
-    if (overlay_ != nullptr &&
-        (target_entry.value.data_value == Res_value::TYPE_REFERENCE ||
-         target_entry.value.data_value == Res_value::TYPE_DYNAMIC_REFERENCE)) {
-      overlay_name = overlay_->GetResourceName(target_entry.value.data_value);
-    }
+      print(target_entry_value.first.to_string(), false, "config: %s",
+          target_entry_value.first.toString().string());
 
-    if (overlay_name) {
-      print(target_entry.value.data_value, "data: %s", overlay_name->c_str());
-    } else {
-      print(target_entry.value.data_value, "data");
+      print(value.data_type, "type: %s",
+            utils::DataTypeToString(value.data_type).data());
+
+      Result<std::string> overlay_name(Error(""));
+      if (overlay_ != nullptr &&
+          (value.data_value == Res_value::TYPE_REFERENCE ||
+           value.data_value == Res_value::TYPE_DYNAMIC_REFERENCE)) {
+        overlay_name = overlay_->GetResourceName(value.data_value);
+      }
+
+      if (overlay_name) {
+        print(value.data_value, "data: %s", overlay_name->c_str());
+      } else {
+        print(value.data_value, "data");
+      }
     }
   }
 
@@ -138,6 +146,8 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
 void RawPrintVisitor::visit(const IdmapData::Header& header) {
   print(header.GetTargetEntryCount(), "target entry count");
   print(header.GetTargetInlineEntryCount(), "target inline entry count");
+  print(header.GetTargetInlineEntryValueCount(), "target inline entry value count");
+  print(header.GetConfigCount(), "config count");
   print(header.GetOverlayEntryCount(), "overlay entry count");
   print(header.GetStringPoolIndexOffset(), "string pool index offset");
 }

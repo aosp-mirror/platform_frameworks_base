@@ -21,6 +21,7 @@ import android.os.Build;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextWatcher;
+import android.text.style.TtsSpan;
 
 import com.android.i18n.phonenumbers.AsYouTypeFormatter;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
@@ -119,6 +120,13 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
             }
             mSelfChange = false;
         }
+
+        //remove previous TTS spans
+        TtsSpan[] ttsSpans = s.getSpans(0, s.length(), TtsSpan.class);
+        for (TtsSpan ttsSpan : ttsSpans) {
+            s.removeSpan(ttsSpan);
+        }
+
         PhoneNumberUtils.ttsSpanAsPhoneNumber(s, 0, s.length());
     }
 

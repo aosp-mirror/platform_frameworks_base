@@ -208,7 +208,7 @@ public final class AmbientBrightnessDayStats implements Parcelable {
     }
 
     private int getBucketIndex(float ambientBrightness) {
-        if (ambientBrightness < mBucketBoundaries[0]) {
+        if (ambientBrightness < mBucketBoundaries[0] || Float.isNaN(ambientBrightness)) {
             return -1;
         }
         int low = 0;

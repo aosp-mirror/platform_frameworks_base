@@ -23,7 +23,6 @@ import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
@@ -43,6 +42,8 @@ import java.util.Map;
  */
 public abstract class ClientTransactionHandler {
 
+    private boolean mIsExecutingLocalTransaction;
+
     // Schedule phase related logic and handlers.
 
     /** Prepare and schedule transaction for execution. */
@@ -57,9 +58,19 @@ public abstract class ClientTransactionHandler {
      */
     @VisibleForTesting
     public void executeTransaction(ClientTransaction transaction) {
-        transaction.preExecute(this);
-        getTransactionExecutor().execute(transaction);
-        transaction.recycle();
+        mIsExecutingLocalTransaction = true;
+        try {
+            transaction.preExecute(this);
+            getTransactionExecutor().execute(transaction);
+        } finally {
+            mIsExecutingLocalTransaction = false;
+            transaction.recycle();
+        }
+    }
+
+    /** Returns {@code true} if the current executing ClientTransaction is from local request. */
+    public boolean isExecutingLocalTransaction() {
+        return mIsExecutingLocalTransaction;
     }
 
     /**
@@ -97,8 +108,8 @@ public abstract class ClientTransactionHandler {
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(@NonNull ActivityClientRecord r, boolean finished,
-            boolean userLeaving, int configChanges, PendingTransactionActions pendingActions,
-            String reason);
+            boolean userLeaving, int configChanges, boolean autoEnteringPip,
+            PendingTransactionActions pendingActions, String reason);
 
     /**
      * Resume the activity.
@@ -109,7 +120,8 @@ public abstract class ClientTransactionHandler {
      * @param reason Reason for performing this operation.
      */
     public abstract void handleResumeActivity(@NonNull ActivityClientRecord r,
-            boolean finalStateRequest, boolean isForward, String reason);
+            boolean finalStateRequest, boolean isForward, boolean shouldSendCompatFakeFocus,
+            String reason);
 
     /**
      * Notify the activity about top resumed state change.
@@ -139,6 +151,9 @@ public abstract class ClientTransactionHandler {
 
     /** Restart the activity after it was stopped. */
     public abstract void performRestartActivity(@NonNull ActivityClientRecord r, boolean start);
+
+     /** Report that activity was refreshed to server. */
+    public abstract void reportRefresh(@NonNull ActivityClientRecord r);
 
     /** Set pending activity configuration in case it will be updated by other transaction item. */
     public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
@@ -173,18 +188,17 @@ public abstract class ClientTransactionHandler {
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions, Intent customIntent);
+            PendingTransactionActions pendingActions, int deviceId, Intent customIntent);
 
     /** Perform activity start. */
     public abstract void handleStartActivity(@NonNull ActivityClientRecord r,
             PendingTransactionActions pendingActions, ActivityOptions activityOptions);
 
     /** Get package info. */
-    public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
-            CompatibilityInfo compatInfo);
+    public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai);
 
-    /** Deliver app configuration change notification. */
-    public abstract void handleConfigurationChanged(Configuration config);
+    /** Deliver app configuration change notification and device association. */
+    public abstract void handleConfigurationChanged(Configuration config, int deviceId);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the
@@ -220,9 +234,6 @@ public abstract class ClientTransactionHandler {
     /**
      * Report that relaunch request was handled.
      * @param r Target activity record.
-     * @param pendingActions Pending actions initialized on earlier stages of activity transaction.
-     *                       Used to check if we should report relaunch to WM.
-     * */
-    public abstract void reportRelaunch(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+     */
+    public abstract void reportRelaunch(@NonNull ActivityClientRecord r);
 }

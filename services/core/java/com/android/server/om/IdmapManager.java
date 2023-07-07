@@ -19,7 +19,9 @@ package com.android.server.om;
 import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
 import android.os.Build.VERSION_CODES;
@@ -30,9 +32,12 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -56,6 +61,18 @@ final class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
+    static final int IDMAP_NOT_EXIST = 0;
+    static final int IDMAP_IS_VERIFIED = 1;
+    static final int IDMAP_IS_MODIFIED = 1 << 1;
+
+    @IntDef(flag = true, prefix = { "IDMAP_" }, value = {
+            IDMAP_NOT_EXIST,
+            IDMAP_IS_VERIFIED,
+            IDMAP_IS_MODIFIED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IdmapStatus {}
+
     private final IdmapDaemon mIdmapDaemon;
     private final PackageManagerHelper mPackageManager;
 
@@ -76,28 +93,36 @@ final class IdmapManager {
     /**
      * Creates the idmap for the target/overlay combination and returns whether the idmap file was
      * modified.
+     * @return the status of the specific idmap file. It's one of the following.<ul>
+     *     <li>{@link #IDMAP_NOT_EXIST} means the idmap file is not existed.</li>
+     *     <li>{@link #IDMAP_IS_VERIFIED} means the idmap file is verified by Idmap2d.</li>
+     *     <li>{@link #IDMAP_IS_MODIFIED | IDMAP_IS_VERIFIED } means the idmap file is modified and
+     *     verified by Idmap2d.</li>
+     * </ul>.
      */
-    boolean createIdmap(@NonNull final AndroidPackage targetPackage,
-            @NonNull final AndroidPackage overlayPackage, String overlayBasePath,
-            String overlayName, int userId) {
+    @IdmapStatus int createIdmap(@NonNull final AndroidPackage targetPackage,
+            @NonNull PackageState overlayPackageState, @NonNull final AndroidPackage overlayPackage,
+            String overlayBasePath, String overlayName, @UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.getPackageName() + " and "
                     + overlayPackage.getPackageName());
         }
-        final String targetPath = targetPackage.getBaseApkPath();
+        final String targetPath = targetPackage.getSplits().get(0).getPath();
         try {
-            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
-            boolean enforce = enforceOverlayable(overlayPackage);
+            int policies = calculateFulfilledPolicies(targetPackage, overlayPackageState,
+                    overlayPackage, userId);
+            boolean enforce = enforceOverlayable(overlayPackageState, overlayPackage);
             if (mIdmapDaemon.verifyIdmap(targetPath, overlayBasePath, overlayName, policies,
                     enforce, userId)) {
-                return false;
+                return IDMAP_IS_VERIFIED;
             }
-            return mIdmapDaemon.createIdmap(targetPath, overlayBasePath, overlayName, policies,
-                    enforce, userId) != null;
+            final boolean idmapCreated = mIdmapDaemon.createIdmap(targetPath, overlayBasePath,
+                    overlayName, policies, enforce, userId) != null;
+            return (idmapCreated) ? IDMAP_IS_MODIFIED | IDMAP_IS_VERIFIED : IDMAP_NOT_EXIST;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayBasePath, e);
-            return false;
+            return IDMAP_NOT_EXIST;
         }
     }
 
@@ -152,13 +177,14 @@ final class IdmapManager {
      * Checks if overlayable and policies should be enforced on the specified overlay for backwards
      * compatibility with pre-Q overlays.
      */
-    private boolean enforceOverlayable(@NonNull final AndroidPackage overlayPackage) {
+    private boolean enforceOverlayable(@NonNull PackageState overlayPackageState,
+            @NonNull final AndroidPackage overlayPackage) {
         if (overlayPackage.getTargetSdkVersion() >= VERSION_CODES.Q) {
             // Always enforce policies for overlays targeting Q+.
             return true;
         }
 
-        if (overlayPackage.isVendor()) {
+        if (overlayPackageState.isVendor()) {
             // If the overlay is on a pre-Q vendor partition, do not enforce overlayable
             // restrictions on this overlay because the pre-Q platform has no understanding of
             // overlayable.
@@ -167,14 +193,15 @@ final class IdmapManager {
 
         // Do not enforce overlayable restrictions on pre-Q overlays that are signed with the
         // platform signature or that are preinstalled.
-        return !(overlayPackage.isSystem() || overlayPackage.isSignedWithPlatformKey());
+        return !(overlayPackageState.isSystem() || overlayPackage.isSignedWithPlatformKey());
     }
 
     /**
      * Retrieves a bitmask for idmap2 that represents the policies the overlay fulfills.
      */
     private int calculateFulfilledPolicies(@NonNull final AndroidPackage targetPackage,
-            @NonNull final AndroidPackage overlayPackage, int userId)  {
+            @NonNull PackageState overlayPackageState, @NonNull final AndroidPackage overlayPackage,
+            @UserIdInt int userId)  {
         int fulfilledPolicies = OverlayablePolicy.PUBLIC;
 
         // Overlay matches target signature
@@ -199,28 +226,28 @@ final class IdmapManager {
         }
 
         // Vendor partition (/vendor)
-        if (overlayPackage.isVendor()) {
+        if (overlayPackageState.isVendor()) {
             return fulfilledPolicies | OverlayablePolicy.VENDOR_PARTITION;
         }
 
         // Product partition (/product)
-        if (overlayPackage.isProduct()) {
+        if (overlayPackageState.isProduct()) {
             return fulfilledPolicies | OverlayablePolicy.PRODUCT_PARTITION;
         }
 
         // Odm partition (/odm)
-        if (overlayPackage.isOdm()) {
+        if (overlayPackageState.isOdm()) {
             return fulfilledPolicies | OverlayablePolicy.ODM_PARTITION;
         }
 
         // Oem partition (/oem)
-        if (overlayPackage.isOem()) {
+        if (overlayPackageState.isOem()) {
             return fulfilledPolicies | OverlayablePolicy.OEM_PARTITION;
         }
 
         // System_ext partition (/system_ext) is considered as system
         // Check this last since every partition except for data is scanned as system in the PMS.
-        if (overlayPackage.isSystem() || overlayPackage.isSystemExt()) {
+        if (overlayPackageState.isSystem() || overlayPackageState.isSystemExt()) {
             return fulfilledPolicies | OverlayablePolicy.SYSTEM_PARTITION;
         }
 

@@ -25,10 +25,6 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
-    public void onNotificationActive() {
-    }
-
-    @Override
     public void setShowingAod(boolean showingAod) {
     }
 
@@ -46,10 +42,6 @@ public class FalsingCollectorFake implements FalsingCollector {
 
     @Override
     public void onQsDown() {
-    }
-
-    @Override
-    public void setQsExpanded(boolean expanded) {
     }
 
     @Override
@@ -160,5 +152,9 @@ public class FalsingCollectorFake implements FalsingCollector {
 
     @Override
     public void updateFalseConfidence(FalsingClassifier.Result result) {
+    }
+
+    @Override
+    public void onA11yAction() {
     }
 }

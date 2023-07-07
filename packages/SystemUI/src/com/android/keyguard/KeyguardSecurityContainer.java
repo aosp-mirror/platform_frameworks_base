@@ -21,9 +21,19 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
+import static androidx.constraintlayout.widget.ConstraintSet.BOTTOM;
+import static androidx.constraintlayout.widget.ConstraintSet.CHAIN_SPREAD;
+import static androidx.constraintlayout.widget.ConstraintSet.END;
+import static androidx.constraintlayout.widget.ConstraintSet.LEFT;
+import static androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT;
+import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
+import static androidx.constraintlayout.widget.ConstraintSet.RIGHT;
+import static androidx.constraintlayout.widget.ConstraintSet.START;
+import static androidx.constraintlayout.widget.ConstraintSet.TOP;
+import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
+
+import static com.android.app.animation.InterpolatorsAndroidX.DECELERATE_QUINT;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
 
 import static java.lang.Integer.max;
 
@@ -40,17 +50,20 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.graphics.drawable.LayerDrawable;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.TypedValue;
-import android.view.Gravity;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -60,20 +73,21 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -81,26 +95,29 @@ import com.android.internal.util.UserIcons;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
+import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter;
-import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyguardSecurityContainer extends FrameLayout {
+/** Determines how the bouncer is displayed to the user. */
+public class KeyguardSecurityContainer extends ConstraintLayout {
     static final int USER_TYPE_PRIMARY = 1;
     static final int USER_TYPE_WORK_PROFILE = 2;
     static final int USER_TYPE_SECONDARY_USER = 3;
 
-    @IntDef({MODE_DEFAULT, MODE_ONE_HANDED, MODE_USER_SWITCHER})
+    @IntDef({MODE_UNINITIALIZED, MODE_DEFAULT, MODE_ONE_HANDED, MODE_USER_SWITCHER})
     public @interface Mode {}
+    static final int MODE_UNINITIALIZED = -1;
     static final int MODE_DEFAULT = 0;
     static final int MODE_ONE_HANDED = 1;
     static final int MODE_USER_SWITCHER = 2;
@@ -124,21 +141,15 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private static final float MIN_DRAG_SIZE = 10;
     // How much to scale the default slop by, to avoid accidental drags.
     private static final float SLOP_SCALE = 4f;
-
-    private static final long IME_DISAPPEAR_DURATION_MS = 125;
-
-    // The duration of the animation to switch bouncer sides.
-    private static final long BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS = 500;
-
-    // How much of the switch sides animation should be dedicated to fading the bouncer out. The
-    // remainder will fade it back in again.
-    private static final float BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION = 0.2f;
-
+    @VisibleForTesting
+    // How much the view scales down to during back gestures.
+    static final float MIN_BACK_SCALE = 0.9f;
     @VisibleForTesting
     KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private GlobalSettings mGlobalSettings;
     private FalsingManager mFalsingManager;
     private UserSwitcherController mUserSwitcherController;
+    private FalsingA11yDelegate mFalsingA11yDelegate;
     private AlertDialog mAlertDialog;
     private boolean mSwipeUpToRetry;
 
@@ -146,6 +157,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private final SpringAnimation mSpringAnimation;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final List<Gefingerpoken> mMotionEventListeners = new ArrayList<>();
+    private final GestureDetector mDoubleTapDetector;
 
     private float mLastTouchY = -1;
     private int mActivePointerId = -1;
@@ -154,9 +166,26 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private boolean mDisappearAnimRunning;
     private SwipeListener mSwipeListener;
     private ViewMode mViewMode = new DefaultViewMode();
-    private @Mode int mCurrentMode = MODE_DEFAULT;
+    private boolean mIsInteractable;
+    protected ViewMediatorCallback mViewMediatorCallback;
+    /*
+     * Using MODE_UNINITIALIZED to mean the view mode is set to DefaultViewMode, but init() has not
+     * yet been called on it. This will happen when the ViewController is initialized.
+     */
+    private @Mode int mCurrentMode = MODE_UNINITIALIZED;
     private int mWidth = -1;
 
+    /**
+     * This callback is used to animate KeyguardSecurityContainer and its child views based on
+     * the interaction with the ime. After
+     * {@link WindowInsetsAnimation.Callback#onPrepare(WindowInsetsAnimation)},
+     * {@link #onApplyWindowInsets} is called where we
+     * set the bottom padding to be the height of the keyboard. We use this padding to determine
+     * the delta of vertical distance for y-translation animations.
+     * Note that bottom padding is not set when the disappear animation is started because
+     * we are deferring the y translation logic to the animator in
+     * {@link KeyguardPasswordView#startDisappearAnimation(Runnable)}
+     */
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
 
@@ -197,7 +226,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                             continue;
                         }
                         interpolatedFraction = animation.getInterpolatedFraction();
-
                         final int paddingBottom = (int) MathUtils.lerp(
                                 start, end,
                                 interpolatedFraction);
@@ -216,39 +244,39 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 public void onEnd(WindowInsetsAnimation animation) {
                     if (!mDisappearAnimRunning) {
                         endJankInstrument(InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_APPEAR);
-                        updateChildren(0 /* translationY */, 1f /* alpha */);
                     } else {
                         endJankInstrument(InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR);
+                        setAlpha(0f);
                     }
-                }
-
-                private void updateChildren(int translationY, float alpha) {
-                    for (int i = 0; i < KeyguardSecurityContainer.this.getChildCount(); ++i) {
-                        View child = KeyguardSecurityContainer.this.getChildAt(i);
-                        child.setTranslationY(translationY);
-                        child.setAlpha(alpha);
-                    }
+                    updateChildren(0 /* translationY */, 1f /* alpha */);
                 }
             };
 
-    // Used to notify the container when something interesting happens.
-    public interface SecurityCallback {
-        boolean dismiss(boolean authenticated, int targetUserId, boolean bypassSecondaryLockScreen);
+    private final OnBackAnimationCallback mBackCallback = new OnBackAnimationCallback() {
+        @Override
+        public void onBackCancelled() {
+            // TODO(b/259608500): Remove once back API auto animates progress to 0 on cancel.
+            resetScale();
+        }
 
-        void userActivity();
+        @Override
+        public void onBackInvoked() { }
 
-        void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
-
-        /**
-         * @param strongAuth   wheher the user has authenticated with strong authentication like
-         *                     pattern, password or PIN but not by trust agents or fingerprint
-         * @param targetUserId a user that needs to be the foreground user at the finish completion.
-         */
-        void finish(boolean strongAuth, int targetUserId);
-
-        void reset();
-
-        void onCancelClicked();
+        @Override
+        public void onBackProgressed(BackEvent event) {
+            float progress = event.getProgress();
+            // TODO(b/263819310): Update the interpolator to match spec.
+            float scale = MIN_BACK_SCALE
+                    +  (1 - MIN_BACK_SCALE) * (1 - DECELERATE_QUINT.getInterpolation(progress));
+            setScale(scale);
+        }
+    };
+    /**
+     * @return the {@link OnBackAnimationCallback} to animate this view during a back gesture.
+     */
+    @NonNull
+    OnBackAnimationCallback getBackCallback() {
+        return mBackCallback;
     }
 
     public interface SwipeListener {
@@ -303,8 +331,14 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
+        mSpringAnimation = new SpringAnimation(this, DynamicAnimation.TRANSLATION_Y);
         mViewConfiguration = ViewConfiguration.get(context);
+        mDoubleTapDetector = new GestureDetector(context, new DoubleTapListener());
+
+        // Add additional top padding.
+        setPadding(getPaddingLeft(), getPaddingTop() + getResources().getDimensionPixelSize(
+                        R.dimen.keyguard_security_container_padding_top), getPaddingRight(),
+                getPaddingBottom());
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -313,7 +347,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
-            UserSwitcherController userSwitcherController) {
+            UserSwitcherController userSwitcherController,
+            UserSwitcherViewMode.UserSwitcherCallback userSwitcherCallback,
+            FalsingA11yDelegate falsingA11yDelegate) {
         if (mCurrentMode == mode) return;
         Log.i(TAG, "Switching mode from " + modeToString(mCurrentMode) + " to "
                 + modeToString(mode));
@@ -325,19 +361,22 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mViewMode = new OneHandedViewMode();
                 break;
             case MODE_USER_SWITCHER:
-                mViewMode = new UserSwitcherViewMode();
+                mViewMode = new UserSwitcherViewMode(userSwitcherCallback);
                 break;
             default:
                 mViewMode = new DefaultViewMode();
         }
         mGlobalSettings = globalSettings;
         mFalsingManager = falsingManager;
+        mFalsingA11yDelegate = falsingA11yDelegate;
         mUserSwitcherController = userSwitcherController;
         setupViewMode();
     }
 
     private String modeToString(@Mode int mode) {
         switch (mode) {
+            case MODE_UNINITIALIZED:
+                return "Uninitialized";
             case MODE_DEFAULT:
                 return "Default";
             case MODE_ONE_HANDED:
@@ -356,7 +395,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         }
 
         mViewMode.init(this, mGlobalSettings, mSecurityViewFlipper, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, mFalsingA11yDelegate);
     }
 
     @Mode int getMode() {
@@ -372,10 +411,23 @@ public class KeyguardSecurityContainer extends FrameLayout {
         mViewMode.updatePositionByTouchX(x);
     }
 
-    /** Returns whether the inner SecurityViewFlipper is left-aligned when in one-handed mode. */
-    public boolean isOneHandedModeLeftAligned() {
-        return mCurrentMode == MODE_ONE_HANDED
-                && ((OneHandedViewMode) mViewMode).isLeftAligned();
+    public boolean isSidedSecurityMode() {
+        return mViewMode instanceof SidedSecurityMode;
+    }
+
+    /** Returns whether the inner SecurityViewFlipper is left-aligned when in sided mode. */
+    public boolean isSecurityLeftAligned() {
+        return mViewMode instanceof SidedSecurityMode
+                && ((SidedSecurityMode) mViewMode).isLeftAligned();
+    }
+
+    /**
+     * Returns whether the touch happened on the other side of security (like bouncer) when in
+     * sided mode.
+     */
+    public boolean isTouchOnTheOtherSideOfSecurity(MotionEvent ev) {
+        return mViewMode instanceof SidedSecurityMode
+                && ((SidedSecurityMode) mViewMode).isTouchOnTheOtherSideOfSecurity(ev);
     }
 
     public void onPause() {
@@ -387,6 +439,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
         mViewMode.reset();
     }
 
+    /** Set true if the view can be interacted with */
+    public void setInteractable(boolean isInteractable) {
+        mIsInteractable = isInteractable;
+    }
+
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
@@ -394,6 +451,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!mIsInteractable) {
+            return true;
+        }
+
         boolean result =  mMotionEventListeners.stream().anyMatch(
                 listener -> listener.onInterceptTouchEvent(event))
                 || super.onInterceptTouchEvent(event);
@@ -413,7 +474,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     return false;
                 }
                 // Avoid dragging the pattern view
-                if (mSecurityViewFlipper.getSecurityView().disallowInterceptTouch(event)) {
+                if (mSecurityViewFlipper.getSecurityView() != null
+                        && mSecurityViewFlipper.getSecurityView().disallowInterceptTouch(event)) {
                     return false;
                 }
                 int index = event.findPointerIndex(mActivePointerId);
@@ -439,16 +501,22 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 .anyMatch(listener -> listener.onTouchEvent(event))
                 || super.onTouchEvent(event);
 
+        // double tap detector should be called after listeners handle touches as listeners are
+        // helping with ignoring falsing. Otherwise falsing will be activated for some double taps
+        mDoubleTapDetector.onTouchEvent(event);
+
         switch (action) {
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
                 int pointerIndex = event.findPointerIndex(mActivePointerId);
-                float y = event.getY(pointerIndex);
-                if (mLastTouchY != -1) {
-                    float dy = y - mLastTouchY;
-                    setTranslationY(getTranslationY() + dy * TOUCH_Y_MULTIPLIER);
+                if (pointerIndex != -1) {
+                    float y = event.getY(pointerIndex);
+                    if (mLastTouchY != -1) {
+                        float dy = y - mLastTouchY;
+                        setTranslationY(getTranslationY() + dy * TOUCH_Y_MULTIPLIER);
+                    }
+                    mLastTouchY = y;
                 }
-                mLastTouchY = y;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -475,13 +543,24 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 if (mSwipeListener != null) {
                     mSwipeListener.onSwipeUp();
                 }
-            } else {
-                if (!mIsDragging) {
-                    mViewMode.handleTap(event);
-                }
             }
         }
         return true;
+    }
+
+    private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            return handleDoubleTap(e);
+        }
+    }
+
+    @VisibleForTesting boolean handleDoubleTap(MotionEvent e) {
+        if (!mIsDragging) {
+            mViewMode.handleDoubleTap(e);
+            return true;
+        }
+        return false;
     }
 
     void addMotionEventListener(Gefingerpoken listener) {
@@ -503,17 +582,25 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     /**
-     * Runs after a succsssful authentication only
+     * Runs after a successful authentication only
      */
     public void startDisappearAnimation(SecurityMode securitySelection) {
         mDisappearAnimRunning = true;
-        mViewMode.startDisappearAnimation(securitySelection);
+        if (securitySelection == SecurityMode.Password
+                && mSecurityViewFlipper.getSecurityView() instanceof KeyguardPasswordView) {
+            ((KeyguardPasswordView) mSecurityViewFlipper.getSecurityView())
+                    .setDisappearAnimationListener(this::setTranslationY);
+        } else {
+            mViewMode.startDisappearAnimation(securitySelection);
+        }
     }
 
     /**
      * This will run when the bouncer shows in all cases except when the user drags the bouncer up.
      */
     public void startAppearAnimation(SecurityMode securityMode) {
+        setTranslationY(0f);
+        updateChildren(0 /* translationY */, 1f /* alpha */);
         mViewMode.startAppearAnimation(securityMode);
     }
 
@@ -561,8 +648,26 @@ public class KeyguardSecurityContainer extends FrameLayout {
         int inset = max(bottomInset, imeInset);
         int paddingBottom = max(inset, getContext().getResources()
                 .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin));
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
+        // If security mode is password, we rely on the animation value of defined in
+        // KeyguardPasswordView to determine the y translation animation.
+        // This means that we will prevent the WindowInsetsAnimationCallback from setting any y
+        // translation values by preventing the setting of the padding here.
+        if (!mDisappearAnimRunning) {
+            setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
+        }
         return insets.inset(0, 0, 0, inset);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.keyguardDoneDrawing();
+        }
+    }
+
+    public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {
+        mViewMediatorCallback = viewMediatorCallback;
     }
 
     private void showDialog(String title, String message) {
@@ -614,46 +719,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int maxHeight = 0;
-        int maxWidth = 0;
-        int childState = 0;
-
-        for (int i = 0; i < getChildCount(); i++) {
-            final View view = getChildAt(i);
-            if (view.getVisibility() != GONE) {
-                int updatedWidthMeasureSpec = mViewMode.getChildWidthMeasureSpec(widthMeasureSpec);
-                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
-
-                // When using EXACTLY spec, measure will use the layout width if > 0. Set before
-                // measuring the child
-                lp.width = MeasureSpec.getSize(updatedWidthMeasureSpec);
-                measureChildWithMargins(view, updatedWidthMeasureSpec, 0, heightMeasureSpec, 0);
-
-                maxWidth = Math.max(maxWidth,
-                        view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
-                maxHeight = Math.max(maxHeight,
-                        view.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-                childState = combineMeasuredStates(childState, view.getMeasuredState());
-            }
-        }
-
-        maxWidth += getPaddingLeft() + getPaddingRight();
-        maxHeight += getPaddingTop() + getPaddingBottom();
-
-        // Check against our minimum height and width
-        maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
-        maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
-
-        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
-                resolveSizeAndState(maxHeight, heightMeasureSpec,
-                        childState << MEASURED_HEIGHT_STATE_SHIFT));
-    }
-
-    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-
         int width = right - left;
         if (changed && mWidth != width) {
             mWidth = width;
@@ -719,16 +786,41 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     void reloadColors() {
         mViewMode.reloadColors();
+        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.materialColorSurface));
+    }
+
+    /** Handles density or font scale changes. */
+    void onDensityOrFontScaleChanged() {
+        mViewMode.onDensityOrFontScaleChanged();
+    }
+
+    void resetScale() {
+        setScale(1);
+    }
+
+    private void setScale(float scale) {
+        setScaleX(scale);
+        setScaleY(scale);
+    }
+
+    private void updateChildren(int translationY, float alpha) {
+        for (int i = 0; i < getChildCount(); ++i) {
+            View child = getChildAt(i);
+            child.setTranslationY(translationY);
+            child.setAlpha(alpha);
+        }
     }
 
     /**
      * Enscapsulates the differences between bouncer modes for the container.
      */
     interface ViewMode {
-        default void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
+        default void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {};
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {};
 
         /** Reinitialize the location */
         default void updateSecurityViewLocation() {};
@@ -736,8 +828,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
         /** Alter the ViewFlipper position, based upon a touch outside of it */
         default void updatePositionByTouchX(float x) {};
 
-        /** A tap on the container, outside of the ViewFlipper */
-        default void handleTap(MotionEvent event) {};
+        /** A double tap on the container, outside of the ViewFlipper */
+        default void handleDoubleTap(MotionEvent event) {};
 
         /** Called when the view needs to reset or hides */
         default void reset() {};
@@ -745,33 +837,99 @@ public class KeyguardSecurityContainer extends FrameLayout {
         /** Refresh colors */
         default void reloadColors() {};
 
+        /** Handles density or font scale changes. */
+        default void onDensityOrFontScaleChanged() {}
+
         /** On a successful auth, optionally handle how the view disappears */
         default void startDisappearAnimation(SecurityMode securityMode) {};
 
         /** On notif tap, this animation will run */
         default void startAppearAnimation(SecurityMode securityMode) {};
 
-        /** Override to alter the width measure spec to perhaps limit the ViewFlipper size */
-        default int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
-            return parentWidthMeasureSpec;
-        }
-
         /** Called when we are setting a new ViewMode */
         default void onDestroy() {};
+    }
+
+    /**
+     * Base class for modes which support having on left/right side of the screen, used for large
+     * screen devices
+     */
+    abstract static class SidedSecurityMode implements ViewMode {
+        private KeyguardSecurityViewFlipper mViewFlipper;
+        private ConstraintLayout mView;
+        private GlobalSettings mGlobalSettings;
+        private int mDefaultSideSetting;
+
+        public void init(ConstraintLayout v, KeyguardSecurityViewFlipper viewFlipper,
+                GlobalSettings globalSettings, boolean leftAlignedByDefault) {
+            mView = v;
+            mViewFlipper = viewFlipper;
+            mGlobalSettings = globalSettings;
+            mDefaultSideSetting =
+                    leftAlignedByDefault ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
+                            : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT;
+        }
+
+        /**
+         * Determine if a double tap on this view is on the other side. If so, will animate
+         * positions and record the preference to always show on this side.
+         */
+        @Override
+        public void handleDoubleTap(MotionEvent event) {
+            boolean currentlyLeftAligned = isLeftAligned();
+            // Did the tap hit the "other" side of the bouncer?
+            if (isTouchOnTheOtherSideOfSecurity(event, currentlyLeftAligned)) {
+                boolean willBeLeftAligned = !currentlyLeftAligned;
+                updateSideSetting(willBeLeftAligned);
+
+                int keyguardState = willBeLeftAligned
+                        ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT
+                        : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_RIGHT;
+                SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, keyguardState);
+
+                updateSecurityViewLocation(willBeLeftAligned, /* animate= */ true);
+            }
+        }
+
+        private boolean isTouchOnTheOtherSideOfSecurity(MotionEvent ev, boolean leftAligned) {
+            float x = ev.getX();
+            return (leftAligned && (x > mView.getWidth() / 2f))
+                    || (!leftAligned && (x < mView.getWidth() / 2f));
+        }
+
+        public boolean isTouchOnTheOtherSideOfSecurity(MotionEvent ev) {
+            return isTouchOnTheOtherSideOfSecurity(ev, isLeftAligned());
+        }
+
+        protected abstract void updateSecurityViewLocation(boolean leftAlign, boolean animate);
+
+        boolean isLeftAligned() {
+            return mGlobalSettings.getInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                    mDefaultSideSetting)
+                    == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
+        }
+
+        protected void updateSideSetting(boolean leftAligned) {
+            mGlobalSettings.putInt(
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                    leftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
+                            : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
+        }
     }
 
     /**
      * Default bouncer is centered within the space
      */
     static class DefaultViewMode implements ViewMode {
-        private ViewGroup mView;
+        private ConstraintLayout mView;
         private KeyguardSecurityViewFlipper mViewFlipper;
 
         @Override
-        public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
+        public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {
             mView = v;
             mViewFlipper = viewFlipper;
 
@@ -780,11 +938,14 @@ public class KeyguardSecurityContainer extends FrameLayout {
         }
 
         private void updateSecurityViewGroup() {
-            FrameLayout.LayoutParams lp =
-                    (FrameLayout.LayoutParams) mViewFlipper.getLayoutParams();
-            lp.gravity = Gravity.CENTER_HORIZONTAL;
-            mViewFlipper.setLayoutParams(lp);
-            mViewFlipper.setTranslationX(0);
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.connect(mViewFlipper.getId(), START, PARENT_ID, START);
+            constraintSet.connect(mViewFlipper.getId(), END, PARENT_ID, END);
+            constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM);
+            constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);
+            constraintSet.constrainHeight(mViewFlipper.getId(), MATCH_CONSTRAINT);
+            constraintSet.constrainWidth(mViewFlipper.getId(), MATCH_CONSTRAINT);
+            constraintSet.applyTo(mView);
         }
     }
 
@@ -792,8 +953,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * User switcher mode will display both the current user icon as well as
      * a user switcher, in both portrait and landscape modes.
      */
-    static class UserSwitcherViewMode implements ViewMode {
-        private ViewGroup mView;
+    static class UserSwitcherViewMode extends SidedSecurityMode {
+        private ConstraintLayout mView;
         private ViewGroup mUserSwitcherViewGroup;
         private KeyguardSecurityViewFlipper mViewFlipper;
         private TextView mUserSwitcher;
@@ -804,28 +965,31 @@ public class KeyguardSecurityContainer extends FrameLayout {
         private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
                 this::setupUserSwitcher;
 
+        private UserSwitcherCallback mUserSwitcherCallback;
+        private FalsingA11yDelegate mFalsingA11yDelegate;
+
+        UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback) {
+            mUserSwitcherCallback = userSwitcherCallback;
+        }
+
         @Override
-        public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
+        public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {
+            init(v, viewFlipper, globalSettings, /* leftAlignedByDefault= */false);
             mView = v;
             mViewFlipper = viewFlipper;
             mFalsingManager = falsingManager;
             mUserSwitcherController = userSwitcherController;
             mResources = v.getContext().getResources();
+            mFalsingA11yDelegate = falsingA11yDelegate;
 
             if (mUserSwitcherViewGroup == null) {
-                LayoutInflater.from(v.getContext()).inflate(
-                        R.layout.keyguard_bouncer_user_switcher,
-                        mView,
-                        true);
-                mUserSwitcherViewGroup =  mView.findViewById(R.id.keyguard_bouncer_user_switcher);
+                inflateUserSwitcher();
             }
-
             updateSecurityViewLocation();
-
-            mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
             setupUserSwitcher();
             mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
@@ -836,6 +1000,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.dismiss();
                 mPopup = null;
             }
+            setupUserSwitcher();
         }
 
         @Override
@@ -846,7 +1011,18 @@ public class KeyguardSecurityContainer extends FrameLayout {
                         android.R.attr.textColorPrimary));
                 header.setBackground(mView.getContext().getDrawable(
                         R.drawable.bouncer_user_switcher_header_bg));
+                Drawable keyDownDrawable =
+                        ((LayerDrawable) header.getBackground().mutate()).findDrawableByLayerId(
+                                R.id.user_switcher_key_down);
+                keyDownDrawable.setTintList(Utils.getColorAttr(mView.getContext(),
+                        android.R.attr.textColorPrimary));
             }
+        }
+
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            mView.removeView(mUserSwitcherViewGroup);
+            inflateUserSwitcher();
         }
 
         @Override
@@ -854,11 +1030,17 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
         }
 
-        private Drawable findUserIcon(int userId) {
+        private Drawable findLargeUserIcon(int userId) {
             Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
             if (userIcon != null) {
-                return new BitmapDrawable(userIcon);
+                int iconSize =
+                        mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size);
+                return CircleFramedDrawable.getInstance(
+                    mView.getContext(),
+                    Icon.scaleDownIfNecessary(userIcon, iconSize, iconSize)
+                );
             }
+
             return UserIcons.getDefaultUserIcon(mResources, userId, false);
         }
 
@@ -870,11 +1052,23 @@ public class KeyguardSecurityContainer extends FrameLayout {
             }
 
             mUserSwitcherViewGroup.setAlpha(0f);
-            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
-                    1f);
-            alphaAnim.setInterpolator(Interpolators.ALPHA_IN);
-            alphaAnim.setDuration(500);
-            alphaAnim.start();
+            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+            int yTrans = mView.getResources().getDimensionPixelSize(R.dimen.pin_view_trans_y_entry);
+            animator.setInterpolator(Interpolators.STANDARD_DECELERATE);
+            animator.setDuration(650);
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mUserSwitcherViewGroup.setAlpha(1f);
+                    mUserSwitcherViewGroup.setTranslationY(0f);
+                }
+            });
+            animator.addUpdateListener(animation -> {
+                float value = (float) animation.getAnimatedValue();
+                mUserSwitcherViewGroup.setAlpha(value);
+                mUserSwitcherViewGroup.setTranslationY(yTrans - yTrans * value);
+            });
+            animator.start();
         }
 
         @Override
@@ -888,7 +1082,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
             AnimatorSet anims = new AnimatorSet();
             ObjectAnimator yAnim = ObjectAnimator.ofFloat(mView, View.TRANSLATION_Y, yTranslation);
-            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mView, View.ALPHA, 0f);
+            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
+                    0f);
 
             anims.setInterpolator(Interpolators.STANDARD_ACCELERATE);
             anims.playTogether(alphaAnim, yAnim);
@@ -901,12 +1096,15 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 Log.e(TAG, "Current user in user switcher is null.");
                 return;
             }
-            Drawable userIcon = findUserIcon(currentUser.info.id);
+            final String currentUserName = mUserSwitcherController.getCurrentUserName();
+            Drawable userIcon = findLargeUserIcon(currentUser.info.id);
             ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
-            mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
+            mUserSwitcher.setText(currentUserName);
 
-            ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);
-            BaseUserAdapter adapter = new BaseUserAdapter(mUserSwitcherController) {
+            KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);
+            anchor.setAccessibilityDelegate(mFalsingA11yDelegate);
+
+            BaseUserSwitcherAdapter adapter = new BaseUserSwitcherAdapter(mUserSwitcherController) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     UserRecord item = getItem(position);
@@ -941,8 +1139,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     }
                     textView.setSelected(item == currentUser);
                     view.setEnabled(item.isSwitchToEnabled);
-                    view.setAlpha(view.isEnabled() ? USER_SWITCH_ENABLED_ALPHA :
-                            USER_SWITCH_DISABLED_ALPHA);
+                    UserSwitcherController.setSelectableAlpha(view);
                     return view;
                 }
 
@@ -974,75 +1171,99 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 }
             };
 
-            if (adapter.getCount() < 2) {
-                // The drop down arrow is at index 1
-                ((LayerDrawable) mUserSwitcher.getBackground()).getDrawable(1).setAlpha(0);
-                anchor.setClickable(false);
-                return;
-            } else {
-                ((LayerDrawable) mUserSwitcher.getBackground()).getDrawable(1).setAlpha(255);
-            }
-
             anchor.setOnClickListener((v) -> {
                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
-
-                mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(), mFalsingManager);
+                mPopup = new KeyguardUserSwitcherPopupMenu(mView.getContext(), mFalsingManager);
                 mPopup.setAnchorView(anchor);
                 mPopup.setAdapter(adapter);
-                mPopup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        public void onItemClick(AdapterView parent, View view, int pos, long id) {
-                            if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
-                            if (!view.isEnabled()) return;
-
-                            // Subtract one for the header
-                            UserRecord user = adapter.getItem(pos - 1);
-                            if (!user.isCurrent) {
-                                adapter.onUserListItemClicked(user);
-                            }
-                            mPopup.dismiss();
-                            mPopup = null;
-                        }
-                    });
+                mPopup.setOnItemClickListener((parent, view, pos, id) -> {
+                    if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
+                    if (!view.isEnabled()) return;
+                    // Subtract one for the header
+                    UserRecord user = adapter.getItem(pos - 1);
+                    if (user.isManageUsers || user.isAddSupervisedUser) {
+                        mUserSwitcherCallback.showUnlockToContinueMessage();
+                    }
+                    if (!user.isCurrent) {
+                        adapter.onUserListItemClicked(user);
+                    }
+                    mPopup.dismiss();
+                    mPopup = null;
+                });
                 mPopup.show();
             });
         }
 
-        /**
-         * Each view will get half the width. Yes, it would be easier to use something other than
-         * FrameLayout but it was too disruptive to downstream projects to change.
-         */
-        @Override
-        public int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
-            return MeasureSpec.makeMeasureSpec(
-                    MeasureSpec.getSize(parentWidthMeasureSpec) / 2,
-                    MeasureSpec.EXACTLY);
-        }
-
         @Override
         public void updateSecurityViewLocation() {
+            updateSecurityViewLocation(isLeftAligned(), /* animate= */false);
+        }
+
+        public void updateSecurityViewLocation(boolean leftAlign, boolean animate) {
+            if (animate) {
+                TransitionManager.beginDelayedTransition(mView,
+                        new KeyguardSecurityViewTransition());
+            }
             int yTrans = mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_y_trans);
-
+            int viewFlipperBottomMargin = mResources.getDimensionPixelSize(
+                    R.dimen.bouncer_user_switcher_view_mode_view_flipper_bottom_margin);
+            int userSwitcherBottomMargin = mResources.getDimensionPixelSize(
+                    R.dimen.bouncer_user_switcher_view_mode_user_switcher_bottom_margin);
             if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                updateViewGravity(mViewFlipper, Gravity.CENTER_HORIZONTAL);
-                updateViewGravity(mUserSwitcherViewGroup, Gravity.CENTER_HORIZONTAL);
-
-                mUserSwitcherViewGroup.setTranslationY(yTrans);
-                mViewFlipper.setTranslationY(-yTrans);
+                ConstraintSet constraintSet = new ConstraintSet();
+                constraintSet.connect(mUserSwitcherViewGroup.getId(), TOP, PARENT_ID, TOP, yTrans);
+                constraintSet.connect(mUserSwitcherViewGroup.getId(), BOTTOM, mViewFlipper.getId(),
+                        TOP, userSwitcherBottomMargin);
+                constraintSet.connect(mViewFlipper.getId(), TOP, mUserSwitcherViewGroup.getId(),
+                        BOTTOM);
+                constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM,
+                        viewFlipperBottomMargin);
+                constraintSet.centerHorizontally(mViewFlipper.getId(), PARENT_ID);
+                constraintSet.centerHorizontally(mUserSwitcherViewGroup.getId(), PARENT_ID);
+                constraintSet.setVerticalChainStyle(mViewFlipper.getId(), CHAIN_SPREAD);
+                constraintSet.setVerticalChainStyle(mUserSwitcherViewGroup.getId(), CHAIN_SPREAD);
+                constraintSet.constrainHeight(mUserSwitcherViewGroup.getId(), WRAP_CONTENT);
+                constraintSet.constrainWidth(mUserSwitcherViewGroup.getId(), WRAP_CONTENT);
+                constraintSet.constrainHeight(mViewFlipper.getId(), MATCH_CONSTRAINT);
+                constraintSet.applyTo(mView);
             } else {
-                updateViewGravity(mViewFlipper, Gravity.RIGHT | Gravity.BOTTOM);
-                updateViewGravity(mUserSwitcherViewGroup, Gravity.LEFT | Gravity.CENTER_VERTICAL);
+                int startElement =
+                        leftAlign ? mViewFlipper.getId() : mUserSwitcherViewGroup.getId();
+                int endElement =
+                        leftAlign ? mUserSwitcherViewGroup.getId() : mViewFlipper.getId();
 
-                // Attempt to reposition a bit higher to make up for this frame being a bit lower
-                // on the device
-                mUserSwitcherViewGroup.setTranslationY(-yTrans);
-                mViewFlipper.setTranslationY(0);
+                ConstraintSet constraintSet = new ConstraintSet();
+                constraintSet.connect(startElement, START, PARENT_ID, START);
+                constraintSet.connect(startElement, END, endElement, START);
+                constraintSet.connect(endElement, START, startElement, END);
+                constraintSet.connect(endElement, END, PARENT_ID, END);
+                constraintSet.connect(mUserSwitcherViewGroup.getId(), TOP, PARENT_ID, TOP);
+                constraintSet.connect(mUserSwitcherViewGroup.getId(), BOTTOM, PARENT_ID, BOTTOM);
+                constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);
+                constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM);
+                constraintSet.setHorizontalChainStyle(mUserSwitcherViewGroup.getId(), CHAIN_SPREAD);
+                constraintSet.setHorizontalChainStyle(mViewFlipper.getId(), CHAIN_SPREAD);
+                constraintSet.constrainHeight(mUserSwitcherViewGroup.getId(),
+                        MATCH_CONSTRAINT);
+                constraintSet.constrainWidth(mUserSwitcherViewGroup.getId(),
+                        MATCH_CONSTRAINT);
+                constraintSet.constrainWidth(mViewFlipper.getId(), MATCH_CONSTRAINT);
+                constraintSet.constrainHeight(mViewFlipper.getId(), MATCH_CONSTRAINT);
+                constraintSet.applyTo(mView);
             }
         }
 
-        private void updateViewGravity(View v, int gravity) {
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) v.getLayoutParams();
-            lp.gravity = gravity;
-            v.setLayoutParams(lp);
+        private void inflateUserSwitcher() {
+            LayoutInflater.from(mView.getContext()).inflate(
+                    R.layout.keyguard_bouncer_user_switcher,
+                    mView,
+                    true);
+            mUserSwitcherViewGroup = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
+            mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
+        }
+
+        interface UserSwitcherCallback {
+            void showUnlockToContinueMessage();
         }
     }
 
@@ -1050,40 +1271,21 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * Logic to enabled one-handed bouncer mode. Supports animating the bouncer
      * between alternate sides of the display.
      */
-    static class OneHandedViewMode implements ViewMode {
-        @Nullable private ValueAnimator mRunningOneHandedAnimator;
-        private ViewGroup mView;
+    static class OneHandedViewMode extends SidedSecurityMode {
+        private ConstraintLayout mView;
         private KeyguardSecurityViewFlipper mViewFlipper;
-        private GlobalSettings mGlobalSettings;
 
         @Override
-        public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
+        public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {
+            init(v, viewFlipper, globalSettings, /* leftAlignedByDefault= */true);
             mView = v;
             mViewFlipper = viewFlipper;
-            mGlobalSettings = globalSettings;
 
-            updateSecurityViewGravity();
             updateSecurityViewLocation(isLeftAligned(), /* animate= */false);
-        }
-
-        /**
-         * One-handed mode contains the child to half of the available space.
-         */
-        @Override
-        public int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
-            return MeasureSpec.makeMeasureSpec(
-                    MeasureSpec.getSize(parentWidthMeasureSpec) / 2,
-                    MeasureSpec.EXACTLY);
-        }
-
-        private void updateSecurityViewGravity() {
-            FrameLayout.LayoutParams lp =
-                    (FrameLayout.LayoutParams) mViewFlipper.getLayoutParams();
-            lp.gravity = Gravity.LEFT | Gravity.BOTTOM;
-            mViewFlipper.setLayoutParams(lp);
         }
 
         /**
@@ -1097,159 +1299,26 @@ public class KeyguardSecurityContainer extends FrameLayout {
             updateSecurityViewLocation(isTouchOnLeft, /* animate= */false);
         }
 
-        boolean isLeftAligned() {
-            return mGlobalSettings.getInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT)
-                == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
-        }
-
-        private void updateSideSetting(boolean leftAligned) {
-            mGlobalSettings.putInt(
-                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                    leftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
-                    : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
-        }
-
-        /**
-         * Determine if a tap on this view is on the other side. If so, will animate positions
-         * and record the preference to always show on this side.
-         */
-        @Override
-        public void handleTap(MotionEvent event) {
-            float x = event.getX();
-            boolean currentlyLeftAligned = isLeftAligned();
-            // Did the tap hit the "other" side of the bouncer?
-            if ((currentlyLeftAligned && (x > mView.getWidth() / 2f))
-                    || (!currentlyLeftAligned && (x < mView.getWidth() / 2f))) {
-
-                boolean willBeLeftAligned = !currentlyLeftAligned;
-                updateSideSetting(willBeLeftAligned);
-
-                int keyguardState = willBeLeftAligned
-                        ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT
-                        : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_RIGHT;
-                SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, keyguardState);
-
-                updateSecurityViewLocation(willBeLeftAligned, true /* animate */);
-            }
-        }
-
         @Override
         public void updateSecurityViewLocation() {
             updateSecurityViewLocation(isLeftAligned(), /* animate= */false);
         }
 
-        /**
-         * Moves the inner security view to the correct location (in one handed mode) with
-         * animation. This is triggered when the user taps on the side of the screen that is not
-         * currently occupied by the security view.
-         */
-        private void updateSecurityViewLocation(boolean leftAlign, boolean animate) {
-            if (mRunningOneHandedAnimator != null) {
-                mRunningOneHandedAnimator.cancel();
-                mRunningOneHandedAnimator = null;
-            }
-
-            int targetTranslation = leftAlign
-                    ? 0 : (int) (mView.getMeasuredWidth() - mViewFlipper.getWidth());
-
+        protected void updateSecurityViewLocation(boolean leftAlign, boolean animate) {
             if (animate) {
-                // This animation is a bit fun to implement. The bouncer needs to move, and fade
-                // in/out at the same time. The issue is, the bouncer should only move a short
-                // amount (120dp or so), but obviously needs to go from one side of the screen to
-                // the other. This needs a pretty custom animation.
-                //
-                // This works as follows. It uses a ValueAnimation to simply drive the animation
-                // progress. This animator is responsible for both the translation of the bouncer,
-                // and the current fade. It will fade the bouncer out while also moving it along the
-                // 120dp path. Once the bouncer is fully faded out though, it will "snap" the
-                // bouncer closer to its destination, then fade it back in again. The effect is that
-                // the bouncer will move from 0 -> X while fading out, then
-                // (destination - X) -> destination while fading back in again.
-                // TODO(b/208250221): Make this animation properly abortable.
-                Interpolator positionInterpolator = AnimationUtils.loadInterpolator(
-                        mView.getContext(), android.R.interpolator.fast_out_extra_slow_in);
-                Interpolator fadeOutInterpolator = Interpolators.FAST_OUT_LINEAR_IN;
-                Interpolator fadeInInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
-
-                mRunningOneHandedAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
-                mRunningOneHandedAnimator.setDuration(BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS);
-                mRunningOneHandedAnimator.setInterpolator(Interpolators.LINEAR);
-
-                int initialTranslation = (int) mViewFlipper.getTranslationX();
-                int totalTranslation = (int) mView.getResources().getDimension(
-                        R.dimen.one_handed_bouncer_move_animation_translation);
-
-                final boolean shouldRestoreLayerType = mViewFlipper.hasOverlappingRendering()
-                        && mViewFlipper.getLayerType() != View.LAYER_TYPE_HARDWARE;
-                if (shouldRestoreLayerType) {
-                    mViewFlipper.setLayerType(View.LAYER_TYPE_HARDWARE, /* paint= */null);
-                }
-
-                float initialAlpha = mViewFlipper.getAlpha();
-
-                mRunningOneHandedAnimator.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mRunningOneHandedAnimator = null;
-                        }
-                    });
-                mRunningOneHandedAnimator.addUpdateListener(animation -> {
-                    float switchPoint = BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION;
-                    boolean isFadingOut = animation.getAnimatedFraction() < switchPoint;
-
-                    int currentTranslation = (int) (positionInterpolator.getInterpolation(
-                            animation.getAnimatedFraction()) * totalTranslation);
-                    int translationRemaining = totalTranslation - currentTranslation;
-
-                    // Flip the sign if we're going from right to left.
-                    if (leftAlign) {
-                        currentTranslation = -currentTranslation;
-                        translationRemaining = -translationRemaining;
-                    }
-
-                    if (isFadingOut) {
-                        // The bouncer fades out over the first X%.
-                        float fadeOutFraction = MathUtils.constrainedMap(
-                                /* rangeMin= */1.0f,
-                                /* rangeMax= */0.0f,
-                                /* valueMin= */0.0f,
-                                /* valueMax= */switchPoint,
-                                animation.getAnimatedFraction());
-                        float opacity = fadeOutInterpolator.getInterpolation(fadeOutFraction);
-
-                        // When fading out, the alpha needs to start from the initial opacity of the
-                        // view flipper, otherwise we get a weird bit of jank as it ramps back to
-                        // 100%.
-                        mViewFlipper.setAlpha(opacity * initialAlpha);
-
-                        // Animate away from the source.
-                        mViewFlipper.setTranslationX(initialTranslation + currentTranslation);
-                    } else {
-                        // And in again over the remaining (100-X)%.
-                        float fadeInFraction = MathUtils.constrainedMap(
-                                /* rangeMin= */0.0f,
-                                /* rangeMax= */1.0f,
-                                /* valueMin= */switchPoint,
-                                /* valueMax= */1.0f,
-                                animation.getAnimatedFraction());
-
-                        float opacity = fadeInInterpolator.getInterpolation(fadeInFraction);
-                        mViewFlipper.setAlpha(opacity);
-
-                        // Fading back in, animate towards the destination.
-                        mViewFlipper.setTranslationX(targetTranslation - translationRemaining);
-                    }
-
-                    if (animation.getAnimatedFraction() == 1.0f && shouldRestoreLayerType) {
-                        mViewFlipper.setLayerType(View.LAYER_TYPE_NONE, /* paint= */null);
-                    }
-                });
-
-                mRunningOneHandedAnimator.start();
-            } else {
-                mViewFlipper.setTranslationX(targetTranslation);
+                TransitionManager.beginDelayedTransition(mView,
+                        new KeyguardSecurityViewTransition());
             }
+            ConstraintSet constraintSet = new ConstraintSet();
+            if (leftAlign) {
+                constraintSet.connect(mViewFlipper.getId(), LEFT, PARENT_ID, LEFT);
+            } else {
+                constraintSet.connect(mViewFlipper.getId(), RIGHT, PARENT_ID, RIGHT);
+            }
+            constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);
+            constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM);
+            constraintSet.constrainPercentWidth(mViewFlipper.getId(), 0.5f);
+            constraintSet.applyTo(mView);
         }
     }
 }

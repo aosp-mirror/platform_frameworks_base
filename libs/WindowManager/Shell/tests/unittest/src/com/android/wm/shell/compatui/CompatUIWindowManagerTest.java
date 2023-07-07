@@ -20,7 +20,7 @@ import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -36,8 +36,10 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
+import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -53,11 +55,16 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.function.Consumer;
 
 /**
  * Tests for {@link CompatUIWindowManager}.
@@ -73,20 +80,22 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private CompatUIController.CompatUICallback mCallback;
+    @Mock private Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnRestartButtonClicked;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private CompatUILayout mLayout;
     @Mock private SurfaceControlViewHost mViewHost;
+    @Mock private CompatUIConfiguration mCompatUIConfiguration;
 
     private CompatUIWindowManager mWindowManager;
+    private TaskInfo mTaskInfo;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        mWindowManager = new CompatUIWindowManager(mContext,
-                createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN),
-                mSyncTransactionQueue, mCallback, mTaskListener,
-                new DisplayLayout(), new CompatUIHintsState());
+        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
+                mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
+                mCompatUIConfiguration, mOnRestartButtonClicked);
 
         spyOn(mWindowManager);
         doReturn(mLayout).when(mWindowManager).inflateLayout();
@@ -328,8 +337,10 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         // Update if the insets change on the existing display layout
         clearInvocations(mWindowManager);
         InsetsState insetsState = new InsetsState();
-        InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
-        insetsSource.setFrame(0, 0, 1000, 1000);
+        insetsState.setDisplayFrame(new Rect(0, 0, 1000, 2000));
+        InsetsSource insetsSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
+        insetsSource.setFrame(0, 1800, 1000, 2000);
         insetsState.addSource(insetsSource);
         displayLayout.setInsets(mContext.getResources(), insetsState);
         mWindowManager.updateDisplayLayout(displayLayout);
@@ -404,7 +415,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     public void testOnRestartButtonClicked() {
         mWindowManager.onRestartButtonClicked();
 
-        verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> restartCaptor =
+                ArgumentCaptor.forClass(Pair.class);
+
+        verify(mOnRestartButtonClicked).accept(restartCaptor.capture());
+        final Pair<TaskInfo, ShellTaskOrganizer.TaskListener> result = restartCaptor.getValue();
+        Assert.assertEquals(mTaskInfo, result.first);
+        Assert.assertEquals(mTaskListener, result.second);
     }
 
     @Test
@@ -437,12 +455,21 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         verify(mLayout).setCameraCompatHintVisibility(/* show= */ true);
     }
 
+    @Test
+    public void testWhenDockedStateHasChanged_needsToBeRecreated() {
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        newTaskInfo.configuration.uiMode |= Configuration.UI_MODE_TYPE_DESK;
+
+        Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
+    }
+
     private static TaskInfo createTaskInfo(boolean hasSizeCompat,
             @TaskInfo.CameraCompatControlState int cameraCompatControlState) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
         taskInfo.topActivityInSizeCompat = hasSizeCompat;
         taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         return taskInfo;
     }
 }

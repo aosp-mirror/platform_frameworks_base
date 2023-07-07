@@ -243,6 +243,12 @@ public final class DevicePolicyResources {
                     PREFIX + "ACCESSIBILITY_CATEGORY_PERSONAL";
 
             /**
+             * Content description for clone profile accounts group
+             */
+            public static final String ACCESSIBILITY_CATEGORY_CLONE =
+                    PREFIX + "ACCESSIBILITY_CATEGORY_CLONE";
+
+            /**
              * Content description for work profile details page title
              */
             public static final String ACCESSIBILITY_WORK_ACCOUNT_TITLE =
@@ -1172,6 +1178,13 @@ public final class DevicePolicyResources {
                     PREFIX + "PERSONAL_CATEGORY_HEADER";
 
             /**
+             * Header for items under the clone user
+             */
+            public static final String CLONE_CATEGORY_HEADER =
+                    PREFIX + "CLONE_CATEGORY_HEADER";
+
+
+            /**
              * Text to indicate work notification content will be shown on the lockscreen.
              */
             public static final String LOCK_SCREEN_SHOW_WORK_NOTIFICATION_CONTENT =
@@ -1662,14 +1675,16 @@ public final class DevicePolicyResources {
             /**
              * Label returned from
              * {@link android.content.pm.CrossProfileApps#getProfileSwitchingLabel(UserHandle)}
-             * that calling app can show to user for the semantic of switching to work profile.
+             * that calling app can show to user for the semantic of switching to work profile, and
+             * accepts the app name as a param.
              */
             public static final String SWITCH_TO_WORK_LABEL = PREFIX + "SWITCH_TO_WORK_LABEL";
 
             /**
              * Label returned from
              * {@link android.content.pm.CrossProfileApps#getProfileSwitchingLabel(UserHandle)}
-             * that calling app can show to user for the semantic of switching to personal profile.
+             * that calling app can show to user for the semantic of switching to personal profile,
+             * and accepts the app name as a param.
              */
             public static final String SWITCH_TO_PERSONAL_LABEL =
                     PREFIX + "SWITCH_TO_PERSONAL_LABEL";
@@ -1802,14 +1817,6 @@ public final class DevicePolicyResources {
                     PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_TITLE";
 
             /**
-             * Text for dialog shown when user tries to open a work app when the work profile is
-             * turned off, confirming that the user wants to turn on access to their
-             * work apps.
-             */
-            public static final String UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE =
-                    PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE";
-
-            /**
              * Notification title shown when work profile is credential encrypted and requires
              * the user to unlock before it's usable.
              */
@@ -1836,6 +1843,90 @@ public final class DevicePolicyResources {
              */
             public static final String WORK_PROFILE_BADGED_LABEL =
                     PREFIX + "WORK_PROFILE_BADGED_LABEL";
+
+            /**
+             * Notification title. This notification lets the user know that they will be unable to
+             * receive phone calls or texts until the work profile is turned on.
+             */
+            public static final String WORK_PROFILE_TELEPHONY_PAUSED_TITLE =
+                    PREFIX + "WORK_PROFILE_TELEPHONY_UNAVAILABLE_TITLE";
+
+            /**
+             * Notification text. This notification lets the user know that they will be unable to
+             * receive phone calls or texts until the work profile is turned on.
+             */
+            public static final String WORK_PROFILE_TELEPHONY_PAUSED_BODY =
+                    PREFIX + "WORK_PROFILE_TELEPHONY_UNAVAILABLE_BODY";
+
+            /**
+             * Label for notification button. This button lets the user turn the work profile on.
+             */
+            public static final String WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON =
+                    PREFIX + "TURN_ON_WORK_PROFILE_BUTTON_TEXT";
+
+            /**
+             * Information section shown on a dialog when the user is unable to place a call in
+             * the personal profile due to admin restrictions, and must choose whether to place
+             * the call from the work profile or cancel.
+             */
+            public static final String MINIRESOLVER_WORK_TELEPHONY_CALL_BLOCKED_INFORMATION =
+                    PREFIX + "MINIRESOLVER_WORK_TELEPHONY_INFORMATION";
+
+            /**
+             * Information section shown on a dialog when the user is unable to send a text in
+             * the personal profile due to admin restrictions, and must choose whether to place
+             * the call from the work profile or cancel.
+             */
+            public static final String MINIRESOLVER_WORK_TELEPHONY_TEXT_BLOCKED_INFORMATION =
+                    PREFIX + "MINIRESOLVER_WORK_TELEPHONY_INFORMATION";
+
+
+            /**
+             * Button for a dialog shown when the user is unable to place a call in the personal
+             * profile due to admin restrictions, and must choose whether to place the call from
+             * the work profile or cancel.
+             */
+            public static final String MINIRESOLVER_CALL_FROM_WORK =
+                    PREFIX + "MINIRESOLVER_CALL_FROM_WORK";
+
+            /**
+             * Button for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or cancel.
+             */
+            public static final String MINIRESOLVER_SWITCH_TO_WORK =
+                    PREFIX + "MINIRESOLVER_SWITCH_TO_WORK";
+
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or open in the same profile browser. Accepts
+             * the app name as a param.
+             */
+            public static final String MINIRESOLVER_OPEN_IN_WORK =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_WORK";
+
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the personal profile, or open in the same profile browser.
+             * Accepts the app name as a param.
+             */
+            public static final String MINIRESOLVER_OPEN_IN_PERSONAL =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or cancel. Accepts the app name as a param.
+             */
+            public static final String MINIRESOLVER_OPEN_WORK = PREFIX + "MINIRESOLVER_OPEN_WORK";
+
+            public static final String MINIRESOLVER_USE_WORK_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            public static final String MINIRESOLVER_USE_PERSONAL_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
         }
 
         /**

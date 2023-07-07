@@ -27,6 +27,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
@@ -112,6 +114,56 @@ public class DisplayTest {
             mMockitoSession.finishMocking();
         }
         Mockito.framework().clearInlineMocks();
+    }
+
+    @Test
+    public void testGetReportedHdrTypes_returns_mode_specific_hdr_types() {
+        setDisplayInfoPortrait(mDisplayInfo);
+        float[] alternativeRefreshRates = new float[0];
+        int[] hdrTypesWithDv = new int[] {1, 2, 3, 4};
+        Display.Mode modeWithDv = new Display.Mode(/* modeId= */ 0, 0, 0, 0f,
+                alternativeRefreshRates, hdrTypesWithDv);
+
+        int[] hdrTypesWithoutDv = new int[]{2, 3, 4};
+        Display.Mode modeWithoutDv = new Display.Mode(/* modeId= */ 1, 0, 0, 0f,
+                alternativeRefreshRates, hdrTypesWithoutDv);
+
+        mDisplayInfo.supportedModes = new Display.Mode[] {modeWithoutDv, modeWithDv};
+        mDisplayInfo.hdrCapabilities = new Display.HdrCapabilities(hdrTypesWithDv, 0, 0, 0);
+
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+
+        mDisplayInfo.modeId = 0;
+        assertArrayEquals(hdrTypesWithDv, display.getReportedHdrTypes());
+
+        mDisplayInfo.modeId = 1;
+        assertArrayEquals(hdrTypesWithoutDv, display.getReportedHdrTypes());
+    }
+
+    @Test
+    public void testGetHdrCapabilities_getSupportedHdrTypes_returns_mode_specific_hdr_types() {
+        setDisplayInfoPortrait(mDisplayInfo);
+        float[] alternativeRefreshRates = new float[0];
+        int[] hdrTypesWithDv = new int[] {1, 2, 3, 4};
+        Display.Mode modeWithDv = new Display.Mode(/* modeId= */ 0, 0, 0, 0f,
+                alternativeRefreshRates, hdrTypesWithDv);
+
+        int[] hdrTypesWithoutDv = new int[]{2, 3, 4};
+        Display.Mode modeWithoutDv = new Display.Mode(/* modeId= */ 1, 0, 0, 0f,
+                alternativeRefreshRates, hdrTypesWithoutDv);
+
+        mDisplayInfo.supportedModes = new Display.Mode[] {modeWithoutDv, modeWithDv};
+        mDisplayInfo.hdrCapabilities = new Display.HdrCapabilities(hdrTypesWithDv, 0, 0, 0);
+
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+
+        mDisplayInfo.modeId = 0;
+        assertArrayEquals(hdrTypesWithDv, display.getHdrCapabilities().getSupportedHdrTypes());
+
+        mDisplayInfo.modeId = 1;
+        assertArrayEquals(hdrTypesWithoutDv, display.getHdrCapabilities().getSupportedHdrTypes());
     }
 
     @Test
@@ -397,6 +449,45 @@ public class DisplayTest {
                 mApplicationContext.getResources());
         // THEN real metrics matches max bounds for the DisplayArea.
         verifyRealMetricsMatchesBounds(display, sDeviceBoundsLandscape);
+    }
+
+    @Test
+    public void testSupportedHdrTypesForDisplayModeAreSorted() {
+        int[] nonSortedHdrTypes = new int[]{3, 2, 1};
+        Display.Mode displayMode = new Display.Mode(0, 0, 0, 0, new float[0], nonSortedHdrTypes);
+
+        int[] sortedHdrTypes = new int[]{1, 2, 3};
+        assertArrayEquals(sortedHdrTypes, displayMode.getSupportedHdrTypes());
+    }
+
+    @Test
+    public void testGetSupportedHdrTypesReturnsCopy() {
+        int[] hdrTypes = new int[]{1, 2, 3};
+        Display.Mode displayMode = new Display.Mode(0, 0, 0, 0, new float[0], hdrTypes);
+
+        int[] hdrTypesCopy = displayMode.getSupportedHdrTypes();
+        hdrTypesCopy[0] = 0;
+        assertArrayEquals(hdrTypes, displayMode.getSupportedHdrTypes());
+    }
+
+    @Test
+    public void testGetAlternativeRefreshRatesReturnsCopy() {
+        float[] alternativeRates = new float[]{1.0f, 2.0f};
+        Display.Mode displayMode = new Display.Mode(0, 0, 0, 0, alternativeRates, new int[0]);
+
+        float[] alternativeRatesCopy = displayMode.getAlternativeRefreshRates();
+        alternativeRatesCopy[0] = 0.0f;
+        assertArrayEquals(alternativeRates, displayMode.getAlternativeRefreshRates(), 0.0f);
+    }
+
+    @Test
+    public void testHdrCapabilitiesGetSupportedHdrTypesReturnsCopy() {
+        int[] hdrTypes = new int[]{1, 2, 3};
+        Display.HdrCapabilities hdrCapabilities = new Display.HdrCapabilities(hdrTypes, 0, 0, 0);
+
+        int[] hdrTypesCopy = hdrCapabilities.getSupportedHdrTypes();
+        hdrTypesCopy[0] = 0;
+        assertArrayEquals(hdrTypes, hdrCapabilities.getSupportedHdrTypes());
     }
 
     // Given rotated display dimensions, calculate the letterboxed app bounds.

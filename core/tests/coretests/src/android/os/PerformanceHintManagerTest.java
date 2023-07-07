@@ -114,9 +114,36 @@ public class PerformanceHintManagerTest {
     }
 
     @Test
+    public void testSendHint() {
+        Session s = createSession();
+        assumeNotNull(s);
+        s.sendHint(Session.CPU_LOAD_RESET);
+        // ensure we can also send within the rate limit without exception
+        s.sendHint(Session.CPU_LOAD_RESET);
+    }
+
+    @Test
+    public void testSendHintWithNegativeHint() {
+        Session s = createSession();
+        assumeNotNull(s);
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.sendHint(-1);
+        });
+    }
+
+    @Test
     public void testCloseHintSession() {
         Session s = createSession();
         assumeNotNull(s);
         s.close();
+    }
+
+    @Test
+    public void testSetThreadsWithIllegalArgument() {
+        Session session = createSession();
+        assumeNotNull(session);
+        assertThrows(IllegalArgumentException.class, () -> {
+            session.setThreads(new int[] { });
+        });
     }
 }

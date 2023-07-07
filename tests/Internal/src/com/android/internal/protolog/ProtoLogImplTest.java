@@ -86,7 +86,7 @@ public class ProtoLogImplTest {
         mFile = testContext.getFileStreamPath("tracing_test.dat");
         //noinspection ResultOfMethodCallIgnored
         mFile.delete();
-        mProtoLog = new ProtoLogImpl(mFile, 1024 * 1024, mReader);
+        mProtoLog = new ProtoLogImpl(mFile, 1024 * 1024, mReader, 1024);
     }
 
     @After
@@ -201,24 +201,24 @@ public class ProtoLogImplTest {
 
     @Test
     public void log_logcatEnabledExternalMessage() {
-        when(mReader.getViewerString(anyInt())).thenReturn("test %b %d %% %o %x %e %g %s %f");
+        when(mReader.getViewerString(anyInt())).thenReturn("test %b %d %% 0x%x %s %f");
         ProtoLogImpl implSpy = Mockito.spy(mProtoLog);
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);
 
         implSpy.log(
                 ProtoLogImpl.LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 1234, 4321, null,
-                new Object[]{true, 10000, 20000, 30000, 0.0001, 0.00002, "test", 0.000003});
+                new Object[]{true, 10000, 30000, "test", 0.000003});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
                 ProtoLogImpl.LogLevel.INFO),
-                eq("test true 10000 % 47040 7530 1.000000e-04 2.00000e-05 test 0.000003"));
+                eq("test true 10000 % 0x7530 test 3.0E-6"));
         verify(mReader).getViewerString(eq(1234));
     }
 
     @Test
     public void log_logcatEnabledInvalidMessage() {
-        when(mReader.getViewerString(anyInt())).thenReturn("test %b %d %% %o %x %e %g %s %f");
+        when(mReader.getViewerString(anyInt())).thenReturn("test %b %d %% %x %s %f");
         ProtoLogImpl implSpy = Mockito.spy(mProtoLog);
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
         TestProtoLogGroup.TEST_GROUP.setLogToProto(false);

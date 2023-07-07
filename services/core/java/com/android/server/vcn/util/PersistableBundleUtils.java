@@ -544,6 +544,20 @@ public class PersistableBundleUtils {
             return mBundle.getInt(key, defaultValue);
         }
 
+        /**
+         * Returns the value associated with the given key, or null if no mapping of the desired
+         * type exists for the given key or a null value is explicitly associated with the key.
+         *
+         * @param key a String, or null
+         * @param defaultValue the value to return if key does not exist
+         * @return an int[] value, or null
+         */
+        @Nullable
+        public int[] getIntArray(@Nullable String key, @Nullable int[] defaultValue) {
+            final int[] value = mBundle.getIntArray(key);
+            return value == null ? defaultValue : value;
+        }
+
         @Override
         public int hashCode() {
             return getHashCode(mBundle);
@@ -558,6 +572,11 @@ public class PersistableBundleUtils {
             final PersistableBundleWrapper other = (PersistableBundleWrapper) obj;
 
             return isEqual(mBundle, other.mBundle);
+        }
+
+        @Override
+        public String toString() {
+            return mBundle.toString();
         }
     }
 }
