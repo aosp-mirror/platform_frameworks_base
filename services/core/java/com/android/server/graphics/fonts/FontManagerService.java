@@ -228,10 +228,15 @@ public final class FontManagerService extends IFontManager.Stub {
         mIsSafeMode = safeMode;
         initialize();
 
-        try {
-            Typeface.setSystemFontMap(getCurrentFontMap());
-        } catch (IOException | ErrnoException e) {
-            Slog.w(TAG, "Failed to set system font map of system_server");
+        // Set system font map only if there is updatable font directory.
+        // If there is no updatable font directory, `initialize` will have already loaded the
+        // system font map, so there's no need to set the system font map again here.
+        if  (mUpdatableFontDir != null) {
+            try {
+                Typeface.setSystemFontMap(getCurrentFontMap());
+            } catch (IOException | ErrnoException e) {
+                Slog.w(TAG, "Failed to set system font map of system_server");
+            }
         }
     }
 
