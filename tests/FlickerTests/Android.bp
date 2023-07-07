@@ -68,6 +68,13 @@ filegroup {
     srcs: ["src/**/rotation/*.kt"],
 }
 
+filegroup {
+    name: "FlickerServiceTests-src",
+    srcs: [
+        "src/com/android/server/wm/flicker/service/**/*.kt",
+    ],
+}
+
 java_defaults {
     name: "FlickerTestsDefault",
     manifest: "manifests/AndroidManifest.xml",
@@ -110,6 +117,7 @@ android_test {
         ":FlickerTestsQuickswitch-src",
         ":FlickerTestsRotation-src",
         ":FlickerTestsNotification-src",
+        ":FlickerServiceTests-src",
     ],
 }
 
@@ -191,6 +199,18 @@ android_test {
     ],
     exclude_srcs: [
         ":FlickerTestsActivityEmbedding-src",
+    ],
+}
+
+android_test {
+    name: "FlickerServiceTests",
+    defaults: ["FlickerTestsDefault"],
+    additional_manifests: ["manifests/AndroidManifestService.xml"],
+    package_name: "com.android.server.wm.flicker.service",
+    instrumentation_target_package: "com.android.server.wm.flicker.service",
+    srcs: [
+        ":FlickerTestsBase-src",
+        ":FlickerServiceTests-src",
     ],
 }
 
