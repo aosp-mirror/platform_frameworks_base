@@ -43,9 +43,6 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
      */
     fun areNearbyMediaDevicesEnabled() = featureFlags.isEnabled(Flags.MEDIA_NEARBY_DEVICES)
 
-    /** Check whether we show explicit indicator on UMO */
-    fun isExplicitIndicatorEnabled() = featureFlags.isEnabled(Flags.MEDIA_EXPLICIT_INDICATOR)
-
     /**
      * If true, keep active media controls for the lifetime of the MediaSession, regardless of
      * whether the underlying notification was dismissed
