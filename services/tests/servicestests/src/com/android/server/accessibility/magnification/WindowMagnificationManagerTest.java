@@ -576,12 +576,15 @@ public class WindowMagnificationManagerTest {
     @Test
     public void onPerformScaleAction_magnifierEnabled_notifyAction() throws RemoteException {
         final float newScale = 4.0f;
+        final boolean updatePersistence = true;
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
 
-        mMockConnection.getConnectionCallback().onPerformScaleAction(TEST_DISPLAY, newScale);
+        mMockConnection.getConnectionCallback().onPerformScaleAction(
+                TEST_DISPLAY, newScale, updatePersistence);
 
-        verify(mMockCallback).onPerformScaleAction(eq(TEST_DISPLAY), eq(newScale));
+        verify(mMockCallback).onPerformScaleAction(
+                eq(TEST_DISPLAY), eq(newScale), eq(updatePersistence));
     }
 
     @Test

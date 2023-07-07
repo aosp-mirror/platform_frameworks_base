@@ -311,6 +311,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
             return;
         }
         scales.put(displayId, scale);
+
+        final MagnificationSettingsController magnificationSettingsController =
+                mMagnificationSettingsSupplier.get(displayId);
+        magnificationSettingsController.setMagnificationScale(scale);
     }
 
     @VisibleForTesting
@@ -330,9 +334,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         }
 
         @Override
-        public void onPerformScaleAction(int displayId, float scale) {
+        public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mWindowMagnificationConnectionImpl != null) {
-                mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
+                mWindowMagnificationConnectionImpl.onPerformScaleAction(
+                        displayId, scale, updatePersistence);
             }
         }
 
@@ -384,9 +389,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
         }
 
         @Override
-        public void onMagnifierScale(int displayId, float scale) {
+        public void onMagnifierScale(int displayId, float scale, boolean updatePersistence) {
             if (mWindowMagnificationConnectionImpl != null) {
-                mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
+                mWindowMagnificationConnectionImpl.onPerformScaleAction(
+                        displayId, scale, updatePersistence);
             }
             mA11yLogger.logThrottled(
                     MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED
