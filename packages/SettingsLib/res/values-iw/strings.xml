@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏אודיו באיכות HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏אודיו באיכות HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"מכשירי שמיעה"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"מחובר אל מכשירי שמיעה"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"‏מחובר אל LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"מחובר לאודיו של מדיה"</string>
@@ -216,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"בחירת פרופיל"</string>
     <string name="category_personal" msgid="6236798763159385225">"אישי"</string>
     <string name="category_work" msgid="4014193632325996115">"עבודה"</string>
+    <string name="category_clone" msgid="1554511758987195974">"שכפול"</string>
     <string name="development_settings_title" msgid="140296922921597393">"אפשרויות למפתחים"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"הפעלת אפשרויות למפתחים"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"הגדרת אפשרויות לפיתוח אפליקציות"</string>
@@ -545,14 +545,17 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"הטלפון הזה"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"הטאבלט הזה"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"הרמקול של אביזר העגינה"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"מכשיר חיצוני"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"המכשיר המחובר"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"לא ניתן להפעיל במכשיר הזה"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"צריך לשדרג את החשבון כדי לעבור"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"לא ניתן להפעיל את ההורדות כאן"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"אפשר לנסות שוב לאחר המודעה"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"צריך להוציא את המכשיר ממצב השינה כדי להפעיל כאן"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"המכשיר לא קיבל אישור להפעלה"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"אי אפשר להפעיל את המדיה הזו כאן"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"לא ניתן להפעיל במכשיר"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"יש לשדרג חשבון כדי לעבור"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"לא ניתן להפעיל הורדות"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"יש לנסות אחרי המודעה"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"צריך להעיר את המכשיר"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"המכשיר לא אושר"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"אי אפשר להפעיל מדיה"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
     <string name="help_label" msgid="3528360748637781274">"עזרה ומשוב"</string>
@@ -575,8 +578,8 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"משתמש"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"פרופיל מוגבל"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"להוסיף משתמש חדש?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף מכשיר זה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כגון Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, על משתמש זה להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. ייתכן שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף את המכשיר הזה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כמו Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. יכול להיות שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, הוא צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"להגדיר את המשתמש הזה כאדמין?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"לאדמינים יש הרשאות מיוחדות שאין למשתמשים אחרים. אדמין יכול לנהל את כל המשתמשים, לעדכן את המכשיר הזה או לאפס אותו, לשנות הגדרות, לראות את כל האפליקציות המותקנות ולהעניק הרשאות אדמין לאחרים או לשלול אותן."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"הגדרה כאדמין"</string>

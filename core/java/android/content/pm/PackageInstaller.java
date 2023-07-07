@@ -444,6 +444,10 @@ public class PackageInstaller {
      * exist, it may be missing native code for the ABIs supported by the
      * device, or it requires a newer SDK version, etc.
      *
+     * Starting in {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, an app with only 32-bit native
+     * code can still be installed on a device that supports both 64-bit and 32-bit ABIs.
+     * However, a warning dialog will be displayed when the app is launched.
+     *
      * @see #EXTRA_STATUS_MESSAGE
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
@@ -616,6 +620,7 @@ public class PackageInstaller {
     /** {@hide} */
     public PackageInstaller(IPackageInstaller installer,
             String installerPackageName, String installerAttributionTag, int userId) {
+        Objects.requireNonNull(installer, "installer cannot be null");
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
         mAttributionTag = installerAttributionTag;
@@ -3039,10 +3044,6 @@ public class PackageInstaller {
          *
          * The update ownership enforcement can only be enabled on initial installation. Set
          * this to {@code true} on package update is a no-op.
-         *
-         * Apps may opt themselves out of update ownership by setting the
-         * <a href="https://developer.android.com/guide/topics/manifest/manifest-element.html#allowupdateownership">android:alllowUpdateOwnership</a>
-         * attribute in their manifest to <code>false</code>.
          *
          * Note: To enable the update ownership enforcement, the installer must have the
          * {@link android.Manifest.permission#ENFORCE_UPDATE_OWNERSHIP ENFORCE_UPDATE_OWNERSHIP}

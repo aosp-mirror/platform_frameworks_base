@@ -684,7 +684,7 @@
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Løft telefonen højere op"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Sænk telefonen"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Flyt telefonen længere til venstre for dig"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre for dig"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kig mere direkte på din enhed."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dit ansigt kan ikke registreres. Hold din telefon i øjenhøjde."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Der er for meget bevægelse. Hold telefonen stille."</string>
@@ -694,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kig mere direkte på din telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kig mere direkte på din telefon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kig mere direkte på din telefon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hvis noget skjuler dit ansigt, skal du fjerne det."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hvis noget skjuler dit ansigt, skal du fjerne det"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Rengør toppen af din skærm, inkl. den sorte bjælke"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget høj musik over længere tid."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Advarsel!\nDu har overskredet den mængde af høje lydsignaler, det er forsvarligt at lytte til over en periode på en uge i dine høretelefoner.\n\nNår du overstiger denne grænse, tager din hørelse permanent skade."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Advarsel!\nDu har 5 gange overskredet den mængde af høje lydsignaler, det er forsvarligt at lytte til over en periode på en uge i dine høretelefoner.\n\nLydstyrken er blevet sænket for at beskytte din hørelse."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Den lydstyrke, du hører medier på, kan medføre høreskader over tid.\n\nHvis du fortsætter med at afspille medier ved så høj lydstyrke over længere tid, kan din hørelse tage skade."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ADvarsel!\nDu lytter i øjeblikket til indhold, der afspilles ved så høj en lydstyrke, at det kan gå ud over din hørelse.\n\nHvis du fortsætter med at afspille indhold ved så høj lydstyrke, vil din hørelse tage skade."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vil du fortsætte med at lytte ved høj lydstyrke?\n\nHøretelefonernes lydstyrke har været høj i længere tid end anbefalet, hvilket kan skade din hørelse"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Der er registreret høj lyd\n\nHøretelefonernes lydstyrke har været højere end anbefalet, hvilket kan skade din hørelse"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruge genvejen til Hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når genvejen er aktiveret, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vil du aktivere genvejen til hjælpefunktioner?"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Stryg ned fra toppen for at afslutte."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK, det er forstået"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter, og få en bedre visning"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Afslut opdelt skærm, og få en bedre visning"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Åbn <xliff:g id="NAME">%s</xliff:g> i fuld skærm for at få en bedre visning"</string>
     <string name="done_label" msgid="7283767013231718521">"Udfør"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkulær timevælger"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkulær minutvælger"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Du kan ikke gøre dette på din <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på din telefon i stedet."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Denne app er udviklet til en ældre version af Android. Den fungerer muligvis ikke korrekt, og den omfatter ikke de nyeste sikkerhedsfunktioner og den nyeste privatlivsbeskyttelse. Tjek, om der er en opdatering, eller kontakt appudvikleren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Søg efter opdatering"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Denne app er ikke kompatibel med den nyeste Android-version. Tjek, om der er en opdatering, eller kontakt appudvikleren."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye beskeder"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Åbn sms-appen for at se beskeden"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Nogle funktioner er begrænsede"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Genoptag"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Der er ingen arbejdsapps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Der er ingen personlige apps"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Vil du åbne <xliff:g id="APP">%s</xliff:g> (arbejde)?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vil du åbne indholdet via <xliff:g id="APP">%s</xliff:g> (personlig)?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vil du åbne indholdet via <xliff:g id="APP">%s</xliff:g> (arbejde)?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vil du foretage et opkald via en arbejdsapp?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vil du skifte til en arbejdsapp?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Din organisation tillader kun, at du foretager opkald via arbejdsapps"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Din organisation tillader kun, at du sender beskeder via arbejdsapps"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Brug personlig browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Brug arbejdsbrowser"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ring op"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Skift"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkode til oplåsning af SIM-netværket"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkode til oplåsning af delmængde for SIM-netværket"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkode til oplåsning af virksomhedens SIM"</string>

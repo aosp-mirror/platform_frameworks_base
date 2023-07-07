@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -64,7 +64,8 @@ open class SwitchBetweenSplitPairsBenchmark(override val flicker: FlickerTest) :
             thisTransition(this)
         }
 
-    @IwTest(focusArea = "sysui") @Presubmit @Test open fun cujCompleted() {}
+    @PlatinumTest(focusArea = "sysui")
+    @Presubmit @Test open fun cujCompleted() {}
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

@@ -106,21 +106,21 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         sExpectedDefaultSizes = new HashMap<>();
         sExpectedMinSizes = new HashMap<>();
 
-        sExpectedMaxSizes.put(16f / 9, new Size(1000, 562));
-        sExpectedDefaultSizes.put(16f / 9, new Size(600, 337));
-        sExpectedMinSizes.put(16f / 9, new Size(499, 281));
+        sExpectedMaxSizes.put(16f / 9, new Size(1000, 563));
+        sExpectedDefaultSizes.put(16f / 9, new Size(600, 338));
+        sExpectedMinSizes.put(16f / 9, new Size(501, 282));
 
         sExpectedMaxSizes.put(4f / 3, new Size(892, 669));
         sExpectedDefaultSizes.put(4f / 3, new Size(535, 401));
-        sExpectedMinSizes.put(4f / 3, new Size(445, 334));
+        sExpectedMinSizes.put(4f / 3, new Size(447, 335));
 
         sExpectedMaxSizes.put(3f / 4, new Size(669, 892));
         sExpectedDefaultSizes.put(3f / 4, new Size(401, 535));
-        sExpectedMinSizes.put(3f / 4, new Size(334, 445));
+        sExpectedMinSizes.put(3f / 4, new Size(335, 447));
 
         sExpectedMaxSizes.put(9f / 16, new Size(562, 999));
         sExpectedDefaultSizes.put(9f / 16, new Size(337, 599));
-        sExpectedMinSizes.put(9f / 16, new Size(281, 499));
+        sExpectedMinSizes.put(9f / 16, new Size(281, 500));
     }
 
     private void forEveryTestCaseCheck(Map<Float, Size> expectedSizes,

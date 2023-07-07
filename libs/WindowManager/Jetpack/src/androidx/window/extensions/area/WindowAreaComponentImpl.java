@@ -28,15 +28,19 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayAddress;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.WindowExtensions;
 import androidx.window.extensions.core.util.function.Consumer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -51,6 +55,7 @@ import java.util.concurrent.Executor;
 public class WindowAreaComponentImpl implements WindowAreaComponent,
         DeviceStateManager.DeviceStateCallback {
 
+    private static final int INVALID_DISPLAY_ADDRESS = -1;
     private final Object mLock = new Object();
 
     @NonNull
@@ -69,8 +74,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     private final int mConcurrentDisplayState;
     @NonNull
     private final int[] mFoldedDeviceStates;
-    @NonNull
-    private long mRearDisplayAddress = 0;
+    private long mRearDisplayAddress = INVALID_DISPLAY_ADDRESS;
     @WindowAreaSessionState
     private int mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
 
@@ -109,10 +113,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 R.integer.config_deviceStateConcurrentRearDisplay);
 
         mDeviceStateManager.registerCallback(mExecutor, this);
-        if (mConcurrentDisplayState != INVALID_DEVICE_STATE) {
-            mRearDisplayAddress = Long.parseLong(context.getResources().getString(
-                    R.string.config_rearDisplayPhysicalAddress));
-        }
+        mRearDisplayAddress = getRearDisplayAddress(context);
     }
 
     /**
@@ -220,6 +221,60 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     }
 
     /**
+     * Returns the{@link DisplayMetrics} associated with the rear facing display. If the rear facing
+     * display was not found in the display list, but we have already computed the
+     * {@link DisplayMetrics} for that display, we return the cached value. If no display has been
+     * found, then we return an empty {@link DisplayMetrics} value.
+     *
+     * TODO(b/267563768): Update with guidance from Display team for missing displays.
+     *
+     * @since {@link WindowExtensions#VENDOR_API_LEVEL_3}
+     */
+    @Override
+    @NonNull
+    public DisplayMetrics getRearDisplayMetrics() {
+        DisplayMetrics rearDisplayMetrics = null;
+
+        // DISPLAY_CATEGORY_REAR displays are only available when you are in the concurrent
+        // display state, so we have to look through all displays to match the address
+        final Display[] displays = mDisplayManager.getDisplays(
+                DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+
+
+        for (int i = 0; i < displays.length; i++) {
+            DisplayAddress.Physical address =
+                    (DisplayAddress.Physical) displays[i].getAddress();
+            if (mRearDisplayAddress == address.getPhysicalDisplayId()) {
+                rearDisplayMetrics = new DisplayMetrics();
+                final Display rearDisplay = displays[i];
+
+                // We must always retrieve the metrics for the rear display regardless of if it is
+                // the default display or not.
+                rearDisplay.getRealMetrics(rearDisplayMetrics);
+
+                // TODO(b/287170025): This should be something like if (!rearDisplay.isEnabled)
+                //  instead. Currently when the rear display is disabled, its state is STATE_OFF.
+                if (rearDisplay.getDisplayId() != Display.DEFAULT_DISPLAY) {
+                    final Display defaultDisplay = mDisplayManager
+                            .getDisplay(Display.DEFAULT_DISPLAY);
+                    rotateRearDisplayMetricsIfNeeded(defaultDisplay.getRotation(),
+                            rearDisplay.getRotation(), rearDisplayMetrics);
+                }
+                break;
+            }
+        }
+
+        synchronized (mLock) {
+            // Update the rear display metrics with our latest value if one was received
+            if (rearDisplayMetrics != null) {
+                mRearDisplayMetrics = rearDisplayMetrics;
+            }
+
+            return Objects.requireNonNullElseGet(mRearDisplayMetrics, DisplayMetrics::new);
+        }
+    }
+
+    /**
      * Adds a listener interested in receiving updates on the RearDisplayPresentationStatus
      * of the device. Because this is being called from the OEM provided
      * extensions, the result of the listener will be posted on the executor
@@ -260,8 +315,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 return;
             }
             @WindowAreaStatus int currentStatus = getCurrentRearDisplayPresentationModeStatus();
-            DisplayMetrics metrics =
-                    currentStatus == STATUS_UNSUPPORTED ? null : getRearDisplayMetrics();
+            DisplayMetrics metrics = currentStatus == STATUS_UNSUPPORTED ? new DisplayMetrics()
+                    : getRearDisplayMetrics();
             consumer.accept(
                     new RearDisplayPresentationStatus(currentStatus, metrics));
         }
@@ -342,11 +397,22 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                             mRearDisplayPresentationController);
             DeviceStateRequest concurrentDisplayStateRequest = DeviceStateRequest.newBuilder(
                     mConcurrentDisplayState).build();
-            mDeviceStateManager.requestState(
-                    concurrentDisplayStateRequest,
-                    mExecutor,
-                    deviceStateCallback
-            );
+
+            try {
+                mDeviceStateManager.requestState(
+                        concurrentDisplayStateRequest,
+                        mExecutor,
+                        deviceStateCallback
+                );
+            } catch (SecurityException e) {
+                // If a SecurityException occurs when invoking DeviceStateManager#requestState
+                // (e.g. if the caller is not in the foreground, or if it does not have the required
+                // permissions), we should first clean up our local state before re-throwing the
+                // SecurityException to the caller. Otherwise, subsequent attempts to
+                // startRearDisplayPresentationSession will always fail.
+                mRearDisplayPresentationController = null;
+                throw e;
+            }
         }
     }
 
@@ -480,43 +546,44 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         }
     }
 
-    /**
-     * Returns the{@link DisplayMetrics} associated with the rear facing display. If the rear facing
-     * display was not found in the display list, but we have already computed the
-     * {@link DisplayMetrics} for that display, we return the cached value.
-     *
-     * TODO(b/267563768): Update with guidance from Display team for missing displays.
-     *
-     * @throws IllegalArgumentException if the display is not found and there is no cached
-     * {@link DisplayMetrics} for this display.
-     */
-    @GuardedBy("mLock")
-    private DisplayMetrics getRearDisplayMetrics() {
-        Display[] displays = mDisplayManager.getDisplays(
-                DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
-        for (int i = 0; i < displays.length; i++) {
-            DisplayAddress.Physical address =
-                    (DisplayAddress.Physical) displays[i].getAddress();
-            if (mRearDisplayAddress == address.getPhysicalDisplayId()) {
-                if (mRearDisplayMetrics == null) {
-                    mRearDisplayMetrics = new DisplayMetrics();
-                }
-                displays[i].getRealMetrics(mRearDisplayMetrics);
-                return mRearDisplayMetrics;
-            }
-        }
-        if (mRearDisplayMetrics != null) {
-            return mRearDisplayMetrics;
-        } else {
-            throw new IllegalArgumentException(
-                    "No display found with the provided display address");
-        }
+    private long getRearDisplayAddress(Context context) {
+        String address = context.getResources().getString(
+                R.string.config_rearDisplayPhysicalAddress);
+        return address.isEmpty() ? INVALID_DISPLAY_ADDRESS : Long.parseLong(address);
     }
 
     @GuardedBy("mLock")
     @WindowAreaSessionState
     private int getLastReportedRearDisplayPresentationStatus() {
         return mLastReportedRearDisplayPresentationStatus;
+    }
+
+    @VisibleForTesting
+    static void rotateRearDisplayMetricsIfNeeded(
+            @Surface.Rotation int defaultDisplayRotation,
+            @Surface.Rotation int rearDisplayRotation,
+            @NonNull DisplayMetrics inOutMetrics) {
+        // If the rear display has a non-zero rotation, it means the backing DisplayContent /
+        // DisplayRotation is fresh.
+        if (rearDisplayRotation != Surface.ROTATION_0) {
+            return;
+        }
+
+        // If the default display is 0 or 180, the rear display must also be 0 or 180.
+        if (defaultDisplayRotation == Surface.ROTATION_0
+                || defaultDisplayRotation == Surface.ROTATION_180) {
+            return;
+        }
+
+        final int heightPixels = inOutMetrics.heightPixels;
+        final int widthPixels = inOutMetrics.widthPixels;
+        inOutMetrics.widthPixels = heightPixels;
+        inOutMetrics.heightPixels = widthPixels;
+
+        final int noncompatHeightPixels = inOutMetrics.noncompatHeightPixels;
+        final int noncompatWidthPixels = inOutMetrics.noncompatWidthPixels;
+        inOutMetrics.noncompatWidthPixels = noncompatHeightPixels;
+        inOutMetrics.noncompatHeightPixels = noncompatWidthPixels;
     }
 
     /**

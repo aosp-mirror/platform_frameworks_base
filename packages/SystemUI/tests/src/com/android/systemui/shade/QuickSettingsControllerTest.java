@@ -247,6 +247,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLogger,
+                mDumpManager,
                 mock(KeyguardFaceAuthInteractor.class),
                 mock(ShadeRepository.class),
                 mCastController
@@ -577,6 +578,30 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         openLockedQS();
 
         verify(mQs).setQsVisible(true);
+    }
+
+    @Test
+    public void calculateBottomCornerRadius_scrimScaleMax() {
+        when(mScrimController.getBackScaling()).thenReturn(1.0f);
+        assertThat(mQsController.calculateBottomCornerRadius(0.0f)).isEqualTo(0);
+    }
+
+    @Test
+    public void calculateBottomCornerRadius_scrimScaleMin() {
+        when(mScrimController.getBackScaling())
+                .thenReturn(mNotificationPanelViewController.SHADE_BACK_ANIM_MIN_SCALE);
+        assertThat(mQsController.calculateBottomCornerRadius(0.0f))
+                .isEqualTo(mQsController.getScrimCornerRadius());
+    }
+
+    @Test
+    public void calculateBottomCornerRadius_scrimScaleCutoff() {
+        float ratio = 1 / mQsController.calculateBottomRadiusProgress();
+        float cutoffScale = 1 - mNotificationPanelViewController.SHADE_BACK_ANIM_MIN_SCALE / ratio;
+        when(mScrimController.getBackScaling())
+                .thenReturn(cutoffScale);
+        assertThat(mQsController.calculateBottomCornerRadius(0.0f))
+                .isEqualTo(mQsController.getScrimCornerRadius());
     }
 
     private void lockScreen() {

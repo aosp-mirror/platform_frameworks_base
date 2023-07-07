@@ -690,8 +690,6 @@ stubs_defaults {
 }
 
 build = [
-    "StubLibraries.bp",
-    "ApiDocs.bp",
     "ProtoLibraries.bp",
     "TestProtoLibraries.bp",
 ]

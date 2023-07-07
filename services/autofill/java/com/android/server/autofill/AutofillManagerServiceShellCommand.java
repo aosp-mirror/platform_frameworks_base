@@ -154,6 +154,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getBindInstantService(pw);
             case "default-augmented-service-enabled":
                 return getDefaultAugmentedServiceEnabled(pw);
+            case "field-detection-service-enabled":
+                return isFieldDetectionServiceEnabled(pw);
             case "saved-password-count":
                 return getSavedPasswordCount(pw);
             default:
@@ -340,6 +342,13 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         mService.setTemporaryDetectionService(userId, serviceName, duration);
         pw.println("Autofill Detection Service temporarily set to " + serviceName + " for "
                 + duration + "ms");
+        return 0;
+    }
+
+    private int isFieldDetectionServiceEnabled(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        boolean enabled = mService.isFieldDetectionServiceEnabledForUser(userId);
+        pw.println(enabled);
         return 0;
     }
 

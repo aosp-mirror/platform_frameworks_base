@@ -17,12 +17,14 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -82,6 +85,10 @@ public class SensorTest {
     private AuthSessionCoordinator mAuthSessionCoordinator;
     @Mock
     FaceProvider mFaceProvider;
+    @Mock
+    BaseClientMonitor mClientMonitor;
+    @Mock
+    AidlSession mCurrentSession;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
@@ -159,6 +166,39 @@ public class SensorTest {
         sensor.onBinderDied();
 
         assertNull(sensor.getSessionForUser(USER_ID));
+    }
+
+    @Test
+    public void onBinderDied_cancelNonInterruptableClient() {
+        mLooper.dispatchAll();
+
+        when(mCurrentSession.getUserId()).thenReturn(USER_ID);
+        when(mClientMonitor.getTargetUserId()).thenReturn(USER_ID);
+        when(mClientMonitor.isInterruptable()).thenReturn(false);
+
+        final SensorProps sensorProps = new SensorProps();
+        sensorProps.commonProps = new CommonProps();
+        sensorProps.commonProps.sensorId = 1;
+        final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
+                sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
+                sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                sensorProps.sensorType, sensorProps.supportsDetectInteraction,
+                sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
+        final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext, null,
+                internalProp, mLockoutResetDispatcher, mBiometricContext, mCurrentSession);
+        mScheduler = (UserAwareBiometricScheduler) sensor.getScheduler();
+        sensor.mCurrentSession = new AidlSession(0, mock(ISession.class),
+                USER_ID, mHalCallback);
+
+        mScheduler.scheduleClientMonitor(mClientMonitor);
+
+        assertNotNull(mScheduler.getCurrentClient());
+
+        sensor.onBinderDied();
+
+        verify(mClientMonitor).cancel();
+        assertNull(sensor.getSessionForUser(USER_ID));
+        assertNull(mScheduler.getCurrentClient());
     }
 
     private void verifyNotLocked() {

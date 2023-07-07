@@ -15,8 +15,6 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.InputDevice.SOURCE_MOUSE;
-import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
@@ -38,6 +36,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.icu.text.SimpleDateFormat;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -62,6 +61,8 @@ import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.BackEvent;
+
+import androidx.annotation.DimenRes;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
@@ -97,7 +98,9 @@ import com.android.wm.shell.pip.Pip;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -224,10 +227,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private float mBottomGestureHeight;
     // The slop to distinguish between horizontal and vertical motion
     private float mTouchSlop;
-    // The threshold for triggering back
-    private float mBackSwipeTriggerThreshold;
     // The threshold for back swipe full progress.
-    private float mBackSwipeProgressThreshold;
+    private float mBackSwipeLinearThreshold;
+    private float mNonLinearFactor;
     // Duration after which we consider the event as longpress.
     private final int mLongPressTimeout;
     private int mStartingQuickstepRotation = -1;
@@ -280,6 +282,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private LogArray mPredictionLog = new LogArray(MAX_NUM_LOGGED_PREDICTIONS);
     private LogArray mGestureLogInsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
     private LogArray mGestureLogOutsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
+    private SimpleDateFormat mLogDateFormat = new SimpleDateFormat("HH:mm:ss.SSS", Locale.US);
+    private Date mTmpLogDate = new Date();
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
@@ -473,11 +477,17 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         final float backGestureSlop = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
         mTouchSlop = mViewConfiguration.getScaledTouchSlop() * backGestureSlop;
-        mBackSwipeTriggerThreshold = res.getDimension(
-                R.dimen.navigation_edge_action_drag_threshold);
-        mBackSwipeProgressThreshold = res.getDimension(
+        mBackSwipeLinearThreshold = res.getDimension(
                 R.dimen.navigation_edge_action_progress_threshold);
+        mNonLinearFactor = getDimenFloat(res,
+                R.dimen.back_progress_non_linear_factor);
         updateBackAnimationThresholds();
+    }
+
+    private float getDimenFloat(Resources res, @DimenRes int resId) {
+        TypedValue typedValue = new TypedValue();
+        res.getValue(resId, typedValue, true);
+        return typedValue.getFloat();
     }
 
     public void updateNavigationBarOverlayExcludeRegion(Rect exclude) {
@@ -939,12 +949,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mMLResults = 0;
             mLogGesture = false;
             mInRejectedExclusion = false;
-            // Trackpad back gestures don't have zones, so we don't need to check if the down event
-            // is within insets. Also we don't allow back for button press from the trackpad, and
-            // yet we do with a mouse.
             boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
+            // Trackpad back gestures don't have zones, so we don't need to check if the down event
+            // is within insets.
             mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
-                    && !isButtonPressFromTrackpad(ev)
                     && (isTrackpadMultiFingerSwipe || isWithinInsets)
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
@@ -962,11 +970,17 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             }
 
             // For debugging purposes, only log edge points
+            long curTime = System.currentTimeMillis();
+            mTmpLogDate.setTime(curTime);
+            String curTimeStr = mLogDateFormat.format(mTmpLogDate);
             (isWithinInsets ? mGestureLogInsideInsets : mGestureLogOutsideInsets).log(String.format(
-                    "Gesture [%d,alw=%B,%B,%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
-                    System.currentTimeMillis(), isTrackpadMultiFingerSwipe, mAllowGesture,
+                    "Gesture [%d [%s],alw=%B, mltf=%B, left=%B, defLeft=%B, backAlw=%B, disbld=%B,"
+                            + " qsDisbld=%b, blkdAct=%B, pip=%B,"
+                            + " disp=%s, wl=%d, il=%d, wr=%d, ir=%d, excl=%s]",
+                    curTime, curTimeStr, mAllowGesture, isTrackpadMultiFingerSwipe,
                     mIsOnLeftEdge, mDeferSetIsOnLeftEdge, mIsBackGestureAllowed,
-                    QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
+                    QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisabledForQuickstep,
+                    mGestureBlockingActivityRunning, mIsInPip, mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
         } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {
@@ -1051,11 +1065,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mProtoTracer.scheduleFrameUpdate();
     }
 
-    private boolean isButtonPressFromTrackpad(MotionEvent ev) {
-        int sources = InputManager.getInstance().getInputDevice(ev.getDeviceId()).getSources();
-        return (sources & (SOURCE_MOUSE | SOURCE_TOUCHPAD)) == sources && ev.getButtonState() != 0;
-    }
-
     private void dispatchToBackAnimation(MotionEvent event) {
         if (mBackAnimation != null) {
             mVelocityTracker.addMovement(event);
@@ -1120,9 +1129,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         if (mBackAnimation == null) {
             return;
         }
-        mBackAnimation.setSwipeThresholds(
-                mBackSwipeTriggerThreshold,
-                Math.min(mDisplaySize.x, mBackSwipeProgressThreshold));
+        int maxDistance = mDisplaySize.x;
+        float linearDistance = Math.min(maxDistance, mBackSwipeLinearThreshold);
+        mBackAnimation.setSwipeThresholds(linearDistance, maxDistance, mNonLinearFactor);
     }
 
     private boolean sendEvent(int action, int code) {

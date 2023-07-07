@@ -79,6 +79,8 @@ public class ContentRecorderTests extends WindowTestsBase {
     private Task mTask;
     private final ContentRecordingSession mDisplaySession =
             ContentRecordingSession.createDisplaySession(DEFAULT_DISPLAY);
+    private final ContentRecordingSession mWaitingDisplaySession =
+            ContentRecordingSession.createDisplaySession(DEFAULT_DISPLAY);
     private ContentRecordingSession mTaskSession;
     private static Point sSurfaceSize;
     private ContentRecorder mContentRecorder;
@@ -119,6 +121,10 @@ public class ContentRecorderTests extends WindowTestsBase {
         sTaskWindowContainerToken = setUpTaskWindowContainerToken(virtualDisplayContent);
         mTaskSession = ContentRecordingSession.createTaskSession(sTaskWindowContainerToken);
         mTaskSession.setVirtualDisplayId(displayId);
+
+        // GIVEN a session is waiting for the user to review consent.
+        mWaitingDisplaySession.setVirtualDisplayId(displayId);
+        mWaitingDisplaySession.setWaitingForConsent(true);
 
         mConfigListener = new ConfigListener();
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
@@ -216,6 +222,18 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.updateRecording();
 
         mContentRecorder.pauseRecording();
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
+    public void testUpdateRecording_waitingForConsent() {
+        mContentRecorder.setContentRecordingSession(mWaitingDisplaySession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+
+
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
     }

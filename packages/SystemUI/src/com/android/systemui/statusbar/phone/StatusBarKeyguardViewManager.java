@@ -23,7 +23,6 @@ import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
 
-import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.hardware.biometrics.BiometricSourceType;
@@ -36,7 +35,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-import android.view.WindowManagerGlobal;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -386,7 +384,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mExpansionCallback);
         mShadeViewController = shadeViewController;
         if (shadeExpansionStateManager != null) {
-            shadeExpansionStateManager.addExpansionListener(this);
+            ShadeExpansionChangeEvent currentState =
+                    shadeExpansionStateManager.addExpansionListener(this);
+            onPanelExpansionChanged(currentState);
         }
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
@@ -488,13 +488,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         final boolean hideBouncerOverDream =
                 mDreamOverlayStateController.isOverlayActive()
                         && (mShadeViewController.isExpanded()
-                        || mShadeViewController.isExpanding());
+                        || mShadeViewController.isExpandingOrCollapsing());
 
         final boolean isUserTrackingStarted =
                 event.getFraction() != EXPANSION_HIDDEN && event.getTracking();
 
         return mKeyguardStateController.isShowing()
                 && !primaryBouncerIsOrWillBeShowing()
+                && !mKeyguardStateController.isKeyguardGoingAway()
                 && isUserTrackingStarted
                 && !hideBouncerOverDream
                 && !mKeyguardStateController.isOccluded()
@@ -983,8 +984,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mShadeViewController.resetViewGroupFade();
         mCentralSurfaces.finishKeyguardFadingAway();
         mBiometricUnlockController.finishKeyguardFadingAway();
-        WindowManagerGlobal.getInstance().trimMemory(
-                ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
     }
 
     private void wakeAndUnlockDejank() {

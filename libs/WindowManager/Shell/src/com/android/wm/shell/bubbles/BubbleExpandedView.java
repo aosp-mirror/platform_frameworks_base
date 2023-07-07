@@ -46,6 +46,7 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
@@ -54,6 +55,7 @@ import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -458,7 +460,9 @@ public class BubbleExpandedView extends LinearLayout {
         if (mManageButton != null) {
             int visibility = mManageButton.getVisibility();
             removeView(mManageButton);
-            mManageButton = (AlphaOptimizedButton) LayoutInflater.from(getContext()).inflate(
+            ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(),
+                    com.android.internal.R.style.Theme_DeviceDefault_DayNight);
+            mManageButton = (AlphaOptimizedButton) LayoutInflater.from(ctw).inflate(
                     R.layout.bubble_manage_button, this /* parent */, false /* attach */);
             addView(mManageButton);
             mManageButton.setVisibility(visibility);
@@ -479,13 +483,18 @@ public class BubbleExpandedView extends LinearLayout {
     void applyThemeAttrs() {
         final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
                 android.R.attr.dialogCornerRadius,
-                com.android.internal.R.attr.materialColorSurfaceBright});
+                com.android.internal.R.attr.materialColorSurfaceBright,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh});
         boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
                 mContext.getResources());
         mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;
         mBackgroundColorFloating = ta.getColor(1, Color.WHITE);
         mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
+        final int manageMenuBg = ta.getColor(2, Color.WHITE);
         ta.recycle();
+        if (mManageButton != null) {
+            mManageButton.getBackground().setColorFilter(manageMenuBg, PorterDuff.Mode.SRC_IN);
+        }
 
         if (mTaskView != null) {
             mTaskView.setCornerRadius(mCornerRadius);

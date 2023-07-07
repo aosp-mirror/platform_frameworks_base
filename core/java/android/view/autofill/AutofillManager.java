@@ -468,7 +468,8 @@ public final class AutofillManager {
             COMMIT_REASON_ACTIVITY_FINISHED,
             COMMIT_REASON_VIEW_COMMITTED,
             COMMIT_REASON_VIEW_CLICKED,
-            COMMIT_REASON_VIEW_CHANGED
+            COMMIT_REASON_VIEW_CHANGED,
+            COMMIT_REASON_SESSION_DESTROYED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutofillCommitReason {}
@@ -507,6 +508,12 @@ public final class AutofillManager {
      * @hide
      */
     public static final int COMMIT_REASON_VIEW_CHANGED = 4;
+    /**
+     * Autofill context was committed because of the session was destroyed.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_SESSION_DESTROYED = 5;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -1773,7 +1780,7 @@ public final class AutofillManager {
                     mForAugmentedAutofillOnly = false;
                 }
 
-                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0 && view != null) {
+                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0) {
                     flags |= FLAG_RESET_FILL_DIALOG_STATE;
                 }
 
@@ -2058,7 +2065,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get enabled autofill services status.");
+            throw new RuntimeException("Fail to get enabled autofill services status. " + e);
         }
     }
 
@@ -2077,7 +2084,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get autofill services component name.");
+            throw new RuntimeException("Fail to get autofill services component name. " + e);
         }
     }
 
@@ -2104,7 +2111,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get user data id for field classification.");
+            throw new RuntimeException("Fail to get user data id for field classification. " + e);
         }
     }
 
@@ -2127,7 +2134,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get user data for field classification.");
+            throw new RuntimeException("Fail to get user data for field classification. " + e);
         }
     }
 
@@ -2167,7 +2174,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get field classification enabled status.");
+            throw new RuntimeException("Fail to get field classification enabled status. " + e);
         }
     }
 
@@ -2191,7 +2198,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get default field classification algorithm.");
+            throw new RuntimeException("Fail to get default field classification algorithm. " + e);
         }
     }
 
@@ -2213,7 +2220,8 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get available field classification algorithms.");
+            throw new
+                RuntimeException("Fail to get available field classification algorithms. " + e);
         }
     }
 
@@ -2237,7 +2245,7 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (SyncResultReceiver.TimeoutException e) {
-            throw new RuntimeException("Fail to get autofill supported status.");
+            throw new RuntimeException("Fail to get autofill supported status. " + e);
         }
     }
 

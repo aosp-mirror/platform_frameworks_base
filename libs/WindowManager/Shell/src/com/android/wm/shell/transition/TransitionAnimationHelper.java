@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
+import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
@@ -102,10 +103,11 @@ public class TransitionAnimationHelper {
             // We will translucent open animation for translucent activities and tasks. Choose
             // WindowAnimation_activityOpenEnterAnimation and set translucent here, then
             // TransitionAnimation loads appropriate animation later.
-            if ((changeFlags & FLAG_TRANSLUCENT) != 0 && enter) {
-                translucent = true;
-            }
-            if (isTask && !translucent) {
+            translucent = (changeFlags & FLAG_TRANSLUCENT) != 0;
+            if (isTask && translucent && !enter) {
+                // For closing translucent tasks, use the activity close animation
+                animAttr = R.styleable.WindowAnimation_activityCloseExitAnimation;
+            } else if (isTask && !translucent) {
                 animAttr = enter
                         ? R.styleable.WindowAnimation_taskOpenEnterAnimation
                         : R.styleable.WindowAnimation_taskOpenExitAnimation;
@@ -150,6 +152,10 @@ public class TransitionAnimationHelper {
                             .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
                                     animAttr, translucent);
                 }
+            } else if (translucent && !isTask && ((changeFlags & FLAGS_IS_NON_APP_WINDOW) == 0)) {
+                // Un-styled translucent activities technically have undefined animations; however,
+                // as is always the case, some apps now rely on this being no-animation, so skip
+                // loading animations here.
             } else {
                 a = transitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
             }

@@ -25,11 +25,13 @@ import com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity
  * An entry point represents where the note task has ben called from. In rare cases, it may
  * represent a "re-entry" (i.e., [APP_CLIPS]).
  */
-enum class
-NoteTaskEntryPoint {
+enum class NoteTaskEntryPoint {
 
     /** @see [LaunchNoteTaskActivity] */
     WIDGET_PICKER_SHORTCUT,
+
+    /** @see [LaunchNoteTaskActivity] */
+    WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE,
 
     /** @see [NoteTaskQuickAffordanceConfig] */
     QUICK_AFFORDANCE,

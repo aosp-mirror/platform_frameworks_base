@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kaldır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ses seviyesi önerilen düzeyin üzerine yükseltilsin mi?\n\nUzun süre yüksek ses seviyesinde dinlemek işitme duyunuza zarar verebilir."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Uyarı,\nBir kullanıcının, bir hafta içinde kulaklıkla güvenle dinleyebileceği yüksek ses sinyali seviyesini aştınız.\n\nBu sınırın üzerine çıkılması, işitme duyunuzda kalıcı hasarlara neden olur."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Uyarı,\nBir kullanıcının, bir hafta içinde kulaklıkla güvenle dinleyebileceği yüksek ses sinyali seviyesini 5 kat aştınız.\n\nİşitme duyunuzu korumak için ses seviyesi düşürüldü."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Medyaları dinlediğiniz seviye, uzun süre bu şekilde devam ederse işitme duyusuna zarar verebilir.\n\nUzun süre bu seviyede dinlemeye devam ederseniz işitme duyunuz zarar görebilir."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Uyarı,\nŞu anda güvenli olmayan bir seviyede çalan içeriği yüksek sesle dinliyorsunuz.\n\nBu kadar yüksek sesle dinlemeye devam ederseniz işitme duyunuzda kalıcı hasar meydana gelebilir."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksek sesle dinlemeye devam edilsin mi?\n\nKulaklığın sesi önerilenden daha uzun süre yüksek düzeyde kaldı ve bu durum işitme kaybına neden olabilir"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Yüksek ses algılandı\n\nKulaklığın ses düzeyi önerilenden yüksek. Bu durum işitme kaybına neden olabilir"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erişilebilirlik Kısayolu Kullanılsın mı?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kısayol açıkken ses düğmelerinin ikisini birden 3 saniyeliğine basılı tutmanız bir erişilebilirlik özelliğini başlatır."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Erişilebilirlik özellikleri için kısayol açılsın mı?"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Çıkmak için yukarıdan aşağıya doğru hızlıca kaydırın."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Anladım"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Daha iyi bir görünüm elde etmek için ekranı döndürün"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Daha iyi bir görünüm elde etmek için bölünmüş ekrandan çıkın"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Daha iyi görünüm için <xliff:g id="NAME">%s</xliff:g> uygulamasını açın"</string>
     <string name="done_label" msgid="7283767013231718521">"Bitti"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Saat kaydırma çemberi"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dakika kaydırma çemberi"</string>
@@ -1952,7 +1950,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> uygulaması şu anda kullanılamıyor. Uygulamanın kullanım durumu <xliff:g id="APP_NAME_1">%2$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Daha fazla bilgi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Uygulamanın duraklatmasını kaldır"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları devam ettirilsin mi?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları açılsın mı?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Devam ettir"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Acil durum"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Bu uygulama Android\'in daha eski bir sürümü için geliştirildi. Bu nedenle, düzgün çalışmayabilir ve son güvenlik ile gizlilik korumalarını içermemektedir. Güncelleme olup olmadığını kontrol edin veya uygulamanın geliştiricisiyle iletişime geçin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncellemeleri denetle"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Bu uygulama Android\'in son sürümüyle uyumlu değil. Güncelleme olup olmadığını kontrol edin veya uygulamanın geliştiricisiyle iletişime geçin."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Görüntülemek için SMS uygulamasını açın"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Bazı işlevler sınırlanabilir"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Devam ettir"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş uygulaması yok"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Kişisel uygulama yok"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"İş uygulaması (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Kişisel uygulamada (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"İş uygulamasında (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"İş uygulamasından aransın mı?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"İş uygulamasına geçilsin mi?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Kuruluşunuz yalnızca iş uygulamalarından telefon etmenize izin veriyor"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Kuruluşunuz yalnızca iş uygulamalarından mesaj göndermenize izin veriyor"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kişisel tarayıcıyı kullan"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"İş tarayıcısını kullan"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Telefon et"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Geçiş yap"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ağ kilidi açma PIN kodu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ağ alt kümesi kilidini açma PIN kodu"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM kurumsal kilidi açma PIN kodu"</string>

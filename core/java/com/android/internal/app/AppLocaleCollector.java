@@ -157,13 +157,13 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
      * Get a list of system locale that removes all extensions except for the numbering system.
      */
     @VisibleForTesting
-    public List<LocaleStore.LocaleInfo> getSystemCurrentLocales() {
-        List<LocaleStore.LocaleInfo> sysLocales = LocaleStore.getSystemCurrentLocales();
+    public Set<LocaleStore.LocaleInfo> getSystemCurrentLocales() {
+        Set<LocaleStore.LocaleInfo> sysLocales = LocaleStore.getSystemCurrentLocales();
         return sysLocales.stream().filter(
                 // For the locale to be added into the suggestion area, its country could not be
                 // empty.
                 info -> info.getLocale().getCountry().length() > 0).collect(
-                Collectors.toList());
+                Collectors.toSet());
     }
 
     @Override
@@ -225,7 +225,10 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
         // Add current system language into suggestion list
         if (!isForCountryMode) {
             boolean isCurrentLocale, existsInApp, existsInIme;
-            for (LocaleStore.LocaleInfo localeInfo : getSystemCurrentLocales()) {
+            // filter out the system locases that are supported by the application.
+            Set<LocaleStore.LocaleInfo> localeInfoSet =
+                    filterSupportedLocales(getSystemCurrentLocales(), result.mAppSupportedLocales);
+            for (LocaleStore.LocaleInfo localeInfo : localeInfoSet) {
                 isCurrentLocale = mAppCurrentLocale != null
                         && localeInfo.getLocale().equals(mAppCurrentLocale.getLocale());
                 // Add the system suggestion flag if the localeInfo exists in mAllAppActiveLocales

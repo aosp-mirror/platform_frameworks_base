@@ -63,6 +63,7 @@ import android.widget.FrameLayout;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1009,6 +1010,13 @@ public abstract class TvInputService extends Service {
          * @param buffer the {@link AdBuffer} that was consumed.
          */
         public void notifyAdBufferConsumed(@NonNull AdBuffer buffer) {
+            AdBuffer dupBuffer;
+            try {
+                dupBuffer = AdBuffer.dupAdBuffer(buffer);
+            } catch (IOException e) {
+                Log.w(TAG, "dup AdBuffer error in notifyAdBufferConsumed:", e);
+                return;
+            }
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1016,10 +1024,14 @@ public abstract class TvInputService extends Service {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyAdBufferConsumed");
                         if (mSessionCallback != null) {
-                            mSessionCallback.onAdBufferConsumed(buffer);
+                            mSessionCallback.onAdBufferConsumed(dupBuffer);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAdBufferConsumed", e);
+                    } finally {
+                        if (dupBuffer != null) {
+                            dupBuffer.getSharedMemory().close();
+                        }
                     }
                 }
             });

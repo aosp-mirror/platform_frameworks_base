@@ -49,7 +49,6 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
-import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -64,9 +63,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,20 +92,19 @@ public class HdmiControlServiceTest {
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private HdmiPortInfo[] mHdmiPortInfo;
     private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
-
-    @Mock protected AudioManager mAudioManager;
+    private static final int PORT_ID_EARC_SUPPORTED = 3;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
         mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, mLocalDeviceTypes,
-                new FakeAudioDeviceVolumeManagerWrapper()));
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 
@@ -153,7 +149,7 @@ public class HdmiControlServiceTest {
                         .setEarcSupported(false)
                         .build();
         mHdmiPortInfo[2] =
-                new HdmiPortInfo.Builder(3, HdmiPortInfo.PORT_INPUT, 0x2000)
+                new HdmiPortInfo.Builder(PORT_ID_EARC_SUPPORTED, HdmiPortInfo.PORT_INPUT, 0x2000)
                         .setCecSupported(true)
                         .setMhlSupported(false)
                         .setArcSupported(true)
@@ -171,7 +167,6 @@ public class HdmiControlServiceTest {
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
-        mHdmiControlServiceSpy.setAudioManager(mAudioManager);
         mHdmiControlServiceSpy.setEarcSupported(true);
 
         mTestLooper.dispatchAll();
@@ -1132,6 +1127,23 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNull();
+    }
+
+    @Test
+    public void disableEarc_noEarcLocalDevice_enableArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNull();
+
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING,
+                PORT_ID_EARC_SUPPORTED);
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyEarcStatusToAudioService(eq(false), eq(new ArrayList<>()));
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
     }
 
     @Test

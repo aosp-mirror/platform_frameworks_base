@@ -79,17 +79,26 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
 
     /** Alerts listener and plugin that the plugin has been created. */
     public void onCreate() {
-        mListener.onPluginAttached(this);
+        boolean loadPlugin = mListener.onPluginAttached(this);
+        if (!loadPlugin) {
+            if (mPlugin != null) {
+                unloadPlugin();
+            }
+            return;
+        }
+
         if (mPlugin == null) {
             loadPlugin();
-        } else {
-            if (!(mPlugin instanceof PluginFragment)) {
-                // Only call onCreate for plugins that aren't fragments, as fragments
-                // will get the onCreate as part of the fragment lifecycle.
-                mPlugin.onCreate(mAppContext, mPluginContext);
-            }
-            mListener.onPluginLoaded(mPlugin, mPluginContext, this);
+            return;
         }
+
+        mPluginFactory.checkVersion(mPlugin);
+        if (!(mPlugin instanceof PluginFragment)) {
+            // Only call onCreate for plugins that aren't fragments, as fragments
+            // will get the onCreate as part of the fragment lifecycle.
+            mPlugin.onCreate(mAppContext, mPluginContext);
+        }
+        mListener.onPluginLoaded(mPlugin, mPluginContext, this);
     }
 
     /** Alerts listener and plugin that the plugin is being shutdown. */
@@ -118,6 +127,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
             return;
         }
 
+        mPluginFactory.checkVersion(mPlugin);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onCreate for plugins that aren't fragments, as fragments
             // will get the onCreate as part of the fragment lifecycle.
@@ -205,12 +215,8 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
             PluginFactory<T> pluginFactory = new PluginFactory<T>(
                     context, mInstanceFactory, appInfo, componentName, mVersionChecker, pluginClass,
                     () -> getClassLoader(appInfo, mBaseClassLoader));
-            // TODO: Only create the plugin before version check if we need it for
-            // legacy version check.
-            T instance = pluginFactory.createPlugin();
-            pluginFactory.checkVersion(instance);
             return new PluginInstance<T>(
-                    context, listener, componentName, pluginFactory, instance);
+                    context, listener, componentName, pluginFactory, null);
         }
 
         private boolean isPluginPackagePrivileged(String packageName) {
@@ -332,7 +338,9 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
                 ClassLoader loader = mClassLoaderFactory.get();
                 Class<T> instanceClass = (Class<T>) Class.forName(
                         mComponentName.getClassName(), true, loader);
-                return (T) mInstanceFactory.create(instanceClass);
+                T result = (T) mInstanceFactory.create(instanceClass);
+                Log.v(TAG, "Created plugin: " + result);
+                return result;
             } catch (ClassNotFoundException ex) {
                 Log.e(TAG, "Failed to load plugin", ex);
             } catch (IllegalAccessException ex) {

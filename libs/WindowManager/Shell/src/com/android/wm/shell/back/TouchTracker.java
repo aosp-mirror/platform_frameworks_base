@@ -28,11 +28,13 @@ import android.window.BackMotionEvent;
  * Helper class to record the touch location for gesture and generate back events.
  */
 class TouchTracker {
-    private static final String PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP =
-            "persist.wm.debug.predictive_back_progress_threshold";
-    private static final int PROGRESS_THRESHOLD = SystemProperties
-            .getInt(PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP, -1);
-    private float mProgressThreshold;
+    private static final String PREDICTIVE_BACK_LINEAR_DISTANCE_PROP =
+            "persist.wm.debug.predictive_back_linear_distance";
+    private static final int LINEAR_DISTANCE = SystemProperties
+            .getInt(PREDICTIVE_BACK_LINEAR_DISTANCE_PROP, -1);
+    private float mLinearDistance = LINEAR_DISTANCE;
+    private float mMaxDistance;
+    private float mNonLinearFactor;
     /**
      * Location of the latest touch event
      */
@@ -125,17 +127,42 @@ class TouchTracker {
         // the location everytime back is restarted after being cancelled.
         float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
         float deltaX = Math.abs(startX - touchX);
-        float maxX = getMaxX();
-        maxX = maxX == 0 ? 1 : maxX;
-        return MathUtils.constrain(deltaX / maxX, 0, 1);
+        float linearDistance = mLinearDistance;
+        float maxDistance = getMaxDistance();
+        maxDistance = maxDistance == 0 ? 1 : maxDistance;
+        float progress;
+        if (linearDistance < maxDistance) {
+            // Up to linearDistance it behaves linearly, then slowly reaches 1f.
+
+            // maxDistance is composed of linearDistance + nonLinearDistance
+            float nonLinearDistance = maxDistance - linearDistance;
+            float initialTarget = linearDistance + nonLinearDistance * mNonLinearFactor;
+
+            boolean isLinear = deltaX <= linearDistance;
+            if (isLinear) {
+                progress = deltaX / initialTarget;
+            } else {
+                float nonLinearDeltaX = deltaX - linearDistance;
+                float nonLinearProgress = nonLinearDeltaX / nonLinearDistance;
+                float currentTarget = MathUtils.lerp(
+                        /* start = */ initialTarget,
+                        /* stop = */ maxDistance,
+                        /* amount = */ nonLinearProgress);
+                progress = deltaX / currentTarget;
+            }
+        } else {
+            // Always linear behavior.
+            progress = deltaX / maxDistance;
+        }
+        return MathUtils.constrain(progress, 0, 1);
     }
 
     /**
-     * Maximum X value (in pixels).
+     * Maximum distance in pixels.
      * Progress is considered to be completed (1f) when this limit is exceeded.
      */
-    float getMaxX() {
-        return PROGRESS_THRESHOLD >= 0 ? PROGRESS_THRESHOLD : mProgressThreshold;
+    float getMaxDistance() {
+        return mMaxDistance;
     }
 
     BackMotionEvent createProgressEvent(float progress) {
@@ -149,7 +176,14 @@ class TouchTracker {
                 /* departingAnimationTarget = */ null);
     }
 
-    public void setProgressThreshold(float progressThreshold) {
-        mProgressThreshold = progressThreshold;
+    public void setProgressThresholds(float linearDistance, float maxDistance,
+            float nonLinearFactor) {
+        if (LINEAR_DISTANCE >= 0) {
+            mLinearDistance = LINEAR_DISTANCE;
+        } else {
+            mLinearDistance = linearDistance;
+        }
+        mMaxDistance = maxDistance;
+        mNonLinearFactor = nonLinearFactor;
     }
 }

@@ -25,7 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.Activity;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.os.Bundle;
-import android.platform.test.annotations.IwTest;
+import android.platform.test.annotations.PlatinumTest;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.util.PollingCheck;
@@ -45,12 +45,12 @@ import com.android.frameworks.coretests.R;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -67,25 +67,12 @@ public class FontScaleConverterActivityTest {
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
-    private float mOriginalFontScale = Float.MIN_VALUE;
-
-    @Before
-    public void setup() {
-        mOriginalFontScale = Settings.System.getFloat(
-            InstrumentationRegistry.getInstrumentation().getContext().getContentResolver(),
-            Settings.System.FONT_SCALE,
-            Float.MIN_VALUE
-        );
-    }
-
     @After
     public void teardown() {
-        if (mOriginalFontScale != Float.MIN_VALUE) {
-            setSystemFontScale(mOriginalFontScale);
-        }
+        restoreSystemFontScaleToDefault();
     }
 
-    @IwTest(focusArea = "accessibility")
+    @PlatinumTest(focusArea = "accessibility")
     @Test
     public void testFontsScaleNonLinearly() {
         final ActivityScenario<TestActivity> scenario = rule.getScenario();
@@ -116,7 +103,7 @@ public class FontScaleConverterActivityTest {
         )));
     }
 
-    @IwTest(focusArea = "accessibility")
+    @PlatinumTest(focusArea = "accessibility")
     @Test
     public void testOnConfigurationChanged_doesNotCrash() {
         final ActivityScenario<TestActivity> scenario = rule.getScenario();
@@ -130,7 +117,7 @@ public class FontScaleConverterActivityTest {
         });
     }
 
-    @IwTest(focusArea = "accessibility")
+    @PlatinumTest(focusArea = "accessibility")
     @Test
     public void testUpdateConfiguration_doesNotCrash() {
         final ActivityScenario<TestActivity> scenario = rule.getScenario();
@@ -141,7 +128,7 @@ public class FontScaleConverterActivityTest {
         });
     }
 
-    private static void setSystemFontScale(float fontScale) {
+    private void setSystemFontScale(float fontScale) {
         ShellIdentityUtils.invokeWithShellPermissions(() -> {
             Settings.System.putFloat(
                     InstrumentationRegistry.getInstrumentation().getContext().getContentResolver(),
@@ -150,13 +137,43 @@ public class FontScaleConverterActivityTest {
             );
         });
 
-        PollingCheck.waitFor(/* timeout= */ 5000, () ->
-                InstrumentationRegistry
+        PollingCheck.waitFor(/* timeout= */ 5000, () -> {
+            AtomicBoolean isActivityAtCorrectScale = new AtomicBoolean(false);
+            rule.getScenario().onActivity(activity ->
+                    isActivityAtCorrectScale.set(
+                            activity.getResources()
+                                .getConfiguration()
+                                .fontScale == fontScale
+                    )
+            );
+            return isActivityAtCorrectScale.get() && InstrumentationRegistry
                     .getInstrumentation()
                     .getContext()
                     .getResources()
                     .getConfiguration()
-                    .fontScale == fontScale
+                    .fontScale == fontScale;
+        });
+    }
+
+    private static void restoreSystemFontScaleToDefault() {
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            // TODO(b/279083734): would use Settings.System.resetToDefaults() if it existed
+            Settings.System.putString(
+                    InstrumentationRegistry.getInstrumentation()
+                            .getContext()
+                            .getContentResolver(),
+                    Settings.System.FONT_SCALE,
+                    null,
+                    /* overrideableByRestore= */ true);
+        });
+
+        PollingCheck.waitFor(
+                /* timeout= */ 5000,
+                () -> InstrumentationRegistry.getInstrumentation()
+                                        .getContext()
+                                        .getResources()
+                                        .getConfiguration()
+                                        .fontScale == 1
         );
     }
 

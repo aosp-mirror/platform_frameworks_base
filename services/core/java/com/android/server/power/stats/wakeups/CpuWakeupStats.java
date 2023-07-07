@@ -23,6 +23,7 @@ import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
@@ -48,6 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,15 +64,14 @@ public class CpuWakeupStats {
     private static final String SUBSYSTEM_SENSOR_STRING = "Sensor";
     private static final String SUBSYSTEM_CELLULAR_DATA_STRING = "Cellular_data";
     private static final String TRACE_TRACK_WAKEUP_ATTRIBUTION = "wakeup_attribution";
-    @VisibleForTesting
-    static final long WAKEUP_REASON_HALF_WINDOW_MS = 500;
+
     private static final long WAKEUP_WRITE_DELAY_MS = TimeUnit.SECONDS.toMillis(30);
 
     private final Handler mHandler;
     private final IrqDeviceMap mIrqDeviceMap;
     @VisibleForTesting
     final Config mConfig = new Config();
-    private final WakingActivityHistory mRecentWakingActivity = new WakingActivityHistory();
+    private final WakingActivityHistory mRecentWakingActivity;
 
     @VisibleForTesting
     final TimeSparseArray<Wakeup> mWakeupEvents = new TimeSparseArray<>();
@@ -85,6 +86,8 @@ public class CpuWakeupStats {
 
     public CpuWakeupStats(Context context, int mapRes, Handler handler) {
         mIrqDeviceMap = IrqDeviceMap.getInstance(context, mapRes);
+        mRecentWakingActivity = new WakingActivityHistory(
+                () -> mConfig.WAKING_ACTIVITY_RETENTION_MS);
         mHandler = handler;
     }
 
@@ -202,15 +205,14 @@ public class CpuWakeupStats {
     /** Notes a wakeup reason as reported by SuspendControlService to battery stats. */
     public synchronized void noteWakeupTimeAndReason(long elapsedRealtime, long uptime,
             String rawReason) {
-        final Wakeup parsedWakeup = Wakeup.parseWakeup(rawReason, elapsedRealtime, uptime);
+        final Wakeup parsedWakeup = Wakeup.parseWakeup(rawReason, elapsedRealtime, uptime,
+                mIrqDeviceMap);
         if (parsedWakeup == null) {
+            // This wakeup is unsupported for attribution. Exit.
             return;
         }
         mWakeupEvents.put(elapsedRealtime, parsedWakeup);
         attemptAttributionFor(parsedWakeup);
-        // Assuming that wakeups always arrive in monotonically increasing elapsedRealtime order,
-        // we can delete all history that will not be useful in attributing future wakeups.
-        mRecentWakingActivity.clearAllBefore(elapsedRealtime - WAKEUP_REASON_HALF_WINDOW_MS);
 
         // Limit history of wakeups and their attribution to the last retentionDuration. Note that
         // the last wakeup and its attribution (if computed) is always stored, even if that wakeup
@@ -244,25 +246,22 @@ public class CpuWakeupStats {
     }
 
     private synchronized void attemptAttributionFor(Wakeup wakeup) {
-        final SparseBooleanArray subsystems = getResponsibleSubsystemsForWakeup(wakeup);
-        if (subsystems == null) {
-            // We don't support attribution for this kind of wakeup yet.
-            return;
-        }
+        final SparseBooleanArray subsystems = wakeup.mResponsibleSubsystems;
 
         SparseArray<SparseIntArray> attribution = mWakeupAttribution.get(wakeup.mElapsedMillis);
         if (attribution == null) {
             attribution = new SparseArray<>();
             mWakeupAttribution.put(wakeup.mElapsedMillis, attribution);
         }
+        final long matchingWindowMillis = mConfig.WAKEUP_MATCHING_WINDOW_MS;
 
         for (int subsystemIdx = 0; subsystemIdx < subsystems.size(); subsystemIdx++) {
             final int subsystem = subsystems.keyAt(subsystemIdx);
 
-            // Blame all activity that happened WAKEUP_REASON_HALF_WINDOW_MS before or after
+            // Blame all activity that happened matchingWindowMillis before or after
             // the wakeup from each responsible subsystem.
-            final long startTime = wakeup.mElapsedMillis - WAKEUP_REASON_HALF_WINDOW_MS;
-            final long endTime = wakeup.mElapsedMillis + WAKEUP_REASON_HALF_WINDOW_MS;
+            final long startTime = wakeup.mElapsedMillis - matchingWindowMillis;
+            final long endTime = wakeup.mElapsedMillis + matchingWindowMillis;
 
             final SparseIntArray uidsToBlame = mRecentWakingActivity.removeBetween(subsystem,
                     startTime, endTime);
@@ -272,18 +271,16 @@ public class CpuWakeupStats {
 
     private synchronized boolean attemptAttributionWith(int subsystem, long activityElapsed,
             SparseIntArray uidProcStates) {
+        final long matchingWindowMillis = mConfig.WAKEUP_MATCHING_WINDOW_MS;
+
         final int startIdx = mWakeupEvents.closestIndexOnOrAfter(
-                activityElapsed - WAKEUP_REASON_HALF_WINDOW_MS);
+                activityElapsed - matchingWindowMillis);
         final int endIdx = mWakeupEvents.closestIndexOnOrBefore(
-                activityElapsed + WAKEUP_REASON_HALF_WINDOW_MS);
+                activityElapsed + matchingWindowMillis);
 
         for (int wakeupIdx = startIdx; wakeupIdx <= endIdx; wakeupIdx++) {
             final Wakeup wakeup = mWakeupEvents.valueAt(wakeupIdx);
-            final SparseBooleanArray subsystems = getResponsibleSubsystemsForWakeup(wakeup);
-            if (subsystems == null) {
-                // Unsupported for attribution
-                continue;
-            }
+            final SparseBooleanArray subsystems = wakeup.mResponsibleSubsystems;
             if (subsystems.get(subsystem)) {
                 // We don't expect more than one wakeup to be found within such a short window, so
                 // just attribute this one and exit
@@ -405,11 +402,13 @@ public class CpuWakeupStats {
      */
     @VisibleForTesting
     static final class WakingActivityHistory {
-        private static final long WAKING_ACTIVITY_RETENTION_MS = TimeUnit.MINUTES.toMillis(10);
-
+        private LongSupplier mRetentionSupplier;
         @VisibleForTesting
-        final SparseArray<TimeSparseArray<SparseIntArray>> mWakingActivity =
-                new SparseArray<>();
+        final SparseArray<TimeSparseArray<SparseIntArray>> mWakingActivity = new SparseArray<>();
+
+        WakingActivityHistory(LongSupplier retentionSupplier) {
+            mRetentionSupplier = retentionSupplier;
+        }
 
         void recordActivity(int subsystem, long elapsedRealtime, SparseIntArray uidProcStates) {
             if (uidProcStates == null) {
@@ -433,27 +432,13 @@ public class CpuWakeupStats {
                     }
                 }
             }
-            // Limit activity history per subsystem to the last WAKING_ACTIVITY_RETENTION_MS.
-            // Note that the last activity is always present, even if it occurred before
-            // WAKING_ACTIVITY_RETENTION_MS.
+            // Limit activity history per subsystem to the last retention period as supplied by
+            // mRetentionSupplier. Note that the last activity is always present, even if it
+            // occurred before the retention period.
             final int endIdx = wakingActivity.closestIndexOnOrBefore(
-                    elapsedRealtime - WAKING_ACTIVITY_RETENTION_MS);
+                    elapsedRealtime - mRetentionSupplier.getAsLong());
             for (int i = endIdx; i >= 0; i--) {
-                wakingActivity.removeAt(endIdx);
-            }
-        }
-
-        void clearAllBefore(long elapsedRealtime) {
-            for (int subsystemIdx = mWakingActivity.size() - 1; subsystemIdx >= 0; subsystemIdx--) {
-                final TimeSparseArray<SparseIntArray> activityPerSubsystem =
-                        mWakingActivity.valueAt(subsystemIdx);
-                final int endIdx = activityPerSubsystem.closestIndexOnOrBefore(elapsedRealtime);
-                for (int removeIdx = endIdx; removeIdx >= 0; removeIdx--) {
-                    activityPerSubsystem.removeAt(removeIdx);
-                }
-                // Generally waking activity is a high frequency occurrence for any subsystem, so we
-                // don't delete the TimeSparseArray even if it is now empty, to avoid object churn.
-                // This will leave one TimeSparseArray per subsystem, which are few right now.
+                wakingActivity.removeAt(i);
             }
         }
 
@@ -515,33 +500,6 @@ public class CpuWakeupStats {
         }
     }
 
-    private SparseBooleanArray getResponsibleSubsystemsForWakeup(Wakeup wakeup) {
-        if (ArrayUtils.isEmpty(wakeup.mDevices)) {
-            return null;
-        }
-        final SparseBooleanArray result = new SparseBooleanArray();
-        for (final Wakeup.IrqDevice device : wakeup.mDevices) {
-            final List<String> rawSubsystems = mIrqDeviceMap.getSubsystemsForDevice(device.mDevice);
-
-            boolean anyKnownSubsystem = false;
-            if (rawSubsystems != null) {
-                for (int i = 0; i < rawSubsystems.size(); i++) {
-                    final int subsystem = stringToKnownSubsystem(rawSubsystems.get(i));
-                    if (subsystem != CPU_WAKEUP_SUBSYSTEM_UNKNOWN) {
-                        // Just in case the xml had arbitrary subsystem names, we want to make sure
-                        // that we only put the known ones into our attribution map.
-                        result.put(subsystem, true);
-                        anyKnownSubsystem = true;
-                    }
-                }
-            }
-            if (!anyKnownSubsystem) {
-                result.put(CPU_WAKEUP_SUBSYSTEM_UNKNOWN, true);
-            }
-        }
-        return result;
-    }
-
     static int stringToKnownSubsystem(String rawSubsystem) {
         switch (rawSubsystem) {
             case SUBSYSTEM_ALARM_STRING:
@@ -598,15 +556,19 @@ public class CpuWakeupStats {
         long mElapsedMillis;
         long mUptimeMillis;
         IrqDevice[] mDevices;
+        SparseBooleanArray mResponsibleSubsystems;
 
-        private Wakeup(int type, IrqDevice[] devices, long elapsedMillis, long uptimeMillis) {
+        private Wakeup(int type, IrqDevice[] devices, long elapsedMillis, long uptimeMillis,
+                SparseBooleanArray responsibleSubsystems) {
             mType = type;
             mDevices = devices;
             mElapsedMillis = elapsedMillis;
             mUptimeMillis = uptimeMillis;
+            mResponsibleSubsystems = responsibleSubsystems;
         }
 
-        static Wakeup parseWakeup(String rawReason, long elapsedMillis, long uptimeMillis) {
+        static Wakeup parseWakeup(String rawReason, long elapsedMillis, long uptimeMillis,
+                IrqDeviceMap deviceMap) {
             final String[] components = rawReason.split(":");
             if (ArrayUtils.isEmpty(components) || components[0].startsWith(ABORT_REASON_PREFIX)) {
                 // Accounting of aborts is not supported yet.
@@ -616,6 +578,7 @@ public class CpuWakeupStats {
             int type = TYPE_IRQ;
             int parsedDeviceCount = 0;
             final IrqDevice[] parsedDevices = new IrqDevice[components.length];
+            final SparseBooleanArray responsibleSubsystems = new SparseBooleanArray();
 
             for (String component : components) {
                 final Matcher matcher = sIrqPattern.matcher(component.trim());
@@ -635,13 +598,35 @@ public class CpuWakeupStats {
                         continue;
                     }
                     parsedDevices[parsedDeviceCount++] = new IrqDevice(line, device);
+
+                    final List<String> rawSubsystems = deviceMap.getSubsystemsForDevice(device);
+                    boolean anyKnownSubsystem = false;
+                    if (rawSubsystems != null) {
+                        for (int i = 0; i < rawSubsystems.size(); i++) {
+                            final int subsystem = stringToKnownSubsystem(rawSubsystems.get(i));
+                            if (subsystem != CPU_WAKEUP_SUBSYSTEM_UNKNOWN) {
+                                // Just in case the xml had arbitrary subsystem names, we want to
+                                // make sure that we only put the known ones into our map.
+                                responsibleSubsystems.put(subsystem, true);
+                                anyKnownSubsystem = true;
+                            }
+                        }
+                    }
+                    if (!anyKnownSubsystem) {
+                        responsibleSubsystems.put(CPU_WAKEUP_SUBSYSTEM_UNKNOWN, true);
+                    }
                 }
             }
             if (parsedDeviceCount == 0) {
                 return null;
             }
+            if (responsibleSubsystems.size() == 1 && responsibleSubsystems.get(
+                    CPU_WAKEUP_SUBSYSTEM_UNKNOWN, false)) {
+                // There is no attributable subsystem here, so we do not support it.
+                return null;
+            }
             return new Wakeup(type, Arrays.copyOf(parsedDevices, parsedDeviceCount), elapsedMillis,
-                    uptimeMillis);
+                    uptimeMillis, responsibleSubsystems);
         }
 
         @Override
@@ -651,6 +636,7 @@ public class CpuWakeupStats {
                     + ", mElapsedMillis=" + mElapsedMillis
                     + ", mUptimeMillis=" + mUptimeMillis
                     + ", mDevices=" + Arrays.toString(mDevices)
+                    + ", mResponsibleSubsystems=" + mResponsibleSubsystems
                     + '}';
         }
 
@@ -672,18 +658,28 @@ public class CpuWakeupStats {
 
     static final class Config implements DeviceConfig.OnPropertiesChangedListener {
         static final String KEY_WAKEUP_STATS_RETENTION_MS = "wakeup_stats_retention_ms";
+        static final String KEY_WAKEUP_MATCHING_WINDOW_MS = "wakeup_matching_window_ms";
+        static final String KEY_WAKING_ACTIVITY_RETENTION_MS = "waking_activity_retention_ms";
 
         private static final String[] PROPERTY_NAMES = {
                 KEY_WAKEUP_STATS_RETENTION_MS,
+                KEY_WAKEUP_MATCHING_WINDOW_MS,
+                KEY_WAKING_ACTIVITY_RETENTION_MS,
         };
 
         static final long DEFAULT_WAKEUP_STATS_RETENTION_MS = TimeUnit.DAYS.toMillis(3);
+        private static final long DEFAULT_WAKEUP_MATCHING_WINDOW_MS = TimeUnit.SECONDS.toMillis(1);
+        private static final long DEFAULT_WAKING_ACTIVITY_RETENTION_MS =
+                TimeUnit.MINUTES.toMillis(5);
 
         /**
          * Wakeup stats are retained only for this duration.
          */
         public volatile long WAKEUP_STATS_RETENTION_MS = DEFAULT_WAKEUP_STATS_RETENTION_MS;
+        public volatile long WAKEUP_MATCHING_WINDOW_MS = DEFAULT_WAKEUP_MATCHING_WINDOW_MS;
+        public volatile long WAKING_ACTIVITY_RETENTION_MS = DEFAULT_WAKING_ACTIVITY_RETENTION_MS;
 
+        @SuppressLint("MissingPermission")
         void register(Executor executor) {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_BATTERY_STATS,
                     executor, this);
@@ -702,6 +698,15 @@ public class CpuWakeupStats {
                         WAKEUP_STATS_RETENTION_MS = properties.getLong(
                                 KEY_WAKEUP_STATS_RETENTION_MS, DEFAULT_WAKEUP_STATS_RETENTION_MS);
                         break;
+                    case KEY_WAKEUP_MATCHING_WINDOW_MS:
+                        WAKEUP_MATCHING_WINDOW_MS = properties.getLong(
+                                KEY_WAKEUP_MATCHING_WINDOW_MS, DEFAULT_WAKEUP_MATCHING_WINDOW_MS);
+                        break;
+                    case KEY_WAKING_ACTIVITY_RETENTION_MS:
+                        WAKING_ACTIVITY_RETENTION_MS = properties.getLong(
+                                KEY_WAKING_ACTIVITY_RETENTION_MS,
+                                DEFAULT_WAKING_ACTIVITY_RETENTION_MS);
+                        break;
                 }
             }
         }
@@ -711,7 +716,19 @@ public class CpuWakeupStats {
 
             pw.increaseIndent();
 
-            pw.print(KEY_WAKEUP_STATS_RETENTION_MS, WAKEUP_STATS_RETENTION_MS);
+            pw.print(KEY_WAKEUP_STATS_RETENTION_MS);
+            pw.print("=");
+            TimeUtils.formatDuration(WAKEUP_STATS_RETENTION_MS, pw);
+            pw.println();
+
+            pw.print(KEY_WAKEUP_MATCHING_WINDOW_MS);
+            pw.print("=");
+            TimeUtils.formatDuration(WAKEUP_MATCHING_WINDOW_MS, pw);
+            pw.println();
+
+            pw.print(KEY_WAKING_ACTIVITY_RETENTION_MS);
+            pw.print("=");
+            TimeUtils.formatDuration(WAKING_ACTIVITY_RETENTION_MS, pw);
             pw.println();
 
             pw.decreaseIndent();

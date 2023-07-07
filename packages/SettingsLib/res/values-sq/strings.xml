@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparatet e dëgjimit"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Lidhur me aparatet e dëgjimit"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"U lidh me audion LE"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"U lidh me audion e medias"</string>
@@ -216,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Zgjidh profilin"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personale"</string>
     <string name="category_work" msgid="4014193632325996115">"Punë"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klono"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opsionet e zhvilluesit"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivizo opsionet e zhvilluesit"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Cakto opsionet për zhvillimin e aplikacionit"</string>
@@ -455,7 +455,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> bazuar në përdorimin tënd"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Deri në <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Deri në: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria mund të mbarojë deri në <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> e mbetur"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> e mbetur (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -520,7 +520,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Më shumë kohë."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Më pak kohë."</string>
     <string name="cancel" msgid="5665114069455378395">"Anulo"</string>
-    <string name="next" msgid="2699398661093607009">"Tjetri"</string>
+    <string name="next" msgid="2699398661093607009">"Para"</string>
     <string name="back" msgid="5554327870352703710">"Prapa"</string>
     <string name="save" msgid="3745809743277153149">"Ruaj"</string>
     <string name="okay" msgid="949938843324579502">"Në rregull"</string>
@@ -545,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Pikërisht tani"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ky telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ky tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altoparlanti i stacionit"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Pajisja e jashtme"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pajisja e lidhur"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ky telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nuk mund të luhet në këtë pajisje"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Përmirëso llogarinë për të ndryshuar"</string>

@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Share"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Screen recording saved"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tap to view"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error deleting screen recording"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Error saving screen recording"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error starting screen recording"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Back"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Face authenticated"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmed"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tap Confirm to complete"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Unlocked by face. Press the unlock icon to continue."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Unlocked by face"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Unlocked by face. Press to continue."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Face recognized. Press to continue."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Face recognized. Press the unlock icon to continue."</string>
@@ -450,11 +450,11 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Network logging"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA certificates"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"View Policies"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"View policies"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"View controls"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> may be able to access data associated with this device, manage apps, and change this devices settings.\n\nIf you have questions, contact <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Your organization installed a certificate authority on this device. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Your organization installed a certificate authority in your work profile. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"A certificate authority is installed on this device. Your secure network traffic may be monitored or modified."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"disable"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Sound and vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Settings"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Lowered to safer volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"The volume has been high for longer than recommended"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume lowered to safer level"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Headphone volume has been high for longer than recommended"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Headphone volume has exceeded the safe limit for this week"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Keep listening"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Lower volume"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is pinned"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"This keeps it in view until you unpin. Touch and hold Back and Overview to unpin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"This keeps it in view until you unpin. Touch and hold Back and Home to unpin."</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Settings"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> is playing from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> of <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> is running"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Play"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Previous track"</string>
@@ -999,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Can’t save. Try again."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Can’t save."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Use at least 4 characters"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Use fewer than 16 characters"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Use fewer than <xliff:g id="LENGTH">%1$d</xliff:g> characters"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build number"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build number copied to clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>
@@ -1119,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Learn more"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Learn more at <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Open <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• The app is set up"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• At least one card has been added to Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Install a camera app"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• The app is set up"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• At least one device is available"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Select a default notes app to use the notetaking shortcut"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"To add the Wallet app as a shortcut, make sure the app is installed"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"To add the Wallet app as a shortcut, make sure at least one card has been added"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"To add the QR code scanner as a shortcut, make sure a camera app is installed"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"To add the Home app as a shortcut, make sure the app is installed"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• At least one device is available"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Select a default notes app to use the notetaking shortcut"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Select app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Touch and hold shortcut"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel"</string>
@@ -1139,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connect your stylus to a charger"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stylus battery low"</string>
     <string name="video_camera" msgid="7654002575156149298">"Video camera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Can\'t call from this profile"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Your work policy allows you to make phone calls only from the work profile"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Can\'t call from a personal app"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Your organization only allows you to make calls from work apps"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Switch to work profile"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Close"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Install a work phone app"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Cancel"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Customize lock screen"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Unlock to customize lock screen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi not available"</string>
@@ -1152,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Priority mode on"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant attention on"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Set default notes app in Settings"</string>
+    <string name="install_app" msgid="5066668100199613936">"Install app"</string>
 </resources>

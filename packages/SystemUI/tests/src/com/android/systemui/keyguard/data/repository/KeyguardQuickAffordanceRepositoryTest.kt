@@ -47,6 +47,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,6 +71,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
         context.resources.configuration.setLayoutDirection(Locale.US)
         config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
         config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
@@ -137,6 +139,13 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             )
     }
 
+    @After
+    fun tearDown() {
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.bool.custom_lockscreen_shortcuts_enabled)
+    }
+
     @Test
     fun setSelections() =
         testScope.runTest {
@@ -180,12 +189,12 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                     listOf(
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config1.key,
-                            name = config1.pickerName,
+                            name = config1.pickerName(),
                             iconResourceId = config1.pickerIconResourceId,
                         ),
                         KeyguardQuickAffordancePickerRepresentation(
                             id = config2.key,
-                            name = config2.pickerName,
+                            name = config2.pickerName(),
                             iconResourceId = config2.pickerIconResourceId,
                         ),
                     )

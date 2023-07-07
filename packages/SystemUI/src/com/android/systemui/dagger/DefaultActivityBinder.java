@@ -32,6 +32,7 @@ import com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActiv
 import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
+import com.android.systemui.telephony.ui.activity.SwitchToManagedProfileForCallActivity;
 import com.android.systemui.tuner.TunerActivity;
 import com.android.systemui.usb.UsbAccessoryUriActivity;
 import com.android.systemui.usb.UsbConfirmActivity;
@@ -178,4 +179,11 @@ public abstract class DefaultActivityBinder {
     @ClassKey(TvSensorPrivacyChangedActivity.class)
     public abstract Activity bindTvSensorPrivacyChangedActivity(
             TvSensorPrivacyChangedActivity activity);
+
+    /** Inject into SwitchToManagedProfileForCallActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(SwitchToManagedProfileForCallActivity.class)
+    public abstract Activity bindSwitchToManagedProfileForCallActivity(
+            SwitchToManagedProfileForCallActivity activity);
 }

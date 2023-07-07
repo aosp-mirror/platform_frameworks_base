@@ -435,11 +435,15 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_KEYGUARD_GOING_AWAY = 7;
     /**
      * A window is appearing above a locked keyguard.
+     * @deprecated use {@link #TRANSIT_TO_FRONT} + {@link #TRANSIT_FLAG_KEYGUARD_OCCLUDING} for
+     *             keyguard occluding with Shell transition.
      * @hide
      */
     int TRANSIT_KEYGUARD_OCCLUDE = 8;
     /**
      * A window is made invisible revealing a locked keyguard.
+     * @deprecated use {@link #TRANSIT_TO_BACK} + {@link #TRANSIT_FLAG_KEYGUARD_UNOCCLUDING} for
+     *             keyguard occluding with Shell transition.
      * @hide
      */
     int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
@@ -555,6 +559,32 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = (1 << 9); // 0x200
 
     /**
+     * Transition flag: The transition is prepared when nothing is visible on screen, e.g. screen
+     * is off. The animation handlers can decide whether to skip animations.
+     * @hide
+     */
+    int TRANSIT_FLAG_INVISIBLE = (1 << 10); // 0x400
+
+    /**
+     * Transition flag: Indicates that keyguard will be showing (locked) with this transition,
+     * which is the opposite of {@link #TRANSIT_FLAG_KEYGUARD_GOING_AWAY}.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_APPEARING = (1 << 11); // 0x800
+
+    /**
+     * Transition flag: Indicates that keyguard is becoming hidden by an app
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_OCCLUDING = (1 << 12); // 0x1000
+
+    /**
+     * Transition flag: Indicates that keyguard is being revealed after an app was occluding it.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_UNOCCLUDING = (1 << 13); // 0x2000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -567,10 +597,28 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_LOCKED,
             TRANSIT_FLAG_IS_RECENTS,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY,
-            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
+            TRANSIT_FLAG_INVISIBLE,
+            TRANSIT_FLAG_KEYGUARD_APPEARING,
+            TRANSIT_FLAG_KEYGUARD_OCCLUDING,
+            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
+
+    /**
+     * Transit flags used to signal keyguard visibility is changing for animations.
+     *
+     * <p>These roughly correspond to CLOSE, OPEN, TO_BACK, and TO_FRONT on a hypothetical Keyguard
+     * container. Since Keyguard isn't a container we can't include it in changes and need to send
+     * this information in its own channel.
+     * @hide
+     */
+    int KEYGUARD_VISIBILITY_TRANSIT_FLAGS =
+            (TRANSIT_FLAG_KEYGUARD_GOING_AWAY
+            | TRANSIT_FLAG_KEYGUARD_APPEARING
+            | TRANSIT_FLAG_KEYGUARD_OCCLUDING
+            | TRANSIT_FLAG_KEYGUARD_UNOCCLUDING);
 
     /**
      * Remove content mode: Indicates remove content mode is currently not defined.
@@ -1183,6 +1231,68 @@ public interface WindowManager extends ViewManager {
     // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE";
+
+    /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app should be opted-out from the
+     * compatibility override that changes the min aspect ratio.
+     *
+     * <p>When this compat override is enabled the min aspect ratio given in the app's manifest can
+     * be overridden by the device manufacturer using their discretion to improve display
+     * compatibility unless the app's manifest value is higher. This treatment will also apply if
+     * no min aspect ratio value is provided in the manifest. These treatments can apply only in
+     * specific cases (e.g. device is in portrait) or each time the app is displayed on screen.
+     *
+     * <p>Setting this property to {@code false} informs the system that the app must be
+     * opted-out from the compatibility treatment even if the device manufacturer has opted the app
+     * into the treatment.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/279428317): Make this public API.
+    String PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE =
+            "android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE";
+
+    /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app should be opted-out from the
+     * compatibility overrides that change the resizability of the app.
+     *
+     * <p>When these compat overrides are enabled they force the packages they are applied to to be
+     * resizable / unresizable. If the app is forced to be resizable this won't change whether
+     * the app can be put into multi-windowing mode, but allow the app to resize without going into
+     * size-compat mode when the window container resizes, such as display size change or screen
+     * rotation.
+     *
+     * <p>Setting this property to {@code false} informs the system that the app must be
+     * opted-out from the compatibility treatment even if the device manufacturer has opted the app
+     * into the treatment.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/280052089): Make this public API.
+    String PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES =
+            "android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES";
 
     /**
      * @hide
@@ -3693,6 +3803,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @TestApi
         public float preferredMinDisplayRefreshRate;
 
         /**
@@ -3701,6 +3812,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @TestApi
         public float preferredMaxDisplayRefreshRate;
 
         /** Indicates whether this window wants the HDR conversion is disabled. */

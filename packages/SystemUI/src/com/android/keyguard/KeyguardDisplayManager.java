@@ -19,27 +19,34 @@ import android.app.Presentation;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.os.Bundle;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.concurrent.Executor;
 
@@ -47,6 +54,7 @@ import javax.inject.Inject;
 
 import dagger.Lazy;
 
+@SysUISingleton
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -60,6 +68,9 @@ public class KeyguardDisplayManager {
 
     private boolean mShowing;
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
+
+    private final DeviceStateHelper mDeviceStateHelper;
+    private final KeyguardStateController mKeyguardStateController;
 
     private final SparseArray<Presentation> mPresentations = new SparseArray<>();
 
@@ -92,7 +103,9 @@ public class KeyguardDisplayManager {
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             DisplayTracker displayTracker,
             @Main Executor mainExecutor,
-            @UiBackground Executor uiBgExecutor) {
+            @UiBackground Executor uiBgExecutor,
+            DeviceStateHelper deviceStateHelper,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
         mNavigationBarControllerLazy = navigationBarControllerLazy;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
@@ -100,6 +113,8 @@ public class KeyguardDisplayManager {
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayTracker = displayTracker;
         mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
+        mDeviceStateHelper = deviceStateHelper;
+        mKeyguardStateController = keyguardStateController;
     }
 
     private boolean isKeyguardShowable(Display display) {
@@ -119,6 +134,18 @@ public class KeyguardDisplayManager {
         if ((mTmpDisplayInfo.flags & Display.FLAG_ALWAYS_UNLOCKED) != 0) {
             if (DEBUG) {
                 Log.i(TAG, "Do not show KeyguardPresentation on an unlocked display");
+            }
+            return false;
+        }
+        if (mKeyguardStateController.isOccluded()
+                && mDeviceStateHelper.isConcurrentDisplayActive(display)) {
+            if (DEBUG) {
+                // When activities with FLAG_SHOW_WHEN_LOCKED are shown on top of Keyguard, the
+                // Keyguard state becomes "occluded". In this case, we should not show the
+                // KeyguardPresentation, since the activity is presenting content onto the
+                // non-default display.
+                Log.i(TAG, "Do not show KeyguardPresentation when occluded and concurrent"
+                        + " display is active");
             }
             return false;
         }
@@ -259,6 +286,53 @@ public class KeyguardDisplayManager {
         }
 
     }
+
+    /**
+     * Helper used to receive device state info from {@link DeviceStateManager}.
+     */
+    static class DeviceStateHelper implements DeviceStateManager.DeviceStateCallback {
+
+        @Nullable
+        private final DisplayAddress.Physical mRearDisplayPhysicalAddress;
+
+        // TODO(b/271317597): These device states should be defined in DeviceStateManager
+        private final int mConcurrentState;
+        private boolean mIsInConcurrentDisplayState;
+
+        @Inject
+        DeviceStateHelper(Context context,
+                DeviceStateManager deviceStateManager,
+                @Main Executor mainExecutor) {
+
+            final String rearDisplayPhysicalAddress = context.getResources().getString(
+                    com.android.internal.R.string.config_rearDisplayPhysicalAddress);
+            if (TextUtils.isEmpty(rearDisplayPhysicalAddress)) {
+                mRearDisplayPhysicalAddress = null;
+            } else {
+                mRearDisplayPhysicalAddress = DisplayAddress
+                        .fromPhysicalDisplayId(Long.parseLong(rearDisplayPhysicalAddress));
+            }
+
+            mConcurrentState = context.getResources().getInteger(
+                    com.android.internal.R.integer.config_deviceStateConcurrentRearDisplay);
+            deviceStateManager.registerCallback(mainExecutor, this);
+        }
+
+        @Override
+        public void onStateChanged(int state) {
+            // When concurrent state ends, the display also turns off. This is enforced in various
+            // ExtensionRearDisplayPresentationTest CTS tests. So, we don't need to invoke
+            // hide() since that will happen through the onDisplayRemoved callback.
+            mIsInConcurrentDisplayState = state == mConcurrentState;
+        }
+
+        boolean isConcurrentDisplayActive(Display display) {
+            return mIsInConcurrentDisplayState
+                    && mRearDisplayPhysicalAddress != null
+                    && mRearDisplayPhysicalAddress.equals(display.getAddress());
+        }
+    }
+
 
     @VisibleForTesting
     static final class KeyguardPresentation extends Presentation {

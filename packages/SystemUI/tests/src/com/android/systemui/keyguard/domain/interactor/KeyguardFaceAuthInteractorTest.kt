@@ -35,7 +35,7 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -82,7 +82,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         bouncerRepository = FakeKeyguardBouncerRepository()
         faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        keyguardTransitionInteractor = KeyguardTransitionInteractor(keyguardTransitionRepository)
+        keyguardTransitionInteractor =
+            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
 
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
@@ -100,8 +101,9 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     mock(DismissCallbackRegistry::class.java),
                     context,
                     keyguardUpdateMonitor,
-                    mock(TrustRepository::class.java),
-                    FakeFeatureFlags(),
+                    FakeTrustRepository(),
+                    FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
+                    testScope.backgroundScope,
                 ),
                 AlternateBouncerInteractor(
                     mock(StatusBarStateController::class.java),

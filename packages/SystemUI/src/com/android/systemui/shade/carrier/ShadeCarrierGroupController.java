@@ -141,6 +141,7 @@ public class ShadeCarrierGroupController {
         mCarrierTextManager = carrierTextManagerBuilder
                 .setShowAirplaneMode(false)
                 .setShowMissingSim(false)
+                .setDebugLocationString("Shade")
                 .build();
         mCarrierConfigTracker = carrierConfigTracker;
         mSlotIndexResolver = slotIndexResolver;
@@ -195,6 +196,11 @@ public class ShadeCarrierGroupController {
     @VisibleForTesting
     protected int getSlotIndex(int subscriptionId) {
         return mSlotIndexResolver.getSlotIndex(subscriptionId);
+    }
+
+    @VisibleForTesting
+    protected int getShadeCarrierVisibility(int index) {
+        return mCarrierGroups[index].getVisibility();
     }
 
     /**
@@ -306,11 +312,13 @@ public class ShadeCarrierGroupController {
                                         + info.subscriptionIds[i]);
                         continue;
                     }
-                    mInfos[slot] = mInfos[slot].changeVisibility(true);
-                    slotSeen[slot] = true;
-                    mCarrierGroups[slot].setCarrierText(
-                            info.listOfCarriers[i].toString().trim());
-                    mCarrierGroups[slot].setVisibility(View.VISIBLE);
+                    String carrierText = info.listOfCarriers[i].toString().trim();
+                    if (!TextUtils.isEmpty(carrierText)) {
+                        mInfos[slot] = mInfos[slot].changeVisibility(true);
+                        slotSeen[slot] = true;
+                        mCarrierGroups[slot].setCarrierText(carrierText);
+                        mCarrierGroups[slot].setVisibility(View.VISIBLE);
+                    }
                 }
                 for (int i = 0; i < SIM_SLOTS; i++) {
                     if (!slotSeen[i]) {

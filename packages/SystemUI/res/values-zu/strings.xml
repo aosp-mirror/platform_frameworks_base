@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Yabelana"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Okokuqopha iskrini kulondoloziwe"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Thepha ukuze ubuke"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Iphutha lokususa ukurekhoda isikrini"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Iphutha lokulondoloza okokuqopha iskrini"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Iphutha lokuqala ukurekhoda isikrini"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Emuva"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Ekhaya"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ubuso bufakazelwe ubuqiniso"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Kuqinisekisiwe"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Thepha okuthi Qinisekisa ukuze uqedele"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ivulwe ngobuso. Cindezela isithonjana sokuvula ukuze uqhubeke."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Vula ngobuso"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Vula ngobuso. Cindezela ukuze uqhubeke."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ubuso buyaziwa. Cindezela ukuze uqhubeke."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ubuso buyaziwa. Cindezela isithonjana sokuvula ukuze uqhubeke."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"khubaza"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Umsindo nokudlidliza"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Amasethingi"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Yehliselwe kuvolumu ephephile"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Ivolumu beyiphezulu isikhathi eside kunokunconyiwe"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Ivolumu yehliselwe kuleveli ephephile"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Ivolumu yama-headphone beyiphezulu isikhathi eside kunokunconyiwe"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Ivolumu yama-headphone ibe phezulu kunokunconyiwe, okungalimaza ukuzwa kwakho"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Qhubeka nokulalela"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Yehlisa ivolomu"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"I-app iphiniwe"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Lokhu kuyigcina ibukeka uze ususe ukuphina. Thinta uphinde ubambe okuthi Emuva Nokubuka konke ukuze ususe ukuphina."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Lokhu kuyigcina ibonakala uze uyisuse. Thinta uphinde ubambe okuthi Emuva nokuthi Ekhaya ukuze ususe ukuphina."</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Izilungiselelo"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"I-<xliff:g id="SONG_NAME">%1$s</xliff:g> ka-<xliff:g id="ARTIST_NAME">%2$s</xliff:g> idlala kusuka ku-<xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> ku-<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> iyasebenza"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Dlala"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Misa"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Ithrekhi yangaphambilini"</string>
@@ -999,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Ayikwazi ukulondoloza. Zama futhi."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Ayikwazi ukulondoloza."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Sebenzisa okungenani izinhlamvu ezi-4"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Sebenzisa isinhlamvu ezimbalwa kuneziyi-16"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Sebenzisa isinhlamvu ezimbalwa kuneziyi-<xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Yakha inombolo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Yakha inombolo ekopishelwe kubhodi yokunamathisela."</string>
     <string name="basic_status" msgid="2315371112182658176">"Vula ingxoxo"</string>
@@ -1119,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Funda kabanzi"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Funda kabanzi ku-<xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Vula i-<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• I-app isethiwe"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Okungenani ikhadi elilodwa lengeziwe ku-Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Faka i-app yekhamera"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• I-app isethiwe"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Okungenani idivayisi eyodwa iyatholakala"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Khetha i-app yamanothi azenzakalelayo ukuze usebenzise isinqamuleli sokubhala amanothi"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Ukuze ungeze i-app ye-Wallet njengesinqamuleli, qinisekisa ukuthi i-app ifakiwe"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Ukuze ungeze i-app ye-Wallet njengesinqamuleli, qinisekisa ukuthi okungenani ikhadi elilodwa lingeziwe"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Ukuze ungeze Iskena sekhodi ye-QR njengesinqamuleli, qinisekisa ukuthi i-app yekhamera ifakiwe"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Ukuze ungeze i-App yasekhaya njengesinqamuleli, qinisekisa ukuthi i-app ifakiwe"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Okungenani idivayisi eyodwa iyatholakala"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Khetha i-app yamanothi azenzakalelayo ukuze usebenzise isinqamuleli sokubhala amanothi"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Khetha i-app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Thinta futhi ubambe isinqamuleli"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Khansela"</string>
@@ -1139,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Xhuma i-stylus yakho kushaja"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Ibhethri le-stylus liphansi"</string>
     <string name="video_camera" msgid="7654002575156149298">"Ikhamera yevidiyo"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Ayikwazi ukufonela le phrofayela"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Inqubomgomo yakho yomsebenzi ikuvumela ukuthi wenze amakholi wefoni kuphela ngephrofayela yomsebenzi"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Ayikwazi ukuthumela umlayezo ukusuka ku-app yomuntu siqu"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Inhlangano yakho ikuvumela kuphela ukuthi wenze amakholi ngama-app asemsebenzini"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Shintshela kuphrofayela yomsebenzi"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Vala"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Faka i-app yefoni yasemsebenzini"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Khansela"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Yenza ngokwezifiso ukukhiya isikrini"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Vula ukuze wenze ukuvala isikrini ngendlela oyifisayo"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"I-Wi-Fi ayitholakali"</string>
@@ -1152,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Imodi ebalulekile ivuliwe"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Ukunaka kwe-Assistant kuvuliwe"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setha i-app yamanothi azenzakalelayo Kumsethingi"</string>
+    <string name="install_app" msgid="5066668100199613936">"Faka i-app"</string>
 </resources>

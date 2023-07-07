@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
 import static android.media.VolumeProvider.VOLUME_CONTROL_FIXED;
 import static android.media.VolumeProvider.VOLUME_CONTROL_RELATIVE;
@@ -33,6 +34,8 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -42,7 +45,9 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
+import android.media.MediaRouter2Manager;
 import android.media.Rating;
+import android.media.RoutingSessionInfo;
 import android.media.VolumeProvider;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -74,6 +79,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -101,6 +107,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     static final long THROW_FOR_INVALID_BROADCAST_RECEIVER = 270049379L;
 
     private static final String TAG = "MediaSessionRecord";
+    private static final String[] ART_URIS = new String[] {
+            MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+            MediaMetadata.METADATA_KEY_ART_URI,
+            MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI};
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
@@ -154,6 +164,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private final SessionStub mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService mService;
+    private final UriGrantsManagerInternal mUgmInternal;
     private final Context mContext;
     private final boolean mVolumeAdjustmentForRemoteGroupSessions;
 
@@ -215,6 +226,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioAttrs = DEFAULT_ATTRIBUTES;
         mPolicies = policies;
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
 
@@ -501,7 +513,33 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
     @Override
     public boolean canHandleVolumeKey() {
-        return mVolumeControlType != VOLUME_CONTROL_FIXED;
+        if (isPlaybackTypeLocal()) {
+            return true;
+        }
+        if (mVolumeControlType == VOLUME_CONTROL_FIXED) {
+            return false;
+        }
+        if (mVolumeAdjustmentForRemoteGroupSessions) {
+            return true;
+        }
+        // See b/228021646 for details.
+        MediaRouter2Manager mRouter2Manager = MediaRouter2Manager.getInstance(mContext);
+        List<RoutingSessionInfo> sessions = mRouter2Manager.getRoutingSessions(mPackageName);
+        boolean foundNonSystemSession = false;
+        boolean remoteSessionAllowVolumeAdjustment = true;
+        for (RoutingSessionInfo session : sessions) {
+            if (!session.isSystemSession()) {
+                foundNonSystemSession = true;
+                if (session.getVolumeHandling() == PLAYBACK_VOLUME_FIXED) {
+                    remoteSessionAllowVolumeAdjustment = false;
+                }
+            }
+        }
+        if (!foundNonSystemSession) {
+            Log.d(TAG, "Package " + mPackageName
+                    + " has a remote media session but no associated routing session");
+        }
+        return foundNonSystemSession && remoteSessionAllowVolumeAdjustment;
     }
 
     @Override
@@ -1080,19 +1118,43 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void setMetadata(MediaMetadata metadata, long duration, String metadataDescription)
                 throws RemoteException {
             synchronized (mLock) {
-                MediaMetadata temp = metadata == null ? null : new MediaMetadata.Builder(metadata)
-                        .build();
-                // This is to guarantee that the underlying bundle is unparceled
-                // before we set it to prevent concurrent reads from throwing an
-                // exception
-                if (temp != null) {
-                    temp.size();
-                }
-                mMetadata = temp;
                 mDuration = duration;
                 mMetadataDescription = metadataDescription;
+                mMetadata = sanitizeMediaMetadata(metadata);
             }
             mHandler.post(MessageHandler.MSG_UPDATE_METADATA);
+        }
+
+        private MediaMetadata sanitizeMediaMetadata(MediaMetadata metadata) {
+            if (metadata == null) {
+                return null;
+            }
+            MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder(metadata);
+            for (String key: ART_URIS) {
+                String uriString = metadata.getString(key);
+                if (TextUtils.isEmpty(uriString)) {
+                    continue;
+                }
+                Uri uri = Uri.parse(uriString);
+                if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+                    continue;
+                }
+                try {
+                    mUgmInternal.checkGrantUriPermission(getUid(),
+                            getPackageName(),
+                            ContentProvider.getUriWithoutUserId(uri),
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            ContentProvider.getUserIdFromUri(uri, getUserId()));
+                } catch (SecurityException e) {
+                    metadataBuilder.putString(key, null);
+                }
+            }
+            MediaMetadata sanitizedMetadata = metadataBuilder.build();
+            // sanitizedMetadata.size() guarantees that the underlying bundle is unparceled
+            // before we set it to prevent concurrent reads from throwing an
+            // exception
+            sanitizedMetadata.size();
+            return sanitizedMetadata;
         }
 
         @Override

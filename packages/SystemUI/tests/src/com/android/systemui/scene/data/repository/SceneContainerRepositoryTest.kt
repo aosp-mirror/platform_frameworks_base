@@ -21,6 +21,7 @@ package com.android.systemui.scene.data.repository
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -34,15 +35,17 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
+    private val utils = SceneTestUtils(this)
+
     @Test
     fun allSceneKeys() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         assertThat(underTest.allSceneKeys("container1"))
             .isEqualTo(
                 listOf(
                     SceneKey.QuickSettings,
                     SceneKey.Shade,
-                    SceneKey.LockScreen,
+                    SceneKey.Lockscreen,
                     SceneKey.Bouncer,
                     SceneKey.Gone,
                 )
@@ -51,15 +54,15 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun allSceneKeys_noSuchContainer_throws() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.allSceneKeys("nonExistingContainer")
     }
 
     @Test
     fun currentScene() = runTest {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         val currentScene by collectLastValue(underTest.currentScene("container1"))
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.LockScreen))
+        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
         underTest.setCurrentScene("container1", SceneModel(SceneKey.Shade))
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
@@ -67,25 +70,25 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun currentScene_noSuchContainer_throws() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.currentScene("nonExistingContainer")
     }
 
     @Test(expected = IllegalStateException::class)
     fun setCurrentScene_noSuchContainer_throws() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.setCurrentScene("nonExistingContainer", SceneModel(SceneKey.Shade))
     }
 
     @Test(expected = IllegalStateException::class)
     fun setCurrentScene_noSuchSceneInContainer_throws() {
         val underTest =
-            fakeSceneContainerRepository(
+            utils.fakeSceneContainerRepository(
                 setOf(
-                    fakeSceneContainerConfig("container1"),
-                    fakeSceneContainerConfig(
+                    utils.fakeSceneContainerConfig("container1"),
+                    utils.fakeSceneContainerConfig(
                         "container2",
-                        listOf(SceneKey.QuickSettings, SceneKey.LockScreen)
+                        listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
                     ),
                 )
             )
@@ -94,7 +97,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test
     fun isVisible() = runTest {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         val isVisible by collectLastValue(underTest.isVisible("container1"))
         assertThat(isVisible).isTrue()
 
@@ -107,19 +110,19 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun isVisible_noSuchContainer_throws() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.isVisible("nonExistingContainer")
     }
 
     @Test(expected = IllegalStateException::class)
     fun setVisible_noSuchContainer_throws() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.setVisible("nonExistingContainer", false)
     }
 
     @Test
     fun sceneTransitionProgress() = runTest {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         val sceneTransitionProgress by
             collectLastValue(underTest.sceneTransitionProgress("container1"))
         assertThat(sceneTransitionProgress).isEqualTo(1f)
@@ -133,7 +136,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun sceneTransitionProgress_noSuchContainer_throws() {
-        val underTest = fakeSceneContainerRepository()
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.sceneTransitionProgress("nonExistingContainer")
     }
 }

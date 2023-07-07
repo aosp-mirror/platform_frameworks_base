@@ -218,8 +218,8 @@ public class BtHelper {
             if (AudioService.DEBUG_VOL) {
                 AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
                         "setAvrcpAbsoluteVolumeIndex: bailing due to null mA2dp").printLog(TAG));
-                return;
             }
+            return;
         }
         if (!mAvrcpAbsVolSupported) {
             AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
@@ -445,8 +445,8 @@ public class BtHelper {
     /*package*/ synchronized void resetBluetoothSco() {
         mScoAudioState = SCO_STATE_INACTIVE;
         broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
-        mDeviceBroker.clearA2dpSuspended();
-        mDeviceBroker.clearLeAudioSuspended();
+        mDeviceBroker.clearA2dpSuspended(false /* internalOnly */);
+        mDeviceBroker.clearLeAudioSuspended(false /* internalOnly */);
         mDeviceBroker.setBluetoothScoOn(false, "resetBluetoothSco");
     }
 

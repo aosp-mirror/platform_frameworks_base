@@ -64,7 +64,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                 RequestInfo.TYPE_CREATE,
                 callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
         mRequestSessionMetric.collectCreateFlowInitialMetricInfo(
-                /*origin=*/request.getOrigin() != null);
+                /*origin=*/request.getOrigin() != null, request);
         mPrimaryProviders = primaryProviders;
     }
 

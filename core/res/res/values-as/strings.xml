@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"মুখাৱয়বৰ মডেল সৃষ্টি কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ডাঠ ৰঙৰ চশমা চিনাক্ত কৰা হৈছে। আপোনাৰ মুখাৱয়ব সম্পূৰ্ণৰূপে দেখা পোৱা হৈ থাকিবই লাগিব।"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"মুখাৱয়বত আৱৰণ চিনাক্ত কৰা হৈছে। আপোনাৰ মুখাৱয়ব সম্পূৰ্ণৰূপে দেখা পোৱা হৈ থাকিবই লাগিব।"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"মুখাৱয়ব ঢাক খাই আছে। সম্পূৰ্ণ মুখাৱয়ব দেখা পাব লাগিব।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। হাৰ্ডৱেৰ নাই।"</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"আঁতৰাওক"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"অনুমোদিত স্তৰতকৈ ওপৰলৈ ভলিউম বঢ়াব নেকি?\n\nদীৰ্ঘ সময়ৰ বাবে উচ্চ ভলিউমত শুনাৰ ফলত শ্ৰৱণ ক্ষমতাৰ ক্ষতি হ\'ব পাৰে।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"সকীয়নি,\nএগৰাকী ব্যক্তিয়ে এসপ্তাহত হেডফ’নৰ জৰিয়তে সুৰক্ষিতভাৱে শুনিব পৰা ডাঙৰ ধ্বনিৰ ছিগনেলৰ পৰিমাণ আপুনি অতিক্ৰম কৰিছে।\n\nএই সীমা অতিক্ৰম কৰাটোৱে আপোনাৰ শ্ৰৱণ শক্তি স্থায়ীভাৱে নষ্ট কৰিব পাৰে।"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"সকীয়নি,\nএগৰাকী ব্যক্তিয়ে এসপ্তাহত হেডফ’নৰ জৰিয়তে সুৰক্ষিতভাৱে শুনিব পৰা ডাঙৰ ধ্বনিৰ ছিগনেলৰ পৰিমাণৰ ৫ গুণ আপুনি অতিক্ৰম কৰিছে।\n\nআপোনাৰ শ্ৰৱণ শক্তি সুৰক্ষিত কৰিবলৈ ভলিউম কমোৱা হৈছে।"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"আপুনি যিটো স্তৰত মিডিয়া শুনি আছে, দীঘলীয়া সময় ধৰি সেইটো স্তৰত শুনি থাকিলে আপোনাৰ শ্ৰৱণ শক্তি নষ্ট হ’ব পাৰে।\n\nএইটো স্তৰত দীঘলীয়া সময়ৰ বাবে প্লে’ কৰি থাকিলে আপোনাৰ শ্ৰৱণ শক্তি নষ্ট হ’ব পাৰে।"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"সকীয়নি,\nআপুনি বৰ্তমান অসুৰক্ষিত স্তৰ এটাত ডাঙৰ ধ্বনিৰ সমল প্লে’ কৰি শুনি আছে।\n\nএই ডাঙৰ ধ্বনিৰ সমলটো শুনি থাকিলে আপোনাৰ শ্ৰৱণ শক্তি নষ্ট হ’ব পাৰে।"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"উচ্চ ভলিউমত শুনি থাকিব নেকি?\n\nহেডফ’নৰ ভলিউম চুপাৰিছ কৰাতকৈ বেছি সময় ধৰি উচ্চ হৈ আছে, যিয়ে আপোনাৰ শ্ৰৱণ ইন্দ্ৰিয় ক্ষতিগ্ৰস্ত কৰিব পাৰে"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"উচ্চ ধ্বনি চিনাক্ত কৰা হৈছে\n\nহেডফ’নৰ ভলিউম চুপাৰিছ কৰাতকৈ বেছি সময় ধৰি উচ্চ হৈ আছে, যিয়ে আপোনাৰ শ্ৰৱণ ইন্দ্ৰিয় ক্ষতিগ্ৰস্ত কৰিব পাৰে"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাট ব্যৱহাৰ কৰেনে?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শ্বৰ্টকাটটো অন হৈ থকাৰ সময়ত দুয়োটা ভলিউম বুটাম ৩ ছেকেণ্ডৰ বাবে হেঁচি ধৰি ৰাখিলে এটা সাধ্য সুবিধা আৰম্ভ হ’ব।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"সাধ্য সুবিধাসমূহৰ বাবে শ্বৰ্টকাট অন কৰিবনে?"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"বাহিৰ হ\'বলৈ ওপৰৰপৰা তললৈ ছোৱাইপ কৰক।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুজি পালোঁ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ভালকৈ চাবলৈ ঘূৰাওক"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ভালকৈ চাবলৈ বিভাজিত স্ক্ৰীনৰ পৰা বাহিৰ হওক"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ভালকৈ চাবলৈ <xliff:g id="NAME">%s</xliff:g> পূৰ্ণ স্ক্ৰীনত খোলক"</string>
     <string name="done_label" msgid="7283767013231718521">"সম্পন্ন কৰা হ’ল"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ঘড়ীৰ বৃত্তাকাৰ শ্লাইডাৰ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"মিনিটৰ বৃত্তাকাৰ শ্লাইডাৰ"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"এইটো আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ত এক্সেছ কৰিব নোৱাৰি। তাৰ পৰিৱৰ্তে আপোনাৰ ফ’নত চেষ্টা কৰি চাওক।"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"এই এপ্‌টো Androidৰ এটা পুৰণা সংস্কৰণৰ বাবে বনোৱা হৈছিল। এইটোৱে সঠিকভাৱে কাম নকৰিব পাৰে আৰু ইয়াত শেহতীয়া সুৰক্ষা আৰু গোপনীয়তা সম্পৰ্কীয় সুৰক্ষাসমূহ নাথাকে। কোনো আপডে’ট আছে নেকি চাওক অথবা এপৰ বিকাশকৰ্তাগৰাকীৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডে’ট আছে নেকি চাওক"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"এই এপ্‌টো Androidৰ শেহতীয়া সংস্কৰণটোৰ সৈতে সমিল নহয়। আপডে’ট আছে নেকি চাওক অথবা এপৰ বিকাশকৰ্তাগৰাকীৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপুনি নতুন বার্তা লাভ কৰিছে"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"চাবলৈ এছএমএছ এপ্ খোলক"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"কিছুমান কাৰ্যকাৰিতা সীমিত হ’ব পাৰে"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"আনপজ কৰক"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"কোনো কৰ্মস্থানৰ এপ্‌ নাই"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"কোনো ব্যক্তিগত এপ্‌ নাই"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"কৰ্মস্থানৰ <xliff:g id="APP">%s</xliff:g>ত খুলিবনে?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ব্যক্তিগত <xliff:g id="APP">%s</xliff:g>ত খুলিবনে?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"কৰ্মস্থানৰ <xliff:g id="APP">%s</xliff:g>ত খুলিবনে?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"কাম সম্পৰ্কীয় এপৰ পৰা কল কৰিবনে?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ইয়াৰ সলনি কাম সম্পৰ্কীয় এপ্ ব্যৱহাৰ কৰিবনে?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"আপোনাৰ প্ৰতিষ্ঠানে আপোনাক কেৱল কাম সম্পৰ্কীয় এপ্‌সমূহৰ পৰা কল কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"আপোনাৰ প্ৰতিষ্ঠানে আপোনাক কেৱল কাম সম্পৰ্কীয় এপ্‌সমূহৰ পৰা বাৰ্তা পঠিওৱাৰ অনুমতি দিয়ে"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ব্যক্তিগত ব্ৰাউজাৰ ব্যৱহাৰ কৰক"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"কৰ্মস্থানৰ ব্ৰাউজাৰ ব্যৱহাৰ কৰক"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"কল কৰক"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"সলনি কৰক"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ছিম কৰ্পৰে\'ট আনলক কৰা পিন"</string>

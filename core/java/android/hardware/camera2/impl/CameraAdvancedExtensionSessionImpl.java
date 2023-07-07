@@ -53,6 +53,7 @@ import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.utils.ExtensionSessionStatsAggregator;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageReader;
@@ -76,18 +77,18 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private static final String TAG = "CameraAdvancedExtensionSessionImpl";
 
     private final Executor mExecutor;
-    private final CameraDevice mCameraDevice;
+    private CameraDevice mCameraDevice;
     private final Map<String, CameraMetadataNative> mCharacteristicsMap;
     private final long mExtensionClientId;
     private final Handler mHandler;
     private final HandlerThread mHandlerThread;
     private final CameraExtensionSession.StateCallback mCallbacks;
-    private final IAdvancedExtenderImpl mAdvancedExtender;
+    private IAdvancedExtenderImpl mAdvancedExtender;
     // maps registered camera surfaces to extension output configs
     private final HashMap<Surface, CameraOutputConfig> mCameraConfigMap = new HashMap<>();
     // maps camera extension output ids to camera registered image readers
     private final HashMap<Integer, ImageReader> mReaderMap = new HashMap<>();
-    private final RequestProcessor mRequestProcessor = new RequestProcessor();
+    private RequestProcessor mRequestProcessor = new RequestProcessor();
     private final int mSessionId;
 
     private Surface mClientRepeatingRequestSurface;
@@ -96,9 +97,10 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private CameraCaptureSession mCaptureSession = null;
     private ISessionProcessorImpl mSessionProcessor = null;
     private final InitializeSessionHandler mInitializeHandler;
+    private final ExtensionSessionStatsAggregator mStatsAggregator;
 
     private boolean mInitialized;
-
+    private boolean mSessionClosed;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock;
@@ -205,6 +207,10 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 extender, cameraDevice, characteristicsMapNative, repeatingRequestSurface,
                 burstCaptureSurface, postviewSurface, config.getStateCallback(),
                 config.getExecutor(), sessionId);
+
+        ret.mStatsAggregator.setClientName(ctx.getOpPackageName());
+        ret.mStatsAggregator.setExtensionType(config.getExtension());
+
         ret.initialize();
 
         return ret;
@@ -231,9 +237,13 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mInitialized = false;
+        mSessionClosed = false;
         mInitializeHandler = new InitializeSessionHandler();
         mSessionId = sessionId;
         mInterfaceLock = cameraDevice.mInterfaceLock;
+
+        mStatsAggregator = new ExtensionSessionStatsAggregator(mCameraDevice.getId(),
+                /*isAdvanced=*/true);
     }
 
     /**
@@ -415,7 +425,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 mSessionProcessor.setParameters(request);
 
                 seqId = mSessionProcessor.startRepeating(new RequestCallbackHandler(request,
-                        executor, listener));
+                        executor, listener, mCameraDevice.getId()));
             } catch (RemoteException e) {
                 throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
                         "Failed to enable repeating request, extension service failed to respond!");
@@ -443,7 +453,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     mSessionProcessor.setParameters(request);
 
                     seqId = mSessionProcessor.startCapture(new RequestCallbackHandler(request,
-                            executor, listener), isPostviewRequested);
+                            executor, listener, mCameraDevice.getId()), isPostviewRequested);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "Failed " +
                             " to submit capture request, extension service failed to respond!");
@@ -451,8 +461,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             } else if ((mClientRepeatingRequestSurface != null) &&
                     request.containsTarget(mClientRepeatingRequestSurface)) {
                 try {
-                    seqId = mSessionProcessor.startTrigger(request,
-                            new RequestCallbackHandler(request, executor, listener));
+                    seqId = mSessionProcessor.startTrigger(request, new RequestCallbackHandler(
+                            request, executor, listener, mCameraDevice.getId()));
                 } catch (RemoteException e) {
                     throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "Failed " +
                             " to submit trigger request, extension service failed to respond!");
@@ -519,11 +529,27 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     mCaptureSession.stopRepeating();
                     mSessionProcessor.stopRepeating();
                     mSessionProcessor.onCaptureSessionEnd();
+                    mSessionClosed = true;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to stop the repeating request or end the session,"
                             + " , extension service does not respond!") ;
                 }
+                // Commit stats before closing the capture session
+                mStatsAggregator.commit(/*isFinal*/true);
                 mCaptureSession.close();
+            }
+        }
+    }
+
+    /**
+     * Called by {@link CameraDeviceImpl} right before the capture session is closed, and before it
+     * calls {@link #release}
+     */
+    public void commitStats() {
+        synchronized (mInterfaceLock) {
+            if (mInitialized) {
+                // Only commit stats if a capture session was initialized
+                mStatsAggregator.commit(/*isFinal*/true);
             }
         }
     }
@@ -536,6 +562,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
             if (mSessionProcessor != null) {
                 try {
+                    if (!mSessionClosed) {
+                        mSessionProcessor.onCaptureSessionEnd();
+                    }
                     mSessionProcessor.deInitSession();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to de-initialize session processor, extension service"
@@ -560,6 +589,10 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
             mClientRepeatingRequestSurface = null;
             mClientCaptureSurface = null;
+            mCaptureSession = null;
+            mRequestProcessor = null;
+            mCameraDevice = null;
+            mAdvancedExtender = null;
         }
 
         if (notifyClose && !skipCloseNotification) {
@@ -608,6 +641,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         public void onConfigured(@NonNull CameraCaptureSession session) {
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
+                // Commit basic stats as soon as the capture session is created
+                mStatsAggregator.commit(/*isFinal*/false);
             }
 
             try {
@@ -680,13 +715,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         private final CaptureRequest mClientRequest;
         private final Executor mClientExecutor;
         private final ExtensionCaptureCallback mClientCallbacks;
+        private final String mCameraId;
 
         private RequestCallbackHandler(@NonNull CaptureRequest clientRequest,
                 @NonNull Executor clientExecutor,
-                @NonNull ExtensionCaptureCallback clientCallbacks) {
+                @NonNull ExtensionCaptureCallback clientCallbacks,
+                @NonNull String cameraId) {
             mClientRequest = clientRequest;
             mClientExecutor = clientExecutor;
             mClientCallbacks = clientCallbacks;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -758,7 +796,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             }
 
             result.set(CaptureResult.SENSOR_TIMESTAMP, timestamp);
-            TotalCaptureResult totalResult = new TotalCaptureResult(mCameraDevice.getId(), result,
+            TotalCaptureResult totalResult = new TotalCaptureResult(mCameraId, result,
                     mClientRequest, requestId, timestamp, new ArrayList<>(), mSessionId,
                     new PhysicalCaptureResultInfo[0]);
             final long ident = Binder.clearCallingIdentity();
@@ -1010,14 +1048,20 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         public int submitBurst(List<Request> requests, IRequestCallback callback) {
             int seqId = -1;
             try {
-                CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
-                ArrayList<CaptureRequest> captureRequests = new ArrayList<>();
-                for (Request request : requests) {
-                    captureRequests.add(initializeCaptureRequest(mCameraDevice, request,
-                            mCameraConfigMap));
+                synchronized (mInterfaceLock) {
+                    if (!mInitialized) {
+                        return seqId;
+                    }
+
+                    CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
+                    ArrayList<CaptureRequest> captureRequests = new ArrayList<>();
+                    for (Request request : requests) {
+                        captureRequests.add(initializeCaptureRequest(mCameraDevice, request,
+                                mCameraConfigMap));
+                    }
+                    seqId = mCaptureSession.captureBurstRequests(captureRequests,
+                            new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
                 }
-                seqId = mCaptureSession.captureBurstRequests(captureRequests,
-                        new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Failed to submit capture requests!");
             } catch (IllegalStateException e) {
@@ -1031,11 +1075,17 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         public int setRepeating(Request request, IRequestCallback callback) {
             int seqId = -1;
             try {
-                CaptureRequest repeatingRequest = initializeCaptureRequest(mCameraDevice,
+                synchronized (mInterfaceLock) {
+                    if (!mInitialized) {
+                        return seqId;
+                    }
+
+                    CaptureRequest repeatingRequest = initializeCaptureRequest(mCameraDevice,
                             request, mCameraConfigMap);
-                CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
-                seqId = mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
-                        new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
+                    CaptureCallbackHandler captureCallback = new CaptureCallbackHandler(callback);
+                    seqId = mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
+                            new CameraExtensionUtils.HandlerExecutor(mHandler), captureCallback);
+                }
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Failed to enable repeating request!");
             } catch (IllegalStateException e) {
@@ -1048,7 +1098,13 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         @Override
         public void abortCaptures() {
             try {
-                mCaptureSession.abortCaptures();
+                synchronized (mInterfaceLock) {
+                    if (!mInitialized) {
+                        return;
+                    }
+
+                    mCaptureSession.abortCaptures();
+                }
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Failed during capture abort!");
             } catch (IllegalStateException e) {
@@ -1059,7 +1115,13 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         @Override
         public void stopRepeating() {
             try {
-                mCaptureSession.stopRepeating();
+                synchronized (mInterfaceLock) {
+                    if (!mInitialized) {
+                        return;
+                    }
+
+                    mCaptureSession.stopRepeating();
+                }
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Failed during repeating capture stop!");
             } catch (IllegalStateException e) {

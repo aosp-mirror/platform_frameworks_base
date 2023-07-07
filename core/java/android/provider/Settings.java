@@ -3036,7 +3036,9 @@ public final class Settings {
 
         public void destroy() {
             try {
-                if (!mArray.isClosed()) {
+                // If this process is the system server process, mArray is the same object as
+                // the memory int array kept inside SettingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
@@ -12446,6 +12448,17 @@ public final class Settings {
                 "bypass_device_policy_management_role_qualifications";
 
         /**
+         * Whether work profile telephony feature is enabled for non
+         * {@link android.app.role.RoleManager#ROLE_DEVICE_POLICY_MANAGEMENT} holders.
+         * ("0" = false, "1" = true).
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS =
+                "allow_work_profile_telephony_for_non_dpm_role_holders";
+
+        /**
          * Indicates whether mobile data should be allowed while the device is being provisioned.
          * This allows the provisioning process to turn off mobile data before the user
          * has an opportunity to set things up, preventing other processes from burning
@@ -15295,18 +15308,6 @@ public final class Settings {
          */
         @Readable
         public static final String ANGLE_EGL_FEATURES = "angle_egl_features";
-
-        /**
-         * Comma-separated list of package names that ANGLE may have issues with
-         * @hide
-         */
-        public static final String ANGLE_DEFERLIST = "angle_deferlist";
-
-        /**
-         * Integer mode of the logic for applying `angle_deferlist`
-         * @hide
-         */
-        public static final String ANGLE_DEFERLIST_MODE = "angle_deferlist_mode";
 
         /**
          * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.

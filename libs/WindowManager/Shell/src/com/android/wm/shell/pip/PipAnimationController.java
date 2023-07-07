@@ -328,6 +328,8 @@ public class PipAnimationController {
         private PipSurfaceTransactionHelper mSurfaceTransactionHelper;
         private @TransitionDirection int mTransitionDirection;
         protected PipContentOverlay mContentOverlay;
+        // Flag to avoid double-end
+        private boolean mHasRequestedEnd;
 
         private PipTransitionAnimator(TaskInfo taskInfo, SurfaceControl leash,
                 @AnimationType int animationType,
@@ -357,6 +359,7 @@ public class PipAnimationController {
 
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
+            if (mHasRequestedEnd) return;
             applySurfaceControlTransaction(mLeash,
                     mSurfaceControlTransactionFactory.getTransaction(),
                     animation.getAnimatedFraction());
@@ -364,6 +367,8 @@ public class PipAnimationController {
 
         @Override
         public void onAnimationEnd(Animator animation) {
+            if (mHasRequestedEnd) return;
+            mHasRequestedEnd = true;
             mCurrentValue = mEndValue;
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();

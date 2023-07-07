@@ -64,7 +64,6 @@ import android.provider.Settings;
 import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -481,8 +480,13 @@ public class BiometricService extends SystemService {
             }
 
             @Override
-            public void onDialogAnimatedIn() {
-                mHandler.post(() -> handleOnDialogAnimatedIn(requestId));
+            public void onDialogAnimatedIn(boolean startFingerprintNow) {
+                mHandler.post(() -> handleOnDialogAnimatedIn(requestId, startFingerprintNow));
+            }
+
+            @Override
+            public void onStartFingerprintNow() {
+                mHandler.post(() -> handleOnStartFingerprintNow(requestId));
             }
         };
     }
@@ -642,16 +646,13 @@ public class BiometricService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public synchronized void registerAuthenticator(int modality,
-                @NonNull SensorPropertiesInternal props,
+        public synchronized void registerAuthenticator(int id, int modality,
+                @Authenticators.Types int strength,
                 @NonNull IBiometricAuthenticator authenticator) {
 
             super.registerAuthenticator_enforcePermission();
 
-            @Authenticators.Types final int strength =
-                    Utils.propertyStrengthToAuthenticatorStrength(props.sensorStrength);
-
-            Slog.d(TAG, "Registering ID: " + props.sensorId
+            Slog.d(TAG, "Registering ID: " + id
                     + " Modality: " + modality
                     + " Strength: " + strength);
 
@@ -672,12 +673,12 @@ public class BiometricService extends SystemService {
             }
 
             for (BiometricSensor sensor : mSensors) {
-                if (sensor.id == props.sensorId) {
+                if (sensor.id == id) {
                     throw new IllegalStateException("Cannot register duplicate authenticator");
                 }
             }
 
-            mSensors.add(new BiometricSensor(getContext(), modality, props, authenticator) {
+            mSensors.add(new BiometricSensor(getContext(), id, modality, strength, authenticator) {
                 @Override
                 boolean confirmationAlwaysRequired(int userId) {
                     return mSettingObserver.getConfirmationAlwaysRequired(modality, userId);
@@ -1241,7 +1242,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnDialogAnimatedIn(long requestId) {
+    private void handleOnDialogAnimatedIn(long requestId, boolean startFingerprintNow) {
         Slog.d(TAG, "handleOnDialogAnimatedIn");
 
         final AuthSession session = getAuthSessionIfCurrent(requestId);
@@ -1250,7 +1251,19 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        session.onDialogAnimatedIn();
+        session.onDialogAnimatedIn(startFingerprintNow);
+    }
+
+    private void handleOnStartFingerprintNow(long requestId) {
+        Slog.d(TAG, "handleOnStartFingerprintNow");
+
+        final AuthSession session = getAuthSessionIfCurrent(requestId);
+        if (session == null) {
+            Slog.w(TAG, "handleOnStartFingerprintNow: AuthSession is not current");
+            return;
+        }
+
+        session.onStartFingerprint();
     }
 
     /**
@@ -1376,17 +1389,13 @@ public class BiometricService extends SystemService {
         return null;
     }
 
-    private void dumpInternal(PrintWriter printWriter) {
-        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter);
-
+    private void dumpInternal(PrintWriter pw) {
         pw.println("Legacy Settings: " + mSettingObserver.mUseLegacyFaceOnlySettings);
         pw.println();
 
         pw.println("Sensors:");
         for (BiometricSensor sensor : mSensors) {
-            pw.increaseIndent();
-            sensor.dump(pw);
-            pw.decreaseIndent();
+            pw.println(" " + sensor);
         }
         pw.println();
         pw.println("CurrentSession: " + mAuthSession);

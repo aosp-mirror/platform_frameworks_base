@@ -1074,6 +1074,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Remove the process record so it won't be considered as alive.
             mService.mProcessNames.remove(wpc.mName, wpc.mUid);
             mService.mProcessMap.remove(wpc.getPid());
+        } else if (r.intent.isSandboxActivity(mService.mContext)) {
+            Slog.e(TAG, "Abort sandbox activity launching as no sandbox process to host it.");
+            r.finishIfPossible("No sandbox process for the activity", false /* oomAdj */);
+            r.launchFailed = true;
+            r.detachFromProcess();
+            return;
         }
 
         r.notifyUnknownVisibilityLaunchedForKeyguardTransition();

@@ -28,7 +28,7 @@ import kotlinx.coroutines.yield
 @RoboPilotTest
 class FakeKeyguardQuickAffordanceConfig(
     override val key: String,
-    override val pickerName: String = key,
+    private val pickerName: String = key,
     override val pickerIconResourceId: Int = 0,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -40,6 +40,8 @@ class FakeKeyguardQuickAffordanceConfig(
         )
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         _lockScreenState
+
+    override fun pickerName(): String = pickerName
 
     override fun onTriggered(
         expandable: Expandable?,

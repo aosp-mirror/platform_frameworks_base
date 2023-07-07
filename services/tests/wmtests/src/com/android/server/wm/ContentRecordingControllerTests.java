@@ -24,10 +24,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.ContentRecordingSession;
 
@@ -36,6 +34,8 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for the {@link ContentRecordingController} class.
@@ -49,12 +49,20 @@ import org.junit.runner.RunWith;
 public class ContentRecordingControllerTests extends WindowTestsBase {
     private final ContentRecordingSession mDefaultSession =
             ContentRecordingSession.createDisplaySession(DEFAULT_DISPLAY);
+    private final ContentRecordingSession mWaitingDisplaySession =
+            ContentRecordingSession.createDisplaySession(DEFAULT_DISPLAY);
 
     private int mVirtualDisplayId;
     private DisplayContent mVirtualDisplayContent;
+    private WindowContainer.RemoteToken mRootTaskToken;
+
+    @Mock
+    private WindowContainer mTaskWindowContainer;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         // GIVEN the VirtualDisplay associated with the session (so the display has state ON).
         mVirtualDisplayContent = new TestDisplayContent.Builder(mAtm, 500, 600).build();
         mVirtualDisplayId = mVirtualDisplayContent.getDisplayId();
@@ -62,6 +70,11 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
         spyOn(mVirtualDisplayContent);
 
         mDefaultSession.setVirtualDisplayId(mVirtualDisplayId);
+        mWaitingDisplaySession.setVirtualDisplayId(mVirtualDisplayId);
+        mWaitingDisplaySession.setWaitingForConsent(true);
+
+        mRootTaskToken = new WindowContainer.RemoteToken(mTaskWindowContainer);
+        mTaskWindowContainer.mRemoteToken = mRootTaskToken;
     }
 
     @Test
@@ -92,7 +105,7 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetContentRecordingSessionLocked_newDisplaySession_accepted() {
+    public void testSetContentRecordingSessionLocked_newSession_accepted() {
         ContentRecordingController controller = new ContentRecordingController();
         // GIVEN a valid display session.
         // WHEN updating the session.
@@ -104,15 +117,37 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetContentRecordingSessionLocked_updateCurrentDisplaySession_notAccepted() {
+    public void testSetContentRecordingSessionLocked_updateSession_noLongerWaiting_accepted() {
+        ContentRecordingController controller = new ContentRecordingController();
+        // GIVEN a valid display session already in place.
+        controller.setContentRecordingSessionLocked(mWaitingDisplaySession, mWm);
+        verify(mVirtualDisplayContent, atLeastOnce()).setContentRecordingSession(
+                mWaitingDisplaySession);
+
+        // WHEN updating the session on the same display, so no longer waiting to record.
+        ContentRecordingSession sessionUpdate = ContentRecordingSession.createTaskSession(
+                mRootTaskToken.toWindowContainerToken().asBinder());
+        sessionUpdate.setVirtualDisplayId(mVirtualDisplayId);
+        sessionUpdate.setWaitingForConsent(false);
+        controller.setContentRecordingSessionLocked(sessionUpdate, mWm);
+
+        ContentRecordingSession resultingSession = controller.getContentRecordingSessionLocked();
+        // THEN the session was accepted.
+        assertThat(resultingSession).isEqualTo(sessionUpdate);
+        verify(mVirtualDisplayContent, atLeastOnce()).setContentRecordingSession(sessionUpdate);
+        verify(mVirtualDisplayContent).updateRecording();
+    }
+
+    @Test
+    public void testSetContentRecordingSessionLocked_invalidUpdateSession_notWaiting_notAccepted() {
         ContentRecordingController controller = new ContentRecordingController();
         // GIVEN a valid display session already in place.
         controller.setContentRecordingSessionLocked(mDefaultSession, mWm);
         verify(mVirtualDisplayContent, atLeastOnce()).setContentRecordingSession(mDefaultSession);
 
         // WHEN updating the session on the same display.
-        ContentRecordingSession sessionUpdate =
-                ContentRecordingSession.createTaskSession(mock(IBinder.class));
+        ContentRecordingSession sessionUpdate = ContentRecordingSession.createTaskSession(
+                mRootTaskToken.toWindowContainerToken().asBinder());
         sessionUpdate.setVirtualDisplayId(mVirtualDisplayId);
         controller.setContentRecordingSessionLocked(sessionUpdate, mWm);
 
@@ -123,7 +158,7 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetContentRecordingSessionLocked_disableCurrentDisplaySession_accepted() {
+    public void testSetContentRecordingSessionLocked_disableCurrentSession_accepted() {
         ContentRecordingController controller = new ContentRecordingController();
         // GIVEN a valid display session already in place.
         controller.setContentRecordingSessionLocked(mDefaultSession, mWm);
@@ -141,7 +176,7 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetContentRecordingSessionLocked_takeOverCurrentDisplaySession_accepted() {
+    public void testSetContentRecordingSessionLocked_takeOverCurrentSession_accepted() {
         ContentRecordingController controller = new ContentRecordingController();
         // GIVEN a valid display session already in place.
         controller.setContentRecordingSessionLocked(mDefaultSession, mWm);

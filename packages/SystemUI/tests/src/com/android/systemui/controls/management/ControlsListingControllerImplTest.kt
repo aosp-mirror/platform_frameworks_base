@@ -39,6 +39,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.APP_PANELS_ALL_APPS_ALLOWED
 import com.android.systemui.flags.Flags.USE_APP_PANELS
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.ActivityTaskManagerProxy
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
@@ -88,6 +89,8 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     private lateinit var packageManager: PackageManager
     @Mock
     private lateinit var featureFlags: FeatureFlags
+    @Mock
+    private lateinit var activityTaskManagerProxy: ActivityTaskManagerProxy
 
     private var componentName = ComponentName("pkg", "class1")
     private var activityName = ComponentName("pkg", "activity")
@@ -112,6 +115,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         // Return disabled by default
         `when`(packageManager.getComponentEnabledSetting(any()))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+        `when`(activityTaskManagerProxy.supportsMultiWindow(any())).thenReturn(true)
         mContext.setMockPackageManager(packageManager)
 
         mContext.orCreateTestableResources
@@ -136,6 +140,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
                 executor,
                 { mockSL },
                 userTracker,
+                activityTaskManagerProxy,
                 dumpManager,
                 featureFlags
         )
@@ -171,6 +176,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
                 exec,
                 { mockServiceListing },
                 userTracker,
+                activityTaskManagerProxy,
                 dumpManager,
                 featureFlags
         )
@@ -637,7 +643,34 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         assertThat(services[0].serviceInfo.componentName).isEqualTo(componentName)
     }
 
+    @Test
+    fun testNoPanelIfMultiWindowNotSupported() {
+        `when`(activityTaskManagerProxy.supportsMultiWindow(any())).thenReturn(false)
 
+        val serviceInfo = ServiceInfo(
+            componentName,
+            activityName
+        )
+
+        `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+
+        setUpQueryResult(listOf(
+            ActivityInfo(
+                activityName,
+                enabled = true,
+                exported = true,
+                permission = Manifest.permission.BIND_CONTROLS
+            )
+        ))
+
+        val list = listOf(serviceInfo)
+        serviceListingCallbackCaptor.value.onServicesReloaded(list)
+
+        executor.runAllReady()
+
+        assertNull(controller.getCurrentServices()[0].panelActivity)
+    }
 
     private fun ServiceInfo(
             componentName: ComponentName,

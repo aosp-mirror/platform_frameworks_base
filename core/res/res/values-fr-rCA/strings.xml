@@ -319,7 +319,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder à vos activités physiques"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"découvrir les appareils à proximité et s\'y connecter"</string>
@@ -506,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de gérer le vibreur de l\'appareil."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet à l\'application d\'accéder au mode vibration."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"appeler directement des numéros de téléphone"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Autorisez l\'application à appeler des numéros de téléphone sans votre intervention. Cela peut entraîner des frais ou des appels imprévus. Notez aussi que cela ne permet pas à l\'application d\'appeler des numéros d\'urgence. Des applications malveillantes peuvent engendrer des frais en passant des appels sans votre confirmation ou en composant des codes de fournisseurs de service qui transfèrent automatiquement des appels entrants vers un autre numéro."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accéder au service d\'appel IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permet à l\'application d\'utiliser le service IMS pour faire des appels sans votre intervention."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"voir l\'état et l\'identité du téléphone"</string>
@@ -693,9 +692,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez inscrire votre visage à nouveau."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Modifiez légèrement la position de votre tête"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez plus directement votre téléphone"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez droit dans le téléphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez droit dans le téléphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez droit dans le téléphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui pourrait couvrir votre visage."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez le haut de l\'écran, y compris la barre noire"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -1665,7 +1664,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"Pour déverrouiller l\'appareil, connectez-vous avec votre compte Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nom d\'utilisateur (courriel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Mot de passe"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"Connexion"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"Se connecter"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Nom d\'utilisateur ou mot de passe non valide."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Vous avez oublié votre nom d\'utilisateur ou votre mot de passe?\nRendez-vous sur la page "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Vérification du compte en cours…"</string>
@@ -1684,10 +1683,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Supprimer"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Augmenter le volume au-dessus du niveau recommandé?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Avertissement,\nVous avez dépassé la quantité de signaux sonores forts hebdomadaire à laquelle vous pouvez être exposé sans danger avec des écouteurs.\n\nLe dépassement de cette limite endommagera votre audition de façon permanente."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Avertissement,\nVous avez dépassé de cinq fois la quantité de signaux sonores forts hebdomadaire à laquelle vous pouvez être exposé sans danger avec des écouteurs.\n\nLe volume a été baissé pour protéger votre audition."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Le niveau auquel vous écoutez le contenu multimédia peut entraîner des dommages auditifs s\'il est maintenu sur une durée prolongée.\n\nVous risquez d\'endommager votre audition si vous continuez l\'écoute à ce niveau sur une durée prolongée."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Avertissement,\nVous écoutez actuellement un contenu dont le niveau sonore élevé est dangereux.\n\nSi vous continuez à écouter à ce niveau, vous endommagerez votre audition de façon permanente."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Continuer à écouter à un volume élevé?\n\nLe niveau du volume des écouteurs est resté élevé au-delà de la durée recommandée, ce qui peut endommager votre audition"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Son fort détecté\n\nLe niveau du volume des écouteurs est plus élevé que celui recommandé, ce qui peut endommager votre audition"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Utiliser le raccourci d\'accessibilité?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quand le raccourci est activé, appuyez sur les deux boutons de volume pendant trois secondes pour lancer une fonctionnalité d\'accessibilité."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Activer le raccourci pour les fonctionnalités d\'accessibilité?"</string>
@@ -1854,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Pour quitter, balayez vers le bas à partir du haut."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Faire pivoter pour obtenir un meilleur affichage"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Quitter l\'écran partagé pour obtenir un meilleur affichage"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Ouvrir <xliff:g id="NAME">%s</xliff:g> en plein écran pour un meilleur affichage"</string>
     <string name="done_label" msgid="7283767013231718521">"Terminé"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Curseur circulaire des heures"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Curseur circulaire des minutes"</string>
@@ -1979,6 +1976,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Impossible d\'accéder à ce contenu sur votre <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre téléphone à la place."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Cette application a été conçue pour une ancienne version d\'Android. Elle pourrait ne pas fonctionner correctement, et ne comprend pas les dernières protections des données confidentielles et de sécurité. Vérifiez s\'il existe une mise à jour ou contactez le développeur de l\'application."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Vérifier la présence de mises à jour"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Cette application n\'est pas compatible avec la dernière version d\'Android. Vérifiez s\'il existe une mise à jour ou communiquez avec le développeur de l\'application."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ouvrez l\'application de messagerie texte pour l\'afficher"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Des fonctionnalités sont limitées"</string>
@@ -2162,20 +2160,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Impossible d\'ouvrir ce contenu avec des applications professionnelles"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Impossible de partager ce contenu avec des applications personnelles"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Impossible d\'ouvrir ce contenu avec des applications personnelles"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Les applications professionnelles sont interrompues"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Réactiver"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune application professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune application personnelle"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Ouvrir le profil professionnel de <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil personnel?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil professionnel?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Appeler à partir de l\'application professionnelle?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Passer à l\'application professionnelle?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Votre organisation vous autorise à passer des appels uniquement à partir d\'applications professionnelles"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Votre organisation vous autorise à envoyer des messages uniquement à partir d\'applications professionnelles"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur du profil personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur du profil professionnel"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Appeler"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Changer"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"NIP de déverrouillage du réseau associé au module SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"NIP de déverrouillage du sous-ensemble du réseau associé au module SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"NIP de déverrouillage du module SIM professionnel"</string>

@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
@@ -59,7 +59,7 @@ class SwitchAppByDoubleTapDivider(override val flicker: FlickerTest) :
             thisTransition(this)
         }
 
-    @IwTest(focusArea = "sysui")
+    @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
     override fun cujCompleted() {

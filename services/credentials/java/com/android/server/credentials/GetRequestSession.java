@@ -28,6 +28,7 @@ import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
+import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
@@ -98,8 +99,9 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
         mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
-        cancelExistingPendingIntent();
+        Binder.withCleanCallingIdentity(()-> {
         try {
+                cancelExistingPendingIntent();
             mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
                             mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
@@ -112,9 +114,9 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
             String exception = GetCredentialException.TYPE_UNKNOWN;
             mRequestSessionMetric.collectFrameworkException(exception);
-            respondToClientWithErrorAndFinish(
-                    exception, "Unable to instantiate selector");
-        }
+                respondToClientWithErrorAndFinish(exception, "Unable to instantiate selector");
+            }
+        });
     }
 
     @Override
@@ -133,6 +135,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
         Slog.i(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
                 isPrimaryProviderViaProviderInfo(componentName));
         if (response != null) {
@@ -158,7 +161,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+        String exception = GetCredentialException.TYPE_USER_CANCELED;
         String message = "User cancelled the selector";
         if (!isUserCancellation) {
             exception = GetCredentialException.TYPE_INTERRUPTED;

@@ -54,6 +54,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
 import android.os.Trace;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -74,7 +75,6 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
@@ -121,6 +121,7 @@ import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseContro
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
@@ -244,9 +245,11 @@ public class MediaControlPanel {
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
     private final FeatureFlags mFeatureFlags;
+    private final GlobalSettings mGlobalSettings;
+
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
-    @VisibleForTesting
-    MultiRippleController.Companion.RipplesFinishedListener mRipplesFinishedListener;
+    private boolean mWasPlaying = false;
+    private boolean mButtonClicked = false;
 
     /**
      * Initialize a new control panel
@@ -275,7 +278,8 @@ public class MediaControlPanel {
             ActivityIntentHelper activityIntentHelper,
             NotificationLockscreenUserManager lockscreenUserManager,
             BroadcastDialogController broadcastDialogController,
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            GlobalSettings globalSettings
     ) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
@@ -304,6 +308,9 @@ public class MediaControlPanel {
         });
 
         mFeatureFlags = featureFlags;
+
+        mGlobalSettings = globalSettings;
+        updateAnimatorDurationScale();
     }
 
     /**
@@ -387,6 +394,16 @@ public class MediaControlPanel {
     }
 
     /**
+     * Reloads animator duration scale.
+     */
+    void updateAnimatorDurationScale() {
+        if (mSeekBarObserver != null) {
+            mSeekBarObserver.setAnimationEnabled(
+                    mGlobalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f);
+        }
+    }
+
+    /**
      * Get the context
      *
      * @return context
@@ -433,18 +450,6 @@ public class MediaControlPanel {
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
         mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
-        if (mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE)) {
-            mRipplesFinishedListener = () -> {
-                if (mTurbulenceNoiseAnimationConfig == null) {
-                    mTurbulenceNoiseAnimationConfig = createTurbulenceNoiseAnimation();
-                }
-                // Color will be correctly updated in ColorSchemeTransition.
-                mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
-                mMainExecutor.executeDelayed(
-                        mTurbulenceNoiseController::finish, TURBULENCE_NOISE_PLAY_DURATION);
-            };
-            mMultiRippleController.addRipplesFinishedListener(mRipplesFinishedListener);
-        }
 
         mColorSchemeTransition = new ColorSchemeTransition(
                 mContext, mMediaViewHolder, mMultiRippleController, mTurbulenceNoiseController);
@@ -568,6 +573,25 @@ public class MediaControlPanel {
         if (!mMetadataAnimationHandler.isRunning()) {
             mMediaViewController.refreshState();
         }
+
+        // Turbulence noise
+        if (shouldPlayTurbulenceNoise()) {
+            if (mTurbulenceNoiseAnimationConfig == null) {
+                mTurbulenceNoiseAnimationConfig =
+                        createTurbulenceNoiseAnimation();
+            }
+            // Color will be correctly updated in ColorSchemeTransition.
+            mTurbulenceNoiseController.play(
+                    mTurbulenceNoiseAnimationConfig
+            );
+            mMainExecutor.executeDelayed(
+                    mTurbulenceNoiseController::finish,
+                    TURBULENCE_NOISE_PLAY_DURATION
+            );
+        }
+        mButtonClicked = false;
+        mWasPlaying = isPlaying();
+
         Trace.endSection();
     }
 
@@ -628,10 +652,7 @@ public class MediaControlPanel {
         seamlessView.setContentDescription(deviceString);
         seamlessView.setOnClickListener(
                 v -> {
-                    if (mFalsingManager.isFalseTap(
-                            mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                                    ? FalsingManager.MODERATE_PENALTY :
-                                    FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         return;
                     }
 
@@ -1141,13 +1162,15 @@ public class MediaControlPanel {
             } else {
                 button.setEnabled(true);
                 button.setOnClickListener(v -> {
-                    if (!mFalsingManager.isFalseTap(
-                            mFeatureFlags.isEnabled(Flags.MEDIA_FALSING_PENALTY)
-                                    ? FalsingManager.MODERATE_PENALTY :
-                                    FalsingManager.LOW_PENALTY)) {
+                    if (!mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                         mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
+                        // Used to determine whether to play turbulence noise.
+                        mWasPlaying = isPlaying();
+                        mButtonClicked = true;
+
                         action.run();
+
                         if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
                             mMultiRippleController.play(createTouchRippleAnimation(button));
                         }
@@ -1188,28 +1211,31 @@ public class MediaControlPanel {
         );
     }
 
+    private boolean shouldPlayTurbulenceNoise() {
+        return mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE) && mButtonClicked && !mWasPlaying
+                && isPlaying();
+    }
+
     private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
         return new TurbulenceNoiseAnimationConfig(
-                TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_GRID_COUNT,
+                /* gridCount= */ 2.14f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
-                /* noiseMoveSpeedX= */ 0f,
+                /* noiseMoveSpeedX= */ 0.42f,
                 /* noiseMoveSpeedY= */ 0f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
-                // We want to add (BlendMode.PLUS) the turbulence noise on top of the album art.
-                // Thus, set the background color with alpha 0.
-                /* backgroundColor= */ ColorUtils.setAlphaComponent(Color.BLACK, 0),
-                TurbulenceNoiseAnimationConfig.DEFAULT_OPACITY,
-                /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
-                /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
+                /* backgroundColor= */ Color.BLACK,
+                /* opacity= */ 51,
+                /* width= */ mMediaViewHolder.getTurbulenceNoiseView().getWidth(),
+                /* height= */ mMediaViewHolder.getTurbulenceNoiseView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
-                /* easeInDuration= */
-                TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
-                /* easeOutDuration= */
-                TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
-                this.getContext().getResources().getDisplayMetrics().density,
-                BlendMode.PLUS,
-                /* onAnimationEnd= */ null
+                /* easeInDuration= */ 1350f,
+                /* easeOutDuration= */ 1350f,
+                getContext().getResources().getDisplayMetrics().density,
+                BlendMode.SCREEN,
+                /* onAnimationEnd= */ null,
+                /* lumaMatteBlendFactor= */ 0.26f,
+                /* lumaMatteOverallBrightness= */ 0.09f
         );
     }
     private void clearButton(final ImageButton button) {
@@ -1235,6 +1261,8 @@ public class MediaControlPanel {
         if ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
                 || (buttonId == R.id.actionNext && semanticActions.getReserveNext())) {
             notVisibleValue = ConstraintSet.INVISIBLE;
+            mMediaViewHolder.getAction(buttonId).setFocusable(visible);
+            mMediaViewHolder.getAction(buttonId).setClickable(visible);
         } else {
             notVisibleValue = ConstraintSet.GONE;
         }

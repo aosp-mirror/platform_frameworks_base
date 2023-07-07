@@ -17,20 +17,22 @@
 package com.android.server.companion.datatransfer.contextsync;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -39,88 +41,72 @@ import java.util.UUID;
 public class CrossDeviceCall {
 
     private static final String TAG = "CrossDeviceCall";
-
-    public static final String EXTRA_CALL_ID =
-            "com.android.companion.datatransfer.contextsync.extra.CALL_ID";
-    private static final int APP_ICON_BITMAP_DIMENSION = 256;
+    private static final String SEPARATOR = "::";
 
     private final String mId;
-    private Call mCall;
+    private final Call mCall;
+    private final int mUserId;
     @VisibleForTesting boolean mIsEnterprise;
-    @VisibleForTesting boolean mIsOtt;
     private final String mCallingAppPackageName;
+    private final String mSerializedPhoneAccountHandle;
     private String mCallingAppName;
     private byte[] mCallingAppIcon;
     private String mCallerDisplayName;
+    private int mCallerDisplayNamePresentation;
     private int mStatus = android.companion.Telecom.Call.UNKNOWN_STATUS;
     private String mContactDisplayName;
+    private Uri mHandle;
+    private int mHandlePresentation;
+    private int mDirection;
     private boolean mIsMuted;
     private final Set<Integer> mControls = new HashSet<>();
+    private final boolean mIsCallPlacedByContextSync;
 
-    public CrossDeviceCall(PackageManager packageManager, @NonNull Call call,
+    public CrossDeviceCall(Context context, @NonNull Call call,
             CallAudioState callAudioState) {
-        this(packageManager, call.getDetails(), callAudioState);
-        mCall = call;
-        call.putExtra(EXTRA_CALL_ID, mId);
+        this(context, call, call.getDetails(), callAudioState);
     }
 
-    CrossDeviceCall(PackageManager packageManager, Call.Details callDetails,
+    CrossDeviceCall(Context context, Call.Details callDetails,
             CallAudioState callAudioState) {
+        this(context, /* call= */ null, callDetails, callAudioState);
+    }
+
+    private CrossDeviceCall(Context context, @Nullable Call call,
+            Call.Details callDetails, CallAudioState callAudioState) {
+        mCall = call;
         final String predefinedId = callDetails.getIntentExtras() != null
-                ? callDetails.getIntentExtras().getString(EXTRA_CALL_ID) : null;
-        mId = predefinedId != null ? predefinedId : UUID.randomUUID().toString();
-        mCallingAppPackageName =
-                callDetails.getAccountHandle().getComponentName().getPackageName();
-        mIsOtt = (callDetails.getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
-                == Call.Details.PROPERTY_SELF_MANAGED;
+                ? callDetails.getIntentExtras().getString(CrossDeviceSyncController.EXTRA_CALL_ID)
+                : null;
+        final String generatedId = UUID.randomUUID().toString();
+        mId = predefinedId != null ? (generatedId + SEPARATOR + predefinedId) : generatedId;
+        if (call != null) {
+            call.putExtra(CrossDeviceSyncController.EXTRA_CALL_ID, mId);
+        }
+        final PhoneAccountHandle handle = callDetails.getAccountHandle();
+        mUserId = handle != null ? handle.getUserHandle().getIdentifier() : -1;
+        mIsCallPlacedByContextSync = handle != null
+                && new ComponentName(context, CallMetadataSyncConnectionService.class)
+                .equals(handle.getComponentName());
+        mCallingAppPackageName = handle != null
+                ? callDetails.getAccountHandle().getComponentName().getPackageName() : "";
+        mSerializedPhoneAccountHandle = handle != null
+                ? handle.getId() + SEPARATOR + handle.getComponentName().flattenToString() : "";
         mIsEnterprise = (callDetails.getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
                 == Call.Details.PROPERTY_ENTERPRISE_CALL;
+        final PackageManager packageManager = context.getPackageManager();
         try {
             final ApplicationInfo applicationInfo = packageManager
-                    .getApplicationInfo(mCallingAppPackageName,
-                            PackageManager.ApplicationInfoFlags.of(0));
+                    .getApplicationInfoAsUser(mCallingAppPackageName,
+                            PackageManager.ApplicationInfoFlags.of(0), mUserId);
             mCallingAppName = packageManager.getApplicationLabel(applicationInfo).toString();
-            mCallingAppIcon = renderDrawableToByteArray(
+            mCallingAppIcon = BitmapUtils.renderDrawableToByteArray(
                     packageManager.getApplicationIcon(applicationInfo));
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Could not get application info for package " + mCallingAppPackageName, e);
         }
         mIsMuted = callAudioState != null && callAudioState.isMuted();
         updateCallDetails(callDetails);
-    }
-
-    private byte[] renderDrawableToByteArray(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            // Can't recycle the drawable's bitmap, so handle separately
-            final Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-            if (bitmap.getWidth() > APP_ICON_BITMAP_DIMENSION
-                    || bitmap.getHeight() > APP_ICON_BITMAP_DIMENSION) {
-                // Downscale, as the original drawable bitmap is too large.
-                final Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
-                        APP_ICON_BITMAP_DIMENSION, APP_ICON_BITMAP_DIMENSION, /* filter= */ true);
-                final byte[] renderedBitmap = renderBitmapToByteArray(scaledBitmap);
-                scaledBitmap.recycle();
-                return renderedBitmap;
-            }
-            return renderBitmapToByteArray(bitmap);
-        }
-        final Bitmap bitmap = Bitmap.createBitmap(APP_ICON_BITMAP_DIMENSION,
-                APP_ICON_BITMAP_DIMENSION,
-                Bitmap.Config.ARGB_8888);
-        try {
-            final Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            drawable.draw(canvas);
-            return renderBitmapToByteArray(bitmap);
-        } finally {
-            bitmap.recycle();
-        }
-    }
-
-    private byte[] renderBitmapToByteArray(Bitmap bitmap) {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(bitmap.getByteCount());
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        return baos.toByteArray();
     }
 
     /**
@@ -148,9 +134,23 @@ public class CrossDeviceCall {
     @VisibleForTesting
     void updateCallDetails(Call.Details callDetails) {
         mCallerDisplayName = callDetails.getCallerDisplayName();
+        mCallerDisplayNamePresentation = callDetails.getCallerDisplayNamePresentation();
         mContactDisplayName = callDetails.getContactDisplayName();
+        mHandle = callDetails.getHandle();
+        mHandlePresentation = callDetails.getHandlePresentation();
+        final int direction = callDetails.getCallDirection();
+        if (direction == Call.Details.DIRECTION_INCOMING) {
+            mDirection = android.companion.Telecom.Call.INCOMING;
+        } else if (direction == Call.Details.DIRECTION_OUTGOING) {
+            mDirection = android.companion.Telecom.Call.OUTGOING;
+        } else {
+            mDirection = android.companion.Telecom.Call.UNKNOWN_DIRECTION;
+        }
         mStatus = convertStateToStatus(callDetails.getState());
         mControls.clear();
+        if (mStatus == android.companion.Telecom.Call.DIALING) {
+            mControls.add(android.companion.Telecom.END);
+        }
         if (mStatus == android.companion.Telecom.Call.RINGING
                 || mStatus == android.companion.Telecom.Call.RINGING_SILENCED) {
             mControls.add(android.companion.Telecom.ACCEPT);
@@ -185,7 +185,16 @@ public class CrossDeviceCall {
                 return android.companion.Telecom.Call.ONGOING;
             case Call.STATE_RINGING:
                 return android.companion.Telecom.Call.RINGING;
+            case Call.STATE_AUDIO_PROCESSING:
+                return android.companion.Telecom.Call.AUDIO_PROCESSING;
+            case Call.STATE_SIMULATED_RINGING:
+                return android.companion.Telecom.Call.RINGING_SIMULATED;
+            case Call.STATE_DISCONNECTED:
+                return android.companion.Telecom.Call.DISCONNECTED;
+            case Call.STATE_DIALING:
+                return android.companion.Telecom.Call.DIALING;
             default:
+                Slog.e(TAG, "Couldn't resolve state to status: " + callState);
                 return android.companion.Telecom.Call.UNKNOWN_STATUS;
         }
     }
@@ -203,6 +212,14 @@ public class CrossDeviceCall {
             case android.companion.Telecom.Call.RINGING:
             case android.companion.Telecom.Call.RINGING_SILENCED:
                 return Call.STATE_RINGING;
+            case android.companion.Telecom.Call.AUDIO_PROCESSING:
+                return Call.STATE_AUDIO_PROCESSING;
+            case android.companion.Telecom.Call.RINGING_SIMULATED:
+                return Call.STATE_SIMULATED_RINGING;
+            case android.companion.Telecom.Call.DISCONNECTED:
+                return Call.STATE_DISCONNECTED;
+            case android.companion.Telecom.Call.DIALING:
+                return Call.STATE_DIALING;
             case android.companion.Telecom.Call.UNKNOWN_STATUS:
             default:
                 return Call.STATE_NEW;
@@ -217,6 +234,10 @@ public class CrossDeviceCall {
         return mCall;
     }
 
+    public int getUserId() {
+        return mUserId;
+    }
+
     public String getCallingAppName() {
         return mCallingAppName;
     }
@@ -229,24 +250,49 @@ public class CrossDeviceCall {
         return mCallingAppPackageName;
     }
 
+    public String getSerializedPhoneAccountHandle() {
+        return mSerializedPhoneAccountHandle;
+    }
+
     /**
      * Get a human-readable "caller id" to display as the origin of the call.
      *
      * @param isAdminBlocked whether there is an admin that has blocked contacts over Bluetooth
      */
     public String getReadableCallerId(boolean isAdminBlocked) {
-        if (mIsOtt) {
+        if (mIsEnterprise && isAdminBlocked) {
+            // Cannot use any contact information.
+            return getNonContactString();
+        }
+        return TextUtils.isEmpty(mContactDisplayName) ? getNonContactString() : mContactDisplayName;
+    }
+
+    private String getNonContactString() {
+        if (!TextUtils.isEmpty(mCallerDisplayName)
+                && mCallerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
             return mCallerDisplayName;
         }
-        return mIsEnterprise && isAdminBlocked ? mCallerDisplayName : mContactDisplayName;
+        if (mHandle != null && mHandle.getSchemeSpecificPart() != null
+                && mHandlePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+            return mHandle.getSchemeSpecificPart();
+        }
+        return null;
     }
 
     public int getStatus() {
         return mStatus;
     }
 
+    public int getDirection() {
+        return mDirection;
+    }
+
     public Set<Integer> getControls() {
         return mControls;
+    }
+
+    public boolean isCallPlacedByContextSync() {
+        return mIsCallPlacedByContextSync;
     }
 
     void doAccept() {

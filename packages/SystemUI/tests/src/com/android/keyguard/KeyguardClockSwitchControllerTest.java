@@ -134,7 +134,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
     private KeyguardClockSwitchController mController;
     private View mSliceView;
-    private LinearLayout mStatusArea;
     private FakeExecutor mExecutor;
 
     @Before
@@ -151,6 +150,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 .thenReturn(100);
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
                 .thenReturn(-200);
+        when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
+                .thenReturn(View.INVISIBLE);
 
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
@@ -196,8 +197,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
-        mStatusArea = new LinearLayout(getContext());
-        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(
+                new LinearLayout(getContext()));
     }
 
     @Test
@@ -402,18 +403,23 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         assertNull(mController.getClock());
     }
 
-    @Test
-    public void testSetAlpha_setClockAlphaForCLockFace() {
-        mController.onViewAttached();
-        mController.setAlpha(0.5f);
-        verify(mLargeClockView).setAlpha(0.5f);
-        verify(mSmallClockView).setAlpha(0.5f);
-        assertEquals(0.5f, mStatusArea.getAlpha(), 0.0f);
-    }
-
     private void verifyAttachment(VerificationMode times) {
         verify(mClockRegistry, times).registerClockChangeListener(
                 any(ClockRegistry.ClockChangeListener.class));
         verify(mClockEventController, times).registerListeners(mView);
+    }
+
+    @Test
+    public void testSplitShadeEnabledSetToSmartspaceController() {
+        mController.setSplitShadeEnabled(true);
+        verify(mSmartspaceController, times(1)).setSplitShadeEnabled(true);
+        verify(mSmartspaceController, times(0)).setSplitShadeEnabled(false);
+    }
+
+    @Test
+    public void testSplitShadeDisabledSetToSmartspaceController() {
+        mController.setSplitShadeEnabled(false);
+        verify(mSmartspaceController, times(1)).setSplitShadeEnabled(false);
+        verify(mSmartspaceController, times(0)).setSplitShadeEnabled(true);
     }
 }

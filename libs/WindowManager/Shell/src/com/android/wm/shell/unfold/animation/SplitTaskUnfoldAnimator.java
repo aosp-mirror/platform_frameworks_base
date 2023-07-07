@@ -213,7 +213,7 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public boolean isApplicableTask(TaskInfo taskInfo) {
         return taskInfo.hasParentTask()
-                && taskInfo.isVisible
+                && taskInfo.isRunning
                 && taskInfo.realActivity != null // to filter out parents created by organizer
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW;
     }

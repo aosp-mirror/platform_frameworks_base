@@ -97,10 +97,6 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(
                 Settings.Global.ANGLE_EGL_FEATURES, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.ANGLE_DEFERLIST, String.class);
-        sGlobalSettingToTypeMap.put(
-                Settings.Global.ANGLE_DEFERLIST_MODE, String.class);
-        sGlobalSettingToTypeMap.put(
                 Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, int.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_APP, String.class);

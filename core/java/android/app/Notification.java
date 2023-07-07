@@ -2840,6 +2840,10 @@ public class Notification implements Parcelable
      * @hide
      */
     public void visitUris(@NonNull Consumer<Uri> visitor) {
+        if (publicVersion != null) {
+            publicVersion.visitUris(visitor);
+        }
+
         visitor.accept(sound);
 
         if (tickerView != null) tickerView.visitUris(visitor);
@@ -5006,12 +5010,6 @@ public class Notification implements Parcelable
             return mUserExtras;
         }
 
-        private Bundle getAllExtras() {
-            final Bundle saveExtras = (Bundle) mUserExtras.clone();
-            saveExtras.putAll(mN.extras);
-            return saveExtras;
-        }
-
         /**
          * Add an action to this notification. Actions are typically displayed by
          * the system as a button adjacent to the notification content.
@@ -6617,9 +6615,16 @@ public class Notification implements Parcelable
                                 + " vs bubble: " + mN.mBubbleMetadata.getShortcutId());
             }
 
-            // first, add any extras from the calling code
+            // Adds any new extras provided by the user.
             if (mUserExtras != null) {
-                mN.extras = getAllExtras();
+                final Bundle saveExtras = (Bundle) mUserExtras.clone();
+                if (SystemProperties.getBoolean(
+                        "persist.sysui.notification.builder_extras_override", false)) {
+                    mN.extras.putAll(saveExtras);
+                } else {
+                    saveExtras.putAll(mN.extras);
+                    mN.extras = saveExtras;
+                }
             }
 
             mN.creationTime = System.currentTimeMillis();

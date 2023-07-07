@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"မျှဝေရန်"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"စကရင်ရိုက်ကူးမှု သိမ်းပြီးပြီ"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ကြည့်ရှုရန် တို့ပါ"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"ဖန်သားပြင် ရိုက်ကူးမှု ဖျက်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"ဖန်သားပြင်ရိုက်ကူးမှုကို သိမ်းရာတွင် အမှားရှိသည်"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ဖန်သားပြင် ရိုက်ကူးမှု စတင်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"နောက်သို့"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ပင်မစာမျက်နှာ"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"အတည်ပြုပြီးပြီ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"အပြီးသတ်ရန်အတွက် \'အတည်ပြုရန်\' ကို တို့ပါ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"မျက်နှာပြ လော့ခ်ဖွင့်ထားသည်။ လော့ခ်ဖွင့်သင်္ကေတနှိပ်၍ ရှေ့ဆက်ပါ။"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"မျက်နှာဖြင့် ဖွင့်ထားသည်"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"မျက်နှာဖြင့် ဖွင့်ထားသည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ။"</string>
@@ -413,7 +413,7 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"အက်ပ်တစ်ခုဖြင့် မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"စတင်ရန်"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"သင်၏ IT စီမံခန့်ခွဲသူက ပိတ်ထားသည်"</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ကိရိယာဆိုင်ရာ မူဝါဒက ဖန်သားပြင်ပုံဖမ်းခြင်းကို ပိတ်ထားသည်"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ကိရိယာ မူဝါဒက ဖန်သားပြင်ပုံဖမ်းခြင်းကို ပိတ်ထားသည်"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးရှင်းရန်"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"စီမံရန်"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"မှတ်တမ်း"</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ပိတ်ရန်"</string>
     <string name="sound_settings" msgid="8874581353127418308">"အသံနှင့် တုန်ခါမှု"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ဆက်တင်များ"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"ပိုအန္တရာယ်ကင်းသော အသံသို့ လျှော့ထားသည်"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"အသံကို အကြံပြုထားသည်ထက် ပိုကြာမြင့်စွာ ချဲ့ထားသည်"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"အသံကို ဘေးကင်းသည့်အဆင့်သို့ တိုးထားသည်"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"နားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုကြာရှည်စွာ ချဲ့ထားသည်"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"နားကြပ်အသံသည် ဤအပတ်အတွက် ဘေးကင်းသည့်ကန့်သတ်ချက်ထက် ကျော်သွားပါပြီ"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"ဆက်နားဆင်ရန်"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"အသံတိုးရန်"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"အက်ပ်ကို ပင်ထိုးထားသည်"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"သင်က ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ။"</string>
@@ -908,7 +911,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"အပြောင်းအလဲများကို သိမ်းမထားပါ"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"အခြားအက်ပ်များကိုကြည့်ပါ"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"ပြန်စီရန်"</string>
-    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"သတ်မှတ်ချက်များ ထည့်ရန်"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"ထိန်းချုပ်မှုများ ထည့်ရန်"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"တည်းဖြတ်ခြင်းသို့ ပြန်သွားရန်"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"ထိန်းချုပ်မှုများကို ဖွင့်၍မရပါ။ အက်ပ်ဆက်တင်များ ပြောင်းမထားကြောင်း သေချာစေရန် <xliff:g id="APP">%s</xliff:g> အက်ပ်ကို စစ်ဆေးပါ။"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"ကိုက်ညီသော ထိန်းချုပ်မှုများကို မရရှိနိုင်ပါ"</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ထားသည်"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> အနက် <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပွင့်နေပါသည်"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"ဖွင့်ရန်"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ခဏရပ်ရန်"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ယခင် တစ်ပုဒ်"</string>
@@ -985,10 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"စပီကာနှင့် ဖန်သားပြင်များ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"အကြံပြုထားသော စက်ပစ္စည်းများ"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"အခြားစက်သို့ မီဒီယာရွှေ့ပြောင်းရန် သင်၏မျှဝေထားသောစက်ရှင်ကို ရပ်ပါ"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"ရပ်ရန်"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ထုတ်လွှင့်မှုဆောင်ရွက်ပုံ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"အနီးရှိတွဲသုံးနိုင်သော ဘလူးတုသ်သုံးစက် အသုံးပြုသူများက သင်ထုတ်လွှင့်နေသော မီဒီယာကို နားဆင်နိုင်သည်"</string>
@@ -1001,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"သိမ်း၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"သိမ်း၍မရပါ။"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"အနည်းဆုံး အက္ခရာ ၄ လုံး သုံးရန်"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"အက္ခရာ ၁၆ လုံးအောက် သုံးရန်"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"အက္ခရာ <xliff:g id="LENGTH">%1$d</xliff:g> လုံးအောက် သုံးရန်"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"တည်ဆောက်မှုနံပါတ်ကို ကလစ်ဘုတ်သို့ မိတ္တူကူးပြီးပါပြီ။"</string>
     <string name="basic_status" msgid="2315371112182658176">"စကားဝိုင်းကို ဖွင့်ရန်"</string>
@@ -1121,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ပိုမိုလေ့လာရန်"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g> တွင် ပိုမိုလေ့လာရန်"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ဖွင့်ရန်"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet တွင် အနည်းဆုံးကတ်တစ်ခု ထည့်ထားရမည်"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ကင်မရာအက်ပ် ထည့်သွင်းထားရမည်"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• အနည်းဆုံး စက်တစ်ခုသုံးနိုင်ရမည်"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"မှတ်စုရေးသည့် ဖြတ်လမ်းလင့်ခ်သုံးရန်အတွက် မူရင်းမှတ်စုများအက်ပ် ရွေးရန်"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet အက်ပ်ကို ဖြတ်လမ်းလင့်ခ်အဖြစ်ထည့်ရန် ၎င်းအားထည့်သွင်းထားကြောင်း သေချာပါစေ"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet အက်ပ်ကို ဖြတ်လမ်းလင့်ခ်အဖြစ်ထည့်ရန် အနည်းဆုံး ကတ်တစ်ခုထည့်ထားကြောင်း သေချာပါစေ"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR ကုဒ် စကင်ဖတ်စနစ်ကို ဖြတ်လမ်းလင့်ခ်အဖြစ်ထည့်ရန် ကင်မရာအက်ပ်အားထည့်သွင်းထားကြောင်း သေချာပါစေ"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home အက်ပ်ကို ဖြတ်လမ်းလင့်ခ်အဖြစ်ထည့်ရန် ၎င်းအားထည့်သွင်းထားကြောင်း သေချာပါစေ"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• အနည်းဆုံး စက်တစ်ခုသုံးနိုင်ရမည်"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"မှတ်စုရေးသည့် ဖြတ်လမ်းလင့်ခ်သုံးရန်အတွက် မူရင်းမှတ်စုများအက်ပ် ရွေးရန်"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"အက်ပ်ရွေးရန်"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ဖြတ်လမ်းလင့်ခ်ကို ထိပြီးဖိထားပါ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"မလုပ်တော့"</string>
@@ -1141,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"စတိုင်လပ်စ်ကို အားသွင်းကိရိယာနှင့် ချိတ်ဆက်ခြင်း"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"စတိုင်လပ်စ် ဘက်ထရီ အားနည်းနေသည်"</string>
     <string name="video_camera" msgid="7654002575156149298">"ဗီဒီယိုကင်မရာ"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ဤပရိုဖိုင်မှ ခေါ်ဆို၍ မရပါ"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"သင့်အလုပ်မူဝါဒသည် သင့်အား အလုပ်ပရိုဖိုင်မှသာ ဖုန်းခေါ်ဆိုခွင့် ပြုသည်"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"ကိုယ်ရေးသုံးအက်ပ်မှ ဖုန်းဆက်၍မရပါ"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"သင့်အဖွဲ့အစည်းသည် သင့်အား အလုပ်သုံးအက်ပ်များမှသာ ဖုန်းဆက်ခွင့်ပြုသည်"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"အလုပ်ပရိုဖိုင်သို့ ပြောင်းရန်"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"ပိတ်ရန်"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"အလုပ်သုံး ဖုန်းအက်ပ် ထည့်သွင်းရန်"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"မလုပ်တော့"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"လော့ခ်မျက်နှာပြင်စိတ်ကြိုက်လုပ်ရန်"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"လော့ခ်မျက်နှာပြင် စိတ်ကြိုက်လုပ်ရန် ဖွင့်ပါ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi မရနိုင်ပါ"</string>
@@ -1154,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ဦးစားပေးမုဒ် ဖွင့်ထားသည်"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant နားထောင်နေသည်"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ဆက်တင်များတွင် မူရင်းမှတ်စုများအက်ပ် သတ်မှတ်ပါ"</string>
+    <string name="install_app" msgid="5066668100199613936">"အက်ပ် ထည့်သွင်းရန်"</string>
 </resources>

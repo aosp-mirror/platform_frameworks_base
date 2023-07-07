@@ -42,13 +42,15 @@ open class ImageCaptureImpl @Inject constructor(
             .setSourceCrop(crop)
             .build()
         val syncScreenCapture = ScreenCapture.createSyncCaptureListener()
-        windowManager.captureDisplay(displayId, captureArgs, syncScreenCapture.first)
-        val buffer = syncScreenCapture.second.get()
+        windowManager.captureDisplay(displayId, captureArgs, syncScreenCapture)
+        val buffer = syncScreenCapture.getBuffer()
         return buffer?.asBitmap()
     }
 
     override suspend fun captureTask(taskId: Int): Bitmap? {
-        val snapshot = withContext(bgContext) { atmService.takeTaskSnapshot(taskId) } ?: return null
+        val snapshot = withContext(bgContext) {
+            atmService.takeTaskSnapshot(taskId, false /* updateCache */)
+        } ?: return null
         return Bitmap.wrapHardwareBuffer(snapshot.hardwareBuffer, snapshot.colorSpace)
     }
 }

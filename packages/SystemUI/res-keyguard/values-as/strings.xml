@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"বাবল"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"এনাল’গ"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"অব্যাহত ৰাখিবলৈ আপোনাৰ ডিভাইচটো আনলক কৰক"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"আপডে’ট পাছত ইনষ্টল কৰিবলৈ পিন দিয়ক"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"আপডে’ট পাছত ইনষ্টল কৰিবলৈ পাছৱৰ্ড দিয়ক"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"আপডে’ট পাছত ইনষ্টল কৰিবলৈ আৰ্হি আঁকক"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ডিভাইচ আপডে’ট কৰা হ’ল। অব্যাহত ৰাখিবলৈ পিন দিয়ক।"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ডিভাইচ আপডে’ট কৰা হ’ল। অব্যাহত ৰাখিবলৈ পাছৱৰ্ড দিয়ক।"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ডিভাইচ আপডে’ট কৰা হ’ল। অব্যাহত ৰাখিবলৈ আৰ্হি আঁকক।"</string>
 </resources>

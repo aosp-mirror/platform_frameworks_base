@@ -148,7 +148,8 @@ public abstract class BroadcastQueue {
      *         dispatching a pending broadcast
      */
     @GuardedBy("mService")
-    public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app);
+    public abstract boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
+            throws BroadcastDeliveryFailedException;
 
     /**
      * Signal from OS internals that the given process has timed out during
@@ -171,6 +172,13 @@ public abstract class BroadcastQueue {
      */
     @GuardedBy("mService")
     public abstract void onApplicationCleanupLocked(@NonNull ProcessRecord app);
+
+    /**
+     * Signal from OS internals that the given process is in a freezable state and will be
+     * frozen soon after.
+     */
+    @GuardedBy("mService")
+    public abstract void onProcessFreezableChangedLocked(@NonNull ProcessRecord app);
 
     /**
      * Signal from OS internals that the given package (or some subset of that

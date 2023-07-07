@@ -72,6 +72,10 @@ public class SettingsToPropertiesMapper {
             Settings.Global.NATIVE_FLAGS_HEALTH_CHECK_ENABLED,
     };
 
+    // TODO(b/282593625): Move this constant to DeviceConfig module
+    private static final String NAMESPACE_TETHERING_U_OR_LATER_NATIVE =
+            "tethering_u_or_later_native";
+
     // All the flags under the listed DeviceConfig scopes will be synced to native level.
     //
     // NOTE: please grant write permission system property prefix
@@ -106,7 +110,8 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_MEMORY_SAFETY_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_MEMORY_SAFETY_NATIVE,
-        DeviceConfig.NAMESPACE_HDMI_CONTROL
+        DeviceConfig.NAMESPACE_HDMI_CONTROL,
+        NAMESPACE_TETHERING_U_OR_LATER_NATIVE
     };
 
     private final String[] mGlobalSettings;

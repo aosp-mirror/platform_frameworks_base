@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Бөлісу"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Экран жазбасы сақталды."</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Көру үшін түртіңіз."</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Экран бейне жазбасын жою кезінде қате кетті"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Экран жазбасын сақтау кезінде қате шықты."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Экрандағы бейнені жазу кезінде қате шықты."</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Артқа"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Үй"</string>
@@ -135,14 +135,14 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Жіберу"</string>
     <string name="cancel" msgid="1089011503403416730">"Бас тарту"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Растау"</string>
-    <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Қайталап көріңіз"</string>
+    <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Қайта көру"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Аутентификациядан бас тарту үшін түртіңіз."</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Қайталап көріңіз."</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Құрылғы бетіңізді талдап жатыр."</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Бет танылды."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Расталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Аяқтау үшін \"Растау\" түймесін түртіңіз."</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Бет үлгісі арқылы ашылды. Жалғастыру үшін құлыпты ашу белгішесін басыңыз."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Бетпен ашылды."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Бетпен ашылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Бет танылды. Жалғастыру үшін басыңыз."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Бет танылды. Жалғастыру үшін құлыпты ашу белгішесін басыңыз."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"өшіру"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Дыбыс және діріл"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Параметрлер"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Қауіпсіз дыбыс деңгейіне төмендетілді"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Дыбыстың жоғары деңгейі ұсынылғаннан уақыттан ұзағырақ болды."</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Дыбыс деңгейі қауіпсіз шекке дейін түсірілді"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Құлақаспаптың жоғары дыбыс деңгейі ұсынылған уақыттан ұзақ қосылып тұрды."</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Құлақаспаптың дыбыс деңгейі осы аптадағы қауіпсіз шектен асып кетті."</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Тыңдай беру"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Дыбыс деңгейін азайту"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Қолданба бекітілді"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Өзіңіз босатқаша ашық тұрады. Босату үшін \"Артқа\" және \"Шолу\" түймелерін басып тұрыңыз."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Өзіңіз босатқаша ашық тұрады. Босату үшін \"Артқа\" және \"Негізгі бет\" түймелерін басып тұрыңыз"</string>
@@ -904,7 +907,7 @@
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Басқару элементтері"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Жылдам кіру үшін құрылғыны басқару элементтерін таңдаңыз."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері жойылды."</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементі жойылды."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Басқа қолданбаларды көру"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Қайта реттеу"</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Параметрлер"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> қолданбасында <xliff:g id="ARTIST_NAME">%2$s</xliff:g> орындайтын \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" әні ойнатылуда."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>/<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> қосулы тұр"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Ойнату"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Кідірту"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Алдыңғы трек"</string>
@@ -985,10 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер мен дисплейлер"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Ұсынылған құрылғылар"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Мультимедиа файлын басқа құрылғыға жылжыту үшін ортақ сеансты тоқтатыңыз."</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Тоқтату"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Тарату қалай жүзеге асады"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Тарату"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Үйлесімді Bluetooth құрылғылары бар маңайдағы адамдар сіз таратып жатқан медиамазмұнды тыңдай алады."</string>
@@ -1001,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Сақталмайды. Қайталап көріңіз."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Сақталмайды."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Кемінде 4 таңба пайдаланыңыз."</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Ең көбі 16 таңба пайдаланыңыз."</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Ең көбі <xliff:g id="LENGTH">%1$d</xliff:g> таңба пайдаланыңыз."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Құрама нөмірі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Құрама нөмірі буферге көшірілді."</string>
     <string name="basic_status" msgid="2315371112182658176">"Ашық әңгіме"</string>
@@ -1121,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Толық ақпарат"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Толық ақпарат: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ашу"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Қолданба реттелген"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet-ке кемінде бір карта қосылған"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Камера қолданбасын орнатыңыз"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Қолданба реттелген"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Кемінде бір құрылғы қолжетімді"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Жазба жазу таңбашасын пайдалану үшін әдепкі жазба қолданбаны таңдаңыз."</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet қолданбасын таңбаша ретінде қосу үшін қолданбаның орнатылғанын тексеріңіз."</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet қолданбасын таңбаша ретінде қосу үшін кемінде бір картаның қосылғанын тексеріңіз."</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR кодының сканерін таңбаша ретінде қосу үшін камера қолданбасының орнатылғанын тексеріңіз."</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home қолданбасын таңбаша ретінде қосу үшін қолданбаның орнатылғанын тексеріңіз."</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Кемінде бір құрылғы қолжетімді."</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Жазба жазу таңбашасын пайдалану үшін әдепкі жазба қолданбаны таңдаңыз."</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Қолданба таңдау"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Таңбашаны басып тұрыңыз."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Бас тарту"</string>
@@ -1141,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Стилусты зарядтағышқа жалғаңыз."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Стилус батареясының заряды аз"</string>
     <string name="video_camera" msgid="7654002575156149298">"Бейнекамера"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Бұл профильден қоңырау шалу мүмкін емес"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Жұмыс саясатыңызға сәйкес тек жұмыс профилінен қоңырау шалуға болады."</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Жеке қолданбадан қоңырау шалу мүмкін емес"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Ұйымыңыз тек жұмыс қолданбаларынан қоңырау шалуға рұқсат етеді."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жұмыс профиліне ауысу"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабу"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Жұмысқа арналған телефон қолданбасын орнату"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Бас тарту"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Құлып экранын бейімдеу"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Құлып экранын бейімдеу үшін құлыпты ашыңыз"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi қолжетімсіз."</string>
@@ -1154,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\"Маңызды\" режимі қосулы."</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant қосулы."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден әдепкі жазба қолданбасын орнатыңыз."</string>
+    <string name="install_app" msgid="5066668100199613936">"Қолданбаны орнату"</string>
 </resources>

@@ -47,4 +47,8 @@ public class FakeCondition extends Condition {
     public void fakeUpdateCondition(boolean isConditionMet) {
         updateCondition(isConditionMet);
     }
+
+    public void fakeClearCondition() {
+        clearCondition();
+    }
 }

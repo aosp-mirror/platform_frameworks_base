@@ -157,6 +157,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
 
     private static final int RINGBUFFER_MAX = 100;
+    private static final int RINGBUFFER_RBC_MAX = 20;
 
     private static final float[] BRIGHTNESS_RANGE_BOUNDARIES = {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80,
@@ -389,6 +390,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     // Keeps a record of brightness changes for dumpsys.
     private RingBuffer<BrightnessEvent> mBrightnessEventRingBuffer;
+
+    // Keeps a record of rbc changes for dumpsys.
+    private final RingBuffer<BrightnessEvent> mRbcEventRingBuffer =
+            new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_RBC_MAX);
 
     // Controls and tracks all the wakelocks that are acquired/released by the system. Also acts as
     // a medium of communication between this class and the PowerManagerService.
@@ -1454,7 +1459,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // Skip the animation when the screen is off or suspended.
         boolean brightnessAdjusted = false;
         final boolean brightnessIsTemporary =
-                (mBrightnessReason.getReason() == BrightnessReason.REASON_TEMPORARY)
+                (mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_TEMPORARY)
                         || mAutomaticBrightnessStrategy
                         .isTemporaryAutoBrightnessAdjustmentApplied();
         if (!mPendingScreenOff) {
@@ -1539,21 +1544,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 }
             }
 
-            // Report brightness to brightnesstracker:
-            // If brightness is not temporary (ie the slider has been released)
-            // AND if we are not in idle screen brightness mode.
-            if (!brightnessIsTemporary
-                    && (mAutomaticBrightnessController != null
-                    && !mAutomaticBrightnessController.isInIdleMode())) {
-                if (userInitiatedChange && (mAutomaticBrightnessController == null
-                        || !mAutomaticBrightnessController.hasValidAmbientLux())) {
-                    // If we don't have a valid lux reading we can't report a valid
-                    // slider event so notify as if the system changed the brightness.
-                    userInitiatedChange = false;
-                }
-                notifyBrightnessTrackerChanged(brightnessState, userInitiatedChange,
-                        wasShortTermModelActive);
-            }
+            notifyBrightnessTrackerChanged(brightnessState, userInitiatedChange,
+                    wasShortTermModelActive, mAutomaticBrightnessStrategy.isAutoBrightnessEnabled(),
+                    brightnessIsTemporary);
 
             // We save the brightness info *after* the brightness setting has been changed and
             // adjustments made so that the brightness info reflects the latest value.
@@ -1605,6 +1598,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mTempBrightnessEvent.getReason().getReason() == BrightnessReason.REASON_TEMPORARY
                         && mLastBrightnessEvent.getReason().getReason()
                         == BrightnessReason.REASON_TEMPORARY;
+        // Purely for dumpsys;
+        final boolean isRbcEvent =
+                mLastBrightnessEvent.isRbcEnabled() != mTempBrightnessEvent.isRbcEnabled();
+
         if ((!mTempBrightnessEvent.equalsMainData(mLastBrightnessEvent) && !tempToTempTransition)
                 || brightnessAdjustmentFlags != 0) {
             mTempBrightnessEvent.setInitialBrightness(mLastBrightnessEvent.getBrightness());
@@ -1624,6 +1621,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             if (mBrightnessEventRingBuffer != null) {
                 mBrightnessEventRingBuffer.append(newEvent);
             }
+            if (isRbcEvent) {
+                mRbcEventRingBuffer.append(newEvent);
+            }
+
         }
 
         // Update display white-balance.
@@ -2171,11 +2172,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }, mClock.uptimeMillis());
     }
 
-    private float getAutoBrightnessAdjustmentSetting() {
-        final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
-        return Float.isNaN(adj) ? 0.0f : clampAutoBrightnessAdjustment(adj);
-    }
 
     @Override
     public float getScreenBrightnessSetting() {
@@ -2215,23 +2211,45 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void notifyBrightnessTrackerChanged(float brightness, boolean userInitiated,
-            boolean wasShortTermModelActive) {
+            boolean wasShortTermModelActive, boolean autobrightnessEnabled,
+            boolean brightnessIsTemporary) {
+
         final float brightnessInNits =
                 mDisplayBrightnessController.convertToAdjustedNits(brightness);
-        if (mAutomaticBrightnessStrategy.shouldUseAutoBrightness() && brightnessInNits >= 0.0f
-                && mAutomaticBrightnessController != null && mBrightnessTracker != null) {
-            // We only want to track changes on devices that can actually map the display backlight
-            // values into a physical brightness unit since the value provided by the API is in
-            // nits and not using the arbitrary backlight units.
-            final float powerFactor = mPowerRequest.lowPowerMode
-                    ? mPowerRequest.screenLowPowerBrightnessFactor
-                    : 1.0f;
-            mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
-                    powerFactor, wasShortTermModelActive,
-                    mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
-                    mAutomaticBrightnessController.getLastSensorValues(),
-                    mAutomaticBrightnessController.getLastSensorTimestamps());
+        // Don't report brightness to brightnessTracker:
+        // If brightness is temporary (ie the slider has not been released)
+        // or if we are in idle screen brightness mode.
+        // or display is not on
+        // or we shouldn't be using autobrightness
+        // or the nits is invalid.
+        if (brightnessIsTemporary
+                || mAutomaticBrightnessController == null
+                || mAutomaticBrightnessController.isInIdleMode()
+                || !autobrightnessEnabled
+                || mBrightnessTracker == null
+                || !mAutomaticBrightnessStrategy.shouldUseAutoBrightness()
+                || brightnessInNits < 0.0f) {
+            return;
         }
+
+        if (userInitiated && (mAutomaticBrightnessController == null
+                || !mAutomaticBrightnessController.hasValidAmbientLux())) {
+            // If we don't have a valid lux reading we can't report a valid
+            // slider event so notify as if the system changed the brightness.
+            userInitiated = false;
+        }
+
+        // We only want to track changes on devices that can actually map the display backlight
+        // values into a physical brightness unit since the value provided by the API is in
+        // nits and not using the arbitrary backlight units.
+        final float powerFactor = mPowerRequest.lowPowerMode
+                ? mPowerRequest.screenLowPowerBrightnessFactor
+                : 1.0f;
+        mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
+                powerFactor, wasShortTermModelActive,
+                mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
+                mAutomaticBrightnessController.getLastSensorValues(),
+                mAutomaticBrightnessController.getLastSensorTimestamps());
     }
 
     @Override
@@ -2354,6 +2372,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             dumpBrightnessEvents(pw);
         }
 
+        dumpRbcEvents(pw);
+
         if (mHbmController != null) {
             mHbmController.dump(pw);
         }
@@ -2426,9 +2446,20 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
-    private static float clampAutoBrightnessAdjustment(float value) {
-        return MathUtils.constrain(value, -1.0f, 1.0f);
+    private void dumpRbcEvents(PrintWriter pw) {
+        int size = mRbcEventRingBuffer.size();
+        if (size < 1) {
+            pw.println("No Reduce Bright Colors Adjustments");
+            return;
+        }
+
+        pw.println("Reduce Bright Colors Adjustments Last " + size + " Events: ");
+        BrightnessEvent[] eventArray = mRbcEventRingBuffer.toArray();
+        for (int i = 0; i < mRbcEventRingBuffer.size(); i++) {
+            pw.println("  " + eventArray[i]);
+        }
     }
+
 
     private void noteScreenState(int screenState) {
         // Log screen state change with display id

@@ -19,6 +19,7 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
@@ -126,7 +127,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
      * Returns the top visible child task's id.
      */
     int getTopVisibleChildTaskId() {
-        final ActivityManager.RunningTaskInfo taskInfo = getChildTaskInfo(t -> t.isVisible);
+        final ActivityManager.RunningTaskInfo taskInfo = getChildTaskInfo(t -> t.isVisible
+                && t.isVisibleRequested);
         return taskInfo != null ? taskInfo.taskId : INVALID_TASK_ID;
     }
 
@@ -182,12 +184,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
             mChildrenTaskInfo.put(taskId, taskInfo);
-            updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
-            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */, taskInfo.isVisible);
+            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */,
+                    taskInfo.isVisible && taskInfo.isVisibleRequested);
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
             }
+            updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
             mCallbacks.onChildTaskAppeared(taskId);
             sendStatusChanged();
         } else {
@@ -201,7 +204,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
-            if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
+            if (!ENABLE_SHELL_TRANSITIONS && mRootTaskInfo.isVisible != taskInfo.isVisible) {
                 if (taskInfo.isVisible) {
                     mSplitDecorManager.inflate(mContext, mRootLeash,
                             taskInfo.configuration.windowConfiguration.getBounds());
@@ -222,7 +225,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
-                    taskInfo.isVisible);
+                    taskInfo.isVisible && taskInfo.isVisibleRequested);
             if (!ENABLE_SHELL_TRANSITIONS) {
                 updateChildTaskSurface(
                         taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
@@ -376,6 +379,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void evictChildren(WindowContainerTransaction wct, int taskId) {
+        final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.get(taskId);
+        if (taskInfo != null) {
+            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+        }
+    }
+
     void reparentTopTask(WindowContainerTransaction wct) {
         wct.reparentTasks(null /* currentParent */, mRootTaskInfo.token,
                 CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES,
@@ -385,6 +395,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     void resetBounds(WindowContainerTransaction wct) {
         wct.setBounds(mRootTaskInfo.token, null);
         wct.setAppBounds(mRootTaskInfo.token, null);
+        wct.setSmallestScreenWidthDp(mRootTaskInfo.token, SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
     }
 
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,
@@ -408,7 +419,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             t.setCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
-            if (firstAppeared && !ENABLE_SHELL_TRANSITIONS) {
+            if (firstAppeared) {
                 t.setAlpha(leash, 1f);
                 t.setMatrix(leash, 1, 0, 0, 1);
                 t.show(leash);

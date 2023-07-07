@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -137,6 +138,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final String mDefaultAudioRouteId;
     private final String mBluetoothA2dpRouteId;
 
+    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public MediaRouterService(Context context) {
         mService2 = new MediaRouter2ServiceImpl(context);
         mContext = context;

@@ -40,7 +40,7 @@ public class DropboxRateLimiter {
     // If a process is rate limited twice in a row we consider it crash-looping and rate limit it
     // more aggressively.
     private static final int STRICT_RATE_LIMIT_ALLOWED_ENTRIES = 1;
-    private static final long STRICT_RATE_LIMIT_BUFFER_DURATION = 60 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long STRICT_RATE_LIMIT_BUFFER_DURATION = 20 * DateUtils.MINUTE_IN_MILLIS;
 
     @GuardedBy("mErrorClusterRecords")
     private final ArrayMap<String, ErrorRecord> mErrorClusterRecords = new ArrayMap<>();

@@ -382,30 +382,34 @@ public class WebViewClient {
     }
 
     /**
-     * Notify the host application that an SSL error occurred while loading a
-     * resource. The host application must call either {@link SslErrorHandler#cancel} or
-     * {@link SslErrorHandler#proceed}. Note that the decision may be retained for use in
-     * response to future SSL errors. The default behavior is to cancel the
-     * load.
-     * <p>
-     * This API is only called for recoverable SSL certificate errors. In the case of
-     * non-recoverable errors (such as when the server fails the client), WebView will call {@link
-     * #onReceivedError(WebView, WebResourceRequest, WebResourceError)} with {@link
-     * #ERROR_FAILED_SSL_HANDSHAKE}.
-     * <p>
-     * Applications are advised not to prompt the user about SSL errors, as
-     * the user is unlikely to be able to make an informed security decision
-     * and WebView does not provide any UI for showing the details of the
-     * error in a meaningful way.
-     * <p>
-     * Application overrides of this method may display custom error pages or
-     * silently log issues, but it is strongly recommended to always call
-     * {@link SslErrorHandler#cancel} and never allow proceeding past errors.
+     * Notifies the host application that an SSL error occurred while loading a
+     * resource. The host application must call either
+     * {@link SslErrorHandler#cancel()} or {@link SslErrorHandler#proceed()}.
      *
-     * @param view The WebView that is initiating the callback.
-     * @param handler An {@link SslErrorHandler} that will handle the user's
-     *            response.
-     * @param error The SSL error object.
+     * <p class="warning"><b>Warning:</b> Application overrides of this method
+     * can be used to display custom error pages or to silently log issues, but
+     * the host application should always call {@code SslErrorHandler#cancel()}
+     * and never proceed past errors.
+     *
+     * <p class="note"><b>Note:</b> Do not prompt the user about SSL errors.
+     * Users are unlikely to be able to make an informed security decision, and
+     * {@code WebView} does not provide a UI for showing the details of the
+     * error in a meaningful way.
+     *
+     * <p>The decision to call {@code proceed()} or {@code cancel()} may be
+     * retained to facilitate responses to future SSL errors. The default
+     * behavior is to cancel the resource loading process.
+     *
+     * <p>This API is called only for recoverable SSL certificate errors. For
+     * non-recoverable errors (such as when the server fails the client), the
+     * {@code WebView} calls {@link #onReceivedError(WebView,
+     * WebResourceRequest, WebResourceError) onReceivedError(WebView,
+     * WebResourceRequest, WebResourceError)} with the
+     * {@link #ERROR_FAILED_SSL_HANDSHAKE} argument.
+     *
+     * @param view {@code WebView} that initiated the callback.
+     * @param handler {@link SslErrorHandler} that handles the user's response.
+     * @param error SSL error object.
      */
     public void onReceivedSslError(WebView view, SslErrorHandler handler,
             SslError error) {

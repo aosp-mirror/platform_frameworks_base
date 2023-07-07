@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.app.Activity.FULLSCREEN_MODE_REQUEST_ENTER;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.FullscreenRequestHandler.REMOTE_CALLBACK_RESULT_KEY;
@@ -818,6 +819,13 @@ class ActivityClientController extends IActivityClientController.Stub {
                                 null /*startTask */, null /* remoteTransition */,
                                 null /* displayChange */);
                         r.mTransitionController.setReady(r.getDisplayContent());
+                        if (under != null && under.returningOptions != null
+                                && under.returningOptions.getAnimationType()
+                                        == ANIM_SCENE_TRANSITION) {
+                            // Pass along the scene-transition animation-type
+                            transition.setOverrideAnimation(TransitionInfo.AnimationOptions
+                                    .makeSceneTransitionAnimOptions(), null, null);
+                        }
                     } else {
                         transition.abort();
                     }

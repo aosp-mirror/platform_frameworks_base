@@ -120,7 +120,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
 
     @Test
     fun testNegativeButton_beforeAuthentication_sendsActionButtonNegative() {
-        biometricView.onDialogAnimatedIn()
+        biometricView.onDialogAnimatedIn(fingerprintWasStarted = true)
         biometricView.mNegativeButton.performClick()
         TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
@@ -212,7 +212,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     @Test
     fun testIgnoresUselessHelp() {
         biometricView.mAnimationDurationHideDialog = 10_000
-        biometricView.onDialogAnimatedIn()
+        biometricView.onDialogAnimatedIn(fingerprintWasStarted = true)
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticating).isTrue()

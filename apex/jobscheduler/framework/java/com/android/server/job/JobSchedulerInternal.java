@@ -59,6 +59,10 @@ public interface JobSchedulerInternal {
      */
     void reportAppUsage(String packageName, int userId);
 
+    /** @return {@code true} if the app is considered buggy from JobScheduler's perspective. */
+    boolean isAppConsideredBuggy(int callingUserId, @NonNull String callingPackageName,
+            int timeoutBlameUserId, @NonNull String timeoutBlamePackageName);
+
     /**
      * @return {@code true} if the given notification is associated with any user-initiated jobs.
      */

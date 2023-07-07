@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.WebView;
@@ -183,7 +184,14 @@ public class SlicePurchaseActivity extends Activity {
         setContentView(mWebView);
 
         // Load the URL
-        mWebView.loadUrl(mUrl.toString());
+        String userData = mIntent.getStringExtra(SlicePurchaseController.EXTRA_USER_DATA);
+        if (TextUtils.isEmpty(userData)) {
+            logd("Starting WebView with url: " + mUrl.toString());
+            mWebView.loadUrl(mUrl.toString());
+        } else {
+            logd("Starting WebView with url: " + mUrl.toString() + ", userData=" + userData);
+            mWebView.postUrl(mUrl.toString(), userData.getBytes());
+        }
     }
 
     private static void logd(@NonNull String s) {

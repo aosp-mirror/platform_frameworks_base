@@ -327,6 +327,7 @@ public class NotificationStackScrollLayoutController {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
+                    updateImportantForAccessibility();
                 }
             };
 
@@ -410,7 +411,8 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
-    private final NotificationSwipeHelper.NotificationCallback mNotificationCallback =
+    @VisibleForTesting
+    final NotificationSwipeHelper.NotificationCallback mNotificationCallback =
             new NotificationSwipeHelper.NotificationCallback() {
 
                 @Override
@@ -469,10 +471,11 @@ public class NotificationStackScrollLayoutController {
                  */
 
                 public void handleChildViewDismissed(View view) {
+                    // The View needs to clean up the Swipe states, e.g. roundness.
+                    mView.onSwipeEnd();
                     if (mView.getClearAllInProgress()) {
                         return;
                     }
-                    mView.onSwipeEnd();
                     if (view instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                         if (row.isHeadsUp()) {
@@ -1205,6 +1208,7 @@ public class NotificationStackScrollLayoutController {
         if (mView.getVisibility() == View.VISIBLE) {
             // Synchronize EmptyShadeView visibility with the parent container.
             updateShowEmptyShadeView();
+            updateImportantForAccessibility();
         }
     }
 
@@ -1229,6 +1233,22 @@ public class NotificationStackScrollLayoutController {
         mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
 
         Trace.endSection();
+    }
+
+    /**
+     * Update the importantForAccessibility of NotificationStackScrollLayout.
+     * <p>
+     * We want the NSSL to be unimportant for accessibility when there's no
+     * notifications in it while the device is on lock screen, to avoid unlablel NSSL view.
+     * Otherwise, we want it to be important for accessibility to enable accessibility
+     * auto-scrolling in NSSL.
+     */
+    public void updateImportantForAccessibility() {
+        if (getVisibleNotificationCount() == 0 && mView.onKeyguard()) {
+            mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        } else {
+            mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     /**

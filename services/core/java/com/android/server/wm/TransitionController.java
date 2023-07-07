@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -58,6 +58,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 /**
@@ -205,6 +206,11 @@ class TransitionController {
      * transaction, set this to true so that the {@link canAssignLayers} will allow it.
      */
     boolean mBuildingFinishLayers = false;
+
+    /**
+     * Whether the surface of navigation bar token is reparented to an app.
+     */
+    boolean mNavigationBarAttachedToApp = false;
 
     private boolean mAnimatingState = false;
 
@@ -431,6 +437,19 @@ class TransitionController {
         return inCollectingTransition(wc) || inPlayingTransition(wc);
     }
 
+    /** Returns {@code true} if the id matches a collecting or playing transition. */
+    boolean inTransition(int syncId) {
+        if (mCollectingTransition != null && mCollectingTransition.getSyncId() == syncId) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).getSyncId() == syncId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @return {@code true} if wc is in a participant subtree */
     boolean isTransitionOnDisplay(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.isOnDisplay(dc)) {
@@ -456,6 +475,19 @@ class TransitionController {
             if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
         }
         return false;
+    }
+
+    boolean canApplyDim(@Nullable Task task) {
+        if (task == null) {
+            // Always allow non-activity window.
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (!mPlayingTransitions.get(i).canApplyDim(task)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -503,8 +535,14 @@ class TransitionController {
      * playing, but can be "opened-up" for certain transition operations like calculating layers
      * for finishTransaction.
      */
-    boolean canAssignLayers() {
-        return mBuildingFinishLayers || !isPlaying();
+    boolean canAssignLayers(@NonNull WindowContainer wc) {
+        // Don't build window state into finish transaction in case another window is added or
+        // removed during transition playing.
+        if (mBuildingFinishLayers) {
+            return wc.asWindowState() == null;
+        }
+        // Always allow WindowState to assign layers since it won't affect transition.
+        return wc.asWindowState() != null || !isPlaying();
     }
 
     @WindowConfiguration.WindowingMode
@@ -600,9 +638,9 @@ class TransitionController {
             }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
-            if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
-                // Add keyguard flag to dismiss keyguard
-                mCollectingTransition.addFlag(flags);
+            if ((flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
+                // Add keyguard flags to affect keyguard visibility
+                mCollectingTransition.addFlag(flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS);
             }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
@@ -1290,18 +1328,18 @@ class TransitionController {
         return transit;
     }
 
-    /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
-    boolean startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Runnable applySync) {
+    /** Starts the sync set if there is no pending or active syncs, otherwise enqueue the sync. */
+    void startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Consumer<Boolean> applySync) {
         if (!mQueuedTransitions.isEmpty() || mSyncEngine.hasActiveSync()) {
             // Just add to queue since we already have a queue.
-            mQueuedTransitions.add(new QueuedTransition(syncGroup, (d) -> applySync.run()));
+            mQueuedTransitions.add(new QueuedTransition(syncGroup,
+                    (deferred) -> applySync.accept(true /* deferred */)));
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
                     "Queueing legacy sync-set: %s", syncGroup.mSyncId);
-            return false;
+            return;
         }
         mSyncEngine.startSyncSet(syncGroup);
-        applySync.run();
-        return true;
+        applySync.accept(false /* deferred */);
     }
 
     interface OnStartCollect {

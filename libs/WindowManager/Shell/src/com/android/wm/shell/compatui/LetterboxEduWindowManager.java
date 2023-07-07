@@ -141,7 +141,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
         // startEnterAnimation will be called immediately if shell-transitions are disabled.
         mTransitions.runOnIdle(this::startEnterAnimation);
-
         return mLayout;
     }
 
@@ -208,6 +207,12 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
 
         return super.updateCompatInfo(taskInfo, taskListener, canShow);
+    }
+
+    @Override
+    boolean needsToBeRecreated(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+        return super.needsToBeRecreated(taskInfo, taskListener)
+                && !mCompatUIConfiguration.getHasSeenLetterboxEducation(mUserId);
     }
 
     @Override

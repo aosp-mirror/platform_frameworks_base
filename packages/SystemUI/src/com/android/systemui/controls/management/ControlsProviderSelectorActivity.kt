@@ -217,7 +217,6 @@ open class ControlsProviderSelectorActivity @Inject constructor(
                     )
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
-                animateExitAndFinish()
             }
         }
     }

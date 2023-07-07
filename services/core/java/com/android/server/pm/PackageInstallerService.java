@@ -104,6 +104,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.utils.RequestThrottle;
 
 import libcore.io.IoUtils;
@@ -510,7 +511,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         } catch (FileNotFoundException e) {
             // Missing sessions are okay, probably first boot
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException e) {
             Slog.wtf(TAG, "Failed reading install sessions", e);
         } finally {
             IoUtils.closeQuietly(fis);
@@ -1292,8 +1293,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public void installExistingPackage(String packageName, int installFlags, int installReason,
             IntentSender statusReceiver, int userId, List<String> allowListedPermissions) {
         final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
-        installPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
-                installReason, allowListedPermissions, statusReceiver);
+
+        var result = installPackageHelper.installExistingPackageAsUser(packageName, userId,
+                installFlags, installReason, allowListedPermissions, statusReceiver);
+
+        int returnCode = result.first;
+        IntentSender onCompleteSender = result.second;
+        if (onCompleteSender != null) {
+            InstallPackageHelper.onInstallComplete(returnCode, mContext, onCompleteSender);
+        }
     }
 
     @Override
@@ -1306,6 +1314,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 session.setPermissionsResult(accepted);
             }
         }
+    }
+
+    private boolean isValidForInstallConstraints(PackageStateInternal ps,
+            String installerPackageName) {
+        return TextUtils.equals(ps.getInstallSource().mInstallerPackageName, installerPackageName)
+                || TextUtils.equals(ps.getInstallSource().mUpdateOwnerPackageName,
+                installerPackageName);
     }
 
     private CompletableFuture<InstallConstraintsResult> checkInstallConstraintsInternal(
@@ -1324,8 +1339,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)) {
             for (var packageName : packageNames) {
                 var ps = snapshot.getPackageStateInternal(packageName);
-                if (ps == null || !TextUtils.equals(
-                        ps.getInstallSource().mInstallerPackageName, installerPackageName)) {
+                if (ps == null || !isValidForInstallConstraints(ps, installerPackageName)) {
                     throw new SecurityException("Caller has no access to package " + packageName);
                 }
             }

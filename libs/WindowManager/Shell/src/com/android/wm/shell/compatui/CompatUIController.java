@@ -334,17 +334,19 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private void createOrUpdateLetterboxEduLayout(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
-        if (mActiveLetterboxEduLayout != null
-                && mActiveLetterboxEduLayout.getTaskId() == taskInfo.taskId) {
-            // UI already exists, update the UI layout.
-            if (!mActiveLetterboxEduLayout.updateCompatInfo(taskInfo, taskListener,
-                    showOnDisplay(mActiveLetterboxEduLayout.getDisplayId()))) {
-                // The layout is no longer eligible to be shown, clear active layout.
+        if (mActiveLetterboxEduLayout != null) {
+            if (mActiveLetterboxEduLayout.needsToBeRecreated(taskInfo, taskListener)) {
+                mActiveLetterboxEduLayout.release();
                 mActiveLetterboxEduLayout = null;
+            } else {
+                if (!mActiveLetterboxEduLayout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(mActiveLetterboxEduLayout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, clear active layout.
+                    mActiveLetterboxEduLayout = null;
+                }
+                return;
             }
-            return;
         }
-
         // Create a new UI layout.
         final Context context = getOrCreateDisplayContext(taskInfo.displayId);
         if (context == null) {

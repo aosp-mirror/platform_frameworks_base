@@ -124,13 +124,6 @@ constructor(
                         message.data.getBoolean(KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE)
                     )
                 }
-                KeyguardPreviewConstants.MESSAGE_ID_COLOR_OVERRIDE -> {
-                    renderer.onColorOverridden(
-                        message.data
-                            .getString(KeyguardPreviewConstants.KEY_COLOR_OVERRIDE)
-                            ?.toIntOrNull()
-                    )
-                }
                 else -> requestDestruction(this)
             }
 

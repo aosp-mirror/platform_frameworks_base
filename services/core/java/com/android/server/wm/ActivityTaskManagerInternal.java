@@ -263,12 +263,14 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
 
     /**
-     * Set focus on an activity.
-     * @param token The activity token.
+     * Registers a {@link ScreenObserver}.
      */
-    public abstract void setFocusedActivity(IBinder token);
-
     public abstract void registerScreenObserver(ScreenObserver observer);
+
+    /**
+     * Unregisters the given {@link ScreenObserver}.
+     */
+    public abstract void unregisterScreenObserver(ScreenObserver observer);
 
     /**
      * Returns is the caller has the same uid as the Recents component
@@ -583,6 +585,11 @@ public abstract class ActivityTaskManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uids of the profile owners.
+     */
+    public abstract void setProfileOwnerUids(Set<Integer> uids);
 
     /**
      * Set all associated companion app that belongs to a userId.

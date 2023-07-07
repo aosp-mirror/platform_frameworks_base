@@ -371,7 +371,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * Find the background task that match the given component.
      */
     @Nullable
-    public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName) {
+    public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName,
+            int userId) {
         if (componentName == null) {
             return null;
         }
@@ -383,7 +384,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             if (task.isVisible) {
                 continue;
             }
-            if (componentName.equals(task.baseIntent.getComponent())) {
+            if (componentName.equals(task.baseIntent.getComponent()) && userId == task.userId) {
                 return task;
             }
         }

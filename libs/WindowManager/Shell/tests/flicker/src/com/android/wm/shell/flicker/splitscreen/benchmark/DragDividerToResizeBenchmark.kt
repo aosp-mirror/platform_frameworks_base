@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -58,7 +58,7 @@ open class DragDividerToResizeBenchmark(override val flicker: FlickerTest) :
         Assume.assumeTrue(tapl.isTablet || !flicker.scenario.isLandscapeOrSeascapeAtStart)
     }
 
-    @IwTest(focusArea = "sysui")
+    @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
     open fun cujCompleted() {

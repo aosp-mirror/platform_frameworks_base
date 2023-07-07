@@ -59,6 +59,8 @@ public final class UsbAlsaDevice {
     private String mDeviceName = "";
     private String mDeviceDescription = "";
 
+    private boolean mHasJackDetect = true;
+
     public UsbAlsaDevice(IAudioService audioService, int card, int device, String deviceAddress,
             boolean hasOutput, boolean hasInput,
             boolean isInputHeadset, boolean isOutputHeadset, boolean isDock) {
@@ -168,8 +170,14 @@ public final class UsbAlsaDevice {
         if (mJackDetector != null) {
             return;
         }
+        if (!mHasJackDetect) {
+            return;
+        }
         // If no jack detect capabilities exist, mJackDetector will be null.
         mJackDetector = UsbAlsaJackDetector.startJackDetect(this);
+        if (mJackDetector == null) {
+            mHasJackDetect = false;
+        }
     }
 
     /** Stops a jack-detection thread. */
@@ -182,8 +190,8 @@ public final class UsbAlsaDevice {
 
     /** Start using this device as the selected USB Audio Device. */
     public synchronized void start() {
-        startInput();
         startOutput();
+        startInput();
     }
 
     /** Start using this device as the selected USB input device. */
@@ -208,8 +216,8 @@ public final class UsbAlsaDevice {
 
     /** Stop using this device as the selected USB Audio Device. */
     public synchronized void stop() {
-        stopInput();
         stopOutput();
+        stopInput();
     }
 
     /** Stop using this device as the selected USB input device. */

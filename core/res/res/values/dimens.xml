@@ -874,6 +874,7 @@
     <dimen name="autofill_elevation">32dp</dimen>
     <dimen name="autofill_save_inner_padding">16dp</dimen>
     <dimen name="autofill_save_icon_size">32dp</dimen>
+    <dimen name="autofill_save_icon_max_height">56dp</dimen>
     <dimen name="autofill_save_title_start_padding">8dp</dimen>
     <dimen name="autofill_save_scroll_view_top_margin">16dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
@@ -882,18 +883,17 @@
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
 
-    <!-- Max (absolute) dimensions (both width and height) of autofill service icon on autofill save affordance.
-      NOTE: the actual displayed size might is actually smaller than this and is hardcoded in the
-      autofill_save.xml layout; this dimension is just used to avoid a crash in the UI (if the icon provided
-      by the autofill service metadata is bigger than these dimentionsit will not be displayed).
-    -->
-    <dimen name="autofill_save_icon_max_size">300dp</dimen>
-
     <!-- Maximum number of datasets that are visible in the UX picker without scrolling -->
     <integer name="autofill_max_visible_datasets">3</integer>
 
-    <!-- Size of an icon in the Autolfill fill dialog -->
+    <!-- Size of an icon in the Autofill fill dialog -->
     <dimen name="autofill_dialog_icon_size">32dp</dimen>
+
+    <!-- The max height of an icon in the Autofill fill dialog. -->
+    <dimen name="autofill_dialog_icon_max_height">56dp</dimen>
+
+    <!-- The max width of the Autofill fill dialog. -->
+    <dimen name="autofill_dialog_max_width">640dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>

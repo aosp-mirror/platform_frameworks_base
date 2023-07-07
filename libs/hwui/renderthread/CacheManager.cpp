@@ -139,6 +139,25 @@ void CacheManager::trimMemory(TrimLevel mode) {
     }
 }
 
+void CacheManager::trimCaches(CacheTrimLevel mode) {
+    switch (mode) {
+        case CacheTrimLevel::FONT_CACHE:
+            SkGraphics::PurgeFontCache();
+            break;
+        case CacheTrimLevel::RESOURCE_CACHE:
+            SkGraphics::PurgeResourceCache();
+            break;
+        case CacheTrimLevel::ALL_CACHES:
+            SkGraphics::PurgeAllCaches();
+            if (mGrContext) {
+                mGrContext->purgeUnlockedResources(false);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 void CacheManager::trimStaleResources() {
     if (!mGrContext) {
         return;

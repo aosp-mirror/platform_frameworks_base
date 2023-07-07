@@ -46,6 +46,8 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -73,6 +75,8 @@ public class RecordingServiceTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private UserContextProvider mUserContextTracker;
+    @Captor
+    private ArgumentCaptor<Runnable> mRunnableCaptor;
     private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil() {
         public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
                 boolean requiresShadeOpen) {
@@ -200,6 +204,17 @@ public class RecordingServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_showsErrorNotification()
+            throws IOException {
+        doReturn(true).when(mController).isRecording();
+        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end();
+
+        mRecordingService.onStopped();
+
+        verify(mRecordingService).createErrorNotification();
+    }
+
+    @Test
     public void testOnSystemRequestedStop_recorderEndThrowsOOMError_releasesRecording()
             throws IOException {
         doReturn(true).when(mController).isRecording();
@@ -208,5 +223,20 @@ public class RecordingServiceTest extends SysuiTestCase {
         assertThrows(Throwable.class, () -> mRecordingService.onStopped());
 
         verify(mScreenMediaRecorder).release();
+    }
+
+    @Test
+    public void testOnErrorSaving() throws IOException {
+        // When the screen recording does not save properly
+        doThrow(new IllegalStateException("fail")).when(mScreenMediaRecorder).save();
+
+        Intent startIntent = RecordingService.getStopIntent(mContext);
+        mRecordingService.onStartCommand(startIntent, 0, 0);
+        verify(mExecutor).execute(mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
+
+        // Then the state is set to not recording and we cancel the notification
+        verify(mController).updateState(false);
+        verify(mNotificationManager).cancelAsUser(any(), anyInt(), any());
     }
 }

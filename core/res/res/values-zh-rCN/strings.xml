@@ -686,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"请将手机向左移动"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"请将手机向右移动"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到人脸，请将手机举到与眼睛齐平的位置。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到您的脸，请将手机举到与眼睛齐平的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"无法识别人脸，请重试。"</string>
@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"无法创建您的脸部模型，请重试。"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"检测到墨镜，您的脸部必须完全可见。"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到脸部有遮挡物，您的脸部必须完全可见。"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到面部被遮挡，请露出整个面部。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"无法验证人脸。硬件无法使用。"</string>
@@ -724,7 +724,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"使用人脸解锁或屏幕锁定凭据验证身份，才能继续操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题。请重试。"</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"出了点问题，请重试。"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"面孔图标"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"允许该应用读取某个帐号的同步设置。例如，此权限可确定“联系人”应用是否与某个帐号同步。"</string>
@@ -1363,7 +1363,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已开启 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已开启 USB 网络共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已开启 USB MIDI 模式"</string>
-    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接为摄像头"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接并作为摄像头使用"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 配件已连接"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"点按即可查看更多选项。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在为连接的设备充电。点按即可查看更多选项。"</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"删除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"警告！\n您在一周内使用头戴式耳机收听的高分贝音频量已超出安全范围限值。\n\n继续超限收听会导致您的听力永久受损。"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"警告！\n您在一周内使用头戴式耳机收听的高分贝音频量已超出安全范围限值的 5 倍。\n\n为保护您的听力，系统已调低音量。"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"长时间以当前音量收听媒体可能会导致听力受损。\n\n如果您继续以这样的音量长时间播放，则可能会损害您的听力。"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"警告！\n当前的内容播放音量已超出安全范围限值。\n\n继续以这样的音量收听会导致您的听力永久受损。"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"继续以较高的音量聆听？\n\n耳机音量保持较高的时间超过了建议时长，可能会损害您的听力"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"检测到较高音量\n\n耳机音量水平超过了建议值，可能会损害您的听力"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"启用这项快捷方式后，同时按下两个音量按钮 3 秒钟即可启动无障碍功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要开启无障碍功能快捷方式吗？"</string>
@@ -1717,7 +1715,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"单手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助听设备"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助听装置"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"松开音量键。如要启用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，请再次同时按住两个音量键 3 秒。"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"要退出，请从顶部向下滑动。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋转可改善预览效果"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"退出分屏可改善预览效果"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"在全屏模式下打开“<xliff:g id="NAME">%s</xliff:g>”可改善预览效果"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小时转盘"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分钟转盘"</string>
@@ -1939,7 +1937,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"添加受监管用户"</string>
     <string name="language_selection_title" msgid="52674936078683285">"添加语言"</string>
-    <string name="country_selection_title" msgid="5221495687299014379">"区域偏好设置"</string>
+    <string name="country_selection_title" msgid="5221495687299014379">"地区偏好设置"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建议语言"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"推荐地区"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在手机上访问。"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"此应用专为旧版 Android 系统打造。它可能无法正常运行，也不包含最新的安全和隐私保护功能。请检查是否有更新，或与应用开发者联系。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"检查更新"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"此应用与最新版 Android 不兼容。请检查是否有更新，或与应用开发者联系。"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新消息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"打开短信应用查看"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"部分功能可能会受到限制"</string>
@@ -1986,7 +1985,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"点按即可查看文件"</string>
     <string name="pin_target" msgid="8036028973110156895">"置顶"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"将<xliff:g id="LABEL">%1$s</xliff:g>置顶"</string>
-    <string name="unpin_target" msgid="3963318576590204447">"取消固定"</string>
+    <string name="unpin_target" msgid="3963318576590204447">"取消置顶"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"取消置顶<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"应用信息"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暂停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"没有支持该内容的工作应用"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"没有支持该内容的个人应用"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"打开工作 <xliff:g id="APP">%s</xliff:g>？"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"在个人 <xliff:g id="APP">%s</xliff:g> 中打开？"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"在工作 <xliff:g id="APP">%s</xliff:g> 中打开？"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"通过工作应用拨打电话？"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"切换到工作应用？"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"贵组织仅允许您通过工作应用拨打电话"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"贵组织仅允许您通过工作应用发送消息"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用个人浏览器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作浏览器"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"拨打电话"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"切换"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 网络解锁 PIN 码"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 网络子集解锁 PIN 码"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 企业解锁 PIN 码"</string>

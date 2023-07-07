@@ -333,7 +333,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 mLpChanged.preferredMinDisplayRefreshRate = 0;
             }
             Trace.setCounter("display_set_preferred_refresh_rate",
-                    (long) mKeyguardPreferredRefreshRate);
+                    (long) mLpChanged.preferredMaxDisplayRefreshRate);
         } else if (mKeyguardMaxRefreshRate > 0) {
             boolean bypassOnKeyguard = mKeyguardBypassController.getBypassEnabled()
                     && state.statusBarState == StatusBarState.KEYGUARD

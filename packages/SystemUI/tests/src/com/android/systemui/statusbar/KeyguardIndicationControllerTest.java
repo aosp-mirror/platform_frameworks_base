@@ -26,6 +26,7 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIME
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
+import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -99,6 +100,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -285,6 +287,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             Looper.prepare();
         }
 
+        FakeFeatureFlags flags = new FakeFeatureFlags();
+        flags.set(KEYGUARD_TALKBACK_FIX, true);
         mController = new KeyguardIndicationController(
                 mContext,
                 mTestableLooper.getLooper(),
@@ -297,7 +301,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
                 mAlternateBouncerInteractor,
                 mAlarmManager,
-                mUserTracker
+                mUserTracker,
+                flags
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
@@ -1066,11 +1071,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onRefreshBatteryInfo_chargingWithOverheat_presentChargingLimited() {
+    public void onRefreshBatteryInfo_chargingWithLongLife_presentChargingLimited() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
                 80 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
-                BatteryManager.BATTERY_HEALTH_OVERHEAT, 0 /* maxChargingWattage */,
+                BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE, 0 /* maxChargingWattage */,
                 true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
@@ -1084,11 +1089,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onRefreshBatteryInfo_fullChargedWithOverheat_presentChargingLimited() {
+    public void onRefreshBatteryInfo_fullChargedWithLongLife_presentChargingLimited() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
                 100 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
-                BatteryManager.BATTERY_HEALTH_OVERHEAT, 0 /* maxChargingWattage */,
+                BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE, 0 /* maxChargingWattage */,
                 true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
@@ -1102,11 +1107,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onRefreshBatteryInfo_fullChargedWithoutOverheat_presentCharged() {
+    public void onRefreshBatteryInfo_fullChargedWithoutLongLife_presentCharged() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
                 100 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
-                BatteryManager.BATTERY_HEALTH_GOOD, 0 /* maxChargingWattage */,
+                BatteryManager.CHARGING_POLICY_DEFAULT, 0 /* maxChargingWattage */,
                 true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
@@ -1118,11 +1123,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onRefreshBatteryInfo_dozing_dischargingWithOverheat_presentBatteryPercentage() {
+    public void onRefreshBatteryInfo_dozing_dischargingWithLongLife_presentBatteryPercentage() {
         createController();
         mController.setVisible(true);
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_DISCHARGING,
-                90 /* level */, 0 /* plugged */, BatteryManager.BATTERY_HEALTH_OVERHEAT,
+                90 /* level */, 0 /* plugged */, BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE,
                 0 /* maxChargingWattage */, true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);

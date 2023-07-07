@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -161,13 +162,31 @@ public class CrossDeviceSyncControllerTest {
     }
 
     @Test
-    public void createPhoneAccount_success() {
+    public void createPhoneAccount_sip_success() {
         final PhoneAccount phoneAccount =
                 CrossDeviceSyncController.PhoneAccountManager.createPhoneAccount(
                         new PhoneAccountHandle(
                                 new ComponentName("com.google.test", "com.google.test.Activity"),
-                                "id"), "Test App", "com.google.test");
+                                "id"), "Test App", "com.google.test", 1, false);
         assertWithMessage("Could not create phone account").that(phoneAccount).isNotNull();
+        assertWithMessage("Wrong schemes supported; should not support TEL")
+                .that(phoneAccount.supportsUriScheme(PhoneAccount.SCHEME_TEL)).isFalse();
+        assertWithMessage("Wrong schemes supported; should support SIP")
+                .that(phoneAccount.supportsUriScheme(PhoneAccount.SCHEME_SIP)).isTrue();
+    }
+
+    @Test
+    public void createPhoneAccount_tel_success() {
+        final PhoneAccount phoneAccount =
+                CrossDeviceSyncController.PhoneAccountManager.createPhoneAccount(
+                        new PhoneAccountHandle(
+                                new ComponentName("com.google.test", "com.google.test.Activity"),
+                                "id"), "Test App", "com.google.test", 1, true);
+        assertWithMessage("Could not create phone account").that(phoneAccount).isNotNull();
+        assertWithMessage("Wrong schemes supported; should support TEL")
+                .that(phoneAccount.supportsUriScheme(PhoneAccount.SCHEME_TEL)).isTrue();
+        assertWithMessage("Wrong schemes supported; should not support SIP")
+                .that(phoneAccount.supportsUriScheme(PhoneAccount.SCHEME_SIP)).isFalse();
     }
 
     @Test
@@ -176,7 +195,8 @@ public class CrossDeviceSyncControllerTest {
                 new CrossDeviceSyncController.PhoneAccountManager(mMockContext);
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         verify(mMockTelecomManager, times(1)).registerPhoneAccount(any());
@@ -189,10 +209,12 @@ public class CrossDeviceSyncControllerTest {
                 new CrossDeviceSyncController.PhoneAccountManager(mMockContext);
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test2"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test2",
+                        "com.google.test2/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         verify(mMockTelecomManager, times(2)).registerPhoneAccount(any());
         verify(mMockTelecomManager, times(0)).unregisterPhoneAccount(any());
@@ -204,11 +226,191 @@ public class CrossDeviceSyncControllerTest {
                 new CrossDeviceSyncController.PhoneAccountManager(mMockContext);
         final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
         callMetadataSyncData.addFacilitator(
-                new CallMetadataSyncData.CallFacilitator("name", "com.google.test"));
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData);
         final CallMetadataSyncData callMetadataSyncData2 = new CallMetadataSyncData();
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData2);
         verify(mMockTelecomManager, times(1)).registerPhoneAccount(any());
         verify(mMockTelecomManager, times(1)).unregisterPhoneAccount(any());
+    }
+
+    @Test
+    public void updateCalls_newIncomingCall_added() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.INCOMING);
+        call.setFacilitator(
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, times(1)).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_newOutgoingCall_added() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.OUTGOING);
+        call.setFacilitator(
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
+        call.setCallerId("555-555-5555");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, times(1)).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_newOutgoingCall_noAddress_notAdded() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.OUTGOING);
+        call.setFacilitator(
+                new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_newIncomingCall_noFacilitator_notAdded() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.INCOMING);
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_newOutgoingCall_noFacilitator_notAdded() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.OUTGOING);
+        call.setCallerId("555-555-5555");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_newIncomingCall_isSelfOwned_notAdded() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc::originalId");
+        call.setDirection(android.companion.Telecom.Call.INCOMING);
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                        "com.google.test/.InCallService"));
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.addSelfOwnedCallId("originalId");
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+
+    @Test
+    public void updateCalls_newOutgoingCall_isSelfOwned_notAdded() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc::originalId");
+        call.setDirection(android.companion.Telecom.Call.OUTGOING);
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                "com.google.test/.InCallService"));
+        call.setCallerId("555-555-5555");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.addSelfOwnedCallId("originalId");
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_existingIncomingCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.INCOMING);
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                "com.google.test/.InCallService"));
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.mCallIds.put(/* associationId= */ 0, Set.of(call.getId()));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_existingOutgoingCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setDirection(android.companion.Telecom.Call.OUTGOING);
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.google.test",
+                "com.google.test/.InCallService"));
+        call.setCallerId("555-555-5555");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.mCallIds.put(/* associationId= */ 0, Set.of(call.getId()));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_removedCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.mCallIds.put(/* associationId= */ 0, Set.of(call.getId(), "fakeCallId"));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        verify(mMockTelecomManager, never()).placeCall(any(), any());
+        assertWithMessage("Hasn't removed the id of the removed call")
+                .that(callManager.mCallIds)
+                .containsExactly(/* associationId= */ 0, Set.of(call.getId()));
     }
 }

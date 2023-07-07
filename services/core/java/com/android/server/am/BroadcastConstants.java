@@ -247,6 +247,26 @@ public class BroadcastConstants {
     private static final long DEFAULT_DELAY_URGENT_MILLIS = -120_000;
 
     /**
+     * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts to
+     * foreground processes, typically a negative value to indicate they should be
+     * executed before most other pending broadcasts.
+     */
+    public long DELAY_FOREGROUND_PROC_MILLIS = DEFAULT_DELAY_FOREGROUND_PROC_MILLIS;
+    private static final String KEY_DELAY_FOREGROUND_PROC_MILLIS =
+            "bcast_delay_foreground_proc_millis";
+    private static final long DEFAULT_DELAY_FOREGROUND_PROC_MILLIS = -120_000;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts to
+     * persistent processes, typically a negative value to indicate they should be
+     * executed before most other pending broadcasts.
+     */
+    public long DELAY_PERSISTENT_PROC_MILLIS = DEFAULT_DELAY_FOREGROUND_PROC_MILLIS;
+    private static final String KEY_DELAY_PERSISTENT_PROC_MILLIS =
+            "bcast_delay_persistent_proc_millis";
+    private static final long DEFAULT_DELAY_PERSISTENT_PROC_MILLIS = -120_000;
+
+    /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of complete
      * historical broadcasts to retain for debugging purposes.
      */
@@ -271,6 +291,15 @@ public class BroadcastConstants {
     public boolean CORE_DEFER_UNTIL_ACTIVE = DEFAULT_CORE_DEFER_UNTIL_ACTIVE;
     private static final String KEY_CORE_DEFER_UNTIL_ACTIVE = "bcast_core_defer_until_active";
     private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = true;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: How frequently we should check for the pending
+     * cold start validity.
+     */
+    public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30 * 1000;
+    private static final String KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
+            "pending_cold_start_check_interval_millis";
+    private static final long DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30_000;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
@@ -411,12 +440,19 @@ public class BroadcastConstants {
                     DEFAULT_DELAY_CACHED_MILLIS);
             DELAY_URGENT_MILLIS = getDeviceConfigLong(KEY_DELAY_URGENT_MILLIS,
                     DEFAULT_DELAY_URGENT_MILLIS);
+            DELAY_FOREGROUND_PROC_MILLIS = getDeviceConfigLong(KEY_DELAY_FOREGROUND_PROC_MILLIS,
+                    DEFAULT_DELAY_FOREGROUND_PROC_MILLIS);
+            DELAY_PERSISTENT_PROC_MILLIS = getDeviceConfigLong(KEY_DELAY_PERSISTENT_PROC_MILLIS,
+                    DEFAULT_DELAY_PERSISTENT_PROC_MILLIS);
             MAX_HISTORY_COMPLETE_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_COMPLETE_SIZE,
                     DEFAULT_MAX_HISTORY_COMPLETE_SIZE);
             MAX_HISTORY_SUMMARY_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_SUMMARY_SIZE,
                     DEFAULT_MAX_HISTORY_SUMMARY_SIZE);
             CORE_DEFER_UNTIL_ACTIVE = getDeviceConfigBoolean(KEY_CORE_DEFER_UNTIL_ACTIVE,
                     DEFAULT_CORE_DEFER_UNTIL_ACTIVE);
+            PENDING_COLD_START_CHECK_INTERVAL_MILLIS = getDeviceConfigLong(
+                    KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
+                    DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
         }
 
         // TODO: migrate BroadcastRecord to accept a BroadcastConstants
@@ -463,6 +499,10 @@ public class BroadcastConstants {
                     TimeUtils.formatDuration(DELAY_CACHED_MILLIS)).println();
             pw.print(KEY_DELAY_URGENT_MILLIS,
                     TimeUtils.formatDuration(DELAY_URGENT_MILLIS)).println();
+            pw.print(KEY_DELAY_FOREGROUND_PROC_MILLIS,
+                    TimeUtils.formatDuration(DELAY_FOREGROUND_PROC_MILLIS)).println();
+            pw.print(KEY_DELAY_PERSISTENT_PROC_MILLIS,
+                    TimeUtils.formatDuration(DELAY_PERSISTENT_PROC_MILLIS)).println();
             pw.print(KEY_MAX_HISTORY_COMPLETE_SIZE, MAX_HISTORY_COMPLETE_SIZE).println();
             pw.print(KEY_MAX_HISTORY_SUMMARY_SIZE, MAX_HISTORY_SUMMARY_SIZE).println();
             pw.print(KEY_MAX_CONSECUTIVE_URGENT_DISPATCHES,
@@ -471,6 +511,8 @@ public class BroadcastConstants {
                     MAX_CONSECUTIVE_NORMAL_DISPATCHES).println();
             pw.print(KEY_CORE_DEFER_UNTIL_ACTIVE,
                     CORE_DEFER_UNTIL_ACTIVE).println();
+            pw.print(KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
+                    PENDING_COLD_START_CHECK_INTERVAL_MILLIS).println();
             pw.decreaseIndent();
             pw.println();
         }

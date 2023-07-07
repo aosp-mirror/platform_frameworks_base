@@ -43,9 +43,6 @@ public class BrowsedAuthenticationMetric {
     // Indicates if this provider returned from the authentication entry query, default false
     private boolean mAuthReturned = false;
 
-    // TODO(b/271135048) - Match the atom and provide a clean per provider session metric
-    // encapsulation.
-
     public BrowsedAuthenticationMetric(int sessionIdProvider) {
         mSessionIdProvider = sessionIdProvider;
     }

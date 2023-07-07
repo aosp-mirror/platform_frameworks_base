@@ -296,15 +296,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /**
      * Fade in the resize veil
      */
-    void showResizeVeil() {
-        mResizeVeil.showVeil(mTaskSurface);
+    void showResizeVeil(Rect taskBounds) {
+        mResizeVeil.showVeil(mTaskSurface, taskBounds);
     }
 
     /**
      * Set new bounds for the resize veil
      */
     void updateResizeVeil(Rect newBounds) {
-        mResizeVeil.relayout(newBounds);
+        mResizeVeil.updateResizeVeil(newBounds);
     }
 
     /**

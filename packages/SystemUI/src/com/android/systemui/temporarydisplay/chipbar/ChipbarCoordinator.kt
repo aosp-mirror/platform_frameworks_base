@@ -21,6 +21,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Rect
 import android.os.PowerManager
+import android.os.Process
+import android.os.VibrationAttributes
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -50,6 +52,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
@@ -90,6 +93,7 @@ constructor(
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
+    tempViewUiEventLogger: TemporaryViewUiEventLogger,
 ) :
     TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
@@ -103,6 +107,7 @@ constructor(
         R.layout.chipbar,
         wakeLockBuilder,
         systemClock,
+        tempViewUiEventLogger,
     ) {
 
     private lateinit var parent: ChipbarRootView
@@ -226,7 +231,15 @@ constructor(
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----
-        newInfo.vibrationEffect?.let { vibratorHelper.vibrate(it) }
+        newInfo.vibrationEffect?.let {
+            vibratorHelper.vibrate(
+                Process.myUid(),
+                context.getApplicationContext().getPackageName(),
+                it,
+                newInfo.windowTitle,
+                VIBRATION_ATTRIBUTES,
+            )
+        }
     }
 
     private fun maybeGetAccessibilityFocus(info: ChipbarInfo?, view: ViewGroup) {
@@ -305,6 +318,7 @@ constructor(
             )
             return
         }
+        tempViewUiEventLogger.logViewManuallyDismissed(currentDisplayInfo.info.instanceId)
         removeView(currentDisplayInfo.info.id, SWIPE_UP_GESTURE_REASON)
         updateGestureListening()
     }
@@ -352,6 +366,11 @@ constructor(
         val loadingView: View,
         val animator: ObjectAnimator,
     )
+
+    companion object {
+        val VIBRATION_ATTRIBUTES: VibrationAttributes =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK)
+    }
 }
 
 @IdRes private val INFO_TAG = R.id.tag_chipbar_info

@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Grabación de pantalla guardada"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca para verla"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"No se ha podido eliminar la grabación de la pantalla"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"No se ha podido guardar la grabación de pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Cara autenticada"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmada"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toca Confirmar para completar la acción"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueado con la cara. Toca el icono de desbloquear para continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Desbloqueado con la cara"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado con la cara. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Cara reconocida. Pulsa para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Cara reconocida. Pulsa el icono de desbloquear para continuar."</string>
@@ -412,7 +412,7 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Cuando compartes, grabas o envías contenido, Android puede acceder a todo lo que se muestre en la pantalla o se reproduzca en tu dispositivo. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Cuando compartes, grabas o envías una aplicación, Android puede acceder a todo lo que se muestre o se reproduzca en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Empezar"</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueadas por tu administrador de TI"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueado por tu administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Las capturas de pantalla están inhabilitadas debido a la política de dispositivos"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactivar"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Sonido y vibración"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ajustes"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Se ha bajado el volumen a un nivel más seguro"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"El volumen ha sido elevado durante más tiempo del recomendado"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volumen bajado a un nivel más seguro"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"El volumen de los auriculares ha estado alto durante más tiempo del recomendado"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"El volumen de los auriculares ha superado el límite de seguridad de esta semana"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Seguir escuchando"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Bajar volumen"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplicación fijada"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás e Inicio."</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ajustes"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Se está reproduciendo <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> de <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Reproducir"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Canción anterior"</string>
@@ -984,11 +988,9 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volumen"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altavoces y pantallas"</string>
-    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Sugerencias de dispositivos"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispositivos sugeridos"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Detén tu sesión compartida para transferir el contenido multimedia a otro dispositivo"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Detener"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cómo funciona la emisión"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emisión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Las personas cercanas con dispositivos Bluetooth compatibles pueden escuchar el contenido multimedia que emites"</string>
@@ -1001,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"No se puede guardar. Inténtalo de nuevo."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"No se puede guardar."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Usa 4 caracteres como mínimo"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Usa menos de 16 caracteres"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Usa menos de <xliff:g id="LENGTH">%1$d</xliff:g> caracteres"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número de compilación copiado en el portapapeles."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
@@ -1121,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Más información"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Más información en <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• La aplicación debe estar configurada"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Se debe haber añadido al menos una tarjeta a Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Debes instalar una aplicación de cámara"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• La aplicación debe estar configurada"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Al menos un dispositivo debe estar disponible"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Selecciona una aplicación de notas predeterminada para usar el acceso directo de toma de notas"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Para añadir la aplicación Wallet como acceso directo, asegúrate de que está instalada"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Para añadir la aplicación Wallet como acceso directo, asegúrate de haber añadido al menos una tarjeta"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Para añadir el escáner de códigos QR como acceso directo, asegúrate de que hay instalada una aplicación de cámara"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Para añadir la aplicación Home como acceso directo, asegúrate de que está instalada"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Al menos un dispositivo debe estar disponible"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecciona una aplicación de notas predeterminada para usar el acceso directo de toma de notas"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Seleccionar aplicación"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantén pulsado el acceso directo"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
@@ -1141,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecta tu lápiz óptico a un cargador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Batería del lápiz óptico baja"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videocámara"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"No se puede llamar desde este perfil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Tu política del trabajo solo te permite hacer llamadas telefónicas desde el perfil de trabajo"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"No puedes llamar desde una aplicación personal"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Tu organización solo te permite hacer llamadas desde aplicaciones de trabajo"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Cambiar al perfil de trabajo"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Cerrar"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalar una aplicación de llamadas de trabajo"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Cancelar"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizar pantalla de bloqueo"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Desbloquea para personalizar la pantalla de bloqueo"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Red Wi-Fi no disponible"</string>
@@ -1154,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modo Prioridad activado"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"El Asistente está activado"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Configura la aplicación de notas predeterminada en Ajustes"</string>
+    <string name="install_app" msgid="5066668100199613936">"Instalar aplicación"</string>
 </resources>

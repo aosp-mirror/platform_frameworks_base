@@ -16,8 +16,11 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+
+import static com.android.wm.shell.transition.DefaultTransitionHandler.isSupportedOverrideAnimation;
 
 import static java.util.Objects.requireNonNull;
 
@@ -111,11 +114,26 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         if (containsNonEmbeddedChange && !handleNonEmbeddedChanges(changes)) {
             return false;
         }
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        if (options != null
+                // Scene-transition will be handled by app side.
+                && (options.getType() == ANIM_SCENE_TRANSITION
+                // Use default transition handler to animate override animation.
+                || isSupportedOverrideAnimation(options))) {
+            return false;
+        }
 
         // Start ActivityEmbedding animation.
         mTransitionCallbacks.put(transition, finishCallback);
         mAnimationRunner.startAnimation(transition, info, startTransaction, finishTransaction);
         return true;
+    }
+
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mAnimationRunner.cancelAnimationFromMerge();
     }
 
     private boolean handleNonEmbeddedChanges(List<TransitionInfo.Change> changes) {

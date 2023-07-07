@@ -16,37 +16,47 @@
 package com.android.systemui.notetask
 
 import android.os.UserHandle
-import android.test.suitebuilder.annotation.SmallTest
-import androidx.test.runner.AndroidJUnit4
+import android.testing.AndroidTestingRunner
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /** atest SystemUITests:NoteTaskInfoTest */
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(AndroidTestingRunner::class)
 internal class NoteTaskInfoTest : SysuiTestCase() {
-
-    private fun createNoteTaskInfo(): NoteTaskInfo =
-        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID, UserHandle.of(0))
 
     @Test
     fun launchMode_keyguardLocked_launchModeActivity() {
-        val underTest = createNoteTaskInfo().copy(isKeyguardLocked = true)
+        val underTest = DEFAULT_INFO.copy(isKeyguardLocked = true)
 
         assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
     }
 
     @Test
-    fun launchMode_keyguardUnlocked_launchModeActivity() {
-        val underTest = createNoteTaskInfo().copy(isKeyguardLocked = false)
+    fun launchMode_multiWindowMode_launchModeActivity() {
+        val underTest = DEFAULT_INFO.copy(entryPoint = WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE)
+
+        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
+    }
+
+    @Test
+    fun launchMode_keyguardUnlocked_launchModeAppBubble() {
+        val underTest = DEFAULT_INFO.copy(isKeyguardLocked = false)
 
         assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.AppBubble)
     }
 
     private companion object {
-        const val NOTES_PACKAGE_NAME = "com.android.note.app"
-        const val NOTES_UID = 123456
+
+        val DEFAULT_INFO =
+            NoteTaskInfo(
+                packageName = "com.android.note.app",
+                uid = 123456,
+                user = UserHandle.of(0),
+            )
     }
 }

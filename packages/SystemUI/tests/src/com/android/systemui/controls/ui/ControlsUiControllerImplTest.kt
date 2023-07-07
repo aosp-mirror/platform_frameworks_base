@@ -70,7 +70,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -103,6 +105,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
     private lateinit var parent: FrameLayout
     private lateinit var underTest: ControlsUiControllerImpl
+
+    private var isKeyguardDismissed: Boolean = true
+    private var isRemoveAppDialogCreated: Boolean = false
 
     @Before
     fun setup() {
@@ -140,11 +145,23 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 authorizedPanelsRepository,
                 preferredPanelRepository,
                 featureFlags,
-                ControlsDialogsFactory { fakeDialogController.dialog },
+                ControlsDialogsFactory {
+                    isRemoveAppDialogCreated = true
+                    fakeDialogController.dialog
+                },
                 dumpManager,
             )
         `when`(userTracker.userId).thenReturn(0)
         `when`(userTracker.userHandle).thenReturn(UserHandle.of(0))
+        doAnswer {
+                if (isKeyguardDismissed) {
+                    it.getArgument<ActivityStarter.OnDismissAction>(0).onDismiss()
+                } else {
+                    it.getArgument<Runnable?>(1)?.run()
+                }
+            }
+            .whenever(activityStarter)
+            .dismissKeyguardThenExecute(any(), isNull(), any())
     }
 
     @Test
@@ -411,6 +428,26 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             .isEqualTo(SelectedItem.EMPTY_SELECTION)
         assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isFalse()
         assertThat(preferredPanelRepository.getSelectedComponent()).isNull()
+    }
+
+    @Test
+    fun testKeyguardRemovingAppsNotShowingDialog() {
+        isKeyguardDismissed = false
+        val componentName = ComponentName(context, "cls")
+        whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
+        val panel = SelectedItem.PanelItem("App name", componentName)
+        preferredPanelRepository.setSelectedComponent(
+            SelectedComponentRepository.SelectedComponent(panel)
+        )
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        assertThat(isRemoveAppDialogCreated).isFalse()
+        verify(controlsController, never()).removeFavorites(eq(componentName))
+        assertThat(underTest.getPreferredSelectedItem(emptyList())).isEqualTo(panel)
+        assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isTrue()
+        assertThat(preferredPanelRepository.getSelectedComponent())
+            .isEqualTo(SelectedComponentRepository.SelectedComponent(panel))
     }
 
     @Test

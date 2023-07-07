@@ -33,6 +33,7 @@ import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -54,7 +55,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository)
+        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
         underTest =
             PrimaryBouncerToGoneTransitionViewModel(
                 interactor,

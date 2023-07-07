@@ -46,8 +46,6 @@ import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
@@ -740,7 +738,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // Since the same CharSequence instance may be reused in the TextView, we need to make
         // a copy of its content so that its value will not be changed by subsequent updates
         // in the TextView.
-        final CharSequence eventText = stringOrSpannedStringWithoutNoCopySpans(text);
+        CharSequence trimmed = TextUtils.trimToParcelableSize(text);
+        final CharSequence eventText = trimmed != null && trimmed == text
+                ? trimmed.toString()
+                : trimmed;
 
         final int composingStart;
         final int composingEnd;
@@ -759,16 +760,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                         .setAutofillId(id).setText(eventText)
                         .setComposingIndex(composingStart, composingEnd)
                         .setSelectionIndex(startIndex, endIndex)));
-    }
-
-    private CharSequence stringOrSpannedStringWithoutNoCopySpans(CharSequence source) {
-        if (source == null) {
-            return null;
-        } else if (source instanceof Spanned) {
-            return new SpannableString(source, /* ignoreNoCopySpan= */ true);
-        } else {
-            return source.toString();
-        }
     }
 
     /** Public because is also used by ViewRootImpl */

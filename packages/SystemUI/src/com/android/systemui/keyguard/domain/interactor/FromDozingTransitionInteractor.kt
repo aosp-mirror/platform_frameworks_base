@@ -52,7 +52,7 @@ constructor(
                 .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (wakefulnessModel, lastStartedTransition) ->
                     if (
-                        wakefulnessModel.isStartingToWake() &&
+                        wakefulnessModel.isStartingToWakeOrAwake() &&
                             lastStartedTransition.to == KeyguardState.DOZING
                     ) {
                         keyguardTransitionRepository.startTransition(

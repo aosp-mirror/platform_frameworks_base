@@ -16,6 +16,7 @@
 
 package com.android.server.credentials.metrics;
 
+import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.ProviderSession;
 import com.android.server.credentials.metrics.shared.ResponseCollective;
 
@@ -29,7 +30,7 @@ import java.util.Map;
  */
 public class CandidateAggregateMetric {
 
-    private static final String TAG = "CandidateProviderMetric";
+    private static final String TAG = "CandidateTotalMetric";
     // The session id of this provider metric
     private final int mSessionIdProvider;
     // Indicates if this provider returned from the candidate query phase,
@@ -74,8 +75,6 @@ public class CandidateAggregateMetric {
 
     /**
      * This will take all the candidate data captured and aggregate that information.
-     * TODO(b/271135048) : Add on authentication entry outputs from track 2 here as well once
-     * generated
      * @param providers the providers associated with the candidate flow
      */
     public void collectAverages(Map<String, ProviderSession> providers) {
@@ -88,11 +87,15 @@ public class CandidateAggregateMetric {
         Map<String, Integer> responseCountQuery = new LinkedHashMap<>();
         Map<EntryEnum, Integer> entryCountQuery = new LinkedHashMap<>();
         var providerSessions = providers.values();
-        long min_query_start = Integer.MAX_VALUE;
-        long max_query_end = Integer.MIN_VALUE;
+        long min_query_start = Long.MAX_VALUE;
+        long max_query_end = Long.MIN_VALUE;
         for (var session : providerSessions) {
             var sessionMetric = session.getProviderSessionMetric();
             var candidateMetric = sessionMetric.getCandidatePhasePerProviderMetric();
+            if (candidateMetric.getCandidateUid() == MetricUtilities.DEFAULT_INT_32) {
+                mNumProviders--;
+                continue; // Do not aggregate this one and reduce the size of actual candidates
+            }
             if (mServiceBeganTimeNanoseconds == -1) {
                 mServiceBeganTimeNanoseconds = candidateMetric.getServiceBeganTimeNanoseconds();
             }
@@ -119,15 +122,17 @@ public class CandidateAggregateMetric {
     }
 
     private void collectAuthAggregates(Map<String, ProviderSession> providers) {
-        mNumProviders = providers.size();
         Map<String, Integer> responseCountAuth = new LinkedHashMap<>();
         Map<EntryEnum, Integer> entryCountAuth = new LinkedHashMap<>();
         var providerSessions = providers.values();
         for (var session : providerSessions) {
             var sessionMetric = session.getProviderSessionMetric();
             var authMetrics = sessionMetric.getBrowsedAuthenticationMetric();
-            mNumAuthEntriesTapped += authMetrics.size();
             for (var authMetric : authMetrics) {
+                if (authMetric.getProviderUid() == MetricUtilities.DEFAULT_INT_32) {
+                    continue; // skip this unfilled base auth entry
+                }
+                mNumAuthEntriesTapped++;
                 mAuthReturned = mAuthReturned || authMetric.isAuthReturned();
                 ResponseCollective authCollective = authMetric.getAuthEntryCollective();
                 ResponseCollective.combineTypeCountMaps(responseCountAuth,

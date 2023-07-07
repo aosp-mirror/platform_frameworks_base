@@ -155,7 +155,7 @@
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nuk u transferua"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kodi i funksionit është i plotë."</string>
     <string name="fcError" msgid="5325116502080221346">"Problem me lidhjen ose kod është i pavlefshëm."</string>
-    <string name="httpErrorOk" msgid="6206751415788256357">"Në rregull!"</string>
+    <string name="httpErrorOk" msgid="6206751415788256357">"Në rregull"</string>
     <string name="httpError" msgid="3406003584150566720">"Pati një gabim në rrjet."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"Nuk mundi ta gjente URL-në."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Skema e vërtetimit nuk mbështetet."</string>
@@ -635,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Me shumë ndriçim"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"U zbulua shtypja e \"Energjisë\""</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Provo ta rregullosh"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ndrysho pak pozicionin e gishtit çdo herë"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ndrysho paksa pozicionin e gishtit çdo herë"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjurma e gishtit nuk u njoh"</string>
@@ -694,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Shiko më drejtpërdrejt telefonin"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Shiko më drejtpërdrejt telefonin"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Shiko më drejtpërdrejt telefonin"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hiq gjithçka që fsheh fytyrën tënde."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hiq gjithçka që ta mbulon fytyrën."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pastro kreun e ekranit, duke përfshirë shiritin e zi"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hiq"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Të ngrihet volumi mbi nivelin e rekomanduar?\n\nDëgjimi me volum të lartë për periudha të gjata mund të dëmtojë dëgjimin."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Paralajmërim:\nE ke kaluar sasinë e sinjaleve të larta zanore që mund të dëgjojë në mënyrë të sigurt një person gjatë një jave nëpërmjet kufjeve.\n\nNëse e kalon këtë kufi, kjo gjë do ta dëmtojë përgjithmonë dëgjimin tënd."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Paralajmërim:\nE ke kaluar 5 herë sasinë e sinjaleve të larta zanore që mund të dëgjojë në mënyrë të sigurt një person gjatë një jave nëpërmjet kufjeve.\n\nVolumi është ulur për të mbrojtur dëgjimin tënd."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Niveli me të cilin po dëgjon median mund të shkaktojë dëmtim të dëgjimit nëse vazhdon për periudha të gjata kohore.\n\nNëse vazhdon të luash me këtë nivel për periudha të gjata kohore, kjo gjë mund të dëmtojë dëgjimin tënd."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Paralajmërim:\nPo dëgjon aktualisht përmbajtje me zë të lartë që po luhet në një nivel jo të sigurt.\n\nNëse vazhdon të dëgjosh me një nivel kaq të lartë, kjo gjë do të dëmtojë përgjithmonë dëgjimin tënd."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"A do të vazhdosh të dëgjosh me një volum të lartë?\n\nVolumi i kufjeve ka qenë i lartë për një kohë më të gjatë nga sa rekomandohet, çka mund të të dëmtojë dëgjimin"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"U zbulua tingull i lartë\n\nVolumi i kufjeve ka qenë më i lartë nga sa rekomandohet, çka mund të të dëmtojë dëgjimin"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Të përdoret shkurtorja e qasshmërisë?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Të aktivizohet shkurtorja për veçoritë e qasshmërisë?"</string>
@@ -1700,9 +1698,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Do të lejosh që <xliff:g id="SERVICE">%1$s</xliff:g> të ketë kontroll të plotë të pajisjes sate?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrolli i plotë është i përshtatshëm për aplikacionet që të ndihmojnë me nevojat e qasshmërisë, por jo për shumicën e aplikacioneve."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Shiko dhe kontrollo ekranin"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ai mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Shiko dhe kryej veprimet"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ai mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Mund të monitorojë ndërveprimet me një aplikacion ose një sensor hardueri dhe të ndërveprojë me aplikacionet në emrin tënd."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Lejo"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuzo"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trokit te një veçori për të filluar ta përdorësh atë:"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Për të dalë, rrëshqit nga lart poshtë."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"E kuptova"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rrotullo për një pamje më të mirë"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Dil nga ekrani i ndarë për një pamje më të mirë"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Hape <xliff:g id="NAME">%s</xliff:g> në ekran të plotë për pamje më të mirë"</string>
     <string name="done_label" msgid="7283767013231718521">"U krye"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Rrëshqitësi rrethor i orëve"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Rrëshqitësi rrethor i minutave"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në telefon më mirë."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ky aplikacion është krijuar për një version më të vjetër të Android. Mund të mos funksionojë siç duhet dhe nuk përfshin mbrojtjet më të fundit të sigurisë dhe privatësisë. Kontrollo për një përditësim ose kontakto zhvilluesin e aplikacionit."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Ky aplikacion nuk është i përputhshëm me versionin më të fundit të Android. Kontrollo për një përditësim ose kontakto me zhvilluesin e aplikacionit."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Hap aplikacionin SMS për ta parë"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Disa veçori mund të jenë të kufizuara"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hiq nga pauza"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nuk ka aplikacione pune"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nuk ka aplikacione personale"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Të hapet <xliff:g id="APP">%s</xliff:g> i punës?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Të hapet te <xliff:g id="APP">%s</xliff:g> personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Të hapet te <xliff:g id="APP">%s</xliff:g> i punës?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Të telefonohet nga aplikacioni i punës?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Të kalohet tek aplikacioni i punës?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organizata jote të lejon që të telefonosh vetëm nga aplikacionet e punës"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organizata jote të lejon që të dërgosh mesazhe vetëm nga aplikacionet e punës"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Përdor shfletuesin personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Përdor shfletuesin e punës"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Telefono"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Ndërro"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kodi PIN i shkyçjes së rrjetit të kartës SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Kodi PIN i shkyçjes së nënrenditjes së rrjetit të kartës SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Kodi PIN i shkyçjes së kartës SIM të korporatës"</string>

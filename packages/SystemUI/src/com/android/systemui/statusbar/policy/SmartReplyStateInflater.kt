@@ -22,6 +22,13 @@ import android.app.PendingIntent
 import android.app.RemoteInput
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -48,7 +55,13 @@ import com.android.systemui.statusbar.policy.InflatedSmartReplyState.SuppressedA
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartButtonType
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartReplies
+import java.util.concurrent.FutureTask
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
+
 
 /** Returns whether we should show the smart reply view and its smart suggestions. */
 fun shouldShowSmartReplyView(
@@ -281,6 +294,51 @@ interface SmartActionInflater {
     ): Button
 }
 
+private const val ICON_TASK_TIMEOUT_MS = 500L
+private val iconTaskThreadPool = ThreadPoolExecutor(0, 25, 1, TimeUnit.MINUTES, SynchronousQueue())
+
+private fun loadIconDrawableWithTimeout(
+    icon: Icon,
+    packageContext: Context,
+    targetSize: Int,
+): Drawable? {
+    if (icon.type != Icon.TYPE_URI && icon.type != Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+        return icon.loadDrawable(packageContext)
+    }
+    val bitmapTask = FutureTask {
+        val bitmap: Bitmap?
+        val durationMillis = measureTimeMillis {
+            val source = ImageDecoder.createSource(packageContext.contentResolver, icon.uri)
+            bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                decoder.setTargetSize(targetSize, targetSize)
+                decoder.allocator = ImageDecoder.ALLOCATOR_DEFAULT
+            }
+        }
+        if (durationMillis > ICON_TASK_TIMEOUT_MS) {
+            Log.w(TAG, "Loading $icon took ${durationMillis / 1000f} sec")
+        }
+        checkNotNull(bitmap) { "ImageDecoder.decodeBitmap() returned null" }
+    }
+    val bitmap = runCatching {
+        iconTaskThreadPool.execute(bitmapTask)
+        bitmapTask.get(ICON_TASK_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+    }.getOrElse { ex ->
+        Log.e(TAG, "Failed to load $icon: $ex")
+        bitmapTask.cancel(true)
+        return null
+    }
+    // TODO(b/288561520): rewrite Icon so that we don't need to duplicate this logic
+    val bitmapDrawable = BitmapDrawable(packageContext.resources, bitmap)
+    val result = if (icon.type == Icon.TYPE_URI_ADAPTIVE_BITMAP)
+        AdaptiveIconDrawable(null, bitmapDrawable) else bitmapDrawable
+    if (icon.hasTint()) {
+        result.mutate()
+        result.setTintList(icon.tintList)
+        result.setTintBlendMode(icon.tintBlendMode)
+    }
+    return result
+}
+
 /* internal */ class SmartActionInflaterImpl @Inject constructor(
     private val constants: SmartReplyConstants,
     private val activityStarter: ActivityStarter,
@@ -304,12 +362,12 @@ interface SmartActionInflater {
 
                 // We received the Icon from the application - so use the Context of the application to
                 // reference icon resources.
-                val iconDrawable = action.getIcon().loadDrawable(packageContext)
-                        .apply {
-                            val newIconSize: Int = context.resources.getDimensionPixelSize(
-                                    R.dimen.smart_action_button_icon_size)
-                            setBounds(0, 0, newIconSize, newIconSize)
-                        }
+                val newIconSize = context.resources
+                    .getDimensionPixelSize(R.dimen.smart_action_button_icon_size)
+                val iconDrawable =
+                    loadIconDrawableWithTimeout(action.getIcon(), packageContext, newIconSize)
+                        ?: GradientDrawable()
+                iconDrawable.setBounds(0, 0, newIconSize, newIconSize)
                 // Add the action icon to the Smart Action button.
                 setCompoundDrawablesRelative(iconDrawable, null, null, null)
 

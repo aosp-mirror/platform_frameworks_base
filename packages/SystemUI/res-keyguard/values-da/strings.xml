@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Boble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Lås din enhed op for at fortsætte"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Angiv din pinkode for at installere opdateringen senere"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Angiv din adgangskode for at installere opdateringen senere"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Tegn dit mønster for at installere opdateringen senere"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Enheden er opdateret. Angiv din pinkode for at fortsætte."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Enheden er opdateret. Angiv din adgangskode for at fortsætte."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Enheden er opdateret. Tegn dit mønster for at fortsætte."</string>
 </resources>

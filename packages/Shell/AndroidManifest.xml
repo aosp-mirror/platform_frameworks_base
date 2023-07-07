@@ -837,6 +837,10 @@
     <uses-permission android:name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
     <!-- Permission required for GTS test - GtsCredentialsTestCases -->
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR" />
+    <!-- Permission required for CTS test IntentRedirectionTest -->
+    <uses-permission android:name="android.permission.QUERY_CLONED_APPS" />
+    <!-- Permission required for accessing all content provider mime types -->
+    <uses-permission android:name="android.permission.GET_ANY_PROVIDER_TYPE" />
 
     <application
         android:label="@string/app_label"

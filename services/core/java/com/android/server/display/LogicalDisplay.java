@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.Display;
@@ -333,6 +332,10 @@ final class LogicalDisplay {
         return mPrimaryDisplayDevice != null;
     }
 
+    boolean isDirtyLocked() {
+        return mDirty;
+    }
+
     /**
      * Updates the {@link DisplayGroup} to which the logical display belongs.
      *
@@ -341,8 +344,7 @@ final class LogicalDisplay {
     public void updateDisplayGroupIdLocked(int groupId) {
         if (groupId != mDisplayGroupId) {
             mDisplayGroupId = groupId;
-            mBaseDisplayInfo.displayGroupId = groupId;
-            mInfo.set(null);
+            mDirty = true;
         }
     }
 
@@ -930,18 +932,6 @@ final class LogicalDisplay {
      */
     public String getDisplayGroupNameLocked() {
         return mDisplayGroupName;
-    }
-
-    /**
-     * Returns whether a display group other than the default display group needs to be assigned.
-     *
-     * <p>If display group name is empty or {@code Display.FLAG_OWN_DISPLAY_GROUP} is set, the
-     * display is assigned to the default display group.
-     */
-    public boolean needsOwnDisplayGroupLocked() {
-        DisplayInfo info = getDisplayInfoLocked();
-        return (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0
-                || !TextUtils.isEmpty(mDisplayGroupName);
     }
 
     public void dumpLocked(PrintWriter pw) {

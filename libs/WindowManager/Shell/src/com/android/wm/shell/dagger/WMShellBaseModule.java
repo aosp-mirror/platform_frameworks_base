@@ -70,6 +70,8 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -100,12 +102,12 @@ import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
+import java.util.Optional;
+
 import dagger.BindsOptionalOf;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.Optional;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -546,19 +548,43 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor,
-            ShellCommandHandler shellCommandHandler) {
+            ShellCommandHandler shellCommandHandler,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellController, organizer, pool,
-                displayController, mainExecutor, mainHandler, animExecutor, shellCommandHandler);
+                displayController, mainExecutor, mainHandler, animExecutor, shellCommandHandler,
+                rootTaskDisplayAreaOrganizer);
     }
 
     @WMSingleton
     @Provides
     static TaskViewTransitions provideTaskViewTransitions(Transitions transitions) {
         return new TaskViewTransitions(transitions);
+    }
+
+    //
+    // Keyguard transitions (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static KeyguardTransitionHandler provideKeyguardTransitionHandler(
+            ShellInit shellInit,
+            Transitions transitions,
+            @ShellMainThread Handler mainHandler,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new KeyguardTransitionHandler(
+                    shellInit, transitions, mainHandler, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static KeyguardTransitions provideKeyguardTransitions(
+            KeyguardTransitionHandler handler) {
+        return handler.asKeyguardTransitions();
     }
 
     //
@@ -708,10 +734,11 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellController provideShellController(ShellInit shellInit,
+    static ShellController provideShellController(Context context,
+            ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellController(shellInit, shellCommandHandler, mainExecutor);
+        return new ShellController(context, shellInit, shellCommandHandler, mainExecutor);
     }
 
     //

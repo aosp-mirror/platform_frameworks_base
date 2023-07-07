@@ -35,7 +35,6 @@ import android.app.KeyguardManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Gravity;
@@ -47,7 +46,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -62,9 +60,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
-import com.android.systemui.util.DeviceConfigProxyFake;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -88,8 +83,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerVibrate;
     View mDrawerMute;
     View mDrawerNormal;
-    private DeviceConfigProxyFake mDeviceConfigProxy;
-    private FakeExecutor mExecutor;
     private TestableLooper mTestableLooper;
     private ConfigurationController mConfigurationController;
     private int mOriginalOrientation;
@@ -131,8 +124,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         getContext().addMockSystemService(KeyguardManager.class, mKeyguard);
 
         mTestableLooper = TestableLooper.get(this);
-        mDeviceConfigProxy = new DeviceConfigProxyFake();
-        mExecutor = new FakeExecutor(new FakeSystemClock());
 
         when(mPostureController.getDevicePosture())
                 .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
@@ -151,8 +142,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
-                mDeviceConfigProxy,
-                mExecutor,
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
@@ -173,9 +162,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 VolumePrefs.SHOW_RINGER_TOAST_COUNT + 1);
 
         Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
-
-        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "false", false);
     }
 
     private State createShellState() {
@@ -351,28 +337,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
      * API does not exist. So we do the next best thing; we check the cached icon id.
      */
     @Test
-    public void notificationVolumeSeparated_theRingerIconChanges() {
-        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "true", false);
-
-        mExecutor.runAllReady(); // for the config change to take effect
-
-        // assert icon is new based on res id
+    public void notificationVolumeSeparated_theRingerIconChangesToSpeakerIcon() {
+        // already separated. assert icon is new based on res id
         assertEquals(mDialog.mVolumeRingerIconDrawableId,
                 R.drawable.ic_speaker_on);
         assertEquals(mDialog.mVolumeRingerMuteIconDrawableId,
                 R.drawable.ic_speaker_mute);
-    }
-
-    @Test
-    public void notificationVolumeNotSeparated_theRingerIconRemainsTheSame() {
-        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "false", false);
-
-        mExecutor.runAllReady();
-
-        assertEquals(mDialog.mVolumeRingerIconDrawableId, R.drawable.ic_volume_ringer);
-        assertEquals(mDialog.mVolumeRingerMuteIconDrawableId, R.drawable.ic_volume_ringer_mute);
     }
 
     @Test
@@ -408,8 +378,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
-                mDeviceConfigProxy,
-                mExecutor,
                 mCsdWarningDialogFactory,
                 devicePostureController,
                 mTestableLooper.getLooper(),
@@ -447,8 +415,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
-                mDeviceConfigProxy,
-                mExecutor,
                 mCsdWarningDialogFactory,
                 devicePostureController,
                 mTestableLooper.getLooper(),
@@ -485,8 +451,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
-                mDeviceConfigProxy,
-                mExecutor,
                 mCsdWarningDialogFactory,
                 devicePostureController,
                 mTestableLooper.getLooper(),
@@ -525,8 +489,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
-                mDeviceConfigProxy,
-                mExecutor,
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),

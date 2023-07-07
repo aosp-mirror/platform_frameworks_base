@@ -17,31 +17,18 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.view.Surface
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.biometrics.AuthBiometricFingerprintView
 import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
-import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.launch
 
 object AuthBiometricFingerprintViewBinder {
 
-    /** Binds a [AuthBiometricFingerprintView] to a [AuthBiometricFingerprintViewModel]. */
+    /**
+     * Binds a [AuthBiometricFingerprintView.mIconView] to a [AuthBiometricFingerprintViewModel].
+     */
     @JvmStatic
     fun bind(view: AuthBiometricFingerprintView, viewModel: AuthBiometricFingerprintViewModel) {
-        view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.onConfigurationChanged(view.context.resources.configuration)
-                viewModel.setRotation(view.context.display?.orientation ?: Surface.ROTATION_0)
-                launch {
-                    viewModel.iconAsset.collect { iconAsset ->
-                        if (view.isSfps) {
-                            view.updateIconViewAnimation(iconAsset)
-                        }
-                    }
-                }
-            }
+        if (view.isSfps) {
+            AuthBiometricFingerprintIconViewBinder.bind(view.getIconView(), viewModel)
         }
     }
 }

@@ -28,11 +28,10 @@ import org.junit.runners.Parameterized
 
 /** Base class for exiting pip (closing pip window) without returning to the app */
 abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            setup { this.setRotation(flicker.scenario.startRotation) }
-            teardown { this.setRotation(Rotation.ROTATION_0) }
-        }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        setup { this.setRotation(flicker.scenario.startRotation) }
+        teardown { this.setRotation(Rotation.ROTATION_0) }
+    }
 
     /**
      * Checks that [pipApp] window is pinned and visible at the start and then becomes unpinned and

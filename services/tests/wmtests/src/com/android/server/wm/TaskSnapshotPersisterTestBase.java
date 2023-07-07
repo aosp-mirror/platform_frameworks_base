@@ -218,7 +218,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             Canvas c = buffer.lockCanvas();
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
-            return new TaskSnapshot(MOCK_SNAPSHOT_ID, mTopActivityComponent,
+            return new TaskSnapshot(MOCK_SNAPSHOT_ID, 0 /* captureTime */, mTopActivityComponent,
                     HardwareBuffer.createFromGraphicBuffer(buffer),
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                     mRotation, taskSize, TEST_CONTENT_INSETS, TEST_LETTERBOX_INSETS,

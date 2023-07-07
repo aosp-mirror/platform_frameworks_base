@@ -24,13 +24,14 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
-import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
@@ -95,8 +96,9 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mock(DismissCallbackRegistry::class.java),
                 context,
                 mKeyguardUpdateMonitor,
-                mock(TrustRepository::class.java),
-                FakeFeatureFlags(),
+                FakeTrustRepository(),
+                FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
+                testScope.backgroundScope,
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(

@@ -68,6 +68,7 @@ import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
 import static com.android.server.am.ProcessList.VISIBLE_APP_ADJ;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.answer;
@@ -2487,6 +2488,57 @@ public class MockingOomAdjusterTests {
         sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
         assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
         assertProcStates(app2, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_AboveClient_SameProcess() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        doReturn(PROCESS_STATE_TOP).when(sService.mAtmInternal).getTopProcessState();
+        doReturn(app).when(sService).getTopApp();
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        sService.mOomAdjuster.updateOomAdjLocked(app, OOM_ADJ_REASON_NONE);
+
+        assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+
+        // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
+        // verify that its OOM adjustment level is unaffected.
+        bindService(app, app, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
+        app.mServices.updateHasAboveClientLocked();
+        assertFalse(app.mServices.hasAboveClient());
+
+        sService.mOomAdjuster.updateOomAdjLocked(app, OOM_ADJ_REASON_NONE);
+        assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_Side_Cycle() {
+        final ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final ProcessRecord app3 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        long now = SystemClock.uptimeMillis();
+        ServiceRecord s = bindService(app, app2, null, 0, mock(IBinder.class));
+        s.startRequested = true;
+        s.lastActivity = now;
+        s = bindService(app2, app3, null, 0, mock(IBinder.class));
+        s.lastActivity = now;
+        s = bindService(app3, app2, null, 0, mock(IBinder.class));
+        s.lastActivity = now;
+
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        sService.mOomAdjuster.mNumServiceProcs = 3;
+        updateOomAdj(app, app2, app3);
+
+        assertEquals(SERVICE_ADJ, app.mState.getSetAdj());
+        assertTrue(sFirstCachedAdj <= app2.mState.getSetAdj());
+        assertTrue(sFirstCachedAdj <= app3.mState.getSetAdj());
+        assertTrue(CACHED_APP_MAX_ADJ >= app2.mState.getSetAdj());
+        assertTrue(CACHED_APP_MAX_ADJ >= app3.mState.getSetAdj());
     }
 
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,

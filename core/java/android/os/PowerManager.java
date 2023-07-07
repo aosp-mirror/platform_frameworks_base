@@ -190,8 +190,7 @@ public final class PowerManager {
     /**
      * Wake lock flag: Turn the screen on when the wake lock is acquired.
      * <p>
-     * This flag requires {@link android.Manifest.permission#TURN_SCREEN_ON} for apps targeting
-     * Android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and higher.
+     * This flag will require {@link android.Manifest.permission#TURN_SCREEN_ON} in future releases.
      * </p><p>
      * Normally wake locks don't actually wake the device, they just cause the screen to remain on
      * once it's already on. This flag will cause the device to wake up when the wake lock is

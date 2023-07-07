@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Del"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Skærmoptagelsen er gemt"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tryk for at se"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Der opstod en fejl ved sletning af skærmoptagelsen"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Skærmoptagelsen kunne ikke gemmes"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Skærmoptagelsen kunne ikke startes"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Tilbage"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Hjem"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansigtet er godkendt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekræftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tryk på Bekræft for at udføre"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Låst op vha. ansigt. Tryk på oplåsningsikonet for at fortsætte."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Låst op via ansigtsgenkendelse"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Låst op ved hjælp af ansigt. Tryk for at fortsætte."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ansigt genkendt. Tryk for at fortsætte."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ansigt genkendt. Tryk på oplåsningsikonet for at fortsætte."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiver"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Lyd og vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Indstillinger"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Der blev skruet ned til en mere sikker lydstyrke"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Lydstyrken har været for høj i længere tid end anbefalet"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Lydstyrken blev sænket til et mere sikkert niveau"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Høretelefonernes lydstyrke har været høj i længere tid end anbefalet"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Høretelefonernes lydstyrke har overskredet sikkerhedsgrænsen for denne uge"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Fortsæt med at lytte"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Skru ned for lyden"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Appen er fastgjort"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage og Overblik, og hold fingeren nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Dette fastholder skærmen i visningen, indtil du frigør den. Hold Tilbage og Startskærm nede for at frigøre skærmen."</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Indstillinger"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> af <xliff:g id="ARTIST_NAME">%2$s</xliff:g> afspilles via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> af <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Afspil"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Sæt på pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Afspil forrige"</string>
@@ -985,10 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Højttalere og skærme"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Foreslåede enheder"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Stop din delte session for at flytte medier til en anden enhed"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Stop"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Sådan fungerer udsendelser"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Udsendelse"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til det medie, du udsender"</string>
@@ -1001,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Der kan ikke gemmes. Prøv igen."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Der kan ikke gemmes."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Angiv mindst 4 tegn"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Angiv højst 16 tegn"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Angiv færre end <xliff:g id="LENGTH">%1$d</xliff:g> tegn"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummeret blev kopieret til udklipsholderen."</string>
     <string name="basic_status" msgid="2315371112182658176">"Åben samtale"</string>
@@ -1121,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Få flere oplysninger"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Få flere oplysninger på <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Åbn <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Appen er konfigureret"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Mindst ét kort er føjet til Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Installer en kameraapp"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Appen er konfigureret"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Mindst én enhed er tilgængelig"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Vælg en standardapp til noter for at bruge genvejen til notetagning"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Hvis du vil tilføje en genvej til Wallet-appen, skal du sørge for, at appen er installeret"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Hvis du vil tilføje en genvej til Wallet-appen, skal du sørge for, at du har tilføjet mindst ét kort"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Hvis du vil tilføje en genvej til QR-kodescanneren, skal du sørge for, at kameraappen er installeret"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Hvis du vil tilføje en genvej til Home-appen, skal du sørge for, at appen er installeret"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Mindst én enhed er tilgængelig"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Vælg en standardapp til noter for at bruge genvejen til notetagning"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Vælg app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Hold fingeren på genvejen"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuller"</string>
@@ -1141,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Slut din styluspen til en oplader"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Lavt batteriniveau på styluspen"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Du kan ikke ringe fra denne profil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Din arbejdspolitik tillader kun, at du kan foretage telefonopkald fra arbejdsprofilen"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Du kan ikke foretage opkald via en personlig app"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Din organisation tillader kun, at du foretager opkald via arbejdsapps"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Skift til arbejdsprofil"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Luk"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Installer en arbejdstelefonapp"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Annuller"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Tilpas låseskærm"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Lås op for at tilpasse låseskærmen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi er ikke tilgængeligt"</string>
@@ -1154,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioritetstilstand er aktiveret"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent lytter"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Angiv standardapp til noter i Indstillinger"</string>
+    <string name="install_app" msgid="5066668100199613936">"Installer app"</string>
 </resources>

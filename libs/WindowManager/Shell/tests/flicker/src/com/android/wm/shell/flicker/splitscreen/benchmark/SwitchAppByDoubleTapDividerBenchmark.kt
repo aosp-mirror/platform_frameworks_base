@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
@@ -134,7 +134,7 @@ open class SwitchAppByDoubleTapDividerBenchmark(override val flicker: FlickerTes
         return displayBounds.width > displayBounds.height
     }
 
-    @IwTest(focusArea = "sysui")
+    @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
     open fun cujCompleted() {

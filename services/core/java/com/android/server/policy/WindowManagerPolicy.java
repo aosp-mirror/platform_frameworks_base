@@ -169,7 +169,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *
      * @param occluded Whether Keyguard is currently occluded or not.
      */
-    void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition);
+    void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
      * Commit any queued changes to keyguard occlude status that had been deferred during the

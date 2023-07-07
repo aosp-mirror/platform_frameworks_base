@@ -62,6 +62,15 @@ open class ViewScreenshotTestRule(
     private val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     override fun apply(base: Statement, description: Description): Statement {
+        if (isRobolectric) {
+            // In robolectric mode, we enable NATIVE graphics and unpack font and icu files.
+            // We need to use reflection, as this library is only needed and therefore
+            //  only available in deviceless mode.
+            val nativeLoaderClassName = "org.robolectric.nativeruntime.DefaultNativeRuntimeLoader"
+            val defaultNativeRuntimeLoader = Class.forName(nativeLoaderClassName)
+            System.setProperty("robolectric.graphicsMode", "NATIVE")
+            defaultNativeRuntimeLoader.getMethod("injectAndLoad").invoke(null)
+        }
         val ruleToApply = if (isRobolectric) roboRule else delegateRule
         return ruleToApply.apply(base, description)
     }
@@ -69,6 +78,7 @@ open class ViewScreenshotTestRule(
     protected fun takeScreenshot(
         mode: Mode = Mode.WrapContent,
         viewProvider: (ComponentActivity) -> View,
+        beforeScreenshot: (ComponentActivity) -> Unit = {}
     ): Bitmap {
         activityRule.scenario.onActivity { activity ->
             // Make sure that the activity draws full screen and fits the whole display instead of
@@ -94,6 +104,7 @@ open class ViewScreenshotTestRule(
             val content = activity.requireViewById<ViewGroup>(android.R.id.content)
             assertEquals(1, content.childCount)
             contentView = content.getChildAt(0)
+            beforeScreenshot(activity)
         }
 
         return if (isRobolectric) {
@@ -111,9 +122,10 @@ open class ViewScreenshotTestRule(
     fun screenshotTest(
         goldenIdentifier: String,
         mode: Mode = Mode.WrapContent,
-        viewProvider: (ComponentActivity) -> View,
+        beforeScreenshot: (ComponentActivity) -> Unit = {},
+        viewProvider: (ComponentActivity) -> View
     ) {
-        val bitmap = takeScreenshot(mode, viewProvider)
+        val bitmap = takeScreenshot(mode, viewProvider, beforeScreenshot)
         screenshotRule.assertBitmapAgainstGolden(
             bitmap,
             goldenIdentifier,

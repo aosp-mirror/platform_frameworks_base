@@ -91,7 +91,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Статус на мобилна мрежа"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-пораки"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Пораки од говорна пошта"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Повикување преку Wi-Fi"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Повици преку Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Статус на SIM-картичка"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Статус на SIM-известувања со висок приоритет"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
@@ -122,7 +122,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"Пребарување за услуга"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Не може да се постави функцијата „Повици преку Wi-Fi“"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повикување преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повици преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"Проблем при регистрирањето на функцијата „Повици преку Wi‑Fi“ со операторот: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -130,15 +130,15 @@
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Повикување преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"Повик преку WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"Повик преку WLAN на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Повици преку Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"Глас преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Повици преку Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повици преку Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Глас преку Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Повик преку WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Исклучено"</string>
@@ -686,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа ликот. Држете го телефонот во висина на очите."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не се гледа ликот. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>
@@ -694,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледајте подиректно во телефонот"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Се стартуваат апликациите."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Подигањето завршува."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно додека го поставувате отпечатокот."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За да завршите со поставувањето, исклучете го екранот."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За да завршите со поставувањето, исклучете го екранот"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Исклучи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Да продолжи потврдувањето на отпечаток?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно за да го потврдите отпечатокот."</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Отстрани"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Опомена,\nго надминавте ограничувањето за гласни звучни сигнали кои може безбедно да се слушаат во една седмица на слушалки.\n\nАко го надминете ограничувањево, може да го оштетите слухот."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Опомена,\nго надминавте ограничувањето од 5 гласни звучни сигнали кои може безбедно да се слушаат во една седмица на слушалки.\n\nГласноста е намалена за да ви се заштити слухот."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Гласноста со која слушате аудиовизуелни содржини може да предизвика оштетување на слухот ако трае подолг временски период.\n\nАко продолжите да слушате со оваа гласност подолг временски период, може да го оштетите слухот."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Опомена,\nтековно слушате гласни содржини што се репродуцираат со небезбедна гласност.\n\nАко продолжите да слушате волку гласно, може трајно да го оштетите слухот."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Сакате да продолжите да слушате со висока јачина на звукот?\n\nЈачината на звукот на слушалките беше висока подолго од препорачаното, што може да доведе до оштетување на слухот"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Откриен е гласен звук\n\nЈачината на звукот на слушалките беше повисока од препорачаната, што може да доведе до оштетување на слухот"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Да се вклучи кратенка за функциите за пристапност?"</string>
@@ -1725,7 +1723,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Изберете ја функцијата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со два прста):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Изберете ја функцијата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со три прста):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"За префрлање помеѓу функциите, допрете и задржете го копчето за пристапност."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За префрлање помеѓу функциите, повлечете нагоре со два прста и задржете."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За да се префрлите на друга функција, повлечете нагоре со два прста и задржете."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За префрлање помеѓу функциите, повлечете нагоре со три прста и задржете."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Зголемување"</string>
     <string name="user_switched" msgid="7249833311585228097">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"За да излезете, повлечете одозгора надолу."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ротирајте за подобар приказ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"За подобар приказ, излезете од поделениот екран"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"За подобар приказ, отворете ја апликацијата <xliff:g id="NAME">%s</xliff:g> на цел екран"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Приказ на часови во кружно движење"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Приказ на минути во кружно движење"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот телефон како алтернатива."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Оваа апликација е создадена за постара верзија на Android. Можеби нема да работи правилно и не ги вклучува најновите мерки за заштита на безбедноста и приватноста. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Апликацијава не е компатибилна со најновата верзија на Android. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Отворете ја апликацијата за SMS за приказ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Некои функции се ограничени"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Прекини ја паузата"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема работни апликации"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема лични апликации"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Да се отвори работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Да се отвори во личната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Да се отвори во работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Да се повика од работна апликација?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Да се префрли на работна апликација?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Вашата организација ви дозволува да упатувате повици само од работни апликации"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Вашата организација ви дозволува да испраќате пораки само од работни апликации"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи личен прелистувач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи работен прелистувач"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Повикај"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Префрли"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за отклучување на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN за отклучување на подмножество на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN за отклучување на корпоративната SIM-картичка"</string>
@@ -2328,7 +2330,7 @@
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Двојниот екран е недостапен бидејќи вашиот телефон станува претопол"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"„Двојниот екран“ е недостапен"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Двојниот екран е недостапен бидејќи е вклучен „Штедач на батерија“. Ова може да се исклучи во „Поставки“."</string>
-    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Одете во „Поставките“"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Отворете „Поставки“"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Исклучи"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> е конфигуриран"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Распоредот на тастатурата е поставен на <xliff:g id="LAYOUT_1">%s</xliff:g>. Допрете за да промените."</string>

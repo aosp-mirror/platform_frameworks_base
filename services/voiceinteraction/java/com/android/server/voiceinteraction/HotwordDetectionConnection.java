@@ -962,7 +962,7 @@ final class HotwordDetectionConnection {
         final DetectorSession session = mDetectorSessions.get(
                 HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
         if (session == null || session.isDestroyed()) {
-            Slog.v(TAG, "Not found the look and talk perceiver");
+            Slog.v(TAG, "Not found the visual query detector");
             return null;
         }
         return (VisualQueryDetectorSession) session;

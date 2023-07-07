@@ -188,6 +188,7 @@ import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -243,6 +244,7 @@ import android.view.inputmethod.ImeTracker;
 import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 import android.window.TransitionRequestInfo;
 
 import com.android.internal.R;
@@ -1182,7 +1184,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mDisplaySwitchTransitionLauncher.foldStateChanged(newFoldState);
                     mDisplayRotation.foldStateChanged(newFoldState);
                 };
-        mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer);
+        mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer,
+                new HandlerExecutor(mWmService.mH));
 
         mCloseToSquareMaxAspectRatio = mWmService.mContext.getResources().getFloat(
                 R.dimen.config_closeToSquareDisplayMaxAspectRatio);
@@ -2962,6 +2965,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mDisplaySwitchTransitionLauncher.requestDisplaySwitchTransitionIfNeeded(mDisplayId,
                         mInitialDisplayWidth, mInitialDisplayHeight, newWidth, newHeight);
                 mDisplayRotation.physicalDisplayChanged();
+                mDisplayPolicy.physicalDisplayChanged();
             }
 
             // If there is an override set for base values - use it, otherwise use new values.
@@ -2993,6 +2997,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             reconfigureDisplayLocked();
 
             if (physicalDisplayChanged) {
+                mDisplayPolicy.physicalDisplayUpdated();
                 mDisplaySwitchTransitionLauncher.onDisplayUpdated(currentRotation, getRotation(),
                         getDisplayAreaInfo());
             }
@@ -3042,7 +3047,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         + mBaseDisplayHeight + " on display:" + getDisplayId());
             }
         }
-        if (mDisplayReady) {
+        if (mDisplayReady && !mDisplayPolicy.shouldKeepCurrentDecorInsets()) {
             mDisplayPolicy.mDecorInsets.invalidate();
         }
     }
@@ -5084,7 +5089,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return null;
         }
 
-        Pair<ScreenCapture.ScreenCaptureListener, ScreenCapture.ScreenshotSync> syncScreenCapture =
+        SynchronousScreenCaptureListener syncScreenCapture =
                 ScreenCapture.createSyncCaptureListener();
 
         getBounds(mTmpRect);
@@ -5093,10 +5098,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 new ScreenCapture.LayerCaptureArgs.Builder(getSurfaceControl())
                         .setSourceCrop(mTmpRect).build();
 
-        ScreenCapture.captureLayers(args, syncScreenCapture.first);
+        ScreenCapture.captureLayers(args, syncScreenCapture);
 
         final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                syncScreenCapture.second.get();
+                syncScreenCapture.getBuffer();
         final Bitmap bitmap = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
@@ -5598,17 +5603,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
             @WindowManager.TransitionFlags int flags) {
-        prepareAppTransition(transit, flags);
-        mTransitionController.requestTransitionIfNeeded(transit, flags,
-                null /* trigger */, this);
+        requestTransitionAndLegacyPrepare(transit, flags, null /* trigger */);
     }
 
     /** @see #requestTransitionAndLegacyPrepare(int, int) */
     void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
-            @Nullable WindowContainer trigger) {
-        prepareAppTransition(transit);
-        mTransitionController.requestTransitionIfNeeded(transit, 0 /* flags */,
-                trigger, this);
+            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger) {
+        prepareAppTransition(transit, flags);
+        mTransitionController.requestTransitionIfNeeded(transit, flags, trigger, this);
     }
 
     void executeAppTransition() {
@@ -6507,6 +6509,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .getKeyguardController().isDisplayOccluded(mDisplayId);
     }
 
+    /**
+     * @return the task that is occluding the keyguard
+     */
+    @Nullable
+    Task getTaskOccludingKeyguard() {
+        final KeyguardController keyguardController = mRootWindowContainer.mTaskSupervisor
+                .getKeyguardController();
+        if (keyguardController.getTopOccludingActivity(mDisplayId) != null) {
+            return keyguardController.getTopOccludingActivity(mDisplayId).getRootTask();
+        }
+        if (keyguardController.getDismissKeyguardActivity(mDisplayId) != null) {
+            return keyguardController.getDismissKeyguardActivity(mDisplayId).getRootTask();
+        }
+        return null;
+    }
+
     @VisibleForTesting
     void removeAllTasks() {
         forAllTasks((t) -> { t.getRootTask().removeChild(t, "removeAllTasks"); });
@@ -6691,9 +6709,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /**
      * Start recording if this DisplayContent no longer has content. Stop recording if it now
-     * has content or the display is not on.
+     * has content or the display is not on. Update recording if the content has changed (for
+     * example, the user has granted consent to token re-use, so we can now start mirroring).
      */
-    @VisibleForTesting void updateRecording() {
+    void updateRecording() {
         if (mContentRecorder == null || !mContentRecorder.isContentRecordingSessionSet()) {
             if (!setDisplayMirroring()) {
                 return;

@@ -315,7 +315,8 @@ public class StackScrollAlgorithm {
             float newNotificationEnd = newYTranslation + newHeight;
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow) && child.isPinned();
             if (mClipNotificationScrollToTop
-                    && ((isHeadsUp && !firstHeadsUp) || child.isHeadsUpAnimatingAway())
+                    && !firstHeadsUp
+                    && (isHeadsUp || child.isHeadsUpAnimatingAway())
                     && newNotificationEnd > firstHeadsUpEnd
                     && !ambientState.isShadeExpanded()) {
                 // The bottom of this view is peeking out from under the previous view.
@@ -548,7 +549,7 @@ public class StackScrollAlgorithm {
         ExpandableViewState viewState = view.getViewState();
         viewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        final float expansionFraction = getExpansionFractionWithoutShelf(
+        float expansionFraction = getExpansionFractionWithoutShelf(
                 algorithmState, ambientState);
 
         // Add gap between sections.
@@ -619,8 +620,12 @@ public class StackScrollAlgorithm {
                     updateViewWithShelf(view, viewState, shelfStart);
                 }
             }
-            // Clip height of view right before shelf.
-            viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
+            viewState.height = getMaxAllowedChildHeight(view);
+            if (!view.isPinned() && !view.isHeadsUpAnimatingAway()
+                    && !ambientState.isPulsingRow(view)) {
+                // The expansion fraction should not affect HUNs or pulsing notifications.
+                viewState.height *= expansionFraction;
+            }
         }
 
         algorithmState.mCurrentYPosition +=
@@ -700,9 +705,11 @@ public class StackScrollAlgorithm {
                 && !(child instanceof FooterView);
     }
 
-    private void updatePulsingStates(StackScrollAlgorithmState algorithmState,
+    @VisibleForTesting
+    void updatePulsingStates(StackScrollAlgorithmState algorithmState,
                                      AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
+        ExpandableNotificationRow pulsingRow = null;
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
@@ -714,6 +721,19 @@ public class StackScrollAlgorithm {
             }
             ExpandableViewState viewState = row.getViewState();
             viewState.hidden = false;
+            pulsingRow = row;
+        }
+
+        // Set AmbientState#pulsingRow to the current pulsing row when on AOD.
+        // Set AmbientState#pulsingRow=null when on lockscreen, since AmbientState#pulsingRow
+        // is only used for skipping the unfurl animation for (the notification that was already
+        // showing at full height on AOD) during the AOD=>lockscreen transition, where
+        // dozeAmount=[1f, 0f). We also need to reset the pulsingRow once it is no longer used
+        // because it will interfere with future unfurling animations - for example, during the
+        // LS=>AOD animation, the pulsingRow may stay at full height when it should squish with the
+        // rest of the stack.
+        if (ambientState.getDozeAmount() == 0.0f || ambientState.getDozeAmount() == 1.0f) {
+            ambientState.setPulsingRow(pulsingRow);
         }
     }
 
@@ -765,6 +785,8 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isPinned()) {
+                // Make sure row yTranslation is at maximum the HUN yTranslation,
+                // which accounts for AmbientState.stackTopMargin in split-shade.
                 childState.setYTranslation(
                         Math.max(childState.getYTranslation(), headsUpTranslation));
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
@@ -789,7 +811,11 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
-                childState.setYTranslation(Math.max(childState.getYTranslation(), mHeadsUpInset));
+                // Make sure row yTranslation is at maximum the HUN yTranslation,
+                // which accounts for AmbientState.stackTopMargin in split-shade.
+                childState.setYTranslation(
+                        Math.max(childState.getYTranslation(), headsUpTranslation));
+                // keep it visible for the animation
                 childState.hidden = false;
             }
         }

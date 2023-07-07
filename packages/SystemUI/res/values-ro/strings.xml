@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Trimite"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Înregistrarea ecranului a fost salvată"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Atinge pentru a afișa"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Eroare la ștergerea înregistrării ecranului"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Eroare la salvarea înregistrării ecranului"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Eroare la începerea înregistrării ecranului"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Înapoi"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Ecranul de pornire"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Chip autentificat"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Atinge Confirm pentru a finaliza"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Deblocat facial. Apasă pictograma Deblocare ca să continui."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"S-a deblocat folosind fața"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"S-a deblocat cu ajutorul feței. Apasă pentru a continua."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Chipul a fost recunoscut. Apasă pentru a continua."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Chip recunoscut. Apasă pictograma Deblocare ca să continui."</string>
@@ -399,7 +399,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Serviciul care oferă această funcție va avea acces la toate informațiile vizibile pe ecran sau redate pe dispozitiv în timp ce înregistrezi sau proiectezi. Între aceste informații se numără parole, detalii de plată, fotografii, mesaje și conținutul audio pe care îl redai."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Tot ecranul"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"O singură aplicație"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Permite accesul la o aplicație sau înregistreaz-o"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Distribuie o aplicație sau înregistreaz-o"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Începi să înregistrezi sau să proiectezi cu <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Când permiți accesul, înregistrezi sau proiectezi, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> are acces la orice este vizibil pe ecran sau se redă pe dispozitiv. Prin urmare, ai grijă cu parolele, detaliile de plată, mesajele, fotografiile și conținutul audio și video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Când permiți accesul, înregistrezi sau proiectezi o aplicație, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> are acces la orice se afișează pe ecran sau se redă în aplicație. Prin urmare, ai grijă cu informații cum ar fi parolele, detaliile de plată, mesajele, fotografiile și conținutul audio și video."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"dezactivează"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Sunete și vibrații"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Setări"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Redus la un volum mai sigur"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Volumul a fost ridicat mai mult timp decât este recomandat"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volumul a fost redus la un nivel mai sigur"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Volumul căștilor a fost ridicat mai mult timp decât este recomandat"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Volumul căștilor a depășit limita de siguranță pentru săptămâna aceasta"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Ascultă în continuare"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Redu volumul"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplicația este fixată"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Astfel rămâne afișat până anulezi fixarea. Atinge lung opțiunile Înapoi și Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Astfel rămâne afișat până anulezi fixarea. Atinge lung opțiunile Înapoi și Acasă pentru a anula fixarea."</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> de la <xliff:g id="ARTIST_NAME">%2$s</xliff:g> se redă în <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> din <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> rulează"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Redă"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Întrerupe"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Melodia anterioară"</string>
@@ -983,7 +987,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispozitive disponibile pentru ieșire audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și afișaje"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și ecrane"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispozitive sugerate"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Oprește sesiunea comună ca să muți elementul media pe alt dispozitiv"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Oprește"</string>
@@ -999,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Nu se poate salva. Încearcă din nou."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Nu se poate salva."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Folosește minimum 4 caractere."</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Folosește maximum 16 caractere"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Folosește maximum <xliff:g id="LENGTH">%1$d</xliff:g> caractere"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numărul versiunii"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numărul versiunii s-a copiat în clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Deschide conversația"</string>
@@ -1119,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Află mai multe"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Află mai multe la <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Deschide <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplicația este configurată"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Cel puțin un card a fost adăugat în Portofel"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Instalează o aplicație pentru camera foto"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplicația este configurată"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Este disponibil cel puțin un dispozitiv"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Selectează o aplicație prestabilită pentru note ca să folosești comanda rapidă de luat note"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Pentru a adăuga aplicația Portofel drept comandă rapidă, asigură-te că aplicația este instalată"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Pentru a adăuga aplicația Portofel drept comandă rapidă, asigură-te că ai adăugat cel puțin un card"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Pentru a adăuga Scanner de coduri QR drept comandă rapidă, asigură-te că este instalată o aplicație pentru camera foto"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Pentru a adăuga aplicația Home drept comandă rapidă, asigură-te că aplicația este instalată"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Este disponibil cel puțin un dispozitiv"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selectează o aplicație prestabilită pentru note ca să folosești comanda rapidă de luat note"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Selectează aplicația"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Atinge lung comanda rapidă"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anulează"</string>
@@ -1139,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conectează-ți creionul la un încărcător"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Nivelul bateriei creionului este scăzut"</string>
     <string name="video_camera" msgid="7654002575156149298">"Cameră video"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Nu poți iniția apeluri din acest profil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Politica privind activitatea îți permite să efectuezi apeluri telefonice numai din profilul de serviciu"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Nu poți iniția apeluri dintr-o aplicație personală"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Organizația îți permite să inițiezi apeluri numai din aplicațiile pentru lucru"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Comută la profilul de serviciu"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Închide"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalează o aplicație de lucru pentru telefon"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Anulează"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizează ecranul de blocare"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Deblochează pentru a personaliza ecranul de blocare"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Conexiune Wi-Fi indisponibilă"</string>
@@ -1152,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modul Cu prioritate este activat"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Asistentul este atent"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setează aplicația prestabilită de note din Setări"</string>
+    <string name="install_app" msgid="5066668100199613936">"Instalează aplicația"</string>
 </resources>

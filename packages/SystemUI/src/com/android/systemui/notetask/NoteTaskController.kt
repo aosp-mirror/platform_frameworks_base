@@ -215,7 +215,7 @@ constructor(
                     debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
-                    if (activityManager.isInForeground(info.packageName)) {
+                    if (info.isKeyguardLocked && activityManager.isInForeground(info.packageName)) {
                         // Force note task into background by calling home.
                         val intent = createHomeIntent()
                         context.startActivityAsUser(intent, user)
@@ -250,6 +250,11 @@ constructor(
      * Widget Picker to all users.
      */
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "setNoteTaskShortcutEnabled call but user locked: user=$user" }
+            return
+        }
+
         val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
 
         val enabledState =
@@ -305,6 +310,10 @@ constructor(
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
         if (roleName != ROLE_NOTES) return
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "onRoleHoldersChanged call but user locked: role=$roleName, user=$user" }
+            return
+        }
 
         if (user == userTracker.userHandle) {
             updateNoteTaskAsUser(user)

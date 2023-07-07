@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -65,7 +65,7 @@ open class EnterSplitScreenByDragFromTaskbarBenchmark(override val flicker: Flic
             thisTransition(this)
         }
 
-    @IwTest(focusArea = "sysui")
+    @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
     fun cujCompleted() =

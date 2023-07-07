@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
@@ -102,7 +102,7 @@ open class CloseImeOnGoHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
 
     @Presubmit
     @Test
-    @IwTest(focusArea = "ime")
+    @PlatinumTest(focusArea = "ime")
     override fun cujCompleted() {
         super.cujCompleted()
         imeLayerBecomesInvisible()

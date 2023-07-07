@@ -68,6 +68,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -145,6 +146,8 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
         mMainStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
+        doReturn(mock(SplitDecorManager.class)).when(mMainStage).getSplitDecorManager();
+        doReturn(mock(SplitDecorManager.class)).when(mSideStage).getSplitDecorManager();
     }
 
     @Test
@@ -156,9 +159,8 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         verify(mMainStage).reparentTopTask(eq(wct));
-        verify(mSplitLayout).resetDividerPosition();
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
@@ -175,7 +177,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
     }
@@ -187,7 +189,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), eq(false));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
     }
 

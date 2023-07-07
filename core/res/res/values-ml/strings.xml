@@ -1009,7 +1009,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"പാറ്റേൺ മറന്നോ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"അക്കൗണ്ട് അൺലോക്ക്"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google Account ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"ഉപയോക്താവിന്റെ പേര് (ഇമെയിൽ)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"പാസ്‌വേഡ്"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"സൈൻ ഇൻ ചെയ്യുക"</string>
@@ -1660,7 +1660,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ സിം ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"പിൻ കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google Account ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"ഉപയോക്താവിന്റെ പേര് (ഇമെയിൽ)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"പാസ്‌വേഡ്"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"സൈൻ ഇൻ ചെയ്യുക"</string>
@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"നീക്കംചെയ്യുക"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"മുന്നറിയിപ്പ്,\nഒരാൾക്ക് ഒരാഴ്ച ഹെഡ്ഫോണുകളിലൂടെ സുരക്ഷിതമായി കേൾക്കാനാകുന്ന ഉച്ചത്തിലുള്ള ശബ്ദ സിഗ്നലുകളുടെ അളവ് നിങ്ങൾ മറികടന്നിരിക്കുന്നു.\n\nഈ പരിധിക്ക് മുകളിൽ പോകുന്നത് നിങ്ങളുടെ കേൾവിശക്തിയെ ശാശ്വതമായി തകരാറിലാക്കും."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"മുന്നറിയിപ്പ്,\nഒരാൾക്ക് ഒരാഴ്ചയിൽ ഹെഡ്ഫോണുകളിലൂടെ സുരക്ഷിതമായി കേൾക്കാനാകുന്ന ഉച്ചത്തിലുള്ള ശബ്ദ സിഗ്നലുകളുടെ അളവിന്റെ 5 മടങ്ങ് നിങ്ങൾ മറികടന്നിരിക്കുന്നു.\n\nനിങ്ങളുടെ കേൾവിശക്തി സംരക്ഷിക്കുന്നതിനായി വോളിയം കുറച്ചു."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"നിങ്ങൾ ഇപ്പോൾ മീഡിയ കേൾക്കുന്ന ലെവൽ ദീർഘകാലം ഉപയോഗിച്ചാൽ അത് കേൾവി തകരാറിലേക്ക് നയിച്ചേക്കാം.\n\nഈ ലെവലിൽ തുടർന്നും ദീർഘകാലം പ്ലേ ചെയ്യുന്നത് നിങ്ങളുടെ കേൾവിശക്തി തകരാറിലാക്കിയേക്കാം."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"മുന്നറിയിപ്പ്,\nസുരക്ഷിതമല്ലാത്ത ലെവലിൽ പ്ലേ ചെയ്യുന്ന ഉച്ചത്തിലുള്ള ഉള്ളടക്കമാണ് നിങ്ങൾ നിലവിൽ കേൾക്കുന്നത്.\n\nഇത്ര ഉച്ചത്തിൽ കേൾക്കുന്നത് തുടർന്നാൽ നിങ്ങളുടെ കേൾവിശക്തി ശാശ്വതമായി തകരാറിലാകും."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ഉയർന്ന വോളിയത്തിൽ കേൾക്കുന്നത് തുടരണോ?\n\nഹെഡ്‌ഫോണിന്റെ വോളിയം, നിർദ്ദേശിച്ചിരിക്കുന്നതിനേക്കാൾ കൂടുതൽ സമയം ഉയർന്ന നിലയിലായിരുന്നു, ഇത് നിങ്ങളുടെ കേൾവിക്ക് തകരാറുണ്ടാക്കും"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ഉച്ചത്തിലുള്ള വോളിയം തിരിച്ചറിഞ്ഞു\n\nഹെഡ്‌ഫോണിന്റെ വോളിയം, നിർദ്ദേശിച്ചിരിക്കുന്നതിനേക്കാൾ ഉയർന്ന നിലയിലായിരുന്നു, ഇത് നിങ്ങളുടെ കേൾവിക്ക് തകരാറുണ്ടാക്കും"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"കുറുക്കുവഴി ഓണായിരിക്കുമ്പോൾ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ഉപയോഗസഹായി ഫീച്ചറുകൾക്കുള്ള കുറുക്കുവഴി ഓണാക്കണോ?"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"മനസ്സിലായി"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"മികച്ച കാഴ്‌ചയ്‌ക്കായി റൊട്ടേറ്റ് ചെയ്യുക"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"മികച്ച കാഴ്‌ചയ്‌ക്കായി സ്‌ക്രീൻ വിഭജന മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"മികച്ച കാഴ്‌‌ചയ്ക്ക് പൂർണ്ണ സ്‌ക്രീനിൽ <xliff:g id="NAME">%s</xliff:g> തുറക്കുക"</string>
     <string name="done_label" msgid="7283767013231718521">"പൂർത്തിയാക്കി"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ചാക്രികമായി മണിക്കൂറുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ചാക്രികമായി മിനിറ്റുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ഈ ആപ്പ് Android-ന്റെ പഴയ പതിപ്പിനായാണ് സൃഷ്ടിച്ചിരിക്കുന്നത്. ഇത് ശരിയായി പ്രവർത്തിക്കണമെന്നില്ല, ഏറ്റവും പുതിയ സുരക്ഷാ, സ്വകാര്യതാ പരിരക്ഷകൾ ഇതിൽ ഉൾപ്പെടുന്നുമില്ല. അപ്ഡേറ്റിനായി തിരയുക അല്ലെങ്കിൽ ആപ്പിന്റെ ഡെവലപ്പറെ ബന്ധപ്പെടുക."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ഈ ആപ്പ്, Android-ന്റെ എറ്റവും പുതിയ പതിപ്പിന് അനുയോജ്യമല്ല. അപ്ഡേറ്റിന് തിരയുക അല്ലെങ്കിൽ ആപ്പിന്റെ ഡെവലപ്പറെ ബന്ധപ്പെടുക."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"കാണുന്നതിന് SMS ആപ്പ് തുറക്കുക"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ചില പ്രവർത്തനം പരിമിതപ്പെടാം"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"താൽക്കാലികമായി നിർത്തിയത് മാറ്റുക"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ഔദ്യോഗിക ആപ്പുകൾ ഇല്ല"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"വ്യക്തിപര ആപ്പുകൾ ഇല്ല"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> തുറക്കണോ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"സ്വകാര്യ <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ഔദ്യോഗിക <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ഔദ്യോഗിക ആപ്പിൽ നിന്ന് കോൾ ചെയ്യണോ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ഔദ്യോഗിക ആപ്പിലേക്ക് മാറണോ?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് കോളുകൾ ചെയ്യാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് സന്ദേശമയയ്ക്കാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"കോൾ ചെയ്യുക"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"മാറുക"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"സിം നെറ്റ്‌വർക്ക് സബ്സെറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"സിം കോർപ്പറേറ്റ് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>

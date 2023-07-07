@@ -52,6 +52,9 @@ final class LetterboxConfiguration {
      */
     static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
+    /** The default aspect ratio for a letterboxed app in multi-window mode. */
+    static final float DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW = 1.01f;
+
     /** Letterboxed app window position multiplier indicating center position. */
     static final float LETTERBOX_POSITION_MULTIPLIER_CENTER = 0.5f;
 
@@ -214,7 +217,7 @@ final class LetterboxConfiguration {
     // otherwise the apps get blacked out when they are resumed and do not have focus yet.
     private boolean mIsCompatFakeFocusEnabled;
 
-    // Whether should use split screen aspect ratio for the activity when camera compat treatment
+    // Whether we should use split screen aspect ratio for the activity when camera compat treatment
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
 
@@ -1118,7 +1121,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Whether should use split screen aspect ratio for the activity when camera compat treatment
+     * Whether we should use split screen aspect ratio for the activity when camera compat treatment
      * is enabled and activity is connected to the camera in fullscreen.
      */
     boolean isCameraCompatSplitScreenAspectRatioEnabled() {

@@ -25,6 +25,7 @@ import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
@@ -38,6 +39,7 @@ import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -81,7 +83,8 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
                 context,
                 keyguardUpdateMonitor,
                 Mockito.mock(TrustRepository::class.java),
-                FakeFeatureFlags(),
+                FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) },
+                TestScope().backgroundScope,
             )
         underTest = KeyguardBouncerViewModel(bouncerView, bouncerInteractor)
     }

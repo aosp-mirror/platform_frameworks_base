@@ -64,6 +64,7 @@ import android.companion.IOnAssociationsChangedListener;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
+import android.companion.utils.FeatureUtils;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -306,6 +307,7 @@ public class CompanionDeviceManagerService extends SystemService {
         } else if (phase == PHASE_BOOT_COMPLETED) {
             // Run the Inactive Association Removal job service daily.
             InactiveAssociationsRemovalService.schedule(getContext());
+            mCrossDeviceSyncController.onBootCompleted();
         }
     }
 
@@ -745,6 +747,11 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
                 int userId, int associationId) {
+            if (!FeatureUtils.isPermSyncEnabled()) {
+                throw new UnsupportedOperationException("Calling"
+                        + " buildPermissionTransferUserConsentIntent, but this API is disabled by"
+                        + " the system.");
+            }
             return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
                     packageName, userId, associationId);
         }
@@ -752,6 +759,10 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void startSystemDataTransfer(String packageName, int userId, int associationId,
                 ISystemDataTransferCallback callback) {
+            if (!FeatureUtils.isPermSyncEnabled()) {
+                throw new UnsupportedOperationException("Calling startSystemDataTransfer, but this"
+                        + " API is disabled by the system.");
+            }
             mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,
                     associationId, callback);
         }
@@ -1382,10 +1393,11 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback) {
+        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback,
+                @CrossDeviceSyncControllerCallback.Type int type) {
             if (CompanionDeviceConfig.isEnabled(
                     CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
-                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback);
+                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback, type);
             }
         }
 
@@ -1411,6 +1423,30 @@ public class CompanionDeviceManagerService extends SystemService {
             if (CompanionDeviceConfig.isEnabled(
                     CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
                 mCrossDeviceSyncController.syncMessageToDevice(associationId, message);
+            }
+        }
+
+        @Override
+        public void sendCrossDeviceSyncMessageToAllDevices(int userId, byte[] message) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncMessageToAllDevicesForUserId(userId, message);
+            }
+        }
+
+        @Override
+        public void addSelfOwnedCallId(String callId) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.addSelfOwnedCallId(callId);
+            }
+        }
+
+        @Override
+        public void removeSelfOwnedCallId(String callId) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.removeSelfOwnedCallId(callId);
             }
         }
     }

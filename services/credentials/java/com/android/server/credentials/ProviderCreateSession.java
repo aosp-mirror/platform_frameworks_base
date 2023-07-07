@@ -54,7 +54,7 @@ public final class ProviderCreateSession extends ProviderSession<
     private static final String TAG = "ProviderCreateSession";
 
     // Key to be used as an entry key for a save entry
-    private static final String SAVE_ENTRY_KEY = "save_entry_key";
+    public static final String SAVE_ENTRY_KEY = "save_entry_key";
     // Key to be used as an entry key for a remote entry
     private static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
@@ -193,11 +193,13 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false,
+                    ((RequestSession) mCallbacks).mRequestSessionMetric.getInitialPhaseMetric());
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false,
+                    ((RequestSession) mCallbacks).mRequestSessionMetric.getInitialPhaseMetric());
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }

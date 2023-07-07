@@ -91,6 +91,21 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     @Override
+    void setClientVisible(boolean clientVisible) {
+        final boolean wasClientVisible = isClientVisible();
+        super.setClientVisible(clientVisible);
+        // The layer of ImePlaceholder needs to be updated on a higher z-order for
+        // non-activity window (For activity window, IME is already on top of it).
+        if (!wasClientVisible && isClientVisible()) {
+            final InsetsControlTarget imeControlTarget = getControlTarget();
+            if (imeControlTarget != null && imeControlTarget.getWindow() != null
+                    && imeControlTarget.getWindow().mActivityRecord == null) {
+                mDisplayContent.assignWindowLayers(false /* setLayoutNeeded */);
+            }
+        }
+    }
+
+    @Override
     void setServerVisible(boolean serverVisible) {
         mServerVisible = serverVisible;
         if (!mFrozen) {

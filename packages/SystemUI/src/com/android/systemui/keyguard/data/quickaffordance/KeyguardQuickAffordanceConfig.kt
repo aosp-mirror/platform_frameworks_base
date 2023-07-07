@@ -18,11 +18,13 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
-import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -30,8 +32,6 @@ interface KeyguardQuickAffordanceConfig {
 
     /** Unique identifier for this quick affordance. It must be globally unique. */
     val key: String
-
-    val pickerName: String
 
     val pickerIconResourceId: Int
 
@@ -41,6 +41,12 @@ interface KeyguardQuickAffordanceConfig {
      * Used to populate the lock screen.
      */
     val lockScreenState: Flow<LockScreenState>
+
+    /**
+     * Returns a user-visible [String] that should be shown as the name for the option in the
+     * wallpaper picker / settings app to select this quick affordance.
+     */
+    fun pickerName(): String
 
     /**
      * Returns the [PickerScreenState] representing the affordance in the settings or selector
@@ -76,37 +82,35 @@ interface KeyguardQuickAffordanceConfig {
 
         /**
          * The picker shows the item for selecting this affordance as disabled. Clicking on it will
-         * show the given instructions to the user. If [actionText] and [actionComponentName] are
-         * provided (optional) a button will be shown to open an activity to help the user complete
-         * the steps described in the instructions.
+         * show the given instructions to the user. If [actionText] and [actionIntent] are provided
+         * (optional) a button will be shown to open an activity to help the user complete the steps
+         * described in the instructions.
          */
         data class Disabled(
-            /** List of human-readable instructions for setting up the quick affordance. */
-            val instructions: List<String>,
+            /** Human-readable explanation as to why the quick affordance is current disabled. */
+            val explanation: String,
             /**
              * Optional text to display on a button that the user can click to start a flow to go
              * and set up the quick affordance and make it enabled.
              */
             val actionText: String? = null,
             /**
-             * Optional component name to be able to build an `Intent` that opens an `Activity` for
-             * the user to be able to set up the quick affordance and make it enabled.
-             *
-             * This is either just an action for the `Intent` or a package name and action,
-             * separated by
-             * [Contract.LockScreenQuickAffordances.AffordanceTable.COMPONENT_NAME_SEPARATOR] for
-             * convenience, you can use the [componentName] function.
+             * Optional [Intent] that opens an `Activity` for the user to be able to set up the
+             * quick affordance and make it enabled.
              */
-            val actionComponentName: String? = null,
+            val actionIntent: Intent? = null,
         ) : PickerScreenState() {
             init {
-                check(instructions.isNotEmpty()) { "Instructions must not be empty!" }
+                check(explanation.isNotEmpty()) { "Explanation must not be empty!" }
                 check(
-                    (actionText.isNullOrEmpty() && actionComponentName.isNullOrEmpty()) ||
-                        (!actionText.isNullOrEmpty() && !actionComponentName.isNullOrEmpty())
+                    (actionText.isNullOrEmpty() && actionIntent == null) ||
+                        (!actionText.isNullOrEmpty() && actionIntent != null)
                 ) {
-                    "actionText and actionComponentName must either both be null/empty or both be" +
-                        " non-empty!"
+                    """
+                        actionText and actionIntent must either both be null/empty or both be
+                        non-null and non-empty!
+                    """
+                        .trimIndent()
                 }
             }
         }
@@ -159,17 +163,33 @@ interface KeyguardQuickAffordanceConfig {
     }
 
     companion object {
-        fun componentName(
-            packageName: String? = null,
-            action: String?,
-        ): String? {
-            return when {
-                action.isNullOrEmpty() -> null
-                !packageName.isNullOrEmpty() ->
-                    "$packageName${Contract.LockScreenQuickAffordances.AffordanceTable
-                        .COMPONENT_NAME_SEPARATOR}$action"
-                else -> action
+
+        /**
+         * Returns an [Intent] that can be used to start an activity that opens the app store app to
+         * a page showing the app with the passed-in [packageName].
+         *
+         * If the feature isn't enabled on this device/variant/configuration, a `null` will be
+         * returned.
+         */
+        fun appStoreIntent(context: Context, packageName: String?): Intent? {
+            if (packageName.isNullOrEmpty()) {
+                return null
+            }
+
+            val appStorePackageName = context.getString(R.string.config_appStorePackageName)
+            val linkTemplate = context.getString(R.string.config_appStoreAppLinkTemplate)
+            if (appStorePackageName.isEmpty() || linkTemplate.isEmpty()) {
+                return null
+            }
+
+            check(linkTemplate.contains(APP_PACKAGE_NAME_PLACEHOLDER))
+
+            return Intent(Intent.ACTION_VIEW).apply {
+                setPackage(appStorePackageName)
+                data = Uri.parse(linkTemplate.replace(APP_PACKAGE_NAME_PLACEHOLDER, packageName))
             }
         }
+
+        private const val APP_PACKAGE_NAME_PLACEHOLDER = "\$packageName"
     }
 }

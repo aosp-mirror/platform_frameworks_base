@@ -1078,6 +1078,12 @@ void CanvasContext::startHintSession() {
     mHintSessionWrapper.init();
 }
 
+bool CanvasContext::shouldDither() {
+    CanvasContext* self = getActiveContext();
+    if (!self) return false;
+    return self->mColorMode != ColorMode::Default;
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */

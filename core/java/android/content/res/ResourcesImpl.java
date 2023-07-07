@@ -650,11 +650,12 @@ public class ResourcesImpl {
                 key = (((long) value.assetCookie) << 32) | value.data;
             }
 
+            int cacheGeneration = caches.getGeneration();
             // First, check whether we have a cached version of this drawable
             // that was inflated against the specified theme. Skip the cache if
             // we're currently preloading or we're not using the cache.
             if (!mPreloading && useCache) {
-                final Drawable cachedDrawable = caches.getInstance(key, wrapper, theme);
+                Drawable cachedDrawable = caches.getInstance(key, wrapper, theme);
                 if (cachedDrawable != null) {
                     cachedDrawable.setChangingConfigurations(value.changingConfigurations);
                     return cachedDrawable;
@@ -702,7 +703,8 @@ public class ResourcesImpl {
             if (dr != null) {
                 dr.setChangingConfigurations(value.changingConfigurations);
                 if (useCache) {
-                    cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
+                    cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr,
+                            cacheGeneration);
                     if (needsNewDrawableAfterCache) {
                         Drawable.ConstantState state = dr.getConstantState();
                         if (state != null) {
@@ -733,7 +735,7 @@ public class ResourcesImpl {
     }
 
     private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCache caches,
-            Resources.Theme theme, boolean usesTheme, long key, Drawable dr) {
+            Resources.Theme theme, boolean usesTheme, long key, Drawable dr, int cacheGeneration) {
         final Drawable.ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
@@ -761,7 +763,7 @@ public class ResourcesImpl {
             }
         } else {
             synchronized (mAccessLock) {
-                caches.put(key, theme, cs, usesTheme);
+                caches.put(key, theme, cs, cacheGeneration, usesTheme);
             }
         }
     }
@@ -1006,6 +1008,7 @@ public class ResourcesImpl {
         if (complexColor != null) {
             return complexColor;
         }
+        int cacheGeneration = cache.getGeneration();
 
         final android.content.res.ConstantState<ComplexColor> factory =
                 sPreloadedComplexColors.get(key);
@@ -1026,7 +1029,7 @@ public class ResourcesImpl {
                     sPreloadedComplexColors.put(key, complexColor.getConstantState());
                 }
             } else {
-                cache.put(key, theme, complexColor.getConstantState());
+                cache.put(key, theme, complexColor.getConstantState(), cacheGeneration);
             }
         }
         return complexColor;

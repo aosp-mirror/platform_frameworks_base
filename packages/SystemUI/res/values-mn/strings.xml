@@ -116,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Хуваалцах"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Дэлгэцийн бичлэгийг хадгалсан"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Харахын тулд товшино уу"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Дэлгэцийн бичлэгийг устгахад алдаа гарлаа"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Дэлгэцийн бичлэгийг хадгалахад алдаа гарлаа"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Дэлгэцийн бичлэгийг эхлүүлэхэд алдаа гарлаа"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Буцах"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Гэрийн"</string>
@@ -142,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Царайг баталгаажууллаа"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Баталгаажсан"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Дуусгахын тулд баталгаажуулахыг товших"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд түгжээг тайлах дүрс тэмдэг дээр дараарай."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Царайгаар түгжээг тайлсан"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Царайг таньсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Царайг таньсан. Үргэлжлүүлэх бол түгжээг тайлах дүрсийг дар."</string>
@@ -479,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"идэвхгүй болгох"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Дуу, чичиргээ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Тохиргоо"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Аюулгүй дууны түвшин рүү багасгасан"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Дууны түвшин санал болгосноос удаан хугацааны туршид өндөр байсан"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Дууны түвшнийг илүү аюулгүй түвшин рүү багасгасан"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Чихэвчийн дууны түвшин санал болгосноос удаан хугацааны туршид өндөр байсан"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Чихэвчийн дууны түвшин энэ долоо хоногийн аюулгүй хязгаараас хэтэрсэн"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Сонссоор байх"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Дууны түвшнийг багасгах"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Аппыг бэхэлсэн"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Таныг тогтоосныг болиулах хүртэл үүнийг харуулна. Тогтоосныг болиулахын тулд Буцах, Тоймыг дараад хүлээнэ үү."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Таныг тогтоосныг болиулах хүртэл үүнийг харуулсан хэвээр байна. Тогтоосныг болиулахын тулд Буцах, Нүүр хуудас товчлуурыг дараад хүлээнэ үү."</string>
@@ -940,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Тохиргоо"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> дээр тоглуулж буй <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-н <xliff:g id="SONG_NAME">%1$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>-н <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ажиллаж байна"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Тоглуулах"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Түр зогсоох"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Өмнөх бичлэг"</string>
@@ -985,10 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Чанга яригч ба дэлгэц"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Санал болгосон төхөөрөмжүүд"</string>
-    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
-    <skip />
-    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
-    <skip />
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Өөр төхөөрөмж рүү медиа зөөхийн тулд хуваалцсан харилцан үйлдлээ зогсооно уу"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Зогсоох"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Нэвтрүүлэлт хэрхэн ажилладаг вэ?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Нэвтрүүлэлт"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Тохиромжтой Bluetooth төхөөрөмжүүдтэй таны ойролцоох хүмүүс таны нэвтрүүлж буй медиаг сонсох боломжтой"</string>
@@ -1001,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Хадгалах боломжгүй. Дахин оролдоно уу."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Хадгалах боломжгүй."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Дор хаяж 4 тэмдэгт ашиглана уу."</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16-аас цөөн тэмдэгт ашиглана уу"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g>-с цөөн тэмдэгт ашиглана уу"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Хийцийн дугаар"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Хийцийн дугаарыг түр санах ойд хуулсан."</string>
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
@@ -1121,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Нэмэлт мэдээлэл авах"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g>-с нэмэлт мэдээлэл авна уу"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>-г нээх"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Аппыг тохируулсан"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Дор хаяж нэг картыг Wallet-д нэмсэн"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Камер аппыг суулгах"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Аппыг тохируулсан"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Дор хаяж нэг төхөөрөмж боломжтой"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Тэмдэглэл хөтлөх товчлолыг ашиглахын тулд тэмдэглэлийн өгөгдмөл аппыг сонгоно уу"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet аппыг товчлолоор нэмэхийн тулд уг аппыг суулгасан эсэхийг шалгана уу"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet аппыг товчлолоор нэмэхийн тулд дор хаяж нэг карт нэмсэн эсэхийг шалгана уу"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR код сканнерыг товчлолоор нэмэхийн тулд камерын аппыг суулгасан эсэхийг шалгана уу"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home аппыг товчлолоор нэмэхийн тулд уг аппыг суулгасан эсэхийг шалгана уу"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Дор хаяж нэг төхөөрөмж боломжтой"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Тэмдэглэл хөтлөх товчлолыг ашиглахын тулд тэмдэглэлийн өгөгдмөл аппыг сонгоно уу"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Апп сонгох"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Товчлолд хүрээд удаан дарна уу"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Цуцлах"</string>
@@ -1141,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Мэдрэгч үзгээ цэнэглэгчтэй холбоорой"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Мэдрэгч үзэгний батарей бага байна"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видео камер"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Энэ профайлаас залгах боломжгүй"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Таны ажлын бодлого танд зөвхөн ажлын профайлаас утасны дуудлага хийхийг зөвшөөрдөг"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Хувийн аппаас залгах боломжгүй"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Танай байгууллага танд зөвхөн ажлын аппуудаас дуудлага хийхийг зөвшөөрдөг"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Ажлын профайл руу сэлгэх"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Хаах"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Ажлын гар утасны апп суулгах"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Цуцлах"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Түгжигдсэн дэлгэцийг өөрчлөх"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Түгжээтэй дэлгэцийг өөрчлөхийн тулд түгжээг тайлна уу"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi боломжгүй байна"</string>
@@ -1154,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Чухал горим асаалттай байна"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Туслах анхаарлаа хандуулж байна"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Тохиргоонд тэмдэглэлийн өгөгдмөл апп тохируулна уу"</string>
+    <string name="install_app" msgid="5066668100199613936">"Аппыг суулгах"</string>
 </resources>

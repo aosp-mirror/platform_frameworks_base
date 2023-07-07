@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
+import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.EdgeExtensionComponentMatcher
@@ -60,7 +60,7 @@ class CopyContentInSplit(override val flicker: FlickerTest) :
             thisTransition(this)
         }
 
-    @IwTest(focusArea = "sysui")
+    @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
     override fun cujCompleted() {

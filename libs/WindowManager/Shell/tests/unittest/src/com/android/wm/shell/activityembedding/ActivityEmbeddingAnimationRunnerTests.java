@@ -65,12 +65,14 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
                 .addChange(createChange(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY))
                 .build();
-        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
+        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(),
+                any());
 
         mAnimRunner.startAnimation(mTransition, info, mStartTransaction, mFinishTransaction);
 
         final ArgumentCaptor<Runnable> finishCallback = ArgumentCaptor.forClass(Runnable.class);
-        verify(mAnimRunner).createAnimator(eq(info), eq(mStartTransaction), eq(mFinishTransaction),
+        verify(mAnimRunner).createAnimator(eq(info), eq(mStartTransaction),
+                eq(mFinishTransaction),
                 finishCallback.capture(), any());
         verify(mStartTransaction).apply();
         verify(mAnimator).start();

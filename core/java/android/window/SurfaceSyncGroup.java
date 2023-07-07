@@ -26,6 +26,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.ArraySet;
@@ -800,22 +801,25 @@ public final class SurfaceSyncGroup {
     }
 
     private void addTimeout() {
+        Looper looper = null;
         synchronized (sHandlerThreadLock) {
             if (sHandlerThread == null) {
                 sHandlerThread = new HandlerThread("SurfaceSyncGroupTimer");
                 sHandlerThread.start();
             }
+
+            looper = sHandlerThread.getLooper();
         }
 
         synchronized (mLock) {
-            if (mTimeoutAdded || mTimeoutDisabled) {
+            if (mTimeoutAdded || mTimeoutDisabled || looper == null) {
                 // We only need one timeout for the entire SurfaceSyncGroup since we just want to
                 // ensure it doesn't stay stuck forever.
                 return;
             }
 
             if (mHandler == null) {
-                mHandler = new Handler(sHandlerThread.getLooper());
+                mHandler = new Handler(looper);
             }
 
             mTimeoutAdded = true;

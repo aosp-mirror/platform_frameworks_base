@@ -234,6 +234,8 @@ public:
 
     void startHintSession();
 
+    static bool shouldDither();
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline,

@@ -43,6 +43,7 @@ import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_AT
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -183,7 +184,7 @@ public class SnapshotDrawerUtils {
 
             // We consider nearly matched dimensions as there can be rounding errors and the user
             // won't notice very minute differences from scaling one dimension more than the other
-            final boolean aspectRatioMismatch = !isAspectRatioMatch(mFrame, mSnapshot);
+            boolean aspectRatioMismatch = !isAspectRatioMatch(mFrame, mSnapshot);
 
             // Keep a reference to it such that it doesn't get destroyed when finalized.
             SurfaceControl childSurfaceControl = new SurfaceControl.Builder(session)
@@ -199,8 +200,20 @@ public class SnapshotDrawerUtils {
             // still hidden.
             mTransaction.show(childSurfaceControl);
             if (aspectRatioMismatch) {
-                // Clip off ugly navigation bar.
-                final Rect crop = calculateSnapshotCrop();
+                Rect crop = null;
+                final Rect letterboxInsets = mSnapshot.getLetterboxInsets();
+                if (letterboxInsets.left != 0 || letterboxInsets.top != 0
+                        || letterboxInsets.right != 0 || letterboxInsets.bottom != 0) {
+                    // Clip off letterbox.
+                    crop = calculateSnapshotCrop(letterboxInsets);
+                    // If the snapshot can cover the frame, then no need to draw background.
+                    aspectRatioMismatch = !isAspectRatioMatch(mFrame, crop);
+                }
+                // if letterbox doesn't match window frame, try crop by content insets
+                if (aspectRatioMismatch) {
+                    // Clip off ugly navigation bar.
+                    crop = calculateSnapshotCrop(mSnapshot.getContentInsets());
+                }
                 frame = calculateSnapshotFrame(crop);
                 mTransaction.setWindowCrop(childSurfaceControl, crop);
                 mTransaction.setPosition(childSurfaceControl, frame.left, frame.top);
@@ -242,14 +255,13 @@ public class SnapshotDrawerUtils {
 
         /**
          * Calculates the snapshot crop in snapshot coordinate space.
-         *
+         * @param insets Content insets or Letterbox insets
          * @return crop rect in snapshot coordinate space.
          */
-        Rect calculateSnapshotCrop() {
+        Rect calculateSnapshotCrop(@NonNull Rect insets) {
             final Rect rect = new Rect();
             final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
             rect.set(0, 0, snapshot.getWidth(), snapshot.getHeight());
-            final Rect insets = mSnapshot.getContentInsets();
 
             final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
             final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
@@ -332,6 +344,15 @@ public class SnapshotDrawerUtils {
         return Math.abs(
                 ((float) buffer.getWidth() / buffer.getHeight())
                         - ((float) frame.width() / frame.height())) <= 0.01f;
+    }
+
+    private static boolean isAspectRatioMatch(Rect frame1, Rect frame2) {
+        if (frame1.isEmpty() || frame2.isEmpty()) {
+            return false;
+        }
+        return Math.abs(
+                ((float) frame2.width() / frame2.height())
+                        - ((float) frame1.width() / frame1.height())) <= 0.01f;
     }
 
     /**

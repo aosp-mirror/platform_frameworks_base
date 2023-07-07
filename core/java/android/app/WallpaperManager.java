@@ -314,6 +314,7 @@ public class WallpaperManager {
     private final boolean mWcgEnabled;
     private final ColorManagementProxy mCmProxy;
     private static Boolean sIsLockscreenLiveWallpaperEnabled = null;
+    private static Boolean sIsMultiCropEnabled = null;
 
     /**
      * Special drawable that draws a wallpaper as fast as possible.  Assumes
@@ -866,6 +867,26 @@ public class WallpaperManager {
     }
 
     /**
+     * Temporary method for project b/270726737
+     * @return true if the wallpaper supports different crops for different display dimensions
+     * @hide
+     */
+    public static boolean isMultiCropEnabled() {
+        if (sGlobals == null) {
+            sIsMultiCropEnabled = SystemProperties.getBoolean(
+                    "persist.wm.debug.wallpaper_multi_crop", false);
+        }
+        if (sIsMultiCropEnabled == null) {
+            try {
+                sIsMultiCropEnabled = sGlobals.mService.isMultiCropEnabled();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+        return sIsMultiCropEnabled;
+    }
+
+    /**
      * Indicate whether wcg (Wide Color Gamut) should be enabled.
      * <p>
      * Some devices lack of capability of mixed color spaces composition,
@@ -892,7 +913,7 @@ public class WallpaperManager {
      *     instead the default system wallpaper is returned
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
+     *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
      * </ul>
@@ -914,18 +935,9 @@ public class WallpaperManager {
     }
 
     /**
-     * <strong> Important note: </strong>
-     * <ul>
-     *     <li>Up to version S, this method requires the
-     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
-     *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
-     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
-     *     can still access the real wallpaper on all versions. </li>
-     * </ul>
+     * <strong> Important note: </strong> only apps with
+     * {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} should use this method.
+     * Otherwise, a {@code SecurityException} will be thrown.
      *
      * <p>
      * Retrieve the requested wallpaper for the specified wallpaper type if the wallpaper is not
@@ -1185,7 +1197,7 @@ public class WallpaperManager {
      *     instead the default system wallpaper is returned
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
+     *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
      * </ul>
@@ -1207,18 +1219,9 @@ public class WallpaperManager {
     }
 
     /**
-     * <strong> Important note: </strong>
-     * <ul>
-     *     <li>Up to version S, this method requires the
-     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
-     *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
-     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
-     *     can still access the real wallpaper on all versions. </li>
-     * </ul>
+     * <strong> Important note: </strong> only apps with
+     * {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} should use this method.
+     * Otherwise, a {@code SecurityException} will be thrown.
      *
      * <p>
      * Equivalent to {@link #getDrawable(int)}.
@@ -1247,7 +1250,7 @@ public class WallpaperManager {
      *     instead the default wallpaper is returned
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
+     *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
      * </ul>
@@ -1269,19 +1272,9 @@ public class WallpaperManager {
     }
 
     /**
-     * <strong> Important note: </strong>
-     * <ul>
-     *     <li>Up to version S, this method requires the
-     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
-     *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
-     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
-     *     can still access the real wallpaper on all versions. </li>
-     * </ul>
-     * <br>
+     * <strong> Important note: </strong> only apps with
+     * {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} should use this method.
+     * Otherwise, a {@code SecurityException} will be thrown.
      *
      * Like {@link #getDrawable(int)}, but the returned Drawable has a number
      * of limitations to reduce its overhead as much as possible. It will
@@ -1313,18 +1306,9 @@ public class WallpaperManager {
     }
 
     /**
-     * <strong> Important note: </strong>
-     * <ul>
-     *     <li>Up to version S, this method requires the
-     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
-     *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
-     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
-     *     can still access the real wallpaper on all versions. </li>
-     * </ul>
+     * <strong> Important note: </strong> only apps with
+     * {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} should use this method.
+     * Otherwise, a {@code SecurityException} will be thrown.
      *
      * <p>
      * Equivalent to {@link #getFastDrawable()}.
@@ -1343,18 +1327,9 @@ public class WallpaperManager {
     }
 
     /**
-     * <strong> Important note: </strong>
-     * <ul>
-     *     <li>Up to version S, this method requires the
-     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
-     *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
-     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
-     *     can still access the real wallpaper on all versions. </li>
-     * </ul>
+     * <strong> Important note: </strong> only apps with
+     * {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     * should use this method. Otherwise, a {@code SecurityException} will be thrown.
      *
      * <p>
      * Equivalent to {@link #getFastDrawable(int)}.
@@ -1541,7 +1516,7 @@ public class WallpaperManager {
      *     instead the default system wallpaper is returned
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
-     *     and will always throw a @code SecurityException}.</li>
+     *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
      * </ul>
@@ -1659,14 +1634,14 @@ public class WallpaperManager {
      * @hide
      */
     public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
-            List<RectF> regions) throws IllegalArgumentException {
+            List<RectF> regions, int which) throws IllegalArgumentException {
         for (RectF region : regions) {
             if (!LOCAL_COLOR_BOUNDS.contains(region)) {
                 throw new IllegalArgumentException("Regions must be within bounds "
                         + LOCAL_COLOR_BOUNDS);
             }
         }
-        sGlobals.addOnColorsChangedListener(callback, regions, FLAG_SYSTEM,
+        sGlobals.addOnColorsChangedListener(callback, regions, which,
                                                  mContext.getUserId(), mContext.getDisplayId());
     }
 
@@ -2912,60 +2887,19 @@ public class WallpaperManager {
             }
         }
 
-        if (!isComponentExist(context, cn)) {
-            cn = null;
-        }
-
-        return cn;
-    }
-
-    /**
-     * Return {@link ComponentName} of the CMF default wallpaper, or
-     * {@link #getDefaultWallpaperComponent(Context)} if none is defined.
-     *
-     * @hide
-     */
-    public static ComponentName getCmfDefaultWallpaperComponent(Context context) {
-        ComponentName cn = null;
-        String[] cmfWallpaperMap = context.getResources().getStringArray(
-                com.android.internal.R.array.cmf_default_wallpaper_component);
-        if (cmfWallpaperMap == null || cmfWallpaperMap.length == 0) {
-            Log.d(TAG, "No CMF wallpaper config");
-            return getDefaultWallpaperComponent(context);
-        }
-
-        for (String entry : cmfWallpaperMap) {
-            String[] cmfWallpaper;
-            if (!TextUtils.isEmpty(entry)) {
-                cmfWallpaper = entry.split(",");
-                if (cmfWallpaper != null && cmfWallpaper.length == 2 && VALUE_CMF_COLOR.equals(
-                        cmfWallpaper[0]) && !TextUtils.isEmpty(cmfWallpaper[1])) {
-                    cn = ComponentName.unflattenFromString(cmfWallpaper[1]);
-                    break;
-                }
+        // Check if the package exists
+        if (cn != null) {
+            try {
+                final PackageManager packageManager = context.getPackageManager();
+                packageManager.getPackageInfo(cn.getPackageName(),
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+            } catch (PackageManager.NameNotFoundException e) {
+                cn = null;
             }
         }
 
-        if (!isComponentExist(context, cn)) {
-            cn = null;
-        }
-
         return cn;
-    }
-
-    private static boolean isComponentExist(Context context, ComponentName cn) {
-        if (cn == null) {
-            return false;
-        }
-        try {
-            final PackageManager packageManager = context.getPackageManager();
-            packageManager.getPackageInfo(cn.getPackageName(),
-                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-        return true;
     }
 
     /**

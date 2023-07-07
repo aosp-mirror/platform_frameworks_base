@@ -157,17 +157,17 @@ class BackPanel(
 
         arrowPaint.color = Utils.getColorAttrDefaultColor(context,
                 if (isDeviceInNightTheme) {
-                    com.android.internal.R.attr.colorAccentPrimary
+                    com.android.internal.R.attr.materialColorOnSecondaryContainer
                 } else {
-                    com.android.internal.R.attr.textColorPrimary
+                    com.android.internal.R.attr.materialColorOnSecondaryFixed
                 }
         )
 
         arrowBackgroundPaint.color = Utils.getColorAttrDefaultColor(context,
                 if (isDeviceInNightTheme) {
-                    com.android.internal.R.attr.materialColorOnSecondary
+                    com.android.internal.R.attr.materialColorSecondaryContainer
                 } else {
-                    com.android.internal.R.attr.colorAccentSecondary
+                    com.android.internal.R.attr.materialColorSecondaryFixedDim
                 }
         )
     }

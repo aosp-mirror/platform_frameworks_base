@@ -115,8 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Sauti ya HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Sauti ya HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Vifaa vya Kusaidia Kusikia"</string>
-    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
-    <skip />
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Imeunganishwa kwenye Vifaa vya Kusaidia Kusikia"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Imeunganishwa kwenye LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Imeunganishwa kwenye sikika ya njia ya mawasiliano"</string>
@@ -215,7 +214,8 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
+    <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Kloni"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Weka chaguo kwa ajili ya maendeleo ya programu"</string>
@@ -545,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sasa hivi"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Simu hii"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Kompyuta kibao hii"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Spika ya kituo"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kifaa cha Nje"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Kifaa kilichounganishwa"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Simu hii"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Huwezi kucheza maudhui kwenye kifaa hiki"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Pata toleo jipya la akaunti ili ubadilishe"</string>

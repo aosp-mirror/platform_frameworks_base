@@ -30,6 +30,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.hardware.HardwareBuffer;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Pair;
 import android.util.Slog;
@@ -166,6 +167,9 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     final TaskSnapshot recordSnapshotInner(TYPE source, boolean allowSnapshotHome) {
+        if (shouldDisableSnapshots()) {
+            return null;
+        }
         final boolean snapshotHome = allowSnapshotHome && source.isActivityTypeHome();
         final TaskSnapshot snapshot = captureSnapshot(source, snapshotHome);
         if (snapshot == null) {
@@ -213,6 +217,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
             // Failed to acquire image. Has been logged.
             return null;
         }
+        builder.setCaptureTime(SystemClock.elapsedRealtimeNanos());
         builder.setSnapshot(screenshotBuffer.getHardwareBuffer());
         builder.setColorSpace(screenshotBuffer.getColorSpace());
         return builder.build();
@@ -432,6 +437,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         // color above
         return new TaskSnapshot(
                 System.currentTimeMillis() /* id */,
+                SystemClock.elapsedRealtimeNanos() /* captureTime */,
                 topActivity.mActivityComponent, hwBitmap.getHardwareBuffer(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),

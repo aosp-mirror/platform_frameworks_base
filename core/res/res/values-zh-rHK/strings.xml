@@ -1682,10 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致你的聽力受損。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"警告：\n你於一週內使用耳機聆聽的高分貝音訊量已超過安全範圍\n\n繼續此行為將導致聽力永久受損。"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"警告：\n你於一週內使用耳機聆聽的高分貝音訊量已超過安全範圍 5 倍。\n\n為保護你的聽力，系統已調低音量。"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"目前的媒體播放音量在長時間聆聽下可能會損害聽力。\n\n如繼續以此音量播放內容，長時間可能導致聽力受損。"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"警告：\n目前的內容播放音量已超過安全聆聽範圍。\n\n繼續聆聽此音量將導致聽力永久受損。"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"要繼續以高音量聆聽嗎？\n\n你以高音量使用耳機的時間已超過建議範圍，可能會導致聽力受損"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"系統偵測到巨響\n\n耳機音量已有一段時間超過建議水平，可能會導致聽力受損"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用快速鍵後，同時按住音量按鈕 3 秒便可啟用無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能捷徑嗎？"</string>
@@ -1697,7 +1695,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要授予「<xliff:g id="SERVICE">%1$s</xliff:g>」裝置的完整控制權？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要授予「<xliff:g id="SERVICE">%1$s</xliff:g>」裝置的完整控制權嗎？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"對於為你提供無障礙功能的應用程式，你可授予完整控制權，但大部分應用程式都不應獲授予此權限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"這項功能可以讀出螢幕上的所有內容，並透過其他應用程式顯示內容。"</string>
@@ -1852,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"由頂部向下滑動即可退出。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉以改善預覽效果"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"退出分割螢幕，以改善預覽效果"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"以全螢幕模式開啟「<xliff:g id="NAME">%s</xliff:g>」，以改善預覽效果"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小時環形滑桿"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分鐘環形滑桿"</string>
@@ -1977,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用手機。"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"此應用程式專為舊版 Android 而設。因此可能無法正常運作，且不提供最新的安全性和私隱保護。請檢查是否有更新版本，或聯絡應用程式開發人員。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"此應用程式不兼容最新 Android 版本。請檢查是否有更新版本，或聯絡應用程式開發人員。"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"你有新的訊息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"開啟短訊應用程式查看內容"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"部分功能可能會受到限制"</string>
@@ -2164,14 +2163,17 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"要開啟「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"要在個人「<xliff:g id="APP">%s</xliff:g>」中開啟嗎？"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"要在工作「<xliff:g id="APP">%s</xliff:g>」中開啟嗎？"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"要透過工作應用程式打電話嗎？"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"要切換至工作應用程式嗎？"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"你的機構只允許你透過工作應用程式打電話"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"你的機構只允許你透過工作應用程式傳送訊息"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"打電話"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"切換"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 網絡解鎖 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 網絡子集解鎖 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 公司解鎖 PIN"</string>

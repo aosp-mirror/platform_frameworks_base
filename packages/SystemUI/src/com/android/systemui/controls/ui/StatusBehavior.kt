@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.ActivityOptions
 import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.DialogInterface
@@ -74,7 +75,11 @@ class StatusBehavior : Behavior {
                 R.string.controls_open_app,
                 DialogInterface.OnClickListener { dialog, _ ->
                     try {
-                        cws.control?.getAppIntent()?.send()
+                        val options = ActivityOptions.makeBasic()
+                                .setPendingIntentBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle()
+                        cws.control?.getAppIntent()?.send(options)
                         context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                     } catch (e: PendingIntent.CanceledException) {
                         cvh.setErrorStatus()

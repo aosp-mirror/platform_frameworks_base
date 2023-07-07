@@ -36,13 +36,23 @@ public interface CompanionDeviceManagerServiceInternal {
      * Registers a callback from an InCallService / ConnectionService to CDM to process sync
      * requests and perform call control actions.
      */
-    void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback);
+    void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback,
+            @CrossDeviceSyncControllerCallback.Type int type);
 
     /**
      * Requests a sync from an InCallService / ConnectionService to CDM, for the given association
      * and message.
      */
     void sendCrossDeviceSyncMessage(int associationId, byte[] message);
+
+    /** Sends the provided message to all active associations for the specified user. */
+    void sendCrossDeviceSyncMessageToAllDevices(int userId, byte[] message);
+
+    /** Mark a call id as "self owned" (i.e. this device owns the canonical call). */
+    void addSelfOwnedCallId(String callId);
+
+    /** Unmark a call id as "self owned" (i.e. this device no longer owns the canonical call). */
+    void removeSelfOwnedCallId(String callId);
 
     /**
      * Requests a sync from an InCallService to CDM, for the given user and call metadata.

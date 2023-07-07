@@ -153,14 +153,16 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     @VisibleForTesting
     /** Should be accessible only to the main thread. */
     final Map<Integer, TelephonyDisplayInfo> mSubIdTelephonyDisplayInfoMap = new HashMap<>();
+    @VisibleForTesting
+    /** Should be accessible only to the main thread. */
+    final Map<Integer, TelephonyManager> mSubIdTelephonyManagerMap = new HashMap<>();
+    @VisibleForTesting
+    /** Should be accessible only to the main thread. */
+    final Map<Integer, TelephonyCallback> mSubIdTelephonyCallbackMap = new HashMap<>();
 
     private WifiManager mWifiManager;
     private Context mContext;
     private SubscriptionManager mSubscriptionManager;
-    /** Should be accessible only to the main thread. */
-    private Map<Integer, TelephonyManager> mSubIdTelephonyManagerMap = new HashMap<>();
-    /** Should be accessible only to the main thread. */
-    private Map<Integer, TelephonyCallback> mSubIdTelephonyCallbackMap = new HashMap<>();
     private TelephonyManager mTelephonyManager;
     private ConnectivityManager mConnectivityManager;
     private CarrierConfigTracker mCarrierConfigTracker;
@@ -320,6 +322,9 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 Log.e(TAG, "Unexpected null telephony call back for Sub " + tm.getSubscriptionId());
             }
         }
+        mSubIdTelephonyManagerMap.clear();
+        mSubIdTelephonyCallbackMap.clear();
+        mSubIdTelephonyDisplayInfoMap.clear();
         mSubscriptionManager.removeOnSubscriptionsChangedListener(
                 mOnSubscriptionsChangedListener);
         mAccessPointController.removeAccessPointCallback(this);

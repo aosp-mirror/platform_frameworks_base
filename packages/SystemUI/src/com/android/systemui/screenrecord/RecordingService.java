@@ -427,6 +427,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 Log.e(TAG, "stopRecording called, but there was an error when ending"
                         + "recording");
                 exception.printStackTrace();
+                createErrorNotification();
             } catch (Throwable throwable) {
                 // Something unexpected happen, SystemUI will crash but let's delete
                 // the temporary files anyway
@@ -453,9 +454,9 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 postGroupNotification(currentUser);
                 mNotificationManager.notifyAsUser(null, mNotificationId,  notification,
                         currentUser);
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
                 Log.e(TAG, "Error saving screen recording: " + e.getMessage());
-                showErrorToast(R.string.screenrecord_delete_error);
+                showErrorToast(R.string.screenrecord_save_error);
                 mNotificationManager.cancelAsUser(null, mNotificationId, currentUser);
             }
         });

@@ -42,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Provides routes for local playbacks such as phone speaker, wired headset, or Bluetooth speakers.
@@ -55,7 +56,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             SystemMediaRoute2Provider.class.getPackage().getName(),
             SystemMediaRoute2Provider.class.getName());
 
-    static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
     static final String SYSTEM_SESSION_ID = "SYSTEM_SESSION";
 
     private final AudioManager mAudioManager;
@@ -170,7 +170,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             Bundle sessionHints) {
         // Assume a router without MODIFY_AUDIO_ROUTING permission can't request with
         // a route ID different from the default route ID. The service should've filtered.
-        if (TextUtils.equals(routeId, DEFAULT_ROUTE_ID)) {
+        if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             mCallback.onSessionCreated(this, requestId, mDefaultSessionInfo);
             return;
         }
@@ -197,7 +197,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+    public void updateDiscoveryPreference(
+            Set<String> activelyScanningPackages, RouteDiscoveryPreference discoveryPreference) {
         // Do nothing
     }
 
@@ -213,7 +214,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     @Override
     public void transferToRoute(long requestId, String sessionId, String routeId) {
-        if (TextUtils.equals(routeId, DEFAULT_ROUTE_ID)) {
+        if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             // The currently selected route is the default route.
             return;
         }
@@ -326,10 +327,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 builder.addTransferableRoute(deviceRoute.getId());
             }
             mSelectedRouteId = selectedRoute.getId();
-            mDefaultRoute = new MediaRoute2Info.Builder(DEFAULT_ROUTE_ID, selectedRoute)
-                    .setSystemRoute(true)
-                    .setProviderId(mUniqueId)
-                    .build();
+            mDefaultRoute =
+                    new MediaRoute2Info.Builder(MediaRoute2Info.ROUTE_ID_DEFAULT, selectedRoute)
+                            .setSystemRoute(true)
+                            .setProviderId(mUniqueId)
+                            .build();
             builder.addSelectedRoute(mSelectedRouteId);
 
             for (MediaRoute2Info route : mBluetoothRouteController.getTransferableRoutes()) {
@@ -363,12 +365,13 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 }
                 mSessionInfos.clear();
                 mSessionInfos.add(newSessionInfo);
-                mDefaultSessionInfo = new RoutingSessionInfo.Builder(
-                        SYSTEM_SESSION_ID, "" /* clientPackageName */)
-                        .setProviderId(mUniqueId)
-                        .setSystemSession(true)
-                        .addSelectedRoute(DEFAULT_ROUTE_ID)
-                        .build();
+                mDefaultSessionInfo =
+                        new RoutingSessionInfo.Builder(
+                                        SYSTEM_SESSION_ID, "" /* clientPackageName */)
+                                .setProviderId(mUniqueId)
+                                .setSystemSession(true)
+                                .addSelectedRoute(MediaRoute2Info.ROUTE_ID_DEFAULT)
+                                .build();
                 return true;
             }
         }
