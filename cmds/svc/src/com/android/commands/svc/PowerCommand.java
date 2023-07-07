@@ -40,7 +40,7 @@ public class PowerCommand extends Svc.Command {
     public String longHelp() {
         return shortHelp() + "\n"
                 + "\n"
-                + "usage: svc power stayon [true|false|usb|ac|wireless]\n"
+                + "usage: svc power stayon [true|false|usb|ac|wireless|dock]\n"
                 + "         Set the 'keep awake while plugged in' setting.\n"
                 + "       svc power reboot [reason]\n"
                 + "         Perform a runtime shutdown and reboot device with specified reason.\n"
@@ -66,9 +66,10 @@ public class PowerCommand extends Svc.Command {
                 if ("stayon".equals(args[1]) && args.length == 3) {
                     int val;
                     if ("true".equals(args[2])) {
-                        val = BatteryManager.BATTERY_PLUGGED_AC |
-                                BatteryManager.BATTERY_PLUGGED_USB |
-                                BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                        val = BatteryManager.BATTERY_PLUGGED_AC
+                                | BatteryManager.BATTERY_PLUGGED_USB
+                                | BatteryManager.BATTERY_PLUGGED_WIRELESS
+                                | BatteryManager.BATTERY_PLUGGED_DOCK;
                     }
                     else if ("false".equals(args[2])) {
                         val = 0;
@@ -78,6 +79,8 @@ public class PowerCommand extends Svc.Command {
                         val = BatteryManager.BATTERY_PLUGGED_AC;
                     } else if ("wireless".equals(args[2])) {
                         val = BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                    } else if ("dock".equals(args[2])) {
+                        val = BatteryManager.BATTERY_PLUGGED_DOCK;
                     } else {
                         break fail;
                     }

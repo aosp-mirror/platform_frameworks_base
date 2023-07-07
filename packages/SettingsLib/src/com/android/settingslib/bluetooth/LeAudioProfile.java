@@ -21,6 +21,7 @@ import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCodecConfig;
@@ -183,6 +184,37 @@ public class LeAudioProfile implements LocalBluetoothProfile {
         return mBluetoothAdapter.getActiveDevices(BluetoothProfile.LE_AUDIO);
     }
 
+    /**
+     * Get Lead device for the group.
+     *
+     * Lead device is the device that can be used as an active device in the system.
+     * Active devices points to the Audio Device for the Le Audio group.
+     * This method returns the Lead devices for the connected LE Audio
+     * group and this device should be used in the setActiveDevice() method by other parts
+     * of the system, which wants to set to active a particular Le Audio group.
+     *
+     * Note: getActiveDevice() returns the Lead device for the currently active LE Audio group.
+     * Note: When Lead device gets disconnected while Le Audio group is active and has more devices
+     * in the group, then Lead device will not change. If Lead device gets disconnected, for the
+     * Le Audio group which is not active, a new Lead device will be chosen
+     *
+     * @param groupId The group id.
+     * @return group lead device.
+     *
+     * @hide
+     */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    public @Nullable BluetoothDevice getConnectedGroupLeadDevice(int groupId) {
+        if (DEBUG) {
+            Log.d(TAG,"getConnectedGroupLeadDevice");
+        }
+        if (mService == null) {
+            Log.e(TAG,"No service.");
+            return null;
+        }
+        return mService.getConnectedGroupLeadDevice(groupId);
+    }
+
     @Override
     public boolean isEnabled(BluetoothDevice device) {
         if (mService == null || device == null) {
@@ -243,7 +275,19 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_le_audio;
+        if (btClass == null) {
+            Log.e(TAG, "No btClass.");
+            return R.drawable.ic_bt_le_audio_speakers;
+        }
+        switch (btClass.getDeviceClass()) {
+            case BluetoothClass.Device.AUDIO_VIDEO_UNCATEGORIZED:
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_MICROPHONE:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+                return R.drawable.ic_bt_le_audio;
+            default:
+                return R.drawable.ic_bt_le_audio_speakers;
+        }
     }
 
     public int getAudioLocation(BluetoothDevice device) {

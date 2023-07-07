@@ -49,7 +49,7 @@
     <string name="print_options_collapsed" msgid="7455930445670414332">"कोल्याप्स गरेका विकल्पहरू प्रिन्ट गर्नुहोस्"</string>
     <string name="search" msgid="5421724265322228497">"खोज्नुहोस्"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सबै प्रिन्टरहरू"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"सेवा थप्नुहोस्"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"सेवा हाल्नुहोस्"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"खोज बाकस देखाइयो"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"खोज बाकस लुकाइयो"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"प्रिन्टर थप्नुहोस्"</string>

@@ -19,6 +19,9 @@ package android.companion;
 import android.app.PendingIntent;
 import android.companion.IAssociationRequestCallback;
 import android.companion.IOnAssociationsChangedListener;
+import android.companion.IOnMessageReceivedListener;
+import android.companion.IOnTransportsChangedListener;
+import android.companion.ISystemDataTransferCallback;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.content.ComponentName;
@@ -62,13 +65,41 @@ interface ICompanionDeviceManager {
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
 
-    void dispatchMessage(in int messageId, in int associationId, in byte[] message);
-
     void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
+    void addOnTransportsChangedListener(IOnTransportsChangedListener listener);
+
+    void removeOnTransportsChangedListener(IOnTransportsChangedListener listener);
+
+    void sendMessage(int messageType, in byte[] data, in int[] associationIds);
+
+    void addOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
+
+    void removeOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
+
     void notifyDeviceAppeared(int associationId);
 
     void notifyDeviceDisappeared(int associationId);
+
+    PendingIntent buildPermissionTransferUserConsentIntent(String callingPackage, int userId,
+        int associationId);
+
+    void startSystemDataTransfer(String packageName, int userId, int associationId,
+        in ISystemDataTransferCallback callback);
+
+    void attachSystemDataTransport(String packageName, int userId, int associationId, in ParcelFileDescriptor fd);
+
+    void detachSystemDataTransport(String packageName, int userId, int associationId);
+
+    boolean isCompanionApplicationBound(String packageName, int userId);
+
+    PendingIntent buildAssociationCancellationIntent(in String callingPackage, int userId);
+
+    void enableSystemDataSync(int associationId, int flags);
+
+    void disableSystemDataSync(int associationId, int flags);
+
+    void enableSecureTransport(boolean enabled);
 }

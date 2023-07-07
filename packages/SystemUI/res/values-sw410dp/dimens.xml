@@ -27,4 +27,6 @@
     <dimen name="global_actions_grid_item_side_margin">12dp</dimen>
     <dimen name="global_actions_grid_item_height">72dp</dimen>
 
+    <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
+    <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
 </resources>

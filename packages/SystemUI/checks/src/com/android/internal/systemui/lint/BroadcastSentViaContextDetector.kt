@@ -16,6 +16,7 @@
 
 package com.android.internal.systemui.lint
 
+import com.android.SdkConstants.CLASS_CONTEXT
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
@@ -48,14 +49,13 @@ class BroadcastSentViaContextDetector : Detector(), SourceCodeScanner {
             return
         }
 
-        val evaulator = context.evaluator
-        if (evaulator.isMemberInSubClassOf(method, "android.content.Context")) {
+        val evaluator = context.evaluator
+        if (evaluator.isMemberInSubClassOf(method, CLASS_CONTEXT)) {
             context.report(
-                    ISSUE,
-                    method,
-                    context.getNameLocation(node),
-                    "Please don't call sendBroadcast/sendBroadcastAsUser directly on " +
-                            "Context, use com.android.systemui.broadcast.BroadcastSender instead."
+                    issue = ISSUE,
+                    location = context.getNameLocation(node),
+                    message = "`Context.${method.name}()` should be replaced with " +
+                    "`BroadcastSender.${method.name}()`"
             )
         }
     }
@@ -65,14 +65,14 @@ class BroadcastSentViaContextDetector : Detector(), SourceCodeScanner {
         val ISSUE: Issue =
             Issue.create(
                 id = "BroadcastSentViaContext",
-                briefDescription = "Broadcast sent via Context instead of BroadcastSender.",
-                explanation =
-                "Broadcast was sent via " +
-                        "Context.sendBroadcast/Context.sendBroadcastAsUser. Please use " +
-                        "BroadcastSender.sendBroadcast/BroadcastSender.sendBroadcastAsUser " +
-                        "which will schedule dispatch of broadcasts on background thread. " +
-                        "Sending broadcasts on main thread causes jank due to synchronous " +
-                        "Binder calls.",
+                briefDescription = "Broadcast sent via `Context` instead of `BroadcastSender`",
+                // lint trims indents and converts \ to line continuations
+                explanation = """
+                        Broadcasts sent via `Context.sendBroadcast()` or \
+                        `Context.sendBroadcastAsUser()` will block the main thread and may cause \
+                        missed frames. Instead, use `BroadcastSender.sendBroadcast()` or \
+                        `BroadcastSender.sendBroadcastAsUser()` which will schedule and dispatch \
+                        broadcasts on a background worker thread.""",
                 category = Category.PERFORMANCE,
                 priority = 8,
                 severity = Severity.WARNING,

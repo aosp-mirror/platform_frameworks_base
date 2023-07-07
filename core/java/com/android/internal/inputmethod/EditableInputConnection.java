@@ -22,7 +22,12 @@ import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_END;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_START;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.method.KeyListener;
@@ -31,11 +36,27 @@ import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.InsertModeGesture;
+import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.PreviewableHandwritingGesture;
+import android.view.inputmethod.RemoveSpaceGesture;
+import android.view.inputmethod.SelectGesture;
+import android.view.inputmethod.SelectRangeGesture;
+import android.view.inputmethod.TextBoundsInfo;
+import android.view.inputmethod.TextBoundsInfoResult;
 import android.widget.TextView;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Base class for an editable InputConnection instance. This is created by {@link TextView} or
@@ -215,13 +236,17 @@ public final class EditableInputConnection extends BaseInputConnection
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         if (DEBUG) Log.v(TAG, "requestUpdateCursorAnchorInfo " + cursorUpdateMode);
 
+        final int knownModeFlags = InputConnection.CURSOR_UPDATE_IMMEDIATE
+                | InputConnection.CURSOR_UPDATE_MONITOR;
+        final int knownFilterFlags = InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER
+                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_TEXT_APPEARANCE;
+
         // It is possible that any other bit is used as a valid flag in a future release.
         // We should reject the entire request in such a case.
-        final int knownFlagMask = InputConnection.CURSOR_UPDATE_IMMEDIATE
-                | InputConnection.CURSOR_UPDATE_MONITOR
-                | InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
-                | InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER
-                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS;
+        final int knownFlagMask = knownModeFlags | knownFilterFlags;
         final int unknownFlags = cursorUpdateMode & ~knownFlagMask;
         if (unknownFlags != 0) {
             if (DEBUG) {
@@ -237,23 +262,29 @@ public final class EditableInputConnection extends BaseInputConnection
             // CursorAnchorInfo is temporarily unavailable.
             return false;
         }
-        mIMM.setUpdateCursorAnchorInfoMode(cursorUpdateMode);
-        if ((cursorUpdateMode & InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0) {
-            if (mTextView == null) {
-                // In this case, FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is silently ignored.
-                // TODO: Return some notification code for the input method that indicates
-                // FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is ignored.
-            } else if (mTextView.isInLayout()) {
-                // In this case, the view hierarchy is currently undergoing a layout pass.
-                // IMM#updateCursorAnchorInfo is supposed to be called soon after the layout
-                // pass is finished.
-            } else {
-                // This will schedule a layout pass of the view tree, and the layout event
-                // eventually triggers IMM#updateCursorAnchorInfo.
-                mTextView.requestLayout();
-            }
+        mIMM.setUpdateCursorAnchorInfoMode(cursorUpdateMode);  // for UnsupportedAppUsage
+        if (mTextView != null) {
+            mTextView.onRequestCursorUpdatesInternal(cursorUpdateMode & knownModeFlags,
+                    cursorUpdateMode & knownFilterFlags);
         }
         return true;
+    }
+
+    @Override
+    public void requestTextBoundsInfo(
+            @NonNull RectF bounds, @Nullable @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        final TextBoundsInfo textBoundsInfo = mTextView.getTextBoundsInfo(bounds);
+        final int resultCode;
+        if (textBoundsInfo != null) {
+            resultCode = TextBoundsInfoResult.CODE_SUCCESS;
+        } else {
+            resultCode = TextBoundsInfoResult.CODE_FAILED;
+        }
+        final TextBoundsInfoResult textBoundsInfoResult =
+                new TextBoundsInfoResult(resultCode, textBoundsInfo);
+
+        executor.execute(() -> consumer.accept(textBoundsInfoResult));
     }
 
     @Override
@@ -263,6 +294,42 @@ public final class EditableInputConnection extends BaseInputConnection
         }
         mTextView.setImeConsumesInput(imeConsumesInput);
         return true;
+    }
+
+    @Override
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        int result;
+        if (gesture instanceof SelectGesture) {
+            result = mTextView.performHandwritingSelectGesture((SelectGesture) gesture);
+        } else if (gesture instanceof SelectRangeGesture) {
+            result = mTextView.performHandwritingSelectRangeGesture((SelectRangeGesture) gesture);
+        } else if (gesture instanceof DeleteGesture) {
+            result = mTextView.performHandwritingDeleteGesture((DeleteGesture) gesture);
+        } else if (gesture instanceof DeleteRangeGesture) {
+            result = mTextView.performHandwritingDeleteRangeGesture((DeleteRangeGesture) gesture);
+        } else if (gesture instanceof InsertGesture) {
+            result = mTextView.performHandwritingInsertGesture((InsertGesture) gesture);
+        } else if (gesture instanceof RemoveSpaceGesture) {
+            result = mTextView.performHandwritingRemoveSpaceGesture((RemoveSpaceGesture) gesture);
+        } else if (gesture instanceof JoinOrSplitGesture) {
+            result = mTextView.performHandwritingJoinOrSplitGesture((JoinOrSplitGesture) gesture);
+        } else if (gesture instanceof InsertModeGesture) {
+            result = mTextView.performHandwritingInsertModeGesture((InsertModeGesture) gesture);
+        } else {
+            result = HANDWRITING_GESTURE_RESULT_UNSUPPORTED;
+        }
+        if (executor != null && consumer != null) {
+            executor.execute(() -> consumer.accept(result));
+        }
+    }
+
+    @Override
+    public boolean previewHandwritingGesture(
+            @NonNull PreviewableHandwritingGesture gesture,
+            @Nullable CancellationSignal cancellationSignal) {
+        return mTextView.previewHandwritingGesture(gesture, cancellationSignal);
     }
 
     @Override

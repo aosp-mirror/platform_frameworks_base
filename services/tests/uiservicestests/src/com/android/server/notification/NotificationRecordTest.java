@@ -19,6 +19,7 @@ import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_NOT_CONVERSATION;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -54,6 +55,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
@@ -125,7 +127,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mMockContext.getSystemService(eq(Vibrator.class))).thenReturn(mVibrator);
-        when(mMockContext.getResources()).thenReturn(getContext().getResources());
+        final Resources res = mContext.getResources();
+        when(mMockContext.getResources()).thenReturn(res);
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
         ApplicationInfo appInfo = new ApplicationInfo();
@@ -755,6 +758,24 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testProposedImportance() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_UNSPECIFIED, record.getProposedImportance());
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_IMPORTANCE_PROPOSAL, IMPORTANCE_DEFAULT);
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
+
+        record.applyAdjustments();
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getProposedImportance());
+    }
+
+    @Test
     public void testAppImportance_returnsCorrectly() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
@@ -766,6 +787,24 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         record.setIsAppImportanceLocked(false);
         assertFalse(record.getIsAppImportanceLocked());
+    }
+
+    @Test
+    public void testSensitiveContent() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse(record.hasSensitiveContent());
+
+        Bundle signals = new Bundle();
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
+
+        record.applyAdjustments();
+
+        assertTrue(record.hasSensitiveContent());
     }
 
     @Test

@@ -26,7 +26,10 @@
 
 #include <filesystem>
 #include <memory>
+#include <mutex>
+#include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace android::os {
@@ -60,11 +63,11 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
   binder::Status deleteFabricatedOverlay(const std::string& overlay_path,
                                          bool* _aidl_return) override;
 
-  binder::Status acquireFabricatedOverlayIterator() override;
+  binder::Status acquireFabricatedOverlayIterator(int32_t* _aidl_return) override;
 
-  binder::Status releaseFabricatedOverlayIterator() override;
+  binder::Status releaseFabricatedOverlayIterator(int32_t iteratorId) override;
 
-  binder::Status nextFabricatedOverlayInfos(
+  binder::Status nextFabricatedOverlayInfos(int32_t iteratorId,
       std::vector<os::FabricatedOverlayInfo>* _aidl_return) override;
 
   binder::Status dumpIdmap(const std::string& overlay_path, std::string* _aidl_return) override;
@@ -74,7 +77,9 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
   // be able to be recalculated if idmap2 dies and restarts.
   std::unique_ptr<idmap2::TargetResourceContainer> framework_apk_cache_;
 
+  int32_t frro_iter_id_ = 0;
   std::optional<std::filesystem::directory_iterator> frro_iter_;
+  std::mutex frro_iter_mutex_;
 
   template <typename T>
   using MaybeUniquePtr = std::variant<std::unique_ptr<T>, T*>;

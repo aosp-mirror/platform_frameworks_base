@@ -26,6 +26,9 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -51,6 +54,7 @@ public final class GameManager {
             GAME_MODE_STANDARD, // 1
             GAME_MODE_PERFORMANCE, // 2
             GAME_MODE_BATTERY, // 3
+            GAME_MODE_CUSTOM, // 4
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GameMode {
@@ -79,6 +83,15 @@ public final class GameManager {
      */
     public static final int GAME_MODE_BATTERY = 3;
 
+    /**
+     * Custom game mode that has user-provided configuration overrides.
+     * <p>
+     * Custom game mode is expected to be handled only by the platform using users'
+     * preferred config. It is currently not allowed to opt in custom mode in game mode XML file nor
+     * expected to perform app-based optimizations when activated.
+     */
+    public static final int GAME_MODE_CUSTOM = 4;
+
     GameManager(Context context, Handler handler) throws ServiceNotFoundException {
         mContext = context;
         mService = IGameManagerService.Stub.asInterface(
@@ -93,19 +106,23 @@ public final class GameManager {
      * application is not a game, always return {@link #GAME_MODE_UNSUPPORTED}.
      * <p>
      * Developers should call this API every time the application is resumed.
+     * <p>
+     * If a game's <code>targetSdkVersion</code> is {@link android.os.Build.VERSION_CODES#TIRAMISU}
+     * or lower, and when the game mode is set to {@link #GAME_MODE_CUSTOM} which is available in
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or newer, this API will return
+     * {@link #GAME_MODE_STANDARD} instead for backward compatibility.
      */
     public @GameMode int getGameMode() {
-        try {
-            return mService.getGameMode(mContext.getPackageName(), mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getGameModeImpl(mContext.getPackageName(),
+                mContext.getApplicationInfo().targetSdkVersion);
     }
 
     /**
      * Gets the game mode for the given package.
      * <p>
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     * <p>
+     * Also see {@link #getGameMode()} on how it handles SDK version compatibility.
      *
      * @hide
      */
@@ -113,11 +130,32 @@ public final class GameManager {
     @UserHandleAware
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int getGameMode(@NonNull String packageName) {
+        final int targetSdkVersion;
         try {
-            return mService.getGameMode(packageName, mContext.getUserId());
+            final ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
+                    packageName, PackageManager.ApplicationInfoFlags.of(0));
+            targetSdkVersion = applicationInfo.targetSdkVersion;
+        } catch (PackageManager.NameNotFoundException ex) {
+            return GAME_MODE_UNSUPPORTED;
+        }
+        return getGameModeImpl(packageName, targetSdkVersion);
+    }
+
+    // This target SDK version check can be performed against any game by a privileged app, and
+    // we don't want a binder call each time to check on behalf of an app using CompatChange.
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private @GameMode int getGameModeImpl(@NonNull String packageName, int targetSdkVersion) {
+        final int gameMode;
+        try {
+            gameMode = mService.getGameMode(packageName,
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        if (gameMode == GAME_MODE_CUSTOM && targetSdkVersion <= Build.VERSION_CODES.TIRAMISU) {
+            return GAME_MODE_STANDARD;
+        }
+        return gameMode;
     }
 
     /**
@@ -149,7 +187,9 @@ public final class GameManager {
      * Sets the game mode for the given package.
      * <p>
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
-     *
+     * <p>
+     * Setting the game mode on a non-game application or setting a game to
+     * {@link #GAME_MODE_UNSUPPORTED} will have no effect.
      * @hide
      */
     @SystemApi
@@ -173,7 +213,7 @@ public final class GameManager {
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int[] getAvailableGameModes(@NonNull String packageName) {
         try {
-            return mService.getAvailableGameModes(packageName);
+            return mService.getAvailableGameModes(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -237,6 +277,28 @@ public final class GameManager {
     public void setGameServiceProvider(@Nullable String packageName) {
         try {
             mService.setGameServiceProvider(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates the config for the game's {@link #GAME_MODE_CUSTOM} mode.
+     * <p>
+     * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     *
+     * @param packageName The package name of the game to update
+     * @param gameModeConfig The configuration to use for game mode interventions
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void updateCustomGameModeConfiguration(@NonNull String packageName,
+            @NonNull GameModeConfiguration gameModeConfig) {
+        try {
+            mService.updateCustomGameModeConfiguration(packageName, gameModeConfig,
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

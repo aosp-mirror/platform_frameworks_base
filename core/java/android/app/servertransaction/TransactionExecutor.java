@@ -32,6 +32,7 @@ import static android.app.servertransaction.TransactionExecutorHelper.transactio
 
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.os.IBinder;
 import android.util.IntArray;
 import android.util.Slog;
@@ -126,10 +127,13 @@ public class TransactionExecutor {
             final ClientTransactionItem item = callbacks.get(i);
             if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
-            final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
-                    item.getPostExecutionState());
-            if (closestPreExecutionState != UNDEFINED) {
-                cycleToPath(r, closestPreExecutionState, transaction);
+
+            if (item.shouldHaveDefinedPreExecutionState()) {
+                final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
+                        item.getPostExecutionState());
+                if (closestPreExecutionState != UNDEFINED) {
+                    cycleToPath(r, closestPreExecutionState, transaction);
+                }
             }
 
             item.execute(mTransactionHandler, token, mPendingActions);
@@ -215,7 +219,7 @@ public class TransactionExecutor {
             switch (state) {
                 case ON_CREATE:
                     mTransactionHandler.handleLaunchActivity(r, mPendingActions,
-                            null /* customIntent */);
+                            Context.DEVICE_ID_INVALID, null /* customIntent */);
                     break;
                 case ON_START:
                     mTransactionHandler.handleStartActivity(r, mPendingActions,
@@ -223,11 +227,13 @@ public class TransactionExecutor {
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,
-                            r.isForward, "LIFECYCLER_RESUME_ACTIVITY");
+                            r.isForward, false /* shouldSendCompatFakeFocus */,
+                            "LIFECYCLER_RESUME_ACTIVITY");
                     break;
                 case ON_PAUSE:
                     mTransactionHandler.handlePauseActivity(r, false /* finished */,
-                            false /* userLeaving */, 0 /* configChanges */, mPendingActions,
+                            false /* userLeaving */, 0 /* configChanges */,
+                            false /* autoEnteringPip */, mPendingActions,
                             "LIFECYCLER_PAUSE_ACTIVITY");
                     break;
                 case ON_STOP:

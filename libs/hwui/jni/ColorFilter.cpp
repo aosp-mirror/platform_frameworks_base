@@ -17,6 +17,7 @@
 
 #include "GraphicsJNI.h"
 
+#include "SkBlendMode.h"
 #include "SkColorFilter.h"
 #include "SkColorMatrixFilter.h"
 

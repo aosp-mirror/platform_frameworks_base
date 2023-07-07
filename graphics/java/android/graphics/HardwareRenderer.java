@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.OverlayProperties;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -47,9 +48,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.stream.Stream;
 
 import sun.misc.Cleaner;
 
@@ -145,6 +144,32 @@ public class HardwareRenderer {
     public @interface DumpFlags {
     }
 
+
+    /**
+     * Trims all Skia caches.
+     * @hide
+     */
+    public static final int CACHE_TRIM_ALL = 0;
+    /**
+     * Trims Skia font caches.
+     * @hide
+     */
+    public static final int CACHE_TRIM_FONT = 1;
+    /**
+     * Trims Skia resource caches.
+     * @hide
+     */
+    public static final int CACHE_TRIM_RESOURCES = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"CACHE_TRIM_"}, value = {
+            CACHE_TRIM_ALL,
+            CACHE_TRIM_FONT,
+            CACHE_TRIM_RESOURCES
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CacheTrimLevel {}
+
     /**
      * Name of the file that holds the shaders cache.
      */
@@ -159,6 +184,7 @@ public class HardwareRenderer {
     private boolean mOpaque = true;
     private boolean mForceDark = false;
     private @ActivityInfo.ColorMode int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+    private float mDesiredSdrHdrRatio = 1f;
 
     /**
      * Creates a new instance of a HardwareRenderer. The HardwareRenderer will default
@@ -320,7 +346,8 @@ public class HardwareRenderer {
      * @param surfaceControl The surface control to pass to render thread in hwui.
      *        If null, any previous references held in render thread will be discarded.
     */
-    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl) {
+    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl,
+            @Nullable BLASTBufferQueue blastBufferQueue) {
         nSetSurfaceControl(mNativeProxy, surfaceControl != null ? surfaceControl.mNativeObject : 0);
     }
 
@@ -644,11 +671,12 @@ public class HardwareRenderer {
      * @param colorMode The @{@link ActivityInfo.ColorMode} to request
      * @hide
      */
-    public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
+    public float setColorMode(@ActivityInfo.ColorMode int colorMode) {
         if (mColorMode != colorMode) {
             mColorMode = colorMode;
-            nSetColorMode(mNativeProxy, colorMode);
+            mDesiredSdrHdrRatio = nSetColorMode(mNativeProxy, colorMode);
         }
+        return mDesiredSdrHdrRatio;
     }
 
     /**
@@ -662,6 +690,12 @@ public class HardwareRenderer {
         nSetSdrWhitePoint(mNativeProxy, whitePoint);
         mColorMode = colorMode;
         nSetColorMode(mNativeProxy, colorMode);
+    }
+
+    /** @hide */
+    public void setTargetHdrSdrRatio(float ratio) {
+        if (ratio < 1.f || !Float.isFinite(ratio)) ratio = 1.f;
+        nSetTargetSdrHdrRatio(mNativeProxy, ratio);
     }
 
     /**
@@ -984,6 +1018,24 @@ public class HardwareRenderer {
     }
 
     /**
+     * Notifies the hardware renderer about pending choreographer callbacks.
+     *
+     * @hide
+     */
+    public void notifyCallbackPending() {
+        nNotifyCallbackPending(mNativeProxy);
+    }
+
+    /**
+     * Notifies the hardware renderer about upcoming expensive frames.
+     *
+     * @hide
+     */
+    public void notifyExpensiveFrame() {
+        nNotifyExpensiveFrame(mNativeProxy);
+    }
+
+    /**
      * b/68769804, b/66945974: For low FPS experiments.
      *
      * @hide
@@ -1046,14 +1098,39 @@ public class HardwareRenderer {
     }
 
     /** @hide */
-    public static int copySurfaceInto(Surface surface, Rect srcRect, Bitmap bitmap) {
-        if (srcRect == null) {
-            // Empty rect means entire surface
-            return nCopySurfaceInto(surface, 0, 0, 0, 0, bitmap.getNativeInstance());
-        } else {
-            return nCopySurfaceInto(surface, srcRect.left, srcRect.top,
-                    srcRect.right, srcRect.bottom, bitmap.getNativeInstance());
+    public abstract static class CopyRequest {
+        protected Bitmap mDestinationBitmap;
+        final Rect mSrcRect;
+
+        protected CopyRequest(Rect srcRect, Bitmap destinationBitmap) {
+            mDestinationBitmap = destinationBitmap;
+            if (srcRect != null) {
+                mSrcRect = srcRect;
+            } else {
+                mSrcRect = new Rect();
+            }
         }
+
+        /**
+         * Retrieve the bitmap in which to store the result of the copy request
+         */
+        public long getDestinationBitmap(int srcWidth, int srcHeight) {
+            if (mDestinationBitmap == null) {
+                mDestinationBitmap =
+                        Bitmap.createBitmap(srcWidth, srcHeight, Bitmap.Config.ARGB_8888);
+            }
+            return mDestinationBitmap.getNativeInstance();
+        }
+
+        /** Called when the copy is completed */
+        public abstract void onCopyFinished(int result);
+    }
+
+    /** @hide */
+    public static void copySurfaceInto(Surface surface, CopyRequest copyRequest) {
+        final Rect srcRect = copyRequest.mSrcRect;
+        nCopySurfaceInto(surface, srcRect.left, srcRect.top, srcRect.right, srcRect.bottom,
+                copyRequest);
     }
 
     /**
@@ -1078,6 +1155,20 @@ public class HardwareRenderer {
      */
     public static void trimMemory(int level) {
         nTrimMemory(level);
+    }
+
+    /**
+     * Invoke this when all font caches should be flushed. This can cause jank on next render
+     * commands so use it only after expensive font allocation operations which would
+     * allocate large amount of temporary memory.
+     *
+     * @param level Hint about which caches to trim. See {@link #CACHE_TRIM_ALL},
+     *              {@link #CACHE_TRIM_FONT}, {@link #CACHE_TRIM_RESOURCES}
+     *
+     * @hide
+     */
+    public static void trimCaches(@CacheTrimLevel int level) {
+        nTrimCaches(level);
     }
 
     /** @hide */
@@ -1114,6 +1205,16 @@ public class HardwareRenderer {
      */
     public static void setContextForInit(Context context) {
         ProcessInitializer.sInstance.setContext(context);
+    }
+
+    /**
+     * Sets whether or not the current process is a system or persistent process. Used to influence
+     * the chosen memory usage policy.
+     *
+     * @hide
+     **/
+    public static void setIsSystemOrPersistent() {
+        nSetIsSystemOrPersistent(true);
     }
 
     /**
@@ -1178,30 +1279,6 @@ public class HardwareRenderer {
 
     private static class ProcessInitializer {
         static ProcessInitializer sInstance = new ProcessInitializer();
-
-        // Magic values from android/data_space.h
-        private static final int INTERNAL_DATASPACE_SRGB = 142671872;
-        private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
-        private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
-
-        private enum Dataspace {
-            DISPLAY_P3(ColorSpace.Named.DISPLAY_P3, INTERNAL_DATASPACE_DISPLAY_P3),
-            SCRGB(ColorSpace.Named.EXTENDED_SRGB, INTERNAL_DATASPACE_SCRGB),
-            SRGB(ColorSpace.Named.SRGB, INTERNAL_DATASPACE_SRGB);
-
-            private final ColorSpace.Named mColorSpace;
-            private final int mNativeDataspace;
-            Dataspace(ColorSpace.Named colorSpace, int nativeDataspace) {
-                this.mColorSpace = colorSpace;
-                this.mNativeDataspace = nativeDataspace;
-            }
-
-            static Optional<Dataspace> find(ColorSpace colorSpace) {
-                return Stream.of(Dataspace.values())
-                        .filter(d -> ColorSpace.get(d.mColorSpace).equals(colorSpace))
-                        .findFirst();
-            }
-        }
 
         private boolean mInitialized = false;
         private boolean mDisplayInitialized = false;
@@ -1271,6 +1348,7 @@ public class HardwareRenderer {
             initDisplayInfo();
 
             nSetIsHighEndGfx(ActivityManager.isHighEndGfx());
+            nSetIsLowRam(ActivityManager.isLowRamDeviceStatic());
             // Defensively clear out the context in case we were passed a context that can leak
             // if we live longer than it, e.g. an activity context.
             mContext = null;
@@ -1289,26 +1367,61 @@ public class HardwareRenderer {
                 return;
             }
 
-            Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
-            if (display == null) {
+            final Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+            if (defaultDisplay == null) {
                 Log.d(LOG_TAG, "Failed to find default display for display-based configuration");
                 return;
             }
 
-            Dataspace wideColorDataspace =
-                    Optional.ofNullable(display.getPreferredWideGamutColorSpace())
-                            .flatMap(Dataspace::find)
-                            // Default to SRGB if the display doesn't support wide color
-                            .orElse(Dataspace.SRGB);
+            final Display[] allDisplays = dm.getDisplays();
+            if (allDisplays.length == 0) {
+                Log.d(LOG_TAG, "Failed to query displays");
+                return;
+            }
 
-            // Grab the physical screen dimensions from the active display mode
-            // Strictly speaking the screen resolution may not always be constant - it is for
-            // sizing the font cache for the underlying rendering thread. Since it's a
-            // heuristic we don't need to be always 100% correct.
-            Mode activeMode = display.getMode();
-            nInitDisplayInfo(activeMode.getPhysicalWidth(), activeMode.getPhysicalHeight(),
-                    display.getRefreshRate(), wideColorDataspace.mNativeDataspace,
-                    display.getAppVsyncOffsetNanos(), display.getPresentationDeadlineNanos());
+            final Mode activeMode = defaultDisplay.getMode();
+            final ColorSpace defaultWideColorSpace =
+                    defaultDisplay.getPreferredWideGamutColorSpace();
+            int wideColorDataspace = defaultWideColorSpace != null
+                    ? defaultWideColorSpace.getDataSpace() : 0;
+            // largest width & height are used to size the default HWUI cache sizes. So find the
+            // largest display resolution we could encounter & use that as the guidance. The actual
+            // memory policy in play will interpret these values differently.
+            int largestWidth = activeMode.getPhysicalWidth();
+            int largestHeight = activeMode.getPhysicalHeight();
+            final OverlayProperties overlayProperties = defaultDisplay.getOverlaySupport();
+            boolean supportFp16ForHdr = overlayProperties != null
+                    ? overlayProperties.supportFp16ForHdr() : false;
+            boolean supportMixedColorSpaces = overlayProperties != null
+                    ? overlayProperties.supportMixedColorSpaces() : false;
+
+            for (int i = 0; i < allDisplays.length; i++) {
+                final Display display = allDisplays[i];
+                // Take the first wide gamut dataspace as the source of truth
+                // Possibly should do per-HardwareRenderer wide gamut dataspace so we can use the
+                // target display's ideal instead
+                if (wideColorDataspace == 0) {
+                    ColorSpace cs = display.getPreferredWideGamutColorSpace();
+                    if (cs != null) {
+                        wideColorDataspace = cs.getDataSpace();
+                    }
+                }
+                Mode[] modes = display.getSupportedModes();
+                for (int j = 0; j < modes.length; j++) {
+                    Mode mode = modes[j];
+                    int width = mode.getPhysicalWidth();
+                    int height = mode.getPhysicalHeight();
+                    if ((width * height) > (largestWidth * largestHeight)) {
+                        largestWidth = width;
+                        largestHeight = height;
+                    }
+                }
+            }
+
+            nInitDisplayInfo(largestWidth, largestHeight, defaultDisplay.getRefreshRate(),
+                    wideColorDataspace, defaultDisplay.getAppVsyncOffsetNanos(),
+                    defaultDisplay.getPresentationDeadlineNanos(),
+                    supportFp16ForHdr, supportMixedColorSpaces);
 
             mDisplayInitialized = true;
         }
@@ -1387,11 +1500,17 @@ public class HardwareRenderer {
 
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
 
-    private static native void nSetColorMode(long nativeProxy, int colorMode);
+    private static native float nSetColorMode(long nativeProxy, int colorMode);
+
+    private static native void nSetTargetSdrHdrRatio(long nativeProxy, float ratio);
 
     private static native void nSetSdrWhitePoint(long nativeProxy, float whitePoint);
 
     private static native void nSetIsHighEndGfx(boolean isHighEndGfx);
+
+    private static native void nSetIsLowRam(boolean isLowRam);
+
+    private static native void nSetIsSystemOrPersistent(boolean isSystemOrPersistent);
 
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
 
@@ -1417,6 +1536,8 @@ public class HardwareRenderer {
     private static native void nDestroyHardwareResources(long nativeProxy);
 
     private static native void nTrimMemory(int level);
+
+    private static native void nTrimCaches(int level);
 
     private static native void nOverrideProperty(String name, String value);
 
@@ -1464,8 +1585,8 @@ public class HardwareRenderer {
 
     private static native void nRemoveObserver(long nativeProxy, long nativeObserver);
 
-    private static native int nCopySurfaceInto(Surface surface,
-            int srcLeft, int srcTop, int srcRight, int srcBottom, long bitmapHandle);
+    private static native void nCopySurfaceInto(Surface surface,
+            int srcLeft, int srcTop, int srcRight, int srcBottom, CopyRequest request);
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
 
@@ -1484,11 +1605,16 @@ public class HardwareRenderer {
     private static native void nSetDisplayDensityDpi(int densityDpi);
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
-            int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos);
+            int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos,
+            boolean supportsFp16ForHdr, boolean nInitDisplayInfo);
 
     private static native void nSetDrawingEnabled(boolean drawingEnabled);
 
     private static native boolean nIsDrawingEnabled();
 
     private static native void nSetRtAnimationsEnabled(boolean rtAnimationsEnabled);
+
+    private static native void nNotifyCallbackPending(long nativeProxy);
+
+    private static native void nNotifyExpensiveFrame(long nativeProxy);
 }

@@ -53,6 +53,13 @@
     <install-in-user-type package="com.android.internal.systemui.onehanded.gestural">
         <install-in user-type="FULL" />
     </install-in-user-type>
+    <install-in-user-type package="com.android.internal.systemui.navbar.transparent">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
+    <install-in-user-type package="com.android.role.notes.enabled">
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
     <install-in-user-type package="com.android.theme.color.amethyst">
         <install-in user-type="FULL" />
         <install-in user-type="PROFILE" />

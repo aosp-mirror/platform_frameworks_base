@@ -47,6 +47,7 @@ public final class KnownPackages {
             PACKAGE_RETAIL_DEMO,
             PACKAGE_RECENTS,
             PACKAGE_AMBIENT_CONTEXT_DETECTION,
+            PACKAGE_WEARABLE_SENSING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {
@@ -71,21 +72,23 @@ public final class KnownPackages {
     public static final int PACKAGE_RETAIL_DEMO = 16;
     public static final int PACKAGE_RECENTS = 17;
     public static final int PACKAGE_AMBIENT_CONTEXT_DETECTION = 18;
+    public static final int PACKAGE_WEARABLE_SENSING = 19;
     // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
     // Please note the numbers should be continuous.
-    public static final int LAST_KNOWN_PACKAGE = PACKAGE_AMBIENT_CONTEXT_DETECTION;
+    public static final int LAST_KNOWN_PACKAGE = PACKAGE_WEARABLE_SENSING;
 
     private final DefaultAppProvider mDefaultAppProvider;
     private final String mRequiredInstallerPackage;
     private final String mRequiredUninstallerPackage;
     private final String mSetupWizardPackage;
-    private final String mRequiredVerifierPackage;
+    private final String[] mRequiredVerifierPackages;
     private final String mDefaultTextClassifierPackage;
     private final String mSystemTextClassifierPackageName;
     private final String mRequiredPermissionControllerPackage;
     private final String mConfiguratorPackage;
     private final String mIncidentReportApproverPackage;
     private final String mAmbientContextDetectionPackage;
+    private final String mWearableSensingPackage;
     private final String mAppPredictionServicePackage;
     private final String mCompanionPackage;
     private final String mRetailDemoPackage;
@@ -94,23 +97,24 @@ public final class KnownPackages {
 
     KnownPackages(DefaultAppProvider defaultAppProvider, String requiredInstallerPackage,
             String requiredUninstallerPackage, String setupWizardPackage,
-            String requiredVerifierPackage, String defaultTextClassifierPackage,
+            String[] requiredVerifierPackages, String defaultTextClassifierPackage,
             String systemTextClassifierPackageName, String requiredPermissionControllerPackage,
             String configuratorPackage, String incidentReportApproverPackage,
-            String ambientContextDetectionPackage, String appPredictionServicePackage,
-            String companionPackageName, String retailDemoPackage,
-            String overlayConfigSignaturePackage, String recentsPackage) {
+            String ambientContextDetectionPackage, String wearableSensingPackage,
+            String appPredictionServicePackage, String companionPackageName,
+            String retailDemoPackage, String overlayConfigSignaturePackage, String recentsPackage) {
         mDefaultAppProvider = defaultAppProvider;
         mRequiredInstallerPackage = requiredInstallerPackage;
         mRequiredUninstallerPackage = requiredUninstallerPackage;
         mSetupWizardPackage = setupWizardPackage;
-        mRequiredVerifierPackage = requiredVerifierPackage;
+        mRequiredVerifierPackages = requiredVerifierPackages;
         mDefaultTextClassifierPackage = defaultTextClassifierPackage;
         mSystemTextClassifierPackageName = systemTextClassifierPackageName;
         mRequiredPermissionControllerPackage = requiredPermissionControllerPackage;
         mConfiguratorPackage = configuratorPackage;
         mIncidentReportApproverPackage = incidentReportApproverPackage;
         mAmbientContextDetectionPackage = ambientContextDetectionPackage;
+        mWearableSensingPackage = wearableSensingPackage;
         mAppPredictionServicePackage = appPredictionServicePackage;
         mCompanionPackage = companionPackageName;
         mRetailDemoPackage = retailDemoPackage;
@@ -165,6 +169,8 @@ public final class KnownPackages {
                 return "Recents";
             case PACKAGE_AMBIENT_CONTEXT_DETECTION:
                 return "Ambient Context Detection";
+            case PACKAGE_WEARABLE_SENSING:
+                return "Wearable sensing";
         }
         return "Unknown";
     }
@@ -182,7 +188,7 @@ public final class KnownPackages {
             case PACKAGE_SYSTEM:
                 return new String[]{"android"};
             case PACKAGE_VERIFIER:
-                return snapshot.filterOnlySystemPackages(mRequiredVerifierPackage);
+                return snapshot.filterOnlySystemPackages(mRequiredVerifierPackages);
             case PACKAGE_SYSTEM_TEXT_CLASSIFIER:
                 return snapshot.filterOnlySystemPackages(
                         mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
@@ -194,6 +200,8 @@ public final class KnownPackages {
                 return snapshot.filterOnlySystemPackages(mIncidentReportApproverPackage);
             case PACKAGE_AMBIENT_CONTEXT_DETECTION:
                 return snapshot.filterOnlySystemPackages(mAmbientContextDetectionPackage);
+            case PACKAGE_WEARABLE_SENSING:
+                return snapshot.filterOnlySystemPackages(mWearableSensingPackage);
             case PACKAGE_APP_PREDICTOR:
                 return snapshot.filterOnlySystemPackages(mAppPredictionServicePackage);
             case PACKAGE_COMPANION:

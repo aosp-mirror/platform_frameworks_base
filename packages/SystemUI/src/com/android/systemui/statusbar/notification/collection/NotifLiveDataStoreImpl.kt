@@ -32,7 +32,7 @@ import javax.inject.Inject
 @SysUISingleton
 class NotifLiveDataStoreImpl @Inject constructor(
     @Main private val mainExecutor: Executor
-) : NotifLiveDataStore {
+) : NotifLiveDataStore, PipelineDumpable {
     private val hasActiveNotifsPrivate = NotifLiveDataImpl(
         name = "hasActiveNotifs",
         initialValue = false,
@@ -66,6 +66,12 @@ class NotifLiveDataStoreImpl @Inject constructor(
             ).forEach { dispatcher -> dispatcher.invoke() }
         }
     }
+
+    override fun dumpPipeline(d: PipelineDumper) {
+        d.dump("activeNotifListPrivate", activeNotifListPrivate)
+        d.dump("activeNotifCountPrivate", activeNotifCountPrivate)
+        d.dump("hasActiveNotifsPrivate", hasActiveNotifsPrivate)
+    }
 }
 
 /** Read-write implementation of [NotifLiveData] */
@@ -73,7 +79,7 @@ class NotifLiveDataImpl<T>(
     private val name: String,
     initialValue: T,
     @Main private val mainExecutor: Executor
-) : NotifLiveData<T> {
+) : NotifLiveData<T>, PipelineDumpable {
     private val syncObservers = ListenerSet<Observer<T>>()
     private val asyncObservers = ListenerSet<Observer<T>>()
     private val atomicValue = AtomicReference(initialValue)
@@ -133,5 +139,10 @@ class NotifLiveDataImpl<T>(
     override fun removeObserver(observer: Observer<T>) {
         syncObservers.remove(observer)
         asyncObservers.remove(observer)
+    }
+
+    override fun dumpPipeline(d: PipelineDumper) {
+        d.dump("syncObservers", syncObservers)
+        d.dump("asyncObservers", asyncObservers)
     }
 }

@@ -23,54 +23,37 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.util.DumpUtilsKt;
+
+import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationShelf}
  * to implement dimming/activating on Keyguard for the double-tap gesture
  */
 public abstract class ActivatableNotificationView extends ExpandableOutlineView {
-
-    /**
-     * The amount of width, which is kept in the end when performing a disappear animation (also
-     * the amount from which the horizontal appearing begins)
-     */
-    private static final float HORIZONTAL_COLLAPSED_REST_PARTIAL = 0.05f;
-
-    /**
-     * At which point from [0,1] does the horizontal collapse animation end (or start when
-     * expanding)? 1.0 meaning that it ends immediately and 0.0 that it is continuously animated.
-     */
-    private static final float HORIZONTAL_ANIMATION_END = 0.2f;
-
-    /**
-     * At which point from [0,1] does the horizontal collapse animation start (or start when
-     * expanding)? 1.0 meaning that it starts immediately and 0.0 that it is animated at all.
-     */
-    private static final float HORIZONTAL_ANIMATION_START = 1.0f;
-
-    /**
-     * At which point from [0,1] does the vertical collapse animation start (or end when
-     * expanding) 1.0 meaning that it starts immediately and 0.0 that it is animated at all.
-     */
-    private static final float VERTICAL_ANIMATION_START = 1.0f;
 
     /**
      * A sentinel value when no color should be used. Can be used with {@link #setTintColor(int)}
@@ -87,10 +70,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * The start of the animation is at #ALPHA_APPEAR_START_FRACTION
      */
     private static final float ALPHA_APPEAR_END_FRACTION = 1;
-    private static final Interpolator ACTIVATE_INVERSE_INTERPOLATOR
-            = new PathInterpolator(0.6f, 0, 0.5f, 1);
-    private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
-            = new PathInterpolator(0, 0, 0.5f, 1);
+    private final Set<SourceType> mOnDetachResetRoundness = new HashSet<>();
     private int mTintedRippleColor;
     private int mNormalRippleColor;
     private Gefingerpoken mTouchHandler;
@@ -103,10 +83,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     private boolean mActivated;
 
-    private OnActivatedListener mOnActivatedListener;
-
     private final Interpolator mSlowOutFastInInterpolator;
-    private final Interpolator mSlowOutLinearInInterpolator;
     private Interpolator mCurrentAppearInterpolator;
 
     NotificationBackgroundView mBackgroundNormal;
@@ -133,12 +110,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected Point mTargetPoint;
     private boolean mDismissed;
     private boolean mRefocusOnDismiss;
-    private AccessibilityManager mAccessibilityManager;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
-        mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
         setClipChildren(false);
         setClipToPadding(false);
         updateColors();
@@ -151,6 +126,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
                 R.color.notification_ripple_untinted_color);
+        // Reset background color tint and override tint, as they are from an old theme
+        mBgTint = NO_COLOR;
+        mOverrideTint = NO_COLOR;
+        mOverrideAmount = 0.0f;
     }
 
     /**
@@ -216,7 +195,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void onTap() {}
 
     /** Sets the last action up time this view was touched. */
-    void setLastActionUpTime(long eventTime) {
+    public void setLastActionUpTime(long eventTime) {
         mLastActionUpTime = eventTime;
     }
 
@@ -232,10 +211,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     protected boolean disallowSingleClick(MotionEvent ev) {
-        return false;
-    }
-
-    protected boolean handleSlideBack() {
         return false;
     }
 
@@ -256,38 +231,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setPressedAllowed(allowed);
     }
 
-    void makeActive() {
-        mActivated = true;
-        if (mOnActivatedListener != null) {
-            mOnActivatedListener.onActivated(this);
-        }
-    }
-
-    public boolean isActive() {
-        return mActivated;
-    }
-
-    /**
-     * Cancels the hotspot and makes the notification inactive.
-     */
-    public void makeInactive(boolean animate) {
-        if (mActivated) {
-            mActivated = false;
-        }
-        if (mOnActivatedListener != null) {
-            mOnActivatedListener.onActivationReset(this);
-        }
-    }
-
     private void updateOutlineAlpha() {
         float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
         alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
         setOutlineAlpha(alpha);
-    }
-
-    private void setNormalBackgroundVisibilityAmount(float normalBackgroundVisibilityAmount) {
-        mNormalBackgroundVisibilityAmount = normalBackgroundVisibilityAmount;
-        updateOutlineAlpha();
     }
 
     @Override
@@ -301,13 +248,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     protected void onBelowSpeedBumpChanged() {
-    }
-
-    /**
-     * @return whether we are below the speed bump
-     */
-    public boolean isBelowSpeedBump() {
-        return mIsBelowSpeedBump;
     }
 
     /**
@@ -381,7 +321,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void setBackgroundTintColor(int color) {
         if (color != mCurrentBackgroundTint) {
             mCurrentBackgroundTint = color;
-            if (color == mNormalColor) {
+            // TODO(282173943): re-enable this tinting optimization when Resources are thread-safe
+            if (false && color == mNormalColor) {
                 // We don't need to tint a normal notification
                 color = 0;
             }
@@ -482,12 +423,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (animationListener != null) {
             mAppearAnimator.addListener(animationListener);
         }
-        if (delay > 0) {
-            // we need to apply the initial state already to avoid drawn frames in the wrong state
-            updateAppearAnimationAlpha();
-            updateAppearRect();
-            mAppearAnimator.setStartDelay(delay);
-        }
+        // we need to apply the initial state already to avoid drawn frames in the wrong state
+        updateAppearAnimationAlpha();
+        updateAppearRect();
         mAppearAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mWasCancelled;
 
@@ -518,7 +456,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mWasCancelled = true;
             }
         });
-        mAppearAnimator.start();
+
+        // Cache the original animator so we can check if the animation should be started in the
+        // Choreographer callback. It's possible that the original animator (mAppearAnimator) is
+        // replaced with a new value before the callback is called.
+        ValueAnimator cachedAnimator = mAppearAnimator;
+        // Even when delay=0, starting the animation on the next frame is necessary to avoid jank.
+        // Not doing so will increase the chances our Animator will be forced to skip a value of
+        // the animation's progression, causing stutter.
+        Choreographer.getInstance().postFrameCallbackDelayed(
+                frameTimeNanos -> {
+                    if (mAppearAnimator == cachedAnimator) {
+                        mAppearAnimator.start();
+                    }
+                }, delay);
     }
 
     private int getCujType(boolean isAppearing) {
@@ -609,31 +560,25 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void resetAllContentAlphas() {}
 
     @Override
-    protected void applyRoundness() {
-        super.applyRoundness();
-        applyBackgroundRoundness(getCurrentBackgroundRadiusTop(),
-                getCurrentBackgroundRadiusBottom());
+    public void applyRoundnessAndInvalidate() {
+        applyBackgroundRoundness(getTopCornerRadius(), getBottomCornerRadius());
+        super.applyRoundnessAndInvalidate();
     }
 
     @Override
-    public float getCurrentBackgroundRadiusTop() {
+    public float getTopCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusTop(), fraction);
+        return MathUtils.lerp(0, super.getTopCornerRadius(), fraction);
     }
 
     @Override
-    public float getCurrentBackgroundRadiusBottom() {
+    public float getBottomCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusBottom(), fraction);
+        return MathUtils.lerp(0, super.getBottomCornerRadius(), fraction);
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {
         mBackgroundNormal.setRadius(topRadius, bottomRadius);
-    }
-
-    @Override
-    protected void setBackgroundTop(int backgroundTop) {
-        mBackgroundNormal.setBackgroundTop(backgroundTop);
     }
 
     protected abstract View getContentView();
@@ -710,10 +655,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
-    public void setOnActivatedListener(OnActivatedListener onActivatedListener) {
-        mOnActivatedListener = onActivatedListener;
-    }
-
     @Override
     public void setFakeShadowIntensity(float shadowIntensity, float outlineAlpha, int shadowYEnd,
             int outlineTranslation) {
@@ -764,16 +705,46 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return mRefocusOnDismiss || isAccessibilityFocused();
     }
 
-    void setTouchHandler(Gefingerpoken touchHandler) {
+    public void setTouchHandler(Gefingerpoken touchHandler) {
         mTouchHandler = touchHandler;
     }
 
-    public void setAccessibilityManager(AccessibilityManager accessibilityManager) {
-        mAccessibilityManager = accessibilityManager;
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (!mOnDetachResetRoundness.isEmpty()) {
+            for (SourceType sourceType : mOnDetachResetRoundness) {
+                requestRoundnessReset(sourceType);
+            }
+            mOnDetachResetRoundness.clear();
+        }
     }
 
-    public interface OnActivatedListener {
-        void onActivated(ActivatableNotificationView view);
-        void onActivationReset(ActivatableNotificationView view);
+    /**
+     * SourceType which should be reset when this View is detached
+     * @param sourceType will be reset on View detached
+     */
+    public void addOnDetachResetRoundness(SourceType sourceType) {
+        mOnDetachResetRoundness.add(sourceType);
+    }
+
+    @Override
+    public void dump(PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
+        super.dump(pw, args);
+        if (DUMP_VERBOSE) {
+            DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                dumpBackgroundView(pw, args);
+            });
+        }
+    }
+
+    protected void dumpBackgroundView(IndentingPrintWriter pw, String[] args) {
+        pw.println("Background View: " + mBackgroundNormal);
+        if (DUMP_VERBOSE && mBackgroundNormal != null) {
+            DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                mBackgroundNormal.dump(pw, args);
+            });
+        }
     }
 }

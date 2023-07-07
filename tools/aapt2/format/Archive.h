@@ -22,12 +22,11 @@
 #include <string>
 #include <vector>
 
+#include "androidfw/BigBuffer.h"
+#include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-
-#include "Diagnostics.h"
 #include "io/Io.h"
-#include "util/BigBuffer.h"
 #include "util/Files.h"
 
 namespace aapt {
@@ -47,12 +46,12 @@ class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
  public:
   virtual ~IArchiveWriter() = default;
 
-  virtual bool WriteFile(const android::StringPiece& path, uint32_t flags, io::InputStream* in) = 0;
+  virtual bool WriteFile(android::StringPiece path, uint32_t flags, io::InputStream* in) = 0;
 
   // Starts a new entry and allows caller to write bytes to it sequentially.
   // Only use StartEntry if code you do not control needs to write to a CopyingOutputStream.
   // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
-  virtual bool StartEntry(const android::StringPiece& path, uint32_t flags) = 0;
+  virtual bool StartEntry(android::StringPiece path, uint32_t flags) = 0;
 
   // Called to finish writing an entry previously started by StartEntry.
   // Prefer WriteFile instead of manually calling StartEntry/FinishEntry.
@@ -70,11 +69,11 @@ class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
   virtual std::string GetError() const = 0;
 };
 
-std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(IDiagnostics* diag,
-                                                             const android::StringPiece& path);
+std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(android::IDiagnostics* diag,
+                                                             android::StringPiece path);
 
-std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(IDiagnostics* diag,
-                                                           const android::StringPiece& path);
+std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(android::IDiagnostics* diag,
+                                                           android::StringPiece path);
 
 }  // namespace aapt
 
