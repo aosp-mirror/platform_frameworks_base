@@ -784,14 +784,7 @@ public class MediaControlPanel {
             contentDescription =
                     mRecommendationViewHolder.getGutsViewHolder().getGutsText().getText();
         } else if (data != null) {
-            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-                contentDescription = mContext.getString(
-                        R.string.controls_media_smartspace_rec_header);
-            } else {
-                contentDescription = mContext.getString(
-                        R.string.controls_media_smartspace_rec_description,
-                        data.getAppName(mContext));
-            }
+            contentDescription = mContext.getString(R.string.controls_media_smartspace_rec_header);
         } else {
             contentDescription = null;
         }
@@ -1377,10 +1370,6 @@ public class MediaControlPanel {
         PackageManager packageManager = mContext.getPackageManager();
         // Set up media source app's logo.
         Drawable icon = packageManager.getApplicationIcon(applicationInfo);
-        if (!mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-            ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
-            headerLogoImageView.setImageDrawable(icon);
-        }
         fetchAndUpdateRecommendationColors(icon);
 
         // Set up media rec card's tap action if applicable.
@@ -1401,16 +1390,7 @@ public class MediaControlPanel {
 
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(itemIndex);
-            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-                bindRecommendationArtwork(
-                        recommendation,
-                        data.getPackageName(),
-                        itemIndex
-                );
-            } else {
-                mediaCoverImageView.post(
-                        () -> mediaCoverImageView.setImageIcon(recommendation.getIcon()));
-            }
+            bindRecommendationArtwork(recommendation, data.getPackageName(), itemIndex);
 
             // Set up the media item's click listener if applicable.
             ViewGroup mediaCoverContainer = mediaCoverContainers.get(itemIndex);
@@ -1455,21 +1435,18 @@ public class MediaControlPanel {
             subtitleView.setText(subtitle);
 
             // Set up progress bar
-            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-                SeekBar mediaProgressBar =
-                        mRecommendationViewHolder.getMediaProgressBars().get(itemIndex);
-                TextView mediaSubtitle =
-                        mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
-                // show progress bar if the recommended album is played.
-                Double progress = MediaDataUtils.getDescriptionProgress(recommendation.getExtras());
-                if (progress == null || progress <= 0.0) {
-                    mediaProgressBar.setVisibility(View.GONE);
-                    mediaSubtitle.setVisibility(View.VISIBLE);
-                } else {
-                    mediaProgressBar.setProgress((int) (progress * 100));
-                    mediaProgressBar.setVisibility(View.VISIBLE);
-                    mediaSubtitle.setVisibility(View.GONE);
-                }
+            SeekBar mediaProgressBar =
+                    mRecommendationViewHolder.getMediaProgressBars().get(itemIndex);
+            TextView mediaSubtitle = mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
+            // show progress bar if the recommended album is played.
+            Double progress = MediaDataUtils.getDescriptionProgress(recommendation.getExtras());
+            if (progress == null || progress <= 0.0) {
+                mediaProgressBar.setVisibility(View.GONE);
+                mediaSubtitle.setVisibility(View.VISIBLE);
+            } else {
+                mediaProgressBar.setProgress((int) (progress * 100));
+                mediaProgressBar.setVisibility(View.VISIBLE);
+                mediaSubtitle.setVisibility(View.GONE);
             }
         }
         mSmartspaceMediaItemsCount = NUM_REQUIRED_RECOMMENDATIONS;
@@ -1588,9 +1565,7 @@ public class MediaControlPanel {
         int textPrimaryColor = MediaColorSchemesKt.textPrimaryFromScheme(colorScheme);
         int textSecondaryColor = MediaColorSchemesKt.textSecondaryFromScheme(colorScheme);
 
-        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-            mRecommendationViewHolder.getCardTitle().setTextColor(textPrimaryColor);
-        }
+        mRecommendationViewHolder.getCardTitle().setTextColor(textPrimaryColor);
 
         mRecommendationViewHolder.getRecommendations()
                 .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
@@ -1598,12 +1573,9 @@ public class MediaControlPanel {
                 (title) -> title.setTextColor(textPrimaryColor));
         mRecommendationViewHolder.getMediaSubtitles().forEach(
                 (subtitle) -> subtitle.setTextColor(textSecondaryColor));
-        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-            mRecommendationViewHolder.getMediaProgressBars().forEach(
-                    (progressBar) -> progressBar.setProgressTintList(
-                            ColorStateList.valueOf(textPrimaryColor))
-            );
-        }
+        mRecommendationViewHolder.getMediaProgressBars().forEach(
+                (progressBar) -> progressBar.setProgressTintList(
+                        ColorStateList.valueOf(textPrimaryColor)));
 
         mRecommendationViewHolder.getGutsViewHolder().setColors(colorScheme);
     }

@@ -655,13 +655,8 @@ constructor(
                 expandedLayout.load(context, R.xml.media_session_expanded)
             }
             TYPE.RECOMMENDATION -> {
-                if (mediaFlags.isRecommendationCardUpdateEnabled()) {
-                    collapsedLayout.load(context, R.xml.media_recommendations_view_collapsed)
-                    expandedLayout.load(context, R.xml.media_recommendations_view_expanded)
-                } else {
-                    collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
-                    expandedLayout.load(context, R.xml.media_recommendation_expanded)
-                }
+                collapsedLayout.load(context, R.xml.media_recommendations_collapsed)
+                expandedLayout.load(context, R.xml.media_recommendations_expanded)
             }
         }
         refreshState()
