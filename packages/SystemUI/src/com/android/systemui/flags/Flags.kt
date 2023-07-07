@@ -89,7 +89,7 @@ object Flags {
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
-        unreleasedFlag(271161129, "notification_shelf_refactor")
+        unreleasedFlag(271161129, "notification_shelf_refactor", teamfood = true)
 
     // TODO(b/288326013): Tracking Bug
     @JvmField
@@ -558,6 +558,12 @@ object Flags {
     @JvmField
     val WALLPAPER_MULTI_CROP =
         sysPropBooleanFlag(1118, "persist.wm.debug.wallpaper_multi_crop", default = false)
+
+    // TODO(b/290220798): Tracking Bug
+    @Keep
+    @JvmField
+    val ENABLE_PIP2_IMPLEMENTATION =
+        sysPropBooleanFlag(1119, "persist.wm.debug.enable_pip2_implementation", default = false)
 
 
     // 1200 - predictive back

@@ -213,5 +213,5 @@ interface IFingerprintService {
     // Internal operation used to clear fingerprint biometric scheduler.
     // Ensures that the scheduler is not stuck.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void scheduleWatchdog();
+    oneway void scheduleWatchdog();
 }

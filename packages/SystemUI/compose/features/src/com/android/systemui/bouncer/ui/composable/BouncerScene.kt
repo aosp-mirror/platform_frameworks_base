@@ -99,7 +99,10 @@ private fun BouncerScene(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(60.dp),
         modifier =
-            modifier.background(MaterialTheme.colorScheme.surface).fillMaxSize().padding(32.dp)
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 32.dp)
     ) {
         Crossfade(
             targetState = message,

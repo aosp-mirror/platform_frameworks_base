@@ -37,4 +37,8 @@ class UdfpsBpViewController(
     dumpManager
 ) {
     override val tag = "UdfpsBpViewController"
+
+    override fun shouldPauseAuth(): Boolean {
+        return false
+    }
 }

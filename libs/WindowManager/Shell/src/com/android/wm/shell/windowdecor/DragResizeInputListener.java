@@ -336,6 +336,7 @@ class DragResizeInputListener implements AutoCloseable {
         private final Runnable mConsumeBatchEventRunnable;
         private boolean mConsumeBatchEventScheduled;
         private boolean mShouldHandleEvents;
+        private int mLastCursorType = PointerIcon.TYPE_DEFAULT;
 
         private TaskResizeInputEventReceiver(
                 InputChannel inputChannel, Handler handler, Choreographer choreographer) {
@@ -437,7 +438,6 @@ class DragResizeInputListener implements AutoCloseable {
                     break;
                 }
                 case MotionEvent.ACTION_HOVER_EXIT:
-                    mInputManager.setPointerIconType(PointerIcon.TYPE_DEFAULT);
                     result = true;
                     break;
             }
@@ -477,7 +477,13 @@ class DragResizeInputListener implements AutoCloseable {
             if (y > mTaskHeight - mTaskCornerRadius) {
                 ctrlType |= CTRL_TYPE_BOTTOM;
             }
-            return checkDistanceFromCenter(ctrlType, x, y);
+            // Check distances from the center if it's in one of four corners.
+            if ((ctrlType & (CTRL_TYPE_LEFT | CTRL_TYPE_RIGHT)) != 0
+                    && (ctrlType & (CTRL_TYPE_TOP | CTRL_TYPE_BOTTOM)) != 0) {
+                return checkDistanceFromCenter(ctrlType, x, y);
+            }
+            // Otherwise, we should make sure we don't resize tasks inside task bounds.
+            return (x < 0 || y < 0 || x >= mTaskWidth || y >= mTaskHeight) ? ctrlType : 0;
         }
 
         // If corner input is not within appropriate distance of corner radius, do not use it.
@@ -511,7 +517,8 @@ class DragResizeInputListener implements AutoCloseable {
                     break;
                 }
                 default: {
-                    return ctrlType;
+                    throw new IllegalArgumentException("ctrlType should be complex, but it's 0x"
+                            + Integer.toHexString(ctrlType));
                 }
             }
             double distanceFromCenter = Math.hypot(x - centerX, y - centerY);
@@ -564,7 +571,19 @@ class DragResizeInputListener implements AutoCloseable {
                     cursorType = PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
                     break;
             }
-            mInputManager.setPointerIconType(cursorType);
+            // Only update the cursor type to default once so that views behind the decor container
+            // layer that aren't in the active resizing regions have chances to update the cursor
+            // type. We would like to enforce the cursor type by setting the cursor type multilple
+            // times in active regions because we shouldn't allow the views behind to change it, as
+            // we'll pilfer the gesture initiated in this area. This is necessary because 1) we
+            // should allow the views behind regions only for touches to set the cursor type; and 2)
+            // there is a small region out of each rounded corner that's inside the task bounds,
+            // where views in the task can receive input events because we can't set touch regions
+            // of input sinks to have rounded corners.
+            if (mLastCursorType != cursorType || cursorType != PointerIcon.TYPE_DEFAULT) {
+                mInputManager.setPointerIconType(cursorType);
+                mLastCursorType = cursorType;
+            }
         }
     }
 }

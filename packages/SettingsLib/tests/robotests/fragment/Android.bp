@@ -1,0 +1,40 @@
+//#############################################
+// Compile Robolectric shadows framework misapplied to androidx
+//#############################################
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "Robolectric_shadows_androidx_fragment_upstream",
+    srcs: [
+        "src/main/java/**/*.java",
+        "src/main/java/**/*.kt",
+    ],
+    javacflags: [
+        "-Aorg.robolectric.annotation.processing.shadowPackage=org.robolectric.shadows.androidx.fragment",
+        "-Aorg.robolectric.annotation.processing.sdkCheckMode=ERROR",
+        // Uncomment the below to debug annotation processors not firing.
+        //"-verbose",
+        //"-XprintRounds",
+        //"-XprintProcessorInfo",
+        //"-Xlint",
+        //"-J-verbose",
+    ],
+    libs: [
+        "Robolectric_all-target_upstream",
+        "androidx.fragment_fragment",
+    ],
+    plugins: [
+        "auto_value_plugin_1.9",
+        "auto_value_builder_plugin_1.9",
+        "Robolectric_processor_upstream",
+    ],
+
+}

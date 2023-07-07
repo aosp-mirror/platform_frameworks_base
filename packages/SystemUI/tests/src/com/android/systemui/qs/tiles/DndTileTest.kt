@@ -25,6 +25,7 @@ import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.ContextThemeWrapper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
@@ -110,7 +111,9 @@ class DndTileTest : SysuiTestCase() {
 
         whenever(qsHost.userId).thenReturn(DEFAULT_USER)
 
-        val wrappedContext = object : ContextWrapper(context) {
+        val wrappedContext = object : ContextWrapper(
+                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
+        ) {
             override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
                 return sharedPreferences
             }

@@ -573,10 +573,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
                 final boolean isRootTask = taskInfo != null
                         && TransitionInfo.isIndependent(change, info);
+                final boolean isRecentsTask = mRecentsTask != null
+                        && mRecentsTask.equals(change.getContainer());
                 hasTaskChange = hasTaskChange || isRootTask;
                 final boolean isLeafTask = leafTaskFilter.test(change);
                 if (TransitionUtil.isOpeningType(change.getMode())) {
-                    if (mRecentsTask != null && mRecentsTask.equals(change.getContainer())) {
+                    if (isRecentsTask) {
                         recentsOpening = change;
                     } else if (isRootTask || isLeafTask) {
                         if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
@@ -591,7 +593,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         openingTaskIsLeafs.add(isLeafTask ? 1 : 0);
                     }
                 } else if (TransitionUtil.isClosingType(change.getMode())) {
-                    if (mRecentsTask != null && mRecentsTask.equals(change.getContainer())) {
+                    if (isRecentsTask) {
                         foundRecentsClosing = true;
                     } else if (isRootTask || isLeafTask) {
                         if (closingTasks == null) {
@@ -612,7 +614,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
                     } else if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME
-                            && !mRecentsTask.equals(change.getContainer())) {
+                            && !isRecentsTask ) {
                         // Unless it is a 3p launcher. This means that the 3p launcher was already
                         // visible (eg. the "pausing" task is translucent over the 3p launcher).
                         // Treat it as if we are "re-opening" the 3p launcher.

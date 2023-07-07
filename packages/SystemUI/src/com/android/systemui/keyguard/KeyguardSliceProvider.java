@@ -50,6 +50,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -151,6 +152,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     @Inject
     WakeLockLogger mWakeLockLogger;
+    @Inject
+    @Background
+    Handler mBgHandler;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -502,7 +506,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected void notifyChange() {
-        mContentResolver.notifyChange(mSliceUri, null /* observer */);
+        mBgHandler.post(() -> mContentResolver.notifyChange(mSliceUri, null /* observer */));
     }
 
     @Override
