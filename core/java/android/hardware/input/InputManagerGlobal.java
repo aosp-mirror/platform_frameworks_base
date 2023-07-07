@@ -145,7 +145,7 @@ public final class InputManagerGlobal {
      * @return The input manager instance.
      */
     public static InputManagerGlobal resetInstance(IInputManager inputManagerService) {
-        synchronized (InputManager.class) {
+        synchronized (InputManagerGlobal.class) {
             sInstance = new InputManagerGlobal(inputManagerService);
             return sInstance;
         }
