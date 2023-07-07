@@ -24,7 +24,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockConfig
 import com.android.systemui.plugins.ClockController
@@ -108,10 +108,10 @@ class DefaultClockController(
 
         override val config = ClockFaceConfig()
 
-        override var logBuffer: LogBuffer?
-            get() = view.logBuffer
+        override var messageBuffer: MessageBuffer?
+            get() = view.messageBuffer
             set(value) {
-                view.logBuffer = value
+                view.messageBuffer = value
             }
 
         override var animations: DefaultClockAnimations = DefaultClockAnimations(view, 0f, 0f)
