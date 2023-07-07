@@ -31,9 +31,11 @@ import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.phone.slice.SlicePurchaseController;
 
 import java.net.URL;
+import java.util.Base64;
 
 /**
  * Activity that launches when the user clicks on the performance boost notification.
@@ -56,11 +58,17 @@ import java.net.URL;
 public class SlicePurchaseActivity extends Activity {
     private static final String TAG = "SlicePurchaseActivity";
 
+    private static final int CONTENTS_TYPE_UNSPECIFIED = 0;
+    private static final int CONTENTS_TYPE_JSON = 1;
+    private static final int CONTENTS_TYPE_XML = 2;
+
     @NonNull private WebView mWebView;
     @NonNull private Context mApplicationContext;
     @NonNull private Intent mIntent;
     @NonNull private URL mUrl;
     @TelephonyManager.PremiumCapability protected int mCapability;
+    @Nullable private String mUserData;
+    private int mContentsType;
     private boolean mIsUserTriggeredFinish;
 
     @Override
@@ -72,6 +80,7 @@ public class SlicePurchaseActivity extends Activity {
         mCapability = mIntent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
         String url = mIntent.getStringExtra(SlicePurchaseController.EXTRA_PURCHASE_URL);
+        mUserData = mIntent.getStringExtra(SlicePurchaseController.EXTRA_USER_DATA);
         mApplicationContext = getApplicationContext();
         mIsUserTriggeredFinish = true;
         logd("onCreate: subId=" + subId + ", capability="
@@ -81,13 +90,37 @@ public class SlicePurchaseActivity extends Activity {
         SlicePurchaseBroadcastReceiver.cancelNotification(mApplicationContext, mCapability);
 
         // Verify purchase URL is valid
-        mUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url);
+        String contentsType = mIntent.getStringExtra(SlicePurchaseController.EXTRA_CONTENTS_TYPE);
+        mContentsType = CONTENTS_TYPE_UNSPECIFIED;
+        if (!TextUtils.isEmpty(contentsType)) {
+            if (contentsType.equals("json")) {
+                mContentsType = CONTENTS_TYPE_JSON;
+            } else if (contentsType.equals("xml")) {
+                mContentsType = CONTENTS_TYPE_XML;
+            }
+        }
+        mUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url, mUserData,
+                mContentsType == CONTENTS_TYPE_UNSPECIFIED);
         if (mUrl == null) {
             String error = "Unable to create a purchase URL.";
             loge(error);
             Intent data = new Intent();
             data.putExtra(SlicePurchaseController.EXTRA_FAILURE_CODE,
                     SlicePurchaseController.FAILURE_CODE_CARRIER_URL_UNAVAILABLE);
+            data.putExtra(SlicePurchaseController.EXTRA_FAILURE_REASON, error);
+            SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponseWithData(mApplicationContext,
+                    mIntent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR, data);
+            finishAndRemoveTask();
+            return;
+        }
+
+        // Verify user data exists if contents type is specified
+        if (mContentsType != CONTENTS_TYPE_UNSPECIFIED && TextUtils.isEmpty(mUserData)) {
+            String error = "Contents type was specified but user data does not exist.";
+            loge(error);
+            Intent data = new Intent();
+            data.putExtra(SlicePurchaseController.EXTRA_FAILURE_CODE,
+                    SlicePurchaseController.FAILURE_CODE_NO_USER_DATA);
             data.putExtra(SlicePurchaseController.EXTRA_FAILURE_REASON, error);
             SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponseWithData(mApplicationContext,
                     mIntent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR, data);
@@ -115,9 +148,7 @@ public class SlicePurchaseActivity extends Activity {
         }
 
         // Clear any cookies that might be persisted from previous sessions before loading WebView
-        CookieManager.getInstance().removeAllCookies(value -> {
-            setupWebView();
-        });
+        CookieManager.getInstance().removeAllCookies(value -> setupWebView());
     }
 
     protected void onPurchaseSuccessful() {
@@ -190,14 +221,46 @@ public class SlicePurchaseActivity extends Activity {
         // Display WebView
         setContentView(mWebView);
 
-        // Load the URL
-        String userData = mIntent.getStringExtra(SlicePurchaseController.EXTRA_USER_DATA);
-        if (TextUtils.isEmpty(userData)) {
-            logd("Starting WebView with url: " + mUrl.toString());
-            mWebView.loadUrl(mUrl.toString());
+        // Start the WebView
+        startWebView(mWebView, mUrl.toString(), mContentsType, mUserData);
+    }
+
+    /**
+     * Send the URL to the WebView as either a GET or POST request, based on the contents type:
+     * <ul>
+     *     <li>
+     *         CONTENTS_TYPE_UNSPECIFIED:
+     *         If the user data exists, append it to the purchase URL and load it as a GET request.
+     *         If the user data does not exist, load just the purchase URL as a GET request.
+     *     </li>
+     *     <li>
+     *         CONTENTS_TYPE_JSON or CONTENTS_TYPE_XML:
+     *         The user data must exist. Send the JSON or XML formatted user data in a POST request.
+     *         If the user data is encoded, it must be prefaced by {@code encodedValue=} and will be
+     *         encoded in Base64. Decode the user data and send it in the POST request.
+     *     </li>
+     * </ul>
+     * @param webView The WebView to start.
+     * @param url The URL to start the WebView with.
+     * @param contentsType The contents type of the userData.
+     * @param userData The user data to send with the GET or POST request, if it exists.
+     */
+    @VisibleForTesting
+    public static void startWebView(@NonNull WebView webView, @NonNull String url, int contentsType,
+            @Nullable String userData) {
+        if (contentsType == CONTENTS_TYPE_UNSPECIFIED) {
+            logd("Starting WebView GET with url: " + url);
+            webView.loadUrl(url);
         } else {
-            logd("Starting WebView with url: " + mUrl.toString() + ", userData=" + userData);
-            mWebView.postUrl(mUrl.toString(), userData.getBytes());
+            byte[] data = userData.getBytes();
+            String[] split = userData.split("encodedValue=");
+            if (split.length > 1) {
+                logd("Decoding encoded value: " + split[1]);
+                data = Base64.getDecoder().decode(split[1]);
+            }
+            logd("Starting WebView POST with url: " + url + ", contentsType: " + contentsType
+                    + ", data: " + new String(data));
+            webView.postUrl(url, data);
         }
     }
 
