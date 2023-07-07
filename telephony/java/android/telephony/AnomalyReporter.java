@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.ParcelUuid;
+import android.provider.DeviceConfig;
 
 import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
@@ -56,6 +57,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class AnomalyReporter {
     private static final String TAG = "AnomalyReporter";
+
+    private static final String KEY_IS_TELEPHONY_ANOMALY_REPORT_ENABLED =
+            "is_telephony_anomaly_report_enabled";
 
     private static Context sContext = null;
 
@@ -101,16 +105,31 @@ public final class AnomalyReporter {
      * @param carrierId the carrier of the id associated with this event.
      */
     public static void reportAnomaly(@NonNull UUID eventId, String description, int carrierId) {
+        Rlog.i(TAG, "reportAnomaly: Received anomaly event report with eventId= " + eventId
+                + " and description= " + description);
         if (sContext == null) {
             Rlog.w(TAG, "AnomalyReporter not yet initialized, dropping event=" + eventId);
             return;
         }
 
+        //always write atoms to statsd
         TelephonyStatsLog.write(
                 TELEPHONY_ANOMALY_DETECTED,
                 carrierId,
                 eventId.getLeastSignificantBits(),
                 eventId.getMostSignificantBits());
+
+        // Don't report via Intent if the server-side flag isn't loaded, as it implies other anomaly
+        // report related config hasn't loaded.
+        try {
+            boolean isAnomalyReportEnabledFromServer = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_TELEPHONY, KEY_IS_TELEPHONY_ANOMALY_REPORT_ENABLED,
+                    false);
+            if (!isAnomalyReportEnabledFromServer) return;
+        } catch (Exception e) {
+            Rlog.w(TAG, "Unable to read device config, dropping event=" + eventId);
+            return;
+        }
 
         // If this event has already occurred, skip sending intents for it; regardless log its
         // invocation here.

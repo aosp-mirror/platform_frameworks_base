@@ -37,10 +37,10 @@ interface IAlarmManager {
     boolean setTime(long millis);
     void setTimeZone(String zone);
     void remove(in PendingIntent operation, in IAlarmListener listener);
+    void removeAll(String packageName);
     long getNextWakeFromIdleTime();
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
-    long currentNetworkTimeMillis();
     boolean canScheduleExactAlarms(String packageName);
     boolean hasScheduleExactAlarm(String packageName, int userId);
     int getConfigVersion();

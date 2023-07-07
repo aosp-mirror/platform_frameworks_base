@@ -32,6 +32,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 import android.app.compat.CompatChanges;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.os.SystemClock;
@@ -40,6 +41,7 @@ import android.util.ArraySet;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -192,6 +194,47 @@ public class ActiveServicesTest {
         mActiveServices.rescheduleServiceRestartIfPossibleLocked(extra, btwn, "test", now);
         verifyDelays(now, new long[] {extra, btwn + extra * 2, rd2,
                 rd2 + btwn + extra, rd2 + (btwn + extra) * 2});
+    }
+
+    @Test
+    public void testGetProcessNameForService() throws Exception {
+        // Regular service
+        final ServiceInfo regularService = new ServiceInfo();
+        regularService.processName = "com.foo";
+        String processName = ActiveServices.getProcessNameForService(regularService, null, null,
+                null, false, false);
+        assertEquals("com.foo", processName);
+
+        // Isolated service
+        final ServiceInfo isolatedService = new ServiceInfo();
+        isolatedService.processName = "com.foo";
+        isolatedService.flags = ServiceInfo.FLAG_ISOLATED_PROCESS;
+        final ComponentName component = new ComponentName("com.foo", "barService");
+        processName = ActiveServices.getProcessNameForService(isolatedService, component,
+                null, null, false, false);
+        assertEquals("com.foo:barService", processName);
+
+        // Isolated service in shared isolated process
+        final ServiceInfo isolatedServiceShared1 = new ServiceInfo();
+        isolatedServiceShared1.flags = ServiceInfo.FLAG_ISOLATED_PROCESS;
+        final String instanceName = "pool";
+        final String callingPackage = "com.foo";
+        final String sharedIsolatedProcessName1 = ActiveServices.getProcessNameForService(
+                isolatedServiceShared1, null, callingPackage, instanceName, false, true);
+        assertEquals("com.foo:ishared:pool", sharedIsolatedProcessName1);
+
+        // Bind another one in the same isolated process
+        final ServiceInfo isolatedServiceShared2 = new ServiceInfo(isolatedServiceShared1);
+        final String sharedIsolatedProcessName2 = ActiveServices.getProcessNameForService(
+                isolatedServiceShared2, null, callingPackage, instanceName, false, true);
+        assertEquals(sharedIsolatedProcessName1, sharedIsolatedProcessName2);
+
+        // Simulate another app trying to do the bind
+        final ServiceInfo isolatedServiceShared3 = new ServiceInfo(isolatedServiceShared1);
+        final String otherCallingPackage = "com.bar";
+        final String sharedIsolatedProcessName3 = ActiveServices.getProcessNameForService(
+                isolatedServiceShared3, null, otherCallingPackage, instanceName, false, true);
+        Assert.assertNotEquals(sharedIsolatedProcessName2, sharedIsolatedProcessName3);
     }
 
     private void prepareTestRescheduleServiceRestarts() {

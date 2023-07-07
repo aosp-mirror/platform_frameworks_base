@@ -45,11 +45,11 @@ public class DraggableConstraintLayout extends ConstraintLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
 
     private static final float VELOCITY_DP_PER_MS = 1;
+    private static final int MAXIMUM_DISMISS_DISTANCE_DP = 400;
 
     private final SwipeDismissHandler mSwipeDismissHandler;
     private final GestureDetector mSwipeDetector;
     private View mActionsContainer;
-    private View mActionsContainerBackground;
     private SwipeDismissCallbacks mCallbacks;
     private final DisplayMetrics mDisplayMetrics;
 
@@ -111,6 +111,9 @@ public class DraggableConstraintLayout extends ConstraintLayout
                     }
                 });
         mSwipeDetector.setIsLongpressEnabled(false);
+
+        mCallbacks = new SwipeDismissCallbacks() {
+        }; // default to unimplemented callbacks
     }
 
     public void setCallbacks(SwipeDismissCallbacks callbacks) {
@@ -119,16 +122,13 @@ public class DraggableConstraintLayout extends ConstraintLayout
 
     @Override
     public boolean onInterceptHoverEvent(MotionEvent event) {
-        if (mCallbacks != null) {
-            mCallbacks.onInteraction();
-        }
+        mCallbacks.onInteraction();
         return super.onInterceptHoverEvent(event);
     }
 
     @Override // View
     protected void onFinishInflate() {
         mActionsContainer = findViewById(R.id.actions_container);
-        mActionsContainerBackground = findViewById(R.id.actions_container_background);
     }
 
     @Override
@@ -186,6 +186,13 @@ public class DraggableConstraintLayout extends ConstraintLayout
         inoutInfo.touchableRegion.set(r);
     }
 
+    private int getBackgroundRight() {
+        // background expected to be null in testing.
+        // animation may have unexpected behavior if view is not present
+        View background = findViewById(R.id.actions_container_background);
+        return background == null ? 0 : background.getRight();
+    }
+
     /**
      * Allows a view to be swipe-dismissed, or returned to its location if distance threshold is not
      * met
@@ -213,8 +220,6 @@ public class DraggableConstraintLayout extends ConstraintLayout
             mGestureDetector = new GestureDetector(context, gestureListener);
             mDisplayMetrics = new DisplayMetrics();
             context.getDisplay().getRealMetrics(mDisplayMetrics);
-            mCallbacks = new SwipeDismissCallbacks() {
-            }; // default to unimplemented callbacks
         }
 
         @Override
@@ -230,7 +235,9 @@ public class DraggableConstraintLayout extends ConstraintLayout
                     return true;
                 }
                 if (isPastDismissThreshold()) {
-                    dismiss();
+                    ValueAnimator anim = createSwipeDismissAnimation();
+                    mCallbacks.onSwipeDismissInitiated(anim);
+                    dismiss(anim);
                 } else {
                     // if we've moved, but not past the threshold, start the return animation
                     if (DEBUG_DISMISS) {
@@ -295,10 +302,7 @@ public class DraggableConstraintLayout extends ConstraintLayout
         }
 
         void dismiss() {
-            float velocityPxPerMs = FloatingWindowUtil.dpToPx(mDisplayMetrics, VELOCITY_DP_PER_MS);
-            ValueAnimator anim = createSwipeDismissAnimation(velocityPxPerMs);
-            mCallbacks.onSwipeDismissInitiated(anim);
-            dismiss(anim);
+            dismiss(createSwipeDismissAnimation());
         }
 
         private void dismiss(ValueAnimator animator) {
@@ -323,6 +327,11 @@ public class DraggableConstraintLayout extends ConstraintLayout
             mDismissAnimation.start();
         }
 
+        private ValueAnimator createSwipeDismissAnimation() {
+            float velocityPxPerMs = FloatingWindowUtil.dpToPx(mDisplayMetrics, VELOCITY_DP_PER_MS);
+            return createSwipeDismissAnimation(velocityPxPerMs);
+        }
+
         private ValueAnimator createSwipeDismissAnimation(float velocity) {
             // velocity is measured in pixels per millisecond
             velocity = Math.min(3, Math.max(1, velocity));
@@ -337,16 +346,20 @@ public class DraggableConstraintLayout extends ConstraintLayout
             if (startX > 0 || (startX == 0 && layoutDir == LAYOUT_DIRECTION_RTL)) {
                 finalX = mDisplayMetrics.widthPixels;
             } else {
-                finalX = -1 * mActionsContainerBackground.getRight();
+                finalX = -1 * getBackgroundRight();
             }
-            float distance = Math.abs(finalX - startX);
+            float distance = Math.min(Math.abs(finalX - startX),
+                    FloatingWindowUtil.dpToPx(mDisplayMetrics, MAXIMUM_DISMISS_DISTANCE_DP));
+            // ensure that view dismisses in the right direction (right in LTR, left in RTL)
+            float distanceVector = Math.copySign(distance, finalX - startX);
 
             anim.addUpdateListener(animation -> {
-                float translation = MathUtils.lerp(startX, finalX, animation.getAnimatedFraction());
+                float translation = MathUtils.lerp(
+                        startX, startX + distanceVector, animation.getAnimatedFraction());
                 mView.setTranslationX(translation);
                 mView.setAlpha(1 - animation.getAnimatedFraction());
             });
-            anim.setDuration((long) (distance / Math.abs(velocity)));
+            anim.setDuration((long) (Math.abs(distance / velocity)));
             return anim;
         }
 

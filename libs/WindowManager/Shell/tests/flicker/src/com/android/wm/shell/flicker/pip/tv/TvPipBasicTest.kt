@@ -25,16 +25,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-/**
- * Test Pip Menu on TV.
- * To run this test: `atest WMShellFlickerTests:TvPipBasicTest`
- */
+/** Test Pip Menu on TV. To run this test: `atest WMShellFlickerTests:TvPipBasicTest` */
 @RequiresDevice
 @RunWith(Parameterized::class)
-class TvPipBasicTest(
-    private val radioButtonId: String,
-    private val pipWindowRatio: Rational?
-) : TvPipTestBase() {
+class TvPipBasicTest(private val radioButtonId: String, private val pipWindowRatio: Rational?) :
+    TvPipTestBase() {
 
     @Test
     fun enterPip_openMenu_pressBack_closePip() {
@@ -43,10 +38,10 @@ class TvPipBasicTest(
 
         // Set up ratio and enter Pip
         testApp.clickObject(radioButtonId)
-        testApp.clickEnterPipButton()
+        testApp.clickEnterPipButton(wmHelper)
 
-        val actualRatio: Float = testApp.ui?.visibleBounds?.ratio
-                ?: fail("Application UI not found")
+        val actualRatio: Float =
+            testApp.ui?.visibleBounds?.ratio ?: fail("Application UI not found")
         pipWindowRatio?.let { expectedRatio ->
             assertEquals("Wrong Pip window ratio", expectedRatio.toFloat(), actualRatio)
         }
@@ -62,7 +57,8 @@ class TvPipBasicTest(
         // Make sure Pip Window ration remained the same after Pip menu was closed
         testApp.ui?.visibleBounds?.let { newBounds ->
             assertEquals("Pip window ratio has changed", actualRatio, newBounds.ratio)
-        } ?: fail("Application UI not found")
+        }
+            ?: fail("Application UI not found")
 
         // Close Pip
         testApp.closePipWindow()
@@ -77,10 +73,10 @@ class TvPipBasicTest(
         fun getParams(): Collection<Array<Any?>> {
             infix fun Int.to(denominator: Int) = Rational(this, denominator)
             return listOf(
-                    arrayOf("ratio_default", null),
-                    arrayOf("ratio_square", 1 to 1),
-                    arrayOf("ratio_wide", 2 to 1),
-                    arrayOf("ratio_tall", 1 to 2)
+                arrayOf("ratio_default", null),
+                arrayOf("ratio_square", 1 to 1),
+                arrayOf("ratio_wide", 2 to 1),
+                arrayOf("ratio_tall", 1 to 2)
             )
         }
     }

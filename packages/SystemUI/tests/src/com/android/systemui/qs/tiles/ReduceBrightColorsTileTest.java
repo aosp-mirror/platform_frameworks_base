@@ -32,15 +32,20 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.R.drawable;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +57,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class ReduceBrightColorsTileTest extends SysuiTestCase {
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -65,6 +70,8 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private ReduceBrightColorsController mReduceBrightColorsController;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
@@ -81,6 +88,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
                 true,
                 mReduceBrightColorsController,
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -91,6 +99,12 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 
@@ -128,6 +142,28 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
         verify(mReduceBrightColorsController, times(1))
                 .setReduceBrightColorsActivated(eq(true));
+    }
+
+    @Test
+    public void testIcon_whenTileEnabled_isOnState() {
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(true);
+        mTile.refreshState();
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(drawable.qs_extra_dim_icon_on));
+    }
+
+    @Test
+    public void testIcon_whenTileDisabled_isOffState() {
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(false);
+        mTile.refreshState();
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(drawable.qs_extra_dim_icon_off));
     }
 
 }

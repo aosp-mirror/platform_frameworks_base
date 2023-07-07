@@ -68,6 +68,7 @@ message SystemSettingsProto {
         // orientationplot.py tool.
         // 0 = no, 1 = yes
         optional SettingProto window_orientation_listener_log = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_key_presses = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional DevOptions developer_options = 7;
 
@@ -115,6 +116,9 @@ message SystemSettingsProto {
         optional SettingProto sound_cache = 2;
         optional SettingProto light_pulse = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto vibration_intensity = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto camera_flash_notification = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto screen_flash_notification = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto screen_flash_notification_color_global = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 17;
 
@@ -195,6 +199,17 @@ message SystemSettingsProto {
     optional Text text = 29;
 
     optional SettingProto time_12_24 = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Touchpad {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto natural_scrolling = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto pointer_speed = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto right_click_zone = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto tap_to_click = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Touchpad touchpad = 36;
+
     optional SettingProto tty_mode = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Vibrate {
@@ -252,5 +267,5 @@ message SystemSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 36;
+    // Next tag = 37;
 }

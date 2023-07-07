@@ -35,7 +35,7 @@ namespace aapt {
 
 class MockFileCollection : public io::IFileCollection {
  public:
-  MOCK_METHOD1(FindFile, io::IFile*(const StringPiece& path));
+  MOCK_METHOD1(FindFile, io::IFile*(StringPiece path));
   MOCK_METHOD0(Iterator, std::unique_ptr<io::IFileCollectionIterator>());
   MOCK_METHOD0(GetDirSeparator, char());
 };
@@ -127,9 +127,9 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
                                  context->GetDiagnostics()));
 
   // Make a styled string.
-  StyleString style_string;
+  android::StyleString style_string;
   style_string.str = "hello";
-  style_string.spans.push_back(Span{"b", 0u, 4u});
+  style_string.spans.push_back(android::Span{"b", 0u, 4u});
   ASSERT_TRUE(table->AddResource(
       NewResourceBuilder(test::ParseNameOrDie("com.app.a:string/styled"))
           .SetValue(util::make_unique<StyledString>(table->string_pool.MakeRef(style_string)))
@@ -164,8 +164,8 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
 
   // Make an overlayable resource.
   OverlayableItem overlayable_item(std::make_shared<Overlayable>(
-      "OverlayableName", "overlay://theme", Source("res/values/overlayable.xml", 40)));
-  overlayable_item.source = Source("res/values/overlayable.xml", 42);
+      "OverlayableName", "overlay://theme", android::Source("res/values/overlayable.xml", 40)));
+  overlayable_item.source = android::Source("res/values/overlayable.xml", 42);
   ASSERT_TRUE(
       table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:integer/overlayable"))
                              .SetOverlayable(overlayable_item)
@@ -271,7 +271,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   attr.compiled_attribute = xml::AaptAttribute(Attribute{}, ResourceId(0x01010000));
   attr.compiled_value =
       ResourceUtils::TryParseItemForAttribute(attr.value, android::ResTable_map::TYPE_DIMENSION);
-  attr.compiled_value->SetSource(Source().WithLine(25));
+  attr.compiled_value->SetSource(android::Source().WithLine(25));
   element.attributes.push_back(std::move(attr));
 
   std::unique_ptr<xml::Text> text = util::make_unique<xml::Text>();
@@ -292,7 +292,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   pb::XmlNode pb_xml;
   SerializeXmlToPb(element, &pb_xml);
 
-  StringPool pool;
+  android::StringPool pool;
   xml::Element actual_el;
   std::string error;
   ASSERT_TRUE(DeserializeXmlFromPb(pb_xml, &actual_el, &pool, &error));
@@ -365,7 +365,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXmlTrimEmptyWhitepsace) {
   options.remove_empty_text_nodes = true;
   SerializeXmlToPb(element, &pb_xml, options);
 
-  StringPool pool;
+  android::StringPool pool;
   xml::Element actual_el;
   std::string error;
   ASSERT_TRUE(DeserializeXmlFromPb(pb_xml, &actual_el, &pool, &error));
@@ -491,7 +491,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
   EXPECT_THAT(bp->value.data, Eq(ResourceUtils::MakeEmpty()->value.data));
 }
 
-static void ExpectConfigSerializes(const StringPiece& config_str) {
+static void ExpectConfigSerializes(StringPiece config_str) {
   const ConfigDescription expected_config = test::ParseConfigOrDie(config_str);
   pb::Configuration pb_config;
   SerializeConfig(expected_config, &pb_config);
@@ -581,9 +581,13 @@ TEST(ProtoSerializeTest, SerializeDeserializeConfiguration) {
 
   ExpectConfigSerializes("v8");
 
+  ExpectConfigSerializes("en-feminine");
+  ExpectConfigSerializes("en-neuter-v34");
+  ExpectConfigSerializes("feminine-v34");
+
   ExpectConfigSerializes(
-      "mcc123-mnc456-b+en+GB-ldltr-sw300dp-w300dp-h400dp-large-long-round-widecg-highdr-land-car-"
-      "night-xhdpi-stylus-keysexposed-qwerty-navhidden-dpad-300x200-v23");
+      "mcc123-mnc456-b+en+GB-masculine-ldltr-sw300dp-w300dp-h400dp-large-long-round-widecg-highdr-"
+      "land-car-night-xhdpi-stylus-keysexposed-qwerty-navhidden-dpad-300x200-v23");
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
@@ -898,7 +902,8 @@ TEST(ProtoSerializeTest, SerializeMacro) {
   auto original = std::make_unique<Macro>();
   original->raw_value = "\nThis being human is a guest house.";
   original->style_string.str = " This being human is a guest house.";
-  original->style_string.spans.emplace_back(Span{.name = "b", .first_char = 12, .last_char = 16});
+  original->style_string.spans.emplace_back(
+      android::Span{.name = "b", .first_char = 12, .last_char = 16});
   original->untranslatable_sections.emplace_back(UntranslatableSection{.start = 12, .end = 17});
   original->alias_namespaces.emplace_back(
       Macro::Namespace{.alias = "prefix", .package_name = "package.name", .is_private = true});
@@ -951,4 +956,100 @@ TEST(ProtoSerializeTest, StagedId) {
   EXPECT_THAT(result.value().entry->staged_id.value().id, Eq(ResourceId(0x01ff0001)));
 }
 
+TEST(ProtoSerializeTest, CustomResourceTypes) {
+  const uint32_t id_one_id = 0x7f020000;
+  const uint32_t id_2_two_id = 0x7f030000;
+  const uint32_t integer_three_id = 0x7f030000;
+  const uint32_t integer_1_four_id = 0x7f030000;
+  const uint32_t layout_bar_id = 0x7f050000;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.app.test:id/one", ResourceId(id_one_id))
+          .AddSimple("com.app.test:id.2/two", ResourceId(id_2_two_id))
+          .AddValue(
+              "com.app.test:integer/one", ResourceId(integer_three_id),
+              util::make_unique<BinaryPrimitive>(uint8_t(android::Res_value::TYPE_INT_DEC), 10u))
+          .AddValue(
+              "com.app.test:integer.1/one", ResourceId(integer_1_four_id),
+              util::make_unique<BinaryPrimitive>(uint8_t(android::Res_value::TYPE_INT_DEC), 1u))
+          .AddValue(
+              "com.app.test:integer.1/one", test::ParseConfigOrDie("v1"),
+              ResourceId(integer_1_four_id),
+              util::make_unique<BinaryPrimitive>(uint8_t(android::Res_value::TYPE_INT_DEC), 2u))
+          .AddFileReference("com.app.test:layout.custom/bar", ResourceId(layout_bar_id),
+                            "res/layout/bar.xml")
+          .Build();
+
+  test::TestFile file_a("res/layout/bar.xml");
+  MockFileCollection files;
+  EXPECT_CALL(files, FindFile(Eq("res/layout/bar.xml"))).WillRepeatedly(::testing::Return(&file_a));
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  DeserializeTableFromPb(pb_table, &files, &new_table, &error);
+  ASSERT_THAT(error, IsEmpty());
+
+  auto bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(
+      &new_table, "com.app.test:integer.1/one", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("1")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "com.app.test:integer.1/one",
+                                                          test::ParseConfigOrDie("v1"), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("2")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "com.app.test:integer/one",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("10")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "com.app.test:integer/one",
+                                                          test::ParseConfigOrDie("v1"), "");
+  ASSERT_THAT(bp, IsNull());
+
+  auto id = test::GetValueForConfigAndProduct<Id>(&new_table, "com.app.test:id/one",
+                                                  ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(id, NotNull());
+
+  id = test::GetValueForConfigAndProduct<Id>(&new_table, "com.app.test:id.2/two",
+                                             ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(id, NotNull());
+
+  auto custom_layout = test::GetValueForConfigAndProduct<FileReference>(
+      &new_table, "com.app.test:layout.custom/bar", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(custom_layout, NotNull());
+  EXPECT_THAT(*(custom_layout->path), Eq("res/layout/bar.xml"));
+}
+
+TEST(ProtoSerializeTest, SerializeDynamicRef) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x7f).Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder().Build();
+  table->included_packages_.insert({20, "foobar"});
+  table->included_packages_.insert({30, "barfoo"});
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  int result = new_table.included_packages_.size();
+  EXPECT_THAT(result, Eq(2));
+  auto it = new_table.included_packages_.begin();
+  EXPECT_THAT(it->first, Eq(20));
+  EXPECT_THAT(it->second, Eq("foobar"));
+  it++;
+  EXPECT_THAT(it->first, Eq(30));
+  EXPECT_THAT(it->second, Eq("barfoo"));
+}
 }  // namespace aapt

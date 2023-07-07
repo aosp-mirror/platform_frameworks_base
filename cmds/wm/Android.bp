@@ -20,5 +20,5 @@ license {
 
 sh_binary {
     name: "wm",
-    src: "wm",
+    src: "wm.sh",
 }

@@ -16,10 +16,11 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import androidx.annotation.NonNull;
 
 /**
  * Receives uninstall events and persists them using a {@link EventResultPersister}.
@@ -58,7 +59,7 @@ public class UninstallEventReceiver extends BroadcastReceiver {
      *
      * @return The id for this event
      */
-    static int addObserver(@NonNull Context context, int id,
+    public static int addObserver(@NonNull Context context, int id,
             @NonNull EventResultPersister.EventResultObserver observer)
             throws EventResultPersister.OutOfIdsException {
         return getReceiver(context).addObserver(id, observer);

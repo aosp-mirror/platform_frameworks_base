@@ -46,6 +46,16 @@ import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_CONTAMINAN
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK_HOST_MODE;
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK_DEVICE_MODE;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_BC_1_2;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_OTHER;
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE;
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED;
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_ENABLED;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -83,6 +93,8 @@ public final class UsbPort {
     private final int mSupportedContaminantProtectionModes;
     private final boolean mSupportsEnableContaminantPresenceProtection;
     private final boolean mSupportsEnableContaminantPresenceDetection;
+    private final boolean mSupportsComplianceWarnings;
+    private final @AltModeType int mSupportedAltModes;
 
     private static final int NUM_DATA_ROLES = Constants.PortDataRole.NUM_DATA_ROLES;
     /**
@@ -245,11 +257,36 @@ public final class UsbPort {
     @Retention(RetentionPolicy.SOURCE)
     @interface EnableUsbDataWhileDockedStatus{}
 
+    /**
+     * Indicates that the Alt Mode being described is DisplayPort.
+     */
+    public static final int FLAG_ALT_MODE_TYPE_DISPLAYPORT = 1 << 0;
+
+    /** @hide */
+    @IntDef(prefix = { "FLAG_ALT_MODE_TYPE_" }, flag = true, value = {
+        FLAG_ALT_MODE_TYPE_DISPLAYPORT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AltModeType {}
+
     /** @hide */
     public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
             int supportedContaminantProtectionModes,
             boolean supportsEnableContaminantPresenceProtection,
             boolean supportsEnableContaminantPresenceDetection) {
+        this(usbManager, id, supportedModes, supportedContaminantProtectionModes,
+                supportsEnableContaminantPresenceProtection,
+                supportsEnableContaminantPresenceDetection,
+                false, 0);
+    }
+
+    /** @hide */
+    public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
+            int supportedContaminantProtectionModes,
+            boolean supportsEnableContaminantPresenceProtection,
+            boolean supportsEnableContaminantPresenceDetection,
+            boolean supportsComplianceWarnings,
+            int supportedAltModes) {
         Objects.requireNonNull(id);
         Preconditions.checkFlagsArgument(supportedModes,
                 MODE_DFP | MODE_UFP | MODE_AUDIO_ACCESSORY | MODE_DEBUG_ACCESSORY);
@@ -262,6 +299,8 @@ public final class UsbPort {
                 supportsEnableContaminantPresenceProtection;
         mSupportsEnableContaminantPresenceDetection =
                 supportsEnableContaminantPresenceDetection;
+        mSupportsComplianceWarnings = supportsComplianceWarnings;
+        mSupportedAltModes = supportedAltModes;
     }
 
     /**
@@ -329,6 +368,42 @@ public final class UsbPort {
     public @Nullable UsbPortStatus getStatus() {
         return mUsbManager.getPortStatus(this);
     }
+
+    /**
+     * Queries USB Port to see if the port is capable of identifying
+     * non compliant USB power source/cable/accessory.
+     *
+     * @return true when the UsbPort is capable of identifying
+     *             non compliant USB power
+     *             source/cable/accessory.
+     * @return false otherwise.
+     */
+    @CheckResult
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public boolean supportsComplianceWarnings() {
+        return mSupportsComplianceWarnings;
+    }
+
+    /**
+     * Returns all Alt Modes supported by the port.
+     *
+     * @hide
+     */
+    public @AltModeType int getSupportedAltModesMask() {
+        return mSupportedAltModes;
+    }
+
+    /**
+     * Returns whether all Alt Mode types in a given mask are supported
+     * by the port.
+     *
+     * @return true if all given Alt Modes are supported, false otherwise.
+     *
+     */
+    public boolean isAltModeSupported(@AltModeType int typeMask) {
+        return (mSupportedAltModes & typeMask) == typeMask;
+    }
+
 
     /**
      * Sets the desired role combination of the port.
@@ -643,6 +718,15 @@ public final class UsbPort {
             statusString.append("disabled-debug, ");
         }
 
+        if ((usbDataStatus & DATA_STATUS_DISABLED_DOCK_HOST_MODE) ==
+            DATA_STATUS_DISABLED_DOCK_HOST_MODE) {
+            statusString.append("disabled-host-dock, ");
+        }
+
+        if ((usbDataStatus & DATA_STATUS_DISABLED_DOCK_DEVICE_MODE) ==
+            DATA_STATUS_DISABLED_DOCK_DEVICE_MODE) {
+            statusString.append("disabled-device-dock, ");
+        }
         return statusString.toString().replaceAll(", $", "");
     }
 
@@ -686,6 +770,53 @@ public final class UsbPort {
     }
 
     /** @hide */
+    public static String complianceWarningsToString(@NonNull int[] complianceWarnings) {
+        StringBuilder complianceWarningString = new StringBuilder();
+        complianceWarningString.append("[");
+
+        if (complianceWarnings != null) {
+            for (int warning : complianceWarnings) {
+                switch (warning) {
+                    case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                        complianceWarningString.append("other, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                        complianceWarningString.append("debug accessory, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_BC_1_2:
+                        complianceWarningString.append("bc12, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
+                        complianceWarningString.append("missing rp, ");
+                        break;
+                    default:
+                        complianceWarningString.append(String.format("Unknown(%d), ", warning));
+                        break;
+                }
+            }
+        }
+
+        complianceWarningString.append("]");
+        return complianceWarningString.toString().replaceAll(", ]$", "]");
+    }
+
+    /** @hide */
+    public static String dpAltModeStatusToString(int dpAltModeStatus) {
+        switch (dpAltModeStatus) {
+            case DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN:
+                return "Unknown";
+            case DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE:
+                return "Not Capable";
+            case DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED:
+                return "Capable-Disabled";
+            case DISPLAYPORT_ALT_MODE_STATUS_ENABLED:
+                return "Enabled";
+            default:
+                return Integer.toString(dpAltModeStatus);
+        }
+    }
+
+    /** @hide */
     public static void checkMode(int powerRole) {
         Preconditions.checkArgumentInRange(powerRole, Constants.PortMode.NONE,
                 Constants.PortMode.NUM_MODES - 1, "portMode");
@@ -720,10 +851,12 @@ public final class UsbPort {
     @Override
     public String toString() {
         return "UsbPort{id=" + mId + ", supportedModes=" + modeToString(mSupportedModes)
-                + "supportedContaminantProtectionModes=" + mSupportedContaminantProtectionModes
-                + "supportsEnableContaminantPresenceProtection="
+                + ", supportedContaminantProtectionModes=" + mSupportedContaminantProtectionModes
+                + ", supportsEnableContaminantPresenceProtection="
                 + mSupportsEnableContaminantPresenceProtection
-                + "supportsEnableContaminantPresenceDetection="
-                + mSupportsEnableContaminantPresenceDetection;
+                + ", supportsEnableContaminantPresenceDetection="
+                + mSupportsEnableContaminantPresenceDetection
+                + ", supportsComplianceWarnings="
+                + mSupportsComplianceWarnings;
     }
 }

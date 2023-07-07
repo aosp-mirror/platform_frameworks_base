@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,12 +30,11 @@ import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
 import android.view.View;
-import android.window.ImeOnBackInvokedDispatcher;
 
-import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.IInputMethod;
+import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
-import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.util.List;
 
@@ -100,21 +100,12 @@ public interface InputMethod {
      * unique token for the session it has with the system service as well as
      * IPC endpoint to do some other privileged operations.
      *
-     * @param token special token for the system to identify
-     *              {@link InputMethodService}
-     * @param privilegedOperations IPC endpoint to do some privileged
-     *                             operations that are allowed only to the
-     *                             current IME.
-     * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
-     * @param stylusHwSupported {@link InputMethodInfo#supportsStylusHandwriting()} declared by IME.
-     * @param navButtonFlags The initial state of {@link InputMethodNavButtonFlags}.
+     * @param params Contains parameters to initialize the {@link InputMethodService}.
      * @hide
      */
     @MainThread
-    default void initializeInternal(IBinder token,
-            IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-            boolean stylusHwSupported, @InputMethodNavButtonFlags int navButtonFlags) {
-        attachToken(token);
+    default void initializeInternal(@NonNull IInputMethod.InitParams params) {
+        attachToken(params.token);
     }
 
     /**
@@ -182,13 +173,13 @@ public interface InputMethod {
      * @param inputConnection Optional specific input connection for
      * communicating with the text box; if null, you should use the generic
      * bound input connection.
-     * @param info Information about the text box (typically, an EditText)
+     * @param editorInfo Information about the text box (typically, an EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
     @MainThread
-    public void startInput(InputConnection inputConnection, EditorInfo info);
+    public void startInput(InputConnection inputConnection, EditorInfo editorInfo);
 
     /**
      * This method is called when the state of this input method needs to be
@@ -201,56 +192,39 @@ public interface InputMethod {
      * @param inputConnection Optional specific input connection for
      * communicating with the text box; if null, you should use the generic
      * bound input connection.
-     * @param attribute The attribute of the text box (typically, a EditText)
+     * @param editorInfo The attribute of the text box (typically, a EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
     @MainThread
-    public void restartInput(InputConnection inputConnection, EditorInfo attribute);
+    public void restartInput(InputConnection inputConnection, EditorInfo editorInfo);
 
     /**
-     * This method is called when {@code {@link #startInput(InputConnection, EditorInfo)} or
-     * {@code {@link #restartInput(InputConnection, EditorInfo)} needs to be dispatched.
+     * This method is called when {@link #startInput(InputConnection, EditorInfo)} or
+     * {@link #restartInput(InputConnection, EditorInfo)} needs to be dispatched.
      *
-     * <p>Note: This method is hidden because the {@code startInputToken} that this method is
-     * dealing with is one of internal details, which should not be exposed to the IME developers.
-     * If you override this method, you are responsible for not breaking existing IMEs that expect
+     * <p>Note: This method is hidden because {@link IInputMethod.StartInputParams} is an internal
+     * details, which should not be exposed to the IME developers. If you override this method, you
+     * are responsible for not breaking existing IMEs that expect
      * {@link #startInput(InputConnection, EditorInfo)} to be still called back.</p>
      *
      * @param inputConnection optional specific input connection for communicating with the text
      *                        box; if {@code null}, you should use the generic bound input
      *                        connection
-     * @param editorInfo information about the text box (typically, an EditText) that requests input
-     * @param restarting {@code false} if this corresponds to
-     *                   {@link #startInput(InputConnection, EditorInfo)}. Otherwise this
-     *                   corresponds to {@link #restartInput(InputConnection, EditorInfo)}.
-     * @param startInputToken a token that identifies a logical session that starts with this method
-     *                        call. Some internal IPCs such as {@link
-     *                        InputMethodManager#setImeWindowStatus(IBinder, IBinder, int, int)}
-     *                        require this token to work, and you have to keep the token alive until
-     *                        the next {@link #startInput(InputConnection, EditorInfo, IBinder)} as
-     *                        long as your implementation of {@link InputMethod} relies on such
-     *                        IPCs
-     * @param navButtonFlags {@link InputMethodNavButtonFlags} in the initial state of this session.
-     * @param imeDispatcher The {@link ImeOnBackInvokedDispatcher }} to be set on the
-     *                      IME's {@link android.window.WindowOnBackInvokedDispatcher}, so that IME
-     *                      {@link android.window.OnBackInvokedCallback}s can be forwarded to
-     *                      the client requesting to start input.
+     * @param params Raw object of {@link IInputMethod.StartInputParams}.
      * @see #startInput(InputConnection, EditorInfo)
      * @see #restartInput(InputConnection, EditorInfo)
      * @see EditorInfo
      * @hide
      */
     @MainThread
-    default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
-            @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        if (restarting) {
-            restartInput(inputConnection, editorInfo);
+    default void dispatchStartInput(@Nullable InputConnection inputConnection,
+            @NonNull IInputMethod.StartInputParams params) {
+        if (params.restarting) {
+            restartInput(inputConnection, params.editorInfo);
         } else {
-            startInput(inputConnection, editorInfo);
+            startInput(inputConnection, params.editorInfo);
         }
     }
 
@@ -326,11 +300,12 @@ public interface InputMethod {
      * @param showInputToken an opaque {@link android.os.Binder} token to identify which API call
      *        of {@link InputMethodManager#showSoftInput(View, int)} is associated with
      *        this callback.
+     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      * @hide
      */
     @MainThread
-    default public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-            IBinder showInputToken) {
+    public default void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+            IBinder showInputToken, @Nullable ImeTracker.Token statsToken) {
         showSoftInput(flags, resultReceiver);
     }
 
@@ -364,11 +339,14 @@ public interface InputMethod {
      * @param hideInputToken an opaque {@link android.os.Binder} token to identify which API call
      *         of {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}} is associated
      *         with this callback.
+     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      * @hide
      */
     @MainThread
-    public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-            IBinder hideInputToken);
+    public default void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+            IBinder hideInputToken, @Nullable ImeTracker.Token statsToken) {
+        hideSoftInput(flags, resultReceiver);
+    }
 
     /**
      * Request that any soft input part of the input method be hidden from the user.
@@ -395,11 +373,20 @@ public interface InputMethod {
 
     /**
      * Checks if IME is ready to start stylus handwriting session.
-     * If yes, {@link #startStylusHandwriting(InputChannel, List)} is called.
+     * If yes, {@link #startStylusHandwriting(int, InputChannel, List)} is called.
      * @param requestId
      * @hide
      */
     default void canStartStylusHandwriting(int requestId) {
+        // intentionally empty
+    }
+
+    /**
+     * This method is called when the user tapped or clicked an {@link android.widget.Editor}.
+     * @param toolType {@link android.view.MotionEvent#getToolType(int)} used for clicking editor.
+     * @hide
+     */
+    default void updateEditorToolType(int toolType) {
         // intentionally empty
     }
 
@@ -428,4 +415,19 @@ public interface InputMethod {
         // intentionally empty
     }
 
+    /**
+     * Remove stylus handwriting window.
+     * @hide
+     */
+    default void removeStylusHandwritingWindow() {
+        // intentionally empty
+    }
+
+    /**
+     * Set a stylus idle-timeout after which handwriting {@code InkWindow} will be removed.
+     * @hide
+     */
+    default void setStylusWindowIdleTimeoutForTest(@DurationMillisLong long timeout) {
+        // intentionally empty
+    }
 }

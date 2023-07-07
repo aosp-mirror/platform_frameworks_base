@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -178,6 +180,24 @@ public final class RouteDiscoveryPreference implements Parcelable {
         dest.writeStringList(mAllowedPackages);
         dest.writeBoolean(mShouldPerformActiveScan);
         dest.writeBundle(mExtras);
+    }
+
+    /**
+     * Dumps current state of the instance. Use with {@code dumpsys}.
+     *
+     * See {@link android.os.Binder#dump(FileDescriptor, PrintWriter, String[])}.
+     *
+     * @hide
+     */
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "RouteDiscoveryPreference");
+
+        String indent = prefix + "  ";
+
+        pw.println(indent + "mPreferredFeatures=" + mPreferredFeatures);
+        pw.println(indent + "mPackageOrder=" + mPackageOrder);
+        pw.println(indent + "mAllowedPackages=" + mAllowedPackages);
+        pw.println(indent + "mExtras=" + mExtras);
     }
 
     @Override

@@ -96,7 +96,7 @@ public abstract class BaseCanvas {
     // These are also implemented in RecordingCanvas so that we can
     // selectively apply on them
     // Everything below here is copy/pasted from Canvas.java
-    // The JNI registration is handled by android_view_Canvas.cpp
+    // The JNI registration is handled by android_graphics_Canvas.cpp
     // ---------------------------------------------------------------------------
 
     public void drawArc(float left, float top, float right, float bottom, float startAngle,
@@ -330,11 +330,7 @@ public abstract class BaseCanvas {
 
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
         throwIfHasHwFeaturesInSwMode(paint);
-        if (path.isSimplePath && path.rects != null) {
-            nDrawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
-        } else {
-            nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
-        }
+        nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
     }
 
     public void drawPoint(float x, float y, @NonNull Paint paint) {
@@ -672,10 +668,34 @@ public abstract class BaseCanvas {
     }
 
     /**
+     * Draws a mesh object to the screen.
+     *
+     * <p>Note: antialiasing is not supported, therefore {@link Paint#ANTI_ALIAS_FLAG} is
+     * ignored.</p>
+     *
+     * @param mesh {@link Mesh} object that will be drawn to the screen
+     * @param blendMode {@link BlendMode} used to blend mesh primitives as the destination color
+     *            with the Paint color/shader as the source color. This defaults to
+     *            {@link BlendMode#MODULATE} if null.
+     * @param paint {@link Paint} used to provide a color/shader/blend mode.
+     */
+    public void drawMesh(@NonNull Mesh mesh, @Nullable BlendMode blendMode, @NonNull Paint paint) {
+        if (!isHardwareAccelerated() && onHwFeatureInSwMode()) {
+            throw new RuntimeException("software rendering doesn't support meshes");
+        }
+        if (blendMode == null) {
+            blendMode = BlendMode.MODULATE;
+        }
+        nDrawMesh(this.mNativeCanvasWrapper, mesh.getNativeWrapperInstance(),
+                blendMode.getXfermode().porterDuffMode, paint.getNativeInstance());
+    }
+
+    /**
      * @hide
      */
-    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
-        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry,
+            float alpha) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, alpha);
     }
 
     /**
@@ -804,6 +824,9 @@ public abstract class BaseCanvas {
             int vertOffset, float[] texs, int texOffset, int[] colors, int colorOffset,
             short[] indices, int indexOffset, int indexCount, long nativePaint);
 
+    private static native void nDrawMesh(
+            long nativeCanvas, long nativeMesh, int mode, long nativePaint);
+
     private static native void nDrawGlyphs(long nativeCanvas, int[] glyphIds, float[] positions,
             int glyphIdStart, int positionStart, int glyphCount, long nativeFont, long nativePaint);
 
@@ -827,5 +850,5 @@ public abstract class BaseCanvas {
             float hOffset, float vOffset, int flags, long nativePaint);
 
     private static native void nPunchHole(long renderer, float left, float top, float right,
-            float bottom, float rx, float ry);
+            float bottom, float rx, float ry, float alpha);
 }

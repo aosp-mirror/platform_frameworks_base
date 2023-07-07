@@ -21,8 +21,8 @@ import android.util.Pools;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.app.animation.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
@@ -53,7 +53,9 @@ public class ImageTransformState extends TransformState {
             return true;
         }
         if (otherState instanceof ImageTransformState) {
-            return mIcon != null && mIcon.sameAs(((ImageTransformState) otherState).getIcon());
+            final Icon otherIcon = ((ImageTransformState) otherState).mIcon;
+            return mIcon == otherIcon || (mIcon != null && otherIcon != null && mIcon.sameAs(
+                    otherIcon));
         }
         return false;
     }

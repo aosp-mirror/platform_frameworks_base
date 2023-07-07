@@ -780,6 +780,7 @@ public class SmsMessage extends SmsMessageBase {
             mUserData = mBearerData.userData.payload;
             mUserDataHeader = mBearerData.userData.userDataHeader;
             mMessageBody = mBearerData.userData.payloadStr;
+            mReceivedEncodingType = mBearerData.userData.msgEncoding;
         }
 
         if (mOriginatingAddress != null) {
@@ -859,6 +860,9 @@ public class SmsMessage extends SmsMessageBase {
         if (bData == null) {
             Rlog.w(LOG_TAG, "BearerData.decode() returned null");
             return null;
+        }
+        if (bData.userData != null) {
+            mReceivedEncodingType = bData.userData.msgEncoding;
         }
 
         if (Rlog.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {

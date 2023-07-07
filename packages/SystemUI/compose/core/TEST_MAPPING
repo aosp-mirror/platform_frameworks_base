@@ -1,0 +1,37 @@
+{
+  "presubmit": [
+    {
+      "name": "PlatformComposeCoreTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "SystemUIComposeFeaturesTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "SystemUIComposeGalleryTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

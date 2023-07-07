@@ -23,7 +23,9 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
 
 import android.animation.Animator;
@@ -34,6 +36,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.view.WindowInsets;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
 import android.view.animation.AnimationUtils;
@@ -43,11 +46,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
@@ -67,6 +70,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
+    private DisappearAnimationListener mDisappearAnimationListener;
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -96,15 +100,19 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_password;
+            case PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE:
+                return R.string.kg_prompt_after_update_password;
             case PROMPT_REASON_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_DEVICE_ADMIN:
                 return R.string.kg_prompt_reason_device_admin;
             case PROMPT_REASON_USER_REQUEST:
-                return R.string.kg_prompt_reason_user_request;
+                return R.string.kg_prompt_after_user_lockdown_password;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
-                return R.string.kg_prompt_reason_timeout_password;
+                return R.string.kg_prompt_unattended_update_password;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
+                return R.string.kg_prompt_reason_timeout_password;
+            case PROMPT_REASON_TRUSTAGENT_EXPIRED:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_NONE:
                 return 0;
@@ -182,9 +190,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                                 return;
                             }
                             Insets shownInsets = controller.getShownStateInsets();
-                            Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0,
-                                    (int) (-shownInsets.bottom / 4
-                                            * anim.getAnimatedFraction())));
+                            int dist = (int) (-shownInsets.bottom / 4
+                                    * anim.getAnimatedFraction());
+                            Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0, dist));
+                            if (mDisappearAnimationListener != null) {
+                                mDisappearAnimationListener.setTranslationY(-dist);
+                            }
+
                             controller.setInsetsAndAlpha(insets,
                                     (float) animation.getAnimatedValue(),
                                     anim.getAnimatedFraction());
@@ -205,6 +217,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                                     controller.finish(false);
                                     runOnFinishImeAnimationRunnable();
                                     finishRunnable.run();
+                                    mDisappearAnimationListener = null;
                                     Trace.endSection();
                                 });
                             }
@@ -235,5 +248,66 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     public CharSequence getTitle() {
         return getResources().getString(
                 com.android.internal.R.string.keyguard_accessibility_password_unlock);
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (!mPasswordEntry.isFocused() && isVisibleToUser()) {
+            mPasswordEntry.requestFocus();
+        }
+        return super.onApplyWindowInsets(insets);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (hasWindowFocus) {
+            if (isVisibleToUser()) {
+                showKeyboard();
+            } else {
+                hideKeyboard();
+            }
+        }
+    }
+
+    /**
+     * Sends signal to the focused window to show the keyboard.
+     */
+    public void showKeyboard() {
+        post(() -> {
+            if (mPasswordEntry.isAttachedToWindow()
+                    && !mPasswordEntry.getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+                mPasswordEntry.requestFocus();
+                mPasswordEntry.getWindowInsetsController().show(WindowInsets.Type.ime());
+            }
+        });
+    }
+
+    /**
+     * Sends signal to the focused window to hide the keyboard.
+     */
+    public void hideKeyboard() {
+        post(() -> {
+            if (mPasswordEntry.isAttachedToWindow()
+                    && mPasswordEntry.getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+                mPasswordEntry.clearFocus();
+                mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+            }
+        });
+    }
+
+    /**
+     * Listens to the progress of the disappear animation and handles it.
+     */
+    interface DisappearAnimationListener {
+        void setTranslationY(int transY);
+    }
+
+    /**
+     * Set an instance of the disappear animation listener to this class. This will be
+     * removed when the animation completes.
+     */
+    public void setDisappearAnimationListener(DisappearAnimationListener listener) {
+        mDisappearAnimationListener = listener;
     }
 }

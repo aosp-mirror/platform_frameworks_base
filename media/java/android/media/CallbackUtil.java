@@ -183,7 +183,7 @@ import java.util.concurrent.Executor;
 
         if (!removeListener(listener, listeners)) {
             throw new IllegalArgumentException("attempt to call " + methodName
-                    + "on an unregistered listener");
+                    + " on an unregistered listener");
         }
         if (listeners.size() == 0) {
             unregisterStub.accept(dispatchStub);

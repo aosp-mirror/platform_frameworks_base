@@ -14,7 +14,7 @@ Copyright (C) 2018 The Android Open Source Project
     limitations under the License.
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <string name="app_name" translatable="false">Android S Easter Egg</string>
+    <string name="app_name" translatable="false">Android Easter Egg</string>
 
     <!-- name of the Q easter egg, a nonogram-style icon puzzle -->
     <string name="q_egg_name" translatable="false">Icon Quiz</string>

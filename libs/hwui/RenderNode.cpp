@@ -152,6 +152,9 @@ void RenderNode::damageSelf(TreeInfo& info) {
             // TODO: Get this from the display list ops or something
             info.damageAccumulator->dirty(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
         }
+        if (!mIsTextureView) {
+            info.out.solelyTextureViewUpdates = false;
+        }
     }
 }
 

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.IResourcesManager;
+import android.content.res.ResourceTimer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -55,7 +56,7 @@ public class ResourcesManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        // Intentionally left empty.
+        ResourceTimer.start();
     }
 
     private final IBinder mService = new IResourcesManager.Stub() {
@@ -73,8 +74,8 @@ public class ResourcesManagerService extends SystemService {
         @Override
         protected void dump(@NonNull FileDescriptor fd,
                 @NonNull PrintWriter pw, @Nullable String[] args) {
-            try {
-                mActivityManagerService.dumpAllResources(ParcelFileDescriptor.dup(fd), pw);
+            try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
+                mActivityManagerService.dumpAllResources(pfd, pw);
             } catch (Exception e) {
                 pw.println("Exception while trying to dump all resources: " + e.getMessage());
                 e.printStackTrace(pw);

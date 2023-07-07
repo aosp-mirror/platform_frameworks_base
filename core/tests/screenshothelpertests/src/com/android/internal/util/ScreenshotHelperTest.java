@@ -17,7 +17,7 @@
 package com.android.internal.util;
 
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
-import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
+import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
@@ -32,9 +32,11 @@ import static org.mockito.Mockito.mock;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.os.Bundle;
+import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.WindowManager;
@@ -80,33 +82,48 @@ public final class ScreenshotHelperTest {
 
     @Test
     public void testFullscreenScreenshot() {
-        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, false, false, mHandler, null);
+        mScreenshotHelper.takeScreenshot(
+                WindowManager.ScreenshotSource.SCREENSHOT_OTHER, mHandler, null);
     }
 
     @Test
-    public void testSelectedRegionScreenshot() {
-        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_SELECTED_REGION, false, false, mHandler,
-                null);
+    public void testFullscreenScreenshotRequest() {
+        ScreenshotRequest request = new ScreenshotRequest.Builder(
+                TAKE_SCREENSHOT_FULLSCREEN, WindowManager.ScreenshotSource.SCREENSHOT_OTHER)
+                .build();
+        mScreenshotHelper.takeScreenshot(request, mHandler, null);
     }
 
     @Test
     public void testProvidedImageScreenshot() {
-        mScreenshotHelper.provideScreenshot(
-                new Bundle(), new Rect(), Insets.of(0, 0, 0, 0), 1, 1, new ComponentName("", ""),
-                WindowManager.ScreenshotSource.SCREENSHOT_OTHER, mHandler, null);
+        HardwareBuffer buffer = HardwareBuffer.create(
+                10, 10, HardwareBuffer.RGBA_8888, 1, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+        Bitmap bitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
+        ScreenshotRequest request = new ScreenshotRequest.Builder(
+                TAKE_SCREENSHOT_PROVIDED_IMAGE, WindowManager.ScreenshotSource.SCREENSHOT_OTHER)
+                .setTopComponent(new ComponentName("", ""))
+                .setTaskId(1)
+                .setUserId(1)
+                .setBitmap(bitmap)
+                .setBoundsOnScreen(new Rect())
+                .setInsets(Insets.NONE)
+                .build();
+        mScreenshotHelper.takeScreenshot(request, mHandler, null);
     }
 
     @Test
     public void testScreenshotTimesOut() {
         long timeoutMs = 10;
+        ScreenshotRequest request = new ScreenshotRequest.Builder(
+                TAKE_SCREENSHOT_FULLSCREEN, WindowManager.ScreenshotSource.SCREENSHOT_OTHER)
+                .build();
 
         CountDownLatch lock = new CountDownLatch(1);
-        mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, false, false, timeoutMs,
-                mHandler,
+        mScreenshotHelper.takeScreenshotInternal(request, mHandler,
                 uri -> {
                     assertNull(uri);
                     lock.countDown();
-                });
+                }, timeoutMs);
 
         try {
             // Add tolerance for delay to prevent flakes.

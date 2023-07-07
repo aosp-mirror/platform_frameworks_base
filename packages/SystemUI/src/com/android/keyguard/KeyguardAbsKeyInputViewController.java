@@ -20,7 +20,6 @@ import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 import static com.android.keyguard.KeyguardAbsKeyInputView.MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT;
 
-import android.annotation.CallSuper;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -38,6 +37,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,15 +45,15 @@ import java.util.Map;
 public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKeyInputView>
         extends KeyguardInputViewController<T> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final LockPatternUtils mLockPatternUtils;
+    protected final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
     private CountDownTimer mCountdownTimer;
-    protected KeyguardMessageAreaController mMessageAreaController;
     private boolean mDismissing;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected boolean mResumed;
+    protected boolean mLockedOut;
 
     private final KeyDownListener mKeyDownListener = (keyCode, keyEvent) -> {
         // Fingerprint sensor sends a KeyEvent.KEYCODE_UNKNOWN.
@@ -79,15 +79,15 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
-            EmergencyButtonController emergencyButtonController) {
-        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
+            EmergencyButtonController emergencyButtonController,
+            FeatureFlags featureFlags) {
+        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
+                messageAreaControllerFactory, featureFlags);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
-        KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
-        mMessageAreaController = messageAreaControllerFactory.create(kma);
     }
 
     abstract void resetState();
@@ -95,7 +95,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onInit() {
         super.onInit();
-        mMessageAreaController.init();
     }
 
     @Override
@@ -107,24 +106,11 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     @Override
     public void reset() {
+        super.reset();
         // start fresh
         mDismissing = false;
         mView.resetPasswordText(false /* animate */, false /* announce */);
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
-        if (shouldLockout(deadline)) {
-            handleAttemptLockout(deadline);
-        } else {
-            resetState();
-        }
-    }
-
-    @CallSuper
-    @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mMessageAreaController.reloadColors();
+        resetState();
     }
 
     @Override
@@ -133,11 +119,15 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     }
 
     @Override
-    public void showMessage(CharSequence message, ColorStateList colorState) {
+    public void showMessage(CharSequence message, ColorStateList colorState, boolean animated) {
+        if (mMessageAreaController == null) {
+            return;
+        }
+
         if (colorState != null) {
             mMessageAreaController.setNextMessageColor(colorState);
         }
-        mMessageAreaController.setMessage(message);
+        mMessageAreaController.setMessage(message, animated);
     }
 
     // Allow subclasses to override this behavior
@@ -148,6 +138,8 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     // Prevent user from using the PIN/Password entry until scheduled deadline.
     protected void handleAttemptLockout(long elapsedRealtimeDeadline) {
         mView.setPasswordEntryEnabled(false);
+        mView.setPasswordEntryInputEnabled(false);
+        mLockedOut = true;
         long elapsedRealtime = SystemClock.elapsedRealtime();
         long secondsInFuture = (long) Math.ceil(
                 (elapsedRealtimeDeadline - elapsedRealtime) / 1000.0);
@@ -158,15 +150,18 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
                 Map<String, Object> arguments = new HashMap<>();
                 arguments.put("count", secondsRemaining);
-                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
-                        mView.getResources(),
-                        arguments,
-                        R.string.kg_too_many_failed_attempts_countdown));
+                mMessageAreaController.setMessage(
+                        PluralsMessageFormatter.format(
+                            mView.getResources(),
+                            arguments,
+                            R.string.kg_too_many_failed_attempts_countdown),
+                        /* animate= */ false);
             }
 
             @Override
             public void onFinish() {
                 mMessageAreaController.setMessage("");
+                mLockedOut = false;
                 resetState();
             }
         }.start();
@@ -179,7 +174,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             if (dismissKeyguard) {
                 mDismissing = true;
                 mLatencyTracker.onActionStart(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
-                getKeyguardSecurityCallback().dismiss(true, userId);
+                getKeyguardSecurityCallback().dismiss(true, userId, getSecurityMode());
             }
         } else {
             if (isValidPassword) {
@@ -190,10 +185,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                     handleAttemptLockout(deadline);
                 }
             }
+            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (timeoutMs == 0) {
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
-            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             startErrorAnimation();
         }
     }
@@ -202,6 +197,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     protected void verifyPasswordAndUnlock() {
         if (mDismissing) return; // already verified but haven't been dismissed; don't do it again.
+        if (mLockedOut) return;
 
         final LockscreenCredential password = mView.getEnteredCredential();
         mView.setPasswordEntryInputEnabled(false);
@@ -265,7 +261,8 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         if (reason != PROMPT_REASON_NONE) {
             int promtReasonStringRes = mView.getPromptReasonStringRes(reason);
             if (promtReasonStringRes != 0) {
-                mMessageAreaController.setMessage(promtReasonStringRes);
+                mMessageAreaController.setMessage(
+                        mView.getResources().getString(promtReasonStringRes), false);
             }
         }
     }
@@ -280,6 +277,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onResume(int reason) {
         mResumed = true;
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (shouldLockout(deadline)) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     @Override

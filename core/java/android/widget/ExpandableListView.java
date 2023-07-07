@@ -31,6 +31,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ExpandableListConnector.PositionMetadata;
 
 import com.android.internal.R;
@@ -1142,6 +1143,24 @@ public class ExpandableListView extends ListView {
         pm.recycle();
 
         return new ExpandableListContextMenuInfo(view, packedPosition, id);
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoForItem(
+            View view, int position, AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoForItem(view, position, info);
+
+        final PositionMetadata metadata = mConnector.getUnflattenedPos(position);
+        if (metadata.position.type == ExpandableListPosition.GROUP) {
+            if (isGroupExpanded(metadata.position.groupPos)) {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+            } else {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+            }
+        }
+
+        metadata.recycle();
     }
 
     /**

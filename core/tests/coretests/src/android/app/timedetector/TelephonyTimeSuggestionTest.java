@@ -16,13 +16,15 @@
 
 package android.app.timedetector;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
-import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.roundTripParcelable;
+import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.os.TimestampedValue;
+import android.app.time.UnixEpochTime;
+import android.os.ShellCommand;
 
 import org.junit.Test;
 
@@ -45,13 +47,13 @@ public class TelephonyTimeSuggestionTest {
             assertEquals(two, one);
         }
 
-        builder1.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
+        builder1.setUnixEpochTime(new UnixEpochTime(1111L, 2222L));
         {
             TelephonyTimeSuggestion one = builder1.build();
             assertEquals(one, one);
         }
 
-        builder2.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
+        builder2.setUnixEpochTime(new UnixEpochTime(1111L, 2222L));
         {
             TelephonyTimeSuggestion one = builder1.build();
             TelephonyTimeSuggestion two = builder2.build();
@@ -61,7 +63,7 @@ public class TelephonyTimeSuggestionTest {
 
         TelephonyTimeSuggestion.Builder builder3 =
                 new TelephonyTimeSuggestion.Builder(SLOT_INDEX + 1);
-        builder3.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
+        builder3.setUnixEpochTime(new UnixEpochTime(1111L, 2222L));
         {
             TelephonyTimeSuggestion one = builder1.build();
             TelephonyTimeSuggestion three = builder3.build();
@@ -84,7 +86,7 @@ public class TelephonyTimeSuggestionTest {
         TelephonyTimeSuggestion.Builder builder = new TelephonyTimeSuggestion.Builder(SLOT_INDEX);
         assertRoundTripParcelable(builder.build());
 
-        builder.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
+        builder.setUnixEpochTime(new UnixEpochTime(1111L, 2222L));
         assertRoundTripParcelable(builder.build());
 
         // DebugInfo should also be stored (but is not checked by equals()
@@ -94,5 +96,46 @@ public class TelephonyTimeSuggestionTest {
             TelephonyTimeSuggestion rtSuggestion1 = roundTripParcelable(suggestion1);
             assertEquals(suggestion1.getDebugInfo(), rtSuggestion1.getDebugInfo());
         }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noSlotIndex() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--elapsed_realtime 54321 --unix_epoch_time 12345");
+        TelephonyTimeSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noReferenceTime() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --unix_epoch_time 12345");
+        TelephonyTimeSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noUnixEpochTime() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --elapsed_realtime 54321");
+        TelephonyTimeSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test
+    public void testParseCommandLineArg_validSuggestion() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --elapsed_realtime 54321 --unix_epoch_time 12345");
+        TelephonyTimeSuggestion expectedSuggestion =
+                new TelephonyTimeSuggestion.Builder(0)
+                        .setUnixEpochTime(new UnixEpochTime(54321L, 12345L))
+                        .build();
+        TelephonyTimeSuggestion actualSuggestion =
+                TelephonyTimeSuggestion.parseCommandLineArg(testShellCommand);
+        assertEquals(expectedSuggestion, actualSuggestion);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_unknownArgument() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --elapsed_realtime 54321 --unix_epoch_time 12345 --bad_arg 0");
+        TelephonyTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 }

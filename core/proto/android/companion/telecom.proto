@@ -1,0 +1,113 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.companion;
+
+option java_multiple_files = true;
+
+// Next index: 4
+message Telecom {
+  // Next index: 6
+  message Call {
+    // UUID representing this call
+    string id = 1;
+
+    message Origin {
+      // Caller's name and/or phone number; what a user would see displayed when receiving an
+      // incoming call on the local device
+      string caller_id = 1;
+      bytes app_icon = 2;
+      CallFacilitator facilitator = 3;
+    }
+    Origin origin = 2;
+
+    enum Status {
+      UNKNOWN_STATUS = 0;
+      RINGING = 1;
+      ONGOING = 2;
+      ON_HOLD = 3;
+      RINGING_SILENCED = 4;
+      AUDIO_PROCESSING = 5;
+      RINGING_SIMULATED = 6;
+      DISCONNECTED = 7;
+      DIALING = 8;
+    }
+    Status status = 3;
+
+    repeated Control controls = 4;
+
+    enum Direction {
+      UNKNOWN_DIRECTION = 0;
+      INCOMING = 1;
+      OUTGOING = 2;
+    }
+    Direction direction = 5;
+  }
+
+  message Request {
+    message CreateAction {
+      // UUID representing this request.
+      string id = 1;
+      // URI representing the address of the intended callee.
+      string address = 2;
+      // Which facilitator should handle this call.
+      CallFacilitator facilitator = 3;
+    }
+    message ControlAction {
+      // UUID representing the call to perform the control action on
+      string id = 1;
+      // The control to perform
+      Control control = 2;
+    }
+
+    oneof action {
+      CreateAction create_action = 1;
+      ControlAction control_action = 2;
+    }
+  }
+
+  // A facilitator (namely an app) that can be directed to place calls.
+  // Next index: 3
+  message CallFacilitator {
+    // Human-readable name of the facilitator
+    string name = 1;
+    // Unique identifier for this facilitator, such as a package name.
+    string identifier = 2;
+    // Extended identifier for this facilitator.
+    string extended_identifier = 3;
+  }
+
+  enum Control {
+    UNKNOWN_CONTROL = 0;
+    ACCEPT = 1;
+    REJECT = 2;
+    SILENCE = 3;
+    MUTE = 4;
+    UNMUTE = 5;
+    END = 6;
+    PUT_ON_HOLD = 7;
+    TAKE_OFF_HOLD = 8;
+  }
+
+  // The list of active calls.
+  repeated Call calls = 1;
+  // The list of requested calls or call changes.
+  repeated Request requests = 2;
+  // The list of call facilitators that this device currently supports.
+  repeated CallFacilitator facilitators = 3;
+}

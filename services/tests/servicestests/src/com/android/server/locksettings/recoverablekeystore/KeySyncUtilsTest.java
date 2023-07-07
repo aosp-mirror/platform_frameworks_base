@@ -27,6 +27,9 @@ import android.util.Pair;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
+import com.android.security.SecureBox;
+
 import com.google.common.collect.ImmutableMap;
 
 import org.junit.Test;
@@ -114,17 +117,6 @@ public class KeySyncUtilsTest {
         byte[] b = KeySyncUtils.generateKeyClaimant();
 
         assertFalse(Arrays.equals(a, b));
-    }
-
-    @Test
-    public void concat_concatenatesArrays() {
-        assertArrayEquals(
-                utf8Bytes("hello, world!"),
-                KeySyncUtils.concat(
-                        utf8Bytes("hello"),
-                        utf8Bytes(", "),
-                        utf8Bytes("world"),
-                        utf8Bytes("!")));
     }
 
     @Test
@@ -253,7 +245,7 @@ public class KeySyncUtilsTest {
         byte[] encryptedPayload = SecureBox.encrypt(
                 /*theirPublicKey=*/ null,
                 /*sharedSecret=*/ keyClaimant,
-                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*header=*/ ArrayUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
                 /*payload=*/ recoveryKey);
 
         byte[] decrypted = KeySyncUtils.decryptRecoveryClaimResponse(
@@ -269,7 +261,7 @@ public class KeySyncUtilsTest {
         byte[] encryptedPayload = SecureBox.encrypt(
                 /*theirPublicKey=*/ null,
                 /*sharedSecret=*/ KeySyncUtils.generateKeyClaimant(),
-                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*header=*/ ArrayUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
                 /*payload=*/ recoveryKey);
 
         try {
@@ -298,9 +290,9 @@ public class KeySyncUtilsTest {
         byte[] decrypted = SecureBox.decrypt(
                 keyPair.getPrivate(),
                 /*sharedSecret=*/ null,
-                /*header=*/ KeySyncUtils.concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
+                /*header=*/ ArrayUtils.concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
                 encryptedRecoveryClaim);
-        assertArrayEquals(KeySyncUtils.concat(LOCK_SCREEN_HASH_1, keyClaimant), decrypted);
+        assertArrayEquals(ArrayUtils.concat(LOCK_SCREEN_HASH_1, keyClaimant), decrypted);
     }
 
     @Test
@@ -320,7 +312,7 @@ public class KeySyncUtilsTest {
             SecureBox.decrypt(
                     keyPair.getPrivate(),
                     /*sharedSecret=*/ null,
-                    /*header=*/ KeySyncUtils.concat(
+                    /*header=*/ ArrayUtils.concat(
                             RECOVERY_CLAIM_HEADER, vaultParams, randomBytes(32)),
                     encryptedRecoveryClaim);
             fail("Should throw if challenge is incorrect.");
@@ -346,7 +338,7 @@ public class KeySyncUtilsTest {
             SecureBox.decrypt(
                     SecureBox.genKeyPair().getPrivate(),
                     /*sharedSecret=*/ null,
-                    /*header=*/ KeySyncUtils.concat(
+                    /*header=*/ ArrayUtils.concat(
                             RECOVERY_CLAIM_HEADER, vaultParams, challenge),
                     encryptedRecoveryClaim);
             fail("Should throw if secret key is incorrect.");
@@ -372,7 +364,7 @@ public class KeySyncUtilsTest {
             SecureBox.decrypt(
                     keyPair.getPrivate(),
                     /*sharedSecret=*/ null,
-                    /*header=*/ KeySyncUtils.concat(
+                    /*header=*/ ArrayUtils.concat(
                             RECOVERY_CLAIM_HEADER, randomBytes(100), challenge),
                     encryptedRecoveryClaim);
             fail("Should throw if vault params is incorrect.");
@@ -399,7 +391,7 @@ public class KeySyncUtilsTest {
             SecureBox.decrypt(
                     keyPair.getPrivate(),
                     /*sharedSecret=*/ null,
-                    /*header=*/ KeySyncUtils.concat(randomBytes(10), vaultParams, challenge),
+                    /*header=*/ ArrayUtils.concat(randomBytes(10), vaultParams, challenge),
                     encryptedRecoveryClaim);
             fail("Should throw if header is incorrect.");
         } catch (AEADBadTagException e) {

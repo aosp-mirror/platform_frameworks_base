@@ -23,6 +23,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import java.util.Arrays;
 
 
 /**
@@ -395,7 +396,7 @@ public class LogMaker {
             out[i * 2] = entries.keyAt(i);
             out[i * 2 + 1] = entries.valueAt(i);
         }
-        int size = out.toString().getBytes().length;
+        int size = Arrays.toString(out).getBytes().length;
         if (size > MAX_SERIALIZED_SIZE) {
             Log.i(TAG, "Log line too long, did not emit: " + size + " bytes.");
             throw new RuntimeException();

@@ -21,7 +21,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE;
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
-import static com.android.systemui.classifier.Classifier.LOCK_ICON;
+import static com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR;
 import static com.android.systemui.classifier.Classifier.SHADE_DRAG;
 
 import android.graphics.Point;
@@ -91,8 +91,8 @@ class ZigZagClassifier extends FalsingClassifier {
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
         if (interactionType == BRIGHTNESS_SLIDER
-                || interactionType == SHADE_DRAG
-                || interactionType == LOCK_ICON) {
+                || interactionType == MEDIA_SEEKBAR
+                || interactionType == SHADE_DRAG) {
             return Result.passed(0);
         }
 
@@ -137,8 +137,8 @@ class ZigZagClassifier extends FalsingClassifier {
             runningAbsDy += Math.abs(point.y - pY);
             pX = point.x;
             pY = point.y;
-            logDebug("(x, y, runningAbsDx, runningAbsDy) - (" + pX + ", " + pY + ", " + runningAbsDx
-                    + ", " + runningAbsDy + ")");
+            logVerbose("(x, y, runningAbsDx, runningAbsDy) - ("
+                    + pX + ", " + pY + ", " + runningAbsDx + ", " + runningAbsDy + ")");
         }
 
         float devianceX = runningAbsDx - actualDx;

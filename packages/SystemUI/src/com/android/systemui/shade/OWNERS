@@ -1,0 +1,18 @@
+justinweir@google.com
+syeonlee@google.com
+
+per-file *Notification* = set noparent
+per-file *Notification* = file:../statusbar/notification/OWNERS
+
+per-file NotificationsQuickSettingsContainer.java = kozynski@google.com, asc@google.com
+per-file NotificationsQSContainerController.kt = kozynski@google.com, asc@google.com
+per-file *ShadeHeader* = kozynski@google.com, asc@google.com
+per-file *Shade* = justinweir@google.com
+
+per-file NotificationShadeWindowViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com
+per-file NotificationShadeWindowView.java = pixel@google.com, cinek@google.com, juliacr@google.com
+
+per-file NotificationPanelUnfoldAnimationController.kt = alexflo@google.com, jeffdq@google.com, juliacr@google.com
+
+per-file NotificationPanelView.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com
+per-file NotificationPanelViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com

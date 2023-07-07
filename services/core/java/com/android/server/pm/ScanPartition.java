@@ -16,13 +16,17 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_FACTORY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_OEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRODUCT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
+import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackagePartitions;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -32,14 +36,18 @@ import java.io.File;
 /**
  * List of partitions to be scanned during system boot
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class ScanPartition extends PackagePartitions.SystemPartition {
     @PackageManagerService.ScanFlags
     public final int scanFlag;
 
+    @Nullable
+    public final ApexManager.ActiveApexInfo apexInfo;
+
     public ScanPartition(@NonNull PackagePartitions.SystemPartition partition) {
         super(partition);
         scanFlag = scanFlagForPartition(partition);
+        apexInfo = null;
     }
 
     /**
@@ -48,9 +56,21 @@ public class ScanPartition extends PackagePartitions.SystemPartition {
      * partition along with any specified additional scan flags.
      */
     public ScanPartition(@NonNull File folder, @NonNull ScanPartition original,
-            @PackageManagerService.ScanFlags int additionalScanFlag) {
+            @Nullable ApexManager.ActiveApexInfo apexInfo) {
         super(folder, original);
-        this.scanFlag = original.scanFlag | additionalScanFlag;
+        var scanFlags = original.scanFlag;
+        this.apexInfo = apexInfo;
+        if (apexInfo != null) {
+            scanFlags |= SCAN_AS_APK_IN_APEX;
+            if (apexInfo.isFactory) {
+                scanFlags |= SCAN_AS_FACTORY;
+            }
+            if (apexInfo.activeApexChanged) {
+                scanFlags |= SCAN_DROP_CACHE;
+            }
+        }
+        //noinspection WrongConstant
+        this.scanFlag = scanFlags;
     }
 
     private static int scanFlagForPartition(PackagePartitions.SystemPartition partition) {

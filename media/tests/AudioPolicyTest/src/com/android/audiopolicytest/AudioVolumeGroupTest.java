@@ -16,22 +16,51 @@
 
 package com.android.audiopolicytest;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
+import static com.android.audiopolicytest.AudioVolumeTestUtil.DEFAULT_ATTRIBUTES;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 
-public class AudioVolumeGroupTest extends AudioVolumesTestBase {
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class AudioVolumeGroupTest {
     private static final String TAG = "AudioVolumeGroupTest";
+
+    @Rule
+    public final AudioVolumesTestRule rule = new AudioVolumesTestRule();
+
+    private AudioManager mAudioManager;
+
+    @Before
+    public void setUp() {
+        mAudioManager = getApplicationContext().getSystemService(AudioManager.class);
+    }
 
     //-----------------------------------------------------------------
     // Test getAudioVolumeGroups and validate groud id
     //-----------------------------------------------------------------
-    public void testGetVolumeGroupsFromNonServiceCaller() throws Exception {
+    @Test
+    public void testGetVolumeGroupsFromNonServiceCaller() {
         // The transaction behind getAudioVolumeGroups will fail. Check is done at binder level
         // with policy service. Error is not reported, the list is just empty.
         // Request must come from service components
@@ -44,7 +73,8 @@ public class AudioVolumeGroupTest extends AudioVolumesTestBase {
     //-----------------------------------------------------------------
     // Test getAudioVolumeGroups and validate groud id
     //-----------------------------------------------------------------
-    public void testGetVolumeGroups() throws Exception {
+    @Test
+    public void testGetVolumeGroups() {
         // Through AudioManager, the transaction behind getAudioVolumeGroups will succeed
         final List<AudioVolumeGroup> audioVolumeGroup = mAudioManager.getAudioVolumeGroups();
         assertNotNull(audioVolumeGroup);
@@ -67,7 +97,7 @@ public class AudioVolumeGroupTest extends AudioVolumesTestBase {
             // for each volume group attributes, find the matching product strategy and ensure
             // it is linked the considered volume group
             for (final AudioAttributes aa : avgAttributes) {
-                if (aa.equals(sDefaultAttributes)) {
+                if (aa.equals(DEFAULT_ATTRIBUTES)) {
                     // Some volume groups may not have valid attributes, used for internal
                     // volume management like patch/rerouting
                     // so bailing out strategy retrieval from attributes

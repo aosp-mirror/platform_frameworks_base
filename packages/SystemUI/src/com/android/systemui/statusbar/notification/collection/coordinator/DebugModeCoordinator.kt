@@ -30,11 +30,11 @@ class DebugModeCoordinator @Inject constructor(
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
-        pipeline.addPreGroupFilter(preGroupFilter)
-        debugModeFilterProvider.registerInvalidationListener(preGroupFilter::invalidateList)
+        pipeline.addPreGroupFilter(filter)
+        debugModeFilterProvider.registerInvalidationListener { filter.invalidateList(null) }
     }
 
-    private val preGroupFilter = object : NotifFilter("DebugModeCoordinator") {
+    private val filter = object : NotifFilter("DebugModeFilter") {
         override fun shouldFilterOut(entry: NotificationEntry, now: Long) =
             debugModeFilterProvider.shouldFilterOut(entry)
     }

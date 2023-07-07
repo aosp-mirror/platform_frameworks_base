@@ -60,4 +60,4 @@ public class CameraInfo implements Parcelable {
             return new CameraInfo[size];
         }
     };
-};
+}

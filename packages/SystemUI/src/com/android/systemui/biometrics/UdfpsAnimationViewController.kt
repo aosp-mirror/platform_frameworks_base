@@ -19,29 +19,29 @@ import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.graphics.RectF
 import com.android.systemui.Dumpable
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionListener
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.util.ViewController
 import java.io.PrintWriter
 
 /**
  * Handles:
  * 1. registering for listeners when its view is attached and unregistering on view detached
- * 2. pausing udfps when fingerprintManager may still be running but we temporarily want to hide
+ * 2. pausing UDFPS when FingerprintManager may still be running but we temporarily want to hide
  * the affordance. this allows us to fade the view in and out nicely (see shouldPauseAuth)
  * 3. sending events to its view including:
- * - illumination events
+ * - enabling and disabling of the UDFPS display mode
  * - sensor position changes
  * - doze time event
  */
 abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     view: T,
     protected val statusBarStateController: StatusBarStateController,
-    protected val panelExpansionStateManager: PanelExpansionStateManager,
+    protected val shadeExpansionStateManager: ShadeExpansionStateManager,
     protected val dialogManager: SystemUIDialogManager,
     private val dumpManager: DumpManager
 ) : ViewController<T>(view), Dumpable {
@@ -54,7 +54,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     private var dialogAlphaAnimator: ValueAnimator? = null
     private val dialogListener = SystemUIDialogManager.Listener { runDialogAlphaAnimator() }
 
-    private val panelExpansionListener = PanelExpansionListener { event ->
+    private val shadeExpansionListener = ShadeExpansionListener { event ->
         // Notification shade can be expanded but not visible (fraction: 0.0), for example
         // when a heads-up notification (HUN) is showing.
         notificationShadeVisible = event.expanded && event.fraction > 0f
@@ -108,13 +108,15 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     }
 
     override fun onViewAttached() {
-        panelExpansionStateManager.addExpansionListener(panelExpansionListener)
+        val currentState =
+            shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
+        shadeExpansionListener.onPanelExpansionChanged(currentState)
         dialogManager.registerListener(dialogListener)
         dumpManager.registerDumpable(dumpTag, this)
     }
 
     override fun onViewDetached() {
-        panelExpansionStateManager.removeExpansionListener(panelExpansionListener)
+        shadeExpansionStateManager.removeExpansionListener(shadeExpansionListener)
         dialogManager.unregisterListener(dialogListener)
         dumpManager.unregisterDumpable(dumpTag)
     }
@@ -167,19 +169,20 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     }
 
     /**
-     * Udfps has started illuminating and the fingerprint manager is working on authenticating.
+     * The display began transitioning into the UDFPS mode and the fingerprint manager started
+     * authenticating.
      */
-    fun onIlluminationStarting() {
-        view.onIlluminationStarting()
+    fun onDisplayConfiguring() {
+        view.onDisplayConfiguring()
         view.postInvalidate()
     }
 
     /**
-     * Udfps has stopped illuminating and the fingerprint manager is no longer attempting to
-     * authenticate.
+     * The display transitioned away from the UDFPS mode and the fingerprint manager stopped
+     * authenticating.
      */
-    fun onIlluminationStopped() {
-        view.onIlluminationStopped()
+    fun onDisplayUnconfigured() {
+        view.onDisplayUnconfigured()
         view.postInvalidate()
     }
 
@@ -187,11 +190,6 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      * Whether to listen for touches outside of the view.
      */
     open fun listenForTouchesOutsideView(): Boolean = false
-
-    /**
-     * Called on touches outside of the view if listenForTouchesOutsideView returns true
-     */
-    open fun onTouchOutsideView() {}
 
     /**
      * Called when a view should announce an accessibility event.

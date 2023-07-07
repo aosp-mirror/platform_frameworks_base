@@ -252,18 +252,22 @@ public final class ServiceManager {
     }
 
     /**
-     * Returns the list of declared instances for an interface.
+     * Returns an array of all declared instances for a particular interface.
      *
-     * @return true if the service is declared somewhere (eg. VINTF manifest) and
-     * waitForService should always be able to return the service.
+     * For instance, if 'android.foo.IFoo/foo' is declared (e.g. in VINTF
+     * manifest), and 'android.foo.IFoo' is passed here, then ["foo"] would be
+     * returned.
+     *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
     public static String[] getDeclaredInstances(@NonNull String iface) {
         try {
             return getIServiceManager().getDeclaredInstances(iface);
         } catch (RemoteException e) {
             Log.e(TAG, "error in getDeclaredInstances", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -288,8 +292,10 @@ public final class ServiceManager {
      * If the service is not running, servicemanager will attempt to start it, and this function
      * will wait for it to be ready.
      *
-     * @return {@code null} if the service is not declared in the manifest, or if there are
-     * permission problems, or if there are fatal errors.
+     * @throws SecurityException if the process does not have the permissions to check
+     * isDeclared() for the service.
+     * @return {@code null} if the service is not declared in the manifest, or if there
+     * are fatal errors.
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)

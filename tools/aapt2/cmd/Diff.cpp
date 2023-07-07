@@ -16,10 +16,10 @@
 
 #include "Diff.h"
 
-#include "android-base/macros.h"
-
+#include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "ValueVisitor.h"
+#include "android-base/macros.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 
@@ -45,7 +45,7 @@ class DiffContext : public IAaptContext {
     return 0x0;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
 
@@ -78,7 +78,7 @@ class DiffContext : public IAaptContext {
   SymbolTable symbol_table_;
 };
 
-static void EmitDiffLine(const Source& source, const StringPiece& message) {
+static void EmitDiffLine(const android::Source& source, StringPiece message) {
   std::cerr << source << ": " << message << "\n";
 }
 
@@ -105,7 +105,7 @@ static bool EmitResourceConfigValueDiff(
   Value* value_b = config_value_b->value.get();
   if (!value_a->Equals(value_b)) {
     std::stringstream str_stream;
-    str_stream << "value " << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
+    str_stream << "value " << pkg_a.name << ":" << type_a.named_type << "/" << entry_a.name
                << " config=" << config_value_a->config << " does not match:\n";
     value_a->Print(&str_stream);
     str_stream << "\n vs \n";
@@ -128,7 +128,7 @@ static bool EmitResourceEntryDiff(IAaptContext* context, LoadedApk* apk_a,
     auto config_value_b = entry_b.FindValue(config_value_a->config);
     if (!config_value_b) {
       std::stringstream str_stream;
-      str_stream << "missing " << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
+      str_stream << "missing " << pkg_a.name << ":" << type_a.named_type << "/" << entry_a.name
                  << " config=" << config_value_a->config;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
@@ -143,7 +143,7 @@ static bool EmitResourceEntryDiff(IAaptContext* context, LoadedApk* apk_a,
     auto config_value_a = entry_a.FindValue(config_value_b->config);
     if (!config_value_a) {
       std::stringstream str_stream;
-      str_stream << "new config " << pkg_b.name << ":" << type_b.type << "/" << entry_b.name
+      str_stream << "new config " << pkg_b.name << ":" << type_b.named_type << "/" << entry_b.name
                  << " config=" << config_value_b->config;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
@@ -164,13 +164,15 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
     if (entry_b_iter == type_b.entries.end()) {
       // Type A contains a type that type B does not have.
       std::stringstream str_stream;
-      str_stream << "missing " << pkg_a.name << ":" << type_a.type << "/" << entry_a_iter->name;
+      str_stream << "missing " << pkg_a.name << ":" << type_a.named_type << "/"
+                 << entry_a_iter->name;
       EmitDiffLine(apk_a->GetSource(), str_stream.str());
       diff = true;
     } else if (entry_a_iter == type_a.entries.end()) {
       // Type B contains a type that type A does not have.
       std::stringstream str_stream;
-      str_stream << "new entry " << pkg_b.name << ":" << type_b.type << "/" << entry_b_iter->name;
+      str_stream << "new entry " << pkg_b.name << ":" << type_b.named_type << "/"
+                 << entry_b_iter->name;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
@@ -178,7 +180,7 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
       const auto& entry_b = *entry_b_iter;
       if (IsSymbolVisibilityDifferent(entry_a.visibility, entry_b.visibility)) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
+        str_stream << pkg_a.name << ":" << type_a.named_type << "/" << entry_a.name
                    << " has different visibility (";
         if (entry_b.visibility.staged_api) {
           str_stream << "STAGED ";
@@ -203,7 +205,7 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
       } else if (IsIdDiff(entry_a.visibility.level, entry_a.id, entry_b.visibility.level,
                           entry_b.id)) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a.name
+        str_stream << pkg_a.name << ":" << type_a.named_type << "/" << entry_a.name
                    << " has different public ID (";
         if (entry_b.id) {
           str_stream << "0x" << std::hex << entry_b.id.value();
@@ -243,13 +245,13 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
     if (type_b_iter == pkg_b.types.end()) {
       // Type A contains a type that type B does not have.
       std::stringstream str_stream;
-      str_stream << "missing " << pkg_a.name << ":" << type_a_iter->type;
+      str_stream << "missing " << pkg_a.name << ":" << type_a_iter->named_type;
       EmitDiffLine(apk_a->GetSource(), str_stream.str());
       diff = true;
     } else if (type_a_iter == pkg_a.types.end()) {
       // Type B contains a type that type A does not have.
       std::stringstream str_stream;
-      str_stream << "new type " << pkg_b.name << ":" << type_b_iter->type;
+      str_stream << "new type " << pkg_b.name << ":" << type_b_iter->named_type;
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
@@ -257,7 +259,7 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
       const auto& type_b = *type_b_iter;
       if (type_a.visibility_level != type_b.visibility_level) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a.type << " has different visibility (";
+        str_stream << pkg_a.name << ":" << type_a.named_type << " has different visibility (";
         if (type_b.visibility_level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
@@ -274,7 +276,7 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
         diff = true;
       } else if (IsIdDiff(type_a.visibility_level, type_a.id, type_b.visibility_level, type_b.id)) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a.type << " has different public ID (";
+        str_stream << pkg_a.name << ":" << type_a.named_type << " has different public ID (";
         if (type_b.id) {
           str_stream << "0x" << std::hex << type_b.id.value();
         } else {
@@ -383,7 +385,7 @@ int DiffCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
-  IDiagnostics* diag = context.GetDiagnostics();
+  android::IDiagnostics* diag = context.GetDiagnostics();
   std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(args[0], diag);
   std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(args[1], diag);
   if (!apk_a || !apk_b) {

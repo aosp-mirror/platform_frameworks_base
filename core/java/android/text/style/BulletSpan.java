@@ -235,4 +235,13 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
             paint.setStyle(style);
         }
     }
+
+    @Override
+    public String toString() {
+        return "BulletSpan{"
+                + "gapWidth=" + getGapWidth()
+                + ", bulletRadius=" + getBulletRadius()
+                + ", color=" + String.format("%08X", getColor())
+                + '}';
+    }
 }

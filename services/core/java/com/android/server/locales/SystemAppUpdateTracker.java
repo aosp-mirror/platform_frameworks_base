@@ -28,12 +28,12 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -152,9 +152,10 @@ public class SystemAppUpdateTracker {
     void onPackageUpdateFinished(String packageName, int uid) {
         try {
             if ((!mUpdatedApps.contains(packageName)) && isUpdatedSystemApp(packageName)) {
+                int userId = UserHandle.getUserId(uid);
                 // If a system app is updated, verify that it has an installer-on-record.
                 String installingPackageName = mLocaleManagerService.getInstallingPackageName(
-                        packageName);
+                        packageName, userId);
                 if (installingPackageName == null) {
                     // We want to broadcast the locales info to the installer.
                     // If this app does not have an installer then do nothing.
@@ -162,7 +163,6 @@ public class SystemAppUpdateTracker {
                 }
 
                 try {
-                    int userId = UserHandle.getUserId(uid);
                     // Fetch the app-specific locales.
                     // If non-empty then send the info to the installer.
                     LocaleList appLocales = mLocaleManagerService.getApplicationLocales(

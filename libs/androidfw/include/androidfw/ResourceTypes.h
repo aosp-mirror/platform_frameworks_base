@@ -21,11 +21,13 @@
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
 #include <android-base/expected.h>
+#include <android-base/unique_fd.h>
 
 #include <androidfw/Asset.h>
 #include <androidfw/Errors.h>
 #include <androidfw/LocaleData.h>
 #include <androidfw/StringPiece.h>
+#include <utils/ByteOrder.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
@@ -45,7 +47,7 @@
 namespace android {
 
 constexpr const uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const uint32_t kIdmapCurrentVersion = 0x00000008u;
+constexpr const uint32_t kIdmapCurrentVersion = 0x00000009u;
 
 // This must never change.
 constexpr const uint32_t kFabricatedOverlayMagic = 0x4f525246; // FRRO (big endian)
@@ -53,10 +55,12 @@ constexpr const uint32_t kFabricatedOverlayMagic = 0x4f525246; // FRRO (big endi
 // The version should only be changed when a backwards-incompatible change must be made to the
 // fabricated overlay file format. Old fabricated overlays must be migrated to the new file format
 // to prevent losing fabricated overlay data.
-constexpr const uint32_t kFabricatedOverlayCurrentVersion = 1;
+constexpr const uint32_t kFabricatedOverlayCurrentVersion = 3;
 
 // Returns whether or not the path represents a fabricated overlay.
 bool IsFabricatedOverlay(const std::string& path);
+bool IsFabricatedOverlay(const char* path);
+bool IsFabricatedOverlay(android::base::borrowed_fd fd);
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
@@ -1067,15 +1071,32 @@ struct ResTable_config
         NAVHIDDEN_NO = ACONFIGURATION_NAVHIDDEN_NO << SHIFT_NAVHIDDEN,
         NAVHIDDEN_YES = ACONFIGURATION_NAVHIDDEN_YES << SHIFT_NAVHIDDEN,
     };
-    
-    union {
-        struct {
-            uint8_t keyboard;
-            uint8_t navigation;
-            uint8_t inputFlags;
-            uint8_t inputPad0;
+
+    enum {
+        GRAMMATICAL_GENDER_ANY = ACONFIGURATION_GRAMMATICAL_GENDER_ANY,
+        GRAMMATICAL_GENDER_NEUTER = ACONFIGURATION_GRAMMATICAL_GENDER_NEUTER,
+        GRAMMATICAL_GENDER_FEMININE = ACONFIGURATION_GRAMMATICAL_GENDER_FEMININE,
+        GRAMMATICAL_GENDER_MASCULINE = ACONFIGURATION_GRAMMATICAL_GENDER_MASCULINE,
+        GRAMMATICAL_INFLECTION_GENDER_MASK = 0b11,
+    };
+
+    struct {
+        union {
+            struct {
+                uint8_t keyboard;
+                uint8_t navigation;
+                uint8_t inputFlags;
+                uint8_t inputFieldPad0;
+            };
+            struct {
+                uint32_t input : 24;
+                uint32_t inputFullPad0 : 8;
+            };
+            struct {
+                uint8_t grammaticalInflectionPad0[3];
+                uint8_t grammaticalInflection;
+            };
         };
-        uint32_t input;
     };
     
     enum {
@@ -1098,7 +1119,7 @@ struct ResTable_config
         SDKVERSION_ANY = 0
     };
     
-  enum {
+    enum {
         MINORVERSION_ANY = 0
     };
     
@@ -1259,6 +1280,7 @@ struct ResTable_config
         CONFIG_LAYOUTDIR = ACONFIGURATION_LAYOUTDIR,
         CONFIG_SCREEN_ROUND = ACONFIGURATION_SCREEN_ROUND,
         CONFIG_COLOR_MODE = ACONFIGURATION_COLOR_MODE,
+        CONFIG_GRAMMATICAL_GENDER = ACONFIGURATION_GRAMMATICAL_GENDER,
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -1437,6 +1459,10 @@ struct ResTable_type
         // Mark any types that use this with a v26 qualifier to prevent runtime issues on older
         // platforms.
         FLAG_SPARSE = 0x01,
+
+        // If set, the offsets to the entries are encoded in 16-bit, real_offset = offset * 4u
+        // An 16-bit offset of 0xffffu means a NO_ENTRY
+        FLAG_OFFSET16 = 0x02,
     };
     uint8_t flags;
 
@@ -1452,6 +1478,11 @@ struct ResTable_type
     // Configuration this collection of entries is designed for. This must always be last.
     ResTable_config config;
 };
+
+// Convert a 16-bit offset to 32-bit if FLAG_OFFSET16 is set
+static inline uint32_t offset_from16(uint16_t off16) {
+    return dtohs(off16) == 0xffffu ? ResTable_type::NO_ENTRY : dtohs(off16) * 4u;
+}
 
 // The minimum size required to read any version of ResTable_type.
 constexpr size_t kResTableTypeMinSize =
@@ -1480,6 +1511,8 @@ union ResTable_sparseTypeEntry {
 static_assert(sizeof(ResTable_sparseTypeEntry) == sizeof(uint32_t),
         "ResTable_sparseTypeEntry must be 4 bytes in size");
 
+struct ResTable_map_entry;
+
 /**
  * This is the beginning of information about an entry in the resource
  * table.  It holds the reference to the name of this entry, and is
@@ -1487,12 +1520,11 @@ static_assert(sizeof(ResTable_sparseTypeEntry) == sizeof(uint32_t),
  *   * A Res_value structure, if FLAG_COMPLEX is -not- set.
  *   * An array of ResTable_map structures, if FLAG_COMPLEX is set.
  *     These supply a set of name/value mappings of data.
+ *   * If FLAG_COMPACT is set, this entry is a compact entry for
+ *     simple values only
  */
-struct ResTable_entry
+union ResTable_entry
 {
-    // Number of bytes in this structure.
-    uint16_t size;
-
     enum {
         // If set, this is a complex entry, holding a set of name/value
         // mappings.  It is followed by an array of ResTable_map structures.
@@ -1504,18 +1536,91 @@ struct ResTable_entry
         // resources of the same name/type. This is only useful during
         // linking with other resource tables.
         FLAG_WEAK = 0x0004,
+        // If set, this is a compact entry with data type and value directly
+        // encoded in the this entry, see ResTable_entry::compact
+        FLAG_COMPACT = 0x0008,
     };
-    uint16_t flags;
-    
-    // Reference into ResTable_package::keyStrings identifying this entry.
-    struct ResStringPool_ref key;
+
+    struct Full {
+        // Number of bytes in this structure.
+        uint16_t size;
+
+        uint16_t flags;
+
+        // Reference into ResTable_package::keyStrings identifying this entry.
+        struct ResStringPool_ref key;
+    } full;
+
+    /* A compact entry is indicated by FLAG_COMPACT, with flags at the same
+     * offset as a normal entry. This is only for simple data values where
+     *
+     * - size for entry or value can be inferred (both being 8 bytes).
+     * - key index is encoded in 16-bit
+     * - dataType is encoded as the higher 8-bit of flags
+     * - data is encoded directly in this entry
+     */
+    struct Compact {
+        uint16_t key;
+        uint16_t flags;
+        uint32_t data;
+    } compact;
+
+    uint16_t flags()  const { return dtohs(full.flags); };
+    bool is_compact() const { return flags() & FLAG_COMPACT; }
+    bool is_complex() const { return flags() & FLAG_COMPLEX; }
+
+    size_t size() const {
+        return is_compact() ? sizeof(ResTable_entry) : dtohs(this->full.size);
+    }
+
+    uint32_t key() const {
+        return is_compact() ? dtohs(this->compact.key) : dtohl(this->full.key.index);
+    }
+
+    /* Always verify the memory associated with this entry and its value
+     * before calling value() or map_entry()
+     */
+    Res_value value() const {
+        Res_value v;
+        if (is_compact()) {
+            v.size = sizeof(Res_value);
+            v.res0 = 0;
+            v.data = dtohl(this->compact.data);
+            v.dataType = dtohs(compact.flags) >> 8;
+        } else {
+            auto vaddr = reinterpret_cast<const uint8_t*>(this) + dtohs(this->full.size);
+            auto value = reinterpret_cast<const Res_value*>(vaddr);
+            v.size = dtohs(value->size);
+            v.res0 = value->res0;
+            v.data = dtohl(value->data);
+            v.dataType = value->dataType;
+        }
+        return v;
+    }
+
+    const ResTable_map_entry* map_entry() const {
+        return is_complex() && !is_compact() ?
+            reinterpret_cast<const ResTable_map_entry*>(this) : nullptr;
+    }
 };
+
+/* Make sure size of ResTable_entry::Full and ResTable_entry::Compact
+ * be the same as ResTable_entry. This is to allow iteration of entries
+ * to work in either cases.
+ *
+ * The offset of flags must be at the same place for both structures,
+ * to ensure the correct reading to decide whether this is a full entry
+ * or a compact entry.
+ */
+static_assert(sizeof(ResTable_entry) == sizeof(ResTable_entry::Full));
+static_assert(sizeof(ResTable_entry) == sizeof(ResTable_entry::Compact));
+static_assert(offsetof(ResTable_entry, full.flags) == offsetof(ResTable_entry, compact.flags));
 
 /**
  * Extended form of a ResTable_entry for map entries, defining a parent map
  * resource from which to inherit values.
  */
-struct ResTable_map_entry : public ResTable_entry
+struct ResTable_map_entry : public ResTable_entry::Full
 {
     // Resource identifier of the parent mapping, or 0 if there is none.
     // This is always treated as a TYPE_DYNAMIC_REFERENCE.
@@ -1746,6 +1851,28 @@ inline ResTable_overlayable_policy_header::PolicyFlags& operator |=(
   return first;
 }
 
+using ResourceId = uint32_t;  // 0xpptteeee
+
+using DataType = uint8_t;    // Res_value::dataType
+using DataValue = uint32_t;  // Res_value::data
+
+struct OverlayManifestInfo {
+  std::string package_name;     // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string name;             // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_package;   // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_name;      // NOLINT(misc-non-private-member-variables-in-classes)
+  ResourceId resource_mapping;  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+struct FabricatedOverlayEntryParameters {
+  std::string resource_name;
+  DataType data_type;
+  DataValue data_value;
+  std::string data_string_value;
+  std::optional<android::base::borrowed_fd> data_binary_value;
+  std::string configuration;
+};
+
 class AssetManager2;
 
 /**
@@ -1776,7 +1903,10 @@ public:
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
 
-    void addAlias(uint32_t stagedId, uint32_t finalizedId);
+    using AliasMap = std::vector<std::pair<uint32_t, uint32_t>>;
+    void setAliases(AliasMap aliases) {
+        mAliasId = std::move(aliases);
+    }
 
     // Returns whether or not the value must be looked up.
     bool requiresLookup(const Res_value* value) const;
@@ -1790,12 +1920,12 @@ public:
         return mEntries;
     }
 
-private:
-    uint8_t                         mAssignedPackageId;
-    uint8_t                         mLookupTable[256];
-    KeyedVector<String16, uint8_t>  mEntries;
-    bool                            mAppAsLib;
-    std::map<uint32_t, uint32_t>    mAliasId;
+   private:
+    uint8_t mLookupTable[256];
+    uint8_t mAssignedPackageId;
+    bool mAppAsLib;
+    KeyedVector<String16, uint8_t> mEntries;
+    AliasMap mAliasId;
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);

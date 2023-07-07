@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.android.server.am;
+option java_multiple_files = true;
+
+message Capability {
+  string name = 1;
+}
+
+message Capabilities {
+  repeated Capability values = 1;
+}

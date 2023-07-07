@@ -16,13 +16,15 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,16 +57,16 @@ public class HybridGroupManager {
         mOverflowNumberPadding = res.getDimensionPixelSize(R.dimen.group_overflow_number_padding);
     }
 
-    private HybridNotificationView inflateHybridViewWithStyle(int style,
-            View contentView, ViewGroup parent) {
-        LayoutInflater inflater = new ContextThemeWrapper(mContext, style)
-                .getSystemService(LayoutInflater.class);
+    private HybridNotificationView inflateHybridView(View contentView, ViewGroup parent) {
+        Trace.beginSection("HybridGroupManager#inflateHybridView");
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         int layout = contentView instanceof ConversationLayout
                 ? R.layout.hybrid_conversation_notification
                 : R.layout.hybrid_notification;
         HybridNotificationView hybrid = (HybridNotificationView)
                 inflater.inflate(layout, parent, false);
         parent.addView(hybrid);
+        Trace.endSection();
         return hybrid;
     }
 
@@ -91,20 +93,18 @@ public class HybridGroupManager {
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
             View contentView, StatusBarNotification notification,
             ViewGroup parent) {
-        return bindFromNotificationWithStyle(reusableView, contentView, notification,
-                R.style.HybridNotification, parent);
-    }
-
-    private HybridNotificationView bindFromNotificationWithStyle(
-            HybridNotificationView reusableView, View contentView,
-            StatusBarNotification notification,
-            int style, ViewGroup parent) {
+        boolean isNewView = false;
         if (reusableView == null) {
-            reusableView = inflateHybridViewWithStyle(style, contentView, parent);
+            Trace.beginSection("HybridGroupManager#bindFromNotification");
+            reusableView = inflateHybridView(contentView, parent);
+            isNewView = true;
         }
         CharSequence titleText = resolveTitle(notification.getNotification());
         CharSequence contentText = resolveText(notification.getNotification());
         reusableView.bind(titleText, contentText, contentView);
+        if (isNewView) {
+            Trace.endSection();
+        }
         return reusableView;
     }
 
@@ -136,8 +136,8 @@ public class HybridGroupManager {
         if (!text.equals(reusableView.getText())) {
             reusableView.setText(text);
         }
-        String contentDescription = String.format(mContext.getResources().getQuantityString(
-                R.plurals.notification_group_overflow_description, number), number);
+        String contentDescription = icuMessageFormat(mContext.getResources(),
+                R.string.notification_group_overflow_description, number);
 
         reusableView.setContentDescription(contentDescription);
         reusableView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mOverflowNumberSize);

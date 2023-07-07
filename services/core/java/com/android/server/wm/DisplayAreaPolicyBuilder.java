@@ -38,6 +38,7 @@ import android.util.ArraySet;
 import android.window.DisplayAreaOrganizer;
 import android.window.WindowContainerToken;
 
+import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
@@ -142,6 +143,7 @@ import java.util.function.Function;
  * the window to the corresponding {@link DisplayArea.Tokens} under the returned root
  * {@link RootDisplayArea}.
  */
+@Keep
 class DisplayAreaPolicyBuilder {
 
     @Nullable private HierarchyBuilder mRootHierarchyBuilder;

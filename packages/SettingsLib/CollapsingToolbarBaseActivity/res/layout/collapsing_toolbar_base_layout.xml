@@ -29,6 +29,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="?android:attr/actionBarTheme" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/support_action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="?android:attr/actionBarTheme"
+        android:visibility="gone" />
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"

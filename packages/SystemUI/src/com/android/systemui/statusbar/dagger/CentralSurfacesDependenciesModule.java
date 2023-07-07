@@ -17,22 +17,30 @@
 package com.android.systemui.statusbar.dagger;
 
 import android.app.IActivityManager;
+import android.app.WallpaperManager;
 import android.content.Context;
-import android.os.Handler;
+import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
+import android.util.Log;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.carrier.QSCarrierGroupController;
+import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
@@ -41,23 +49,15 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
-import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
-import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.DynamicChildBindController;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -67,6 +67,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
@@ -77,7 +78,6 @@ import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
-import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -104,12 +104,10 @@ public interface CentralSurfacesDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
-            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
-            Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
+            RemoteInputControllerLogger remoteInputControllerLogger,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
             DumpManager dumpManager) {
@@ -119,12 +117,10 @@ public interface CentralSurfacesDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 visibilityProvider,
-                notificationEntryManager,
-                rebuilder,
                 centralSurfacesOptionalLazy,
                 statusBarStateController,
-                mainHandler,
                 remoteInputUriController,
+                remoteInputControllerLogger,
                 clickNotifier,
                 actionClickLogger,
                 dumpManager);
@@ -138,29 +134,33 @@ public interface CentralSurfacesDependenciesModule {
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
-            NotifPipelineFlags notifPipelineFlags,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
-            DumpManager dumpManager) {
+            StatusBarStateController statusBarStateController,
+            SysuiColorExtractor colorExtractor,
+            KeyguardStateController keyguardStateController,
+            DumpManager dumpManager,
+            WallpaperManager wallpaperManager) {
         return new NotificationMediaManager(
                 context,
                 centralSurfacesOptionalLazy,
                 notificationShadeWindowController,
                 visibilityProvider,
-                notificationEntryManager,
                 mediaArtworkProcessor,
                 keyguardBypassController,
                 notifPipeline,
                 notifCollection,
-                notifPipelineFlags,
                 mainExecutor,
                 mediaDataManager,
-                dumpManager);
+                statusBarStateController,
+                colorExtractor,
+                keyguardStateController,
+                dumpManager,
+                wallpaperManager);
     }
 
     /** */
@@ -184,47 +184,6 @@ public interface CentralSurfacesDependenciesModule {
     NotificationRemoteInputManager.Callback provideNotificationRemoteInputManagerCallback(
             StatusBarRemoteInputCallback callbackImpl);
 
-    /** */
-    @SysUISingleton
-    @Provides
-    static NotificationViewHierarchyManager provideNotificationViewHierarchyManager(
-            Context context,
-            @Main Handler mainHandler,
-            FeatureFlags featureFlags,
-            NotificationLockscreenUserManager notificationLockscreenUserManager,
-            NotificationGroupManagerLegacy groupManager,
-            VisualStabilityManager visualStabilityManager,
-            StatusBarStateController statusBarStateController,
-            NotificationEntryManager notificationEntryManager,
-            KeyguardBypassController bypassController,
-            Optional<Bubbles> bubblesOptional,
-            DynamicPrivacyController privacyController,
-            DynamicChildBindController dynamicChildBindController,
-            LowPriorityInflationHelper lowPriorityInflationHelper,
-            AssistantFeedbackController assistantFeedbackController,
-            NotifPipelineFlags notifPipelineFlags,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardStateController keyguardStateController) {
-        return new NotificationViewHierarchyManager(
-                context,
-                mainHandler,
-                featureFlags,
-                notificationLockscreenUserManager,
-                groupManager,
-                visualStabilityManager,
-                statusBarStateController,
-                notificationEntryManager,
-                bypassController,
-                bubblesOptional,
-                privacyController,
-                dynamicChildBindController,
-                lowPriorityInflationHelper,
-                assistantFeedbackController,
-                notifPipelineFlags,
-                keyguardUpdateMonitor,
-                keyguardStateController);
-    }
-
     /**
      * Provides our instance of CommandQueue which is considered optional.
      */
@@ -232,9 +191,12 @@ public interface CentralSurfacesDependenciesModule {
     @SysUISingleton
     static CommandQueue provideCommandQueue(
             Context context,
+            DisplayTracker displayTracker,
             ProtoTracer protoTracer,
-            CommandRegistry registry) {
-        return new CommandQueue(context, protoTracer, registry);
+            CommandRegistry registry,
+            DumpHandler dumpHandler
+    ) {
+        return new CommandQueue(context, displayTracker, protoTracer, registry, dumpHandler);
     }
 
     /**
@@ -254,6 +216,16 @@ public interface CentralSurfacesDependenciesModule {
     @Binds
     StatusBarIconController provideStatusBarIconController(
             StatusBarIconControllerImpl controllerImpl);
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static StatusBarIconList provideStatusBarIconList(Context context) {
+        return new StatusBarIconList(
+                context.getResources().getStringArray(
+                        com.android.internal.R.array.config_statusBarIcons));
+    }
 
     /**
      */
@@ -302,8 +274,8 @@ public interface CentralSurfacesDependenciesModule {
 
     /** */
     @Binds
-    QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
-            QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
+    ShadeCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
+            ShadeCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
 
     /**
      */
@@ -317,7 +289,45 @@ public interface CentralSurfacesDependenciesModule {
      */
     @Provides
     @SysUISingleton
-    static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager) {
-        return new DialogLaunchAnimator(dreamManager);
+    static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
+            KeyguardStateController keyguardStateController,
+            Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
+            InteractionJankMonitor interactionJankMonitor,
+            AnimationFeatureFlags animationFeatureFlags) {
+        DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
+            @Override
+            public boolean isDreaming() {
+                try {
+                    return dreamManager.isDreaming();
+                } catch (RemoteException e) {
+                    Log.e("DialogLaunchAnimator.Callback", "dreamManager.isDreaming failed", e);
+                    return false;
+                }
+            }
+
+            @Override
+            public boolean isUnlocked() {
+                return keyguardStateController.isUnlocked();
+            }
+
+            @Override
+            public boolean isShowingAlternateAuthOnUnlock() {
+                return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
+            }
+        };
+        return new DialogLaunchAnimator(callback, interactionJankMonitor, animationFeatureFlags);
+    }
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static AnimationFeatureFlags provideAnimationFeatureFlags(FeatureFlags featureFlags) {
+        return new AnimationFeatureFlags() {
+            @Override
+            public boolean isPredictiveBackQsDialogAnim() {
+                return featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM);
+            }
+        };
     }
 }

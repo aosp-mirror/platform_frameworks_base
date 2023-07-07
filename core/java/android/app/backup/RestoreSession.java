@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -391,19 +390,6 @@ public class RestoreSession {
         public void restoreFinished(int error) {
             mHandler.sendMessage(
                     mHandler.obtainMessage(MSG_RESTORE_FINISHED, error, 0));
-        }
-    }
-
-    private class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
-        final BackupManagerMonitor mMonitor;
-
-        BackupManagerMonitorWrapper(BackupManagerMonitor monitor) {
-            mMonitor = monitor;
-        }
-
-        @Override
-        public void onEvent(final Bundle event) throws RemoteException {
-            mMonitor.onEvent(event);
         }
     }
 }

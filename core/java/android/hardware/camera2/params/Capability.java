@@ -40,39 +40,45 @@ public final class Capability {
     public static final int COUNT = 3;
 
     private final int mMode;
-    private final int mMaxStreamingWidth;
-    private final int mMaxStreamingHeight;
-    private final float mMinZoomRatio;
-    private final float mMaxZoomRatio;
+    private final Size mMaxStreamingSize;
+    private final Range<Float> mZoomRatioRange;
 
     /**
      * Create a new Capability object.
      *
-     * @param mode supported mode for a camera capability.
-     * @param maxStreamingWidth The width of the maximum streaming size for this mode
-     * @param maxStreamingHeight The height of the maximum streaming size for this mode
-     * @param minZoomRatio the minimum zoom ratio this mode supports
-     * @param maxZoomRatio the maximum zoom ratio this mode supports
+     * <p>The mode argument can be any integer value. maxStreamingWidth and maxStreamingHeight
+     * must be non-negative, while minZoomRatio and maxZoomRatio must be strictly
+     * positive.</p>
      *
-     * @throws IllegalArgumentException if any of the argument is not valid
-     * @hide
+     * <p>This constructor is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
+     *
+     * @param mode supported mode for a camera capability.
+     * @param maxStreamingSize The maximum streaming size for this mode
+     * @param zoomRatioRange the minimum/maximum zoom ratio this mode supports
+     *
+     * @throws IllegalArgumentException if any of the arguments are not valid
      */
-    public Capability(int mode, int maxStreamingWidth, int maxStreamingHeight,
-            float minZoomRatio, float maxZoomRatio) {
+    public Capability(int mode, @NonNull Size maxStreamingSize,
+            @NonNull Range<Float> zoomRatioRange) {
         mMode = mode;
-        mMaxStreamingWidth = checkArgumentNonnegative(maxStreamingWidth,
-                "maxStreamingWidth must be nonnegative");
-        mMaxStreamingHeight = checkArgumentNonnegative(maxStreamingHeight,
-                "maxStreamingHeight must be nonnegative");
+        checkArgumentNonnegative(maxStreamingSize.getWidth(),
+                "maxStreamingSize.getWidth() must be nonnegative");
+        checkArgumentNonnegative(maxStreamingSize.getHeight(),
+                "maxStreamingSize.getHeight() must be nonnegative");
+        mMaxStreamingSize = maxStreamingSize;
 
-        if (minZoomRatio > maxZoomRatio) {
-            throw new IllegalArgumentException("minZoomRatio " + minZoomRatio
-                    + " is greater than maxZoomRatio " + maxZoomRatio);
+        if (zoomRatioRange.getLower() > zoomRatioRange.getUpper()) {
+            throw new IllegalArgumentException("zoomRatioRange.getLower() "
+                    + zoomRatioRange.getLower() + " is greater than zoomRatioRange.getUpper() "
+                    + zoomRatioRange.getUpper());
         }
-        mMinZoomRatio = checkArgumentPositive(minZoomRatio,
-                "minZoomRatio must be positive");
-        mMaxZoomRatio = checkArgumentPositive(maxZoomRatio,
-                "maxZoomRatio must be positive");
+        checkArgumentPositive(zoomRatioRange.getLower(),
+                "zoomRatioRange.getLower() must be positive");
+        checkArgumentPositive(zoomRatioRange.getUpper(),
+                "zoomRatioRange.getUpper() must be positive");
+        mZoomRatioRange = zoomRatioRange;
     }
 
     /**
@@ -93,7 +99,7 @@ public final class Capability {
      * @return a new {@link Size} with non-negative width and height
      */
     public @NonNull Size getMaxStreamingSize() {
-        return new Size(mMaxStreamingWidth, mMaxStreamingHeight);
+        return mMaxStreamingSize;
     }
 
     /**
@@ -102,7 +108,7 @@ public final class Capability {
      * @return The supported zoom ratio range supported by this capability
      */
     public @NonNull Range<Float> getZoomRatioRange() {
-        return new Range<Float>(mMinZoomRatio, mMaxZoomRatio);
+        return mZoomRatioRange;
     }
 
 
@@ -125,10 +131,8 @@ public final class Capability {
         if (obj instanceof Capability) {
             final Capability other = (Capability) obj;
             return (mMode == other.mMode
-                    && mMaxStreamingWidth == other.mMaxStreamingWidth
-                    && mMaxStreamingHeight == other.mMaxStreamingHeight
-                    && mMinZoomRatio == other.mMinZoomRatio
-                    && mMaxZoomRatio == other.mMaxZoomRatio);
+                    && mMaxStreamingSize.equals(other.mMaxStreamingSize)
+                    && mZoomRatioRange.equals(other.mZoomRatioRange));
         }
         return false;
     }
@@ -138,8 +142,9 @@ public final class Capability {
      */
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCode(mMode, mMaxStreamingWidth, mMaxStreamingHeight,
-                mMinZoomRatio, mMaxZoomRatio);
+        return HashCodeHelpers.hashCode(mMode, mMaxStreamingSize.getWidth(),
+                mMaxStreamingSize.getHeight(), mZoomRatioRange.getLower(),
+                mZoomRatioRange.getUpper());
     }
 
     /**
@@ -151,7 +156,7 @@ public final class Capability {
     @Override
     public String toString() {
         return String.format("(mode:%d, maxStreamingSize:%d x %d, zoomRatio: %f-%f)",
-                mMode, mMaxStreamingWidth, mMaxStreamingHeight, mMinZoomRatio,
-                mMaxZoomRatio);
+                mMode, mMaxStreamingSize.getWidth(), mMaxStreamingSize.getHeight(),
+                mZoomRatioRange.getLower(), mZoomRatioRange.getUpper());
     }
 }

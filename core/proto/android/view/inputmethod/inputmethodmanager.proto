@@ -29,4 +29,6 @@ message InputMethodManagerProto {
     optional int32 display_id = 3;
     optional bool active = 4;
     optional bool served_connecting = 5;
+    optional string served_view = 6;
+    optional string next_served_view = 7;
 }

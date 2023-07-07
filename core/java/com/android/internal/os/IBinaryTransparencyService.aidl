@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import android.os.Bundle;
+
 /**
  * "Backend" interface used by {@link android.os.BinaryTransparencyManager} to talk to the
  * BinaryTransparencyService that actually implements the measurement and information aggregation
@@ -26,5 +28,35 @@ package com.android.internal.os;
 interface IBinaryTransparencyService {
     String getSignedImageInfo();
 
-    Map getApexInfo();
+    void recordMeasurementsForAllPackages();
+
+    parcelable ApexInfo {
+        String packageName;
+        long longVersion;
+        byte[] digest;
+        int digestAlgorithm;
+        String[] signerDigests;
+
+        // Test only
+        String moduleName;
+    }
+
+    parcelable AppInfo {
+        String packageName;
+        long longVersion;
+        String splitName;
+        byte[] digest;
+        int digestAlgorithm;
+        String[] signerDigests;
+        int mbaStatus;
+        String initiator;
+        String[] initiatorSignerDigests;
+        String installer;
+        String originator;
+    }
+
+    /** Test only */
+    List<ApexInfo> collectAllApexInfo(boolean includeTestOnly);
+    List<AppInfo> collectAllUpdatedPreloadInfo(in Bundle packagesToSkip);
+    List<AppInfo> collectAllSilentInstalledMbaInfo(in Bundle packagesToSkip);
 }

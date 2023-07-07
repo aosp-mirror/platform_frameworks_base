@@ -40,7 +40,7 @@ public class InputDeviceVibratorManager extends VibratorManager
     private static final boolean DEBUG = false;
 
     private final Binder mToken;
-    private final InputManager mInputManager;
+    private final InputManagerGlobal mGlobal;
 
     // The input device Id.
     private final int mDeviceId;
@@ -48,8 +48,8 @@ public class InputDeviceVibratorManager extends VibratorManager
     @GuardedBy("mVibrators")
     private final SparseArray<Vibrator> mVibrators = new SparseArray<>();
 
-    public InputDeviceVibratorManager(InputManager inputManager, int deviceId) {
-        mInputManager = inputManager;
+    public InputDeviceVibratorManager(int deviceId) {
+        mGlobal = InputManagerGlobal.getInstance();
         mDeviceId = deviceId;
         mToken = new Binder();
 
@@ -61,10 +61,10 @@ public class InputDeviceVibratorManager extends VibratorManager
             mVibrators.clear();
             InputDevice inputDevice = InputDevice.getDevice(mDeviceId);
             final int[] vibratorIds =
-                    mInputManager.getVibratorIds(mDeviceId);
+                    mGlobal.getVibratorIds(mDeviceId);
             for (int i = 0; i < vibratorIds.length; i++) {
                 mVibrators.put(vibratorIds[i],
-                        new InputDeviceVibrator(mInputManager, mDeviceId, vibratorIds[i]));
+                        new InputDeviceVibrator(mDeviceId, vibratorIds[i]));
             }
         }
     }
@@ -95,7 +95,7 @@ public class InputDeviceVibratorManager extends VibratorManager
         synchronized (mVibrators) {
             int[] vibratorIds = new int[mVibrators.size()];
             for (int idx = 0; idx < mVibrators.size(); idx++) {
-                vibratorIds[idx++] = mVibrators.keyAt(idx);
+                vibratorIds[idx] = mVibrators.keyAt(idx);
             }
             return vibratorIds;
         }
@@ -127,12 +127,12 @@ public class InputDeviceVibratorManager extends VibratorManager
     @Override
     public void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             String reason, @Nullable VibrationAttributes attributes) {
-        mInputManager.vibrate(mDeviceId, effect, mToken);
+        mGlobal.vibrate(mDeviceId, effect, mToken);
     }
 
     @Override
     public void cancel() {
-        mInputManager.cancelVibrate(mDeviceId, mToken);
+        mGlobal.cancelVibrate(mDeviceId, mToken);
     }
 
     @Override

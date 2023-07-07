@@ -70,6 +70,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,10 +174,12 @@ public class AuthService extends SystemService {
     }
 
     private final class AuthServiceImpl extends IAuthService.Stub {
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) throws RemoteException {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            super.createTestSession_enforcePermission();
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -187,10 +190,12 @@ public class AuthService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public List<SensorPropertiesInternal> getSensorProperties(String opPackageName)
                 throws RemoteException {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            super.getSensorProperties_enforcePermission();
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -202,9 +207,11 @@ public class AuthService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public String getUiPackage() {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            super.getUiPackage_enforcePermission();
 
             return getContext().getResources()
                     .getString(R.string.config_biometric_prompt_ui_package);
@@ -256,6 +263,11 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
+                VirtualDeviceManagerInternal vdm = getLocalService(
+                        VirtualDeviceManagerInternal.class);
+                if (vdm != null) {
+                    vdm.onAuthenticationPrompt(callingUid);
+                }
                 return mBiometricService.authenticate(
                         token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {
@@ -336,10 +348,9 @@ public class AuthService extends SystemService {
         public void registerEnabledOnKeyguardCallback(
                 IBiometricEnabledOnKeyguardCallback callback) throws RemoteException {
             checkInternalPermission();
-            final int callingUserId = UserHandle.getCallingUserId();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.registerEnabledOnKeyguardCallback(callback, callingUserId);
+                mBiometricService.registerEnabledOnKeyguardCallback(callback);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -398,6 +409,17 @@ public class AuthService extends SystemService {
             try {
                 mBiometricService.resetLockoutTimeBound(token, opPackageName, fromSensorId, userId,
                         hardwareAuthToken);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
+            checkInternalPermission();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.resetLockout(userId, hardwareAuthToken);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

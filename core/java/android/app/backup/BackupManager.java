@@ -16,11 +16,11 @@
 
 package android.app.backup;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -38,8 +37,6 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -201,22 +198,6 @@ public class BackupManager {
     @SystemApi
     public static final int ERROR_TRANSPORT_INVALID = -2;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        OperationType.BACKUP,
-        OperationType.MIGRATION,
-        OperationType.ADB_BACKUP,
-    })
-    public @interface OperationType {
-        // A backup / restore to / from an off-device location, e.g. cloud.
-        int BACKUP = 0;
-        // A direct transfer to another device.
-        int MIGRATION = 1;
-        // Backup via adb, data saved on the host machine.
-        int ADB_BACKUP = 3;
-    }
-
     private Context mContext;
     @UnsupportedAppUsage
     private static IBackupManager sService;
@@ -246,6 +227,9 @@ public class BackupManager {
      * new changes to its data.  A backup operation using your application's
      * {@link android.app.backup.BackupAgent} subclass will be scheduled when you
      * call this method.
+     *
+     * <p>
+     * Note: This only works if your application is performing Key/Value backups.
      */
     public void dataChanged() {
         checkServiceBinder();
@@ -268,6 +252,8 @@ public class BackupManager {
      * as the caller.
      *
      * @param packageName The package name identifying the application to back up.
+     * <p>
+     * Note: Only works for packages performing Key/Value backups.
      */
     public static void dataChanged(String packageName) {
         checkServiceBinder();
@@ -417,6 +403,36 @@ public class BackupManager {
             } catch (RemoteException e) {
                 Log.e(TAG, "setBackupEnabled() couldn't connect");
             }
+        }
+    }
+
+    /**
+     * Enable/disable the framework backup scheduling entirely for the context user. When disabled,
+     * no Key/Value or Full backup jobs will be scheduled by the Android framework.
+     *
+     * <p>Note: This does not disable backups: only their scheduling is affected and backups can
+     * still be triggered manually.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method. If the
+     * context user is different from the calling user, then the caller must additionally hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {android.Manifest.permission.BACKUP,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)
+    public void setFrameworkSchedulingEnabled(boolean isEnabled) {
+        checkServiceBinder();
+        if (sService == null) {
+            Log.e(TAG, "setFrameworkSchedulingEnabled() couldn't connect");
+            return;
+        }
+
+        try {
+            sService.setFrameworkSchedulingEnabledForUser(mContext.getUserId(), isEnabled);
+        } catch (RemoteException e) {
+            Log.e(TAG, "setFrameworkSchedulingEnabled() couldn't connect");
         }
     }
 
@@ -1030,6 +1046,64 @@ public class BackupManager {
         }
     }
 
+    /**
+     * Get an instance of {@link BackupRestoreEventLogger} to report B&R related events during an
+     * ongoing backup or restore operation.
+     *
+     * @param backupAgent the agent currently running a B&R operation.
+     *
+     * @return an instance of {@code BackupRestoreEventLogger} or {@code null} if the agent has not
+     *         finished initialisation, i.e. {@link BackupAgent#onCreate()} has not been called yet.
+     * @throws IllegalStateException if called before the agent has finished initialisation.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public BackupRestoreEventLogger getBackupRestoreEventLogger(@NonNull BackupAgent backupAgent) {
+        BackupRestoreEventLogger logger = backupAgent.getBackupRestoreEventLogger();
+        if (logger == null) {
+            throw new IllegalStateException("Attempting to get logger on an uninitialised "
+                    + "BackupAgent");
+        }
+        return backupAgent.getBackupRestoreEventLogger();
+    }
+
+    /**
+     * Get an instance of {@link BackupRestoreEventLogger} to report B&R related events during a
+     * delayed restore operation.
+     *
+     * @return an instance of {@link BackupRestoreEventLogger}.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public BackupRestoreEventLogger getDelayedRestoreLogger() {
+        return new BackupRestoreEventLogger(OperationType.RESTORE);
+    }
+
+    /**
+     * Report B&R related events following a delayed restore operation.
+     *
+     * @param logger an instance of {@link BackupRestoreEventLogger} to which the corresponding
+     *               events have been logged.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void reportDelayedRestoreResult(@NonNull BackupRestoreEventLogger logger) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.reportDelayedRestoreResult(mContext.getPackageName(),
+                        logger.getLoggingResults());
+            } catch (RemoteException e) {
+                Log.w(TAG, "reportDelayedRestoreResult() couldn't connect");
+            }
+        }
+    }
+
     /*
      * We wrap incoming binder calls with a private class implementation that
      * redirects them into main-thread actions.  This serializes the backup
@@ -1118,18 +1192,4 @@ public class BackupManager {
             });
         }
     }
-
-    private class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
-        final BackupManagerMonitor mMonitor;
-
-        BackupManagerMonitorWrapper(BackupManagerMonitor monitor) {
-            mMonitor = monitor;
-        }
-
-        @Override
-        public void onEvent(final Bundle event) throws RemoteException {
-            mMonitor.onEvent(event);
-        }
-    }
-
 }

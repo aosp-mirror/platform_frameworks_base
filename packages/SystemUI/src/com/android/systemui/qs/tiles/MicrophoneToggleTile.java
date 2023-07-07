@@ -37,6 +37,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -45,8 +46,12 @@ import javax.inject.Inject;
 
 public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
 
+    public static final String TILE_SPEC = "mictoggle";
+
     @Inject
-    protected MicrophoneToggleTile(QSHost host,
+    protected MicrophoneToggleTile(
+            QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             MetricsLogger metricsLogger,
@@ -56,7 +61,7 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
             KeyguardStateController keyguardStateController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger, sensorPrivacyController,
                 keyguardStateController);
     }
@@ -72,9 +77,9 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
     @Override
     public @DrawableRes int getIconRes(boolean isBlocked) {
         if (isBlocked) {
-            return com.android.internal.R.drawable.ic_mic_blocked;
+            return R.drawable.qs_mic_access_off;
         } else {
-            return com.android.internal.R.drawable.ic_mic_allowed;
+            return R.drawable.qs_mic_access_on;
         }
     }
 

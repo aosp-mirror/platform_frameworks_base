@@ -28,7 +28,6 @@ import static com.android.server.pm.PackageManagerService.DEFERRED_PENDING_KILL_
 import static com.android.server.pm.PackageManagerService.DOMAIN_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_STATUS;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_TIMEOUT;
-import static com.android.server.pm.PackageManagerService.INIT_COPY;
 import static com.android.server.pm.PackageManagerService.INSTANT_APP_RESOLUTION_PHASE_TWO;
 import static com.android.server.pm.PackageManagerService.INTEGRITY_VERIFICATION_COMPLETE;
 import static com.android.server.pm.PackageManagerService.PACKAGE_VERIFIED;
@@ -37,7 +36,6 @@ import static com.android.server.pm.PackageManagerService.PRUNE_UNUSED_STATIC_SH
 import static com.android.server.pm.PackageManagerService.SEND_PENDING_BROADCAST;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerService.WRITE_PACKAGE_LIST;
-import static com.android.server.pm.PackageManagerService.WRITE_PACKAGE_RESTRICTIONS;
 import static com.android.server.pm.PackageManagerService.WRITE_SETTINGS;
 
 import android.content.Intent;
@@ -63,11 +61,13 @@ import java.io.IOException;
 final class PackageHandler extends Handler {
     private final PackageManagerService mPm;
     private final InstallPackageHelper mInstallPackageHelper;
+    private final RemovePackageHelper mRemovePackageHelper;
 
     PackageHandler(Looper looper, PackageManagerService pm) {
         super(looper);
         mPm = pm;
         mInstallPackageHelper = new InstallPackageHelper(mPm);
+        mRemovePackageHelper = new RemovePackageHelper(mPm);
     }
 
     @Override
@@ -81,18 +81,6 @@ final class PackageHandler extends Handler {
 
     void doHandleMessage(Message msg) {
         switch (msg.what) {
-            case INIT_COPY: {
-                HandlerParams params = (HandlerParams) msg.obj;
-                if (params != null) {
-                    if (DEBUG_INSTALL) Slog.i(TAG, "init_copy: " + params);
-                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                            System.identityHashCode(params));
-                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "startCopy");
-                    params.startCopy();
-                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                }
-                break;
-            }
             case SEND_PENDING_BROADCAST: {
                 mInstallPackageHelper.sendPendingBroadcasts();
                 break;
@@ -100,18 +88,14 @@ final class PackageHandler extends Handler {
             case POST_INSTALL: {
                 if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
 
-                PostInstallData data = mPm.mRunningInstalls.get(msg.arg1);
+                InstallRequest request = mPm.mRunningInstalls.get(msg.arg1);
                 final boolean didRestore = (msg.arg2 != 0);
                 mPm.mRunningInstalls.delete(msg.arg1);
 
-                if (data != null && data.res.mFreezer != null) {
-                    data.res.mFreezer.close();
-                }
-
-                if (data != null && data.mPostInstallRunnable != null) {
-                    data.mPostInstallRunnable.run();
-                } else if (data != null && data.args != null) {
-                    mInstallPackageHelper.handlePackagePostInstall(data.res, data.args, didRestore);
+                request.closeFreezer();
+                request.runPostInstallRunnable();
+                if (!request.isInstallExistingForUser()) {
+                    mInstallPackageHelper.handlePackagePostInstall(request, didRestore);
                 } else if (DEBUG_INSTALL) {
                     // No post-install when we run restore from installExistingPackageForUser
                     Slog.i(TAG, "Nothing to do for post-install token " + msg.arg1);
@@ -120,11 +104,9 @@ final class PackageHandler extends Handler {
                 Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
             } break;
             case DEFERRED_NO_KILL_POST_DELETE: {
-                synchronized (mPm.mInstallLock) {
-                    InstallArgs args = (InstallArgs) msg.obj;
-                    if (args != null) {
-                        args.doPostDeleteLI(true);
-                    }
+                InstallArgs args = (InstallArgs) msg.obj;
+                if (args != null) {
+                    mRemovePackageHelper.cleanUpResources(args.mCodeFile, args.mInstructionSets);
                 }
             } break;
             case DEFERRED_NO_KILL_INSTALL_OBSERVER:
@@ -136,10 +118,7 @@ final class PackageHandler extends Handler {
                 }
             } break;
             case WRITE_SETTINGS: {
-                mPm.writeSettings();
-            } break;
-            case WRITE_PACKAGE_RESTRICTIONS: {
-                mPm.writePendingRestrictions();
+                mPm.writeSettings(/*sync=*/false);
             } break;
             case WRITE_PACKAGE_LIST: {
                 mPm.writePackageList(msg.arg1);
@@ -153,43 +132,16 @@ final class PackageHandler extends Handler {
                     // Not found or complete.
                     break;
                 }
-                if (!streaming && state.timeoutExtended()) {
+
+                final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
+                if (!streaming && state.timeoutExtended(response.callerUid)) {
                     // Timeout extended.
                     break;
                 }
 
-                final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
+                VerificationUtils.processVerificationResponseOnTimeout(verificationId, state,
+                        response, mPm);
 
-                final VerificationParams params = state.getVerificationParams();
-                final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
-
-                String errorMsg = "Verification timed out for " + originUri;
-                Slog.i(TAG, errorMsg);
-
-                final UserHandle user = params.getUser();
-                if (response.code != PackageManager.VERIFICATION_REJECT) {
-                    Slog.i(TAG, "Continuing with installation of " + originUri);
-                    state.setVerifierResponse(response.callerUid, response.code);
-                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                            PackageManager.VERIFICATION_ALLOW, null, params.mDataLoaderType,
-                            user, mPm.mContext);
-                } else {
-                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                            PackageManager.VERIFICATION_REJECT, null,
-                            params.mDataLoaderType, user, mPm.mContext);
-                    params.setReturnCode(
-                            PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
-                    state.setVerifierResponse(response.callerUid, response.code);
-                }
-
-                if (state.areAllVerificationsComplete()) {
-                    mPm.mPendingVerification.remove(verificationId);
-                }
-
-                Trace.asyncTraceEnd(
-                        TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                params.handleVerificationFinished();
                 break;
             }
             case CHECK_PENDING_INTEGRITY_VERIFICATION: {
@@ -197,8 +149,8 @@ final class PackageHandler extends Handler {
                 final PackageVerificationState state = mPm.mPendingVerification.get(verificationId);
 
                 if (state != null && !state.isIntegrityVerificationComplete()) {
-                    final VerificationParams params = state.getVerificationParams();
-                    final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
+                    final VerifyingSession verifyingSession = state.getVerifyingSession();
+                    final Uri originUri = Uri.fromFile(verifyingSession.mOriginInfo.mResolvedFile);
 
                     String errorMsg = "Integrity verification timed out for " + originUri;
                     Slog.i(TAG, errorMsg);
@@ -210,7 +162,7 @@ final class PackageHandler extends Handler {
                             == PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW) {
                         Slog.i(TAG, "Integrity check times out, continuing with " + originUri);
                     } else {
-                        params.setReturnCode(
+                        verifyingSession.setReturnCode(
                                 PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                                 errorMsg);
                     }
@@ -224,7 +176,7 @@ final class PackageHandler extends Handler {
                             "integrity_verification",
                             verificationId);
 
-                    params.handleIntegrityVerificationFinished();
+                    verifyingSession.handleIntegrityVerificationFinished();
                 }
                 break;
             }
@@ -244,31 +196,7 @@ final class PackageHandler extends Handler {
                 }
 
                 final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
-                state.setVerifierResponse(response.callerUid, response.code);
-
-                if (state.isVerificationComplete()) {
-                    final VerificationParams params = state.getVerificationParams();
-                    final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
-
-                    if (state.isInstallAllowed()) {
-                        VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                                response.code, null, params.mDataLoaderType, params.getUser(),
-                                mPm.mContext);
-                    } else {
-                        params.setReturnCode(
-                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                                "Install not allowed");
-                    }
-
-                    if (state.areAllVerificationsComplete()) {
-                        mPm.mPendingVerification.remove(verificationId);
-                    }
-
-                    Trace.asyncTraceEnd(
-                            TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                    params.handleVerificationFinished();
-                }
+                VerificationUtils.processVerificationResponse(verificationId, state, response, mPm);
 
                 break;
             }
@@ -283,15 +211,15 @@ final class PackageHandler extends Handler {
                 }
 
                 final int response = (Integer) msg.obj;
-                final VerificationParams params = state.getVerificationParams();
-                final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
+                final VerifyingSession verifyingSession = state.getVerifyingSession();
+                final Uri originUri = Uri.fromFile(verifyingSession.mOriginInfo.mResolvedFile);
 
                 state.setIntegrityVerificationResult(response);
 
                 if (response == PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW) {
                     Slog.i(TAG, "Integrity check passed for " + originUri);
                 } else {
-                    params.setReturnCode(
+                    verifyingSession.setReturnCode(
                             PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                             "Integrity check failed for " + originUri);
                 }
@@ -305,7 +233,7 @@ final class PackageHandler extends Handler {
                         "integrity_verification",
                         verificationId);
 
-                params.handleIntegrityVerificationFinished();
+                verifyingSession.handleIntegrityVerificationFinished();
                 break;
             }
             case INSTANT_APP_RESOLUTION_PHASE_TWO: {
@@ -321,7 +249,7 @@ final class PackageHandler extends Handler {
             case ENABLE_ROLLBACK_STATUS: {
                 final int enableRollbackToken = msg.arg1;
                 final int enableRollbackCode = msg.arg2;
-                final VerificationParams params =
+                final VerifyingSession params =
                         mPm.mPendingEnableRollback.get(enableRollbackToken);
                 if (params == null) {
                     Slog.w(TAG, "Invalid rollback enabled token "
@@ -346,7 +274,7 @@ final class PackageHandler extends Handler {
             case ENABLE_ROLLBACK_TIMEOUT: {
                 final int enableRollbackToken = msg.arg1;
                 final int sessionId = msg.arg2;
-                final VerificationParams params =
+                final VerifyingSession params =
                         mPm.mPendingEnableRollback.get(enableRollbackToken);
                 if (params != null) {
                     final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
@@ -363,8 +291,8 @@ final class PackageHandler extends Handler {
                     rollbackTimeoutIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
                             sessionId);
-                    rollbackTimeoutIntent.addFlags(
-                            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    rollbackTimeoutIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
                     mPm.mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
                             android.Manifest.permission.PACKAGE_ROLLBACK_AGENT);
                 }

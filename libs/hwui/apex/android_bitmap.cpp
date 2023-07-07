@@ -24,6 +24,11 @@
 
 #include <GraphicsJNI.h>
 #include <hwui/Bitmap.h>
+#include <SkBitmap.h>
+#include <SkColorSpace.h>
+#include <SkImageInfo.h>
+#include <SkRefCnt.h>
+#include <SkStream.h>
 #include <utils/Color.h>
 
 using namespace android;

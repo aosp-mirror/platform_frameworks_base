@@ -53,13 +53,13 @@ import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -816,8 +816,7 @@ final class DiscreteRegistry {
 
                     }
                 } catch (Throwable t) {
-                    Slog.e(TAG, "Error while cleaning timeline files: " + t.getMessage() + " "
-                            + t.getStackTrace());
+                    Slog.e(TAG, "Error while cleaning timeline files: ", t);
                 }
             }
         }

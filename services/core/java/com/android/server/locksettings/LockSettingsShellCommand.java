@@ -43,7 +43,6 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_SET_PIN = "set-pin";
     private static final String COMMAND_SET_PASSWORD = "set-password";
     private static final String COMMAND_CLEAR = "clear";
-    private static final String COMMAND_SP = "sp";
     private static final String COMMAND_SET_DISABLED = "set-disabled";
     private static final String COMMAND_VERIFY = "verify";
     private static final String COMMAND_GET_DISABLED = "get-disabled";
@@ -107,6 +106,14 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_HELP:
                     onHelp();
                     return 0;
+                case COMMAND_GET_DISABLED:
+                    runGetDisabled();
+                    return 0;
+                case COMMAND_SET_DISABLED:
+                    // Note: if the user has an LSKF, then this has no immediate effect but instead
+                    // just ensures the lockscreen will be disabled later when the LSKF is cleared.
+                    runSetDisabled();
+                    return 0;
             }
             if (!checkCredential()) {
                 return -1;
@@ -125,17 +132,8 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_CLEAR:
                     success = runClear();
                     break;
-                case COMMAND_SP:
-                    runChangeSp();
-                    break;
-                case COMMAND_SET_DISABLED:
-                    runSetDisabled();
-                    break;
                 case COMMAND_VERIFY:
                     runVerify();
-                    break;
-                case COMMAND_GET_DISABLED:
-                    runGetDisabled();
                     break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);
@@ -180,12 +178,6 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("  set-password [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
             pw.println("    Sets the lock screen as password, using the given PASSOWRD to unlock.");
             pw.println("");
-            pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID]");
-            pw.println("    Gets whether synthetic password is enabled.");
-            pw.println("");
-            pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID] <1|0>");
-            pw.println("    Enables / disables synthetic password.");
-            pw.println("");
             pw.println("  clear [--old <CREDENTIAL>] [--user USER_ID]");
             pw.println("    Clears the lock credentials.");
             pw.println("");
@@ -212,27 +204,16 @@ class LockSettingsShellCommand extends ShellCommand {
             if ("--old".equals(opt)) {
                 mOld = getNextArgRequired();
             } else if ("--user".equals(opt)) {
-                mCurrentUserId = Integer.parseInt(getNextArgRequired());
+                mCurrentUserId = UserHandle.parseUserArg(getNextArgRequired());
+                if (mCurrentUserId == UserHandle.USER_CURRENT) {
+                    mCurrentUserId = ActivityManager.getCurrentUser();
+                }
             } else {
                 getErrPrintWriter().println("Unknown option: " + opt);
                 throw new IllegalArgumentException();
             }
         }
         mNew = getNextArg();
-    }
-
-    private void runChangeSp() {
-        if (mNew != null ) {
-            if ("1".equals(mNew)) {
-                mLockPatternUtils.enableSyntheticPassword();
-                getOutPrintWriter().println("Synthetic password enabled");
-            } else if ("0".equals(mNew)) {
-                mLockPatternUtils.disableSyntheticPassword();
-                getOutPrintWriter().println("Synthetic password disabled");
-            }
-        }
-        getOutPrintWriter().println(String.format("SP Enabled = %b",
-                mLockPatternUtils.isSyntheticPasswordEnabled()));
     }
 
     private LockscreenCredential getOldCredential() {

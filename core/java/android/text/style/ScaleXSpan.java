@@ -102,4 +102,9 @@ public class ScaleXSpan extends MetricAffectingSpan implements ParcelableSpan {
     public void updateMeasureState(TextPaint ds) {
         ds.setTextScaleX(ds.getTextScaleX() * mProportion);
     }
+
+    @Override
+    public String toString() {
+        return "ScaleXSpan{scaleX=" + getScaleX() + '}';
+    }
 }

@@ -125,6 +125,7 @@ struct MediaEvent : public RefBase {
 };
 
 struct FilterClientCallbackImpl : public FilterClientCallback {
+    FilterClientCallbackImpl();
     ~FilterClientCallbackImpl();
     virtual void onFilterEvent(const vector<DemuxFilterEvent>& events);
     virtual void onFilterStatus(const DemuxFilterStatus status);
@@ -135,18 +136,46 @@ struct FilterClientCallbackImpl : public FilterClientCallback {
 private:
     jweak mFilterObj;
     sp<FilterClient> mFilterClient;
+    jclass mEventClass;
+    jclass mSectionEventClass;
+    jclass mMediaEventClass;
+    jclass mAudioDescriptorClass;
+    jclass mPesEventClass;
+    jclass mTsRecordEventClass;
+    jclass mMmtpRecordEventClass;
+    jclass mDownloadEventClass;
+    jclass mIpPayloadEventClass;
+    jclass mTemiEventClass;
+    jclass mScramblingStatusEventClass;
+    jclass mIpCidChangeEventClass;
+    jclass mRestartEventClass;
+    jmethodID mSectionEventInitID;
+    jmethodID mMediaEventInitID;
+    jmethodID mAudioDescriptorInitID;
+    jmethodID mPesEventInitID;
+    jmethodID mTsRecordEventInitID;
+    jmethodID mMmtpRecordEventInitID;
+    jmethodID mDownloadEventInitID;
+    jmethodID mIpPayloadEventInitID;
+    jmethodID mTemiEventInitID;
+    jmethodID mScramblingStatusEventInitID;
+    jmethodID mIpCidChangeEventInitID;
+    jmethodID mRestartEventInitID;
+    jfieldID mMediaEventFieldContextID;
     bool mSharedFilter;
-    void getSectionEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getMediaEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getPesEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getTsRecordEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getMmtpRecordEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getDownloadEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getIpPayloadEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getTemiEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getScramblingStatusEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getIpCidChangeEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getRestartEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getSectionEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getMediaEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getPesEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getTsRecordEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getMmtpRecordEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getDownloadEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getIpPayloadEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getTemiEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getScramblingStatusEvent(const jobjectArray& arr, const int size,
+                                  const DemuxFilterEvent& event);
+    void getIpCidChangeEvent(const jobjectArray& arr, const int size,
+                             const DemuxFilterEvent& event);
+    void getRestartEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
 };
 
 struct JTuner;
@@ -189,6 +218,7 @@ struct JTuner : public RefBase {
     int scan(const FrontendSettings& settings, FrontendScanType scanType);
     int stopScan();
     int setLnb(sp<LnbClient> lnbClient);
+    bool isLnaSupported();
     int setLna(bool enable);
     jobject openLnbByHandle(int handle);
     jobject openLnbByName(jstring name);
@@ -197,6 +227,7 @@ struct JTuner : public RefBase {
     jobject openDescrambler();
     jobject openDvr(DvrType type, jlong bufferSize);
     jobject getDemuxCaps();
+    jobject getDemuxInfo(int handle);
     jobject getFrontendStatus(jintArray types);
     Result openDemux(int handle);
     jint close();
@@ -216,7 +247,8 @@ protected:
 private:
     jclass mClass;
     jweak mObject;
-    static sp<TunerClient> mTunerClient;
+    static sp<TunerClient> sTunerClient;
+    static std::mutex sTunerClientMutex;
     sp<FrontendClient> mFeClient;
     sp<FrontendClientCallbackImpl> mFeClientCb;
     int mFeId;
@@ -233,6 +265,7 @@ private:
     static jobject getIsdbsFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
     static jobject getIsdbtFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
     static jobject getDtmbFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
+    static jobject getIptvFrontendCaps(JNIEnv* env, FrontendCapabilities& caps);
 };
 
 class C2DataIdInfo : public C2Param {

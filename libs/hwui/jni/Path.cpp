@@ -102,6 +102,18 @@ public:
         obj->rQuadTo(dx1, dy1, dx2, dy2);
     }
 
+    static void conicTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x1, jfloat y1, jfloat x2,
+                        jfloat y2, jfloat weight) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        obj->conicTo(x1, y1, x2, y2, weight);
+    }
+
+    static void rConicTo(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx1, jfloat dy1,
+                         jfloat dx2, jfloat dy2, jfloat weight) {
+        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
+        obj->rConicTo(dx1, dy1, dx2, dy2, weight);
+    }
+
     static void cubicTo__FFFFFF(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x1, jfloat y1,
             jfloat x2, jfloat y2, jfloat x3, jfloat y3) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
@@ -170,11 +182,7 @@ public:
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
         AutoJavaFloatArray  afa(env, array, 8);
-#ifdef SK_SCALAR_IS_FLOAT
         const float* src = afa.ptr();
-#else
-        #error Need to convert float array to SkScalar array before calling the following function.
-#endif
         obj->addRoundRect(rect, src, dir);
     }
 
@@ -207,6 +215,14 @@ public:
     static void setLastPoint(JNIEnv* env, jclass clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->setLastPt(dx, dy);
+    }
+
+    static jboolean interpolate(JNIEnv* env, jclass clazz, jlong startHandle, jlong endHandle,
+                                jfloat t, jlong interpolatedHandle) {
+        SkPath* startPath = reinterpret_cast<SkPath*>(startHandle);
+        SkPath* endPath = reinterpret_cast<SkPath*>(endHandle);
+        SkPath* interpolatedPath = reinterpret_cast<SkPath*>(interpolatedHandle);
+        return startPath->interpolate(*endPath, t, interpolatedPath);
     }
 
     static void transform__MatrixPath(JNIEnv* env, jclass clazz, jlong objHandle, jlong matrixHandle,
@@ -473,6 +489,16 @@ public:
 
     // ---------------- @CriticalNative -------------------------
 
+    static jint getGenerationID(CRITICAL_JNI_PARAMS_COMMA jlong pathHandle) {
+        return (reinterpret_cast<SkPath*>(pathHandle)->getGenerationID());
+    }
+
+    static jboolean isInterpolatable(CRITICAL_JNI_PARAMS_COMMA jlong startHandle, jlong endHandle) {
+        SkPath* startPath = reinterpret_cast<SkPath*>(startHandle);
+        SkPath* endPath = reinterpret_cast<SkPath*>(endHandle);
+        return startPath->isInterpolatable(*endPath);
+    }
+
     static void reset(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->reset();
@@ -506,48 +532,53 @@ public:
 };
 
 static const JNINativeMethod methods[] = {
-    {"nInit","()J", (void*) SkPathGlue::init},
-    {"nInit","(J)J", (void*) SkPathGlue::init_Path},
-    {"nGetFinalizer", "()J", (void*) SkPathGlue::getFinalizer},
-    {"nSet","(JJ)V", (void*) SkPathGlue::set},
-    {"nComputeBounds","(JLandroid/graphics/RectF;)V", (void*) SkPathGlue::computeBounds},
-    {"nIncReserve","(JI)V", (void*) SkPathGlue::incReserve},
-    {"nMoveTo","(JFF)V", (void*) SkPathGlue::moveTo__FF},
-    {"nRMoveTo","(JFF)V", (void*) SkPathGlue::rMoveTo},
-    {"nLineTo","(JFF)V", (void*) SkPathGlue::lineTo__FF},
-    {"nRLineTo","(JFF)V", (void*) SkPathGlue::rLineTo},
-    {"nQuadTo","(JFFFF)V", (void*) SkPathGlue::quadTo__FFFF},
-    {"nRQuadTo","(JFFFF)V", (void*) SkPathGlue::rQuadTo},
-    {"nCubicTo","(JFFFFFF)V", (void*) SkPathGlue::cubicTo__FFFFFF},
-    {"nRCubicTo","(JFFFFFF)V", (void*) SkPathGlue::rCubicTo},
-    {"nArcTo","(JFFFFFFZ)V", (void*) SkPathGlue::arcTo},
-    {"nClose","(J)V", (void*) SkPathGlue::close},
-    {"nAddRect","(JFFFFI)V", (void*) SkPathGlue::addRect},
-    {"nAddOval","(JFFFFI)V", (void*) SkPathGlue::addOval},
-    {"nAddCircle","(JFFFI)V", (void*) SkPathGlue::addCircle},
-    {"nAddArc","(JFFFFFF)V", (void*) SkPathGlue::addArc},
-    {"nAddRoundRect","(JFFFFFFI)V", (void*) SkPathGlue::addRoundRectXY},
-    {"nAddRoundRect","(JFFFF[FI)V", (void*) SkPathGlue::addRoundRect8},
-    {"nAddPath","(JJFF)V", (void*) SkPathGlue::addPath__PathFF},
-    {"nAddPath","(JJ)V", (void*) SkPathGlue::addPath__Path},
-    {"nAddPath","(JJJ)V", (void*) SkPathGlue::addPath__PathMatrix},
-    {"nOffset","(JFF)V", (void*) SkPathGlue::offset__FF},
-    {"nSetLastPoint","(JFF)V", (void*) SkPathGlue::setLastPoint},
-    {"nTransform","(JJJ)V", (void*) SkPathGlue::transform__MatrixPath},
-    {"nTransform","(JJ)V", (void*) SkPathGlue::transform__Matrix},
-    {"nOp","(JJIJ)Z", (void*) SkPathGlue::op},
-    {"nApproximate", "(JF)[F", (void*) SkPathGlue::approximate},
+        {"nInit", "()J", (void*)SkPathGlue::init},
+        {"nInit", "(J)J", (void*)SkPathGlue::init_Path},
+        {"nGetFinalizer", "()J", (void*)SkPathGlue::getFinalizer},
+        {"nSet", "(JJ)V", (void*)SkPathGlue::set},
+        {"nComputeBounds", "(JLandroid/graphics/RectF;)V", (void*)SkPathGlue::computeBounds},
+        {"nIncReserve", "(JI)V", (void*)SkPathGlue::incReserve},
+        {"nMoveTo", "(JFF)V", (void*)SkPathGlue::moveTo__FF},
+        {"nRMoveTo", "(JFF)V", (void*)SkPathGlue::rMoveTo},
+        {"nLineTo", "(JFF)V", (void*)SkPathGlue::lineTo__FF},
+        {"nRLineTo", "(JFF)V", (void*)SkPathGlue::rLineTo},
+        {"nQuadTo", "(JFFFF)V", (void*)SkPathGlue::quadTo__FFFF},
+        {"nRQuadTo", "(JFFFF)V", (void*)SkPathGlue::rQuadTo},
+        {"nConicTo", "(JFFFFF)V", (void*)SkPathGlue::conicTo},
+        {"nRConicTo", "(JFFFFF)V", (void*)SkPathGlue::rConicTo},
+        {"nCubicTo", "(JFFFFFF)V", (void*)SkPathGlue::cubicTo__FFFFFF},
+        {"nRCubicTo", "(JFFFFFF)V", (void*)SkPathGlue::rCubicTo},
+        {"nArcTo", "(JFFFFFFZ)V", (void*)SkPathGlue::arcTo},
+        {"nClose", "(J)V", (void*)SkPathGlue::close},
+        {"nAddRect", "(JFFFFI)V", (void*)SkPathGlue::addRect},
+        {"nAddOval", "(JFFFFI)V", (void*)SkPathGlue::addOval},
+        {"nAddCircle", "(JFFFI)V", (void*)SkPathGlue::addCircle},
+        {"nAddArc", "(JFFFFFF)V", (void*)SkPathGlue::addArc},
+        {"nAddRoundRect", "(JFFFFFFI)V", (void*)SkPathGlue::addRoundRectXY},
+        {"nAddRoundRect", "(JFFFF[FI)V", (void*)SkPathGlue::addRoundRect8},
+        {"nAddPath", "(JJFF)V", (void*)SkPathGlue::addPath__PathFF},
+        {"nAddPath", "(JJ)V", (void*)SkPathGlue::addPath__Path},
+        {"nAddPath", "(JJJ)V", (void*)SkPathGlue::addPath__PathMatrix},
+        {"nInterpolate", "(JJFJ)Z", (void*)SkPathGlue::interpolate},
+        {"nOffset", "(JFF)V", (void*)SkPathGlue::offset__FF},
+        {"nSetLastPoint", "(JFF)V", (void*)SkPathGlue::setLastPoint},
+        {"nTransform", "(JJJ)V", (void*)SkPathGlue::transform__MatrixPath},
+        {"nTransform", "(JJ)V", (void*)SkPathGlue::transform__Matrix},
+        {"nOp", "(JJIJ)Z", (void*)SkPathGlue::op},
+        {"nApproximate", "(JF)[F", (void*)SkPathGlue::approximate},
 
-    // ------- @FastNative below here ----------------------
-    {"nIsRect","(JLandroid/graphics/RectF;)Z", (void*) SkPathGlue::isRect},
+        // ------- @FastNative below here ----------------------
+        {"nIsRect", "(JLandroid/graphics/RectF;)Z", (void*)SkPathGlue::isRect},
 
-    // ------- @CriticalNative below here ------------------
-    {"nReset","(J)V", (void*) SkPathGlue::reset},
-    {"nRewind","(J)V", (void*) SkPathGlue::rewind},
-    {"nIsEmpty","(J)Z", (void*) SkPathGlue::isEmpty},
-    {"nIsConvex","(J)Z", (void*) SkPathGlue::isConvex},
-    {"nGetFillType","(J)I", (void*) SkPathGlue::getFillType},
-    {"nSetFillType","(JI)V", (void*) SkPathGlue::setFillType},
+        // ------- @CriticalNative below here ------------------
+        {"nGetGenerationID", "(J)I", (void*)SkPathGlue::getGenerationID},
+        {"nIsInterpolatable", "(JJ)Z", (void*)SkPathGlue::isInterpolatable},
+        {"nReset", "(J)V", (void*)SkPathGlue::reset},
+        {"nRewind", "(J)V", (void*)SkPathGlue::rewind},
+        {"nIsEmpty", "(J)Z", (void*)SkPathGlue::isEmpty},
+        {"nIsConvex", "(J)Z", (void*)SkPathGlue::isConvex},
+        {"nGetFillType", "(J)I", (void*)SkPathGlue::getFillType},
+        {"nSetFillType", "(JI)V", (void*)SkPathGlue::setFillType},
 };
 
 int register_android_graphics_Path(JNIEnv* env) {

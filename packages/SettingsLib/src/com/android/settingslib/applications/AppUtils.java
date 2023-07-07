@@ -32,6 +32,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -305,5 +306,18 @@ public class AppUtils {
                 appEntry.mounted = mounted;
             }
         }
+    }
+
+    /**
+     * Returns clone user profile id if present. Returns -1 if not present.
+     */
+    public static int getCloneUserId(Context context) {
+        UserManager userManager = context.getSystemService(UserManager.class);
+        for (UserHandle userHandle : userManager.getUserProfiles()) {
+            if (userManager.getUserInfo(userHandle.getIdentifier()).isCloneProfile()) {
+                return userHandle.getIdentifier();
+            }
+        }
+        return -1;
     }
 }

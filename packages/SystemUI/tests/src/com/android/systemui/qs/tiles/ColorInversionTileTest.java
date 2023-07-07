@@ -32,17 +32,21 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,9 +58,11 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ColorInversionTileTest extends SysuiTestCase {
+    private static final Integer COLOR_INVERSION_DISABLED = 0;
+    private static final Integer COLOR_INVERSION_ENABLED = 1;
 
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -66,7 +72,7 @@ public class ColorInversionTileTest extends SysuiTestCase {
     @Mock
     private QSLogger mQSLogger;
     @Mock
-    private UiEventLogger mUiEventLogger;
+    private QsEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
 
@@ -82,10 +88,10 @@ public class ColorInversionTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
-        when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
 
         mTile = new ColorInversionTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -101,6 +107,12 @@ public class ColorInversionTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    @After
+    public void tearDown() {
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
+    }
+
     @Test
     public void longClick_expectedAction() {
         final ArgumentCaptor<Intent> IntentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -112,5 +124,25 @@ public class ColorInversionTileTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(IntentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_COLOR_INVERSION_SETTINGS);
+    }
+
+    @Test
+    public void testIcon_whenColorInversionDisabled_isOffState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, COLOR_INVERSION_DISABLED);
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_invert_colors_icon_off));
+    }
+
+    @Test
+    public void testIcon_whenColorInversionEnabled_isOnState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, COLOR_INVERSION_ENABLED);
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_invert_colors_icon_on));
     }
 }

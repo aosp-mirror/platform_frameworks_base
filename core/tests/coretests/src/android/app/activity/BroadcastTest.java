@@ -18,6 +18,8 @@ package android.app.activity;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.BroadcastOptions;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -534,6 +536,42 @@ public class BroadcastTest extends ActivityTestsBase {
             fail("No exception thrown on second unregister");
         } catch (IllegalArgumentException e) {
             Log.i("foo", "Unregister exception", e);
+        }
+    }
+
+    public void testBroadcastOption_interactive() throws Exception {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setInteractive(true);
+        final Intent intent = makeBroadcastIntent(BROADCAST_REGISTERED);
+
+        try {
+            getContext().sendBroadcast(intent, null, options.toBundle());
+            fail("No exception thrown with BroadcastOptions.setInteractive(true)");
+        } catch (SecurityException se) {
+            // Expected, correct behavior - this case intentionally empty
+        } catch (Exception e) {
+            fail("Unexpected exception " + e.getMessage()
+                    + " thrown with BroadcastOptions.setInteractive(true)");
+        }
+    }
+
+    public void testBroadcastOption_interactive_PendingIntent() throws Exception {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setInteractive(true);
+        final Intent intent = makeBroadcastIntent(BROADCAST_REGISTERED);
+        PendingIntent brPending = PendingIntent.getBroadcast(getContext(),
+                1, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        try {
+            brPending.send(getContext(), 1, null, null, null, null, options.toBundle());
+            fail("No exception thrown with BroadcastOptions.setInteractive(true)");
+        } catch (SecurityException se) {
+            // Expected, correct behavior - this case intentionally empty
+        } catch (Exception e) {
+            fail("Unexpected exception " + e.getMessage()
+                    + " thrown with BroadcastOptions.setInteractive(true)");
+        } finally {
+            brPending.cancel();
         }
     }
 }

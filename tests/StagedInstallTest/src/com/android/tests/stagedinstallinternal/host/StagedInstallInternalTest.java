@@ -31,6 +31,7 @@ import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
+import com.android.tradefed.device.PackageInfo;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.CommandResult;
@@ -63,6 +64,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
     private static final String APEXD_TEST_APEX = "apex.apexd_test.apex";
     private static final String FAKE_APEX_SYSTEM_SERVER_APEX = "test_com.android.server.apex";
+    private static final String REBOOTLESS_V1 = "test.rebootless_apex_v1.apex";
+    private static final String REBOOTLESS_V2 = "test.rebootless_apex_v2.apex";
 
     private static final String TEST_VENDOR_APEX_ALLOW_LIST =
             "/vendor/etc/sysconfig/test-vendor-apex-allow-list.xml";
@@ -94,7 +97,9 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex",
                 "/system/apex/test.rebootless_apex_v*.apex",
+                "/vendor/apex/test.rebootless_apex_v*.apex",
                 "/data/apex/active/test.apex.rebootless*.apex",
+                "/system/app/TestApp/TestAppAv1.apk",
                 TEST_VENDOR_APEX_ALLOW_LIST);
     }
 
@@ -118,16 +123,27 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         }
 
         boolean found = false;
+        boolean remountSystem = false;
+        boolean remountVendor = false;
         for (String file : files) {
             CommandResult result = getDevice().executeShellV2Command("ls " + file);
             if (result.getStatus() == CommandStatus.SUCCESS) {
                 found = true;
-                break;
+                if (file.startsWith("/system")) {
+                    remountSystem = true;
+                } else if (file.startsWith("/vendor")) {
+                    remountVendor = true;
+                }
             }
         }
 
         if (found) {
-            getDevice().remountSystemWritable();
+            if (remountSystem) {
+                getDevice().remountSystemWritable();
+            }
+            if (remountVendor) {
+                getDevice().remountVendorWritable();
+            }
             for (String file : files) {
                 getDevice().executeShellCommand("rm -rf " + file);
             }
@@ -136,20 +152,34 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     private void pushTestApex(String fileName) throws Exception {
+        pushTestApex(fileName, "system");
+    }
+
+    private void pushTestApex(String fileName, String partition) throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final File apex = buildHelper.getTestFile(fileName);
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
         }
-        getDevice().remountSystemWritable();
-        assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+        if ("system".equals(partition)) {
+            getDevice().remountSystemWritable();
+        } else if ("vendor".equals(partition)) {
+            getDevice().remountVendorWritable();
+        }
+        assertTrue(getDevice().pushFile(apex, "/" + partition + "/apex/" + fileName));
+    }
+
+    private void installTestApex(String fileName, String... extraArgs) throws Exception {
+        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
+        final File apex = buildHelper.getTestFile(fileName);
+        getDevice().installPackage(apex, false, extraArgs);
     }
 
     private void pushTestVendorApexAllowList(String installerPackageName) throws Exception {
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
         }
-        getDevice().remountSystemWritable();
+        getDevice().remountVendorWritable();
         File file = File.createTempFile("test-vendor-apex-allow-list", ".xml");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             final String fmt =
@@ -160,6 +190,25 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
             writer.write(String.format(fmt, installerPackageName));
         }
         getDevice().pushFile(file, TEST_VENDOR_APEX_ALLOW_LIST);
+    }
+
+    /**
+     * Tests app info flags are set correctly when updating a system app.
+     */
+    @Test
+    public void testUpdateSystemApp() throws Exception {
+        // Push TestAppAv1.apk to /system
+        final File apkFile = mHostUtils.getTestFile(APK_A);
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        assertTrue(getDevice().pushFile(apkFile, "/system/app/TestApp/" + apkFile.getName()));
+        getDevice().reboot();
+
+        runPhase("testUpdateSystemApp_InstallV2");
+        getDevice().reboot();
+        runPhase("testUpdateSystemApp_PostInstallV2");
     }
 
     /**
@@ -174,6 +223,28 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         runPhase("testDuplicateApkInApexShouldFail_Commit");
         getDevice().reboot();
         runPhase("testDuplicateApkInApexShouldFail_Verify");
+    }
+
+    /**
+     * Tests the cache of apk-in-apex is pruned and rebuilt correctly.
+     */
+    @Test
+    @LargeTest
+    public void testApkInApexPruneCache() throws Exception {
+        final String apkInApexPackageName = "com.android.cts.install.lib.testapp.A";
+
+        pushTestApex(APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
+        getDevice().reboot();
+        PackageInfo pi = getDevice().getAppPackageInfo(apkInApexPackageName);
+        assertThat(Integer.parseInt(pi.getVersionCode())).isEqualTo(1);
+        assertThat(pi.getCodePath()).startsWith("/apex/" + APK_IN_APEX_TESTAPEX_NAME);
+
+        installPackage(APK_IN_APEX_TESTAPEX_NAME + "_v2.apex", "--staged");
+        getDevice().reboot();
+        pi = getDevice().getAppPackageInfo(apkInApexPackageName);
+        // The version code of apk-in-apex will be stale if the cache is not rebuilt
+        assertThat(Integer.parseInt(pi.getVersionCode())).isEqualTo(2);
+        assertThat(pi.getCodePath()).startsWith("/apex/" + APK_IN_APEX_TESTAPEX_NAME);
     }
 
     @Test
@@ -475,6 +546,33 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
         runPhase("testVendorApexCorrectInstaller_staged");
         runPhase("testVendorApexCorrectInstaller_nonStaged");
+    }
+
+    /**
+     * Tests correctness of {@link android.content.pm.ApplicationInfo} for APEXes on /vendor.
+     */
+    @Test
+    @LargeTest
+    public void testVendorApex_Staged() throws Exception {
+        pushTestApex(REBOOTLESS_V1, "vendor");
+        getDevice().reboot();
+        runPhase("testVendorApex_VerifyFactory");
+        installTestApex(REBOOTLESS_V2, "--staged");
+        getDevice().reboot();
+        runPhase("testVendorApex_VerifyData");
+    }
+
+    /**
+     * Tests correctness of {@link android.content.pm.ApplicationInfo} for APEXes on /vendor.
+     */
+    @Test
+    @LargeTest
+    public void testVendorApex_NonStaged() throws Exception {
+        pushTestApex(REBOOTLESS_V1, "vendor");
+        getDevice().reboot();
+        runPhase("testVendorApex_VerifyFactory");
+        installTestApex(REBOOTLESS_V2, "--force-non-staged");
+        runPhase("testVendorApex_VerifyData");
     }
 
     @Test

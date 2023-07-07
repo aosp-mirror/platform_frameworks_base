@@ -24,7 +24,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "androidx.test.ext.junit",
-        "androidx.test.uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "mockito-target-minus-junit4",
         "servicestests-utils",
         "truth-prebuilt",

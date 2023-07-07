@@ -101,6 +101,13 @@ public class SystemConfigService extends SystemService {
             }
             return enabledComponent;
         }
+
+        @Override
+        public List<ComponentName> getDefaultVrComponents() {
+            getContext().enforceCallingOrSelfPermission(Manifest.permission.QUERY_ALL_PACKAGES,
+                    "Caller must hold " + Manifest.permission.QUERY_ALL_PACKAGES);
+            return new ArrayList<>(SystemConfig.getInstance().getDefaultVrComponents());
+        }
     };
 
     public SystemConfigService(Context context) {

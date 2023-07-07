@@ -19,6 +19,8 @@
 #include <SkCanvasVirtualEnforcer.h>
 #include <SkNoDrawCanvas.h>
 
+enum class SkBlendMode;
+
 namespace android {
 namespace uirenderer {
 namespace test {

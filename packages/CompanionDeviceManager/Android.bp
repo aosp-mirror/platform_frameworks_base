@@ -41,6 +41,7 @@ android_app {
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.recyclerview_recyclerview",
+        "androidx-constraintlayout_constraintlayout",
         "androidx.appcompat_appcompat",
     ],
 

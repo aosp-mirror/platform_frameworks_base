@@ -18,23 +18,27 @@ package com.android.systemui.volume.dagger;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Looper;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
+import com.android.systemui.volume.VolumePanelFactory;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-
 
 /** Dagger Module for code in the volume package. */
 @Module
@@ -52,8 +56,12 @@ public interface VolumeModule {
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
             MediaOutputDialogFactory mediaOutputDialogFactory,
+            VolumePanelFactory volumePanelFactory,
             ActivityStarter activityStarter,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            CsdWarningDialog.Factory csdFactory,
+            DevicePostureController devicePostureController,
+            DumpManager dumpManager) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
                 volumeDialogController,
@@ -61,8 +69,13 @@ public interface VolumeModule {
                 deviceProvisionedController,
                 configurationController,
                 mediaOutputDialogFactory,
+                volumePanelFactory,
                 activityStarter,
-                interactionJankMonitor);
+                interactionJankMonitor,
+                csdFactory,
+                devicePostureController,
+                Looper.getMainLooper(),
+                dumpManager);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);

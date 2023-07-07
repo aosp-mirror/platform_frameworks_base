@@ -61,6 +61,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -70,7 +71,8 @@ import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -80,16 +82,10 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
-import com.android.systemui.statusbar.notification.NotificationFilter;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -102,18 +98,14 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
-import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
@@ -141,13 +133,13 @@ import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
+import dagger.Lazy;
+
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import dagger.Lazy;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -260,7 +252,6 @@ public class Dependency {
     @Inject Lazy<UserInfoController> mUserInfoController;
     @Inject Lazy<KeyguardStateController> mKeyguardMonitor;
     @Inject Lazy<KeyguardUpdateMonitor> mKeyguardUpdateMonitor;
-    @Inject Lazy<BatteryController> mBatteryController;
     @Inject Lazy<NightDisplayListener> mNightDisplayListener;
     @Inject Lazy<ReduceBrightColorsController> mReduceBrightColorsController;
     @Inject Lazy<ManagedProfileController> mManagedProfileController;
@@ -278,7 +269,6 @@ public class Dependency {
     @Inject Lazy<NotificationShadeWindowController> mNotificationShadeWindowController;
     @Inject Lazy<StatusBarWindowController> mTempStatusBarWindowController;
     @Inject Lazy<DarkIconDispatcher> mDarkIconDispatcher;
-    @Inject Lazy<ConfigurationController> mConfigurationController;
     @Inject Lazy<StatusBarIconController> mStatusBarIconController;
     @Inject Lazy<ScreenLifecycle> mScreenLifecycle;
     @Inject Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
@@ -306,7 +296,6 @@ public class Dependency {
     @Inject Lazy<IStatusBarService> mIStatusBarService;
     @Inject Lazy<DisplayMetrics> mDisplayMetrics;
     @Inject Lazy<LockscreenGestureLogger> mLockscreenGestureLogger;
-    @Inject Lazy<KeyguardEnvironment> mKeyguardEnvironment;
     @Inject Lazy<ShadeController> mShadeController;
     @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
     @Inject Lazy<AppOpsController> mAppOpsController;
@@ -314,31 +303,23 @@ public class Dependency {
     @Inject Lazy<AccessibilityFloatingMenuController> mAccessibilityFloatingMenuController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationLockscreenUserManager> mNotificationLockscreenUserManager;
-    @Inject Lazy<NotificationGroupAlertTransferHelper> mNotificationGroupAlertTransferHelper;
-    @Inject Lazy<NotificationGroupManagerLegacy> mNotificationGroupManager;
-    @Inject Lazy<VisualStabilityManager> mVisualStabilityManager;
     @Inject Lazy<NotificationGutsManager> mNotificationGutsManager;
     @Inject Lazy<NotificationMediaManager> mNotificationMediaManager;
     @Inject Lazy<NotificationRemoteInputManager> mNotificationRemoteInputManager;
     @Inject Lazy<SmartReplyConstants> mSmartReplyConstants;
     @Inject Lazy<NotificationListener> mNotificationListener;
     @Inject Lazy<NotificationLogger> mNotificationLogger;
-    @Inject Lazy<NotificationViewHierarchyManager> mNotificationViewHierarchyManager;
-    @Inject Lazy<NotificationFilter> mNotificationFilter;
     @Inject Lazy<KeyguardDismissUtil> mKeyguardDismissUtil;
     @Inject Lazy<SmartReplyController> mSmartReplyController;
     @Inject Lazy<RemoteInputQuickSettingsDisabler> mRemoteInputQuickSettingsDisabler;
-    @Inject Lazy<NotificationEntryManager> mNotificationEntryManager;
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
     @Inject Lazy<AutoHideController> mAutoHideController;
-    @Inject Lazy<ForegroundServiceNotificationListener> mForegroundServiceNotificationListener;
     @Inject Lazy<PrivacyItemController> mPrivacyItemController;
     @Inject @Background Lazy<Looper> mBgLooper;
     @Inject @Background Lazy<Handler> mBgHandler;
     @Inject @Main Lazy<Looper> mMainLooper;
     @Inject @Main Lazy<Handler> mMainHandler;
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
-    @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;
     @Inject @Main Lazy<Executor> mMainExecutor;
     @Inject @Background Lazy<Executor> mBackgroundExecutor;
@@ -374,6 +355,7 @@ public class Dependency {
     @Inject Lazy<GroupExpansionManager> mGroupExpansionManagerLazy;
     @Inject Lazy<SystemUIDialogManager> mSystemUIDialogManagerLazy;
     @Inject Lazy<DialogLaunchAnimator> mDialogLaunchAnimatorLazy;
+    @Inject Lazy<UserTracker> mUserTrackerLazy;
 
     @Inject
     public Dependency() {
@@ -419,8 +401,6 @@ public class Dependency {
 
         mProviders.put(UserInfoController.class, mUserInfoController::get);
 
-        mProviders.put(BatteryController.class, mBatteryController::get);
-
         mProviders.put(NightDisplayListener.class, mNightDisplayListener::get);
 
         mProviders.put(ReduceBrightColorsController.class, mReduceBrightColorsController::get);
@@ -457,8 +437,6 @@ public class Dependency {
         mProviders.put(StatusBarWindowController.class, mTempStatusBarWindowController::get);
 
         mProviders.put(DarkIconDispatcher.class, mDarkIconDispatcher::get);
-
-        mProviders.put(ConfigurationController.class, mConfigurationController::get);
 
         mProviders.put(StatusBarIconController.class, mStatusBarIconController::get);
 
@@ -513,7 +491,6 @@ public class Dependency {
 
         mProviders.put(LockscreenGestureLogger.class, mLockscreenGestureLogger::get);
 
-        mProviders.put(KeyguardEnvironment.class, mKeyguardEnvironment::get);
         mProviders.put(ShadeController.class, mShadeController::get);
 
         mProviders.put(NotificationRemoteInputManager.Callback.class,
@@ -529,10 +506,6 @@ public class Dependency {
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
         mProviders.put(NotificationLockscreenUserManager.class,
                 mNotificationLockscreenUserManager::get);
-        mProviders.put(VisualStabilityManager.class, mVisualStabilityManager::get);
-        mProviders.put(NotificationGroupManagerLegacy.class, mNotificationGroupManager::get);
-        mProviders.put(NotificationGroupAlertTransferHelper.class,
-                mNotificationGroupAlertTransferHelper::get);
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);
         mProviders.put(NotificationGutsManager.class, mNotificationGutsManager::get);
         mProviders.put(NotificationRemoteInputManager.class,
@@ -540,16 +513,10 @@ public class Dependency {
         mProviders.put(SmartReplyConstants.class, mSmartReplyConstants::get);
         mProviders.put(NotificationListener.class, mNotificationListener::get);
         mProviders.put(NotificationLogger.class, mNotificationLogger::get);
-        mProviders.put(NotificationViewHierarchyManager.class,
-                mNotificationViewHierarchyManager::get);
-        mProviders.put(NotificationFilter.class, mNotificationFilter::get);
         mProviders.put(KeyguardDismissUtil.class, mKeyguardDismissUtil::get);
         mProviders.put(SmartReplyController.class, mSmartReplyController::get);
         mProviders.put(RemoteInputQuickSettingsDisabler.class,
                 mRemoteInputQuickSettingsDisabler::get);
-        mProviders.put(NotificationEntryManager.class, mNotificationEntryManager::get);
-        mProviders.put(ForegroundServiceNotificationListener.class,
-                mForegroundServiceNotificationListener::get);
         mProviders.put(ClockManager.class, mClockManager::get);
         mProviders.put(PrivacyItemController.class, mPrivacyItemController::get);
         mProviders.put(ActivityManagerWrapper.class, mActivityManagerWrapper::get);
@@ -594,6 +561,7 @@ public class Dependency {
         mProviders.put(GroupExpansionManager.class, mGroupExpansionManagerLazy::get);
         mProviders.put(SystemUIDialogManager.class, mSystemUIDialogManagerLazy::get);
         mProviders.put(DialogLaunchAnimator.class, mDialogLaunchAnimatorLazy::get);
+        mProviders.put(UserTracker.class, mUserTrackerLazy::get);
 
         Dependency.setInstance(this);
     }

@@ -27,6 +27,7 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
+        "truth-prebuilt",
     ],
     libs: [
         "android.test.runner",

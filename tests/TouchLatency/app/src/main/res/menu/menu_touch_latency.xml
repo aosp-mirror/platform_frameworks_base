@@ -14,15 +14,20 @@
      limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".TouchLatencyActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="101"
-        android:showAsAction="always"
-        android:title="@string/mode"/>
+        android:title="@string/mode"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/frame_rate"
+        android:title="@string/frame_rate"
+        app:showAsAction="collapseActionView" />
     <item
         android:id="@+id/display_mode"
-        android:showAsAction="ifRoom"
         android:title="@string/display_mode"
-        android:visible="false"/>
+        android:visible="false"
+        app:showAsAction="always" />
 </menu>

@@ -138,12 +138,11 @@ public class ServiceState implements Parcelable {
      */
     public static final int FREQUENCY_RANGE_MMWAVE = 4;
 
-    private static final List<Integer> FREQUENCY_RANGE_ORDER = Arrays.asList(
-            FREQUENCY_RANGE_UNKNOWN,
-            FREQUENCY_RANGE_LOW,
-            FREQUENCY_RANGE_MID,
-            FREQUENCY_RANGE_HIGH,
-            FREQUENCY_RANGE_MMWAVE);
+    /**
+     * Number of frequency ranges.
+     * @hide
+     */
+    public static final int FREQUENCY_RANGE_COUNT = 5;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -631,11 +630,17 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current roaming indicator of phone
+     * Get current roaming indicator of phone. This roaming state could be overridden by the carrier
+     * config.
      * (note: not just decoding from TS 27.007 7.2)
-     *
+     * @see TelephonyDisplayInfo#isRoaming() for visualization purpose.
      * @return true if TS 27.007 7.2 roaming is true
      *              and ONS is different from SPN
+     * @see CarrierConfigManager#KEY_FORCE_HOME_NETWORK_BOOL
+     * @see CarrierConfigManager#KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
      */
     public boolean getRoaming() {
         return getVoiceRoaming() || getDataRoaming();
@@ -650,8 +655,9 @@ public class ServiceState implements Parcelable {
     public boolean getVoiceRoaming() {
         return getVoiceRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
+
     /**
-     * Get current voice network roaming type
+     * Get current voice roaming type. This roaming type could be overridden by the carrier config.
      * @return roaming type
      * @hide
      */
@@ -701,7 +707,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current data network roaming type
+     * Get current data roaming type. This roaming type could be overridden by the carrier config.
      * @return roaming type
      * @hide
      */
@@ -1207,13 +1213,8 @@ public class ServiceState implements Parcelable {
 
     /**
      * Initialize the service state. Set everything to the default value.
-     *
-     * @param legacyMode {@code true} if the device is on IWLAN legacy mode, where IWLAN is
-     * considered as a RAT on WWAN {@link NetworkRegistrationInfo}. {@code false} if the device
-     * is on AP-assisted mode, where IWLAN should be reported through WLAN.
-     * {@link NetworkRegistrationInfo}.
      */
-    private void init(boolean legacyMode) {
+    private void init() {
         if (DBG) Rlog.d(LOG_TAG, "init");
         mVoiceRegState = STATE_OUT_OF_SERVICE;
         mDataRegState = STATE_OUT_OF_SERVICE;
@@ -1245,13 +1246,11 @@ public class ServiceState implements Parcelable {
                     .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
                     .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN)
                     .build());
-            if (!legacyMode) {
-                addNetworkRegistrationInfo(new NetworkRegistrationInfo.Builder()
-                        .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
-                        .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WLAN)
-                        .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN)
-                        .build());
-            }
+            addNetworkRegistrationInfo(new NetworkRegistrationInfo.Builder()
+                    .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                    .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WLAN)
+                    .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN)
+                    .build());
         }
         mOperatorAlphaLongRaw = null;
         mOperatorAlphaShortRaw = null;
@@ -1260,11 +1259,11 @@ public class ServiceState implements Parcelable {
     }
 
     public void setStateOutOfService() {
-        init(true);
+        init();
     }
 
     public void setStateOff() {
-        init(true);
+        init();
         mVoiceRegState = STATE_POWER_OFF;
         mDataRegState = STATE_POWER_OFF;
     }
@@ -1272,14 +1271,11 @@ public class ServiceState implements Parcelable {
     /**
      * Set the service state to out-of-service
      *
-     * @param legacyMode {@code true} if the device is on IWLAN legacy mode, where IWLAN is
-     * considered as a RAT on WWAN {@link NetworkRegistrationInfo}. {@code false} if the device
-     * is on AP-assisted mode, where IWLAN should be reported through WLAN.
      * @param powerOff {@code true} if this is a power off case (i.e. Airplane mode on).
      * @hide
      */
-    public void setOutOfService(boolean legacyMode, boolean powerOff) {
-        init(legacyMode);
+    public void setOutOfService(boolean powerOff) {
+        init();
         if (powerOff) {
             mVoiceRegState = STATE_POWER_OFF;
             mDataRegState = STATE_POWER_OFF;
@@ -1445,7 +1441,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
-        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE);
+        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE, android.telephony.ServiceState.class);
         if (ssFromBundle != null) {
             copyFrom(ssFromBundle);
         }
@@ -2105,15 +2101,6 @@ public class ServiceState implements Parcelable {
 
             mNetworkRegistrationInfos.add(new NetworkRegistrationInfo(nri));
         }
-    }
-
-    /**
-     * @hide
-     */
-    public static final int getBetterNRFrequencyRange(int range1, int range2) {
-        return FREQUENCY_RANGE_ORDER.indexOf(range1) > FREQUENCY_RANGE_ORDER.indexOf(range2)
-                ? range1
-                : range2;
     }
 
     /**

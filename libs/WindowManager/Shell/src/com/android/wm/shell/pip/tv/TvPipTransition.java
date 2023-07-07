@@ -16,57 +16,43 @@
 
 package com.android.wm.shell.pip.tv;
 
-import android.app.TaskInfo;
-import android.graphics.Rect;
-import android.os.IBinder;
-import android.view.SurfaceControl;
-import android.window.TransitionInfo;
-import android.window.TransitionRequestInfo;
-import android.window.WindowContainerTransaction;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipMenuController;
-import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
+import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip.PipTransition;
+import com.android.wm.shell.pip.PipTransitionState;
+import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
+
+import java.util.Optional;
 
 /**
  * PiP Transition for TV.
- * TODO: Implement animation once TV is using Transitions.
  */
-public class TvPipTransition extends PipTransitionController {
-    public TvPipTransition(PipBoundsState pipBoundsState,
-            PipMenuController pipMenuController,
+public class TvPipTransition extends PipTransition {
+
+    public TvPipTransition(Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
+            TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
+            PipTransitionState pipTransitionState,
+            TvPipMenuController tvPipMenuController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
-            Transitions transitions,
-            @NonNull ShellTaskOrganizer shellTaskOrganizer) {
-        super(pipBoundsState, pipMenuController, tvPipBoundsAlgorithm, pipAnimationController,
-                transitions, shellTaskOrganizer);
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            Optional<SplitScreenController> splitScreenOptional) {
+        super(context, shellInit, shellTaskOrganizer, transitions, tvPipBoundsState,
+                pipDisplayLayoutState, pipTransitionState, tvPipMenuController,
+                tvPipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
+                splitScreenOptional);
     }
 
-    @Override
-    public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds, int direction,
-            SurfaceControl.Transaction tx) {
-
-    }
-
-    @Override
-    public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @android.annotation.NonNull SurfaceControl.Transaction finishTransaction,
-            @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        return false;
-    }
-
-    @Nullable
-    @Override
-    public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
-            @NonNull TransitionRequestInfo request) {
-        return null;
-    }
 }

@@ -26,11 +26,6 @@ import java.util.function.Predicate;
  */
 public interface PooledPredicate<T> extends PooledLambda, Predicate<T> {
 
-    /**
-     * Ignores the result
-     */
-    PooledConsumer<T> asConsumer();
-
     /** @inheritDoc */
     PooledPredicate<T> recycleOnUse();
 }

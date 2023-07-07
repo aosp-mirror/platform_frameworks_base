@@ -34,9 +34,19 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
+
+        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
     ],
 
     cppflags: ["-Wno-conversion-null"],
+
+    product_variables: {
+        eng: {
+            cflags: ["-DNO_RESET_STACK_PROTECTOR"],
+        },
+    },
+
+    cpp_std: "gnu++20",
 
     srcs: [
         "android_animation_PropertyValuesHolder.cpp",
@@ -50,6 +60,7 @@ cc_library_shared {
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
+        "core_jni_helpers.cpp",
         ":deviceproductinfoconstants_aidl",
     ],
 
@@ -77,6 +88,10 @@ cc_library_shared {
     export_include_dirs: [
         ".",
         "include",
+    ],
+
+    defaults: [
+        "latest_android_media_audio_common_types_cpp_target_shared",
     ],
 
     target: {
@@ -120,6 +135,7 @@ cc_library_shared {
                 "android_view_KeyCharacterMap.cpp",
                 "android_view_KeyEvent.cpp",
                 "android_view_MotionEvent.cpp",
+                "android_view_MotionPredictor.cpp",
                 "android_view_PointerIcon.cpp",
                 "android_view_Surface.cpp",
                 "android_view_SurfaceControl.cpp",
@@ -185,6 +201,7 @@ cc_library_shared {
                 "android_hardware_display_DisplayManagerGlobal.cpp",
                 "android_hardware_display_DisplayViewport.cpp",
                 "android_hardware_HardwareBuffer.cpp",
+                "android_hardware_OverlayProperties.cpp",
                 "android_hardware_SensorManager.cpp",
                 "android_hardware_SerialPort.cpp",
                 "android_hardware_SyncFence.cpp",
@@ -204,8 +221,10 @@ cc_library_shared {
                 "android_content_res_ApkAssets.cpp",
                 "android_content_res_ObbScanner.cpp",
                 "android_content_res_Configuration.cpp",
+                "android_content_res_ResourceTimer.cpp",
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
+                "com_android_internal_content_om_OverlayManagerImpl.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
@@ -226,6 +245,8 @@ cc_library_shared {
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
                 "android_window_WindowInfosListener.cpp",
+                "android_window_ScreenCapture.cpp",
+                "jni_common.cpp",
             ],
 
             static_libs: [
@@ -239,10 +260,11 @@ cc_library_shared {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
+                "libtextclassifier_hash_static",
+                "libexpresslog_jni",
             ],
 
             shared_libs: [
-                "android.media.audio.common.types-V1-cpp",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "audiopolicy-types-aidl-cpp",
@@ -250,7 +272,6 @@ cc_library_shared {
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
                 "libandroid_net",
-                "libandroidicu",
                 "libbattery",
                 "libnetdutils",
                 "libmemtrack",
@@ -268,8 +289,10 @@ cc_library_shared {
                 "libhwui",
                 "libmediandk",
                 "libpermission",
+                "libPlatformProperties",
                 "libsensor",
                 "libinput",
+                "libicu",
                 "libcamera_client",
                 "libcamera_metadata",
                 "libprocinfo",
@@ -310,6 +333,8 @@ cc_library_shared {
                 "libdl_android",
                 "libtimeinstate",
                 "server_configurable_flags",
+                "libimage_io",
+                "libultrahdr",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers
@@ -322,7 +347,12 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
-                "libandroid_runtime_vm_headers",
+                "flatbuffer_headers",
+                "libtextclassifier_hash_headers",
+                "tensorflow_headers",
+            ],
+            runtime_libs: [
+                "libidmap2",
             ],
         },
         host: {
@@ -360,6 +390,10 @@ cc_library_shared {
                 "libwebp-decode",
                 "libwebp-encode",
                 "libwuffs_mirror_release_c",
+                "libimage_io",
+                "libjpegdecoder",
+                "libjpegencoder",
+                "libultrahdr",
             ],
         },
         host_linux: {
@@ -401,6 +435,7 @@ cc_library_shared {
                 // (e.g. gDefaultServiceManager)
                 "libbinder",
                 "libhidlbase", // libhwbinder is in here
+                "libvintf",
             ],
         },
     },
@@ -409,25 +444,4 @@ cc_library_shared {
     lto: {
         never: true,
     },
-}
-
-cc_library_headers {
-    name: "libandroid_runtime_vm_headers",
-    host_supported: true,
-    vendor_available: true,
-    // TODO(b/153609531): remove when libbinder is not native_bridge_supported
-    native_bridge_supported: true,
-    // Allow only modules from the following list to create threads that can be
-    // attached to the JVM. This list should be a subset of the dependencies of
-    // libandroid_runtime.
-    visibility: [
-        "//frameworks/native/libs/binder",
-    ],
-    export_include_dirs: ["include_vm"],
-    header_libs: [
-        "jni_headers",
-    ],
-    export_header_lib_headers: [
-        "jni_headers",
-    ],
 }

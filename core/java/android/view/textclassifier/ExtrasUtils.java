@@ -58,7 +58,7 @@ public final class ExtrasUtils {
      */
     @Nullable
     public static Intent getActionIntent(Bundle container) {
-        return container.getParcelable(ACTION_INTENT);
+        return container.getParcelable(ACTION_INTENT, android.content.Intent.class);
     }
 
     /**
@@ -69,7 +69,7 @@ public final class ExtrasUtils {
         if (classification == null) {
             return null;
         }
-        return classification.getExtras().getParcelableArrayList(ACTIONS_INTENTS);
+        return classification.getExtras().getParcelableArrayList(ACTIONS_INTENTS, android.content.Intent.class);
     }
 
     /**

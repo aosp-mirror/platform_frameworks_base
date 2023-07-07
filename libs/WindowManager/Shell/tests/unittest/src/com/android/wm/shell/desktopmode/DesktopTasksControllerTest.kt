@@ -1,0 +1,626 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.wm.shell.desktopmode
+
+import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
+import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
+import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
+import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.os.Binder
+import android.testing.AndroidTestingRunner
+import android.view.Display.DEFAULT_DISPLAY
+import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
+import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.DisplayAreaInfo
+import android.window.TransitionRequestInfo
+import android.window.WindowContainerTransaction
+import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
+import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
+import com.android.dx.mockito.inline.extended.ExtendedMockito.never
+import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer
+import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.TestRunningTaskInfoBuilder
+import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
+import com.android.wm.shell.sysui.ShellController
+import com.android.wm.shell.sysui.ShellInit
+import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
+import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
+import org.junit.After
+import org.junit.Assume.assumeTrue
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.isNull
+import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
+
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+class DesktopTasksControllerTest : ShellTestCase() {
+
+    @Mock lateinit var testExecutor: ShellExecutor
+    @Mock lateinit var shellController: ShellController
+    @Mock lateinit var displayController: DisplayController
+    @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
+    @Mock lateinit var syncQueue: SyncTransactionQueue
+    @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+    @Mock lateinit var transitions: Transitions
+    @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
+    @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
+
+    private lateinit var mockitoSession: StaticMockitoSession
+    private lateinit var controller: DesktopTasksController
+    private lateinit var shellInit: ShellInit
+    private lateinit var desktopModeTaskRepository: DesktopModeTaskRepository
+
+    // Mock running tasks are registered here so we can get the list from mock shell task organizer
+    private val runningTasks = mutableListOf<RunningTaskInfo>()
+
+    @Before
+    fun setUp() {
+        mockitoSession = mockitoSession().mockStatic(DesktopModeStatus::class.java).startMocking()
+        whenever(DesktopModeStatus.isProto2Enabled()).thenReturn(true)
+
+        shellInit = Mockito.spy(ShellInit(testExecutor))
+        desktopModeTaskRepository = DesktopModeTaskRepository()
+
+        whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
+        whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
+
+        controller = createController()
+
+        shellInit.init()
+    }
+
+    private fun createController(): DesktopTasksController {
+        return DesktopTasksController(
+            context,
+            shellInit,
+            shellController,
+            displayController,
+            shellTaskOrganizer,
+            syncQueue,
+            rootTaskDisplayAreaOrganizer,
+            transitions,
+            enterDesktopTransitionHandler,
+            exitDesktopTransitionHandler,
+            desktopModeTaskRepository,
+            TestShellExecutor()
+        )
+    }
+
+    @After
+    fun tearDown() {
+        mockitoSession.finishMocking()
+
+        runningTasks.clear()
+    }
+
+    @Test
+    fun instantiate_addInitCallback() {
+        verify(shellInit).addInitCallback(any(), any<DesktopTasksController>())
+    }
+
+    @Test
+    fun instantiate_flagOff_doNotAddInitCallback() {
+        whenever(DesktopModeStatus.isProto2Enabled()).thenReturn(false)
+        clearInvocations(shellInit)
+
+        createController()
+
+        verify(shellInit, never()).addInitCallback(any(), any<DesktopTasksController>())
+    }
+
+    @Test
+    fun showDesktopApps_allAppsInvisible_bringsToFront() {
+        val homeTask = setUpHomeTask()
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        markTaskHidden(task1)
+        markTaskHidden(task2)
+
+        controller.showDesktopApps(DEFAULT_DISPLAY)
+
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
+        assertThat(wct.hierarchyOps).hasSize(3)
+        // Expect order to be from bottom: home, task1, task2
+        wct.assertReorderAt(index = 0, homeTask)
+        wct.assertReorderAt(index = 1, task1)
+        wct.assertReorderAt(index = 2, task2)
+    }
+
+    @Test
+    fun showDesktopApps_appsAlreadyVisible_bringsToFront() {
+        val homeTask = setUpHomeTask()
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        markTaskVisible(task1)
+        markTaskVisible(task2)
+
+        controller.showDesktopApps(DEFAULT_DISPLAY)
+
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
+        assertThat(wct.hierarchyOps).hasSize(3)
+        // Expect order to be from bottom: home, task1, task2
+        wct.assertReorderAt(index = 0, homeTask)
+        wct.assertReorderAt(index = 1, task1)
+        wct.assertReorderAt(index = 2, task2)
+    }
+
+    @Test
+    fun showDesktopApps_someAppsInvisible_reordersAll() {
+        val homeTask = setUpHomeTask()
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        markTaskHidden(task1)
+        markTaskVisible(task2)
+
+        controller.showDesktopApps(DEFAULT_DISPLAY)
+
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
+        assertThat(wct.hierarchyOps).hasSize(3)
+        // Expect order to be from bottom: home, task1, task2
+        wct.assertReorderAt(index = 0, homeTask)
+        wct.assertReorderAt(index = 1, task1)
+        wct.assertReorderAt(index = 2, task2)
+    }
+
+    @Test
+    fun showDesktopApps_noActiveTasks_reorderHomeToTop() {
+        val homeTask = setUpHomeTask()
+
+        controller.showDesktopApps(DEFAULT_DISPLAY)
+
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
+        assertThat(wct.hierarchyOps).hasSize(1)
+        wct.assertReorderAt(index = 0, homeTask)
+    }
+
+    @Test
+    fun showDesktopApps_twoDisplays_bringsToFrontOnlyOneDisplay() {
+        val homeTaskDefaultDisplay = setUpHomeTask(DEFAULT_DISPLAY)
+        val taskDefaultDisplay = setUpFreeformTask(DEFAULT_DISPLAY)
+        setUpHomeTask(SECOND_DISPLAY)
+        val taskSecondDisplay = setUpFreeformTask(SECOND_DISPLAY)
+        markTaskHidden(taskDefaultDisplay)
+        markTaskHidden(taskSecondDisplay)
+
+        controller.showDesktopApps(DEFAULT_DISPLAY)
+
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
+        assertThat(wct.hierarchyOps).hasSize(2)
+        // Expect order to be from bottom: home, task
+        wct.assertReorderAt(index = 0, homeTaskDefaultDisplay)
+        wct.assertReorderAt(index = 1, taskDefaultDisplay)
+    }
+
+    @Test
+    fun getVisibleTaskCount_noTasks_returnsZero() {
+        assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
+        setUpHomeTask()
+        setUpFreeformTask().also(::markTaskVisible)
+        setUpFreeformTask().also(::markTaskVisible)
+        assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(2)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
+        setUpHomeTask()
+        setUpFreeformTask().also(::markTaskVisible)
+        setUpFreeformTask().also(::markTaskHidden)
+        assertThat(controller.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasksVisibleOnDifferentDisplays_returnsOne() {
+        setUpHomeTask()
+        setUpFreeformTask(DEFAULT_DISPLAY).also(::markTaskVisible)
+        setUpFreeformTask(SECOND_DISPLAY).also(::markTaskVisible)
+        assertThat(controller.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(1)
+    }
+
+    @Test
+    fun moveToDesktop() {
+        val task = setUpFullscreenTask()
+        controller.moveToDesktop(task)
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun moveToDesktop_nonExistentTask_doesNothing() {
+        controller.moveToDesktop(999)
+        verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToDesktop_otherFreeformTasksBroughtToFront() {
+        val homeTask = setUpHomeTask()
+        val freeformTask = setUpFreeformTask()
+        val fullscreenTask = setUpFullscreenTask()
+        markTaskHidden(freeformTask)
+
+        controller.moveToDesktop(fullscreenTask)
+
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            // Operations should include home task, freeform task
+            assertThat(hierarchyOps).hasSize(3)
+            assertReorderSequence(homeTask, freeformTask, fullscreenTask)
+            assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
+        }
+    }
+
+    @Test
+    fun moveToDesktop_onlyFreeformTasksFromCurrentDisplayBroughtToFront() {
+        setUpHomeTask(displayId = DEFAULT_DISPLAY)
+        val freeformTaskDefault = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        val fullscreenTaskDefault = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+        markTaskHidden(freeformTaskDefault)
+
+        val homeTaskSecond = setUpHomeTask(displayId = SECOND_DISPLAY)
+        val freeformTaskSecond = setUpFreeformTask(displayId = SECOND_DISPLAY)
+        markTaskHidden(freeformTaskSecond)
+
+        controller.moveToDesktop(fullscreenTaskDefault)
+
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            // Check that hierarchy operations do not include tasks from second display
+            assertThat(hierarchyOps.map { it.container })
+                .doesNotContain(homeTaskSecond.token.asBinder())
+            assertThat(hierarchyOps.map { it.container })
+                .doesNotContain(freeformTaskSecond.token.asBinder())
+        }
+    }
+
+    @Test
+    fun moveToFullscreen() {
+        val task = setUpFreeformTask()
+        controller.moveToFullscreen(task)
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
+
+    @Test
+    fun moveToFullscreen_nonExistentTask_doesNothing() {
+        controller.moveToFullscreen(999)
+        verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToFullscreen_secondDisplayTaskHasFreeform_secondDisplayNotAffected() {
+        val taskDefaultDisplay = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        val taskSecondDisplay = setUpFreeformTask(displayId = SECOND_DISPLAY)
+
+        controller.moveToFullscreen(taskDefaultDisplay)
+
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            assertThat(changes.keys).contains(taskDefaultDisplay.token.asBinder())
+            assertThat(changes.keys).doesNotContain(taskSecondDisplay.token.asBinder())
+        }
+    }
+
+    @Test
+    fun moveToNextDisplay_noOtherDisplays() {
+        whenever(rootTaskDisplayAreaOrganizer.displayIds).thenReturn(intArrayOf(DEFAULT_DISPLAY))
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+        verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToNextDisplay_moveFromFirstToSecondDisplay() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+                .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+                .thenReturn(secondDisplayArea)
+
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            assertThat(hierarchyOps).hasSize(1)
+            assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
+            assertThat(hierarchyOps[0].isReparent).isTrue()
+            assertThat(hierarchyOps[0].newParent).isEqualTo(secondDisplayArea.token.asBinder())
+            assertThat(hierarchyOps[0].toTop).isTrue()
+        }
+    }
+
+    @Test
+    fun moveToNextDisplay_moveFromSecondToFirstDisplay() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: default display
+        val defaultDisplayArea = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
+                .thenReturn(defaultDisplayArea)
+
+        val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            assertThat(hierarchyOps).hasSize(1)
+            assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
+            assertThat(hierarchyOps[0].isReparent).isTrue()
+            assertThat(hierarchyOps[0].newParent).isEqualTo(defaultDisplayArea.token.asBinder())
+            assertThat(hierarchyOps[0].toTop).isTrue()
+        }
+    }
+
+    @Test
+    fun getTaskWindowingMode() {
+        val fullscreenTask = setUpFullscreenTask()
+        val freeformTask = setUpFreeformTask()
+
+        assertThat(controller.getTaskWindowingMode(fullscreenTask.taskId))
+            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+        assertThat(controller.getTaskWindowingMode(freeformTask.taskId))
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+        assertThat(controller.getTaskWindowingMode(999)).isEqualTo(WINDOWING_MODE_UNDEFINED)
+    }
+
+    @Test
+    fun handleRequest_fullscreenTask_freeformVisible_returnSwitchToFreeformWCT() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val freeformTask = setUpFreeformTask()
+        markTaskVisible(freeformTask)
+        val fullscreenTask = createFullscreenTask()
+
+        val result = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+        assertThat(result?.changes?.get(fullscreenTask.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun handleRequest_fullscreenTask_freeformNotVisible_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val freeformTask = setUpFreeformTask()
+        markTaskHidden(freeformTask)
+        val fullscreenTask = createFullscreenTask()
+        assertThat(controller.handleRequest(Binder(), createTransition(fullscreenTask))).isNull()
+    }
+
+    @Test
+    fun handleRequest_fullscreenTask_noOtherTasks_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val fullscreenTask = createFullscreenTask()
+        assertThat(controller.handleRequest(Binder(), createTransition(fullscreenTask))).isNull()
+    }
+
+    @Test
+    fun handleRequest_fullscreenTask_freeformTaskOnOtherDisplay_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val fullscreenTaskDefaultDisplay = createFullscreenTask(displayId = DEFAULT_DISPLAY)
+        createFreeformTask(displayId = SECOND_DISPLAY)
+
+        val result =
+            controller.handleRequest(Binder(), createTransition(fullscreenTaskDefaultDisplay))
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun handleRequest_freeformTask_freeformVisible_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val freeformTask1 = setUpFreeformTask()
+        markTaskVisible(freeformTask1)
+
+        val freeformTask2 = createFreeformTask()
+        assertThat(controller.handleRequest(Binder(), createTransition(freeformTask2))).isNull()
+    }
+
+    @Test
+    fun handleRequest_freeformTask_freeformNotVisible_returnSwitchToFullscreenWCT() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val freeformTask1 = setUpFreeformTask()
+        markTaskHidden(freeformTask1)
+
+        val freeformTask2 = createFreeformTask()
+        val result =
+            controller.handleRequest(
+                Binder(),
+                createTransition(freeformTask2, type = TRANSIT_TO_FRONT)
+            )
+        assertThat(result?.changes?.get(freeformTask2.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
+
+    @Test
+    fun handleRequest_freeformTask_noOtherTasks_returnSwitchToFullscreenWCT() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val task = createFreeformTask()
+        val result = controller.handleRequest(Binder(), createTransition(task))
+        assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
+
+    @Test
+    fun handleRequest_freeformTask_freeformOnOtherDisplayOnly_returnSwitchToFullscreenWCT() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val taskDefaultDisplay = createFreeformTask(displayId = DEFAULT_DISPLAY)
+        createFreeformTask(displayId = SECOND_DISPLAY)
+
+        val result = controller.handleRequest(Binder(), createTransition(taskDefaultDisplay))
+        assertThat(result?.changes?.get(taskDefaultDisplay.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
+
+    @Test
+    fun handleRequest_notOpenOrToFrontTransition_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val task =
+            TestRunningTaskInfoBuilder()
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .build()
+        val transition = createTransition(task = task, type = WindowManager.TRANSIT_CLOSE)
+        val result = controller.handleRequest(Binder(), transition)
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun handleRequest_noTriggerTask_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        assertThat(controller.handleRequest(Binder(), createTransition(task = null))).isNull()
+    }
+
+    @Test
+    fun handleRequest_triggerTaskNotStandard_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        val task = TestRunningTaskInfoBuilder().setActivityType(ACTIVITY_TYPE_HOME).build()
+        assertThat(controller.handleRequest(Binder(), createTransition(task))).isNull()
+    }
+
+    @Test
+    fun handleRequest_triggerTaskNotFullscreenOrFreeform_returnNull() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+        val task =
+            TestRunningTaskInfoBuilder()
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+                .build()
+        assertThat(controller.handleRequest(Binder(), createTransition(task))).isNull()
+    }
+
+    private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+        val task = createFreeformTask(displayId)
+        whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        desktopModeTaskRepository.addActiveTask(displayId, task.taskId)
+        desktopModeTaskRepository.addOrMoveFreeformTaskToTop(task.taskId)
+        runningTasks.add(task)
+        return task
+    }
+
+    private fun setUpHomeTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+        val task = createHomeTask(displayId)
+        whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        runningTasks.add(task)
+        return task
+    }
+
+    private fun setUpFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+        val task = createFullscreenTask(displayId)
+        whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
+        runningTasks.add(task)
+        return task
+    }
+
+    private fun markTaskVisible(task: RunningTaskInfo) {
+        desktopModeTaskRepository.updateVisibleFreeformTasks(
+            task.displayId,
+            task.taskId,
+            visible = true
+        )
+    }
+
+    private fun markTaskHidden(task: RunningTaskInfo) {
+        desktopModeTaskRepository.updateVisibleFreeformTasks(
+            task.displayId,
+            task.taskId,
+            visible = false
+        )
+    }
+
+    private fun getLatestWct(
+        @WindowManager.TransitionType expectTransition: Int = TRANSIT_OPEN
+    ): WindowContainerTransaction {
+        val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+        if (ENABLE_SHELL_TRANSITIONS) {
+            verify(transitions).startTransition(eq(expectTransition), arg.capture(), isNull())
+        } else {
+            verify(shellTaskOrganizer).applyTransaction(arg.capture())
+        }
+        return arg.value
+    }
+
+    private fun verifyWCTNotExecuted() {
+        if (ENABLE_SHELL_TRANSITIONS) {
+            verify(transitions, never()).startTransition(anyInt(), any(), isNull())
+        } else {
+            verify(shellTaskOrganizer, never()).applyTransaction(any())
+        }
+    }
+
+    private fun createTransition(
+        task: RunningTaskInfo?,
+        @WindowManager.TransitionType type: Int = TRANSIT_OPEN
+    ): TransitionRequestInfo {
+        return TransitionRequestInfo(type, task, null /* remoteTransition */)
+    }
+
+    companion object {
+        const val SECOND_DISPLAY = 2
+    }
+}
+
+private fun WindowContainerTransaction.assertReorderAt(index: Int, task: RunningTaskInfo) {
+    assertWithMessage("WCT does not have a hierarchy operation at index $index")
+        .that(hierarchyOps.size)
+        .isGreaterThan(index)
+    val op = hierarchyOps[index]
+    assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_REORDER)
+    assertThat(op.container).isEqualTo(task.token.asBinder())
+}
+
+private fun WindowContainerTransaction.assertReorderSequence(vararg tasks: RunningTaskInfo) {
+    for (i in tasks.indices) {
+        assertReorderAt(i, tasks[i])
+    }
+}

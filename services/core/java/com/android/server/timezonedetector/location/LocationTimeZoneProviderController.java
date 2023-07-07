@@ -35,6 +35,10 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.app.time.DetectorStatusTypes;
+import android.app.time.DetectorStatusTypes.DetectionAlgorithmStatus;
+import android.app.time.LocationTimeZoneAlgorithmStatus;
+import android.app.time.LocationTimeZoneAlgorithmStatus.ProviderStatus;
 import android.service.timezone.TimeZoneProviderEvent;
 import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
@@ -44,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.Dumpable;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.LocationAlgorithmEvent;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 import com.android.server.timezonedetector.location.ThreadingDomain.SingleRunnableQueue;
 
@@ -83,8 +88,7 @@ import java.util.Objects;
  * <p>All incoming calls except for {@link
  * LocationTimeZoneProviderController#dump(android.util.IndentingPrintWriter, String[])} must be
  * made on the {@link android.os.Handler} thread of the {@link ThreadingDomain} passed to {@link
- * #LocationTimeZoneProviderController(ThreadingDomain, LocationTimeZoneProvider,
- * LocationTimeZoneProvider)}.
+ * #LocationTimeZoneProviderController}.
  *
  * <p>Provider / controller integration notes:
  *
@@ -172,10 +176,10 @@ class LocationTimeZoneProviderController implements Dumpable {
     @GuardedBy("mSharedLock")
     private final ReferenceWithHistory<@State String> mState = new ReferenceWithHistory<>(10);
 
-    /** Contains the last suggestion actually made, if there is one. */
+    /** Contains the last event reported, if there is one. */
     @GuardedBy("mSharedLock")
     @Nullable
-    private GeolocationTimeZoneSuggestion mLastSuggestion;
+    private LocationAlgorithmEvent mLastEvent;
 
     LocationTimeZoneProviderController(@NonNull ThreadingDomain threadingDomain,
             @NonNull MetricsLogger metricsLogger,
@@ -213,7 +217,7 @@ class LocationTimeZoneProviderController implements Dumpable {
             setState(STATE_PROVIDERS_INITIALIZING);
             mPrimaryProvider.initialize(providerListener);
             mSecondaryProvider.initialize(providerListener);
-            setState(STATE_STOPPED);
+            setStateAndReportStatusOnlyEvent(STATE_STOPPED, "initialize()");
 
             alterProvidersStartedStateIfRequired(
                     null /* oldConfiguration */, mCurrentUserConfiguration);
@@ -273,13 +277,51 @@ class LocationTimeZoneProviderController implements Dumpable {
             // Enter destroyed state.
             mPrimaryProvider.destroy();
             mSecondaryProvider.destroy();
-            setState(STATE_DESTROYED);
+            setStateAndReportStatusOnlyEvent(STATE_DESTROYED, "destroy()");
         }
     }
 
     /**
-     * Updates {@link #mState} if needed, and performs all the record-keeping / callbacks associated
-     * with state changes.
+     * Sets the state and reports an event containing the algorithm status and a {@code null}
+     * suggestion.
+     */
+    @GuardedBy("mSharedLock")
+    private void setStateAndReportStatusOnlyEvent(@State String state, @NonNull String reason) {
+        setState(state);
+
+        final GeolocationTimeZoneSuggestion suggestion = null;
+        LocationAlgorithmEvent event =
+                new LocationAlgorithmEvent(generateCurrentAlgorithmStatus(), suggestion);
+        event.addDebugInfo(reason);
+        reportEvent(event);
+    }
+
+    /**
+     * Reports an event containing the algorithm status and the supplied suggestion.
+     */
+    @GuardedBy("mSharedLock")
+    private void reportSuggestionEvent(
+            @NonNull GeolocationTimeZoneSuggestion suggestion, @NonNull String reason) {
+        LocationTimeZoneAlgorithmStatus algorithmStatus = generateCurrentAlgorithmStatus();
+        LocationAlgorithmEvent event = new LocationAlgorithmEvent(
+                algorithmStatus, suggestion);
+        event.addDebugInfo(reason);
+        reportEvent(event);
+    }
+
+    /**
+     * Sends an event immediately. This method updates {@link #mLastEvent}.
+     */
+    @GuardedBy("mSharedLock")
+    private void reportEvent(@NonNull LocationAlgorithmEvent event) {
+        debugLog("makeSuggestion: suggestion=" + event);
+        mCallback.sendEvent(event);
+        mLastEvent = event;
+    }
+
+    /**
+     * Updates the state if needed. This includes setting {@link #mState} and performing all the
+     * record-keeping / callbacks associated with state changes.
      */
     @GuardedBy("mSharedLock")
     private void setState(@State String state) {
@@ -300,17 +342,7 @@ class LocationTimeZoneProviderController implements Dumpable {
         // By definition, if both providers are stopped, the controller is uncertain.
         cancelUncertaintyTimeout();
 
-        // If a previous "certain" suggestion has been made, then a new "uncertain"
-        // suggestion must now be made to indicate the controller {does not / no longer has}
-        // an opinion and will not be sending further updates (until at least the providers are
-        // re-started).
-        if (Objects.equals(mState.get(), STATE_CERTAIN)) {
-            GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                    mEnvironment.elapsedRealtimeMillis(),
-                    "Withdraw previous suggestion, providers are stopping: " + reason);
-            makeSuggestion(suggestion, STATE_UNCERTAIN);
-        }
-        setState(STATE_STOPPED);
+        setStateAndReportStatusOnlyEvent(STATE_STOPPED, "Providers stopped: " + reason);
     }
 
     @GuardedBy("mSharedLock")
@@ -381,7 +413,7 @@ class LocationTimeZoneProviderController implements Dumpable {
         //    timeout started when the primary entered {started uncertain} should be cancelled.
 
         if (newIsGeoDetectionExecutionEnabled) {
-            setState(STATE_INITIALIZING);
+            setStateAndReportStatusOnlyEvent(STATE_INITIALIZING, "initializing()");
 
             // Try to start the primary provider.
             tryStartProvider(mPrimaryProvider, newConfiguration);
@@ -397,13 +429,11 @@ class LocationTimeZoneProviderController implements Dumpable {
                 ProviderState newSecondaryState = mSecondaryProvider.getCurrentState();
                 if (!newSecondaryState.isStarted()) {
                     // If both providers are {perm failed} then the controller immediately
-                    // reports uncertain.
-                    GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                            mEnvironment.elapsedRealtimeMillis(),
-                            "Providers are failed:"
-                                    + " primary=" + mPrimaryProvider.getCurrentState()
-                                    + " secondary=" + mPrimaryProvider.getCurrentState());
-                    makeSuggestion(suggestion, STATE_FAILED);
+                    // reports the failure.
+                    String reason = "Providers are failed:"
+                            + " primary=" + mPrimaryProvider.getCurrentState()
+                            + " secondary=" + mPrimaryProvider.getCurrentState();
+                    setStateAndReportStatusOnlyEvent(STATE_FAILED, reason);
                 }
             }
         } else {
@@ -537,12 +567,10 @@ class LocationTimeZoneProviderController implements Dumpable {
 
             // If both providers are now terminated, then a suggestion must be sent informing the
             // time zone detector that there are no further updates coming in the future.
-            GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                    mEnvironment.elapsedRealtimeMillis(),
-                    "Both providers are terminated:"
-                            + " primary=" + primaryCurrentState.provider
-                            + ", secondary=" + secondaryCurrentState.provider);
-            makeSuggestion(suggestion, STATE_FAILED);
+            String reason = "Both providers are terminated:"
+                    + " primary=" + primaryCurrentState.provider
+                    + ", secondary=" + secondaryCurrentState.provider;
+            setStateAndReportStatusOnlyEvent(STATE_FAILED, reason);
         }
     }
 
@@ -615,6 +643,9 @@ class LocationTimeZoneProviderController implements Dumpable {
 
         TimeZoneProviderSuggestion providerSuggestion = providerEvent.getSuggestion();
 
+        // Set the current state so it is correct when the suggestion event is created.
+        setState(STATE_CERTAIN);
+
         // For the suggestion's effectiveFromElapsedMillis, use the time embedded in the provider's
         // suggestion (which indicates the time when the provider detected the location used to
         // establish the time zone).
@@ -623,15 +654,13 @@ class LocationTimeZoneProviderController implements Dumpable {
         // this would hinder the ability for the time_zone_detector to judge which suggestions are
         // based on newer information when comparing suggestions between different sources.
         long effectiveFromElapsedMillis = providerSuggestion.getElapsedRealtimeMillis();
-        GeolocationTimeZoneSuggestion geoSuggestion =
+        GeolocationTimeZoneSuggestion suggestion =
                 GeolocationTimeZoneSuggestion.createCertainSuggestion(
                         effectiveFromElapsedMillis, providerSuggestion.getTimeZoneIds());
-
-        String debugInfo = "Event received provider=" + provider
+        String debugInfo = "Provider event received: provider=" + provider
                 + ", providerEvent=" + providerEvent
                 + ", suggestionCreationTime=" + mEnvironment.elapsedRealtimeMillis();
-        geoSuggestion.addDebugInfo(debugInfo);
-        makeSuggestion(geoSuggestion, STATE_CERTAIN);
+        reportSuggestionEvent(suggestion, debugInfo);
     }
 
     @Override
@@ -647,7 +676,7 @@ class LocationTimeZoneProviderController implements Dumpable {
                     + mEnvironment.getProviderInitializationTimeoutFuzz());
             ipw.println("uncertaintyDelay=" + mEnvironment.getUncertaintyDelay());
             ipw.println("mState=" + mState.get());
-            ipw.println("mLastSuggestion=" + mLastSuggestion);
+            ipw.println("mLastEvent=" + mLastEvent);
 
             ipw.println("State history:");
             ipw.increaseIndent(); // level 2
@@ -668,19 +697,6 @@ class LocationTimeZoneProviderController implements Dumpable {
         }
     }
 
-    /**
-     * Sends an immediate suggestion and enters a new state if needed. This method updates
-     * mLastSuggestion and changes mStateEnum / reports the new state for metrics.
-     */
-    @GuardedBy("mSharedLock")
-    private void makeSuggestion(@NonNull GeolocationTimeZoneSuggestion suggestion,
-            @State String newState) {
-        debugLog("makeSuggestion: suggestion=" + suggestion);
-        mCallback.suggest(suggestion);
-        mLastSuggestion = suggestion;
-        setState(newState);
-    }
-
     /** Clears the uncertainty timeout. */
     @GuardedBy("mSharedLock")
     private void cancelUncertaintyTimeout() {
@@ -688,18 +704,16 @@ class LocationTimeZoneProviderController implements Dumpable {
     }
 
     /**
-     * Called when a provider has become "uncertain" about the time zone.
+     * Called when a provider has reported it is "uncertain" about the time zone.
      *
      * <p>A provider is expected to report its uncertainty as soon as it becomes uncertain, as
      * this enables the most flexibility for the controller to start other providers when there are
-     * multiple ones available. The controller is therefore responsible for deciding when to make a
-     * "uncertain" suggestion to the downstream time zone detector.
+     * multiple ones available. The controller is therefore responsible for deciding when to pass
+     * the "uncertain" suggestion to the downstream time zone detector.
      *
      * <p>This method schedules an "uncertainty" timeout (if one isn't already scheduled) to be
      * triggered later if nothing else preempts it. It can be preempted if the provider becomes
-     * certain (or does anything else that calls {@link
-     * #makeSuggestion(GeolocationTimeZoneSuggestion, String)}) within {@link
-     * Environment#getUncertaintyDelay()}. Preemption causes the scheduled
+     * certain within {@link Environment#getUncertaintyDelay()}. Preemption causes the scheduled
      * "uncertainty" timeout to be cancelled. If the provider repeatedly sends uncertainty events
      * within the uncertainty delay period, those events are effectively ignored (i.e. the timeout
      * is not reset each time).
@@ -741,6 +755,8 @@ class LocationTimeZoneProviderController implements Dumpable {
         synchronized (mSharedLock) {
             long afterUncertaintyTimeoutElapsedMillis = mEnvironment.elapsedRealtimeMillis();
 
+            setState(STATE_UNCERTAIN);
+
             // For the effectiveFromElapsedMillis suggestion property, use the
             // uncertaintyStartedElapsedMillis. This is the time when the provider first reported
             // uncertainty, i.e. before the uncertainty timeout.
@@ -749,30 +765,65 @@ class LocationTimeZoneProviderController implements Dumpable {
             // the location_time_zone_manager finally confirms that the time zone was uncertain,
             // but the suggestion property allows the information to be back-dated, which should
             // help when comparing suggestions from different sources.
-            GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                    uncertaintyStartedElapsedMillis,
-                    "Uncertainty timeout triggered for " + provider.getName() + ":"
-                            + " primary=" + mPrimaryProvider
-                            + ", secondary=" + mSecondaryProvider
-                            + ", uncertaintyStarted="
-                            + Duration.ofMillis(uncertaintyStartedElapsedMillis)
-                            + ", afterUncertaintyTimeout="
-                            + Duration.ofMillis(afterUncertaintyTimeoutElapsedMillis)
-                            + ", uncertaintyDelay=" + uncertaintyDelay
-            );
-            makeSuggestion(suggestion, STATE_UNCERTAIN);
+            GeolocationTimeZoneSuggestion suggestion =
+                    GeolocationTimeZoneSuggestion.createUncertainSuggestion(
+                            uncertaintyStartedElapsedMillis);
+            String debugInfo = "Uncertainty timeout triggered for " + provider.getName() + ":"
+                    + " primary=" + mPrimaryProvider
+                    + ", secondary=" + mSecondaryProvider
+                    + ", uncertaintyStarted="
+                    + Duration.ofMillis(uncertaintyStartedElapsedMillis)
+                    + ", afterUncertaintyTimeout="
+                    + Duration.ofMillis(afterUncertaintyTimeoutElapsedMillis)
+                    + ", uncertaintyDelay=" + uncertaintyDelay;
+            reportSuggestionEvent(suggestion, debugInfo);
         }
     }
 
+    @GuardedBy("mSharedLock")
     @NonNull
-    private static GeolocationTimeZoneSuggestion createUncertainSuggestion(
-            @ElapsedRealtimeLong long effectiveFromElapsedMillis,
-            @NonNull String reason) {
-        GeolocationTimeZoneSuggestion suggestion =
-                GeolocationTimeZoneSuggestion.createUncertainSuggestion(
-                        effectiveFromElapsedMillis);
-        suggestion.addDebugInfo(reason);
-        return suggestion;
+    private LocationTimeZoneAlgorithmStatus generateCurrentAlgorithmStatus() {
+        @State String controllerState = mState.get();
+        ProviderState primaryProviderState = mPrimaryProvider.getCurrentState();
+        ProviderState secondaryProviderState = mSecondaryProvider.getCurrentState();
+        return createAlgorithmStatus(controllerState, primaryProviderState, secondaryProviderState);
+    }
+
+    @NonNull
+    private static LocationTimeZoneAlgorithmStatus createAlgorithmStatus(
+            @NonNull @State String controllerState,
+            @NonNull ProviderState primaryProviderState,
+            @NonNull ProviderState secondaryProviderState) {
+
+        @DetectionAlgorithmStatus int algorithmStatus =
+                mapControllerStateToDetectionAlgorithmStatus(controllerState);
+        @ProviderStatus int primaryProviderStatus = primaryProviderState.getProviderStatus();
+        @ProviderStatus int secondaryProviderStatus = secondaryProviderState.getProviderStatus();
+
+        // Neither provider is running. The algorithm is not running.
+        return new LocationTimeZoneAlgorithmStatus(algorithmStatus,
+                primaryProviderStatus, primaryProviderState.getReportedStatus(),
+                secondaryProviderStatus, secondaryProviderState.getReportedStatus());
+    }
+
+    /**
+     * Maps the internal state enum value to one of the status values exposed to the layers above.
+     */
+    private static @DetectionAlgorithmStatus int mapControllerStateToDetectionAlgorithmStatus(
+            @NonNull @State String controllerState) {
+        switch (controllerState) {
+            case STATE_INITIALIZING:
+            case STATE_PROVIDERS_INITIALIZING:
+            case STATE_CERTAIN:
+            case STATE_UNCERTAIN:
+                return DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+            case STATE_STOPPED:
+            case STATE_DESTROYED:
+            case STATE_FAILED:
+            case STATE_UNKNOWN:
+            default:
+                return DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_RUNNING;
+        }
     }
 
     /**
@@ -798,8 +849,8 @@ class LocationTimeZoneProviderController implements Dumpable {
         synchronized (mSharedLock) {
             LocationTimeZoneManagerServiceState.Builder builder =
                     new LocationTimeZoneManagerServiceState.Builder();
-            if (mLastSuggestion != null) {
-                builder.setLastSuggestion(mLastSuggestion);
+            if (mLastEvent != null) {
+                builder.setLastEvent(mLastEvent);
             }
             builder.setControllerState(mState.get())
                     .setStateChanges(mRecordedStates)
@@ -867,17 +918,15 @@ class LocationTimeZoneProviderController implements Dumpable {
     abstract static class Callback {
 
         @NonNull protected final ThreadingDomain mThreadingDomain;
-        @NonNull protected final Object mSharedLock;
 
         Callback(@NonNull ThreadingDomain threadingDomain) {
             mThreadingDomain = Objects.requireNonNull(threadingDomain);
-            mSharedLock = threadingDomain.getLockObject();
         }
 
         /**
          * Suggests the latest time zone state for the device.
          */
-        abstract void suggest(@NonNull GeolocationTimeZoneSuggestion suggestion);
+        abstract void sendEvent(@NonNull LocationAlgorithmEvent event);
     }
 
     /**

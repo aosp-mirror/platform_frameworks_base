@@ -28,6 +28,8 @@ import com.android.internal.util.UserIcons
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.tiles.UserDetailItemView
+import com.android.systemui.user.data.source.UserRecord
+import com.android.systemui.util.mockito.whenever
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -38,8 +40,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -56,8 +58,6 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     @Mock
     private lateinit var inflatedUserDetailItemView: KeyguardUserDetailItemView
     @Mock
-    private lateinit var userInfo: UserInfo
-    @Mock
     private lateinit var layoutInflater: LayoutInflater
     @Mock
     private lateinit var keyguardUserSwitcherController: KeyguardUserSwitcherController
@@ -68,6 +68,8 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        whenever(userSwitcherController.isUserSwitcherEnabled).thenReturn(true)
 
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, layoutInflater)
         `when`(layoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
@@ -186,13 +188,14 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     private fun createUserRecord(isCurrentUser: Boolean, isGuestUser: Boolean) =
-            UserSwitcherController.UserRecord(
-                    userInfo,
-                    picture,
-                    isGuestUser,
-                    isCurrentUser,
-                    false /* isAddUser */,
-                    false /* isRestricted */,
-                    true /* isSwitchToEnabled */,
-                    false /* isAddSupervisedUser */)
+        UserRecord(
+            UserInfo(0 /* id */, "name", 0 /* flags */),
+            picture,
+            isGuestUser,
+            isCurrentUser,
+            false /* isAddUser */,
+            false /* isRestricted */,
+            true /* isSwitchToEnabled */,
+            false /* isAddSupervisedUser */
+        )
 }

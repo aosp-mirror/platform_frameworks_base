@@ -243,6 +243,29 @@ abstract class ParcelableComponentTest(
     )
 
     /**
+     * Variant of [getSetByValue] that allows specifying a non-member [getFunction]. Mostly used
+     * for AndroidPackageHidden for APIs which are hidden from the interface.
+     */
+    @Suppress("UNCHECKED_CAST")
+    protected fun <ObjectType, ReturnType, SetType : Any?, CompareType : Any?> getSetByValue(
+        getFunction: (ObjectType) -> ReturnType,
+        getFunctionName: String,
+        setFunction: KFunction2<ObjectType, SetType, Any?>,
+        value: CompareType,
+        transformGet: (ReturnType) -> CompareType = { it as CompareType },
+        transformSet: (CompareType) -> SetType = { it as SetType },
+        compare: (CompareType, CompareType) -> Boolean? = Objects::equals
+    ) = Param(
+        getFunctionName,
+        { transformGet(getFunction(it as ObjectType)) },
+        setFunction.name,
+        { setFunction.call(it.first() as ObjectType, transformSet(it[1] as CompareType)) },
+        { value },
+        { first, second -> compare(first as CompareType, second as CompareType) == true },
+        verifyFunctionName = false
+    )
+
+    /**
      * Variant of [getSetByValue] that allows specifying a [setFunction] with 2 inputs.
      */
     @Suppress("UNCHECKED_CAST")
@@ -293,12 +316,21 @@ abstract class ParcelableComponentTest(
         first?.let { property(it) } == second?.let { property(it) }
     }
 
-    @Test
-    fun valueComparison() {
+    fun buildBefore(): Pair<List<Param>, Parcelable> {
         val params = baseParams.mapNotNull(::buildParams) + extraParams().filterNotNull()
         val before = initialObject()
 
         params.forEach { it.setFunction(arrayOf(before, it.value())) }
+        finalizeObject(before)
+        return params to before
+    }
+
+    protected open fun finalizeObject(parcelable: Parcelable) {
+    }
+
+    @Test
+    fun valueComparison() {
+        val (params, before) = buildBefore()
 
         val parcel = Parcel.obtain()
         writeToParcel(parcel, before)
@@ -307,6 +339,15 @@ abstract class ParcelableComponentTest(
 
         parcel.setDataPosition(0)
 
+        val baseline = initialObject()
+        finalizeObject(baseline)
+
+        val baselineParcel = Parcel.obtain()
+        writeToParcel(baselineParcel, baseline)
+
+        // Check that something substantial actually changed in the test object
+        expect.that(parcel.dataSize()).isGreaterThan(baselineParcel.dataSize())
+
         val after = creator.createFromParcel(parcel)
 
         expect.withMessage("Mismatched write and read data sizes")
@@ -314,6 +355,7 @@ abstract class ParcelableComponentTest(
             .isEqualTo(dataSize)
 
         parcel.recycle()
+        baselineParcel.recycle()
 
         runAssertions(params, before, after)
     }
@@ -388,7 +430,7 @@ abstract class ParcelableComponentTest(
                 - excludedMethods)
             .distinct()
 
-        val allTestedFunctions = params.flatMap {
+        val allTestedFunctions = params.filter(Param::verifyFunctionName).flatMap {
             listOfNotNull(it.getFunctionName, it.setFunctionName)
         }
         expect.that(allTestedFunctions).containsExactlyElementsIn(expectedFunctions)
@@ -408,6 +450,7 @@ abstract class ParcelableComponentTest(
         val setFunctionName: String?,
         val setFunction: (Array<Any?>) -> Unit,
         val value: () -> Any?,
-        val compare: (Any?, Any?) -> Boolean = Objects::equals
+        val compare: (Any?, Any?) -> Boolean = Objects::equals,
+        val verifyFunctionName: Boolean = true
     )
 }

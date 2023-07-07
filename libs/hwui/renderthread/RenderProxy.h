@@ -17,18 +17,24 @@
 #ifndef RENDERPROXY_H_
 #define RENDERPROXY_H_
 
-#include <SkBitmap.h>
+#include <SkRefCnt.h>
+#include <android/hardware_buffer.h>
 #include <android/native_window.h>
-#include <cutils/compiler.h>
 #include <android/surface_control.h>
+#include <cutils/compiler.h>
 #include <utils/Functor.h>
 
 #include "../FrameMetricsObserver.h"
 #include "../IContextFactory.h"
 #include "ColorMode.h"
+#include "CopyRequest.h"
 #include "DrawFrameTask.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
+
+class SkBitmap;
+class SkPicture;
+class SkImage;
 
 namespace android {
 class GraphicBuffer;
@@ -71,7 +77,7 @@ public:
     void setSwapBehavior(SwapBehavior swapBehavior);
     bool loadSystemProperties();
     void setName(const char* name);
-
+    void setHardwareBuffer(AHardwareBuffer* buffer);
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
     void setSurfaceControl(ASurfaceControl* surfaceControl);
     void allocateBuffers();
@@ -79,8 +85,10 @@ public:
     void setStopped(bool stopped);
     void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightGeometry(const Vector3& lightCenter, float lightRadius);
+    void setHardwareBufferRenderParams(const HardwareBufferRenderParams& params);
     void setOpaque(bool opaque);
-    void setColorMode(ColorMode mode);
+    float setColorMode(ColorMode mode);
+    void setRenderSdrHdrRatio(float ratio);
     int64_t* frameInfo();
     void forceDrawNextFrame();
     int syncAndDrawFrame();
@@ -97,6 +105,7 @@ public:
 
     void destroyHardwareResources();
     static void trimMemory(int level);
+    static void trimCaches(int level);
     static void purgeCaches();
     static void overrideProperty(const char* name, const char* value);
 
@@ -104,6 +113,8 @@ public:
     static int maxTextureSize();
     void stopDrawing();
     void notifyFramePending();
+    void notifyCallbackPending();
+    void notifyExpensiveFrame();
 
     void dumpProfileInfo(int fd, int dumpFlags);
     // Not exported, only used for testing
@@ -133,8 +144,7 @@ public:
     void removeFrameMetricsObserver(FrameMetricsObserver* observer);
     void setForceDark(bool enable);
 
-    static int copySurfaceInto(ANativeWindow* window, int left, int top, int right,
-                                           int bottom, SkBitmap* bitmap);
+    static void copySurfaceInto(ANativeWindow* window, std::shared_ptr<CopyRequest>&& request);
     static void prepareToDraw(Bitmap& bitmap);
 
     static int copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);

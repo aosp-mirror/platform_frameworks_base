@@ -26,10 +26,10 @@
             ]
         },
         {
-            "name": "CtsPermission2TestCases",
+            "name": "CtsPermissionPolicyTestCases",
             "options": [
                 {
-                    "include-filter": "android.permission2.cts.RestrictedPermissionsTest"
+                    "include-filter": "android.permissionpolicy.cts.RestrictedPermissionsTest"
                 },
                 {
                     "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"

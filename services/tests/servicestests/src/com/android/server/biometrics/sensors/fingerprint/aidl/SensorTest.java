@@ -17,15 +17,23 @@
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.common.CommonProps;
+import android.hardware.biometrics.face.SensorProps;
 import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -34,12 +42,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.CoexCoordinator;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
+import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +82,16 @@ public class SensorTest {
     private BiometricLogger mLogger;
     @Mock
     private BiometricContext mBiometricContext;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    FingerprintProvider mFingerprintProvider;
+    @Mock
+    GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
+    @Mock
+    private AidlSession mCurrentSession;
+    @Mock
+    private BaseClientMonitor mClientMonitor;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
@@ -84,6 +104,7 @@ public class SensorTest {
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
 
         mScheduler = new UserAwareBiometricScheduler(TAG,
                 new Handler(mLooper.getLooper()),
@@ -91,11 +112,11 @@ public class SensorTest {
                 null /* gestureAvailabilityDispatcher */,
                 mBiometricService,
                 () -> USER_ID,
-                mUserSwitchCallback,
-                CoexCoordinator.getInstance());
+                mUserSwitchCallback);
         mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
                 TAG, mScheduler, SENSOR_ID,
-                USER_ID, mLockoutCache, mLockoutResetDispatcher, mHalSessionCallback);
+                USER_ID, mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                mHalSessionCallback);
     }
 
     @Test
@@ -109,7 +130,7 @@ public class SensorTest {
         mScheduler.scheduleClientMonitor(new FingerprintResetLockoutClient(mContext,
                 () -> new AidlSession(1, mSession, USER_ID, mHalCallback),
                 USER_ID, TAG, SENSOR_ID, mLogger, mBiometricContext, HAT, mLockoutCache,
-                mLockoutResetDispatcher));
+                mLockoutResetDispatcher, 0 /* biometricStrength */));
         mLooper.dispatchAll();
 
         verifyNotLocked();
@@ -125,8 +146,43 @@ public class SensorTest {
         verifyNotLocked();
     }
 
+    @Test
+    public void onBinderDied_cancelNonInterruptableClient() {
+        mLooper.dispatchAll();
+
+        when(mCurrentSession.getUserId()).thenReturn(USER_ID);
+        when(mClientMonitor.getTargetUserId()).thenReturn(USER_ID);
+        when(mClientMonitor.isInterruptable()).thenReturn(false);
+
+        final SensorProps sensorProps = new SensorProps();
+        sensorProps.commonProps = new CommonProps();
+        sensorProps.commonProps.sensorId = 1;
+        final FingerprintSensorPropertiesInternal internalProp = new
+                FingerprintSensorPropertiesInternal(
+                        sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
+                        sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                        sensorProps.sensorType, false /* resetLockoutRequiresHardwareAuthToken */);
+        final Sensor sensor = new Sensor("SensorTest", mFingerprintProvider, mContext,
+                null /* handler */, internalProp, mLockoutResetDispatcher,
+                mGestureAvailabilityDispatcher, mBiometricContext, mCurrentSession);
+        mScheduler = (UserAwareBiometricScheduler) sensor.getScheduler();
+        sensor.mCurrentSession = new AidlSession(0, mock(ISession.class),
+                USER_ID, mHalCallback);
+
+        mScheduler.scheduleClientMonitor(mClientMonitor);
+
+        assertNotNull(mScheduler.getCurrentClient());
+
+        sensor.onBinderDied();
+
+        verify(mClientMonitor).cancel();
+        assertNull(sensor.getSessionForUser(USER_ID));
+        assertNull(mScheduler.getCurrentClient());
+    }
+
     private void verifyNotLocked() {
         assertEquals(LockoutTracker.LOCKOUT_NONE, mLockoutCache.getLockoutModeForUser(USER_ID));
         verify(mLockoutResetDispatcher).notifyLockoutResetCallbacks(eq(SENSOR_ID));
+        verify(mAuthSessionCoordinator).resetLockoutFor(eq(USER_ID), anyInt(), anyLong());
     }
 }

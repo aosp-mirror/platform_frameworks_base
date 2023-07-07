@@ -43,7 +43,7 @@ public final class DisplayThread extends ServiceThread {
             sInstance = new DisplayThread();
             sInstance.start();
             sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
-            sHandler = new Handler(sInstance.getLooper());
+            sHandler = makeSharedHandler(sInstance.getLooper());
         }
     }
 

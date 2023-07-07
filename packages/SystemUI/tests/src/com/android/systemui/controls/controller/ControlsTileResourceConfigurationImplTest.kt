@@ -20,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,16 +28,20 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class ControlsTileResourceConfigurationImplTest : SysuiTestCase() {
+
+    @Test
+    fun getPackageName() {
+        assertThat(ControlsTileResourceConfigurationImpl().getPackageName()).isNull()
+    }
+
     @Test
     fun getTileImageId() {
         val instance = ControlsTileResourceConfigurationImpl()
-        assertEquals(instance.getTileImageId(),
-            R.drawable.controls_icon)
+        assertEquals(instance.getTileImageId(), R.drawable.controls_icon)
     }
     @Test
     fun getTileTitleId() {
         val instance = ControlsTileResourceConfigurationImpl()
-        assertEquals(instance.getTileTitleId(),
-            R.string.quick_controls_title)
+        assertEquals(instance.getTileTitleId(), R.string.quick_controls_title)
     }
 }

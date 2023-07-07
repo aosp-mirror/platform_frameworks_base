@@ -18,6 +18,7 @@
 
 #include "SkiaUtils.h"
 
+#include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 #include <SkMatrix.h>

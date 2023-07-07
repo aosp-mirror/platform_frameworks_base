@@ -46,7 +46,8 @@ public final class BackgroundThread extends HandlerThread {
             looper.setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
             looper.setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
-            sHandler = new Handler(sInstance.getLooper());
+            sHandler = new Handler(sInstance.getLooper(), /*callback=*/ null, /* async=*/ false,
+                    /* shared=*/ true);
             sHandlerExecutor = new HandlerExecutor(sHandler);
         }
     }

@@ -18,6 +18,8 @@
 <resources>
 
     <style name="Theme.AlertDialogActivity"
-            parent="@android:style/Theme.DeviceDefault.Dialog.Alert" />
+        parent="@android:style/Theme.DeviceDefault.Dialog.Alert">
+        <item name="alertDialogStyle">@style/AlertDialog</item>
+    </style>
 
 </resources>

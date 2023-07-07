@@ -671,6 +671,13 @@ public class WatchedIntentFilter
     }
 
     /**
+     * @see IntentFilter#checkDataPathAndSchemeSpecificParts()
+     */
+    public boolean checkDataPathAndSchemeSpecificParts() {
+        return mFilter.checkDataPathAndSchemeSpecificParts();
+    }
+
+    /**
      * @see IntentFilter#getHostsList()
      */
     public ArrayList<String> getHostsList() {

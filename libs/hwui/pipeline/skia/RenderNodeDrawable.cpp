@@ -15,7 +15,11 @@
  */
 
 #include "RenderNodeDrawable.h"
+#include <SkPaint.h>
 #include <SkPaintFilterCanvas.h>
+#include <SkPoint.h>
+#include <SkRRect.h>
+#include <SkRect.h>
 #include <gui/TraceUtils.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
@@ -197,6 +201,7 @@ protected:
         paint.setAlpha((uint8_t)paint.getAlpha() * mAlpha);
         return true;
     }
+
     void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
         // We unroll the drawable using "this" canvas, so that draw calls contained inside will
         // get their alpha applied. The default SkPaintFilterCanvas::onDrawDrawable does not unroll.
@@ -224,10 +229,10 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
     bool quickRejected = properties.getClipToBounds() && canvas->quickReject(bounds);
-    auto clipBounds = canvas->getLocalClipBounds();
-    SkIRect srcBounds = SkIRect::MakeWH(bounds.width(), bounds.height());
-    SkIPoint offset = SkIPoint::Make(0.0f, 0.0f);
     if (!quickRejected) {
+        auto clipBounds = canvas->getLocalClipBounds();
+        SkIRect srcBounds = SkIRect::MakeWH(bounds.width(), bounds.height());
+        SkIPoint offset = SkIPoint::Make(0.0f, 0.0f);
         SkiaDisplayList* displayList = renderNode->getDisplayList().asSkiaDl();
         const LayerProperties& layerProperties = properties.layerProperties();
         // composing a hardware layer
@@ -288,8 +293,10 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 // with the same canvas transformation + clip into the target
                 // canvas then draw the layer on top
                 if (renderNode->hasHolePunches()) {
-                    TransformCanvas transformCanvas(canvas, SkBlendMode::kClear);
+                    canvas->save();
+                    TransformCanvas transformCanvas(canvas, SkBlendMode::kDstOut);
                     displayList->draw(&transformCanvas);
+                    canvas->restore();
                 }
                 canvas->drawImageRect(snapshotImage, SkRect::Make(srcBounds),
                                       SkRect::Make(dstBounds), sampling, &paint,

@@ -58,7 +58,7 @@ public class ViewDumpParser {
         Object hash = getProperty(props, "__hash__");
 
         if (name instanceof String && hash instanceof Integer) {
-            return String.format(Locale.US, "%s@%x", name, hash);
+            return String.format(Locale.US, "%s@%x", name, (Integer) hash);
         } else {
             return null;
         }

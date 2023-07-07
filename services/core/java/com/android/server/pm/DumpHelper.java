@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.incremental.PerUidReadTimeouts;
 import android.service.pm.PackageServiceDumpProto;
@@ -51,38 +52,39 @@ import java.io.PrintWriter;
  */
 final class DumpHelper {
     private final PermissionManagerServiceInternal mPermissionManager;
-    private final ApexManager mApexManager;
     private final StorageEventHelper mStorageEventHelper;
     private final DomainVerificationManagerInternal mDomainVerificationManager;
     private final PackageInstallerService mInstallerService;
-    private final String mRequiredVerifierPackage;
+    private final String[] mRequiredVerifierPackages;
     private final KnownPackages mKnownPackages;
     private final ChangedPackagesTracker mChangedPackagesTracker;
     private final ArrayMap<String, FeatureInfo> mAvailableFeatures;
     private final ArraySet<String> mProtectedBroadcasts;
     private final PerUidReadTimeouts[] mPerUidReadTimeouts;
+    private final SnapshotStatistics mSnapshotStatistics;
 
     DumpHelper(
-            PermissionManagerServiceInternal permissionManager, ApexManager apexManager,
+            PermissionManagerServiceInternal permissionManager,
             StorageEventHelper storageEventHelper,
             DomainVerificationManagerInternal domainVerificationManager,
-            PackageInstallerService installerService, String requiredVerifierPackage,
+            PackageInstallerService installerService, String[] requiredVerifierPackages,
             KnownPackages knownPackages,
             ChangedPackagesTracker changedPackagesTracker,
             ArrayMap<String, FeatureInfo> availableFeatures,
             ArraySet<String> protectedBroadcasts,
-            PerUidReadTimeouts[] perUidReadTimeouts) {
+            PerUidReadTimeouts[] perUidReadTimeouts,
+            SnapshotStatistics snapshotStatistics) {
         mPermissionManager = permissionManager;
-        mApexManager = apexManager;
         mStorageEventHelper = storageEventHelper;
         mDomainVerificationManager = domainVerificationManager;
         mInstallerService = installerService;
-        mRequiredVerifierPackage = requiredVerifierPackage;
+        mRequiredVerifierPackages = requiredVerifierPackages;
         mKnownPackages = knownPackages;
         mChangedPackagesTracker = changedPackagesTracker;
         mAvailableFeatures = availableFeatures;
         mProtectedBroadcasts = protectedBroadcasts;
         mPerUidReadTimeouts = perUidReadTimeouts;
+        mSnapshotStatistics = snapshotStatistics;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -109,6 +111,8 @@ final class DumpHelper {
                 dumpState.setOptionEnabled(DumpState.OPTION_DUMP_ALL_COMPONENTS);
             } else if ("-f".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
+            } else if ("--include-apex".equals(opt)) {
+                dumpState.setOptionEnabled(DumpState.OPTION_INCLUDE_APEX);
             } else if ("--proto".equals(opt)) {
                 dumpProto(snapshot, fd);
                 return;
@@ -271,7 +275,7 @@ final class DumpHelper {
         // Return if the package doesn't exist.
         if (packageName != null
                 && snapshot.getPackageStateInternal(packageName) == null
-                && !mApexManager.isApexPackage(packageName)) {
+                && !snapshot.isApexPackage(packageName)) {
             pw.println("Unable to find package: " + packageName);
             return;
         }
@@ -315,26 +319,28 @@ final class DumpHelper {
             ipw.decreaseIndent();
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS)
-                && packageName == null) {
-            final String requiredVerifierPackage = mRequiredVerifierPackage;
-            if (!checkin) {
+        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
+            if (!checkin && mRequiredVerifierPackages.length > 0) {
                 if (dumpState.onTitlePrinted()) {
                     pw.println();
                 }
                 pw.println("Verifiers:");
-                pw.print("  Required: ");
-                pw.print(requiredVerifierPackage);
-                pw.print(" (uid=");
-                pw.print(snapshot.getPackageUid(requiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
-                pw.println(")");
-            } else if (requiredVerifierPackage != null) {
-                pw.print("vrfy,");
-                pw.print(requiredVerifierPackage);
-                pw.print(",");
-                pw.println(snapshot.getPackageUid(requiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
+            }
+            for (String requiredVerifierPackage : mRequiredVerifierPackages) {
+                if (!checkin) {
+                    pw.print("  Required: ");
+                    pw.print(requiredVerifierPackage);
+                    pw.print(" (uid=");
+                    pw.print(snapshot.getPackageUid(requiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
+                    pw.println(")");
+                } else {
+                    pw.print("vrfy,");
+                    pw.print(requiredVerifierPackage);
+                    pw.print(",");
+                    pw.println(snapshot.getPackageUid(requiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
+                }
             }
         }
 
@@ -553,10 +559,8 @@ final class DumpHelper {
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
         }
 
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_APEX)
-                && (packageName == null || mApexManager.isApexPackage(packageName))) {
-            mApexManager.dump(pw, packageName);
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
+            snapshot.dump(DumpState.DUMP_APEX, fd, pw, dumpState);
         }
 
         if (!checkin
@@ -587,6 +591,9 @@ final class DumpHelper {
             if (dumpState.onTitlePrinted()) {
                 pw.println();
             }
+            pw.println("Snapshot statistics:");
+            mSnapshotStatistics.dump(pw, "   " /* indent */, SystemClock.currentTimeMicro(),
+                    snapshot.getUsed(), dumpState.isBrief());
         }
 
         if (!checkin
@@ -646,17 +653,19 @@ final class DumpHelper {
     private void dumpProto(Computer snapshot, FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
-        final long requiredVerifierPackageToken =
-                proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
-        proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
-                mRequiredVerifierPackage);
-        proto.write(
-                PackageServiceDumpProto.PackageShortProto.UID,
-                snapshot.getPackageUid(
-                        mRequiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.USER_SYSTEM));
-        proto.end(requiredVerifierPackageToken);
+        for (String requiredVerifierPackage : mRequiredVerifierPackages) {
+            final long requiredVerifierPackageToken =
+                    proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
+            proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
+                    requiredVerifierPackage);
+            proto.write(
+                    PackageServiceDumpProto.PackageShortProto.UID,
+                    snapshot.getPackageUid(
+                            requiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING,
+                            UserHandle.USER_SYSTEM));
+            proto.end(requiredVerifierPackageToken);
+        }
 
         DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
         ComponentName verifierComponent = proxy.getComponentName();

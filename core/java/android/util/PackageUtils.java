@@ -184,24 +184,15 @@ public final class PackageUtils {
     }
 
     /**
-     * @see #computeSha256DigestForLargeFile(String, byte[], String)
-     */
-    public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath,
-            @NonNull byte[] fileBuffer) {
-        return computeSha256DigestForLargeFile(filePath, fileBuffer, null);
-    }
-
-    /**
-     * Computes the SHA256 digest of large files. This is typically useful for large APEXs.
+     * Computes the SHA256 digest of a large file.
      * @param filePath The path to which the file's content is to be hashed.
      * @param fileBuffer A buffer to read file's content into memory. It is strongly recommended to
      *                   make use of the {@link #createLargeFileBuffer()} method to create this
      *                   buffer.
-     * @param separator Separator between each pair of characters, such as colon, or null to omit.
-     * @return The SHA256 digest or null if an error occurs.
+     * @return The byte array of SHA256 digest or null if an error occurs.
      */
-    public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath,
-            @NonNull byte[] fileBuffer, @Nullable String separator) {
+    public static @Nullable byte[] computeSha256DigestForLargeFileAsBytes(@NonNull String filePath,
+            @NonNull byte[] fileBuffer) {
         MessageDigest messageDigest;
         try {
             messageDigest = MessageDigest.getInstance("SHA256");
@@ -221,10 +212,32 @@ public final class PackageUtils {
             return null;
         }
 
-        byte[] resultBytes = messageDigest.digest();
+        return messageDigest.digest();
+    }
 
+    /**
+     * @see #computeSha256DigestForLargeFile(String, byte[], String)
+     */
+    public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath,
+            @NonNull byte[] fileBuffer) {
+        return computeSha256DigestForLargeFile(filePath, fileBuffer, null);
+    }
+
+    /**
+     * Computes the SHA256 digest of a large file.
+     * @param filePath The path to which the file's content is to be hashed.
+     * @param fileBuffer A buffer to read file's content into memory. It is strongly recommended to
+     *                   make use of the {@link #createLargeFileBuffer()} method to create this
+     *                   buffer.
+     * @param separator Separator between each pair of characters, such as colon, or null to omit.
+     * @see #computeSha256DigestForLargeFile(String, byte[])
+     * @return The encoded string of SHA256 digest or null if an error occurs.
+     */
+    public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath,
+            @NonNull byte[] fileBuffer, @Nullable String separator) {
+        byte[] resultBytes = computeSha256DigestForLargeFileAsBytes(filePath, fileBuffer);
         if (separator == null) {
-            return HexEncoding.encodeToString(resultBytes, true);
+            return HexEncoding.encodeToString(resultBytes, false);
         }
 
         int length = resultBytes.length;

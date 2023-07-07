@@ -31,6 +31,7 @@
 #include <SkPath.h>
 #include <SkPathMeasure.h>
 #include <SkRect.h>
+#include <SkRefCnt.h>
 #include <SkShader.h>
 #include <SkSurface.h>
 

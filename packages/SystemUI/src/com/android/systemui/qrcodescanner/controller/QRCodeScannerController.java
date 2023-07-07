@@ -158,14 +158,18 @@ public class QRCodeScannerController implements
      * Returns true if lock screen entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForLockScreenButton() {
-        return mQRCodeScannerEnabled && mIntent != null && mConfigEnableLockScreenButton
-                && isActivityCallable(mIntent);
+        return mQRCodeScannerEnabled && isAbleToOpenCameraApp() && isAvailableOnDevice();
+    }
+
+    /** Returns whether the feature is available on the device. */
+    public boolean isAvailableOnDevice() {
+        return mConfigEnableLockScreenButton;
     }
 
     /**
-     * Returns true if quick settings entry point for QR Code Scanner is to be enabled.
+     * Returns true if the feature can open a camera app on the device.
      */
-    public boolean isEnabledForQuickSettings() {
+    public boolean isAbleToOpenCameraApp() {
         return mIntent != null && isActivityCallable(mIntent);
     }
 

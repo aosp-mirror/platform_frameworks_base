@@ -33,7 +33,7 @@ interface ISliceManager {
     // Perms.
     void grantSlicePermission(String callingPkg, String toPkg, in Uri uri);
     void revokeSlicePermission(String callingPkg, String toPkg, in Uri uri);
-    int checkSlicePermission(in Uri uri, String callingPkg, String pkg, int pid, int uid,
+    int checkSlicePermission(in Uri uri, String callingPkg, int pid, int uid,
             in String[] autoGrantPermissions);
     void grantPermissionFromUser(in Uri uri, String pkg, String callingPkg, boolean allSlices);
 }

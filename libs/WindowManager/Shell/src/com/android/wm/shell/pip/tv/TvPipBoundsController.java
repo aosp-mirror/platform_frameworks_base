@@ -39,7 +39,6 @@ import java.util.function.Supplier;
  * Manages debouncing of PiP movements and scheduling of unstashing.
  */
 public class TvPipBoundsController {
-    private static final boolean DEBUG = false;
     private static final String TAG = "TvPipBoundsController";
 
     /**
@@ -122,22 +121,22 @@ public class TvPipBoundsController {
             cancelScheduledPlacement();
             applyPlacementBounds(placement.getUnstashedBounds(), animationDuration);
         } else if (immediate) {
+            boolean shouldStash = mUnstashRunnable != null || placement.getTriggerStash();
             cancelScheduledPlacement();
-            applyPlacementBounds(placement.getBounds(), animationDuration);
-            scheduleUnstashIfNeeded(placement);
+            applyPlacement(placement, shouldStash, animationDuration);
         } else {
-            applyPlacementBounds(mCurrentPlacementBounds, animationDuration);
+            if (mCurrentPlacementBounds != null) {
+                applyPlacementBounds(mCurrentPlacementBounds, animationDuration);
+            }
             schedulePinnedStackPlacement(placement, animationDuration);
         }
     }
 
     private void schedulePinnedStackPlacement(@NonNull final Placement placement,
             int animationDuration) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: schedulePinnedStackPlacement() - pip bounds: %s",
-                    TAG, placement.getBounds().toShortString());
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: schedulePinnedStackPlacement() - pip bounds: %s",
+                TAG, placement.getBounds().toShortString());
 
         if (mPendingPlacement != null && Objects.equals(mPendingPlacement.getBounds(),
                 placement.getBounds())) {
@@ -171,30 +170,27 @@ public class TvPipBoundsController {
     }
 
     private void applyPendingPlacement() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: applyPendingPlacement()", TAG);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: applyPendingPlacement()", TAG);
         if (mPendingPlacement != null) {
-            if (mPendingStash) {
-                mPendingStash = false;
-                scheduleUnstashIfNeeded(mPendingPlacement);
-            }
-
-            if (mUnstashRunnable != null) {
-                // currently stashed, use stashed pos
-                applyPlacementBounds(mPendingPlacement.getBounds(),
-                        mPendingPlacementAnimationDuration);
-            } else {
-                applyPlacementBounds(mPendingPlacement.getUnstashedBounds(),
-                        mPendingPlacementAnimationDuration);
-            }
+            applyPlacement(mPendingPlacement, mPendingStash, mPendingPlacementAnimationDuration);
+            mPendingStash = false;
+            mPendingPlacement = null;
         }
-
-        mPendingPlacement = null;
     }
 
-    void onPipDismissed() {
+    private void applyPlacement(@NonNull final Placement placement, boolean shouldStash,
+            int animationDuration) {
+        if (placement.getStashType() != STASH_TYPE_NONE && shouldStash) {
+            scheduleUnstashIfNeeded(placement);
+        }
+
+        Rect bounds =
+                mUnstashRunnable != null ? placement.getBounds() : placement.getUnstashedBounds();
+        applyPlacementBounds(bounds, animationDuration);
+    }
+
+    void reset() {
         mCurrentPlacementBounds = null;
         mPipTargetBounds = null;
         cancelScheduledPlacement();
@@ -227,10 +223,8 @@ public class TvPipBoundsController {
         }
 
         mPipTargetBounds = bounds;
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: movePipTo() - new pip bounds: %s", TAG, bounds.toShortString());
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: movePipTo() - new pip bounds: %s", TAG, bounds.toShortString());
 
         if (mListener != null) {
             mListener.onPipTargetBoundsChange(bounds, animationDuration);

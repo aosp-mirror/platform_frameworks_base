@@ -46,6 +46,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     SCREENSHOT_SAVED(306),
     @UiEvent(doc = "screenshot failed to save")
     SCREENSHOT_NOT_SAVED(336),
+    @UiEvent(doc = "failed to capture screenshot")
+    SCREENSHOT_CAPTURE_FAILED(1281),
     @UiEvent(doc = "screenshot preview tapped")
     SCREENSHOT_PREVIEW_TAPPED(307),
     @UiEvent(doc = "screenshot edit button tapped")
@@ -89,7 +91,9 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     @UiEvent(doc = "User has saved a long screenshot to a file")
     SCREENSHOT_LONG_SCREENSHOT_SAVED(910),
     @UiEvent(doc = "User has discarded the result of a long screenshot")
-    SCREENSHOT_LONG_SCREENSHOT_EXIT(911);
+    SCREENSHOT_LONG_SCREENSHOT_EXIT(911),
+    @UiEvent(doc = "A screenshot has been taken and saved to work profile")
+    SCREENSHOT_SAVED_TO_WORK_PROFILE(1240);
 
     private final int mId;
 

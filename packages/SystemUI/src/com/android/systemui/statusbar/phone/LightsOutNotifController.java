@@ -22,8 +22,8 @@ import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFrag
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.view.InsetsVisibilities;
 import android.view.View;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
@@ -32,6 +32,7 @@ import android.view.animation.AccelerateInterpolator;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
@@ -143,8 +144,8 @@ public class LightsOutNotifController extends ViewController<View> {
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) {
+                @Behavior int behavior, @InsetsType int requestedVisibleTypes,
+                String packageName, LetterboxDetails[] letterboxDetails) {
             if (displayId != mDisplayId) {
                 return;
             }

@@ -118,4 +118,4 @@ public class CryptoObject {
         }
         return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mCrypto);
     }
-};
+}

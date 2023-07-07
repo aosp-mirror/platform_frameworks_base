@@ -41,7 +41,7 @@
         <aapt:attr name="android:animation">
             <set android:ordering="together">
                 <objectAnimator android:propertyName="pathData"
-                                android:duration="500"
+                                android:duration="250"
                                 android:startOffset="0"
                                 android:valueFrom="M48 0.25 C48,0.25 48,0 48,0 C47.75,26 31.25,48 0,48 C0,48 0,48 0,48 C-30,48 -48,25.75 -48,-0.25 C-48,-0.25 -48,-0.25 -48,-0.25 C-47.75,-23.5 -32.25,-47.75 0.5,-48 C0.5,-48 0.5,-48 0.5,-48 C28,-47.75 47.75,-29.75 48,0.25c "
                                 android:valueTo="M48 -16 C48,-16 48,16 48,16 C48,33.67 33.67,48 16,48 C16,48 -16,48 -16,48 C-33.67,48 -48,33.67 -48,16 C-48,16 -48,-16 -48,-16 C-48,-33.67 -33.67,-48 -16,-48 C-16,-48 16,-48 16,-48 C33.67,-48 48,-33.67 48,-16c "
@@ -57,7 +57,7 @@
         <aapt:attr name="android:animation">
             <set android:ordering="together">
                 <objectAnimator android:propertyName="translateX"
-                                android:duration="517"
+                                android:duration="267"
                                 android:startOffset="0"
                                 android:valueFrom="0"
                                 android:valueTo="1"

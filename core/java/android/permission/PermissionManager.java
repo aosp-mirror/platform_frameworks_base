@@ -27,6 +27,7 @@ import static android.os.Build.VERSION_CODES.S;
 import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.DurationMillisLong;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -75,6 +76,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.util.CollectionUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -110,6 +113,15 @@ public final class PermissionManager {
      * The app should receive a {@code SecurityException}, or an error through a relevant callback.
      */
     public static final int PERMISSION_HARD_DENIED = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "PERMISSION_" }, value = {
+            PERMISSION_GRANTED,
+            PERMISSION_SOFT_DENIED,
+            PERMISSION_HARD_DENIED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionResult {}
 
     /**
      * The set of flags that indicate that a permission state has been explicitly set
@@ -262,7 +274,7 @@ public final class PermissionManager {
      *
      * @see #checkPermissionForPreflight(String, AttributionSource)
      */
-    @PermissionCheckerManager.PermissionResult
+    @PermissionResult
     @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
     public int checkPermissionForDataDelivery(@NonNull String permission,
             @NonNull AttributionSource attributionSource, @Nullable String message) {
@@ -289,7 +301,7 @@ public final class PermissionManager {
      *
      * @see #checkPermissionForDataDelivery(String, AttributionSource, String)
      */
-    @PermissionCheckerManager.PermissionResult
+    @PermissionResult
     @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
     public int checkPermissionForStartDataDelivery(@NonNull String permission,
             @NonNull AttributionSource attributionSource, @Nullable String message) {
@@ -342,7 +354,7 @@ public final class PermissionManager {
      *
      * @see #checkPermissionForPreflight(String, AttributionSource)
      */
-    @PermissionCheckerManager.PermissionResult
+    @PermissionResult
     @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
     public int checkPermissionForDataDeliveryFromDataSource(@NonNull String permission,
             @NonNull AttributionSource attributionSource, @Nullable String message) {
@@ -373,7 +385,7 @@ public final class PermissionManager {
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      */
-    @PermissionCheckerManager.PermissionResult
+    @PermissionResult
     public int checkPermissionForPreflight(@NonNull String permission,
             @NonNull AttributionSource attributionSource) {
         return PermissionChecker.checkPermissionForPreflight(mContext, permission,
@@ -1371,8 +1383,7 @@ public final class PermissionManager {
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
         try {
             mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
-                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
-                    importanceToKeepSessionAlive);
+                    timeoutMillis, revokeAfterKilledDelayMillis);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

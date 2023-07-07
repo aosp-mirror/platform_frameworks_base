@@ -37,6 +37,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -48,6 +49,8 @@ import javax.inject.Inject;
 public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
 
+    public static final String TILE_SPEC = "battery";
+
     private final BatteryController mBatteryController;
     @VisibleForTesting
     protected final SettingObserver mSetting;
@@ -57,11 +60,10 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     private boolean mCharging;
     private boolean mPluggedIn;
 
-    private Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_battery_saver);
-
     @Inject
     public BatterySaverTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -72,7 +74,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
             BatteryController batteryController,
             SecureSettings secureSettings
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
@@ -145,7 +147,9 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.state = mPluggedIn ? Tile.STATE_UNAVAILABLE
                 : mPowerSave ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.icon = mIcon;
+        state.icon = ResourceIcon.get(mPowerSave
+                ? R.drawable.qs_battery_saver_icon_on
+                : R.drawable.qs_battery_saver_icon_off);
         state.label = mContext.getString(R.string.battery_detail_switch_title);
         state.secondaryLabel = "";
         state.contentDescription = state.label;

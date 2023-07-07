@@ -16,8 +16,8 @@
 
 package com.android.systemui.media.dream;
 
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.ComplicationViewModel;
+import com.android.systemui.complication.Complication;
+import com.android.systemui.complication.ComplicationViewModel;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
 
 import javax.inject.Inject;
@@ -34,11 +34,6 @@ public class MediaDreamComplication implements Complication {
     @Inject
     public MediaDreamComplication(MediaComplicationComponent.Factory componentFactory) {
         mComponentFactory = componentFactory;
-    }
-
-    @Override
-    public int getRequiredTypeAvailability() {
-        return COMPLICATION_TYPE_CAST_INFO;
     }
 
     @Override

@@ -37,12 +37,13 @@ interface IPip {
      * @param activityInfo ActivityInfo tied to the Activity
      * @param pictureInPictureParams PictureInPictureParams tied to the Activity
      * @param launcherRotation Launcher rotation to calculate the PiP destination bounds
-     * @param shelfHeight Shelf height of launcher to calculate the PiP destination bounds
+     * @param hotseatKeepClearArea Bounds of Hotseat to avoid used to calculate PiP destination
+              bounds
      * @return destination bounds the PiP window should land into
      */
     Rect startSwipePipToHome(in ComponentName componentName, in ActivityInfo activityInfo,
                 in PictureInPictureParams pictureInPictureParams,
-                int launcherRotation, int shelfHeight) = 1;
+                int launcherRotation, in Rect hotseatKeepClearArea) = 1;
 
     /**
      * Notifies the swiping Activity to PiP onto home transition is finished
@@ -56,12 +57,35 @@ interface IPip {
             in Rect destinationBounds, in SurfaceControl overlay) = 2;
 
     /**
+     * Notifies the swiping Activity to PiP onto home transition is aborted
+     *
+     * @param taskId the Task id that the Activity and overlay are currently in.
+     * @param componentName ComponentName represents the Activity
+     */
+    oneway void abortSwipePipToHome(int taskId, in ComponentName componentName) = 3;
+
+    /**
      * Sets listener to get pinned stack animation callbacks.
      */
-    oneway void setPinnedStackAnimationListener(IPipAnimationListener listener) = 3;
+    oneway void setPipAnimationListener(IPipAnimationListener listener) = 4;
 
     /**
      * Sets the shelf height and visibility.
      */
-    oneway void setShelfHeight(boolean visible, int shelfHeight) = 4;
+    oneway void setShelfHeight(boolean visible, int shelfHeight) = 5;
+
+    /**
+     * Sets the next pip animation type to be the alpha animation.
+     */
+    oneway void setPipAnimationTypeToAlpha() = 6;
+
+    /**
+     * Sets the height and visibility of the Launcher keep clear area.
+     */
+    oneway void setLauncherKeepClearAreaHeight(boolean visible, int height) = 7;
+
+    /**
+     * Sets the app icon size in pixel used by Launcher
+     */
+    oneway void setLauncherAppIconSize(int iconSizePx) = 8;
 }

@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +36,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.SingleTapClassifier;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +55,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     @Mock
     private PasswordTextView mPasswordEntry;
     @Mock
-    private KeyguardMessageArea mKeyguardMessageArea;
+    private BouncerKeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
@@ -90,16 +94,19 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         when(mPinBasedInputView.findViewById(1)).thenReturn(mPasswordEntry);
         when(mPinBasedInputView.isAttachedToWindow()).thenReturn(true);
         when(mPinBasedInputView.getButtons()).thenReturn(mButtons);
-        when(mPinBasedInputView.findViewById(R.id.keyguard_message_area))
+        when(mPinBasedInputView.requireViewById(R.id.bouncer_message_area))
                 .thenReturn(mKeyguardMessageArea);
         when(mPinBasedInputView.findViewById(R.id.delete_button))
                 .thenReturn(mDeleteButton);
         when(mPinBasedInputView.findViewById(R.id.key_enter))
                 .thenReturn(mOkButton);
+        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
+        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
+
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
-                mEmergencyButtonController, mFalsingCollector) {
+                mEmergencyButtonController, mFalsingCollector, featureFlags) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
@@ -113,5 +120,15 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mKeyguardPinViewController.onResume(KeyguardSecurityView.SCREEN_ON);
         verify(mPasswordEntry).requestFocus();
     }
-}
 
+    @Test
+    public void testGetInitialMessageResId() {
+        assertThat(mKeyguardPinViewController.getInitialMessageResId()).isNotEqualTo(0);
+    }
+
+    @Test
+    public void testMessageIsSetWhenReset() {
+        mKeyguardPinViewController.resetState();
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pin);
+    }
+}

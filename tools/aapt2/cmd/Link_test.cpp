@@ -19,6 +19,7 @@
 #include <android-base/file.h>
 
 #include "AppInfo.h"
+#include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "test/Test.h"
 
@@ -86,7 +87,8 @@ TEST_F(LinkTest, KeepRawXmlStrings) {
   // Check that the raw string index has been set to the correct string pool entry
   int32_t raw_index = tree.getAttributeValueStringID(0);
   ASSERT_THAT(raw_index, Ne(-1));
-  EXPECT_THAT(util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)), Eq("007"));
+  EXPECT_THAT(android::util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)),
+              Eq("007"));
 }
 
 TEST_F(LinkTest, NoCompressAssets) {
@@ -409,7 +411,7 @@ struct SourceXML {
 
 static void BuildApk(const std::vector<SourceXML>& source_files, const std::string& apk_path,
                      LinkCommandBuilder&& link_args, CommandTestFixture* fixture,
-                     IDiagnostics* diag) {
+                     android::IDiagnostics* diag) {
   TemporaryDir res_dir;
   TemporaryDir compiled_res_dir;
   for (auto& source_file : source_files) {
@@ -422,7 +424,7 @@ static void BuildApk(const std::vector<SourceXML>& source_files, const std::stri
 
 static void BuildSDK(const std::vector<SourceXML>& source_files, const std::string& apk_path,
                      const std::string& java_root_path, CommandTestFixture* fixture,
-                     IDiagnostics* diag) {
+                     android::IDiagnostics* diag) {
   auto android_manifest = ManifestBuilder(fixture).SetPackageName("android").Build();
 
   auto android_link_args = LinkCommandBuilder(fixture)
@@ -434,7 +436,7 @@ static void BuildSDK(const std::vector<SourceXML>& source_files, const std::stri
 }
 
 static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string& java_path,
-                                 CommandTestFixture* fixture, IDiagnostics* diag) {
+                                 CommandTestFixture* fixture, android::IDiagnostics* diag) {
   const std::string android_values =
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
@@ -470,7 +472,7 @@ static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string&
 }
 
 static void BuildFinalizedSDK(const std::string& apk_path, const std::string& java_path,
-                              CommandTestFixture* fixture, IDiagnostics* diag) {
+                              CommandTestFixture* fixture, android::IDiagnostics* diag) {
   const std::string android_values =
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
@@ -510,7 +512,7 @@ static void BuildFinalizedSDK(const std::string& apk_path, const std::string& ja
 
 static void BuildAppAgainstSDK(const std::string& apk_path, const std::string& java_path,
                                const std::string& sdk_path, CommandTestFixture* fixture,
-                               IDiagnostics* diag) {
+                               android::IDiagnostics* diag) {
   const std::string app_values =
       R"(<resources xmlns:android="http://schemas.android.com/apk/res/android">
            <attr name="bar" />
@@ -781,6 +783,214 @@ TEST_F(LinkTest, MacroSubstitution) {
 
   EXPECT_THAT(xml_attrs[1].compiled_value.get(), IsNull());
   EXPECT_THAT(xml_attrs[1].value, Eq("Hello World!"));
+}
+
+TEST_F(LinkTest, LocaleConfigVerification) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+
+  // Normal case
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string localeconfig_manifest = GetTestPath("localeconfig_manifest.xml");
+  WriteFile(localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/locales_config">
+      </application>
+    </manifest>)"));
+
+  const std::string out_apk = GetTestPath("out.apk");
+
+  auto link_args = LinkCommandBuilder(this)
+                       .SetManifestFile(localeconfig_manifest)
+                       .AddCompiledResDir(compiled_files_dir, &diag)
+                       .Build(out_apk);
+  ASSERT_TRUE(Link(link_args, &diag));
+
+  // Empty locale list
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/empty_locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string empty_localeconfig_manifest = GetTestPath("empty_localeconfig_manifest.xml");
+  WriteFile(empty_localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/empty_locales_config">
+      </application>
+    </manifest>)"));
+
+  auto link1_args = LinkCommandBuilder(this)
+                        .SetManifestFile(empty_localeconfig_manifest)
+                        .AddCompiledResDir(compiled_files_dir, &diag)
+                        .Build(out_apk);
+  ASSERT_TRUE(Link(link1_args, &diag));
+}
+
+TEST_F(LinkTest, LocaleConfigVerificationExternalSymbol) {
+  StdErrDiagnostics diag;
+  const std::string base_files_dir = GetTestPath("base");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          base_files_dir, &diag));
+  const std::string base_apk = GetTestPath("base.apk");
+  std::vector<std::string> link_args = {
+      "--manifest",
+      GetDefaultManifest("com.aapt2.app"),
+      "-o",
+      base_apk,
+  };
+  ASSERT_TRUE(Link(link_args, base_files_dir, &diag));
+
+  const std::string localeconfig_manifest = GetTestPath("localeconfig_manifest.xml");
+  const std::string out_apk = GetTestPath("out.apk");
+  WriteFile(localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/locales_config">
+      </application>
+    </manifest>)"));
+  link_args = LinkCommandBuilder(this)
+                  .SetManifestFile(localeconfig_manifest)
+                  .AddParameter("-I", base_apk)
+                  .Build(out_apk);
+  ASSERT_TRUE(Link(link_args, &diag));
+}
+
+TEST_F(LinkTest, LocaleConfigWrongTag) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+
+  // Invalid element: locale1-config
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_locale_config.xml"), R"(
+    <locale1-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale1-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string locale1config_manifest = GetTestPath("locale1config_manifest.xml");
+  WriteFile(locale1config_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_locale_config">
+      </application>
+    </manifest>)"));
+
+  const std::string out_apk = GetTestPath("out.apk");
+  auto link_args = LinkCommandBuilder(this)
+                       .SetManifestFile(locale1config_manifest)
+                       .AddCompiledResDir(compiled_files_dir, &diag)
+                       .Build(out_apk);
+  ASSERT_FALSE(Link(link_args, &diag));
+
+  // Invalid element: locale1
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_locale.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale1 android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string locale1_manifest = GetTestPath("locale1_manifest.xml");
+  WriteFile(locale1_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_locale">
+      </application>
+    </manifest>)"));
+
+  auto link1_args = LinkCommandBuilder(this)
+                        .SetManifestFile(locale1_manifest)
+                        .AddCompiledResDir(compiled_files_dir, &diag)
+                        .Build(out_apk);
+  ASSERT_FALSE(Link(link1_args, &diag));
+
+  // Invalid attribute: android:name1
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_attribute.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name1="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string wrong_attribute_manifest = GetTestPath("wrong_attribute_manifest.xml");
+  WriteFile(wrong_attribute_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_attribute">
+      </application>
+    </manifest>)"));
+
+  auto link2_args = LinkCommandBuilder(this)
+                        .SetManifestFile(wrong_attribute_manifest)
+                        .AddCompiledResDir(compiled_files_dir, &diag)
+                        .Build(out_apk);
+  ASSERT_FALSE(Link(link2_args, &diag));
+}
+
+TEST_F(LinkTest, LocaleConfigWrongLocaleFormat) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+
+  // Invalid locale: en-U
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_locale.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-U"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string wrong_locale_manifest = GetTestPath("wrong_locale_manifest.xml");
+  WriteFile(wrong_locale_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_locale">
+      </application>
+    </manifest>)"));
+
+  const std::string out_apk = GetTestPath("out.apk");
+  auto link_args = LinkCommandBuilder(this)
+                       .SetManifestFile(wrong_locale_manifest)
+                       .AddCompiledResDir(compiled_files_dir, &diag)
+                       .Build(out_apk);
+  ASSERT_FALSE(Link(link_args, &diag));
 }
 
 }  // namespace aapt

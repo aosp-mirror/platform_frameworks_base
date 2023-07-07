@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
@@ -68,6 +69,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS =
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
+    private static final boolean SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED =
+            SystemProperties.getBoolean("ro.hotword.detection_service_required", false);
 
     @NonNull
     private final Object mLock = new Object();
@@ -199,9 +202,16 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }
     }
 
-    private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
-        // Usage of the HotwordDetectionService won't be enforced until a later release.
-        return false;
+    /**
+     * @hide
+     */
+    public static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
+        // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
+        if (pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return false;
+        }
+        return SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED;
     }
 
     @Override
@@ -315,6 +325,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
         code = resolveRecordAudioOp(code, uid);
+        code = resolveSandboxedServiceOp(code, uid);
         if (attributionTag == null) {
             return code;
         }
@@ -438,6 +449,28 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         return code;
     }
 
+    private int resolveSandboxedServiceOp(int code, int uid) {
+        if (!Process.isIsolated(uid) // simple check which fails-fast for the common case
+                 || !(code == AppOpsManager.OP_RECORD_AUDIO || code == AppOpsManager.OP_CAMERA)) {
+            return code;
+        }
+        final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
+                mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
+        if (hotwordDetectionServiceIdentity != null
+                && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+            // Upgrade the op such that no indicators is shown for camera or audio service. This
+            // will bypass the permission checking for the original OP_RECORD_AUDIO and OP_CAMERA.
+            switch (code) {
+                case AppOpsManager.OP_RECORD_AUDIO:
+                    return AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
+                case AppOpsManager.OP_CAMERA:
+                    return AppOpsManager.OP_CAMERA_SANDBOXED;
+            }
+        }
+        return code;
+    }
+
+
     private int resolveUid(int code, int uid) {
         // The HotwordDetectionService is an isolated service, which ordinarily cannot hold
         // permissions. So we allow it to assume the owning package identity for certain
@@ -446,7 +479,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         // package, so we don't need to modify it.
         if (Process.isIsolated(uid) // simple check which fails-fast for the common case
                 && (code == AppOpsManager.OP_RECORD_AUDIO
-                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD)) {
+                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD
+                || code == AppOpsManager.OP_CAMERA)) {
             final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
                     mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
             if (hotwordDetectionServiceIdentity != null

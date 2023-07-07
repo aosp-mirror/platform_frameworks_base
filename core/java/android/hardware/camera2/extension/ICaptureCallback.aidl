@@ -27,4 +27,5 @@ interface ICaptureCallback
     void onCaptureSequenceCompleted(int captureSequenceId);
     void onCaptureSequenceAborted(int captureSequenceId);
     void onCaptureCompleted(long shutterTimestamp, int requestId, in CameraMetadataNative results);
+    void onCaptureProcessProgressed(int progress);
 }

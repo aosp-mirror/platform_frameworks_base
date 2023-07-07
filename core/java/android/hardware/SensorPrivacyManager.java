@@ -73,6 +73,13 @@ public final class SensorPrivacyManager {
             + ".extra.all_sensors";
 
     /**
+     * An extra containing the sensor type
+     * @hide
+     */
+    public static final String EXTRA_TOGGLE_TYPE = SensorPrivacyManager.class.getName()
+            + ".extra.toggle_type";
+
+    /**
      * Sensor constants which are used in {@link SensorPrivacyManager}
      */
     public static class Sensors {
@@ -458,7 +465,7 @@ public final class SensorPrivacyManager {
             @Override
             public void onSensorPrivacyChanged(SensorPrivacyChangedParams params) {
                 if (params.getSensor() == sensor) {
-                    listener.onSensorPrivacyChanged(params.getSensor(), params.isEnabled());
+                    listener.onSensorPrivacyChanged(params);
                 }
             }
             @Override

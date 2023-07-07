@@ -21,8 +21,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Process
 import android.util.Log
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.testutils.whenever
+import java.io.File
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.notNullValue
@@ -33,13 +34,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.argThat
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
-import java.io.File
 
 @RunWith(JUnit4::class)
 class PackageManagerServiceBootTest {
@@ -57,7 +56,6 @@ class PackageManagerServiceBootTest {
 
     private fun createPackageManagerService(): PackageManagerService {
         return PackageManagerService(rule.mocks().injector,
-                false /*coreOnly*/,
                 false /*factoryTest*/,
                 MockSystem.DEFAULT_VERSION_INFO.fingerprint,
                 false /*isEngBuild*/,
@@ -121,8 +119,7 @@ class PackageManagerServiceBootTest {
         whenever(rule.mocks().packageParser.parsePackage(
                 argThat { path: File -> path.path.contains("a.data.package") },
                 anyInt(),
-                anyBoolean(),
-                any()))
+                anyBoolean()))
                 .thenThrow(PackageManagerException(
                         PackageManager.INSTALL_FAILED_INVALID_APK, "Oh no!"))
         val pm = createPackageManagerService()

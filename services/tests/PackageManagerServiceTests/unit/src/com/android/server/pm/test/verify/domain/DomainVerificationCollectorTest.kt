@@ -18,14 +18,15 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.os.Build
 import android.os.PatternMatcher
 import android.util.ArraySet
 import com.android.server.SystemConfig
 import com.android.server.compat.PlatformCompat
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.server.pm.pkg.AndroidPackage
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationCollector
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -87,7 +88,7 @@ class DomainVerificationCollectorTest {
 
     @Test
     fun verifyV1NoValidIntentFilter() {
-        val pkg = mockThrowOnUnmocked<AndroidPackage> {
+        val pkg = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(packageName) { TEST_PKG_NAME }
             whenever(targetSdkVersion) { Build.VERSION_CODES.R }
 

@@ -26,6 +26,7 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+import static android.app.AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -34,6 +35,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
+import static android.hardware.SensorPrivacyManager.EXTRA_TOGGLE_TYPE;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.hardware.SensorPrivacyManager.Sources.DIALOG;
@@ -81,6 +83,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
@@ -199,6 +202,7 @@ public final class SensorPrivacyService extends SystemService {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
             mCallStateHelper = new CallStateHelper();
+            mSensorPrivacyServiceImpl.registerSettingsObserver();
         } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             mCameraPrivacyLightController = new CameraPrivacyLightController(mContext);
         }
@@ -219,7 +223,7 @@ public final class SensorPrivacyService extends SystemService {
     }
 
     class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
-            AppOpsManager.OnOpNotedListener, AppOpsManager.OnOpStartedListener,
+            AppOpsManager.OnOpNotedInternalListener, AppOpsManager.OnOpStartedListener,
             IBinder.DeathRecipient, UserManagerInternal.UserRestrictionsListener {
 
         private final SensorPrivacyHandler mHandler;
@@ -270,11 +274,12 @@ public final class SensorPrivacyService extends SystemService {
             mHandler = new SensorPrivacyHandler(FgThread.get().getLooper(), mContext);
             mSensorPrivacyStateController = SensorPrivacyStateController.getInstance();
 
+            correctStateIfNeeded();
+
             int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE,
-                    OP_CAMERA, OP_PHONE_CALL_CAMERA};
+                    OP_CAMERA, OP_PHONE_CALL_CAMERA, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO};
             mAppOpsManager.startWatchingNoted(micAndCameraOps, this);
             mAppOpsManager.startWatchingStarted(micAndCameraOps, this);
-
 
 
             mContext.registerReceiver(new BroadcastReceiver() {
@@ -282,7 +287,7 @@ public final class SensorPrivacyService extends SystemService {
                 public void onReceive(Context context, Intent intent) {
                     setToggleSensorPrivacy(
                             ((UserHandle) intent.getParcelableExtra(
-                                    Intent.EXTRA_USER)).getIdentifier(), OTHER,
+                                    Intent.EXTRA_USER, android.os.UserHandle.class)).getIdentifier(), OTHER,
                             intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
                 }
             }, new IntentFilter(ACTION_DISABLE_TOGGLE_SENSOR_PRIVACY),
@@ -307,6 +312,20 @@ public final class SensorPrivacyService extends SystemService {
                     mHandler,
                     (toggleType, userId, sensor, state) -> mHandler.handleSensorPrivacyChanged(
                             userId, toggleType, sensor, state.isEnabled()));
+        }
+
+        // If sensor privacy is enabled for a sensor, but the device doesn't support sensor privacy
+        // for that sensor, then disable privacy
+        private void correctStateIfNeeded() {
+            mSensorPrivacyStateController.forEachState((type, user, sensor, state) -> {
+                if (type != TOGGLE_TYPE_SOFTWARE) {
+                    return;
+                }
+                if (!supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor) && state.isEnabled()) {
+                    setToggleSensorPrivacyUnchecked(
+                            TOGGLE_TYPE_SOFTWARE, user, OTHER, sensor, false);
+                }
+            });
         }
 
         @Override
@@ -340,7 +359,8 @@ public final class SensorPrivacyService extends SystemService {
 
             int sensor;
             if (result == MODE_IGNORED) {
-                if (code == OP_RECORD_AUDIO || code == OP_PHONE_CALL_MICROPHONE) {
+                if (code == OP_RECORD_AUDIO || code == OP_PHONE_CALL_MICROPHONE
+                        || code == OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO) {
                     sensor = MICROPHONE;
                 } else if (code == OP_CAMERA || code == OP_PHONE_CALL_CAMERA) {
                     sensor = CAMERA;
@@ -660,6 +680,29 @@ public final class SensorPrivacyService extends SystemService {
                             .build());
         }
 
+        private void showSensorStateChangedActivity(@SensorPrivacyManager.Sensors.Sensor int sensor,
+                @SensorPrivacyManager.ToggleType int toggleType) {
+            String activityName = mContext.getResources().getString(
+                    R.string.config_sensorStateChangedActivity);
+            if (TextUtils.isEmpty(activityName)) {
+                return;
+            }
+
+            Intent dialogIntent = new Intent();
+            dialogIntent.setComponent(
+                    ComponentName.unflattenFromString(activityName));
+
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setTaskOverlay(true, true);
+
+            dialogIntent.addFlags(
+                    FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | FLAG_ACTIVITY_NO_USER_ACTION);
+
+            dialogIntent.putExtra(EXTRA_SENSOR, sensor);
+            dialogIntent.putExtra(EXTRA_TOGGLE_TYPE, toggleType);
+            mContext.startActivityAsUser(dialogIntent, options.toBundle(), UserHandle.SYSTEM);
+        }
+
         private boolean isTelevision(Context context) {
             int uiMode = context.getResources().getConfiguration().uiMode;
             return (uiMode & Configuration.UI_MODE_TYPE_MASK)
@@ -693,7 +736,12 @@ public final class SensorPrivacyService extends SystemService {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
             }
+
             if (!canChangeToggleSensorPrivacy(userId, sensor)) {
+                return;
+            }
+            if (enable && !supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor)) {
+                // Do not enable sensor privacy if the device doesn't support it
                 return;
             }
 
@@ -702,6 +750,16 @@ public final class SensorPrivacyService extends SystemService {
 
         private void setToggleSensorPrivacyUnchecked(int toggleType, int userId, int source,
                 int sensor, boolean enable) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " setToggleSensorPrivacyUnchecked("
+                        + "userId=" + userId
+                        + " source=" + source
+                        + " sensor=" + sensor
+                        + " enable=" + enable
+                        + ")");
+            }
             final long[] lastChange = new long[1];
             mSensorPrivacyStateController.atomic(() -> {
                 SensorState sensorState = mSensorPrivacyStateController
@@ -835,8 +893,9 @@ public final class SensorPrivacyService extends SystemService {
          */
         private void enforceObserveSensorPrivacyPermission() {
             String systemUIPackage = mContext.getString(R.string.config_systemUi);
-            if (Binder.getCallingUid() == mPackageManagerInternal
-                    .getPackageUid(systemUIPackage, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM)) {
+            int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
+                    .getPackageUid(systemUIPackage, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM));
+            if (UserHandle.getCallingAppId() == systemUIAppId) {
                 // b/221782106, possible race condition with role grant might bootloop device.
                 return;
             }
@@ -1072,6 +1131,14 @@ public final class SensorPrivacyService extends SystemService {
                     // restrict it when the microphone is disabled
                     mAppOpsManagerInternal.setGlobalRestriction(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
                             enabled, mAppOpsRestrictionToken);
+
+                    // Set restriction for OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
+                    boolean allowed = (Settings.Global.getInt(mContext.getContentResolver(),
+                            Settings.Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED, 1)
+                            == 1);
+                    mAppOpsManagerInternal.setGlobalRestriction(
+                            OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO, enabled && !allowed,
+                            mAppOpsRestrictionToken);
                     break;
                 case CAMERA:
                     mAppOpsManagerInternal.setGlobalRestriction(OP_CAMERA, enabled,
@@ -1110,6 +1177,19 @@ public final class SensorPrivacyService extends SystemService {
                             + " from " + key);
                 }
             }
+        }
+
+        private void registerSettingsObserver() {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(
+                            Settings.Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED),
+                    false, new ContentObserver(mHandler) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            setGlobalRestriction(MICROPHONE,
+                                    isCombinedToggleSensorPrivacyEnabled(MICROPHONE));
+                        }
+                    });
         }
 
         /**
@@ -1353,6 +1433,8 @@ public final class SensorPrivacyService extends SystemService {
                     mToggleSensorListeners.finishBroadcast();
                 }
             }
+
+            mSensorPrivacyServiceImpl.showSensorStateChangedActivity(sensor, toggleType);
         }
 
         public void removeSuppressPackageReminderToken(Pair<Integer, UserHandle> key,

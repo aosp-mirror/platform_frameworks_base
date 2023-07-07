@@ -45,6 +45,7 @@ interface IAppWidgetService {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId);
     int[] getAppWidgetIdsForHost(String callingPackage, int hostId);
+    void setAppWidgetHidden(in String callingPackage, int hostId);
     IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
             int intentFlags);
 
@@ -69,7 +70,8 @@ interface IAppWidgetService {
             int providerProfileId, in ComponentName providerComponent, in Bundle options);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
-            IApplicationThread caller, IBinder token, IServiceConnection connection, int flags);
+            IApplicationThread caller, IBinder token, IServiceConnection connection, long flags);
+    void notifyProviderInheritance(in ComponentName[] componentNames);
 
     @UnsupportedAppUsage
     int[] getAppWidgetIds(in ComponentName providerComponent);

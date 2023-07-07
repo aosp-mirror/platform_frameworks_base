@@ -86,6 +86,7 @@
 ?audio/x-matroska mka
 ?audio/x-pn-realaudio ra
 ?audio/x-mpeg mp3
+?audio/mp3 mp3
 
 ?image/bmp bmp
 ?image/gif gif

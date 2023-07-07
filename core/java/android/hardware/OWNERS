@@ -16,3 +16,6 @@ per-file *Sensor*,*Trigger* = file:platform/frameworks/native:/services/sensorse
 # Buffers
 per-file HardwareBuffer* = file:/graphics/java/android/graphics/OWNERS
 per-file DataSpace* = file:/graphics/java/android/graphics/OWNERS
+
+# OverlayProperties
+per-file OverlayProperties* = file:/graphics/java/android/graphics/OWNERS

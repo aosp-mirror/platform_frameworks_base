@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2022, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- Long comment describing anything that may be needed
+for this file and its maintenance -->
+<irq-device-map>
+    <!-- Small comment specific to this device -->
+    <invalid name="test.device.1">
+        <!-- These valid subsystem definitions should be ignored because of invalid parent tag -->
+        <subsystem>test.subsystem.1</subsystem>
+        <subsystem>test.subsystem.2</subsystem>
+    </invalid>
+    <device name="test.device.2">
+        <!-- Multiline comment to describe nuances
+         about why these subsystems
+         rely on this hardware device
+         to wake the CPU up from sleep
+        -->
+        <subsystem>test.subsystem.3</subsystem>
+        <!-- Small comment specific to test.subsystem.4 -->
+        <subsystem>test.subsystem.4</subsystem>
+        <subsystem>test.subsystem.5</subsystem>
+        <!-- Duplicates should be ignored -->
+        <subsystem>test.subsystem.4</subsystem>
+        <subsystem>test.subsystem.3</subsystem>
+        <subsystem>test.subsystem.5</subsystem>
+    </device>
+
+    <device name="test.device.3">
+        <!-- All child tags are invalid, mapping should be empty / non-existent for this device -->
+        <subsys>ignored</subsys>
+        <system>redundant</system>
+    </device>
+
+    <device name="test.device.4">
+        <!-- Invalid child tags should be skipped but others should be mapped -->
+        <invalid>unused</invalid>
+        <random>skipped</random>
+        <subsystem>test.subsystem.1</subsystem>
+        <subsystem>test.subsystem.4</subsystem>
+    </device>
+
+</irq-device-map>

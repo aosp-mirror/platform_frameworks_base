@@ -182,7 +182,7 @@ public class ResumeOnRebootServiceProvider {
             waitForLatch(binderLatch, "wrapSecret", timeOutInMillis);
             if (resultCallback.getResult().containsKey(ResumeOnRebootService.EXCEPTION_KEY)) {
                 throwTypedException(resultCallback.getResult().getParcelable(
-                        ResumeOnRebootService.EXCEPTION_KEY));
+                        ResumeOnRebootService.EXCEPTION_KEY, android.os.ParcelableException.class));
             }
             return resultCallback.mResult.getByteArray(ResumeOnRebootService.WRAPPED_BLOB_KEY);
         }
@@ -202,7 +202,7 @@ public class ResumeOnRebootServiceProvider {
             waitForLatch(binderLatch, "unWrapSecret", timeOut);
             if (resultCallback.getResult().containsKey(ResumeOnRebootService.EXCEPTION_KEY)) {
                 throwTypedException(resultCallback.getResult().getParcelable(
-                        ResumeOnRebootService.EXCEPTION_KEY));
+                        ResumeOnRebootService.EXCEPTION_KEY, android.os.ParcelableException.class));
             }
             return resultCallback.getResult().getByteArray(
                     ResumeOnRebootService.UNWRAPPED_BLOB_KEY);

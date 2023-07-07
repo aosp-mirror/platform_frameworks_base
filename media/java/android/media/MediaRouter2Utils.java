@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * @hide
  */
@@ -31,14 +33,8 @@ public class MediaRouter2Utils {
 
     @NonNull
     public static String toUniqueId(@NonNull String providerId, @NonNull String id) {
-        if (TextUtils.isEmpty(providerId)) {
-            Log.w(TAG, "toUniqueId: providerId shouldn't be empty");
-            return null;
-        }
-        if (TextUtils.isEmpty(id)) {
-            Log.w(TAG, "toUniqueId: id shouldn't be null");
-            return null;
-        }
+        Preconditions.checkArgument(!TextUtils.isEmpty(providerId)
+                && !TextUtils.isEmpty(id));
 
         return providerId + SEPARATOR + id;
     }

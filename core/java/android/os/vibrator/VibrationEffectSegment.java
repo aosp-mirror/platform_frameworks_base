@@ -21,6 +21,7 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 
 /**
  * Representation of a single segment of a {@link VibrationEffect}.
@@ -56,6 +57,15 @@ public abstract class VibrationEffectSegment implements Parcelable {
      * is device and potentially run-time dependent), this returns -1.
      */
     public abstract long getDuration();
+
+   /**
+     * Checks if a given {@link Vibrator} can play this segment as intended. See
+     * {@link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more information about
+     * what counts as supported by a vibrator, and what counts as not.
+     *
+     * @hide
+     */
+    public abstract boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator);
 
     /**
      * Returns true if this segment could be a haptic feedback effect candidate.
@@ -147,6 +157,28 @@ public abstract class VibrationEffectSegment implements Parcelable {
         if (value < 0) {
             throw new IllegalArgumentException(name + " must be >= 0, got " + value);
         }
+    }
+
+    /**
+     * Helper method to check if an amplitude requires a vibrator to have amplitude control to play.
+     *
+     * @hide
+     */
+    protected static boolean amplitudeRequiresAmplitudeControl(float amplitude) {
+        return (amplitude != 0)
+                && (amplitude != 1)
+                && (amplitude != VibrationEffect.DEFAULT_AMPLITUDE);
+    }
+
+    /**
+     * Helper method to check if a frequency requires a vibrator to have frequency control to play.
+     *
+     * @hide
+     */
+    protected static boolean frequencyRequiresFrequencyControl(float frequency) {
+        // Anything other than the default frequency value (represented with "0") requires frequency
+        // control.
+        return frequency != 0;
     }
 
     @NonNull

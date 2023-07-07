@@ -42,12 +42,12 @@ struct SurfaceControlHdrLayerInfoListener : public gui::BnHdrLayerInfoListener {
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&mVm) != JNI_OK, "Failed to GetJavaVm");
     }
 
-    binder::Status onHdrLayerInfoChanged(int numberOfHdrLayers, int maxW, int maxH,
-                                         int flags) override {
+    binder::Status onHdrLayerInfoChanged(int numberOfHdrLayers, int maxW, int maxH, int flags,
+                                         float maxDesiredHdrSdrRatio) override {
         JNIEnv* env = requireEnv();
 
         env->CallVoidMethod(mListener, gListenerClassInfo.mOnHdrInfoChanged, mDisplayToken,
-                            numberOfHdrLayers, maxW, maxH, flags);
+                            numberOfHdrLayers, maxW, maxH, flags, maxDesiredHdrSdrRatio);
 
         if (env->ExceptionCheck()) {
             ALOGE("SurfaceControlHdrLayerInfoListener.onHdrInfoChanged() failed.");
@@ -129,7 +129,7 @@ int register_android_view_SurfaceControlHdrLayerInfoListener(JNIEnv* env) {
     jclass clazz = env->FindClass("android/view/SurfaceControlHdrLayerInfoListener");
     gListenerClassInfo.mClass = MakeGlobalRefOrDie(env, clazz);
     gListenerClassInfo.mOnHdrInfoChanged =
-            env->GetMethodID(clazz, "onHdrInfoChanged", "(Landroid/os/IBinder;IIII)V");
+            env->GetMethodID(clazz, "onHdrInfoChanged", "(Landroid/os/IBinder;IIIIF)V");
     return 0;
 }
 

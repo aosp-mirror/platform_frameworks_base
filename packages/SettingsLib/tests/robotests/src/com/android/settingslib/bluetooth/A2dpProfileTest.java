@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothA2dp;
@@ -76,6 +77,21 @@ public class A2dpProfileTest {
         mServiceListener.onServiceConnected(BluetoothProfile.A2DP, mBluetoothA2dp);
         when(mBluetoothAdapter.getActiveDevices(eq(BluetoothProfile.A2DP)))
                 .thenReturn(Arrays.asList(mDevice));
+    }
+
+
+    @Test
+    public void onServiceConnected_isProfileReady() {
+        assertThat(mProfile.isProfileReady()).isTrue();
+        verify(mProfileManager).callServiceConnectedListeners();
+    }
+
+    @Test
+    public void onServiceDisconnected_profileNotReady() {
+        mServiceListener.onServiceDisconnected(BluetoothProfile.A2DP);
+
+        assertThat(mProfile.isProfileReady()).isFalse();
+        verify(mProfileManager).callServiceDisconnectedListeners();
     }
 
     @Test

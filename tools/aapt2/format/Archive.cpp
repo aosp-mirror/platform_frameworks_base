@@ -25,9 +25,9 @@
 #include "android-base/macros.h"
 #include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
-#include "ziparchive/zip_writer.h"
-
 #include "util/Files.h"
+#include "util/Util.h"
+#include "ziparchive/zip_writer.h"
 
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
@@ -40,8 +40,8 @@ class DirectoryWriter : public IArchiveWriter {
  public:
   DirectoryWriter() = default;
 
-  bool Open(const StringPiece& out_dir) {
-    dir_ = out_dir.to_string();
+  bool Open(StringPiece out_dir) {
+    dir_ = std::string(out_dir);
     file::FileType type = file::GetFileType(dir_);
     if (type == file::FileType::kNonExistant) {
       error_ = "directory does not exist";
@@ -53,14 +53,14 @@ class DirectoryWriter : public IArchiveWriter {
     return true;
   }
 
-  bool StartEntry(const StringPiece& path, uint32_t flags) override {
+  bool StartEntry(StringPiece path, uint32_t flags) override {
     if (file_) {
       return false;
     }
 
     std::string full_path = dir_;
     file::AppendPath(&full_path, path);
-    file::mkdirs(file::GetStem(full_path).to_string());
+    file::mkdirs(std::string(file::GetStem(full_path)));
 
     file_ = {::android::base::utf8::fopen(full_path.c_str(), "wb"), fclose};
     if (!file_) {
@@ -91,7 +91,7 @@ class DirectoryWriter : public IArchiveWriter {
     return true;
   }
 
-  bool WriteFile(const StringPiece& path, uint32_t flags, io::InputStream* in) override {
+  bool WriteFile(StringPiece path, uint32_t flags, io::InputStream* in) override {
     if (!StartEntry(path, flags)) {
       return false;
     }
@@ -132,8 +132,8 @@ class ZipFileWriter : public IArchiveWriter {
  public:
   ZipFileWriter() = default;
 
-  bool Open(const StringPiece& path) {
-    file_ = {::android::base::utf8::fopen(path.to_string().c_str(), "w+b"), fclose};
+  bool Open(StringPiece path) {
+    file_ = {::android::base::utf8::fopen(path.data(), "w+b"), fclose};
     if (!file_) {
       error_ = SystemErrorCodeToString(errno);
       return false;
@@ -142,7 +142,7 @@ class ZipFileWriter : public IArchiveWriter {
     return true;
   }
 
-  bool StartEntry(const StringPiece& path, uint32_t flags) override {
+  bool StartEntry(StringPiece path, uint32_t flags) override {
     if (!writer_) {
       return false;
     }
@@ -182,7 +182,7 @@ class ZipFileWriter : public IArchiveWriter {
     return true;
   }
 
-  bool WriteFile(const StringPiece& path, uint32_t flags, io::InputStream* in) override {
+  bool WriteFile(StringPiece path, uint32_t flags, io::InputStream* in) override {
     while (true) {
       if (!StartEntry(path, flags)) {
         return false;
@@ -256,21 +256,21 @@ class ZipFileWriter : public IArchiveWriter {
 
 }  // namespace
 
-std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(IDiagnostics* diag,
-                                                             const StringPiece& path) {
+std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(android::IDiagnostics* diag,
+                                                             StringPiece path) {
   std::unique_ptr<DirectoryWriter> writer = util::make_unique<DirectoryWriter>();
   if (!writer->Open(path)) {
-    diag->Error(DiagMessage(path) << writer->GetError());
+    diag->Error(android::DiagMessage(path) << writer->GetError());
     return {};
   }
   return std::move(writer);
 }
 
-std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(IDiagnostics* diag,
-                                                           const StringPiece& path) {
+std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(android::IDiagnostics* diag,
+                                                           StringPiece path) {
   std::unique_ptr<ZipFileWriter> writer = util::make_unique<ZipFileWriter>();
   if (!writer->Open(path)) {
-    diag->Error(DiagMessage(path) << writer->GetError());
+    diag->Error(android::DiagMessage(path) << writer->GetError());
     return {};
   }
   return std::move(writer);

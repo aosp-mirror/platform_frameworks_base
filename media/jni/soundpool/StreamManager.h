@@ -394,7 +394,7 @@ public:
     // Returns positive streamID on success, 0 on failure.  This is locked.
     int32_t queueForPlay(const std::shared_ptr<Sound> &sound,
             int32_t soundID, float leftVolume, float rightVolume,
-            int32_t priority, int32_t loop, float rate)
+            int32_t priority, int32_t loop, float rate, int32_t playerIId)
             NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
 
     ///////////////////////////////////////////////////////////////////////

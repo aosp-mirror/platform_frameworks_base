@@ -849,7 +849,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * mode.</p>
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability,
+     * capability or devices where
+     * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -1329,7 +1331,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * mode.</p>
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability, {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
+     * capability or devices where
+     * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}},
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
@@ -1962,7 +1967,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * mode.</p>
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability, {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
+     * capability or devices where
+     * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}},
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
@@ -2631,6 +2639,157 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<Float> CONTROL_ZOOM_RATIO =
             new Key<Float>("android.control.zoomRatio", float.class);
+
+    /**
+     * <p>The desired CaptureRequest settings override with which certain keys are
+     * applied earlier so that they can take effect sooner.</p>
+     * <p>There are some CaptureRequest keys which can be applied earlier than others
+     * when controls within a CaptureRequest aren't required to take effect at the same time.
+     * One such example is zoom. Zoom can be applied at a later stage of the camera pipeline.
+     * As soon as the camera device receives the CaptureRequest, it can apply the requested
+     * zoom value onto an earlier request that's already in the pipeline, thus improves zoom
+     * latency.</p>
+     * <p>This key's value in the capture result reflects whether the controls for this capture
+     * are overridden "by" a newer request. This means that if a capture request turns on
+     * settings override, the capture result of an earlier request will contain the key value
+     * of ZOOM. On the other hand, if a capture request has settings override turned on,
+     * but all newer requests have it turned off, the key's value in the capture result will
+     * be OFF because this capture isn't overridden by a newer capture. In the two examples
+     * below, the capture results columns illustrate the settingsOverride values in different
+     * scenarios.</p>
+     * <p>Assuming the zoom settings override can speed up by 1 frame, below example illustrates
+     * the speed-up at the start of capture session:</p>
+     * <pre><code>Camera session created
+     * Request 1 (zoom=1.0x, override=ZOOM) -&gt;
+     * Request 2 (zoom=1.2x, override=ZOOM) -&gt;
+     * Request 3 (zoom=1.4x, override=ZOOM) -&gt;  Result 1 (zoom=1.2x, override=ZOOM)
+     * Request 4 (zoom=1.6x, override=ZOOM) -&gt;  Result 2 (zoom=1.4x, override=ZOOM)
+     * Request 5 (zoom=1.8x, override=ZOOM) -&gt;  Result 3 (zoom=1.6x, override=ZOOM)
+     *                                      -&gt;  Result 4 (zoom=1.8x, override=ZOOM)
+     *                                      -&gt;  Result 5 (zoom=1.8x, override=OFF)
+     * </code></pre>
+     * <p>The application can turn on settings override and use zoom as normal. The example
+     * shows that the later zoom values (1.2x, 1.4x, 1.6x, and 1.8x) overwrite the zoom
+     * values (1.0x, 1.2x, 1.4x, and 1.8x) of earlier requests (#1, #2, #3, and #4).</p>
+     * <p>The application must make sure the settings override doesn't interfere with user
+     * journeys requiring simultaneous application of all controls in CaptureRequest on the
+     * requested output targets. For example, if the application takes a still capture using
+     * CameraCaptureSession#capture, and the repeating request immediately sets a different
+     * zoom value using override, the inflight still capture could have its zoom value
+     * overwritten unexpectedly.</p>
+     * <p>So the application is strongly recommended to turn off settingsOverride when taking
+     * still/burst captures, and turn it back on when there is only repeating viewfinder
+     * request and no inflight still/burst captures.</p>
+     * <p>Below is the example demonstrating the transitions in and out of the
+     * settings override:</p>
+     * <pre><code>Request 1 (zoom=1.0x, override=OFF)
+     * Request 2 (zoom=1.2x, override=OFF)
+     * Request 3 (zoom=1.4x, override=ZOOM)  -&gt; Result 1 (zoom=1.0x, override=OFF)
+     * Request 4 (zoom=1.6x, override=ZOOM)  -&gt; Result 2 (zoom=1.4x, override=ZOOM)
+     * Request 5 (zoom=1.8x, override=OFF)   -&gt; Result 3 (zoom=1.6x, override=ZOOM)
+     *                                       -&gt; Result 4 (zoom=1.6x, override=OFF)
+     *                                       -&gt; Result 5 (zoom=1.8x, override=OFF)
+     * </code></pre>
+     * <p>This example shows that:</p>
+     * <ul>
+     * <li>The application "ramps in" settings override by setting the control to ZOOM.
+     * In the example, request #3 enables zoom settings override. Because the camera device
+     * can speed up applying zoom by 1 frame, the outputs of request #2 has 1.4x zoom, the
+     * value specified in request #3.</li>
+     * <li>The application "ramps out" of settings override by setting the control to OFF. In
+     * the example, request #5 changes the override to OFF. Because request #4's zoom
+     * takes effect in result #3, result #4's zoom remains the same until new value takes
+     * effect in result #5.</li>
+     * </ul>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_SETTINGS_OVERRIDE_OFF OFF}</li>
+     *   <li>{@link #CONTROL_SETTINGS_OVERRIDE_ZOOM ZOOM}</li>
+     * </ul>
+     *
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_SETTINGS_OVERRIDES android.control.availableSettingsOverrides}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_SETTINGS_OVERRIDES
+     * @see #CONTROL_SETTINGS_OVERRIDE_OFF
+     * @see #CONTROL_SETTINGS_OVERRIDE_ZOOM
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> CONTROL_SETTINGS_OVERRIDE =
+            new Key<Integer>("android.control.settingsOverride", int.class);
+
+    /**
+     * <p>Automatic crop, pan and zoom to keep objects in the center of the frame.</p>
+     * <p>Auto-framing is a special mode provided by the camera device to dynamically crop, zoom
+     * or pan the camera feed to try to ensure that the people in a scene occupy a reasonable
+     * portion of the viewport. It is primarily designed to support video calling in
+     * situations where the user isn't directly in front of the device, especially for
+     * wide-angle cameras.
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} and {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in CaptureResult will be used
+     * to denote the coordinates of the auto-framed region.
+     * Zoom and video stabilization controls are disabled when auto-framing is enabled. The 3A
+     * regions must map the screen coordinates into the scaler crop returned from the capture
+     * result instead of using the active array sensor.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AUTOFRAMING_OFF OFF}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_ON ON}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_AUTOFRAMING_OFF
+     * @see #CONTROL_AUTOFRAMING_ON
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> CONTROL_AUTOFRAMING =
+            new Key<Integer>("android.control.autoframing", int.class);
+
+    /**
+     * <p>Current state of auto-framing.</p>
+     * <p>When the camera doesn't have auto-framing available (i.e
+     * <code>{@link CameraCharacteristics#CONTROL_AUTOFRAMING_AVAILABLE android.control.autoframingAvailable}</code> == false) or it is not enabled (i.e
+     * <code>{@link CaptureRequest#CONTROL_AUTOFRAMING android.control.autoframing}</code> == OFF), the state will always be INACTIVE.
+     * Other states indicate the current auto-framing state:</p>
+     * <ul>
+     * <li>When <code>{@link CaptureRequest#CONTROL_AUTOFRAMING android.control.autoframing}</code> is set to ON, auto-framing will take
+     * place. While the frame is aligning itself to center the object (doing things like
+     * zooming in, zooming out or pan), the state will be FRAMING.</li>
+     * <li>When field of view is not being adjusted anymore and has reached a stable state, the
+     * state will be CONVERGED.</li>
+     * </ul>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AUTOFRAMING_STATE_INACTIVE INACTIVE}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_STATE_FRAMING FRAMING}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_STATE_CONVERGED CONVERGED}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @see CameraCharacteristics#CONTROL_AUTOFRAMING_AVAILABLE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see #CONTROL_AUTOFRAMING_STATE_INACTIVE
+     * @see #CONTROL_AUTOFRAMING_STATE_FRAMING
+     * @see #CONTROL_AUTOFRAMING_STATE_CONVERGED
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> CONTROL_AUTOFRAMING_STATE =
+            new Key<Integer>("android.control.autoframingState", int.class);
 
     /**
      * <p>Operation mode for edge
@@ -3595,9 +3754,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Output streams use this rectangle to produce their output, cropping to a smaller region
      * if necessary to maintain the stream's aspect ratio, then scaling the sensor input to
      * match the output's configured resolution.</p>
-     * <p>The crop region is applied after the RAW to other color space (e.g. YUV)
-     * conversion. Since raw streams (e.g. RAW16) don't have the conversion stage, they are not
-     * croppable. The crop region will be ignored by raw streams.</p>
+     * <p>The crop region is usually applied after the RAW to other color space (e.g. YUV)
+     * conversion. As a result RAW streams are not croppable unless supported by the
+     * camera device. See {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES android.scaler.availableStreamUseCases}#CROPPED_RAW for details.</p>
      * <p>For non-raw streams, any additional per-stream cropping will be done to maximize the
      * final pixel area of the stream.</p>
      * <p>For example, if the crop region is set to a 4:3 aspect ratio, then 4:3 streams will use
@@ -3678,7 +3837,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} for details.</p>
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability, {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
+     * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * <p>{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
@@ -3692,6 +3853,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
      * @see CameraCharacteristics#SCALER_CROPPING_TYPE
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
@@ -3797,6 +3959,60 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<Integer> SCALER_ROTATE_AND_CROP =
             new Key<Integer>("android.scaler.rotateAndCrop", int.class);
+
+    /**
+     * <p>The region of the sensor that corresponds to the RAW read out for this
+     * capture when the stream use case of a RAW stream is set to CROPPED_RAW.</p>
+     * <p>The coordinate system follows that of {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.</p>
+     * <p>This CaptureResult key will be set when the corresponding CaptureRequest has a RAW target
+     * with stream use case set to
+     * {@link android.hardware.camera2.CameraMetadata#SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW },
+     * otherwise it will be {@code null}.
+     * The value of this key specifies the region of the sensor used for the RAW capture and can
+     * be used to calculate the corresponding field of view of RAW streams.
+     * This field of view will always be &gt;= field of view for (processed) non-RAW streams for the
+     * capture. Note: The region specified may not necessarily be centered.</p>
+     * <p>For example: Assume a camera device has a pre correction active array size of
+     * {@code {0, 0, 1500, 2000}}. If the RAW_CROP_REGION is {@code {500, 375, 1500, 1125}}, that
+     * corresponds to a centered crop of 1/4th of the full field of view RAW stream.</p>
+     * <p>The metadata keys which describe properties of RAW frames:</p>
+     * <ul>
+     * <li>{@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}</li>
+     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP android.statistics.lensShadingCorrectionMap}</li>
+     * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * </ul>
+     * <p>should be interpreted in the effective after raw crop field-of-view coordinate system.
+     * In this coordinate system,
+     * {preCorrectionActiveArraySize.left, preCorrectionActiveArraySize.top} corresponds to the
+     * the top left corner of the cropped RAW frame and
+     * {preCorrectionActiveArraySize.right, preCorrectionActiveArraySize.bottom} corresponds to
+     * the bottom right corner. Client applications must use the values of the keys
+     * in the CaptureResult metadata if present.</p>
+     * <p>Crop regions (android.scaler.CropRegion), AE/AWB/AF regions and face coordinates still
+     * use the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate system as usual.</p>
+     * <p><b>Units</b>: Pixel coordinates relative to
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} or
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} depending on distortion correction
+     * capability and mode</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_DISTORTION
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
+     * @see CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.graphics.Rect> SCALER_RAW_CROP_REGION =
+            new Key<android.graphics.Rect>("android.scaler.rawCropRegion", android.graphics.Rect.class);
 
     /**
      * <p>Duration each pixel is exposed to
@@ -4234,13 +4450,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT } mode.
      * When operating in
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT } mode, sensors
-     * with {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability would typically perform pixel binning in order to improve low light
+     * would typically perform pixel binning in order to improve low light
      * performance, noise reduction etc. However, in
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }
-     * mode (supported only
-     * by {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * sensors), sensors typically operate in unbinned mode allowing for a larger image size.
+     * mode, sensors typically operate in unbinned mode allowing for a larger image size.
      * The stream configurations supported in
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }
      * mode are also different from those of
@@ -4254,7 +4467,32 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}</code>
      * must not be mixed in the same CaptureRequest. In other words, these outputs are
      * exclusive to each other.
-     * This key does not need to be set for reprocess requests.</p>
+     * This key does not need to be set for reprocess requests.
+     * This key will be be present on devices supporting the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability. It may also be present on devices which do not support the aforementioned
+     * capability. In that case:</p>
+     * <ul>
+     * <li>
+     * <p>The mandatory stream combinations listed in
+     *   {@link android.hardware.camera2.CameraCharacteristics.mandatoryMaximumResolutionStreamCombinations }
+     *   would not apply.</p>
+     * </li>
+     * <li>
+     * <p>The bayer pattern of {@code RAW} streams when
+     *   {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }
+     *   is selected will be the one listed in {@link android.sensor.info.binningFactor }.</p>
+     * </li>
+     * <li>
+     * <p>The following keys will always be present:</p>
+     * <ul>
+     * <li>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.pixelArraySizeMaximumResolution}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution}</li>
+     * </ul>
+     * </li>
+     * </ul>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_PIXEL_MODE_DEFAULT DEFAULT}</li>
@@ -4265,6 +4503,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
      * @see #SENSOR_PIXEL_MODE_DEFAULT
      * @see #SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION
      */
@@ -5423,9 +5664,69 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     public static final Key<Integer> DISTORTION_CORRECTION_MODE =
             new Key<Integer>("android.distortionCorrection.mode", int.class);
 
+    /**
+     * <p>Contains the extension type of the currently active extension</p>
+     * <p>The capture result will only be supported and included by camera extension
+     * {@link android.hardware.camera2.CameraExtensionSession sessions}.
+     * In case the extension session was configured to use
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_AUTOMATIC AUTO},
+     * then the extension type value will indicate the currently active extension like
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_HDR HDR},
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_NIGHT NIGHT} etc.
+     * , and will never return
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_AUTOMATIC AUTO}.
+     * In case the extension session was configured to use an extension different from
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_AUTOMATIC AUTO},
+     * then the result type will always match with the configured extension type.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Extension type value listed in
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics }</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> EXTENSION_CURRENT_TYPE =
+            new Key<Integer>("android.extension.currentType", int.class);
+
+    /**
+     * <p>Strength of the extension post-processing effect</p>
+     * <p>This control allows Camera extension clients to configure the strength of the applied
+     * extension effect. Strength equal to 0 means that the extension must not apply any
+     * post-processing and return a regular captured frame. Strength equal to 100 is the
+     * default level of post-processing applied when the control is not supported or not set
+     * by the client. Values between 0 and 100 will have different effect depending on the
+     * extension type as described below:</p>
+     * <ul>
+     * <li>{@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_BOKEH BOKEH} -
+     * the strength is expected to control the amount of blur.</li>
+     * <li>{@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_HDR HDR} and
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_NIGHT NIGHT} -
+     * the strength can control the amount of images fused and the brightness of the final image.</li>
+     * <li>{@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_FACE_RETOUCH FACE_RETOUCH} -
+     * the strength value will control the amount of cosmetic enhancement and skin
+     * smoothing.</li>
+     * </ul>
+     * <p>The control will be supported if the capture request key is part of the list generated by
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#getAvailableCaptureRequestKeys }.
+     * The control is only defined and available to clients sending capture requests via
+     * {@link android.hardware.camera2.CameraExtensionSession }.
+     * The default value is 100.</p>
+     * <p><b>Range of valid values:</b><br>
+     * 0 - 100</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> EXTENSION_STRENGTH =
+            new Key<Integer>("android.extension.strength", int.class);
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
+
+
 
 
 

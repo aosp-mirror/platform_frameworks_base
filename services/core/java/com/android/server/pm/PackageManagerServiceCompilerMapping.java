@@ -41,6 +41,7 @@ public class PackageManagerServiceCompilerMapping {
         "ab-ota",
         "inactive",
         "cmdline",
+        "boot-after-mainline-update",
         // "shared" must be the last entry
         "shared"
     };

@@ -471,7 +471,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected MultipleDownloadsCompletedReceiver registerNewMultipleDownloadsReceiver() {
         MultipleDownloadsCompletedReceiver receiver = new MultipleDownloadsCompletedReceiver();
         mContext.registerReceiver(receiver, new IntentFilter(
-                DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_EXPORTED_UNAUDITED);
         return receiver;
     }
 

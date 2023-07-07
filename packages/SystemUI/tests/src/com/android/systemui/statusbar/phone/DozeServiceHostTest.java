@@ -25,10 +25,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Point;
 import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -39,8 +42,11 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
+import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -59,10 +65,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class DozeServiceHostTest extends SysuiTestCase {
 
     private DozeServiceHost mDozeServiceHost;
@@ -70,7 +76,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
-    @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
@@ -86,57 +91,56 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private NotificationPanelViewController mNotificationPanel;
+    @Mock private ShadeViewController mShadeViewController;
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
+    @Mock private DozeHost.Callback mCallback;
+    @Mock private BurnInInteractor mBurnInInteractor;
 
+    @Mock private DozeInteractor mDozeInteractor;
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mDozeServiceHost = new DozeServiceHost(mDozeLog, mPowerManager, mWakefullnessLifecycle,
                 mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
                 mBatteryController, mScrimController, () -> mBiometricUnlockController,
-                mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
-                mKeyguardUpdateMonitor, mPulseExpansionHandler, Optional.empty(),
+                () -> mAssistManager, mDozeScrimController,
+                mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mAuthController, mNotificationIconAreaController);
+                mAuthController, mNotificationIconAreaController, mDozeInteractor,
+                mBurnInInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,
                 mStatusBarKeyguardViewManager,
                 mNotificationShadeWindowViewController,
-                mNotificationPanel,
+                mShadeViewController,
                 mAmbientIndicationContainer);
     }
 
     @Test
     public void testStartStopDozing() {
+        mDozeServiceHost.addCallback(mCallback);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
         when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
 
         assertFalse(mDozeServiceHost.getDozingRequested());
 
         mDozeServiceHost.startDozing();
+        verify(mCallback).onDozingChanged(eq(true));
         verify(mStatusBarStateController).setIsDozing(eq(true));
         verify(mCentralSurfaces).updateIsKeyguard();
 
         mDozeServiceHost.stopDozing();
+        verify(mCallback).onDozingChanged(eq(false));
         verify(mStatusBarStateController).setIsDozing(eq(false));
     }
-
 
     @Test
     public void testPulseWhileDozing_updatesScrimController() {
         mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
         mCentralSurfaces.showKeyguardImpl();
-
-        // Keep track of callback to be able to stop the pulse
-//        DozeHost.PulseCallback[] pulseCallback = new DozeHost.PulseCallback[1];
-//        doAnswer(invocation -> {
-//            pulseCallback[0] = invocation.getArgument(0);
-//            return null;
-//        }).when(mDozeScrimController).pulse(any(), anyInt());
 
         // Starting a pulse should change the scrim controller to the pulsing state
         mDozeServiceHost.pulseWhileDozing(new DozeHost.PulseCallback() {
@@ -202,5 +206,39 @@ public class DozeServiceHostTest extends SysuiTestCase {
                         + " passive auth. Please consider how this pulse reason should behave.");
             }
         }
+    }
+
+    @Test
+    public void testStopPulsing_setPendingPulseToFalse() {
+        // GIVEN a pending pulse
+        mDozeServiceHost.setPulsePending(true);
+
+        // WHEN pulsing is stopped
+        mDozeServiceHost.stopPulsing();
+
+        // THEN isPendingPulse=false, pulseOutNow is called
+        assertFalse(mDozeServiceHost.isPulsePending());
+        verify(mDozeScrimController).pulseOutNow();
+    }
+
+    @Test
+    public void onSlpiTap_calls_DozeInteractor() {
+        mDozeServiceHost.onSlpiTap(100, 200);
+        verify(mDozeInteractor).setLastTapToWakePosition(new Point(100, 200));
+    }
+
+    @Test
+    public void onSlpiTap_doesnt_pass_negative_values() {
+        mDozeServiceHost.onSlpiTap(-1, 200);
+        mDozeServiceHost.onSlpiTap(100, -2);
+        verifyZeroInteractions(mDozeInteractor);
+    }
+    @Test
+    public void dozeTimeTickSentTBurnInInteractor() {
+        // WHEN dozeTimeTick
+        mDozeServiceHost.dozeTimeTick();
+
+        // THEN burnInInteractor's dozeTimeTick is updated
+        verify(mBurnInInteractor).dozeTimeTick();
     }
 }

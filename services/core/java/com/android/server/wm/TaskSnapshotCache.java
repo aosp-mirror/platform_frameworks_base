@@ -18,38 +18,28 @@ package com.android.server.wm;
 
 import android.annotation.Nullable;
 import android.window.TaskSnapshot;
-import android.util.ArrayMap;
-
-import java.io.PrintWriter;
 
 /**
  * Caches snapshots. See {@link TaskSnapshotController}.
  * <p>
  * Access to this class should be guarded by the global window manager lock.
  */
-class TaskSnapshotCache {
+class TaskSnapshotCache extends SnapshotCache<Task> {
 
-    private final WindowManagerService mService;
-    private final TaskSnapshotLoader mLoader;
-    private final ArrayMap<ActivityRecord, Integer> mAppTaskMap = new ArrayMap<>();
-    private final ArrayMap<Integer, CacheEntry> mRunningCache = new ArrayMap<>();
+    private final AppSnapshotLoader mLoader;
 
-    TaskSnapshotCache(WindowManagerService service, TaskSnapshotLoader loader) {
-        mService = service;
+    TaskSnapshotCache(WindowManagerService service, AppSnapshotLoader loader) {
+        super(service, "Task");
         mLoader = loader;
-    }
-
-    void clearRunningCache() {
-        mRunningCache.clear();
     }
 
     void putSnapshot(Task task, TaskSnapshot snapshot) {
         final CacheEntry entry = mRunningCache.get(task.mTaskId);
         if (entry != null) {
-            mAppTaskMap.remove(entry.topApp);
+            mAppIdMap.remove(entry.topApp);
         }
         final ActivityRecord top = task.getTopMostActivity();
-        mAppTaskMap.put(top, task.mTaskId);
+        mAppIdMap.put(top, task.mTaskId);
         mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, top));
     }
 
@@ -58,13 +48,9 @@ class TaskSnapshotCache {
      */
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean isLowResolution) {
-
-        synchronized (mService.mGlobalLock) {
-            // Try the running cache.
-            final CacheEntry entry = mRunningCache.get(taskId);
-            if (entry != null) {
-                return entry.snapshot;
-            }
+        final TaskSnapshot snapshot = getSnapshot(taskId);
+        if (snapshot != null) {
+            return snapshot;
         }
 
         // Try to restore from disk if asked.
@@ -78,68 +64,6 @@ class TaskSnapshotCache {
      * DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING THIS METHOD!
      */
     private TaskSnapshot tryRestoreFromDisk(int taskId, int userId, boolean isLowResolution) {
-        final TaskSnapshot snapshot = mLoader.loadTask(taskId, userId, isLowResolution);
-        if (snapshot == null) {
-            return null;
-        }
-        return snapshot;
-    }
-
-    /**
-     * Called when an app token has been removed
-     */
-    void onAppRemoved(ActivityRecord activity) {
-        final Integer taskId = mAppTaskMap.get(activity);
-        if (taskId != null) {
-            removeRunningEntry(taskId);
-        }
-    }
-
-    /**
-     * Callend when an app window token's process died.
-     */
-    void onAppDied(ActivityRecord activity) {
-        final Integer taskId = mAppTaskMap.get(activity);
-        if (taskId != null) {
-            removeRunningEntry(taskId);
-        }
-    }
-
-    void onTaskRemoved(int taskId) {
-        removeRunningEntry(taskId);
-    }
-
-    void removeRunningEntry(int taskId) {
-        final CacheEntry entry = mRunningCache.get(taskId);
-        if (entry != null) {
-            mAppTaskMap.remove(entry.topApp);
-            mRunningCache.remove(taskId);
-        }
-    }
-
-    void dump(PrintWriter pw, String prefix) {
-        final String doublePrefix = prefix + "  ";
-        final String triplePrefix = doublePrefix + "  ";
-        pw.println(prefix + "SnapshotCache");
-        for (int i = mRunningCache.size() - 1; i >= 0; i--) {
-            final CacheEntry entry = mRunningCache.valueAt(i);
-            pw.println(doublePrefix + "Entry taskId=" + mRunningCache.keyAt(i));
-            pw.println(triplePrefix + "topApp=" + entry.topApp);
-            pw.println(triplePrefix + "snapshot=" + entry.snapshot);
-        }
-    }
-
-    private static final class CacheEntry {
-
-        /** The snapshot. */
-        final TaskSnapshot snapshot;
-
-        /** The app token that was on top of the task when the snapshot was taken */
-        final ActivityRecord topApp;
-
-        CacheEntry(TaskSnapshot snapshot, ActivityRecord topApp) {
-            this.snapshot = snapshot;
-            this.topApp = topApp;
-        }
+        return mLoader.loadTask(taskId, userId, isLowResolution);
     }
 }

@@ -79,11 +79,11 @@ public class PluginActionManagerTest extends SysuiTestCase {
     private PluginInstance<TestPlugin> mPluginInstance;
     private PluginInstance.Factory mPluginInstanceFactory = new PluginInstance.Factory(
             this.getClass().getClassLoader(),
-            new PluginInstance.InstanceFactory<>(), new PluginInstance.VersionChecker(),
+            new PluginInstance.InstanceFactory<>(), new PluginInstance.VersionCheckerImpl(),
             Collections.emptyList(), false) {
         @Override
         public <T extends Plugin> PluginInstance<T> create(Context context, ApplicationInfo appInfo,
-                ComponentName componentName, Class<T> pluginClass) {
+                ComponentName componentName, Class<T> pluginClass, PluginListener<T> listener) {
             return (PluginInstance<T>) mPluginInstance;
         }
     };
@@ -128,7 +128,7 @@ public class PluginActionManagerTest extends SysuiTestCase {
         createPlugin();
 
         // Verify startup lifecycle
-        verify(mPluginInstance).onCreate(mContext, mMockListener);
+        verify(mPluginInstance).onCreate();
     }
 
     @Test
@@ -140,7 +140,7 @@ public class PluginActionManagerTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
 
         // Verify shutdown lifecycle
-        verify(mPluginInstance).onDestroy(mMockListener);
+        verify(mPluginInstance).onDestroy();
     }
 
     @Test
@@ -152,9 +152,9 @@ public class PluginActionManagerTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
 
         // Verify the old one was destroyed.
-        verify(mPluginInstance).onDestroy(mMockListener);
+        verify(mPluginInstance).onDestroy();
         verify(mPluginInstance, Mockito.times(2))
-                .onCreate(mContext, mMockListener);
+                .onCreate();
     }
 
     @Test
@@ -188,7 +188,7 @@ public class PluginActionManagerTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
 
         // Verify startup lifecycle
-        verify(mPluginInstance).onCreate(mContext, mMockListener);
+        verify(mPluginInstance).onCreate();
     }
 
     @Test

@@ -29,6 +29,8 @@ import com.android.server.utils.WatchedArraySet;
  * Internal variant of {@link PackageUserState} that includes data not exposed as API. This is
  * still read-only and should be used inside system server code when possible over the
  * implementation.
+ *
+ * @hide
  */
 public interface PackageUserStateInternal extends PackageUserState, FrameworkPackageUserState {
 

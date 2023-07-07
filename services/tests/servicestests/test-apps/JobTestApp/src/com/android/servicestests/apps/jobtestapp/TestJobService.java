@@ -34,7 +34,8 @@ public class TestJobService extends JobService {
     public boolean onStartJob(JobParameters params) {
         Log.i(TAG, "Test job executing: " + params.getJobId());
         Intent reportJobStartIntent = new Intent(ACTION_JOB_STARTED);
-        reportJobStartIntent.putExtra(JOB_PARAMS_EXTRA_KEY, params);
+        reportJobStartIntent.putExtra(JOB_PARAMS_EXTRA_KEY, params)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         sendBroadcast(reportJobStartIntent);
         return true;
     }
@@ -43,7 +44,8 @@ public class TestJobService extends JobService {
     public boolean onStopJob(JobParameters params) {
         Log.i(TAG, "Test job stopped executing: " + params.getJobId());
         Intent reportJobStopIntent = new Intent(ACTION_JOB_STOPPED);
-        reportJobStopIntent.putExtra(JOB_PARAMS_EXTRA_KEY, params);
+        reportJobStopIntent.putExtra(JOB_PARAMS_EXTRA_KEY, params)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         sendBroadcast(reportJobStopIntent);
         // Deadline constraint is dropped on reschedule, so it's more reliable to use a new job.
         return false;

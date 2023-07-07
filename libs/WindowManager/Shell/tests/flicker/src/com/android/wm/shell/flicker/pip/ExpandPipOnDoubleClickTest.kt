@@ -16,16 +16,14 @@
 
 package com.android.wm.shell.flicker.pip
 
-import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
+import android.tools.common.Rotation
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
-import com.android.server.wm.flicker.annotation.Group3
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,34 +31,34 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test expanding a pip window by double clicking it
+ * Test expanding a pip window by double-clicking it
  *
  * To run this test: `atest WMShellFlickerTests:ExpandPipOnDoubleClickTest`
  *
  * Actions:
+ * ```
  *     Launch an app in pip mode [pipApp],
  *     Expand [pipApp] app to its maximum pip size by double clicking on it
+ * ```
  *
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group3
-class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true) {
-            transitions {
-                pipApp.doubleClickPipWindow(wmHelper)
-            }
-        }
+open class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) {
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        transitions { pipApp.doubleClickPipWindow(wmHelper) }
+    }
 
     /**
      * Checks that the pip app window remains inside the display bounds throughout the whole
@@ -69,9 +67,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
-        }
+        flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -81,42 +77,29 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
-        }
+        flicker.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
-    /**
-     * Checks [pipApp] window remains visible throughout the animation
-     */
+    /** Checks [pipApp] window remains visible throughout the animation */
     @Presubmit
     @Test
     fun pipWindowIsAlwaysVisible() {
-        testSpec.assertWm {
-            isAppWindowVisible(pipApp.component)
-        }
+        flicker.assertWm { isAppWindowVisible(pipApp) }
     }
 
-    /**
-     * Checks [pipApp] layer remains visible throughout the animation
-     */
+    /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
     fun pipLayerIsAlwaysVisible() {
-        testSpec.assertLayers {
-            isVisible(pipApp.component)
-        }
+        flicker.assertLayers { isVisible(pipApp) }
     }
 
-    /**
-     * Checks that the visible region of [pipApp] always expands during the animation
-     */
-    @FlakyTest(bugId = 228012337)
+    /** Checks that the visible region of [pipApp] always expands during the animation */
+    @Presubmit
     @Test
     fun pipLayerExpands() {
-        val layerName = pipApp.component.toLayerName()
-        testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.coversAtLeast(previous.visibleRegion.region)
             }
@@ -126,65 +109,48 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipSameAspectRatio() {
-        val layerName = pipApp.component.toLayerName()
-        testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.isSameAspectRatio(previous.visibleRegion)
             }
         }
     }
 
-    /**
-     * Checks [pipApp] window remains pinned throughout the animation
-     */
+    /** Checks [pipApp] window remains pinned throughout the animation */
     @Presubmit
     @Test
     fun windowIsAlwaysPinned() {
-        testSpec.assertWm {
-            this.invoke("hasPipWindow") { it.isPinned(pipApp.component) }
-        }
+        flicker.assertWm { this.invoke("hasPipWindow") { it.isPinned(pipApp) } }
     }
 
-    /**
-     * Checks [pipApp] layer remains visible throughout the animation
-     */
+    /** Checks [ComponentNameMatcher.LAUNCHER] layer remains visible throughout the animation */
     @Presubmit
     @Test
     fun launcherIsAlwaysVisible() {
-        testSpec.assertLayers {
-            isVisible(LAUNCHER_COMPONENT)
-        }
+        flicker.assertLayers { isVisible(ComponentNameMatcher.LAUNCHER) }
     }
 
-    /**
-     * Checks that the focus doesn't change between windows during the transition
-     */
-    @FlakyTest(bugId = 216306753)
+    /** Checks that the focus doesn't change between windows during the transition */
+    @Presubmit
     @Test
     fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
-        }
+        flicker.assertEventLog { this.focusDoesNotChange() }
     }
-
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 3)
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_0)
+            )
         }
     }
 }

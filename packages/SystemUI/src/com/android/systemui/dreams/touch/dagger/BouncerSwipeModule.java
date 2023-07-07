@@ -25,15 +25,15 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
-import com.android.systemui.statusbar.phone.PanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
-
-import javax.inject.Named;
-import javax.inject.Provider;
 
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+
+import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * This module captures the components associated with {@link BouncerSwipeTouchHandler}.
@@ -77,8 +77,9 @@ public class BouncerSwipeModule {
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilderProvider) {
         return flingAnimationUtilsBuilderProvider.get()
                 .reset()
-                .setMaxLengthSeconds(PanelViewController.FLING_CLOSING_MAX_LENGTH_SECONDS)
-                .setSpeedUpFactor(PanelViewController.FLING_SPEED_UP_FACTOR)
+                .setMaxLengthSeconds(
+                        ShadeViewController.FLING_CLOSING_MAX_LENGTH_SECONDS)
+                .setSpeedUpFactor(ShadeViewController.FLING_SPEED_UP_FACTOR)
                 .build();
     }
 
@@ -91,8 +92,8 @@ public class BouncerSwipeModule {
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilderProvider) {
         return flingAnimationUtilsBuilderProvider.get()
                 .reset()
-                .setMaxLengthSeconds(PanelViewController.FLING_MAX_LENGTH_SECONDS)
-                .setSpeedUpFactor(PanelViewController.FLING_SPEED_UP_FACTOR)
+                .setMaxLengthSeconds(ShadeViewController.FLING_MAX_LENGTH_SECONDS)
+                .setSpeedUpFactor(ShadeViewController.FLING_SPEED_UP_FACTOR)
                 .build();
     }
 

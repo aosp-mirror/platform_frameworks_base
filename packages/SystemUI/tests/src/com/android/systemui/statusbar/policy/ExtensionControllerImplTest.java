@@ -33,7 +33,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.statusbar.policy.ExtensionController.TunerFactory;
@@ -45,6 +45,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -53,16 +55,18 @@ import java.util.function.Consumer;
 @SmallTest
 public class ExtensionControllerImplTest extends SysuiTestCase {
 
+    @Mock
+    private ConfigurationController mConfigurationController;
+
     private PluginManager mPluginManager;
     private TunerService mTunerService;
     private ExtensionController mExtensionController;
-    private ConfigurationController mConfigurationController;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         mPluginManager = mDependency.injectMockDependency(PluginManager.class);
         mTunerService = mDependency.injectMockDependency(TunerService.class);
-        mConfigurationController = mDependency.injectMockDependency(ConfigurationController.class);
         mExtensionController = new ExtensionControllerImpl(
                 mContext,
                 mock(LeakDetector.class),

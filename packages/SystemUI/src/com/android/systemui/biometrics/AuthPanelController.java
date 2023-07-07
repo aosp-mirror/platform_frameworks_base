@@ -20,6 +20,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Outline;
 import android.util.Log;
 import android.view.View;
@@ -64,13 +65,12 @@ public class AuthPanelController extends ViewOutlineProvider {
     @Override
     public void getOutline(View view, Outline outline) {
         final int left = getLeftBound(mPosition);
-        final int right = left + mContentWidth;
+        final int right = getRightBound(mPosition, left);
 
         // If the content fits in the container, shrink the height to wrap it. Otherwise, expand to
         // fill the display (minus the margin), since the content is scrollable.
         final int top = getTopBound(mPosition);
-        final int bottom = Math.min(top + mContentHeight, mContainerHeight - mMargin);
-
+        final int bottom = getBottomBound(top);
         outline.setRoundRect(left, top, right, bottom, mCornerRadius);
     }
 
@@ -79,6 +79,10 @@ public class AuthPanelController extends ViewOutlineProvider {
             case POSITION_BOTTOM:
                 return (mContainerWidth - mContentWidth) / 2;
             case POSITION_LEFT:
+                if (!mUseFullScreen) {
+                    final Insets navBarInsets = Utils.getNavbarInsets(mContext);
+                    return mMargin + navBarInsets.left;
+                }
                 return mMargin;
             case POSITION_RIGHT:
                 return mContainerWidth - mContentWidth - mMargin;
@@ -88,16 +92,34 @@ public class AuthPanelController extends ViewOutlineProvider {
         }
     }
 
+    private int getRightBound(@Position int position, int left) {
+        if (!mUseFullScreen) {
+            final Insets navBarInsets = Utils.getNavbarInsets(mContext);
+            if (position == POSITION_RIGHT) {
+                return left + mContentWidth - navBarInsets.right;
+            } else if (position == POSITION_LEFT) {
+                return left + mContentWidth - navBarInsets.left;
+            }
+        }
+        return left + mContentWidth;
+    }
+
+    private int getBottomBound(int top) {
+        if (!mUseFullScreen) {
+            final Insets navBarInsets = Utils.getNavbarInsets(mContext);
+            return Math.min(top + mContentHeight - navBarInsets.bottom,
+                    mContainerHeight - mMargin - navBarInsets.bottom);
+        }
+        return Math.min(top + mContentHeight, mContainerHeight - mMargin);
+    }
+
     private int getTopBound(@Position int position) {
         switch (position) {
-            case POSITION_BOTTOM:
-                return Math.max(mContainerHeight - mContentHeight - mMargin, mMargin);
             case POSITION_LEFT:
             case POSITION_RIGHT:
                 return Math.max((mContainerHeight - mContentHeight) / 2, mMargin);
             default:
-                Log.e(TAG, "Unrecognized position: " + position);
-                return getTopBound(POSITION_BOTTOM);
+                return Math.max(mContainerHeight - mContentHeight - mMargin, mMargin);
         }
     }
 
@@ -111,6 +133,10 @@ public class AuthPanelController extends ViewOutlineProvider {
 
     public void setPosition(@Position int position) {
         mPosition = position;
+    }
+
+    public @Position int getPosition() {
+        return mPosition;
     }
 
     public void setUseFullScreen(boolean fullScreen) {
@@ -177,11 +203,11 @@ public class AuthPanelController extends ViewOutlineProvider {
         }
     }
 
-    int getContainerWidth() {
+    public int getContainerWidth() {
         return mContainerWidth;
     }
 
-    int getContainerHeight() {
+    public int getContainerHeight() {
         return mContainerHeight;
     }
 

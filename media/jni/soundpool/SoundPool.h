@@ -39,7 +39,7 @@ public:
     int32_t load(int fd, int64_t offset, int64_t length, int32_t priority);
     bool unload(int32_t soundID);
     int32_t play(int32_t soundID, float leftVolume, float rightVolume, int32_t priority,
-            int32_t loop, float rate);
+            int32_t loop, float rate, int32_t playerIId = PLAYER_PIID_INVALID);
     void pause(int32_t streamID);
     void autoPause();
     void resume(int32_t streamID);

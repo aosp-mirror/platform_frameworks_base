@@ -17,6 +17,10 @@
 package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,23 +29,24 @@ import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,47 +64,77 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     private final List<NotificationInterruptSuppressor> mSuppressors = new ArrayList<>();
     private final StatusBarStateController mStatusBarStateController;
-    private final NotificationFilter mNotificationFilter;
+    private final KeyguardStateController mKeyguardStateController;
     private final ContentResolver mContentResolver;
     private final PowerManager mPowerManager;
-    private final IDreamManager mDreamManager;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatteryController mBatteryController;
-    private final ContentObserver mHeadsUpObserver;
     private final HeadsUpManager mHeadsUpManager;
     private final NotificationInterruptLogger mLogger;
     private final NotifPipelineFlags mFlags;
     private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
+    private final UiEventLogger mUiEventLogger;
+    private final UserTracker mUserTracker;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
+
+    public enum NotificationInterruptEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "FSI suppressed for suppressive GroupAlertBehavior")
+        FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(1235),
+
+        @UiEvent(doc = "FSI suppressed for suppressive BubbleMetadata")
+        FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA(1353),
+
+        @UiEvent(doc = "FSI suppressed for requiring neither HUN nor keyguard")
+        FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236),
+
+        @UiEvent(doc = "HUN suppressed for old when")
+        HUN_SUPPRESSED_OLD_WHEN(1237),
+
+        @UiEvent(doc = "HUN snooze bypassed for potentially suppressed FSI")
+        HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI(1269);
+
+        private final int mId;
+
+        NotificationInterruptEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
 
     @Inject
     public NotificationInterruptStateProviderImpl(
             ContentResolver contentResolver,
             PowerManager powerManager,
-            IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
-            NotificationFilter notificationFilter,
             BatteryController batteryController,
             StatusBarStateController statusBarStateController,
+            KeyguardStateController keyguardStateController,
             HeadsUpManager headsUpManager,
             NotificationInterruptLogger logger,
             @Main Handler mainHandler,
             NotifPipelineFlags flags,
-            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker) {
         mContentResolver = contentResolver;
         mPowerManager = powerManager;
-        mDreamManager = dreamManager;
         mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
-        mNotificationFilter = notificationFilter;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManager;
         mLogger = logger;
         mFlags = flags;
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
-        mHeadsUpObserver = new ContentObserver(mainHandler) {
+        mUiEventLogger = uiEventLogger;
+        mUserTracker = userTracker;
+        ContentObserver headsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 boolean wasUsing = mUseHeadsUp;
@@ -122,12 +157,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED),
                     true,
-                    mHeadsUpObserver);
+                    headsUpObserver);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(SETTING_HEADS_UP_TICKER), true,
-                    mHeadsUpObserver);
+                    headsUpObserver);
         }
-        mHeadsUpObserver.onChange(true); // set up
+        headsUpObserver.onChange(true); // set up
     }
 
     @Override
@@ -139,23 +174,23 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     public boolean shouldBubbleUp(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
 
-        if (!canAlertCommon(entry)) {
+        if (!canAlertCommon(entry, true)) {
             return false;
         }
 
-        if (!canAlertAwakeCommon(entry)) {
+        if (!canAlertAwakeCommon(entry, true)) {
             return false;
         }
 
         if (!entry.canBubble()) {
-            mLogger.logNoBubbleNotAllowed(sbn);
+            mLogger.logNoBubbleNotAllowed(entry);
             return false;
         }
 
         if (entry.getBubbleMetadata() == null
                 || (entry.getBubbleMetadata().getShortcutId() == null
                     && entry.getBubbleMetadata().getIntent() == null)) {
-            mLogger.logNoBubbleNoMetadata(sbn);
+            mLogger.logNoBubbleNoMetadata(entry);
             return false;
         }
 
@@ -165,10 +200,15 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     @Override
     public boolean shouldHeadsUp(NotificationEntry entry) {
+        return checkHeadsUp(entry, true);
+    }
+
+    @Override
+    public boolean checkHeadsUp(NotificationEntry entry, boolean log) {
         if (mStatusBarStateController.isDozing()) {
-            return shouldHeadsUpWhenDozing(entry);
+            return shouldHeadsUpWhenDozing(entry, log);
         } else {
-            return shouldHeadsUpWhenAwake(entry);
+            return shouldHeadsUpWhenAwake(entry, log);
         }
     }
 
@@ -178,20 +218,53 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      */
     @Override
     public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
-        if (entry.getSbn().getNotification().fullScreenIntent == null) {
-            return false;
+        FullScreenIntentDecision decision = getFullScreenIntentDecision(entry);
+        logFullScreenIntentDecision(entry, decision);
+        return decision.shouldLaunch;
+    }
+
+    // Given whether the relevant entry was suppressed by DND, and the full screen intent launch
+    // decision independent of the DND decision, returns the combined FullScreenIntentDecision that
+    // results. If the entry was suppressed by DND but the decision otherwise would launch the
+    // FSI, then it is suppressed *only* by DND, whereas (because the DND decision happens before
+    // all others) if the entry would not otherwise have launched the FSI, DND is the effective
+    // suppressor.
+    //
+    // If the entry was not suppressed by DND, just returns the given decision.
+    @NonNull
+    private FullScreenIntentDecision getDecisionGivenSuppression(FullScreenIntentDecision decision,
+            boolean suppressedByDND) {
+        if (suppressedByDND) {
+            return decision.shouldLaunch
+                    ? FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+                    : FullScreenIntentDecision.NO_FSI_SUPPRESSED_BY_DND;
         }
+        return decision;
+    }
+
+    @Override
+    public FullScreenIntentDecision getFullScreenIntentDecision(@NonNull NotificationEntry entry) {
+        if (entry.getSbn().getNotification().fullScreenIntent == null) {
+            if (entry.isStickyAndNotDemoted()) {
+                return FullScreenIntentDecision.NO_FSI_SHOW_STICKY_HUN;
+            }
+            return FullScreenIntentDecision.NO_FULL_SCREEN_INTENT;
+        }
+
+        // Boolean indicating whether this FSI would have been suppressed by DND. Because we
+        // want to be able to identify when something would have shown an FSI if not for being
+        // suppressed, we need to keep track of this value for future decisions.
+        boolean suppressedByDND = false;
 
         // Never show FSI when suppressed by DND
         if (entry.shouldSuppressFullScreenIntent()) {
-            mLogger.logNoFullscreen(entry, "Suppressed by DND");
-            return false;
+            suppressedByDND = true;
         }
 
         // Never show FSI if importance is not HIGH
         if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-            mLogger.logNoFullscreen(entry, "Not important enough");
-            return false;
+            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NOT_IMPORTANT_ENOUGH,
+                    suppressedByDND);
         }
 
         // If the notification has suppressive GroupAlertBehavior, block FSI and warn.
@@ -199,10 +272,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
             // b/231322873: Detect and report an event when a notification has both an FSI and a
             // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
-            final int uid = entry.getSbn().getUid();
-            android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "groupAlertBehavior");
-            mLogger.logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
-            return false;
+            return getDecisionGivenSuppression(
+                    FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+                    suppressedByDND);
         }
 
         // If the notification has suppressive BubbleMetadata, block FSI and warn.
@@ -210,101 +282,181 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         if (bubbleMetadata != null && bubbleMetadata.isNotificationSuppressed()) {
             // b/274759612: Detect and report an event when a notification has both an FSI and a
             // suppressive BubbleMetadata, and now correctly block the FSI from firing.
-            final int uid = entry.getSbn().getUid();
-            android.util.EventLog.writeEvent(0x534e4554, "274759612", uid, "bubbleMetadata");
-            mLogger.logNoFullscreenWarning(entry, "BubbleMetadata may prevent HUN");
-            return false;
+            return getDecisionGivenSuppression(
+                    FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA,
+                    suppressedByDND);
+        }
+
+        // Notification is coming from a suspended package, block FSI
+        if (entry.getRanking().isSuspended()) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_SUSPENDED,
+                    suppressedByDND);
         }
 
         // If the screen is off, then launch the FullScreenIntent
         if (!mPowerManager.isInteractive()) {
-            mLogger.logFullscreen(entry, "Device is not interactive");
-            return true;
+            return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
+                    suppressedByDND);
         }
 
         // If the device is currently dreaming, then launch the FullScreenIntent
-        if (isDreaming()) {
-            mLogger.logFullscreen(entry, "Device is dreaming");
-            return true;
+        // We avoid using IDreamManager#isDreaming here as that method will return false during
+        // the dream's wake-up phase.
+        if (mStatusBarStateController.isDreaming()) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_DEVICE_IS_DREAMING,
+                    suppressedByDND);
         }
 
         // If the keyguard is showing, then launch the FullScreenIntent
         if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
-            mLogger.logFullscreen(entry, "Keyguard is showing");
-            return true;
+            return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_KEYGUARD_SHOWING,
+                    suppressedByDND);
         }
 
         // If the notification should HUN, then we don't need FSI
-        if (shouldHeadsUp(entry)) {
-            mLogger.logNoFullscreen(entry, "Expected to HUN");
-            return false;
+        // Because this is not the heads-up decision-making point, and checking whether it would
+        // HUN, don't log this specific check.
+        if (checkHeadsUp(entry, /* log= */ false)) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_EXPECTED_TO_HUN,
+                    suppressedByDND);
         }
 
-        // If the notification won't HUN for some other reason (DND/snooze/etc), launch FSI.
-        mLogger.logFullscreen(entry, "Expected not to HUN");
-        return true;
+        // If notification won't HUN and keyguard is showing, launch the FSI.
+        if (mKeyguardStateController.isShowing()) {
+            if (mKeyguardStateController.isOccluded()) {
+                return getDecisionGivenSuppression(
+                        FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED,
+                        suppressedByDND);
+            } else {
+                // Likely LOCKED_SHADE, but launch FSI anyway
+                return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_LOCKED_SHADE,
+                        suppressedByDND);
+            }
+        }
+
+        // Detect the case determined by b/231322873 to launch FSI while device is in use,
+        // as blocked by the correct implementation, and report the event.
+        return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD,
+                suppressedByDND);
     }
 
-    private boolean isDreaming() {
-        try {
-            return mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query dream manager.", e);
-            return false;
+    @Override
+    public void logFullScreenIntentDecision(NotificationEntry entry,
+            FullScreenIntentDecision decision) {
+        final int uid = entry.getSbn().getUid();
+        final String packageName = entry.getSbn().getPackageName();
+        switch (decision) {
+            case NO_FULL_SCREEN_INTENT:
+                // explicitly prevent logging for this (frequent) case
+                return;
+            case NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR:
+                android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
+                        "groupAlertBehavior");
+                mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR, uid,
+                        packageName);
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": GroupAlertBehavior will prevent HUN");
+                return;
+            case NO_FSI_SUPPRESSIVE_BUBBLE_METADATA:
+                android.util.EventLog.writeEvent(0x534e4554, "274759612", uid,
+                        "bubbleMetadata");
+                mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA, uid,
+                        packageName);
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": BubbleMetadata may prevent HUN");
+                return;
+            case NO_FSI_NO_HUN_OR_KEYGUARD:
+                android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
+                        "no hun or keyguard");
+                mUiEventLogger.log(FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD, uid, packageName);
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": Expected not to HUN while not on keyguard");
+                return;
+            default:
+                if (decision.shouldLaunch) {
+                    mLogger.logFullscreen(entry, decision.name());
+                } else {
+                    mLogger.logNoFullscreen(entry, decision.name());
+                }
         }
     }
-
-    private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
+    private boolean shouldHeadsUpWhenAwake(NotificationEntry entry, boolean log) {
         StatusBarNotification sbn = entry.getSbn();
 
         if (!mUseHeadsUp) {
-            mLogger.logNoHeadsUpFeatureDisabled();
+            if (log) mLogger.logNoHeadsUpFeatureDisabled();
             return false;
         }
 
-        if (!canAlertCommon(entry)) {
+        if (!canAlertCommon(entry, log)) {
             return false;
         }
 
-        if (!canAlertAwakeCommon(entry)) {
+        if (!canAlertHeadsUpCommon(entry, log)) {
             return false;
         }
 
-        if (isSnoozedPackage(sbn)) {
-            mLogger.logNoHeadsUpPackageSnoozed(sbn);
+        if (!canAlertAwakeCommon(entry, log)) {
+            return false;
+        }
+
+        final boolean isSnoozedPackage = isSnoozedPackage(sbn);
+        final boolean hasFsi = sbn.getNotification().fullScreenIntent != null;
+
+        // Assume any notification with an FSI is time-sensitive (like an alarm or incoming call)
+        // and ignore whether HUNs have been snoozed for the package.
+        if (isSnoozedPackage && !hasFsi) {
+            if (log) mLogger.logNoHeadsUpPackageSnoozed(entry);
             return false;
         }
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
-            mLogger.logNoHeadsUpAlreadyBubbled(sbn);
+            if (log) mLogger.logNoHeadsUpAlreadyBubbled(entry);
             return false;
         }
 
         if (entry.shouldSuppressPeek()) {
-            mLogger.logNoHeadsUpSuppressedByDnd(sbn);
+            if (log) mLogger.logNoHeadsUpSuppressedByDnd(entry);
             return false;
         }
 
         if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-            mLogger.logNoHeadsUpNotImportant(sbn);
+            if (log) mLogger.logNoHeadsUpNotImportant(entry);
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn() && !isDreaming();
+        boolean inUse = mPowerManager.isScreenOn() && !mStatusBarStateController.isDreaming();
 
         if (!inUse) {
-            mLogger.logNoHeadsUpNotInUse(sbn);
+            if (log) mLogger.logNoHeadsUpNotInUse(entry);
+            return false;
+        }
+
+        if (shouldSuppressHeadsUpWhenAwakeForOldWhen(entry, log)) {
             return false;
         }
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeHeadsUp(entry)) {
-                mLogger.logNoHeadsUpSuppressedBy(sbn, mSuppressors.get(i));
+                if (log) mLogger.logNoHeadsUpSuppressedBy(entry, mSuppressors.get(i));
                 return false;
             }
         }
-        mLogger.logHeadsUp(sbn);
+
+        if (isSnoozedPackage) {
+            if (log) {
+                mLogger.logHeadsUpPackageSnoozeBypassedHasFsi(entry);
+                final int uid = entry.getSbn().getUid();
+                final String packageName = entry.getSbn().getPackageName();
+                mUiEventLogger.log(HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI, uid,
+                        packageName);
+            }
+
+            return true;
+        }
+
+        if (log) mLogger.logHeadsUp(entry);
         return true;
     }
 
@@ -315,34 +467,43 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * @param entry the entry to check
      * @return true if the entry should ambient pulse, false otherwise
      */
-    private boolean shouldHeadsUpWhenDozing(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.getSbn();
-
-        if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
-            mLogger.logNoPulsingSettingDisabled(sbn);
+    private boolean shouldHeadsUpWhenDozing(NotificationEntry entry, boolean log) {
+        if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(mUserTracker.getUserId())) {
+            if (log) mLogger.logNoPulsingSettingDisabled(entry);
             return false;
         }
 
         if (mBatteryController.isAodPowerSave()) {
-            mLogger.logNoPulsingBatteryDisabled(sbn);
+            if (log) mLogger.logNoPulsingBatteryDisabled(entry);
             return false;
         }
 
-        if (!canAlertCommon(entry)) {
-            mLogger.logNoPulsingNoAlert(sbn);
+        if (!canAlertCommon(entry, log)) {
+            if (log) mLogger.logNoPulsingNoAlert(entry);
+            return false;
+        }
+
+        if (!canAlertHeadsUpCommon(entry, log)) {
+            if (log) mLogger.logNoPulsingNoAlert(entry);
             return false;
         }
 
         if (entry.shouldSuppressAmbient()) {
-            mLogger.logNoPulsingNoAmbientEffect(sbn);
+            if (log) mLogger.logNoPulsingNoAmbientEffect(entry);
+            return false;
+        }
+
+        if (entry.getRanking().getLockscreenVisibilityOverride()
+                == Notification.VISIBILITY_PRIVATE) {
+            if (log) mLogger.logNoPulsingNotificationHidden(entry);
             return false;
         }
 
         if (entry.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
-            mLogger.logNoPulsingNotImportant(sbn);
+            if (log) mLogger.logNoPulsingNotImportant(entry);
             return false;
         }
-        mLogger.logPulsing(sbn);
+        if (log) mLogger.logPulsing(entry);
         return true;
     }
 
@@ -350,36 +511,46 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * Common checks between regular & AOD heads up and bubbles.
      *
      * @param entry the entry to check
+     * @param log whether or not to log the results of these checks
      * @return true if these checks pass, false if the notification should not alert
      */
-    private boolean canAlertCommon(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.getSbn();
-
-        if (!mFlags.isNewPipelineEnabled() && mNotificationFilter.shouldFilterOut(entry)) {
-            mLogger.logNoAlertingFilteredOut(sbn);
-            return false;
-        }
-
-        // Don't alert notifications that are suppressed due to group alert behavior
-        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            mLogger.logNoAlertingGroupAlertBehavior(sbn);
-            return false;
-        }
-
+    private boolean canAlertCommon(NotificationEntry entry, boolean log) {
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressInterruptions(entry)) {
-                mLogger.logNoAlertingSuppressedBy(sbn, mSuppressors.get(i), /* awake */ false);
+                if (log) {
+                    mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i),
+                            /* awake */ false);
+                }
                 return false;
             }
         }
 
-        if (entry.hasJustLaunchedFullScreenIntent()) {
-            mLogger.logNoAlertingRecentFullscreen(sbn);
+        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
+            if (log) mLogger.keyguardHideNotification(entry);
             return false;
         }
 
-        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
-            mLogger.keyguardHideNotification(entry.getKey());
+        return true;
+    }
+
+    /**
+     * Common checks for heads up notifications on regular and AOD displays.
+     *
+     * @param entry the entry to check
+     * @param log whether or not to log the results of these checks
+     * @return true if these checks pass, false if the notification should not alert
+     */
+    private boolean canAlertHeadsUpCommon(NotificationEntry entry, boolean log) {
+        StatusBarNotification sbn = entry.getSbn();
+
+        // Don't alert notifications that are suppressed due to group alert behavior
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            if (log) mLogger.logNoAlertingGroupAlertBehavior(entry);
+            return false;
+        }
+
+        if (entry.hasJustLaunchedFullScreenIntent()) {
+            if (log) mLogger.logNoAlertingRecentFullscreen(entry);
             return false;
         }
 
@@ -392,12 +563,14 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * @param entry the entry to check
      * @return true if these checks pass, false if the notification should not alert
      */
-    private boolean canAlertAwakeCommon(NotificationEntry entry) {
+    private boolean canAlertAwakeCommon(NotificationEntry entry, boolean log) {
         StatusBarNotification sbn = entry.getSbn();
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeInterruptions(entry)) {
-                mLogger.logNoAlertingSuppressedBy(sbn, mSuppressors.get(i), /* awake */ true);
+                if (log) {
+                    mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i), /* awake */ true);
+                }
                 return false;
             }
         }
@@ -407,4 +580,56 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private boolean isSnoozedPackage(StatusBarNotification sbn) {
         return mHeadsUpManager.isSnoozed(sbn.getPackageName());
     }
+
+    private boolean shouldSuppressHeadsUpWhenAwakeForOldWhen(NotificationEntry entry, boolean log) {
+        if (!mFlags.isNoHunForOldWhenEnabled()) {
+            return false;
+        }
+
+        final Notification notification = entry.getSbn().getNotification();
+        if (notification == null) {
+            return false;
+        }
+
+        final long when = notification.when;
+        final long now = System.currentTimeMillis();
+        final long age = now - when;
+
+        if (age < MAX_HUN_WHEN_AGE_MS) {
+            return false;
+        }
+
+        if (when <= 0) {
+            // Some notifications (including many system notifications) are posted with the "when"
+            // field set to 0. Nothing in the Javadocs for Notification mentions a special meaning
+            // for a "when" of 0, but Android didn't even exist at the dawn of the Unix epoch.
+            // Therefore, assume that these notifications effectively don't have a "when" value,
+            // and don't suppress HUNs.
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "when <= 0");
+            return false;
+        }
+
+        if (notification.fullScreenIntent != null) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "full-screen intent");
+            return false;
+        }
+
+        if (notification.isForegroundService()) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "foreground service");
+            return false;
+        }
+
+        if (notification.isUserInitiatedJob()) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "user initiated job");
+            return false;
+        }
+
+        if (log) mLogger.logNoHeadsUpOldWhen(entry, when, age);
+        final int uid = entry.getSbn().getUid();
+        final String packageName = entry.getSbn().getPackageName();
+        mUiEventLogger.log(NotificationInterruptEvent.HUN_SUPPRESSED_OLD_WHEN, uid, packageName);
+        return true;
+    }
+
+    public static final long MAX_HUN_WHEN_AGE_MS = 24 * 60 * 60 * 1000;
 }

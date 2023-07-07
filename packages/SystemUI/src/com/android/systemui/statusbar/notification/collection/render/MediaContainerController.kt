@@ -55,4 +55,8 @@ class MediaContainerController @Inject constructor(
 
     override val view: View
         get() = mediaContainerView!!
+
+    override fun offerToKeepInParentForAnimation(): Boolean = false
+    override fun removeFromParentIfKeptForAnimation(): Boolean = false
+    override fun resetKeepInParentForAnimation() {}
 }

@@ -18,10 +18,7 @@ package com.android.settingslib.enterprise;
 
 import static com.android.settingslib.enterprise.ActionDisabledByAdminControllerTestUtils.ENFORCED_ADMIN;
 import static com.android.settingslib.enterprise.ActionDisabledByAdminControllerTestUtils.ENFORCEMENT_ADMIN_USER_ID;
-import static com.android.settingslib.enterprise.ActionDisabledByAdminControllerTestUtils.LEARN_MORE_ACTION_LAUNCH_HELP_PAGE;
-import static com.android.settingslib.enterprise.ActionDisabledByAdminControllerTestUtils.LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES;
 import static com.android.settingslib.enterprise.ActionDisabledByAdminControllerTestUtils.SUPPORT_MESSAGE;
-import static com.android.settingslib.enterprise.ActionDisabledByAdminControllerTestUtils.URL;
 import static com.android.settingslib.enterprise.FakeDeviceAdminStringProvider.DEFAULT_DISABLED_BY_POLICY_CONTENT;
 import static com.android.settingslib.enterprise.FakeDeviceAdminStringProvider.DEFAULT_DISABLED_BY_POLICY_TITLE;
 import static com.android.settingslib.enterprise.FakeDeviceAdminStringProvider.DISALLOW_ADJUST_VOLUME_TITLE;
@@ -64,67 +61,6 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
     }
 
     @Test
-    public void setupLearnMoreButton_noUrl_negativeButtonSet() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(EMPTY_URL);
-
-        controller.setupLearnMoreButton(mContext);
-
-        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES);
-    }
-
-    @Test
-    public void setupLearnMoreButton_validUrl_foregroundUser_launchesHelpPage() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(
-                URL,
-                /* isUserForeground= */ true,
-                /* preferredUserHandle= */ MANAGED_USER,
-                /* userContainingBrowser= */ MANAGED_USER);
-
-        controller.setupLearnMoreButton(mContext);
-
-        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_LAUNCH_HELP_PAGE);
-    }
-
-    @Test
-    public void setupLearnMoreButton_validUrl_browserInPreferredUser_notForeground_showsAdminPolicies() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(
-                URL,
-                /* isUserForeground= */ false,
-                /* preferredUserHandle= */ MANAGED_USER,
-                /* userContainingBrowser= */ MANAGED_USER);
-
-        controller.setupLearnMoreButton(mContext);
-
-        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES);
-    }
-
-    @Test
-    public void setupLearnMoreButton_validUrl_browserInCurrentUser_launchesHelpPage() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(
-                URL,
-                /* isUserForeground= */ false,
-                /* preferredUserHandle= */ MANAGED_USER,
-                /* userContainingBrowser= */ mContext.getUser());
-
-        controller.setupLearnMoreButton(mContext);
-
-        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_LAUNCH_HELP_PAGE);
-    }
-
-    @Test
-    public void setupLearnMoreButton_validUrl_browserNotOnAnyUser_showsAdminPolicies() {
-        ManagedDeviceActionDisabledByAdminController controller = createController(
-                URL,
-                /* isUserForeground= */ false,
-                /* preferredUserHandle= */ MANAGED_USER,
-                /* userContainingBrowser= */ null);
-
-        controller.setupLearnMoreButton(mContext);
-
-        mTestUtils.assertLearnMoreAction(LEARN_MORE_ACTION_SHOW_ADMIN_POLICIES);
-    }
-
-    @Test
     public void getAdminSupportTitleResource_noRestriction_works() {
         ManagedDeviceActionDisabledByAdminController controller = createController();
 
@@ -137,7 +73,7 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
         ManagedDeviceActionDisabledByAdminController controller = createController();
 
         assertThat(controller.getAdminSupportTitle(RESTRICTION))
-                .isEqualTo(SUPPORT_TITLE_FOR_RESTRICTION);
+                .isEqualTo(DEFAULT_DISABLED_BY_POLICY_TITLE);
     }
 
     @Test

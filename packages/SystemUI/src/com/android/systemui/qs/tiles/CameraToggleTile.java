@@ -37,6 +37,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -45,8 +46,12 @@ import javax.inject.Inject;
 
 public class CameraToggleTile extends SensorPrivacyToggleTile {
 
+    public static final String TILE_SPEC = "cameratoggle";
+
     @Inject
-    protected CameraToggleTile(QSHost host,
+    protected CameraToggleTile(
+            QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             MetricsLogger metricsLogger,
@@ -56,7 +61,7 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
             KeyguardStateController keyguardStateController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger, sensorPrivacyController,
                 keyguardStateController);
     }
@@ -72,9 +77,9 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
     @Override
     public @DrawableRes int getIconRes(boolean isBlocked) {
         if (isBlocked) {
-            return com.android.internal.R.drawable.ic_camera_blocked;
+            return R.drawable.qs_camera_access_icon_off;
         } else {
-            return com.android.internal.R.drawable.ic_camera_allowed;
+            return R.drawable.qs_camera_access_icon_on;
         }
     }
 

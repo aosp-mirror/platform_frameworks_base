@@ -25,13 +25,14 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.am.ActivityManagerService;
+import com.android.server.am.StackTracesDumpHelper;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -187,13 +188,17 @@ public final class SystemServerInitThreadPool implements Dumpable {
     }
 
     /**
-     * A helper function to call ActivityManagerService.dumpStackTraces().
+     * A helper function to call StackTracesDumpHelper.dumpStackTraces().
      */
     private static void dumpStackTraces() {
         final ArrayList<Integer> pids = new ArrayList<>();
         pids.add(Process.myPid());
-        ActivityManagerService.dumpStackTraces(pids, null, null,
-                Watchdog.getInterestingNativePids(), null, null, null);
+        StackTracesDumpHelper.dumpStackTraces(pids,
+                /* processCpuTracker= */null, /* lastPids= */null,
+                CompletableFuture.completedFuture(Watchdog.getInterestingNativePids()),
+                /* logExceptionCreatingFile= */null, /* subject= */null,
+                /* criticalEventSection= */null, Runnable::run,
+                /* latencyTracker= */null);
     }
 
     @Override

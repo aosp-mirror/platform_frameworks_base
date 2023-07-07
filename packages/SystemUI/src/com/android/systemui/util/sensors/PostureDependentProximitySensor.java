@@ -23,6 +23,8 @@ import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import java.util.HashSet;
+
 import javax.inject.Inject;
 
 /**
@@ -37,6 +39,7 @@ class PostureDependentProximitySensor extends ProximitySensorImpl {
     private final ThresholdSensor[] mPostureToPrimaryProxSensorMap;
     private final ThresholdSensor[] mPostureToSecondaryProxSensorMap;
 
+    private final HashSet<Listener> mListenersRegisteredWhenProxUnavailable = new HashSet<>();
     private final DevicePostureController mDevicePostureController;
 
     @Inject
@@ -69,6 +72,25 @@ class PostureDependentProximitySensor extends ProximitySensorImpl {
         mDevicePostureController.removeCallback(mDevicePostureCallback);
     }
 
+    @Override
+    public void register(ThresholdSensor.Listener listener) {
+        if (!isLoaded()) {
+            logDebug("No prox sensor when registering listener=" + listener);
+            mListenersRegisteredWhenProxUnavailable.add(listener);
+        }
+
+        super.register(listener);
+    }
+
+    @Override
+    public void unregister(ThresholdSensor.Listener listener) {
+        if (mListenersRegisteredWhenProxUnavailable.remove(listener)) {
+            logDebug("Removing listener from mListenersRegisteredWhenProxUnavailable "
+                    + listener);
+        }
+        super.unregister(listener);
+    }
+
     private void chooseSensors() {
         if (mDevicePosture >= mPostureToPrimaryProxSensorMap.length
                 || mDevicePosture >= mPostureToSecondaryProxSensorMap.length) {
@@ -98,6 +120,14 @@ class PostureDependentProximitySensor extends ProximitySensorImpl {
 
             mInitializedListeners = false;
             registerInternal();
+
+            final Listener[] listenersToReregister =
+                    mListenersRegisteredWhenProxUnavailable.toArray(new Listener[0]);
+            mListenersRegisteredWhenProxUnavailable.clear();
+            for (Listener listener : listenersToReregister) {
+                logDebug("Re-register listener " + listener);
+                register(listener);
+            }
         }
     }
 

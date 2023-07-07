@@ -16,10 +16,11 @@
 package com.android.test
 
 import android.graphics.Point
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import com.android.test.SurfaceViewBufferTestBase.Companion.ScalingMode
 import com.android.test.SurfaceViewBufferTestBase.Companion.Transform
 import junit.framework.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -45,10 +46,11 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
             activity.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */)
         }
         // Verify we reject buffers since scaling mode == NATIVE_WINDOW_SCALING_MODE_FREEZE
-        assertThat(trace).layer("SurfaceView", 2).doesNotExist()
-
+        Assert.assertThrows(AssertionError::class.java) {
+            LayersTraceSubject(trace).layer("SurfaceView", 2)
+        }
         // Verify the next buffer is submitted with the correct size
-        assertThat(trace).layer("SurfaceView", 3).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 3).also {
             it.hasBufferSize(defaultBufferSize)
             // scaling mode is not passed down to the layer for blast
             if (useBlastAdapter) {
@@ -81,9 +83,11 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
         }
 
         // verify buffer size is reset to default buffer size
-        assertThat(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
-        assertThat(trace).layer("SurfaceView", 2).doesNotExist()
-        assertThat(trace).layer("SurfaceView", 3).hasBufferSize(bufferSize)
+        LayersTraceSubject(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
+        Assert.assertThrows(AssertionError::class.java) {
+            LayersTraceSubject(trace).layer("SurfaceView", 2)
+        }
+        LayersTraceSubject(trace).layer("SurfaceView", 3).hasBufferSize(bufferSize)
     }
 
     @Test
@@ -109,10 +113,13 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
         }
 
         // verify buffer size is reset to default buffer size
-        assertThat(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
-        assertThat(trace).layer("SurfaceView", 2).doesNotExist()
-        assertThat(trace).layer("SurfaceView", 3).hasBufferSize(rotatedBufferSize)
-        assertThat(trace).layer("SurfaceView", 3).hasBufferOrientation(Transform.ROT_90.value)
+        LayersTraceSubject(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
+        Assert.assertThrows(AssertionError::class.java) {
+            LayersTraceSubject(trace).layer("SurfaceView", 2)
+        }
+        LayersTraceSubject(trace).layer("SurfaceView", 3).hasBufferSize(rotatedBufferSize)
+        LayersTraceSubject(trace).layer("SurfaceView", 3)
+                .hasBufferOrientation(Transform.ROT_90.value)
     }
 
     @Test
@@ -141,11 +148,12 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
         }
 
         for (count in 0 until 5) {
-            assertThat(trace).layer("SurfaceView", (count * 3) + 1L)
+            LayersTraceSubject(trace).layer("SurfaceView", (count * 3) + 1L)
                     .hasBufferSize(defaultBufferSize)
-            assertThat(trace).layer("SurfaceView", (count * 3) + 2L)
-                    .doesNotExist()
-            assertThat(trace).layer("SurfaceView", (count * 3) + 3L)
+            Assert.assertThrows(AssertionError::class.java) {
+                LayersTraceSubject(trace).layer("SurfaceView", (count * 3) + 2L)
+            }
+            LayersTraceSubject(trace).layer("SurfaceView", (count * 3) + 3L)
                     .hasBufferSize(bufferSize)
         }
     }

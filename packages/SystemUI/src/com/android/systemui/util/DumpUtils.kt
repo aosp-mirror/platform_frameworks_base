@@ -55,6 +55,10 @@ fun IndentingPrintWriter.withIncreasedIndent(runnable: Runnable) {
     }
 }
 
+/** Print a line which is '$label=$value' */
+fun IndentingPrintWriter.println(label: String, value: Any) =
+    append(label).append('=').println(value)
+
 /** Return a readable string for the visibility */
 fun visibilityString(@View.Visibility visibility: Int): String = when (visibility) {
     View.GONE -> "gone"

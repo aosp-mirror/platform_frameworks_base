@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.CameraExtensionSessionStats;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
@@ -74,6 +75,7 @@ import android.view.Surface;
 import android.view.WindowManagerGlobal;
 
 import com.android.framework.protobuf.nano.MessageNano;
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -242,11 +244,15 @@ public class CameraServiceProxy extends SystemService
         public List<CameraStreamStats> mStreamStats;
         public String mUserTag;
         public int mVideoStabilizationMode;
+        public final long mLogId;
+        public final int mSessionIndex;
 
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
+        public CameraExtensionSessionStats mExtSessionStats = null;
 
         CameraUsageEvent(String cameraId, int facing, String clientName, int apiLevel,
-                boolean isNdk, int action, int latencyMs, int operatingMode) {
+                boolean isNdk, int action, int latencyMs, int operatingMode, boolean deviceError,
+                long logId, int sessionIdx) {
             mCameraId = cameraId;
             mCameraFacing = facing;
             mClientName = clientName;
@@ -257,12 +263,15 @@ public class CameraServiceProxy extends SystemService
             mAction = action;
             mLatencyMs = latencyMs;
             mOperatingMode = operatingMode;
+            mDeviceError = deviceError;
+            mLogId = logId;
+            mSessionIndex = sessionIdx;
         }
 
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
-                int videoStabilizationMode) {
+                int videoStabilizationMode, CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -275,6 +284,7 @@ public class CameraServiceProxy extends SystemService
             mStreamStats = streamStats;
             mUserTag = userTag;
             mVideoStabilizationMode = videoStabilizationMode;
+            mExtSessionStats = extStats;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -355,7 +365,7 @@ public class CameraServiceProxy extends SystemService
                 case UsbManager.ACTION_USB_DEVICE_ATTACHED:
                 case UsbManager.ACTION_USB_DEVICE_DETACHED:
                     synchronized (mLock) {
-                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, android.hardware.usb.UsbDevice.class);
                         if (device != null) {
                             notifyUsbDeviceHotplugLocked(device,
                                     action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED));
@@ -386,6 +396,16 @@ public class CameraServiceProxy extends SystemService
             @Nullable TaskInfo taskInfo, int displayRotation, int lensFacing,
             boolean ignoreResizableAndSdkCheck) {
         if (taskInfo == null) {
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+
+        // When config_isWindowManagerCameraCompatTreatmentEnabled is true,
+        // DisplayRotationCompatPolicy in WindowManager force rotates fullscreen activities with
+        // fixed orientation to align them with the natural orientation of the device.
+        if (ctx.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled)) {
+            Slog.v(TAG, "Disable Rotate and Crop to avoid conflicts with"
+                    + " WM force rotation treatment.");
             return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
         }
 
@@ -487,7 +507,8 @@ public class CameraServiceProxy extends SystemService
 
             if ((recentTasks != null) && (!recentTasks.getList().isEmpty())) {
                 for (ActivityManager.RecentTaskInfo task : recentTasks.getList()) {
-                    if (packageName.equals(task.topActivityInfo.packageName)) {
+                    if (task.topActivityInfo != null && packageName.equals(
+                            task.topActivityInfo.packageName)) {
                         taskInfo = new TaskInfo();
                         taskInfo.frontTaskId = task.taskId;
                         taskInfo.isResizeable =
@@ -551,6 +572,15 @@ public class CameraServiceProxy extends SystemService
                     lensFacing, ignoreResizableAndSdkCheck);
         }
 
+        /**
+         * Placeholder method to fetch the system state for autoframing.
+         * TODO: b/260617354
+         */
+        @Override
+        public int getAutoframingOverride(String packageName) {
+            return CaptureRequest.CONTROL_AUTOFRAMING_OFF;
+        }
+
         @Override
         public void pingForUserUpdate() {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
@@ -582,13 +612,18 @@ public class CameraServiceProxy extends SystemService
         }
 
         @Override
-        public boolean isCameraDisabled() {
+        public boolean isCameraDisabled(int userId) {
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
             if (dpm == null) {
                 Slog.e(TAG, "Failed to get the device policy manager service");
                 return false;
             }
-            return dpm.getCameraDisabled(null);
+            try {
+                return dpm.getCameraDisabled(null, userId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     };
 
@@ -793,6 +828,36 @@ public class CameraServiceProxy extends SystemService
                     Slog.w(TAG, "Unknown camera facing: " + e.mCameraFacing);
             }
 
+            int extensionType = FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NONE;
+            boolean extensionIsAdvanced = false;
+            if (e.mExtSessionStats != null) {
+                switch (e.mExtSessionStats.type) {
+                    case CameraExtensionSessionStats.Type.EXTENSION_AUTOMATIC:
+                        extensionType = FrameworkStatsLog
+                                .CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_AUTOMATIC;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_FACE_RETOUCH:
+                        extensionType = FrameworkStatsLog
+                                .CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_FACE_RETOUCH;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_BOKEH:
+                        extensionType =
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_BOKEH;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_HDR:
+                        extensionType =
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_HDR;
+                        break;
+                    case CameraExtensionSessionStats.Type.EXTENSION_NIGHT:
+                        extensionType =
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NIGHT;
+                        break;
+                    default:
+                        Slog.w(TAG, "Unknown extension type: " + e.mExtSessionStats.type);
+                }
+                extensionIsAdvanced = e.mExtSessionStats.isAdvanced;
+            }
+
             int streamCount = 0;
             if (e.mStreamStats != null) {
                 streamCount = e.mStreamStats.size();
@@ -813,7 +878,11 @@ public class CameraServiceProxy extends SystemService
                         + ", deviceError " + e.mDeviceError
                         + ", streamCount is " + streamCount
                         + ", userTag is " + e.mUserTag
-                        + ", videoStabilizationMode " + e.mVideoStabilizationMode);
+                        + ", videoStabilizationMode " + e.mVideoStabilizationMode
+                        + ", logId " + e.mLogId
+                        + ", sessionIndex " + e.mSessionIndex
+                        + ", mExtSessionStats {type " + extensionType
+                        + " isAdvanced " + extensionIsAdvanced + "}");
             }
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
@@ -836,6 +905,7 @@ public class CameraServiceProxy extends SystemService
                     streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
                     streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
                     streamProtos[i].streamUseCase = streamStats.getStreamUseCase();
+                    streamProtos[i].colorSpace = streamStats.getColorSpace();
 
                     if (CameraServiceProxy.DEBUG) {
                         String histogramTypeName =
@@ -858,7 +928,8 @@ public class CameraServiceProxy extends SystemService
                                 + ", histogramCounts "
                                 + Arrays.toString(streamProtos[i].histogramCounts)
                                 + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile
-                                + ", streamUseCase " + streamProtos[i].streamUseCase);
+                                + ", streamUseCase " + streamProtos[i].streamUseCase
+                                + ", colorSpace " + streamProtos[i].colorSpace);
                     }
                 }
             }
@@ -871,7 +942,8 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
                     MessageNano.toByteArray(streamProtos[4]),
-                    e.mUserTag, e.mVideoStabilizationMode);
+                    e.mUserTag, e.mVideoStabilizationMode, e.mLogId, e.mSessionIndex,
+                    extensionType, extensionIsAdvanced);
         }
     }
 
@@ -1060,6 +1132,9 @@ public class CameraServiceProxy extends SystemService
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
+        long logId = cameraState.getLogId();
+        int sessionIdx = cameraState.getSessionIndex();
+        CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1081,7 +1156,7 @@ public class CameraServiceProxy extends SystemService
                     CameraUsageEvent openEvent = new CameraUsageEvent(
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__OPEN,
-                            latencyMs, sessionType);
+                            latencyMs, sessionType, deviceError, logId, sessionIdx);
                     mCameraUsageHistory.add(openEvent);
                     break;
                 case CameraSessionStats.CAMERA_STATE_ACTIVE:
@@ -1108,13 +1183,14 @@ public class CameraServiceProxy extends SystemService
                     CameraUsageEvent newEvent = new CameraUsageEvent(
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__SESSION,
-                            latencyMs, sessionType);
+                            latencyMs, sessionType, deviceError, logId, sessionIdx);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
-                                /*userTag*/"", /*videoStabilizationMode*/-1);
+                                /*userTag*/"", /*videoStabilizationMode*/-1,
+                                new CameraExtensionSessionStats());
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1125,8 +1201,10 @@ public class CameraServiceProxy extends SystemService
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
-                                videoStabilizationMode);
+                                videoStabilizationMode, extSessionStats);
                         mCameraUsageHistory.add(doneEvent);
+                        // Do not double count device error
+                        deviceError = false;
 
                         // Check current active camera IDs to see if this package is still
                         // talking to some camera
@@ -1150,7 +1228,7 @@ public class CameraServiceProxy extends SystemService
                         CameraUsageEvent closeEvent = new CameraUsageEvent(
                                 cameraId, facing, clientName, apiLevel, isNdk,
                                 FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__CLOSE,
-                                latencyMs, sessionType);
+                                latencyMs, sessionType, deviceError, logId, sessionIdx);
                         mCameraUsageHistory.add(closeEvent);
                     }
 

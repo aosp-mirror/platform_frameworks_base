@@ -20,6 +20,8 @@ import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 
+import static org.testng.Assert.assertThrows;
+
 public class BinderTest extends TestCase {
     private static final int UID = 100;
 
@@ -45,12 +47,8 @@ public class BinderTest extends TestCase {
     }
 
     @SmallTest
-    public void testGetCallingUidOrThrow() throws Exception {
-        try {
-            Binder.getCallingUidOrThrow();
-            throw new AssertionError("IllegalStateException expected");
-        } catch (IllegalStateException expected) {
-        }
+    public void testGetCallingUidOrThrow_throws() throws Exception {
+        assertThrows(IllegalStateException.class, () -> Binder.getCallingUidOrThrow());
     }
 
     @SmallTest

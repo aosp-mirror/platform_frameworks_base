@@ -55,7 +55,6 @@
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
             android:maxLines="2"
-            android:hyphenationFrequency="normalFast"
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <TextView
@@ -63,7 +62,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textDirection="locale"
-            android:hyphenationFrequency="normalFast"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"/>
 

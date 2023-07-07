@@ -39,7 +39,7 @@ import java.util.UUID;
  *
  * @hide
  */
-public class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper implements IEnrolledModelDb {
     static final String TAG = "SoundModelDBHelper";
     static final boolean DBG = false;
 
@@ -153,11 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * Updates the given keyphrase model, adds it, if it doesn't already exist.
-     *
-     * TODO: We only support one keyphrase currently.
-     */
+    @Override
     public boolean updateKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
         synchronized(this) {
             SQLiteDatabase db = getWritableDatabase();
@@ -193,9 +189,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * Deletes the sound model and associated keyphrases.
-     */
+    @Override
     public boolean deleteKeyphraseSoundModel(int keyphraseId, int userHandle, String bcp47Locale) {
         // Normalize the locale to guard against SQL injection.
         bcp47Locale = Locale.forLanguageTag(bcp47Locale).toLanguageTag();
@@ -218,12 +212,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * Returns a matching {@link KeyphraseSoundModel} for the keyphrase ID.
-     * Returns null if a match isn't found.
-     *
-     * TODO: We only support one keyphrase currently.
-     */
+    @Override
     public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, int userHandle,
             String bcp47Locale) {
         // Sanitize the locale to guard against SQL injection.
@@ -237,12 +226,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * Returns a matching {@link KeyphraseSoundModel} for the keyphrase string.
-     * Returns null if a match isn't found.
-     *
-     * TODO: We only support one keyphrase currently.
-     */
+    @Override
     public KeyphraseSoundModel getKeyphraseSoundModel(String keyphrase, int userHandle,
             String bcp47Locale) {
         // Sanitize the locale to guard against SQL injection.

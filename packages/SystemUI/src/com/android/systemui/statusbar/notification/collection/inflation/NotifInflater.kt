@@ -42,9 +42,14 @@ interface NotifInflater {
 
     /**
      * Request to stop the inflation of an entry.  For example, called when a notification is
-     * removed and no longer needs to be inflated.
+     * removed and no longer needs to be inflated.  Returns whether anything may have been aborted.
      */
-    fun abortInflation(entry: NotificationEntry)
+    fun abortInflation(entry: NotificationEntry): Boolean
+
+    /**
+     * Called to let the system remove the content views from the notification row.
+     */
+    fun releaseViews(entry: NotificationEntry)
 
     /**
      * Callback once all the views are inflated and bound for a given NotificationEntry.
@@ -56,5 +61,5 @@ interface NotifInflater {
     /**
      * A class holding parameters used when inflating the notification row
      */
-    class Params(val isLowPriority: Boolean, val reason: String)
+    class Params(val isLowPriority: Boolean, val reason: String, val showSnooze: Boolean)
 }

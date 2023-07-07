@@ -16,10 +16,13 @@
 
 package android.graphics.perftests;
 
+import static org.junit.Assume.assumeNotNull;
+
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.graphics.fonts.FontVariationAxis;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 
@@ -39,6 +42,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -137,6 +142,20 @@ public class TypefaceCreatePerfTest {
 
         while (state.keepRunning()) {
             Typeface face = r.getFont(R.font.samplefont);
+        }
+    }
+
+    @Test
+    public void testCreate_fromTypefaceWithVariation() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final List<FontVariationAxis> axes = Arrays.asList(
+                new FontVariationAxis("wght", 100f),
+                new FontVariationAxis("wdth", 0.8f));
+
+        while (state.keepRunning()) {
+            Typeface face = Typeface.createFromTypefaceWithVariation(Typeface.SANS_SERIF, axes);
+            // Make sure that the test device has variable fonts.
+            assumeNotNull(face);
         }
     }
 

@@ -35,7 +35,7 @@ import com.android.server.location.injector.LocationUsageLogger;
 import java.util.Collection;
 
 /**
- * Implementation of a handler for {@link IGnssStatusListener}.
+ * GNSS status HAL module and listener multiplexer.
  */
 public class GnssStatusProvider extends
         GnssListenerMultiplexer<Void, IGnssStatusListener, Void> implements

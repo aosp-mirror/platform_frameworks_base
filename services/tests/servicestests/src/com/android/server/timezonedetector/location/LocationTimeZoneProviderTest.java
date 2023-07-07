@@ -15,6 +15,9 @@
  */
 package com.android.server.timezonedetector.location;
 
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_OK;
+
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
@@ -33,6 +36,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
@@ -56,6 +60,12 @@ import java.util.List;
 public class LocationTimeZoneProviderTest {
 
     private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 123456789L;
+    private static final TimeZoneProviderStatus ARBITRARY_PROVIDER_STATUS =
+            new TimeZoneProviderStatus.Builder()
+                    .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                    .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
+                    .build();
 
     private TestThreadingDomain mTestThreadingDomain;
     private TestProviderListener mProviderListener;
@@ -79,89 +89,108 @@ public class LocationTimeZoneProviderTest {
                 mTimeZoneProviderEventPreProcessor);
 
         // initialize()
-        provider.initialize(mProviderListener);
-        provider.assertOnInitializeCalled();
+        {
+            provider.initialize(mProviderListener);
+            provider.assertOnInitializeCalled();
 
-        ProviderState currentState = assertAndReturnProviderState(
-                provider, providerMetricsLogger, PROVIDER_STATE_STOPPED);
-        assertNull(currentState.currentUserConfiguration);
-        assertSame(provider, currentState.provider);
-        mTestThreadingDomain.assertQueueEmpty();
+            ProviderState currentState = assertAndReturnProviderState(
+                    provider, providerMetricsLogger, PROVIDER_STATE_STOPPED,
+                    /*expectedReportedStatus=*/null);
+            assertNull(currentState.currentUserConfiguration);
+            assertSame(provider, currentState.provider);
+            mTestThreadingDomain.assertQueueEmpty();
+        }
+
+        ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
 
         // startUpdates()
-        ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
-        Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
-        Duration arbitraryInitializationTimeoutFuzz = Duration.ofMinutes(2);
-        Duration arbitraryEventFilteringAgeThreshold = Duration.ofMinutes(3);
-        provider.startUpdates(config, arbitraryInitializationTimeout,
-                arbitraryInitializationTimeoutFuzz, arbitraryEventFilteringAgeThreshold);
+        {
+            Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
+            Duration arbitraryInitializationTimeoutFuzz = Duration.ofMinutes(2);
+            Duration arbitraryEventFilteringAgeThreshold = Duration.ofMinutes(3);
+            provider.startUpdates(config, arbitraryInitializationTimeout,
+                    arbitraryInitializationTimeoutFuzz, arbitraryEventFilteringAgeThreshold);
 
-        provider.assertOnStartCalled(
-                arbitraryInitializationTimeout, arbitraryEventFilteringAgeThreshold);
+            provider.assertOnStartCalled(
+                    arbitraryInitializationTimeout, arbitraryEventFilteringAgeThreshold);
 
-        currentState = assertAndReturnProviderState(
-                provider, providerMetricsLogger, PROVIDER_STATE_STARTED_INITIALIZING);
-        assertSame(provider, currentState.provider);
-        assertEquals(config, currentState.currentUserConfiguration);
-        assertNull(currentState.event);
-        // The initialization timeout should be queued.
-        Duration expectedInitializationTimeout =
-                arbitraryInitializationTimeout.plus(arbitraryInitializationTimeoutFuzz);
-        mTestThreadingDomain.assertSingleDelayedQueueItem(expectedInitializationTimeout);
-        // We don't intend to trigger the timeout, so clear it.
-        mTestThreadingDomain.removeAllQueuedRunnables();
+            ProviderState currentState = assertAndReturnProviderState(
+                    provider, providerMetricsLogger, PROVIDER_STATE_STARTED_INITIALIZING,
+                    /*expectedReportedStatus=*/null);
+            assertSame(provider, currentState.provider);
+            assertEquals(config, currentState.currentUserConfiguration);
+            assertNull(currentState.event);
+            // The initialization timeout should be queued.
+            Duration expectedInitializationTimeout =
+                    arbitraryInitializationTimeout.plus(arbitraryInitializationTimeoutFuzz);
+            mTestThreadingDomain.assertSingleDelayedQueueItem(expectedInitializationTimeout);
+            // We don't intend to trigger the timeout, so clear it.
+            mTestThreadingDomain.removeAllQueuedRunnables();
 
-        // Entering started does not trigger an onProviderStateChanged() as it is requested by the
-        // controller.
-        mProviderListener.assertProviderChangeNotReported();
+            // Entering started does not trigger an onProviderStateChanged() as it is requested by
+            // the controller.
+            mProviderListener.assertProviderChangeNotReported();
+        }
 
         // Simulate a suggestion event being received.
-        TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
-                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
-                .setTimeZoneIds(Arrays.asList("Europe/London"))
-                .build();
-        TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion);
-        provider.simulateProviderEventReceived(event);
+        {
+            TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
+                    .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                    .setTimeZoneIds(Arrays.asList("Europe/London"))
+                    .build();
+            TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
+                    ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion, ARBITRARY_PROVIDER_STATUS);
+            provider.simulateProviderEventReceived(event);
 
-        currentState = assertAndReturnProviderState(
-                provider, providerMetricsLogger, PROVIDER_STATE_STARTED_CERTAIN);
-        assertSame(provider, currentState.provider);
-        assertEquals(event, currentState.event);
-        assertEquals(config, currentState.currentUserConfiguration);
-        mTestThreadingDomain.assertQueueEmpty();
-        mProviderListener.assertProviderChangeReported(PROVIDER_STATE_STARTED_CERTAIN);
+            ProviderState currentState = assertAndReturnProviderState(
+                    provider, providerMetricsLogger, PROVIDER_STATE_STARTED_CERTAIN,
+                    ARBITRARY_PROVIDER_STATUS);
+            assertSame(provider, currentState.provider);
+            assertEquals(event, currentState.event);
+            assertEquals(config, currentState.currentUserConfiguration);
+            mTestThreadingDomain.assertQueueEmpty();
+            mProviderListener.assertProviderChangeReported(PROVIDER_STATE_STARTED_CERTAIN);
+        }
 
         // Simulate an uncertain event being received.
-        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS);
-        provider.simulateProviderEventReceived(event);
+        {
+            TimeZoneProviderEvent event = TimeZoneProviderEvent.createUncertainEvent(
+                    ARBITRARY_ELAPSED_REALTIME_MILLIS, ARBITRARY_PROVIDER_STATUS);
+            provider.simulateProviderEventReceived(event);
 
-        currentState = assertAndReturnProviderState(
-                provider, providerMetricsLogger, PROVIDER_STATE_STARTED_UNCERTAIN);
-        assertSame(provider, currentState.provider);
-        assertEquals(event, currentState.event);
-        assertEquals(config, currentState.currentUserConfiguration);
-        mTestThreadingDomain.assertQueueEmpty();
-        mProviderListener.assertProviderChangeReported(PROVIDER_STATE_STARTED_UNCERTAIN);
+            ProviderState currentState = assertAndReturnProviderState(
+                    provider, providerMetricsLogger, PROVIDER_STATE_STARTED_UNCERTAIN,
+                    ARBITRARY_PROVIDER_STATUS);
+            assertSame(provider, currentState.provider);
+            assertEquals(event, currentState.event);
+            assertEquals(config, currentState.currentUserConfiguration);
+            mTestThreadingDomain.assertQueueEmpty();
+            mProviderListener.assertProviderChangeReported(PROVIDER_STATE_STARTED_UNCERTAIN);
+        }
 
         // stopUpdates()
-        provider.stopUpdates();
-        provider.assertOnStopUpdatesCalled();
+        {
+            provider.stopUpdates();
+            provider.assertOnStopUpdatesCalled();
 
-        currentState = assertAndReturnProviderState(
-                provider, providerMetricsLogger, PROVIDER_STATE_STOPPED);
-        assertSame(provider, currentState.provider);
-        assertEquals(PROVIDER_STATE_STOPPED, currentState.stateEnum);
-        assertNull(currentState.event);
-        assertNull(currentState.currentUserConfiguration);
-        mTestThreadingDomain.assertQueueEmpty();
-        // Entering stopped does not trigger an onProviderStateChanged() as it is requested by the
-        // controller.
-        mProviderListener.assertProviderChangeNotReported();
+            ProviderState currentState = assertAndReturnProviderState(
+                    provider, providerMetricsLogger, PROVIDER_STATE_STOPPED,
+                    /*expectedReportedStatus=*/null);
+            assertSame(provider, currentState.provider);
+            assertEquals(PROVIDER_STATE_STOPPED, currentState.stateEnum);
+            assertNull(currentState.event);
+            assertNull(currentState.currentUserConfiguration);
+            mTestThreadingDomain.assertQueueEmpty();
+            // Entering stopped does not trigger an onProviderStateChanged() as it is requested by
+            // the controller.
+            mProviderListener.assertProviderChangeNotReported();
+        }
 
         // destroy()
-        provider.destroy();
-        provider.assertOnDestroyCalled();
+        {
+            provider.destroy();
+            provider.assertOnDestroyCalled();
+        }
     }
 
     @Test
@@ -193,12 +222,12 @@ public class LocationTimeZoneProviderTest {
                 .setTimeZoneIds(Arrays.asList("Europe/London"))
                 .build();
         TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion);
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, suggestion, null);
         provider.simulateProviderEventReceived(event);
         provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_CERTAIN);
 
         // Simulate an uncertain event being received.
-        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS);
+        event = TimeZoneProviderEvent.createUncertainEvent(ARBITRARY_ELAPSED_REALTIME_MILLIS, null);
         provider.simulateProviderEventReceived(event);
         provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_UNCERTAIN);
 
@@ -235,8 +264,9 @@ public class LocationTimeZoneProviderTest {
                 .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .setTimeZoneIds(invalidTimeZoneIds)
                 .build();
+        TimeZoneProviderStatus providerStatus = null;
         TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_ELAPSED_REALTIME_MILLIS, invalidIdSuggestion);
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, invalidIdSuggestion, providerStatus);
         provider.simulateProviderEventReceived(event);
         provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_UNCERTAIN);
     }
@@ -270,9 +300,11 @@ public class LocationTimeZoneProviderTest {
      */
     private static ProviderState assertAndReturnProviderState(
             TestLocationTimeZoneProvider provider,
-            RecordingProviderMetricsLogger providerMetricsLogger, int expectedStateEnum) {
+            RecordingProviderMetricsLogger providerMetricsLogger, int expectedStateEnum,
+            TimeZoneProviderStatus expectedReportedStatus) {
         ProviderState currentState = provider.getCurrentState();
         assertEquals(expectedStateEnum, currentState.stateEnum);
+        assertEquals(expectedReportedStatus, currentState.getReportedStatus());
         providerMetricsLogger.assertChangeLoggedAndRemove(expectedStateEnum);
         providerMetricsLogger.assertNoMoreLogEntries();
         return currentState;
@@ -298,8 +330,9 @@ public class LocationTimeZoneProviderTest {
         }
 
         @Override
-        void onInitialize() {
+        boolean onInitialize() {
             mOnInitializeCalled = true;
+            return true;
         }
 
         @Override

@@ -27,9 +27,10 @@
     systemui:layout_constraintEnd_toEndOf="parent"
     systemui:layout_constraintTop_toTopOf="parent"
     android:layout_marginHorizontal="@dimen/status_view_margin_horizontal"
+    android:clipChildren="false"
     android:layout_width="0dp"
     android:layout_height="wrap_content">
-    <LinearLayout
+    <com.android.keyguard.KeyguardStatusContainer
         android:id="@+id/status_view_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,5 +48,5 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/qs_media_padding"
             />
-    </LinearLayout>
+    </com.android.keyguard.KeyguardStatusContainer>
 </com.android.keyguard.KeyguardStatusView>

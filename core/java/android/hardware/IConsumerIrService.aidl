@@ -19,8 +19,13 @@ package android.hardware;
 /** {@hide} */
 interface IConsumerIrService
 {
+    @RequiresNoPermission
     boolean hasIrEmitter();
+
+    @EnforcePermission("TRANSMIT_IR")
     void transmit(String packageName, int carrierFrequency, in int[] pattern);
+
+    @EnforcePermission("TRANSMIT_IR")
     int[] getCarrierFrequencies();
 }
 

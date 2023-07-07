@@ -19,6 +19,13 @@
 #include "SkPaintFilterCanvas.h"
 #include <effects/StretchEffect.h>
 
+class SkData;
+class SkDrawable;
+class SkMatrix;
+class SkPaint;
+enum class SkBlendMode;
+struct SkRect;
+
 class TransformCanvas : public SkPaintFilterCanvas {
 public:
     TransformCanvas(SkCanvas* target, SkBlendMode blendmode) :

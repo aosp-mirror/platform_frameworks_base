@@ -32,6 +32,7 @@ import com.android.internal.org.bouncycastle.asn1.ASN1Set;
 import com.android.internal.org.bouncycastle.asn1.ASN1TaggedObject;
 import com.android.internal.org.bouncycastle.asn1.x509.Certificate;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -147,7 +148,7 @@ class AndroidKeystoreAttestationVerificationAttributes {
     @NonNull
     static AndroidKeystoreAttestationVerificationAttributes fromCertificate(
             @NonNull X509Certificate x509Certificate)
-            throws Exception {
+            throws CertificateEncodingException, IOException {
         return new AndroidKeystoreAttestationVerificationAttributes(x509Certificate);
     }
 
@@ -281,7 +282,7 @@ class AndroidKeystoreAttestationVerificationAttributes {
     }
 
     private AndroidKeystoreAttestationVerificationAttributes(X509Certificate x509Certificate)
-            throws Exception {
+            throws CertificateEncodingException, IOException {
         Certificate certificate = Certificate.getInstance(
                 new ASN1InputStream(x509Certificate.getEncoded()).readObject());
         ASN1Sequence keyAttributes = (ASN1Sequence) certificate.getTBSCertificate().getExtensions()
@@ -380,7 +381,7 @@ class AndroidKeystoreAttestationVerificationAttributes {
     }
 
     private void parseAttestationApplicationId(byte [] attestationApplicationId)
-            throws Exception {
+            throws IOException {
         ASN1Sequence outerSequence = ASN1Sequence.getInstance(
                 new ASN1InputStream(attestationApplicationId).readObject());
         Map<String, Long> packageNameVersion = new HashMap<>();

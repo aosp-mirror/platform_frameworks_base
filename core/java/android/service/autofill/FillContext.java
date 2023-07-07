@@ -32,7 +32,7 @@ import android.view.autofill.AutofillId;
 
 import com.android.internal.util.DataClass;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 /**
  * This class represents a context for each fill request made via {@link
@@ -95,7 +95,7 @@ public final class FillContext implements Parcelable {
      * @hide
      */
     @NonNull public ViewNode[] findViewNodesByAutofillIds(@NonNull AutofillId[] ids) {
-        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
+        final ArrayDeque<ViewNode> nodesToProcess = new ArrayDeque<>();
         final ViewNode[] foundNodes = new AssistStructure.ViewNode[ids.length];
 
         // Indexes of foundNodes that are not found yet
@@ -127,7 +127,7 @@ public final class FillContext implements Parcelable {
                 final int index = missingNodeIndexes.keyAt(i);
                 final AutofillId id = ids[index];
 
-                if (id.equals(node.getAutofillId())) {
+                if (id != null && id.equals(node.getAutofillId())) {
                     foundNodes[index] = node;
 
                     if (mViewNodeLookupTable == null) {

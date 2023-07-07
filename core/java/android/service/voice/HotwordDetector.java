@@ -28,8 +28,11 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.SharedMemory;
 
+import java.io.PrintWriter;
+
 /**
- * Basic functionality for hotword detectors.
+ * Basic functionality for sandboxed detectors. This interface will be used by detectors that
+ * manages their service lifecycle.
  *
  * @hide
  */
@@ -58,9 +61,20 @@ public interface HotwordDetector {
     int DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE = 2;
 
     /**
-     * Starts hotword recognition.
+     * Indicates that it is a visual query detector.
+     *
+     * @hide
+     */
+    int DETECTOR_TYPE_VISUAL_QUERY_DETECTOR = 3;
+
+    /**
+     * Starts sandboxed detection recognition.
      * <p>
-     * On calling this, the system streams audio from the device microphone to this application's
+     * If a {@link VisualQueryDetector} calls this method, {@link VisualQueryDetectionService
+     * #onStartDetection(VisualQueryDetectionService.Callback)} will be called to start detection.
+     * <p>
+     * Otherwise if a {@link AlwaysOnHotwordDetector} or {@link SoftwareHotwordDetector} calls this,
+     * the system streams audio from the device microphone to this application's
      * {@link HotwordDetectionService}. Audio is streamed until {@link #stopRecognition()} is
      * called.
      * <p>
@@ -73,15 +87,15 @@ public interface HotwordDetector {
      * <p>
      * Calling this again while recognition is active does nothing.
      *
-     * @return true if the request to start recognition succeeded
+     * @return {@code true} if the request to start recognition succeeded
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     boolean startRecognition();
 
     /**
-     * Stops hotword recognition.
+     * Stops sandboxed detection recognition.
      *
-     * @return true if the request to stop recognition succeeded
+     * @return {@code true} if the request to stop recognition succeeded
      */
     boolean stopRecognition();
 
@@ -96,7 +110,7 @@ public interface HotwordDetector {
      *         source of the audio. This will be provided to the {@link HotwordDetectionService}.
      *         PersistableBundle does not allow any remotable objects or other contents that can be
      *         used to communicate with other processes.
-     * @return true if the request to start recognition succeeded
+     * @return {@code true} if the request to start recognition succeeded
      */
     boolean startRecognition(
             @NonNull ParcelFileDescriptor audioStream,
@@ -104,28 +118,35 @@ public interface HotwordDetector {
             @Nullable PersistableBundle options);
 
     /**
-     * Set configuration and pass read-only data to hotword detection service.
+     * Set configuration and pass read-only data to sandboxed detection service.
      *
-     * @param options Application configuration data to provide to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to provide to the
-     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
-     *
+     * @param options Application configuration data to provide to sandboxed detection services.
+     * PersistableBundle does not allow any remotable objects or other contents that can be used to
+     * communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to sandboxed detection services.
+     * Use this to provide model data or other such data to the trusted process.
      * @throws IllegalStateException if this HotwordDetector wasn't specified to use a
-     * {@link HotwordDetectionService} when it was created.
+     *         sandboxed detection service when it was created.
      */
     void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory);
 
     /**
-     * Invalidates this hotword detector so that any future calls to this result
-     * in an {@link IllegalStateException}.
+     * Invalidates this detector so that any future calls to this result
+     * in an {@link IllegalStateException} when a caller has a target SDK below API level 33
+     * or an {@link IllegalDetectorStateException} when a caller has a target SDK of API level 33
+     * or above.
      *
      * <p>If there are no other {@link HotwordDetector} instances linked to the
-     * {@link HotwordDetectionService}, the service will be shutdown.
+     * sandboxed detection service, the service will be shutdown.
      */
     default void destroy() {
+        throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * @hide
+     */
+    default boolean isUsingSandboxedDetectionService() {
         throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
     }
 
@@ -140,9 +161,16 @@ public interface HotwordDetector {
                 return "trusted_hotword_dsp";
             case DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE:
                 return "trusted_hotword_software";
+            case DETECTOR_TYPE_VISUAL_QUERY_DETECTOR:
+                return "visual_query_detector";
             default:
                 return Integer.toString(detectorType);
         }
+    }
+
+    /** @hide */
+    default void dump(String prefix, PrintWriter pw) {
+        throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
     }
 
     /**
@@ -160,8 +188,37 @@ public interface HotwordDetector {
 
         /**
          * Called when the detection fails due to an error.
+         *
+         * @deprecated On {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above,
+         * implement {@link HotwordDetector.Callback#onFailure(HotwordDetectionServiceFailure)},
+         * {@link AlwaysOnHotwordDetector.Callback#onFailure(SoundTriggerFailure)},
+         * {@link HotwordDetector.Callback#onUnknownFailure(String)} instead.
          */
+        @Deprecated
         void onError();
+
+        /**
+         * Called when the detection fails due to an error occurs in the
+         * {@link HotwordDetectionService}, {@link HotwordDetectionServiceFailure} will be reported
+         * to the detector.
+         *
+         * @param hotwordDetectionServiceFailure It provides the error code, error message and
+         *                                       suggested action.
+         */
+        default void onFailure(
+                @NonNull HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+            onError();
+        }
+
+        /**
+         * Called when the detection fails due to an unknown error occurs, an error message
+         * will be reported to the detector.
+         *
+         * @param errorMessage It provides the error message.
+         */
+        default void onUnknownFailure(@NonNull String errorMessage) {
+            onError();
+        }
 
         /**
          * Called when the recognition is paused temporarily for some reason.
@@ -178,7 +235,7 @@ public interface HotwordDetector {
         void onRecognitionResumed();
 
         /**
-         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+         * Called when the {@link HotwordDetectionService} second stage detection did not detect the
          * keyphrase.
          *
          * @param result Info about the second stage detection result, provided by the
@@ -187,18 +244,21 @@ public interface HotwordDetector {
         void onRejected(@NonNull HotwordRejectedResult result);
 
         /**
-         * Called when the {@link HotwordDetectionService} is created by the system and given a
-         * short amount of time to report it's initialization state.
+         * Called when the {@link HotwordDetectionService} or {@link VisualQueryDetectionService} is
+         * created by the system and given a short amount of time to report their initialization
+         * state.
          *
-         * @param status Info about initialization state of {@link HotwordDetectionService}; the
-         * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},
-         * 1<->{@link HotwordDetectionService#getMaxCustomInitializationStatus()},
-         * {@link HotwordDetectionService#INITIALIZATION_STATUS_UNKNOWN}.
+         * @param status Info about initialization state of {@link HotwordDetectionService} or
+         * {@link VisualQueryDetectionService}; allowed values are
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link SandboxedDetectionInitializer#getMaxCustomInitializationStatus()},
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_UNKNOWN}.
          */
         void onHotwordDetectionServiceInitialized(int status);
 
         /**
-         * Called with the {@link HotwordDetectionService} is restarted.
+         * Called with the {@link HotwordDetectionService} or {@link VisualQueryDetectionService} is
+         * restarted.
          *
          * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
          * the newly created service.

@@ -36,10 +36,12 @@ import android.sysprop.HdmiProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ConcurrentUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +50,7 @@ import java.util.stream.Collectors;
 
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
- * to attached CEC devices.
+ * to attached CEC devices. It also allows to control the eARC feature.
  *
  * <p>Provides various HDMI client instances that represent HDMI-CEC logical devices
  * hosted in the system. {@link #getTvClient()}, for instance will return an
@@ -67,6 +69,32 @@ public final class HdmiControlManager {
     @Nullable private final IHdmiControlService mService;
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+
+    /**
+     * A cache of the current device's physical address. When device's HDMI out port
+     * is not connected to any device, it is set to {@link #INVALID_PHYSICAL_ADDRESS}.
+     *
+     * <p>Otherwise it is updated by the {@link ClientHotplugEventListener} registered
+     * with {@link com.android.server.hdmi.HdmiControlService} by the
+     * {@link #addHotplugEventListener(HotplugEventListener)} and the address is from
+     * {@link com.android.server.hdmi.HdmiControlService#getPortInfo()}
+     */
+    @GuardedBy("mLock")
+    private int mLocalPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+
+    private void setLocalPhysicalAddress(int physicalAddress) {
+        synchronized (mLock) {
+            mLocalPhysicalAddress = physicalAddress;
+        }
+    }
+
+    private int getLocalPhysicalAddress() {
+        synchronized (mLock) {
+            return mLocalPhysicalAddress;
+        }
+    }
+
+    private final Object mLock = new Object();
 
     /**
      * Broadcast Action: Display OSD message.
@@ -369,6 +397,30 @@ public final class HdmiControlManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RoutingControl {}
+
+    // -- Whether the Soundbar mode feature is enabled or disabled.
+    /**
+     * Soundbar mode feature enabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    public static final int SOUNDBAR_MODE_ENABLED = 1;
+    /**
+     * Soundbar mode feature disabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    public static final int SOUNDBAR_MODE_DISABLED = 0;
+    /**
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     * @hide
+     */
+    @IntDef(prefix = { "SOUNDBAR_MODE" }, value = {
+            SOUNDBAR_MODE_ENABLED,
+            SOUNDBAR_MODE_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SoundbarMode {}
 
     // -- Scope of CEC power control messages sent by a playback device.
     /**
@@ -747,6 +799,31 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SadPresenceInQuery {}
 
+    // -- Whether eARC is enabled or disabled.
+    /**
+     * eARC enabled.
+     *
+     * @see HdmiControlManager#SETTING_NAME_EARC_ENABLED
+     */
+    public static final int EARC_FEATURE_ENABLED = 1;
+    /**
+     * eARC disabled.
+     *
+     * @see HdmiControlManager#SETTING_NAME_EARC_ENABLED
+     */
+    public static final int EARC_FEATURE_DISABLED = 0;
+    /**
+     * @hide
+     *
+     * @see HdmiControlManager#SETTING_NAME_EARC_ENABLED
+     */
+    @IntDef(prefix = { "EARC_FEATURE" }, value = {
+            EARC_FEATURE_ENABLED,
+            EARC_FEATURE_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EarcFeature {}
+
     // -- Settings available in the CEC Configuration.
     /**
      * Name of a setting deciding whether the CEC is enabled.
@@ -766,6 +843,14 @@ public final class HdmiControlManager {
      * @see HdmiControlManager#setRoutingControl(int)
      */
     public static final String CEC_SETTING_NAME_ROUTING_CONTROL = "routing_control";
+    /**
+     * Name of a setting deciding whether the Soundbar mode feature is enabled.
+     * Before exposing this setting make sure the hardware supports it, otherwise, you may
+     * experience multiple issues.
+     *
+     * @see HdmiControlManager#setSoundbarMode(int)
+     */
+    public static final String CEC_SETTING_NAME_SOUNDBAR_MODE = "soundbar_mode";
     /**
      * Name of a setting deciding on the power control mode.
      *
@@ -1004,11 +1089,21 @@ public final class HdmiControlManager {
      */
     public static final String CEC_SETTING_NAME_QUERY_SAD_MAX = "query_sad_max";
     /**
+     * Name of a setting representing whether eARC is enabled or not.
+     *
+     * @see HdmiControlManager#setEarcEnabled(int)
+     */
+    public static final String SETTING_NAME_EARC_ENABLED = "earc_enabled";
+    /**
      * @hide
      */
-    @StringDef(prefix = { "CEC_SETTING_NAME_" }, value = {
+    // TODO(b/240379115): change names of CEC settings so that their prefix matches with the other
+    // HDMI control settings.
+    @StringDef(value = {
         CEC_SETTING_NAME_HDMI_CEC_ENABLED,
         CEC_SETTING_NAME_HDMI_CEC_VERSION,
+        CEC_SETTING_NAME_ROUTING_CONTROL,
+        CEC_SETTING_NAME_SOUNDBAR_MODE,
         CEC_SETTING_NAME_POWER_CONTROL_MODE,
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
@@ -1038,8 +1133,9 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_QUERY_SAD_DST,
         CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
         CEC_SETTING_NAME_QUERY_SAD_MAX,
+        SETTING_NAME_EARC_ENABLED,
     })
-    public @interface CecSettingName {}
+    public @interface SettingName {}
 
     /**
      * @hide
@@ -1094,6 +1190,37 @@ public final class HdmiControlManager {
         mHasAudioSystemDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
         mIsSwitchDevice = HdmiProperties.is_switch().orElse(false);
+        addHotplugEventListener(new ClientHotplugEventListener());
+    }
+
+    private final class ClientHotplugEventListener implements HotplugEventListener {
+
+        @Override
+        public void onReceived(HdmiHotplugEvent event) {
+            List<HdmiPortInfo> ports = new ArrayList<>();
+            try {
+                ports = mService.getPortInfo();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (ports.isEmpty()) {
+                Log.e(TAG, "Can't find port info, not updating connected status. "
+                        + "Hotplug event:" + event);
+                return;
+            }
+            // If the HDMI OUT port is plugged or unplugged, update the mLocalPhysicalAddress
+            for (HdmiPortInfo port : ports) {
+                if (port.getId() == event.getPort()) {
+                    if (port.getType() == HdmiPortInfo.PORT_OUTPUT) {
+                        setLocalPhysicalAddress(
+                                event.isConnected()
+                                        ? port.getAddress()
+                                        : INVALID_PHYSICAL_ADDRESS);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
@@ -1129,7 +1256,16 @@ public final class HdmiControlManager {
             case HdmiDeviceInfo.DEVICE_PLAYBACK:
                 return mHasPlaybackDevice ? new HdmiPlaybackClient(mService) : null;
             case HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM:
-                return mHasAudioSystemDevice ? new HdmiAudioSystemClient(mService) : null;
+                try {
+                    if ((mService.getCecSettingIntValue(CEC_SETTING_NAME_SOUNDBAR_MODE)
+                            == SOUNDBAR_MODE_ENABLED && mHasPlaybackDevice)
+                            || mHasAudioSystemDevice) {
+                        return new HdmiAudioSystemClient(mService);
+                    }
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                return null;
             case HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH:
                 return (mHasSwitchDevice || mIsSwitchDevice)
                     ? new HdmiSwitchClient(mService) : null;
@@ -1226,6 +1362,22 @@ public final class HdmiControlManager {
     public List<HdmiDeviceInfo> getConnectedDevicesList() {
         try {
             return mService.getDeviceList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the list of the HDMI ports configuration.
+     *
+     * <p>This returns an empty list when the current device does not have HDMI ports.
+     *
+     * @return a list of {@link HdmiPortInfo}
+     */
+    @NonNull
+    public List<HdmiPortInfo> getPortInfo() {
+        try {
+            return mService.getPortInfo();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1464,11 +1616,7 @@ public final class HdmiControlManager {
      * 1.4b 8.7 Physical Address for more details on the address discovery proccess.
      */
     public int getPhysicalAddress() {
-        try {
-            return mService.getPhysicalAddress();
-        } catch (RemoteException e) {
-            return INVALID_PHYSICAL_ADDRESS;
-        }
+        return getLocalPhysicalAddress();
     }
 
     /**
@@ -1482,7 +1630,7 @@ public final class HdmiControlManager {
      */
     public boolean isDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Objects.requireNonNull(targetDevice);
-        int physicalAddress = getPhysicalAddress();
+        int physicalAddress = getLocalPhysicalAddress();
         if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
@@ -1501,7 +1649,7 @@ public final class HdmiControlManager {
     @Deprecated
     public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Objects.requireNonNull(targetDevice);
-        int physicalAddress = getPhysicalAddress();
+        int physicalAddress = getLocalPhysicalAddress();
         if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
@@ -1630,7 +1778,7 @@ public final class HdmiControlManager {
     public void addHotplugEventListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull HotplugEventListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "addHotplugEventListener: HdmiControlService is not available");
             return;
         }
         if (mHotplugEventListeners.containsKey(listener)) {
@@ -1655,7 +1803,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void removeHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "removeHotplugEventListener: HdmiControlService is not available");
             return;
         }
         IHdmiHotplugEventListener wrappedListener = mHotplugEventListeners.remove(listener);
@@ -1723,7 +1871,7 @@ public final class HdmiControlManager {
     public void addHdmiControlStatusChangeListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull HdmiControlStatusChangeListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "addHdmiControlStatusChangeListener: HdmiControlService is not available");
             return;
         }
         if (mHdmiControlStatusChangeListeners.containsKey(listener)) {
@@ -1750,7 +1898,8 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void removeHdmiControlStatusChangeListener(HdmiControlStatusChangeListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG,
+                    "removeHdmiControlStatusChangeListener: HdmiControlService is not available");
             return;
         }
         IHdmiControlStatusChangeListener wrappedListener =
@@ -1799,7 +1948,8 @@ public final class HdmiControlManager {
     public void addHdmiCecVolumeControlFeatureListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull HdmiCecVolumeControlFeatureListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG,
+                    "addHdmiCecVolumeControlFeatureListener: HdmiControlService is not available");
             return;
         }
         if (mHdmiCecVolumeControlFeatureListeners.containsKey(listener)) {
@@ -1827,7 +1977,9 @@ public final class HdmiControlManager {
     public void removeHdmiCecVolumeControlFeatureListener(
             HdmiCecVolumeControlFeatureListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG,
+                    "removeHdmiCecVolumeControlFeatureListener: HdmiControlService is not "
+                            + "available");
             return;
         }
         IHdmiCecVolumeControlFeatureListener wrappedListener =
@@ -1867,7 +2019,7 @@ public final class HdmiControlManager {
          *
          * @param setting name of a CEC setting that changed
          */
-        void onChange(@NonNull @CecSettingName String setting);
+        void onChange(@NonNull @SettingName String setting);
     }
 
     private final ArrayMap<String,
@@ -1875,11 +2027,11 @@ public final class HdmiControlManager {
                     mCecSettingChangeListeners = new ArrayMap<>();
 
     private void addCecSettingChangeListener(
-            @NonNull @CecSettingName String setting,
+            @NonNull @SettingName String setting,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CecSettingChangeListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "addCecSettingChangeListener: HdmiControlService is not available");
             return;
         }
         if (mCecSettingChangeListeners.containsKey(setting)
@@ -1901,10 +2053,10 @@ public final class HdmiControlManager {
     }
 
     private void removeCecSettingChangeListener(
-            @NonNull @CecSettingName String setting,
+            @NonNull @SettingName String setting,
             @NonNull CecSettingChangeListener listener) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "removeCecSettingChangeListener: HdmiControlService is not available");
             return;
         }
         IHdmiCecSettingChangeListener wrappedListener =
@@ -1937,17 +2089,20 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get a set of user-modifiable settings.
+     * Get a set of user-modifiable HDMI control settings.
+     * This applies to CEC settings and eARC settings.
      *
      * @return a set of user-modifiable settings.
      * @throws RuntimeException when the HdmiControlService is not available.
      */
+    // TODO(b/240379115): rename this API to represent that this applies to all HDMI control
+    // settings and not just CEC settings.
     @NonNull
-    @CecSettingName
+    @SettingName
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public List<String> getUserCecSettings() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getUserCecSettings: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -1958,7 +2113,9 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get a set of allowed values for a setting (string value-type).
+     * Get a set of allowed values for an HDMI control setting (string value-type).
+     * This applies to CEC settings and eARC settings.
+     *
      *
      * @param name name of the setting
      * @return a set of allowed values for a settings. {@code null} on failure.
@@ -1966,11 +2123,13 @@ public final class HdmiControlManager {
      * @throws IllegalArgumentException when setting {@code name} value type is invalid.
      * @throws RuntimeException when the HdmiControlService is not available.
      */
+    // TODO(b/240379115): rename this API to represent that this applies to all HDMI control
+    // settings and not just CEC settings.
     @NonNull
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public List<String> getAllowedCecSettingStringValues(@NonNull @CecSettingName String name) {
+    public List<String> getAllowedCecSettingStringValues(@NonNull @SettingName String name) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getAllowedCecSettingStringValues: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -1981,7 +2140,8 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get a set of allowed values for a setting (int value-type).
+     * Get a set of allowed values for an HDMI control setting (int value-type).
+     * This applies to CEC settings and eARC settings.
      *
      * @param name name of the setting
      * @return a set of allowed values for a settings. {@code null} on failure.
@@ -1989,11 +2149,13 @@ public final class HdmiControlManager {
      * @throws IllegalArgumentException when setting {@code name} value type is invalid.
      * @throws RuntimeException when the HdmiControlService is not available.
      */
+    // TODO(b/240379115): rename this API to represent that this applies to all HDMI control
+    // settings and not just CEC settings.
     @NonNull
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public List<Integer> getAllowedCecSettingIntValues(@NonNull @CecSettingName String name) {
+    public List<Integer> getAllowedCecSettingIntValues(@NonNull @SettingName String name) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getAllowedCecSettingIntValues: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2012,7 +2174,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setHdmiCecEnabled(@NonNull @HdmiCecControl int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setHdmiCecEnabled: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2032,7 +2194,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getHdmiCecEnabled() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getHdmiCecEnabled: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2090,7 +2252,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setHdmiCecVersion(@NonNull @HdmiCecVersion int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setHdmiCecVersion: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2112,7 +2274,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getHdmiCecVersion() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getHdmiCecVersion: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2135,7 +2297,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setRoutingControl(@NonNull @RoutingControl int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setRoutingControl: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2160,11 +2322,59 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getRoutingControl() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getRoutingControl: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_ROUTING_CONTROL);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the status of Soundbar mode feature.
+     *
+     * <p>This allows to enable/disable Soundbar mode on the playback device.
+     * The setting's effect will be available on devices where the hardware supports this feature.
+     * If enabled, an audio system local device will be allocated and try to establish an ARC
+     * connection with the TV. If disabled, the ARC connection will be terminated and the audio
+     * system local device will be removed from the network.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setSoundbarMode(@SoundbarMode int value) {
+        if (mService == null) {
+            Log.e(TAG, "setSoundbarMode: HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_SOUNDBAR_MODE, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of Soundbar mode feature.
+     *
+     * <p>Reflects whether Soundbar mode is currently enabled on the playback device.
+     * If enabled, an audio system local device will be allocated and try to establish an ARC
+     * connection with the TV. If disabled, the ARC connection will be terminated and the audio
+     * system local device will be removed from the network.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SOUNDBAR_MODE
+     */
+    @SoundbarMode
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getSoundbarMode() {
+        if (mService == null) {
+            Log.e(TAG, "getSoundbarMode: HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_SOUNDBAR_MODE);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2181,7 +2391,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setPowerControlMode(@NonNull @PowerControlMode String value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setPowerControlMode: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2204,7 +2414,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public String getPowerControlMode() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getPowerControlMode: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2225,7 +2435,8 @@ public final class HdmiControlManager {
     public void setPowerStateChangeOnActiveSourceLost(
             @NonNull @ActiveSourceLostBehavior String value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG,
+                    "setPowerStateChangeOnActiveSourceLost: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2248,7 +2459,8 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public String getPowerStateChangeOnActiveSourceLost() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG,
+                    "getPowerStateChangeOnActiveSourceLost: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2273,7 +2485,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setSystemAudioControl(@NonNull @SystemAudioControl int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setSystemAudioControl: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2299,7 +2511,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getSystemAudioControl() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getSystemAudioControl: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2319,7 +2531,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setSystemAudioModeMuting(@NonNull @SystemAudioModeMuting int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setSystemAudioModeMuting: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2341,7 +2553,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getSystemAudioModeMuting() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getSystemAudioModeMuting: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2362,7 +2574,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setTvWakeOnOneTouchPlay(@NonNull @TvWakeOnOneTouchPlay int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setTvWakeOnOneTouchPlay: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2385,7 +2597,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getTvWakeOnOneTouchPlay() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getTvWakeOnOneTouchPlay: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2406,7 +2618,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setTvSendStandbyOnSleep(@NonNull @TvSendStandbyOnSleep int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setTvSendStandbyOnSleep: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2429,7 +2641,7 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getTvSendStandbyOnSleep() {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getTvSendStandbyOnSleep: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2461,7 +2673,7 @@ public final class HdmiControlManager {
     public void setSadPresenceInQuery(@NonNull @CecSettingSad String setting,
             @SadPresenceInQuery int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setSadPresenceInQuery: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2495,7 +2707,7 @@ public final class HdmiControlManager {
     public void setSadsPresenceInQuery(@NonNull @CecSettingSad List<String> settings,
             @SadPresenceInQuery int value) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "setSadsPresenceInQuery: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
@@ -2527,11 +2739,51 @@ public final class HdmiControlManager {
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public int getSadPresenceInQuery(@NonNull @CecSettingSad String setting) {
         if (mService == null) {
-            Log.e(TAG, "HdmiControlService is not available");
+            Log.e(TAG, "getSadPresenceInQuery: HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
             return mService.getCecSettingIntValue(setting);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the global status of eARC.
+     *
+     * <p>This allows to enable/disable the eARC feature on the device. If the feature is enabled
+     * and the hardware supports eARC as well, the device can attempt to establish an eARC
+     * connection.
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setEarcEnabled(@NonNull @EarcFeature int value) {
+        if (mService == null) {
+            Log.e(TAG, "setEarcEnabled: HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(SETTING_NAME_EARC_ENABLED, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current global status of eARC.
+     *
+     * <p>Reflects whether the eARC feature is currently enabled on the device.
+     */
+    @NonNull
+    @EarcFeature
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getEarcEnabled() {
+        if (mService == null) {
+            Log.e(TAG, "getEarcEnabled: HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(SETTING_NAME_EARC_ENABLED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

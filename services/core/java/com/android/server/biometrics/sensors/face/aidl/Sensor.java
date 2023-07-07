@@ -18,9 +18,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.SynchronousUserSwitchObserver;
-import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -54,12 +51,12 @@ import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -92,15 +89,7 @@ public class Sensor {
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     @NonNull private final Supplier<AidlSession> mLazySession;
-    @Nullable private AidlSession mCurrentSession;
-
-    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
-        @Override
-        public void onUserSwitching(int newUserId) {
-            mProvider.scheduleInternalCleanup(
-                    mSensorProperties.sensorId, newUserId, null /* callback */);
-        }
-    };
+    @Nullable AidlSession mCurrentSession;
 
     @VisibleForTesting
     public static class HalSessionCallback extends ISessionCallback.Stub {
@@ -128,6 +117,9 @@ public class Sensor {
         private final LockoutCache mLockoutCache;
         @NonNull
         private final LockoutResetDispatcher mLockoutResetDispatcher;
+
+        @NonNull
+        private AuthSessionCoordinator mAuthSessionCoordinator;
         @NonNull
         private final Callback mCallback;
 
@@ -135,6 +127,7 @@ public class Sensor {
                 @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
                 @NonNull LockoutCache lockoutTracker,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+                @NonNull AuthSessionCoordinator authSessionCoordinator,
                 @NonNull Callback callback) {
             mContext = context;
             mHandler = handler;
@@ -144,6 +137,7 @@ public class Sensor {
             mUserId = userId;
             mLockoutCache = lockoutTracker;
             mLockoutResetDispatcher = lockoutResetDispatcher;
+            mAuthSessionCoordinator = authSessionCoordinator;
             mCallback = callback;
         }
 
@@ -347,8 +341,12 @@ public class Sensor {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceResetLockoutClient)) {
                     Slog.d(mTag, "onLockoutCleared outside of resetLockout by HAL");
+                    // Given that onLockoutCleared() can happen at any time, and is not necessarily
+                    // coming from a specific client, set this to -1 to indicate it wasn't for a
+                    // specific request.
                     FaceResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
-                            mLockoutCache, mLockoutResetDispatcher);
+                            mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                            Utils.getCurrentStrength(mSensorId), -1 /* requestId */);
                 } else {
                     Slog.d(mTag, "onLockoutCleared after resetLockout");
                     final FaceResetLockoutClient resetLockoutClient =
@@ -488,7 +486,7 @@ public class Sensor {
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricContext biometricContext, AidlSession session) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -515,7 +513,8 @@ public class Sensor {
 
                         final HalSessionCallback resultController = new HalSessionCallback(mContext,
                                 mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
-                                lockoutResetDispatcher, () -> {
+                                lockoutResetDispatcher,
+                                biometricContext.getAuthSessionCoordinator(), () -> {
                             Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
                             mCurrentSession = null;
                         });
@@ -548,12 +547,14 @@ public class Sensor {
         mLockoutCache = new LockoutCache();
         mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
+    }
 
-        try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, mTag);
-        } catch (RemoteException e) {
-            Slog.e(mTag, "Unable to register user switch observer");
-        }
+    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext) {
+        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
+                biometricContext, null);
     }
 
     @NonNull Supplier<AidlSession> getLazySession() {
@@ -564,7 +565,7 @@ public class Sensor {
         return mSensorProperties;
     }
 
-    @Nullable AidlSession getSessionForUser(int userId) {
+    @VisibleForTesting @Nullable AidlSession getSessionForUser(int userId) {
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -638,7 +639,7 @@ public class Sensor {
 
     public void onBinderDied() {
         final BaseClientMonitor client = mScheduler.getCurrentClient();
-        if (client instanceof Interruptable) {
+        if (client != null && client.isInterruptable()) {
             Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
             errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
@@ -648,6 +649,8 @@ public class Sensor {
                     BiometricsProtoEnums.MODALITY_FACE,
                     BiometricsProtoEnums.ISSUE_HAL_DEATH,
                     -1 /* sensorId */);
+        } else if (client != null) {
+            client.cancel();
         }
 
         mScheduler.recordCrashState();

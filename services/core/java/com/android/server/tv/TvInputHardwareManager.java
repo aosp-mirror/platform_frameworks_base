@@ -48,6 +48,7 @@ import android.media.tv.TvInputService.PriorityHintUseCaseType;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -59,6 +60,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Surface;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
@@ -69,7 +71,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +90,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<>();
     private final List<TvInputHardwareInfo> mHardwareList = new ArrayList<>();
-    private final List<HdmiDeviceInfo> mHdmiDeviceList = new LinkedList<>();
+    private final List<HdmiDeviceInfo> mHdmiDeviceList = new ArrayList<>();
     /* A map from a device ID to the matching TV input ID. */
     private final SparseArray<String> mHardwareInputIdMap = new SparseArray<>();
     /* A map from a HDMI logical address to the matching TV input ID. */
@@ -112,9 +113,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private int mCurrentMaxIndex = 0;
 
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
-    private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
+    private final List<Message> mPendingHdmiDeviceEvents = new ArrayList<>();
 
-    private final List<Message> mPendingTvinputInfoEvents = new LinkedList<>();
+    private final List<Message> mPendingTvinputInfoEvents = new ArrayList<>();
 
     // Calls to mListener should happen here.
     private final Handler mHandler = new ListenerHandler();
@@ -234,11 +235,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             } else {
                 Message msg = mHandler.obtainMessage(ListenerHandler.TVINPUT_INFO_ADDED,
                     deviceId, cableConnectionStatus, connection);
-                for (Iterator<Message> it = mPendingTvinputInfoEvents.iterator(); it.hasNext();) {
-                    if (it.next().arg1 == deviceId) {
-                    it.remove();
-                    }
-                }
+                mPendingTvinputInfoEvents.removeIf(message -> message.arg1 == deviceId);
                 mPendingTvinputInfoEvents.add(msg);
            }
             ITvInputHardwareCallback callback = connection.getCallbackLocked();
@@ -266,6 +263,21 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 runnable.run();
                 connection.setOnFirstFrameCapturedLocked(null);
             }
+        }
+    }
+
+    @Override
+    public void onTvMessage(int deviceId, int type, Bundle data) {
+        synchronized (mLock) {
+            String inputId = mHardwareInputIdMap.get(deviceId);
+            if (inputId == null) {
+                return;
+            }
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = mHardwareInputIdMap.get(deviceId);
+            args.arg2 = data;
+            mHandler.obtainMessage(ListenerHandler.TV_MESSAGE_RECEIVED, type, 0, args)
+                    .sendToTarget();
         }
     }
 
@@ -464,9 +476,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     private int findDeviceIdForInputIdLocked(String inputId) {
         for (int i = 0; i < mConnections.size(); ++i) {
-            Connection connection = mConnections.get(i);
-            if (connection.getInfoLocked().getId().equals(inputId)) {
-                return i;
+            int key = mConnections.keyAt(i);
+            Connection connection = mConnections.get(key);
+            if (connection != null && connection.getInfoLocked() != null
+                    && connection.getInfoLocked().getId().equals(inputId)) {
+                return key;
             }
         }
         return -1;
@@ -492,6 +506,27 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
         return configsList;
+    }
+
+    public boolean setTvMessageEnabled(String inputId, int type,
+            boolean enabled) {
+        synchronized (mLock) {
+            int deviceId = findDeviceIdForInputIdLocked(inputId);
+            if (deviceId < 0) {
+                Slog.e(TAG, "Invalid inputId : " + inputId);
+                return false;
+            }
+
+            Connection connection = mConnections.get(deviceId);
+            boolean success = true;
+            for (TvStreamConfig config : connection.getConfigsLocked()) {
+                success = success
+                        && mHal.setTvMessageEnabled(deviceId, config, type, enabled)
+                        == TvInputHal.SUCCESS;
+            }
+
+            return success;
+        }
     }
 
     /**
@@ -769,6 +804,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + " mHardwareInfo: " + mHardwareInfo
                     + ", mInfo: " + mInfo
                     + ", mCallback: " + mCallback
+                    + ", mHardware: " + mHardware
                     + ", mConfigs: " + Arrays.toString(mConfigs)
                     + ", mCallingUid: " + mCallingUid
                     + ", mResolvedUserId: " + mResolvedUserId
@@ -1205,6 +1241,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         void onHdmiDeviceAdded(HdmiDeviceInfo device);
         void onHdmiDeviceRemoved(HdmiDeviceInfo device);
         void onHdmiDeviceUpdated(String inputId, HdmiDeviceInfo device);
+        void onTvMessage(String inputId, int type, Bundle data);
     }
 
     private class ListenerHandler extends Handler {
@@ -1215,6 +1252,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private static final int HDMI_DEVICE_REMOVED = 5;
         private static final int HDMI_DEVICE_UPDATED = 6;
         private static final int TVINPUT_INFO_ADDED = 7;
+        private static final int TV_MESSAGE_RECEIVED = 8;
 
         @Override
         public final void handleMessage(Message msg) {
@@ -1282,6 +1320,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             }
                         }
                     }
+                    break;
+                }
+                case TV_MESSAGE_RECEIVED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String inputId = (String) args.arg1;
+                    Bundle data = (Bundle) args.arg2;
+                    int type = msg.arg1;
+                    mListener.onTvMessage(inputId, type, data);
+                    args.recycle();
                     break;
                 }
                 default: {

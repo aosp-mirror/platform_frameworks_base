@@ -30,14 +30,14 @@ import android.app.WindowConfiguration;
 import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider;
 
 import org.xmlpull.v1.XmlPullParser;

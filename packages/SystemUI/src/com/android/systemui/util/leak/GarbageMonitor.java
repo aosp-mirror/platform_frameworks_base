@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -57,8 +58,9 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -304,7 +306,7 @@ public class GarbageMonitor implements Dumpable {
         MemoryIconDrawable(Context context) {
             baseIcon = context.getDrawable(R.drawable.ic_memory).mutate();
             dp = context.getResources().getDisplayMetrics().density;
-            paint.setColor(QSIconViewImpl.getIconColorForState(context, STATE_ACTIVE));
+            paint.setColor(Color.WHITE);
         }
 
         public void setRss(long rss) {
@@ -412,10 +414,12 @@ public class GarbageMonitor implements Dumpable {
         private final GarbageMonitor gm;
         private ProcessMemInfo pmi;
         private boolean dumpInProgress;
+        private final PanelInteractor mPanelInteractor;
 
         @Inject
         public MemoryTile(
                 QSHost host,
+                QsEventLogger uiEventLogger,
                 @Background Looper backgroundLooper,
                 @Main Handler mainHandler,
                 FalsingManager falsingManager,
@@ -423,11 +427,13 @@ public class GarbageMonitor implements Dumpable {
                 StatusBarStateController statusBarStateController,
                 ActivityStarter activityStarter,
                 QSLogger qsLogger,
-                GarbageMonitor monitor
+                GarbageMonitor monitor,
+                PanelInteractor panelInteractor
         ) {
-            super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+            super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                     statusBarStateController, activityStarter, qsLogger);
             gm = monitor;
+            mPanelInteractor = panelInteractor;
         }
 
         @Override
@@ -457,7 +463,7 @@ public class GarbageMonitor implements Dumpable {
                     mHandler.post(() -> {
                         dumpInProgress = false;
                         refreshState();
-                        getHost().collapsePanels();
+                        mPanelInteractor.collapsePanels();
                         mActivityStarter.postStartActivityDismissingKeyguard(shareIntent, 0);
                     });
                 }
@@ -564,12 +570,13 @@ public class GarbageMonitor implements Dumpable {
 
     /** */
     @SysUISingleton
-    public static class Service extends CoreStartable implements Dumpable {
+    public static class Service implements CoreStartable,  Dumpable {
+        private final Context mContext;
         private final GarbageMonitor mGarbageMonitor;
 
         @Inject
         public Service(Context context, GarbageMonitor garbageMonitor) {
-            super(context);
+            mContext = context;
             mGarbageMonitor = garbageMonitor;
         }
 

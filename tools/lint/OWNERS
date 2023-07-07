@@ -2,4 +2,8 @@ brufino@google.com
 jsharkey@google.com
 
 per-file *CallingSettingsNonUserGetterMethods* = file:/packages/SettingsProvider/OWNERS
+per-file *RegisterReceiverFlagDetector* = jacobhobbie@google.com
 
+# Android lint in the Android platform maintainers
+colefaust@google.com
+farivar@google.com

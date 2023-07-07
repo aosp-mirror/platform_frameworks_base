@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -55,8 +54,9 @@ public final class ShutdownCheckPoints {
     private static final int MAX_DUMP_FILES = 20;
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+    private static final File[] EMPTY_FILE_ARRAY = {};
 
-    private final LinkedList<CheckPoint> mCheckPoints;
+    private final ArrayList<CheckPoint> mCheckPoints;
     private final Injector mInjector;
 
     private ShutdownCheckPoints() {
@@ -85,7 +85,7 @@ public final class ShutdownCheckPoints {
 
     @VisibleForTesting
     ShutdownCheckPoints(Injector injector) {
-        mCheckPoints = new LinkedList<>();
+        mCheckPoints = new ArrayList<>();
         mInjector = injector;
     }
 
@@ -144,8 +144,8 @@ public final class ShutdownCheckPoints {
 
     private void recordCheckPointInternal(CheckPoint checkPoint) {
         synchronized (mCheckPoints) {
-            mCheckPoints.addLast(checkPoint);
-            if (mCheckPoints.size() > mInjector.maxCheckPoints()) mCheckPoints.removeFirst();
+            mCheckPoints.add(checkPoint);
+            if (mCheckPoints.size() > mInjector.maxCheckPoints()) mCheckPoints.remove(0);
         }
     }
 
@@ -295,11 +295,18 @@ public final class ShutdownCheckPoints {
         @Nullable
         String getProcessName() {
             try {
-                List<ActivityManager.RunningAppProcessInfo> runningProcesses =
-                        mActivityManager.getRunningAppProcesses();
-                for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
-                    if (processInfo.pid == mCallerProcessId) {
-                        return processInfo.processName;
+                List<ActivityManager.RunningAppProcessInfo> runningProcesses = null;
+                if (mActivityManager != null) {
+                    runningProcesses = mActivityManager.getRunningAppProcesses();
+                } else {
+                    Slog.v(TAG, "No ActivityManager available to find process name with pid="
+                            + mCallerProcessId);
+                }
+                if (runningProcesses != null) {
+                    for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+                        if (processInfo.pid == mCallerProcessId) {
+                            return processInfo.processName;
+                        }
                     }
                 }
             } catch (RemoteException e) {
@@ -382,6 +389,9 @@ public final class ShutdownCheckPoints {
                     return true;
                 }
             });
+            if (files == null) {
+                return EMPTY_FILE_ARRAY;
+            }
             Arrays.sort(files);
             return files;
         }

@@ -51,9 +51,10 @@ import javax.inject.Inject;
  * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
  */
 @SysUISingleton
-public class RingtonePlayer extends CoreStartable {
+public class RingtonePlayer implements CoreStartable {
     private static final String TAG = "RingtonePlayer";
     private static final boolean LOGD = false;
+    private final Context mContext;
 
     // TODO: support Uri switching under same IBinder
 
@@ -64,7 +65,7 @@ public class RingtonePlayer extends CoreStartable {
 
     @Inject
     public RingtonePlayer(Context context) {
-        super(context);
+        mContext = context;
     }
 
     @Override
@@ -87,17 +88,9 @@ public class RingtonePlayer extends CoreStartable {
         private final IBinder mToken;
         private final Ringtone mRingtone;
 
-        public Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa) {
-            this(token, uri, user, aa, null);
-        }
-
-        Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa,
-                @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        Client(IBinder token, Ringtone ringtone) {
             mToken = token;
-
-            mRingtone = new Ringtone(getContextForUser(user), false);
-            mRingtone.setAudioAttributes(aa);
-            mRingtone.setUri(uri, volumeShaperConfig);
+            mRingtone = ringtone;
         }
 
         @Override
@@ -127,11 +120,28 @@ public class RingtonePlayer extends CoreStartable {
             Client client;
             synchronized (mClients) {
                 client = mClients.get(token);
-                if (client == null) {
-                    final UserHandle user = Binder.getCallingUserHandle();
-                    client = new Client(token, uri, user, aa, volumeShaperConfig);
-                    token.linkToDeath(client, 0);
-                    mClients.put(token, client);
+            }
+            // Don't hold the lock while constructing the ringtone, since it can be slow. The caller
+            // shouldn't call play on the same ringtone from 2 threads, so this shouldn't race and
+            // waste the build.
+            if (client == null) {
+                final UserHandle user = Binder.getCallingUserHandle();
+                Ringtone ringtone = new Ringtone(getContextForUser(user), false);
+                ringtone.setAudioAttributesField(aa);
+                ringtone.setUri(uri, volumeShaperConfig);
+                ringtone.createLocalMediaPlayer();
+                synchronized (mClients) {
+                    client = mClients.get(token);
+                    if (client == null) {
+                        client = new Client(token, ringtone);
+                        token.linkToDeath(client, 0);
+                        mClients.put(token, client);
+                        ringtone = null;  // "owned" by the client now.
+                    }
+                }
+                // Clean up ringtone if it was abandoned (a client already existed).
+                if (ringtone != null) {
+                    ringtone.stop();
                 }
             }
             client.mRingtone.setLooping(looping);

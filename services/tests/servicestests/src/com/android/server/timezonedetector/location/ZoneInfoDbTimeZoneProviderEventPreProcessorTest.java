@@ -16,10 +16,15 @@
 
 package com.android.server.timezonedetector.location;
 
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_FAILED;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_OK;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 import android.service.timezone.TimeZoneProviderSuggestion;
 
 import org.junit.Test;
@@ -54,8 +59,14 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
         for (String timeZone : nonExistingTimeZones) {
             TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
 
+            TimeZoneProviderStatus expectedProviderStatus =
+                    new TimeZoneProviderStatus.Builder(event.getTimeZoneProviderStatus())
+                            .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
+                            .build();
+
             TimeZoneProviderEvent expectedResultEvent =
-                    TimeZoneProviderEvent.createUncertainEvent(event.getCreationElapsedMillis());
+                    TimeZoneProviderEvent.createUncertainEvent(
+                            event.getCreationElapsedMillis(), expectedProviderStatus);
             assertWithMessage(timeZone + " is not a valid time zone")
                     .that(mPreProcessor.preProcess(event))
                     .isEqualTo(expectedResultEvent);
@@ -63,12 +74,17 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
     }
 
     private static TimeZoneProviderEvent timeZoneProviderEvent(String... timeZoneIds) {
+        TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder()
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
+                .build();
+        TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
+                .setTimeZoneIds(Arrays.asList(timeZoneIds))
+                .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
+                .build();
         return TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_TIME_MILLIS,
-                new TimeZoneProviderSuggestion.Builder()
-                        .setTimeZoneIds(Arrays.asList(timeZoneIds))
-                        .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
-                .build());
+                ARBITRARY_TIME_MILLIS, suggestion, providerStatus);
     }
 
 }

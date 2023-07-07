@@ -18,8 +18,9 @@ package com.android.systemui.unfold
 
 import com.android.keyguard.KeyguardUnfoldTransition
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.NotificationPanelUnfoldAnimationController
+import com.android.systemui.shade.NotificationPanelUnfoldAnimationController
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.kotlin.getOrNull
@@ -92,5 +93,9 @@ interface SysUIUnfoldComponent {
 
     fun getUnfoldTransitionWallpaperController(): UnfoldTransitionWallpaperController
 
+    fun getUnfoldHapticsPlayer(): UnfoldHapticsPlayer
+
     fun getUnfoldLightRevealOverlayAnimation(): UnfoldLightRevealOverlayAnimation
+
+    fun getUnfoldKeyguardVisibilityManager(): UnfoldKeyguardVisibilityManager
 }

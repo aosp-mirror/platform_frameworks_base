@@ -5,6 +5,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.telecom.Connection;
 import android.telephony.data.ApnSetting;
+import android.telephony.ims.ImsCallProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -494,7 +495,7 @@ public class Annotation {
             PreciseCallState.PRECISE_CALL_STATE_HOLDING,
             PreciseCallState.PRECISE_CALL_STATE_DIALING,
             PreciseCallState.PRECISE_CALL_STATE_ALERTING,
-            PreciseCallState. PRECISE_CALL_STATE_INCOMING,
+            PreciseCallState.PRECISE_CALL_STATE_INCOMING,
             PreciseCallState.PRECISE_CALL_STATE_WAITING,
             PreciseCallState.PRECISE_CALL_STATE_DISCONNECTED,
             PreciseCallState.PRECISE_CALL_STATE_DISCONNECTING})
@@ -726,6 +727,36 @@ public class Annotation {
             NetworkAgent.VALIDATION_STATUS_NOT_VALID
     })
     public @interface ValidationStatus {}
+
+    /**
+     * IMS call Service types
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SERVICE_TYPE_" }, value = {
+            ImsCallProfile.SERVICE_TYPE_NONE,
+            ImsCallProfile.SERVICE_TYPE_NORMAL,
+            ImsCallProfile.SERVICE_TYPE_EMERGENCY,
+    })
+    public @interface ImsCallServiceType {}
+
+    /**
+     * IMS call types
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CALL_TYPE_" }, value = {
+            ImsCallProfile.CALL_TYPE_NONE,
+            ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO,
+            ImsCallProfile.CALL_TYPE_VOICE,
+            ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE,
+            ImsCallProfile.CALL_TYPE_VT,
+            ImsCallProfile.CALL_TYPE_VT_TX,
+            ImsCallProfile.CALL_TYPE_VT_RX,
+            ImsCallProfile.CALL_TYPE_VT_NODIR,
+            ImsCallProfile.CALL_TYPE_VS,
+            ImsCallProfile.CALL_TYPE_VS_TX,
+            ImsCallProfile.CALL_TYPE_VS_RX,
+    })
+    public @interface ImsCallType {}
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

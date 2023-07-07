@@ -5,46 +5,72 @@
 SystemUI is a persistent process that provides UI for the system but outside
 of the system_server process.
 
-The starting point for most of sysui code is a list of services that extend
-SystemUI that are started up by SystemUIApplication. These services then depend
-on some custom dependency injection provided by Dependency.
-
 Inputs directed at sysui (as opposed to general listeners) generally come in
 through IStatusBar. Outputs from sysui are through a variety of private APIs to
 the android platform all over.
 
 ## SystemUIApplication
 
-When SystemUIApplication starts up, it will start up the services listed in
-config_systemUIServiceComponents or config_systemUIServiceComponentsPerUser.
+When SystemUIApplication starts up, it instantiates a Dagger graph from which
+various pieces of the application are built.
 
-Each of these services extend SystemUI. SystemUI provides them with a Context
-and gives them callbacks for onConfigurationChanged (this historically was
-the main path for onConfigurationChanged, now also happens through
-ConfigurationController). They also receive a callback for onBootCompleted
+To support customization, SystemUIApplication relies on the AndroidManifest.xml
+having an `android.app.AppComponentFactory` specified. Specifically, it relies
+on an `AppComponentFactory` that subclases `SystemUIAppComponentFactoryBase`.
+Implementations of this abstract base class must override
+`#createSystemUIInitializer(Context)` which returns a `SystemUIInitializer`.
+`SystemUIInitializer` primary job in turn is to intialize and return the Dagger
+root component back to the `SystemUIApplication`.
+
+Writing a custom `SystemUIAppComponentFactoryBase` and `SystemUIInitializer`,
+should be enough for most implementations to stand up a customized Dagger
+graph, and launch a custom version of SystemUI.
+
+## Dagger / Dependency Injection
+
+See [dagger.md](docs/dagger.md) and https://dagger.dev/.
+
+## CoreStartable
+
+The starting point for most of SystemUI code is a list of classes that
+implement `CoreStartable` that are started up by SystemUIApplication.
+CoreStartables are like miniature services. They have their `#start` method
+called after being instantiated, and a reference to them is stored inside
+SystemUIApplication. They are in charge of their own behavior beyond this,
+registering and unregistering with the rest of the system as needed.
+
+`CoreStartable` also receives a callback for `#onBootCompleted`
 since these objects may be started before the device has finished booting.
 
-Each SystemUI service is expected to be a major part of system ui and the
-goal is to minimize communication between them. So in general they should be
-relatively silo'd.
+`CoreStartable` is an ideal place to add new features and functionality
+that does not belong directly under the umbrella of an existing feature.
+It is better to define a new `CoreStartable` than to stick unrelated
+initialization code together in catch-all methods.
 
-## Dependencies
+CoreStartables are tied to application startup via Dagger:
 
-The first SystemUI service that is started should always be Dependency.
-Dependency provides a static method for getting a hold of dependencies that
-have a lifecycle that spans sysui. Dependency has code for how to create all
-dependencies manually added. SystemUIFactory is also capable of
-adding/replacing these dependencies.
+```kotlin
+class FeatureStartable
+@Inject
+constructor(
+    /* ... */
+) : CoreStartable {
+    override fun start() {
+        // ...
+    }
+}
 
-Dependencies are lazily initialized, so if a Dependency is never referenced at
-runtime, it will never be created.
+@Module
+abstract class FeatureModule {
+    @Binds
+    @IntoMap
+    @ClassKey(FeatureStartable::class)
+    abstract fun bind(impl: FeatureStartable): CoreStartable
+}
+```
 
-If an instantiated dependency implements Dumpable it will be included in dumps
-of sysui (and bug reports), allowing it to include current state information.
-This is how \*Controllers dump state to bug reports.
-
-If an instantiated dependency implements ConfigurationChangeReceiver it will
-receive onConfigurationChange callbacks when the configuration changes.
+Including `FeatureModule` in the Dagger graph such as this will ensure that
+`FeatureStartable` gets constructed and that its `#start` method is called.
 
 ## IStatusBar
 
@@ -64,12 +90,6 @@ across sysui. Such as when StatusBar calls CommandQueue#recomputeDisableFlags.
 This is generally used a shortcut to directly trigger CommandQueue rather than
 calling StatusManager and waiting for the call to come back to IStatusBar.
 
-## Default SystemUI services list
-
-### [com.android.systemui.Dependency](/packages/SystemUI/src/com/android/systemui/Dependency.java)
-
-Provides custom dependency injection.
-
 ### [com.android.systemui.util.NotificationChannels](/packages/SystemUI/src/com/android/systemui/util/NotificationChannels.java)
 
 Creates/initializes the channels sysui uses when posting notifications.
@@ -88,11 +108,11 @@ activity. It provides this cached data to RecentsActivity when it is started.
 Registers all the callbacks/listeners required to show the Volume dialog when
 it should be shown.
 
-### [com.android.systemui.status.phone.StatusBar](/packages/SystemUI/src/com/android/systemui/status/phone/StatusBar.java)
+### [com.android.systemui.status.phone.CentralSurfaces](/packages/SystemUI/src/com/android/systemui/status/phone/CentralSurfaces.java)
 
 This shows the UI for the status bar and the notification shade it contains.
 It also contains a significant amount of other UI that interacts with these
-surfaces (keyguard, AOD, etc.). StatusBar also contains a notification listener
+surfaces (keyguard, AOD, etc.). CentralSurfaces also contains a notification listener
 to receive notification callbacks.
 
 ### [com.android.systemui.usb.StorageNotification](/packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java)

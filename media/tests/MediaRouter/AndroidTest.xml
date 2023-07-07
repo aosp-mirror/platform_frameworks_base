@@ -6,6 +6,8 @@
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer"/>
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer"/>
     <option name="test-suite-tag" value="apct"/>
+    <option name="test-suite-tag" value="apct-instrumentation" />
+
     <option name="test-tag" value="MediaRouterTest"/>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkImage.h>
 #include <SkMatrix.h>

@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.collection.render
 
 import android.view.View
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable
+import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
@@ -28,8 +30,11 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 class RootNodeController(
     private val listContainer: NotificationListContainer,
     override val view: View
-) : NodeController {
+) : NodeController, PipelineDumpable {
     override val nodeLabel: String = "<root>"
+    override fun offerToKeepInParentForAnimation(): Boolean = false
+    override fun removeFromParentIfKeptForAnimation(): Boolean = false
+    override fun resetKeepInParentForAnimation() {}
 
     override fun getChildAt(index: Int): View? {
         return listContainer.getContainerChildAt(index)
@@ -58,5 +63,9 @@ class RootNodeController(
         if (isTransfer) {
             listContainer.setChildTransferInProgress(false)
         }
+    }
+
+    override fun dumpPipeline(d: PipelineDumper) = with(d) {
+        dump("listContainer", listContainer)
     }
 }

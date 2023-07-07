@@ -29,12 +29,14 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayShape;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.display.mode.DisplayModeDirector;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -305,7 +307,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
+            DisplayControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         @Override
@@ -339,6 +341,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mode.getPhysicalWidth();
                 mInfo.height = mode.getPhysicalHeight();
                 mInfo.modeId = mode.getModeId();
+                mInfo.renderFrameRate = mode.getRefreshRate();
                 mInfo.defaultModeId = mModes[0].getModeId();
                 mInfo.supportedModes = mModes;
                 mInfo.densityDpi = rawMode.mDensityDpi;
@@ -361,6 +364,8 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.state = mState;
                 // The display is trusted since it is created by system.
                 mInfo.flags |= FLAG_TRUSTED;
+                mInfo.displayShape =
+                        DisplayShape.createDefaultDisplayShape(mInfo.width, mInfo.height, false);
             }
             return mInfo;
         }
@@ -460,7 +465,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate,
                 long presentationDeadlineNanos, int state) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = SurfaceControl.createDisplay(mName, mFlags.mSecure);
+                IBinder displayToken = DisplayControl.createDisplay(mName, mFlags.mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName, mModes, mActiveMode,
                         DEFAULT_MODE_INDEX, refreshRate, presentationDeadlineNanos,
                         mFlags, state, surfaceTexture, mNumber) {

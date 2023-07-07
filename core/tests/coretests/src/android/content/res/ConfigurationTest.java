@@ -157,6 +157,22 @@ public class ConfigurationTest extends TestCase {
         assertFalse(config.isNightModeActive());
     }
 
+    @Test
+    public void testSequenceNumberWrapAround() {
+        Configuration config = new Configuration();
+        Configuration otherConfig = new Configuration();
+
+        // Verify the other configuration is not newer when this sequence number warp around.
+        config.seq = 1000;
+        otherConfig.seq = Integer.MAX_VALUE - 1000;
+        assertFalse(config.isOtherSeqNewer(otherConfig));
+
+        // Verify the other configuration is newer when the other sequence number warp around.
+        config.seq = Integer.MAX_VALUE - 1000;
+        otherConfig.seq = 1000;
+        assertTrue(config.isOtherSeqNewer(otherConfig));
+    }
+
     private void dumpDebug(File f, Configuration config) throws Exception {
         final AtomicFile af = new AtomicFile(f);
         FileOutputStream fos = af.startWrite();

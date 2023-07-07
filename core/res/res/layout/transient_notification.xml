@@ -25,7 +25,7 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:maxWidth="@dimen/toast_width"
-    android:background="?android:attr/toastFrameBackground"
+    android:background="?android:attr/colorBackground"
     android:elevation="@dimen/toast_elevation"
     android:layout_marginEnd="16dp"
     android:layout_marginStart="16dp"
