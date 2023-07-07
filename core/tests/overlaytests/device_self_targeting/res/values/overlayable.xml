@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <overlayable name="PublicOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="public">
+            <item type="color" name="public_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="SignatureOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="signature">
+            <item type="color" name="mycolor" />
+            <item type="color" name="signature_overlayable_color" />
+            <item type="string" name="mystring" />
+            <item type="drawable" name="mydrawable" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="SystemAppOverlayable" actor="overlay://theme">
+        <!-- The app in system partition can overlay the below resources -->
+        <policy type="system">
+            <item type="color" name="system_app_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="OdmOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="odm">
+            <item type="color" name="odm_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="OemOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="oem">
+            <item type="color" name="oem_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="VendorOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="vendor">
+            <item type="color" name="vendor_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="ProductOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="product">
+            <item type="color" name="product_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="ActorOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="actor">
+            <item type="color" name="actor_overlayable_color" />
+        </policy>
+    </overlayable>
+
+    <overlayable name="ConfigOverlayable" actor="overlay://theme">
+        <!-- The app with the same signature can overlay the below resources -->
+        <policy type="config_signature">
+            <item type="color" name="config_overlayable_color" />
+        </policy>
+    </overlayable>
+
+</resources>

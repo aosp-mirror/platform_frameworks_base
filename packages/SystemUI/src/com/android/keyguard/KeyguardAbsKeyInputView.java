@@ -22,6 +22,8 @@ import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
 
+import androidx.annotation.CallSuper;
+
 import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
 
@@ -48,7 +50,9 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
     protected abstract void resetState();
 
     @Override
+    @CallSuper
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
     }
 

@@ -48,6 +48,7 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -70,6 +71,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -177,8 +179,10 @@ final class SaveUi {
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
-           boolean nightMode, boolean isUpdate, boolean compatMode) {
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+           boolean nightMode, boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi = pendingUi;
         mListener = new OneActionThenDestroyListener(listener);
@@ -199,8 +203,10 @@ final class SaveUi {
                 intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
 
                 PendingIntent p = PendingIntent.getActivityAsUser(this, /* requestCode= */ 0,
-                        intent, PendingIntent.FLAG_MUTABLE, /* options= */ null,
-                        UserHandle.CURRENT);
+                        intent,
+                        PendingIntent.FLAG_MUTABLE
+                                | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
+                        /* options= */ null, UserHandle.CURRENT);
                 if (sDebug) {
                     Slog.d(TAG, "startActivity add save UI restored with intent=" + intent);
                 }
@@ -288,7 +294,9 @@ final class SaveUi {
         }
         titleView.setText(mTitle);
 
-        setServiceIcon(context, view, serviceIcon);
+        if (showServiceIcon) {
+            setServiceIcon(context, view, serviceIcon);
+        }
 
         final boolean hasCustomDescription =
                 applyCustomDescription(context, view, valueFinder, info);
@@ -354,9 +362,17 @@ final class SaveUi {
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
         window.setCloseOnTouchOutside(true);
         final WindowManager.LayoutParams params = window.getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        window.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int screenWidth = displayMetrics.widthPixels;
+        final int maxWidth =
+                context.getResources().getDimensionPixelSize(R.dimen.autofill_dialog_max_width);
+        params.width = Math.min(screenWidth, maxWidth);
+
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
+        params.setTrustedOverlay();
 
         show();
     }
@@ -555,25 +571,7 @@ final class SaveUi {
     private void setServiceIcon(Context context, View view, Drawable serviceIcon) {
         final ImageView iconView = view.findViewById(R.id.autofill_save_icon);
         final Resources res = context.getResources();
-
-        final int maxWidth = res.getDimensionPixelSize(R.dimen.autofill_save_icon_max_size);
-        final int maxHeight = maxWidth;
-        final int actualWidth = serviceIcon.getMinimumWidth();
-        final int actualHeight = serviceIcon.getMinimumHeight();
-
-        if (actualWidth <= maxWidth && actualHeight <= maxHeight) {
-            if (sDebug) {
-                Slog.d(TAG, "Adding service icon "
-                        + "(" + actualWidth + "x" + actualHeight + ") as it's less than maximum "
-                        + "(" + maxWidth + "x" + maxHeight + ").");
-            }
-            iconView.setImageDrawable(serviceIcon);
-        } else {
-            Slog.w(TAG, "Not adding service icon of size "
-                    + "(" + actualWidth + "x" + actualHeight + ") because maximum is "
-                    + "(" + maxWidth + "x" + maxHeight + ").");
-            ((ViewGroup)iconView.getParent()).removeView(iconView);
-        }
+        iconView.setImageDrawable(serviceIcon);
     }
 
     private static boolean isValidLink(PendingIntent pendingIntent, Intent intent) {

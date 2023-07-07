@@ -41,9 +41,7 @@ class CollectV1Worker(appContext: Context, params: WorkerParameters) :
                     Data.Builder()
                         .putInt(VERIFICATION_ID_KEY, verificationId)
                         .apply {
-                            if (DEBUG) {
-                                putString(PACKAGE_NAME_KEY, packageName)
-                            }
+                            putString(PACKAGE_NAME_KEY, packageName)
                         }
                         .build()
                 )
@@ -52,6 +50,18 @@ class CollectV1Worker(appContext: Context, params: WorkerParameters) :
 
     override suspend fun doWork() = coroutineScope {
         if (!AndroidUtils.isReceiverV1Enabled(appContext)) {
+            //clear sp and commit here
+            val inputData = params.inputData
+            val packageName = inputData.getString(PACKAGE_NAME_KEY)
+            val deContext = appContext.createDeviceProtectedStorageContext()
+            val sp = deContext?.getSharedPreferences(packageName, Context.MODE_PRIVATE)
+            val editor = sp?.edit()
+            editor?.clear()?.commit()
+            //delete sp file
+            val retOfDel = deContext?.deleteSharedPreferences(packageName)
+            if (DEBUG) {
+                Log.d(TAG, "delete sp for $packageName return $retOfDel")
+            }
             return@coroutineScope Result.success()
         }
 
@@ -59,7 +69,10 @@ class CollectV1Worker(appContext: Context, params: WorkerParameters) :
         val verificationId = inputData.getInt(VERIFICATION_ID_KEY, -1)
         val successfulHosts = mutableListOf<String>()
         val failedHosts = mutableListOf<String>()
-        inputData.keyValueMap.entries.forEach { (key, _) ->
+        val packageName = inputData.getString(PACKAGE_NAME_KEY)
+        val deContext = appContext.createDeviceProtectedStorageContext()
+        val sp = deContext?.getSharedPreferences(packageName, Context.MODE_PRIVATE)
+        sp?.all?.entries?.forEach { (key, _) ->
             when {
                 key.startsWith(SingleV1RequestWorker.HOST_SUCCESS_PREFIX) ->
                     successfulHosts += key.removePrefix(SingleV1RequestWorker.HOST_SUCCESS_PREFIX)
@@ -69,7 +82,6 @@ class CollectV1Worker(appContext: Context, params: WorkerParameters) :
         }
 
         if (DEBUG) {
-            val packageName = inputData.getString(PACKAGE_NAME_KEY)
             Log.d(
                 TAG, "Domain verification v1 request for $packageName: " +
                         "success = $successfulHosts, failed = $failedHosts"
@@ -83,6 +95,15 @@ class CollectV1Worker(appContext: Context, params: WorkerParameters) :
         }
 
         appContext.packageManager.verifyIntentFilter(verificationId, resultCode, failedHosts)
+
+        //clear sp and commit here
+        val editor = sp?.edit()
+        editor?.clear()?.commit()
+        //delete sp file
+        val retOfDel = deContext?.deleteSharedPreferences(packageName)
+        if (DEBUG) {
+            Log.d(TAG, "delete sp for $packageName return $retOfDel")
+        }
 
         Result.success()
     }

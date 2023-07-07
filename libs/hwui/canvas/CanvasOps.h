@@ -17,13 +17,19 @@
 #pragma once
 
 #include <SkAndroidFrameworkUtils.h>
+#include <SkBlendMode.h>
 #include <SkCanvas.h>
-#include <SkPath.h>
-#include <SkRegion.h>
-#include <SkVertices.h>
+#include <SkClipOp.h>
 #include <SkImage.h>
+#include <SkPaint.h>
+#include <SkPath.h>
 #include <SkPicture.h>
+#include <SkRRect.h>
+#include <SkRect.h>
+#include <SkRegion.h>
 #include <SkRuntimeEffect.h>
+#include <SkSamplingOptions.h>
+#include <SkVertices.h>
 
 #include <log/log.h>
 

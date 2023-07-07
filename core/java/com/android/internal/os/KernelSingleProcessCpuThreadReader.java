@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -117,13 +118,16 @@ public class KernelSingleProcessCpuThreadReader {
     public void startTrackingThreadCpuTimes() {
         if (!mIsTracking) {
             if (!startTrackingProcessCpuTimes(mPid, mCpuTimeInStateReader)) {
-                Slog.e(TAG, "Failed to start tracking process CPU times for " + mPid);
+                Slog.wtf(TAG, "Failed to start tracking process CPU times for " + mPid);
+                Counter.logIncrement("cpu.value_process_tracking_start_failure_count");
             }
             if (mSelectedThreadNativeTids.length > 0) {
                 if (!startAggregatingThreadCpuTimes(mSelectedThreadNativeTids,
                         mCpuTimeInStateReader)) {
-                    Slog.e(TAG, "Failed to start tracking aggregated thread CPU times for "
+                    Slog.wtf(TAG, "Failed to start tracking aggregated thread CPU times for "
                             + Arrays.toString(mSelectedThreadNativeTids));
+                    Counter.logIncrement(
+                            "cpu.value_aggregated_thread_tracking_start_failure_count");
                 }
             }
             mIsTracking = true;

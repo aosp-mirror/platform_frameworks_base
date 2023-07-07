@@ -23,6 +23,6 @@
 
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
-    <integer name="config_mobile_mtu">1422</integer>
+    <integer name="config_mobile_mtu">1358</integer>
 
 </resources>

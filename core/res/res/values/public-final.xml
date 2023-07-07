@@ -3402,4 +3402,343 @@
     <!-- @hide @SystemApi -->
   <public type="bool" name="config_enableQrCodeScannerOnLockScreen" id="0x01110008" />
 
+  <!-- ===============================================================
+    Resources added in version U of the platform
+
+    NOTE: After this version of the platform is forked, changes cannot be made to the root
+    branch's groups for that release. Only merge changes to the forked platform branch.
+    =============================================================== -->
+  <eat-comment/>
+
+  <staging-public-group-final type="attr" first-id="0x01ce0000">
+    <public name="handwritingBoundsOffsetLeft" />
+    <public name="handwritingBoundsOffsetTop" />
+    <public name="handwritingBoundsOffsetRight" />
+    <public name="handwritingBoundsOffsetBottom" />
+    <public name="accessibilityDataSensitive" />
+    <public name="enableTextStylingShortcuts" />
+    <public name="requiredDisplayCategory"/>
+    <public name="removed_maxConcurrentSessionsCount" />
+    <public name="visualQueryDetectionService" />
+    <public name="physicalKeyboardHintLanguageTag" />
+    <public name="physicalKeyboardHintLayoutType" />
+    <public name="allowSharedIsolatedProcess" />
+    <public name="keyboardLocale" />
+    <public name="keyboardLayoutType" />
+    <public name="allowUpdateOwnership" />
+    <public name="isCredential"/>
+    <public name="searchResultHighlightColor" />
+    <public name="focusedSearchResultHighlightColor" />
+    <public name="stylusHandwritingSettingsActivity" />
+    <public name="windowNoMoveAnimation" />
+    <public name="settingsSubtitle" />
+    <public name="capability" />
+  </staging-public-group-final>
+
+  <public type="attr" name="handwritingBoundsOffsetLeft" id="0x01010673" />
+  <public type="attr" name="handwritingBoundsOffsetTop" id="0x01010674" />
+  <public type="attr" name="handwritingBoundsOffsetRight" id="0x01010675" />
+  <public type="attr" name="handwritingBoundsOffsetBottom" id="0x01010676" />
+  <public type="attr" name="accessibilityDataSensitive" id="0x01010677" />
+  <public type="attr" name="enableTextStylingShortcuts" id="0x01010678" />
+  <public type="attr" name="requiredDisplayCategory" id="0x01010679" />
+  <public type="attr" name="visualQueryDetectionService" id="0x0101067a" />
+  <public type="attr" name="physicalKeyboardHintLanguageTag" id="0x0101067b" />
+  <public type="attr" name="physicalKeyboardHintLayoutType" id="0x0101067c" />
+  <public type="attr" name="allowSharedIsolatedProcess" id="0x0101067d" />
+  <public type="attr" name="keyboardLocale" id="0x0101067e" />
+  <public type="attr" name="keyboardLayoutType" id="0x0101067f" />
+  <public type="attr" name="allowUpdateOwnership" id="0x01010680" />
+  <public type="attr" name="isCredential" id="0x01010681" />
+  <public type="attr" name="searchResultHighlightColor" id="0x01010682" />
+  <public type="attr" name="focusedSearchResultHighlightColor" id="0x01010683" />
+  <public type="attr" name="stylusHandwritingSettingsActivity" id="0x01010684" />
+  <public type="attr" name="windowNoMoveAnimation" id="0x01010685" />
+  <public type="attr" name="settingsSubtitle" id="0x01010686" />
+  <public type="attr" name="capability" id="0x01010687" />
+
+  <staging-public-group-final type="id" first-id="0x01cd0000">
+    <public name="bold" />
+    <public name="italic" />
+    <public name="underline" />
+    <public name="accessibilityActionScrollInDirection" />
+  </staging-public-group-final>
+
+  <public type="id" name="bold" id="0x0102005b" />
+  <public type="id" name="italic" id="0x0102005c" />
+  <public type="id" name="underline" id="0x0102005d" />
+  <public type="id" name="accessibilityActionScrollInDirection" id="0x0102005e" />
+
+  <staging-public-group-final type="string" first-id="0x01cb0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_systemWearHealthService" />
+    <!-- @hide @SystemApi -->
+    <public name="config_defaultNotes" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemFinancedDeviceController" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemCallStreaming" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_systemWearHealthService" id="0x01040044" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_defaultNotes" id="0x01040045" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_systemFinancedDeviceController" id="0x01040046" />
+    <!-- @hide @SystemApi -->
+  <public type="string" name="config_systemCallStreaming" id="0x01040047" />
+
+  <staging-public-group-final type="dimen" first-id="0x01ca0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_viewConfigurationHandwritingGestureLineMargin" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi -->
+  <public type="dimen" name="config_viewConfigurationHandwritingGestureLineMargin" id="0x0105000a" />
+
+  <staging-public-group-final type="color" first-id="0x01c90000">
+    <public name="system_primary_container_light" />
+    <public name="system_on_primary_container_light" />
+    <public name="system_primary_light" />
+    <public name="system_on_primary_light" />
+    <public name="system_secondary_container_light" />
+    <public name="system_on_secondary_container_light" />
+    <public name="system_secondary_light" />
+    <public name="system_on_secondary_light" />
+    <public name="system_tertiary_container_light" />
+    <public name="system_on_tertiary_container_light" />
+    <public name="system_tertiary_light" />
+    <public name="system_on_tertiary_light" />
+    <public name="system_background_light" />
+    <public name="system_on_background_light" />
+    <public name="system_surface_light" />
+    <public name="system_on_surface_light" />
+    <public name="system_surface_container_low_light" />
+    <public name="system_surface_container_lowest_light" />
+    <public name="system_surface_container_light" />
+    <public name="system_surface_container_high_light" />
+    <public name="system_surface_container_highest_light" />
+    <public name="system_surface_bright_light" />
+    <public name="system_surface_dim_light" />
+    <public name="system_surface_variant_light" />
+    <public name="system_on_surface_variant_light" />
+    <public name="system_outline_light" />
+    <public name="system_error_light" />
+    <public name="system_on_error_light" />
+    <public name="system_error_container_light" />
+    <public name="system_on_error_container_light" />
+    <public name="removed_system_primary_fixed_light" />
+    <public name="removed_system_primary_fixed_dim_light" />
+    <public name="removed_system_on_primary_fixed_light" />
+    <public name="removed_system_on_primary_fixed_variant_light" />
+    <public name="removed_system_secondary_fixed_light" />
+    <public name="removed_system_secondary_fixed_dim_light" />
+    <public name="removed_system_on_secondary_fixed_light" />
+    <public name="removed_system_on_secondary_fixed_variant_light" />
+    <public name="removed_system_tertiary_fixed_light" />
+    <public name="removed_system_tertiary_fixed_dim_light" />
+    <public name="removed_system_on_tertiary_fixed_light" />
+    <public name="removed_system_on_tertiary_fixed_variant_light" />
+    <public name="system_control_activated_light" />
+    <public name="system_control_normal_light" />
+    <public name="system_control_highlight_light" />
+    <public name="system_text_primary_inverse_light" />
+    <public name="system_text_secondary_and_tertiary_inverse_light" />
+    <public name="system_text_primary_inverse_disable_only_light" />
+    <public name="system_text_secondary_and_tertiary_inverse_disabled_light" />
+    <public name="system_text_hint_inverse_light" />
+    <public name="system_palette_key_color_primary_light" />
+    <public name="system_palette_key_color_secondary_light" />
+    <public name="system_palette_key_color_tertiary_light" />
+    <public name="system_palette_key_color_neutral_light" />
+    <public name="system_palette_key_color_neutral_variant_light" />
+    <public name="system_primary_container_dark"/>
+    <public name="system_on_primary_container_dark"/>
+    <public name="system_primary_dark"/>
+    <public name="system_on_primary_dark"/>
+    <public name="system_secondary_container_dark"/>
+    <public name="system_on_secondary_container_dark"/>
+    <public name="system_secondary_dark"/>
+    <public name="system_on_secondary_dark"/>
+    <public name="system_tertiary_container_dark"/>
+    <public name="system_on_tertiary_container_dark"/>
+    <public name="system_tertiary_dark"/>
+    <public name="system_on_tertiary_dark"/>
+    <public name="system_background_dark"/>
+    <public name="system_on_background_dark"/>
+    <public name="system_surface_dark"/>
+    <public name="system_on_surface_dark"/>
+    <public name="system_surface_container_low_dark"/>
+    <public name="system_surface_container_lowest_dark"/>
+    <public name="system_surface_container_dark"/>
+    <public name="system_surface_container_high_dark"/>
+    <public name="system_surface_container_highest_dark"/>
+    <public name="system_surface_bright_dark"/>
+    <public name="system_surface_dim_dark"/>
+    <public name="system_surface_variant_dark"/>
+    <public name="system_on_surface_variant_dark"/>
+    <public name="system_outline_dark"/>
+    <public name="system_error_dark"/>
+    <public name="system_on_error_dark"/>
+    <public name="system_error_container_dark"/>
+    <public name="system_on_error_container_dark"/>
+    <public name="removed_system_primary_fixed_dark"/>
+    <public name="removed_system_primary_fixed_dim_dark"/>
+    <public name="removed_system_on_primary_fixed_dark"/>
+    <public name="removed_system_on_primary_fixed_variant_dark"/>
+    <public name="removed_system_secondary_fixed_dark"/>
+    <public name="removed_system_secondary_fixed_dim_dark"/>
+    <public name="removed_system_on_secondary_fixed_dark"/>
+    <public name="removed_system_on_secondary_fixed_variant_dark"/>
+    <public name="removed_system_tertiary_fixed_dark"/>
+    <public name="removed_system_tertiary_fixed_dim_dark"/>
+    <public name="removed_system_on_tertiary_fixed_dark"/>
+    <public name="removed_system_on_tertiary_fixed_variant_dark"/>
+    <public name="system_control_activated_dark"/>
+    <public name="system_control_normal_dark"/>
+    <public name="system_control_highlight_dark"/>
+    <public name="system_text_primary_inverse_dark"/>
+    <public name="system_text_secondary_and_tertiary_inverse_dark"/>
+    <public name="system_text_primary_inverse_disable_only_dark"/>
+    <public name="system_text_secondary_and_tertiary_inverse_disabled_dark"/>
+    <public name="system_text_hint_inverse_dark"/>
+    <public name="system_palette_key_color_primary_dark"/>
+    <public name="system_palette_key_color_secondary_dark"/>
+    <public name="system_palette_key_color_tertiary_dark"/>
+    <public name="system_palette_key_color_neutral_dark"/>
+    <public name="system_palette_key_color_neutral_variant_dark"/>
+    <public name="system_primary_fixed" />
+    <public name="system_primary_fixed_dim" />
+    <public name="system_on_primary_fixed" />
+    <public name="system_on_primary_fixed_variant" />
+    <public name="system_secondary_fixed" />
+    <public name="system_secondary_fixed_dim" />
+    <public name="system_on_secondary_fixed" />
+    <public name="system_on_secondary_fixed_variant" />
+    <public name="system_tertiary_fixed" />
+    <public name="system_tertiary_fixed_dim" />
+    <public name="system_on_tertiary_fixed" />
+    <public name="system_on_tertiary_fixed_variant" />
+    <public name="system_outline_variant_light" />
+    <public name="system_outline_variant_dark" />
+  </staging-public-group-final>
+
+  <public type="color" name="system_primary_container_light" id="0x0106005e" />
+  <public type="color" name="system_on_primary_container_light" id="0x0106005f" />
+  <public type="color" name="system_primary_light" id="0x01060060" />
+  <public type="color" name="system_on_primary_light" id="0x01060061" />
+  <public type="color" name="system_secondary_container_light" id="0x01060062" />
+  <public type="color" name="system_on_secondary_container_light" id="0x01060063" />
+  <public type="color" name="system_secondary_light" id="0x01060064" />
+  <public type="color" name="system_on_secondary_light" id="0x01060065" />
+  <public type="color" name="system_tertiary_container_light" id="0x01060066" />
+  <public type="color" name="system_on_tertiary_container_light" id="0x01060067" />
+  <public type="color" name="system_tertiary_light" id="0x01060068" />
+  <public type="color" name="system_on_tertiary_light" id="0x01060069" />
+  <public type="color" name="system_background_light" id="0x0106006a" />
+  <public type="color" name="system_on_background_light" id="0x0106006b" />
+  <public type="color" name="system_surface_light" id="0x0106006c" />
+  <public type="color" name="system_on_surface_light" id="0x0106006d" />
+  <public type="color" name="system_surface_container_low_light" id="0x0106006e" />
+  <public type="color" name="system_surface_container_lowest_light" id="0x0106006f" />
+  <public type="color" name="system_surface_container_light" id="0x01060070" />
+  <public type="color" name="system_surface_container_high_light" id="0x01060071" />
+  <public type="color" name="system_surface_container_highest_light" id="0x01060072" />
+  <public type="color" name="system_surface_bright_light" id="0x01060073" />
+  <public type="color" name="system_surface_dim_light" id="0x01060074" />
+  <public type="color" name="system_surface_variant_light" id="0x01060075" />
+  <public type="color" name="system_on_surface_variant_light" id="0x01060076" />
+  <public type="color" name="system_outline_light" id="0x01060077" />
+  <public type="color" name="system_error_light" id="0x01060078" />
+  <public type="color" name="system_on_error_light" id="0x01060079" />
+  <public type="color" name="system_error_container_light" id="0x0106007a" />
+  <public type="color" name="system_on_error_container_light" id="0x0106007b" />
+  <public type="color" name="system_control_activated_light" id="0x0106007c" />
+  <public type="color" name="system_control_normal_light" id="0x0106007d" />
+  <public type="color" name="system_control_highlight_light" id="0x0106007e" />
+  <public type="color" name="system_text_primary_inverse_light" id="0x0106007f" />
+  <public type="color" name="system_text_secondary_and_tertiary_inverse_light" id="0x01060080" />
+  <public type="color" name="system_text_primary_inverse_disable_only_light" id="0x01060081" />
+  <public type="color" name="system_text_secondary_and_tertiary_inverse_disabled_light" id="0x01060082" />
+  <public type="color" name="system_text_hint_inverse_light" id="0x01060083" />
+  <public type="color" name="system_palette_key_color_primary_light" id="0x01060084" />
+  <public type="color" name="system_palette_key_color_secondary_light" id="0x01060085" />
+  <public type="color" name="system_palette_key_color_tertiary_light" id="0x01060086" />
+  <public type="color" name="system_palette_key_color_neutral_light" id="0x01060087" />
+  <public type="color" name="system_palette_key_color_neutral_variant_light" id="0x01060088" />
+  <public type="color" name="system_primary_container_dark" id="0x01060089" />
+  <public type="color" name="system_on_primary_container_dark" id="0x0106008a" />
+  <public type="color" name="system_primary_dark" id="0x0106008b" />
+  <public type="color" name="system_on_primary_dark" id="0x0106008c" />
+  <public type="color" name="system_secondary_container_dark" id="0x0106008d" />
+  <public type="color" name="system_on_secondary_container_dark" id="0x0106008e" />
+  <public type="color" name="system_secondary_dark" id="0x0106008f" />
+  <public type="color" name="system_on_secondary_dark" id="0x01060090" />
+  <public type="color" name="system_tertiary_container_dark" id="0x01060091" />
+  <public type="color" name="system_on_tertiary_container_dark" id="0x01060092" />
+  <public type="color" name="system_tertiary_dark" id="0x01060093" />
+  <public type="color" name="system_on_tertiary_dark" id="0x01060094" />
+  <public type="color" name="system_background_dark" id="0x01060095" />
+  <public type="color" name="system_on_background_dark" id="0x01060096" />
+  <public type="color" name="system_surface_dark" id="0x01060097" />
+  <public type="color" name="system_on_surface_dark" id="0x01060098" />
+  <public type="color" name="system_surface_container_low_dark" id="0x01060099" />
+  <public type="color" name="system_surface_container_lowest_dark" id="0x0106009a" />
+  <public type="color" name="system_surface_container_dark" id="0x0106009b" />
+  <public type="color" name="system_surface_container_high_dark" id="0x0106009c" />
+  <public type="color" name="system_surface_container_highest_dark" id="0x0106009d" />
+  <public type="color" name="system_surface_bright_dark" id="0x0106009e" />
+  <public type="color" name="system_surface_dim_dark" id="0x0106009f" />
+  <public type="color" name="system_surface_variant_dark" id="0x010600a0" />
+  <public type="color" name="system_on_surface_variant_dark" id="0x010600a1" />
+  <public type="color" name="system_outline_dark" id="0x010600a2" />
+  <public type="color" name="system_error_dark" id="0x010600a3" />
+  <public type="color" name="system_on_error_dark" id="0x010600a4" />
+  <public type="color" name="system_error_container_dark" id="0x010600a5" />
+  <public type="color" name="system_on_error_container_dark" id="0x010600a6" />
+  <public type="color" name="system_control_activated_dark" id="0x010600a7" />
+  <public type="color" name="system_control_normal_dark" id="0x010600a8" />
+  <public type="color" name="system_control_highlight_dark" id="0x010600a9" />
+  <public type="color" name="system_text_primary_inverse_dark" id="0x010600aa" />
+  <public type="color" name="system_text_secondary_and_tertiary_inverse_dark" id="0x010600ab" />
+  <public type="color" name="system_text_primary_inverse_disable_only_dark" id="0x010600ac" />
+  <public type="color" name="system_text_secondary_and_tertiary_inverse_disabled_dark" id="0x010600ad" />
+  <public type="color" name="system_text_hint_inverse_dark" id="0x010600ae" />
+  <public type="color" name="system_palette_key_color_primary_dark" id="0x010600af" />
+  <public type="color" name="system_palette_key_color_secondary_dark" id="0x010600b0" />
+  <public type="color" name="system_palette_key_color_tertiary_dark" id="0x010600b1" />
+  <public type="color" name="system_palette_key_color_neutral_dark" id="0x010600b2" />
+  <public type="color" name="system_palette_key_color_neutral_variant_dark" id="0x010600b3" />
+  <public type="color" name="system_primary_fixed" id="0x010600b4" />
+  <public type="color" name="system_primary_fixed_dim" id="0x010600b5" />
+  <public type="color" name="system_on_primary_fixed" id="0x010600b6" />
+  <public type="color" name="system_on_primary_fixed_variant" id="0x010600b7" />
+  <public type="color" name="system_secondary_fixed" id="0x010600b8" />
+  <public type="color" name="system_secondary_fixed_dim" id="0x010600b9" />
+  <public type="color" name="system_on_secondary_fixed" id="0x010600ba" />
+  <public type="color" name="system_on_secondary_fixed_variant" id="0x010600bb" />
+  <public type="color" name="system_tertiary_fixed" id="0x010600bc" />
+  <public type="color" name="system_tertiary_fixed_dim" id="0x010600bd" />
+  <public type="color" name="system_on_tertiary_fixed" id="0x010600be" />
+  <public type="color" name="system_on_tertiary_fixed_variant" id="0x010600bf" />
+  <public type="color" name="system_outline_variant_light" id="0x010600c0" />
+  <public type="color" name="system_outline_variant_dark" id="0x010600c1" />
+
+  <staging-public-group-final type="bool" first-id="0x01be0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_safetyProtectionEnabled" />
+    <!-- @hide @SystemApi -->
+    <public name="config_enableDefaultNotes" />
+    <!-- @hide @SystemApi -->
+    <public name="config_enableDefaultNotesForWorkProfile" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi -->
+  <public type="bool" name="config_safetyProtectionEnabled" id="0x01110009" />
+    <!-- @hide @SystemApi -->
+  <public type="bool" name="config_enableDefaultNotes" id="0x0111000a" />
+    <!-- @hide @SystemApi -->
+  <public type="bool" name="config_enableDefaultNotesForWorkProfile" id="0x0111000b" />
+
 </resources>

@@ -16,7 +16,7 @@
 
 package com.android.server.pm.pkg.component;
 
-import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
+import static com.android.server.pm.parsing.pkg.PackageImpl.sForInternedString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

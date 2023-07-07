@@ -39,6 +39,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -59,15 +60,17 @@ import javax.inject.Inject;
 public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         ConfigurationController.ConfigurationListener,
         BatteryController.BatteryStateChangeCallback {
+
+    public static final String TILE_SPEC = "dark";
+
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
-    private final Icon mIcon = ResourceIcon.get(
-            com.android.internal.R.drawable.ic_qs_ui_mode_night);
-    private UiModeManager mUiModeManager;
+    private final UiModeManager mUiModeManager;
     private final BatteryController mBatteryController;
     private final LocationController mLocationController;
     @Inject
     public UiModeNightTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -79,7 +82,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             BatteryController batteryController,
             LocationController locationController
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mBatteryController = batteryController;
         mUiModeManager = host.getUserContext().getSystemService(UiModeManager.class);
@@ -155,7 +158,6 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         }
         state.value = nightMode;
         state.label = mContext.getString(R.string.quick_settings_ui_mode_night_label);
-        state.icon = mIcon;
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
                 ? state.label
                 : TextUtils.concat(state.label, ", ", state.secondaryLabel);
@@ -164,6 +166,9 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         } else {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
+        state.icon = ResourceIcon.get(state.state == Tile.STATE_ACTIVE
+                ? R.drawable.qs_light_dark_theme_icon_on
+                : R.drawable.qs_light_dark_theme_icon_off);
         state.showRippleEffect = false;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }

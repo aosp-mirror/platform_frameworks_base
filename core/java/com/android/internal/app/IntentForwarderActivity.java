@@ -16,18 +16,28 @@
 
 package com.android.internal.app;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_CALL_FROM_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_SWITCH_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_WORK_TELEPHONY_CALL_BLOCKED_INFORMATION;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_WORK_TELEPHONY_TEXT_BLOCKED_INFORMATION;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.ManagedSubscriptionsPolicy;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -37,6 +47,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,9 +55,16 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
+import android.util.Log;
 import android.util.Slog;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -73,6 +91,10 @@ public class IntentForwarderActivity extends Activity  {
 
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
+
+    @TestApi
+    public static final String EXTRA_SKIP_USER_CONFIRMATION =
+            "com.android.internal.app.EXTRA_SKIP_USER_CONFIRMATION";
 
     private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEMES
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
@@ -103,16 +125,19 @@ public class IntentForwarderActivity extends Activity  {
         String className = intentReceived.getComponent().getClassName();
         final int targetUserId;
         final String userMessage;
+        final UserInfo managedProfile;
         if (className.equals(FORWARD_INTENT_TO_PARENT)) {
             userMessage = getForwardToPersonalMessage();
             targetUserId = getProfileParent();
+            managedProfile = null;
 
             getMetricsLogger().write(
                     new LogMaker(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE)
                     .setSubtype(MetricsEvent.PARENT_PROFILE));
         } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             userMessage = getForwardToWorkMessage();
-            targetUserId = getManagedProfile();
+            managedProfile = getManagedProfile();
+            targetUserId = managedProfile == null ? UserHandle.USER_NULL : managedProfile.id;
 
             getMetricsLogger().write(
                     new LogMaker(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE)
@@ -121,6 +146,7 @@ public class IntentForwarderActivity extends Activity  {
             Slog.wtf(TAG, IntentForwarderActivity.class.getName() + " cannot be called directly");
             userMessage = null;
             targetUserId = UserHandle.USER_NULL;
+            managedProfile = null;
         }
         if (targetUserId == UserHandle.USER_NULL) {
             // This covers the case where there is no parent / managed profile.
@@ -151,16 +177,183 @@ public class IntentForwarderActivity extends Activity  {
                     if (isResolverActivityResolveInfo(targetResolveInfo)) {
                         launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
                                 callingUserId, targetUserId);
-                        return targetResolveInfo;
+                    // When switching to the personal profile, automatically start the activity
+                    } else if (className.equals(FORWARD_INTENT_TO_PARENT)) {
+                        startActivityAsCaller(newIntent, targetUserId);
                     }
-                    startActivityAsCaller(newIntent, targetUserId);
                     return targetResolveInfo;
                 }, mExecutorService)
                 .thenAcceptAsync(result -> {
-                    maybeShowDisclosure(intentReceived, result, userMessage);
-                    finish();
+                    // When switching to the personal profile, inform user after starting activity
+                    if (className.equals(FORWARD_INTENT_TO_PARENT)) {
+                        maybeShowDisclosure(intentReceived, result, userMessage);
+                        finish();
+                    // When switching to the work profile, ask the user for consent before launching
+                    } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+                        maybeShowUserConsentMiniResolver(result, newIntent, managedProfile);
+                    }
                 }, getApplicationContext().getMainExecutor());
     }
+
+    private void maybeShowUserConsentMiniResolver(
+            ResolveInfo target, Intent launchIntent, UserInfo managedProfile) {
+        if (target == null || isIntentForwarderResolveInfo(target) || !isDeviceProvisioned()) {
+            finish();
+            return;
+        }
+
+        int targetUserId = managedProfile == null ? UserHandle.USER_NULL : managedProfile.id;
+        String callingPackage = getCallingPackage();
+        boolean privilegedCallerAskedToSkipUserConsent =
+                launchIntent.getBooleanExtra(
+                        EXTRA_SKIP_USER_CONFIRMATION, /* defaultValue= */ false)
+                        && callingPackage != null
+                        && PERMISSION_GRANTED == getPackageManager().checkPermission(
+                              INTERACT_ACROSS_USERS, callingPackage);
+
+        DevicePolicyManager devicePolicyManager =
+                getSystemService(DevicePolicyManager.class);
+        ComponentName profileOwnerName = devicePolicyManager.getProfileOwnerAsUser(targetUserId);
+        boolean intentToLaunchProfileOwner = profileOwnerName != null
+                && profileOwnerName.getPackageName().equals(target.getComponentInfo().packageName);
+
+        if (privilegedCallerAskedToSkipUserConsent || intentToLaunchProfileOwner) {
+            Log.i("IntentForwarderActivity", String.format(
+                    "Skipping user consent for redirection into the managed profile for intent [%s]"
+                            + ", privilegedCallerAskedToSkipUserConsent=[%s]"
+                            + ", intentToLaunchProfileOwner=[%s]",
+                    launchIntent, privilegedCallerAskedToSkipUserConsent,
+                    intentToLaunchProfileOwner));
+            startActivityAsCaller(launchIntent, targetUserId);
+            finish();
+            return;
+        }
+
+        Log.i("IntentForwarderActivity", String.format(
+                "Showing user consent for redirection into the managed profile for intent [%s] and "
+                        + " calling package [%s]",
+                launchIntent, callingPackage));
+        int layoutId = R.layout.miniresolver;
+        setContentView(layoutId);
+
+        findViewById(R.id.title_container).setElevation(0);
+
+        PackageManager packageManagerForTargetUser =
+                createContextAsUser(UserHandle.of(targetUserId), /* flags= */ 0)
+                        .getPackageManager();
+
+        ImageView icon = findViewById(R.id.icon);
+        icon.setImageDrawable(
+                getAppIcon(target, launchIntent, targetUserId, packageManagerForTargetUser));
+
+        View buttonContainer = findViewById(R.id.button_bar_container);
+        buttonContainer.setPadding(0, 0, 0, buttonContainer.getPaddingBottom());
+
+        ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                getOpenInWorkMessage(launchIntent, target.loadLabel(packageManagerForTargetUser)));
+
+        // The mini-resolver's negative button is reused in this flow to cancel the intent
+        ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
+        findViewById(R.id.use_same_profile_browser).setOnClickListener(v -> finish());
+
+        ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
+        findViewById(R.id.button_open).setOnClickListener(v -> {
+            startActivityAsCaller(
+                    launchIntent,
+                    ActivityOptions.makeCustomAnimation(
+                                    getApplicationContext(),
+                                    R.anim.activity_open_enter,
+                                    R.anim.push_down_out)
+                            .toBundle(),
+                    /* ignoreTargetSecurity= */ false,
+                    targetUserId);
+            finish();
+        });
+
+
+        View telephonyInfo = findViewById(R.id.miniresolver_info_section);
+
+        // Additional information section is work telephony specific. Therefore, it is only shown
+        // for telephony related intents, when all sim subscriptions are in the work profile.
+        if ((isDialerIntent(launchIntent) || isTextMessageIntent(launchIntent))
+                && devicePolicyManager.getManagedSubscriptionsPolicy().getPolicyType()
+                    == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            telephonyInfo.setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.miniresolver_info_section_text))
+                    .setText(getWorkTelephonyInfoSectionMessage(launchIntent));
+        } else {
+            telephonyInfo.setVisibility(View.GONE);
+        }
+    }
+
+    private Drawable getAppIcon(
+            ResolveInfo target,
+            Intent launchIntent,
+            int targetUserId,
+            PackageManager packageManagerForTargetUser) {
+        if (isDialerIntent(launchIntent)) {
+            // The icon for the call intent will be a generic phone icon as the target will be
+            // the telecom call handler. From the user's perspective, they are being directed
+            // to the dialer app, so use the icon from that app instead.
+            TelecomManager telecomManager =
+                    getApplicationContext().getSystemService(TelecomManager.class);
+            String defaultDialerPackageName =
+                    telecomManager.getDefaultDialerPackage(UserHandle.of(targetUserId));
+            try {
+                return packageManagerForTargetUser
+                        .getApplicationInfo(defaultDialerPackageName, /* flags= */ 0)
+                        .loadIcon(packageManagerForTargetUser);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Allow to fall-through to the icon from the target if we can't find the default
+                // dialer icon.
+                Slog.w(TAG, "Cannot load icon for default dialer package");
+            }
+        }
+        return target.loadIcon(packageManagerForTargetUser);
+    }
+
+    private int getOpenInWorkButtonString(Intent launchIntent) {
+        if (isDialerIntent(launchIntent)) {
+            return R.string.miniresolver_call;
+        }
+        if (isTextMessageIntent(launchIntent)) {
+            return R.string.miniresolver_switch;
+        }
+        return R.string.whichViewApplicationLabel;
+    }
+
+    private String getOpenInWorkMessage(Intent launchIntent, CharSequence targetLabel) {
+        if (isDialerIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_CALL_FROM_WORK,
+                () -> getString(R.string.miniresolver_call_in_work));
+        }
+        if (isTextMessageIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                    MINIRESOLVER_SWITCH_TO_WORK,
+                    () -> getString(R.string.miniresolver_switch_to_work));
+        }
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_OPEN_WORK,
+                () -> getString(R.string.miniresolver_open_work, targetLabel),
+                targetLabel);
+    }
+
+    private String getWorkTelephonyInfoSectionMessage(Intent launchIntent) {
+        if (isDialerIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_WORK_TELEPHONY_CALL_BLOCKED_INFORMATION,
+                () -> getString(R.string.miniresolver_call_information));
+        }
+        if (isTextMessageIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_WORK_TELEPHONY_TEXT_BLOCKED_INFORMATION,
+                () -> getString(R.string.miniresolver_sms_information));
+        }
+        return "";
+    }
+
+
 
     private String getForwardToPersonalMessage() {
         return getSystemService(DevicePolicyManager.class).getResources().getString(
@@ -224,7 +417,7 @@ public class IntentForwarderActivity extends Activity  {
         int selectedProfile = findSelectedProfile(className);
         sanitizeIntent(intentReceived);
         intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
-        Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT);
+        Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT, android.content.Intent.class);
         if (innerIntent == null) {
             Slog.wtf(TAG, "Cannot start a chooser intent with no extra " + Intent.EXTRA_INTENT);
             return;
@@ -340,20 +533,18 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     /**
-     * Returns the userId of the managed profile for this device or UserHandle.USER_NULL if there is
-     * no managed profile.
+     * Returns the managed profile for this device or null if there is no managed profile.
      *
-     * TODO: Remove the assumption that there is only one managed profile
-     * on the device.
+     * TODO: Remove the assumption that there is only one managed profile on the device.
      */
-    private int getManagedProfile() {
+    @Nullable private UserInfo getManagedProfile() {
         List<UserInfo> relatedUsers = mInjector.getUserManager().getProfiles(UserHandle.myUserId());
         for (UserInfo userInfo : relatedUsers) {
-            if (userInfo.isManagedProfile()) return userInfo.id;
+            if (userInfo.isManagedProfile()) return userInfo;
         }
         Slog.wtf(TAG, FORWARD_INTENT_TO_MANAGED_PROFILE
                 + " has been called, but there is no managed profile");
-        return UserHandle.USER_NULL;
+        return null;
     }
 
     /**

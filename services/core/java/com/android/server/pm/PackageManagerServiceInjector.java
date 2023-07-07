@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -30,6 +31,7 @@ import com.android.server.SystemConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
@@ -106,6 +108,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<PackageDexOptimizer>
             mPackageDexOptimizerProducer;
     private final Singleton<DexManager> mDexManagerProducer;
+    private final Singleton<DynamicCodeLogger> mDynamicCodeLoggerProducer;
     private final Singleton<ArtManagerService>
             mArtManagerServiceProducer;
     private final Singleton<ApexManager> mApexManagerProducer;
@@ -136,9 +139,11 @@ public class PackageManagerServiceInjector {
     private final Singleton<DomainVerificationManagerInternal>
             mDomainVerificationManagerInternalProducer;
     private final Singleton<Handler> mHandlerProducer;
-    private final Singleton<BackgroundDexOptService> mBackgroundDexOptService;
+    private final Singleton<BackgroundDexOptService>
+            mBackgroundDexOptService; // TODO(b/260124949): Remove this.
     private final Singleton<IBackupManager> mIBackupManager;
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
+    private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
             Installer installer, Object installLock, PackageAbiHelper abiHelper,
@@ -153,6 +158,7 @@ public class PackageManagerServiceInjector {
             Producer<SystemConfig> systemConfigProducer,
             Producer<PackageDexOptimizer> packageDexOptimizerProducer,
             Producer<DexManager> dexManagerProducer,
+            Producer<DynamicCodeLogger> dynamicCodeLoggerProducer,
             Producer<ArtManagerService> artManagerServiceProducer,
             Producer<ApexManager> apexManagerProducer,
             Producer<ViewCompiler> viewCompilerProducer,
@@ -176,7 +182,8 @@ public class PackageManagerServiceInjector {
             ServiceProducer getSystemServiceProducer,
             Producer<BackgroundDexOptService> backgroundDexOptService,
             Producer<IBackupManager> iBackupManager,
-            Producer<SharedLibrariesImpl> sharedLibrariesProducer) {
+            Producer<SharedLibrariesImpl> sharedLibrariesProducer,
+            Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -198,6 +205,7 @@ public class PackageManagerServiceInjector {
         mPackageDexOptimizerProducer = new Singleton<>(
                 packageDexOptimizerProducer);
         mDexManagerProducer = new Singleton<>(dexManagerProducer);
+        mDynamicCodeLoggerProducer = new Singleton<>(dynamicCodeLoggerProducer);
         mArtManagerServiceProducer = new Singleton<>(
                 artManagerServiceProducer);
         mApexManagerProducer = new Singleton<>(apexManagerProducer);
@@ -228,6 +236,8 @@ public class PackageManagerServiceInjector {
         mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
         mIBackupManager = new Singleton<>(iBackupManager);
         mSharedLibrariesProducer = new Singleton<>(sharedLibrariesProducer);
+        mCrossProfileIntentFilterHelperProducer = new Singleton<>(
+                crossProfileIntentFilterHelperProducer);
     }
 
     /**
@@ -260,6 +270,14 @@ public class PackageManagerServiceInjector {
 
     public PackageManagerTracedLock getLock() {
         return mLock;
+    }
+
+    /**
+     * {@link CrossProfileIntentFilterHelper} which manages {@link CrossProfileIntentFilter}
+     * @return CrossProfileIntentFilterHelper
+     */
+    public CrossProfileIntentFilterHelper getCrossProfileIntentFilterHelper() {
+        return mCrossProfileIntentFilterHelperProducer.get(this, mPackageManager);
     }
 
     public Installer getInstaller() {
@@ -300,6 +318,10 @@ public class PackageManagerServiceInjector {
 
     public DexManager getDexManager() {
         return mDexManagerProducer.get(this, mPackageManager);
+    }
+
+    public DynamicCodeLogger getDynamicCodeLogger() {
+        return mDynamicCodeLoggerProducer.get(this, mPackageManager);
     }
 
     public ArtManagerService getArtManagerService() {
@@ -388,6 +410,7 @@ public class PackageManagerServiceInjector {
         return getLocalService(ActivityManagerInternal.class);
     }
 
+    @Nullable
     public BackgroundDexOptService getBackgroundDexOptService() {
         return mBackgroundDexOptService.get(this, mPackageManager);
     }

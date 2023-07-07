@@ -1,0 +1,32 @@
+{
+  "presubmit": [
+    {
+      "name": "WMShellUnitTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "include-filter": "com.android.wm.shell.back"
+        }
+      ]
+    },
+    {
+      "name": "CtsWindowManagerDeviceTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "include-filter": "android.server.wm.BackGestureInvokedTest"
+        },
+        {
+          "include-filter": "android.server.wm.BackNavigationTests"
+        },
+        {
+          "include-filter": "android.server.wm.OnBackInvokedCallbackGestureTest"
+        }
+      ]
+    }
+  ]
+}

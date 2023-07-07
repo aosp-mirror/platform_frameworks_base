@@ -18,6 +18,8 @@ package android.companion.virtual;
 
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.IVirtualDeviceSoundEffectListener;
+import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -40,10 +42,35 @@ interface IVirtualDeviceManager {
      * @param params The parameters for creating this virtual device. See {@link
      *   VirtualDeviceManager.VirtualDeviceParams}.
      * @param activityListener The listener to listen for activity changes in a virtual device.
+     * @param soundEffectListener The listener to listen for sound effect playback requests.
      */
     IVirtualDevice createVirtualDevice(
             in IBinder token, String packageName, int associationId,
-            in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener);
+            in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener,
+            in IVirtualDeviceSoundEffectListener soundEffectListener);
+
+    /**
+     * Returns the details of all available virtual devices.
+     */
+    List<VirtualDevice> getVirtualDevices();
+
+   /**
+     * Returns the ID of the device which owns the display with the given ID.
+     */
+    int getDeviceIdForDisplayId(int displayId);
+
+   /**
+     * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
+     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
+     * created by {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
+    */
+   boolean isValidVirtualDeviceId(int deviceId);
+
+    /**
+     * Returns the device policy for the given virtual device and policy type.
+     */
+    int getDevicePolicy(int deviceId, int policyType);
 
     /**
      * Creates a virtual display owned by a particular virtual device.
@@ -56,4 +83,25 @@ interface IVirtualDeviceManager {
     int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
             in IVirtualDisplayCallback callback, in IVirtualDevice virtualDevice,
             String packageName);
+
+    /**
+     * Returns device-specific session id for playback, or AUDIO_SESSION_ID_GENERATE
+     * if there's none.
+     */
+    int getAudioPlaybackSessionId(int deviceId);
+
+    /**
+     * Returns device-specific session id for recording, or AUDIO_SESSION_ID_GENERATE
+     * if there's none.
+     */
+    int getAudioRecordingSessionId(int deviceId);
+
+    /**
+     * Triggers sound effect playback on virtual device.
+     *
+     * @param deviceId id of the virtual device.
+     * @param sound effect type corresponding to
+     *   {@code android.media.AudioManager.SystemSoundEffect}
+     */
+    void playSoundEffect(int deviceId, int effectType);
 }

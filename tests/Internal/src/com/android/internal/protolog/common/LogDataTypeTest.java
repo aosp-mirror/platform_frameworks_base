@@ -36,15 +36,12 @@ import java.util.List;
 public class LogDataTypeTest {
     @Test
     public void parseFormatString() {
-        String str = "%b %d %o %x %f %e %g %s %%";
+        String str = "%b %d %x %f %s %%";
         List<Integer> out = LogDataType.parseFormatString(str);
         assertEquals(Arrays.asList(
                 LogDataType.BOOLEAN,
                 LogDataType.LONG,
                 LogDataType.LONG,
-                LogDataType.LONG,
-                LogDataType.DOUBLE,
-                LogDataType.DOUBLE,
                 LogDataType.DOUBLE,
                 LogDataType.STRING
         ), out);

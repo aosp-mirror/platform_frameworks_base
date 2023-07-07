@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -33,6 +35,7 @@ import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.SensorLocation;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
@@ -41,6 +44,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
@@ -111,16 +115,38 @@ public class FingerprintProviderTest {
                 mGestureAvailabilityDispatcher, mBiometricContext);
     }
 
+    @Test
+    public void testAddingSensors() {
+        mFingerprintProvider = new TestableFingerprintProvider(mDaemon, mContext,
+                mBiometricStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,
+                mGestureAvailabilityDispatcher, mBiometricContext);
+
+        waitForIdle();
+
+        for (SensorProps prop : mSensorProps) {
+            final BiometricScheduler scheduler =
+                    mFingerprintProvider.mFingerprintSensors.get(prop.commonProps.sensorId)
+                            .getScheduler();
+            BaseClientMonitor currentClient = scheduler.getCurrentClient();
+
+            assertThat(currentClient).isInstanceOf(FingerprintInternalCleanupClient.class);
+            assertThat(currentClient.getSensorId()).isEqualTo(prop.commonProps.sensorId);
+            assertThat(currentClient.getTargetUserId()).isEqualTo(UserHandle.USER_SYSTEM);
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     @Test
     public void halServiceDied_resetsAllSchedulers() {
+        waitForIdle();
         assertEquals(mSensorProps.length, mFingerprintProvider.getSensorProperties().size());
 
         // Schedule N operations on each sensor
         final int numFakeOperations = 10;
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
-                    mFingerprintProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
+                    mFingerprintProvider.mFingerprintSensors.get(prop.commonProps.sensorId)
+                            .getScheduler();
             for (int i = 0; i < numFakeOperations; i++) {
                 final HalClientMonitor testMonitor = mock(HalClientMonitor.class);
                 when(testMonitor.getFreshDaemon()).thenReturn(new Object());
@@ -132,8 +158,9 @@ public class FingerprintProviderTest {
         // The right amount of pending and current operations are scheduled
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
-                    mFingerprintProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
-            assertEquals(numFakeOperations - 1, scheduler.getCurrentPendingCount());
+                    mFingerprintProvider.mFingerprintSensors.get(prop.commonProps.sensorId)
+                            .getScheduler();
+            assertEquals(numFakeOperations, scheduler.getCurrentPendingCount());
             assertNotNull(scheduler.getCurrentClient());
         }
 
@@ -145,7 +172,8 @@ public class FingerprintProviderTest {
         // No pending operations, no current operation.
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
-                    mFingerprintProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
+                    mFingerprintProvider.mFingerprintSensors.get(prop.commonProps.sensorId)
+                            .getScheduler();
             assertNull(scheduler.getCurrentClient());
             assertEquals(0, scheduler.getCurrentPendingCount());
         }

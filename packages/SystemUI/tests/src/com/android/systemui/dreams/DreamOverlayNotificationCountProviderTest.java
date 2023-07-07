@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +49,8 @@ public class DreamOverlayNotificationCountProviderTest extends SysuiTestCase {
     @Mock
     StatusBarNotification mNotification2;
     @Mock
+    StatusBarNotification mNotification3;
+    @Mock
     NotificationListenerService.RankingMap mRankingMap;
 
     private DreamOverlayNotificationCountProvider mProvider;
@@ -58,6 +61,8 @@ public class DreamOverlayNotificationCountProviderTest extends SysuiTestCase {
 
         when(mNotification1.getKey()).thenReturn("key1");
         when(mNotification2.getKey()).thenReturn("key2");
+        when(mNotification3.getKey()).thenReturn("key3");
+        when(mNotification3.isOngoing()).thenReturn(true);
 
         final StatusBarNotification[] notifications = {mNotification1};
         when(mNotificationListener.getActiveNotifications()).thenReturn(notifications);
@@ -82,5 +87,14 @@ public class DreamOverlayNotificationCountProviderTest extends SysuiTestCase {
         verify(mNotificationListener).addNotificationHandler(handlerArgumentCaptor.capture());
         handlerArgumentCaptor.getValue().onNotificationRemoved(mNotification1, mRankingMap);
         verify(mCallback).onNotificationCountChanged(0);
+    }
+
+    @Test
+    public void testPostingOngoingNotificationDoesNotCallCallbackWithNotificationCount() {
+        final ArgumentCaptor<NotificationHandler> handlerArgumentCaptor =
+                ArgumentCaptor.forClass(NotificationHandler.class);
+        verify(mNotificationListener).addNotificationHandler(handlerArgumentCaptor.capture());
+        handlerArgumentCaptor.getValue().onNotificationPosted(mNotification3, mRankingMap);
+        verify(mCallback, never()).onNotificationCountChanged(2);
     }
 }

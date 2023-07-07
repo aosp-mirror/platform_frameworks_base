@@ -20,7 +20,12 @@ package android.service.games;
  * @hide
  */
 oneway interface IGameSession {
+    @RequiresNoPermission
     void onDestroyed();
+
+    @RequiresNoPermission
     void onTransientSystemBarVisibilityFromRevealGestureChanged(boolean visibleDueToGesture);
+
+    @RequiresNoPermission
     void onTaskFocusChanged(boolean focused);
 }

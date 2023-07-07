@@ -26,17 +26,25 @@ import android.hardware.location.IGeofenceHardwareMonitorCallback;
 interface IGeofenceHardware {
     void setGpsGeofenceHardware(in IGpsGeofenceHardware service);
     void setFusedGeofenceHardware(in IFusedGeofenceHardware service);
+    @EnforcePermission("LOCATION_HARDWARE")
     int[] getMonitoringTypes();
+    @EnforcePermission("LOCATION_HARDWARE")
     int getStatusOfMonitoringType(int monitoringType);
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean addCircularFence(
             int monitoringType,
             in GeofenceHardwareRequestParcelable request,
             in IGeofenceHardwareCallback callback);
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean removeGeofence(int id, int monitoringType);
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean pauseGeofence(int id, int monitoringType);
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean resumeGeofence(int id, int monitoringType, int monitorTransitions);
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean registerForMonitorStateChangeCallback(int monitoringType,
             IGeofenceHardwareMonitorCallback callback);
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean unregisterForMonitorStateChangeCallback(int monitoringType,
             IGeofenceHardwareMonitorCallback callback);
 }

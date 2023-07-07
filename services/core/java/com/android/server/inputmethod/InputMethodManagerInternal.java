@@ -25,9 +25,9 @@ import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.LocalServices;
 
 import java.util.Collections;
@@ -178,6 +178,14 @@ public abstract class InputMethodManagerInternal {
     public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
 
     /**
+     * Switch the keyboard layout in response to a keyboard shortcut.
+     *
+     * @param direction {@code 1} to switch to the next subtype, {@code -1} to switch to the
+     *                           previous subtype.
+     */
+    public abstract void switchKeyboardLayout(int direction);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -255,6 +263,10 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void maybeFinishStylusHandwriting() {
+                }
+
+                @Override
+                public void switchKeyboardLayout(int direction) {
                 }
             };
 

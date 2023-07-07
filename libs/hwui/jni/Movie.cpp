@@ -3,8 +3,8 @@
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedLocalRef.h>
 #include "Movie.h"
+#include "SkRefCnt.h"
 #include "SkStream.h"
-#include "SkUtils.h"
 #include "Utils.h"
 
 #include <androidfw/Asset.h>

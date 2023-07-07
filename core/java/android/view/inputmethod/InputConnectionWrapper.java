@@ -16,14 +16,21 @@
 
 package android.view.inputmethod;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.view.KeyEvent;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * <p>Wrapper class for proxying calls to another InputConnection.  Subclass and have fun!
@@ -323,8 +330,51 @@ public class InputConnectionWrapper implements InputConnection {
      * @throws NullPointerException if the target is {@code null}.
      */
     @Override
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        mTarget.performHandwritingGesture(gesture, executor, consumer);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean previewHandwritingGesture(
+            @NonNull PreviewableHandwritingGesture gesture,
+            @Nullable CancellationSignal cancellationSignal) {
+        return mTarget.previewHandwritingGesture(gesture, cancellationSignal);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         return mTarget.requestCursorUpdates(cursorUpdateMode);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean requestCursorUpdates(@CursorUpdateMode int cursorUpdateMode,
+            @CursorUpdateFilter int cursorUpdateFilter) {
+        return mTarget.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public void requestTextBoundsInfo(
+            @NonNull RectF bounds, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        mTarget.requestTextBoundsInfo(bounds, executor, consumer);
     }
 
     /**
@@ -361,5 +411,47 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean setImeConsumesInput(boolean imeConsumesInput) {
         return mTarget.setImeConsumesInput(imeConsumesInput);
+    }
+
+    /**
+     * Called by the system when it needs to take a snapshot of multiple text-related data in an
+     * atomic manner.
+     *
+     * <p><strong>Editor authors</strong>: Supporting this method is strongly encouraged. Atomically
+     * taken {@link TextSnapshot} is going to be really helpful for the system when optimizing IPCs
+     * in a safe and deterministic manner.  Return {@code null} if an atomically taken
+     * {@link TextSnapshot} is unavailable.  The system continues supporting such a scenario
+     * gracefully.</p>
+     *
+     * <p><strong>IME authors</strong>: Currently IMEs cannot call this method directly and always
+     * receive {@code null} as the result.</p>
+     *
+     * <p>Beware that there is a bug that this method was not overridden in
+     * {@link InputConnectionWrapper}, which ended up always returning {@code null} when gets
+     * called even if the wrapped {@link InputConnection} implements this method.  The bug was
+     * fixed in {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}.</p>
+     *
+     * @return {@code null} if {@link TextSnapshot} is unavailable and/or this API is called from
+     *         IMEs. Beware the bug in older devices mentioned above.
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Nullable
+    @Override
+    public TextSnapshot takeSnapshot() {
+        return mTarget.takeSnapshot();
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean replaceText(
+            @IntRange(from = 0) int start,
+            @IntRange(from = 0) int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return mTarget.replaceText(start, end, text, newCursorPosition, textAttribute);
     }
 }

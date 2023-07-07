@@ -153,8 +153,9 @@ public final class TelephonyScanManager {
                     nsi = mScanInfo.get(message.arg2);
                 }
                 if (nsi == null) {
-                    throw new RuntimeException(
-                        "Failed to find NetworkScanInfo with id " + message.arg2);
+                    Rlog.e(TAG, "Unexpceted message " + message.what
+                            + " as there is no NetworkScanInfo with id " + message.arg2);
+                    return;
                 }
 
                 final NetworkScanCallback callback = nsi.mCallback;
@@ -171,7 +172,7 @@ public final class TelephonyScanManager {
                                 ci[i] = (CellInfo) parcelables[i];
                             }
                             executor.execute(() -> {
-                                Rlog.d(TAG, "onResults: " + ci.toString());
+                                Rlog.d(TAG, "onResults: " + Arrays.toString(ci));
                                 callback.onResults(Arrays.asList(ci));
                             });
                         } catch (Exception e) {

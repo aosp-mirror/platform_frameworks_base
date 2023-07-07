@@ -18,10 +18,11 @@ package android.security.identity;
 
 import android.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An object that holds personalization data.
@@ -38,7 +39,7 @@ public class PersonalizationData {
     private PersonalizationData() {
     }
 
-    private LinkedList<AccessControlProfile> mProfiles = new LinkedList<>();
+    private ArrayList<AccessControlProfile> mProfiles = new ArrayList<>();
 
     private LinkedHashMap<String, NamespaceData> mNamespaces = new LinkedHashMap<>();
 

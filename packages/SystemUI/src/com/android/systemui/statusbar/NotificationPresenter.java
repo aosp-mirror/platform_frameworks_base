@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -25,8 +24,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * for affecting the state of the system (e.g. starting an intent, given that the presenter may
  * want to perform some action before doing so).
  */
-public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener,
-        ActivatableNotificationView.OnActivatedListener {
+public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener {
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
      * animations if this returns true.
@@ -48,16 +46,6 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
      * @return true iff the device is in vr mode
      */
     boolean isDeviceInVrMode();
-
-    /**
-     * Updates the visual representation of the notifications.
-     */
-    void updateNotificationViews(String reason);
-
-    /**
-     * Called when the row states are updated by {@link NotificationViewHierarchyManager}.
-     */
-    void onUpdateRowStates();
 
     /**
      * @return true if the shade is collapsing.

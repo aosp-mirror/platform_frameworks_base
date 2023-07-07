@@ -77,7 +77,7 @@ bool IsWhitespace(char32_t codepoint) {
          (codepoint == 0x3000);
 }
 
-bool IsJavaIdentifier(const StringPiece& str) {
+bool IsJavaIdentifier(StringPiece str) {
   Utf8Iterator iter(str);
 
   // Check the first character.
@@ -99,7 +99,7 @@ bool IsJavaIdentifier(const StringPiece& str) {
   return true;
 }
 
-bool IsValidResourceEntryName(const StringPiece& str) {
+bool IsValidResourceEntryName(StringPiece str) {
   Utf8Iterator iter(str);
 
   // Check the first character.

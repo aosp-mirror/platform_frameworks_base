@@ -468,37 +468,37 @@ public class RelativeDateTimeFormatterTest {
         cal.set(2015, Calendar.FEBRUARY, 5, 10, 50, 0);
         final long base = cal.getTimeInMillis();
 
-        assertEquals("5 seconds ago, 10:49 AM",
+        assertEquals("5 seconds ago, 10:49\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 5 * SECOND_IN_MILLIS, base, 0,
                         MINUTE_IN_MILLIS, 0));
-        assertEquals("5 min. ago, 10:45 AM",
+        assertEquals("5 min. ago, 10:45\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 5 * MINUTE_IN_MILLIS, base, 0,
                         HOUR_IN_MILLIS, FORMAT_ABBREV_RELATIVE));
-        assertEquals("0 hr. ago, 10:45 AM",
+        assertEquals("0 hr. ago, 10:45\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 5 * MINUTE_IN_MILLIS, base,
                         HOUR_IN_MILLIS, DAY_IN_MILLIS, FORMAT_ABBREV_RELATIVE));
-        assertEquals("5 hours ago, 5:50 AM",
+        assertEquals("5 hours ago, 5:50\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 5 * HOUR_IN_MILLIS, base,
                         HOUR_IN_MILLIS, DAY_IN_MILLIS, 0));
-        assertEquals("Yesterday, 7:50 PM",
+        assertEquals("Yesterday, 7:50\u202fPM",
                 getRelativeDateTimeString(en_US, tz, base - 15 * HOUR_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, FORMAT_ABBREV_RELATIVE));
-        assertEquals("5 days ago, 10:50 AM",
+        assertEquals("5 days ago, 10:50\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 5 * DAY_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
-        assertEquals("Jan 29, 10:50 AM",
+        assertEquals("Jan 29, 10:50\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 7 * DAY_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
-        assertEquals("11/27/2014, 10:50 AM",
+        assertEquals("11/27/2014, 10:50\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 10 * WEEK_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
-        assertEquals("11/27/2014, 10:50 AM",
+        assertEquals("11/27/2014, 10:50\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 10 * WEEK_IN_MILLIS, base, 0,
                         YEAR_IN_MILLIS, 0));
 
         // User-supplied flags should be ignored when formatting the date clause.
         final int FORMAT_SHOW_WEEKDAY = 0x00002;
-        assertEquals("11/27/2014, 10:50 AM",
+        assertEquals("11/27/2014, 10:50\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base - 10 * WEEK_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS,
                         FORMAT_ABBREV_ALL | FORMAT_SHOW_WEEKDAY));
@@ -514,14 +514,14 @@ public class RelativeDateTimeFormatterTest {
         // So 5 hours before 3:15 AM should be formatted as 'Yesterday, 9:15 PM'.
         cal.set(2014, Calendar.MARCH, 9, 3, 15, 0);
         long base = cal.getTimeInMillis();
-        assertEquals("Yesterday, 9:15 PM",
+        assertEquals("Yesterday, 9:15\u202fPM",
                 getRelativeDateTimeString(en_US, tz, base - 5 * HOUR_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
 
         // 1 hour after 2:00 AM should be formatted as 'In 1 hour, 4:00 AM'.
         cal.set(2014, Calendar.MARCH, 9, 2, 0, 0);
         base = cal.getTimeInMillis();
-        assertEquals("In 1 hour, 4:00 AM",
+        assertEquals("In 1 hour, 4:00\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base + 1 * HOUR_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
 
@@ -529,22 +529,22 @@ public class RelativeDateTimeFormatterTest {
         // 1:00 AM. 8 hours before 5:20 AM should be 'Yesterday, 10:20 PM'.
         cal.set(2014, Calendar.NOVEMBER, 2, 5, 20, 0);
         base = cal.getTimeInMillis();
-        assertEquals("Yesterday, 10:20 PM",
+        assertEquals("Yesterday, 10:20\u202fPM",
                 getRelativeDateTimeString(en_US, tz, base - 8 * HOUR_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
 
         cal.set(2014, Calendar.NOVEMBER, 2, 0, 45, 0);
         base = cal.getTimeInMillis();
         // 45 minutes after 0:45 AM should be 'In 45 minutes, 1:30 AM'.
-        assertEquals("In 45 minutes, 1:30 AM",
+        assertEquals("In 45 minutes, 1:30\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base + 45 * MINUTE_IN_MILLIS, base, 0,
                         WEEK_IN_MILLIS, 0));
         // 45 minutes later, it should be 'In 45 minutes, 1:15 AM'.
-        assertEquals("In 45 minutes, 1:15 AM",
+        assertEquals("In 45 minutes, 1:15\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base + 90 * MINUTE_IN_MILLIS,
                         base + 45 * MINUTE_IN_MILLIS, 0, WEEK_IN_MILLIS, 0));
         // Another 45 minutes later, it should be 'In 45 minutes, 2:00 AM'.
-        assertEquals("In 45 minutes, 2:00 AM",
+        assertEquals("In 45 minutes, 2:00\u202fAM",
                 getRelativeDateTimeString(en_US, tz, base + 135 * MINUTE_IN_MILLIS,
                         base + 90 * MINUTE_IN_MILLIS, 0, WEEK_IN_MILLIS, 0));
     }
@@ -593,7 +593,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar yesterdayCalendar1 = Calendar.getInstance(tz, en_US);
         yesterdayCalendar1.set(2011, Calendar.SEPTEMBER, 1, 10, 24, 0);
         long yesterday1 = yesterdayCalendar1.getTimeInMillis();
-        assertEquals("Yesterday, 10:24 AM",
+        assertEquals("Yesterday, 10:24\u202fAM",
                 getRelativeDateTimeString(en_US, tz, yesterday1, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -601,7 +601,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar yesterdayCalendar2 = Calendar.getInstance(tz, en_US);
         yesterdayCalendar2.set(2011, Calendar.SEPTEMBER, 1, 10, 22, 0);
         long yesterday2 = yesterdayCalendar2.getTimeInMillis();
-        assertEquals("Yesterday, 10:22 AM",
+        assertEquals("Yesterday, 10:22\u202fAM",
                 getRelativeDateTimeString(en_US, tz, yesterday2, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -609,7 +609,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar twoDaysAgoCalendar1 = Calendar.getInstance(tz, en_US);
         twoDaysAgoCalendar1.set(2011, Calendar.AUGUST, 31, 10, 24, 0);
         long twoDaysAgo1 = twoDaysAgoCalendar1.getTimeInMillis();
-        assertEquals("2 days ago, 10:24 AM",
+        assertEquals("2 days ago, 10:24\u202fAM",
                 getRelativeDateTimeString(en_US, tz, twoDaysAgo1, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -617,7 +617,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar twoDaysAgoCalendar2 = Calendar.getInstance(tz, en_US);
         twoDaysAgoCalendar2.set(2011, Calendar.AUGUST, 31, 10, 22, 0);
         long twoDaysAgo2 = twoDaysAgoCalendar2.getTimeInMillis();
-        assertEquals("2 days ago, 10:22 AM",
+        assertEquals("2 days ago, 10:22\u202fAM",
                 getRelativeDateTimeString(en_US, tz, twoDaysAgo2, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -625,7 +625,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar tomorrowCalendar1 = Calendar.getInstance(tz, en_US);
         tomorrowCalendar1.set(2011, Calendar.SEPTEMBER, 3, 10, 22, 0);
         long tomorrow1 = tomorrowCalendar1.getTimeInMillis();
-        assertEquals("Tomorrow, 10:22 AM",
+        assertEquals("Tomorrow, 10:22\u202fAM",
                 getRelativeDateTimeString(en_US, tz, tomorrow1, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -633,7 +633,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar tomorrowCalendar2 = Calendar.getInstance(tz, en_US);
         tomorrowCalendar2.set(2011, Calendar.SEPTEMBER, 3, 10, 24, 0);
         long tomorrow2 = tomorrowCalendar2.getTimeInMillis();
-        assertEquals("Tomorrow, 10:24 AM",
+        assertEquals("Tomorrow, 10:24\u202fAM",
                 getRelativeDateTimeString(en_US, tz, tomorrow2, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -641,7 +641,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar twoDaysLaterCalendar1 = Calendar.getInstance(tz, en_US);
         twoDaysLaterCalendar1.set(2011, Calendar.SEPTEMBER, 4, 10, 22, 0);
         long twoDaysLater1 = twoDaysLaterCalendar1.getTimeInMillis();
-        assertEquals("In 2 days, 10:22 AM",
+        assertEquals("In 2 days, 10:22\u202fAM",
                 getRelativeDateTimeString(en_US, tz, twoDaysLater1, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
 
@@ -649,7 +649,7 @@ public class RelativeDateTimeFormatterTest {
         Calendar twoDaysLaterCalendar2 = Calendar.getInstance(tz, en_US);
         twoDaysLaterCalendar2.set(2011, Calendar.SEPTEMBER, 4, 10, 24, 0);
         long twoDaysLater2 = twoDaysLaterCalendar2.getTimeInMillis();
-        assertEquals("In 2 days, 10:24 AM",
+        assertEquals("In 2 days, 10:24\u202fAM",
                 getRelativeDateTimeString(en_US, tz, twoDaysLater2, now, MINUTE_IN_MILLIS,
                         WEEK_IN_MILLIS, 0));
     }
@@ -664,11 +664,11 @@ public class RelativeDateTimeFormatterTest {
         cal.set(2012, Calendar.FEBRUARY, 5, 10, 50, 0);
         long base = cal.getTimeInMillis();
 
-        assertEquals("Feb 5, 5:50 AM", getRelativeDateTimeString(en_US, tz,
+        assertEquals("Feb 5, 5:50\u202fAM", getRelativeDateTimeString(en_US, tz,
                 base - 5 * HOUR_IN_MILLIS, base, 0, MINUTE_IN_MILLIS, 0));
-        assertEquals("Jan 29, 10:50 AM", getRelativeDateTimeString(en_US, tz,
+        assertEquals("Jan 29, 10:50\u202fAM", getRelativeDateTimeString(en_US, tz,
                 base - 7 * DAY_IN_MILLIS, base, 0, WEEK_IN_MILLIS, 0));
-        assertEquals("11/27/2011, 10:50 AM", getRelativeDateTimeString(en_US, tz,
+        assertEquals("11/27/2011, 10:50\u202fAM", getRelativeDateTimeString(en_US, tz,
                 base - 10 * WEEK_IN_MILLIS, base, 0, WEEK_IN_MILLIS, 0));
 
         assertEquals("January 6", getRelativeTimeSpanString(en_US, tz,
@@ -687,11 +687,11 @@ public class RelativeDateTimeFormatterTest {
         // Feb 5, 2018 at 10:50 PST
         cal.set(2018, Calendar.FEBRUARY, 5, 10, 50, 0);
         base = cal.getTimeInMillis();
-        assertEquals("Feb 5, 5:50 AM", getRelativeDateTimeString(en_US, tz,
+        assertEquals("Feb 5, 5:50\u202fAM", getRelativeDateTimeString(en_US, tz,
                 base - 5 * HOUR_IN_MILLIS, base, 0, MINUTE_IN_MILLIS, 0));
-        assertEquals("Jan 29, 10:50 AM", getRelativeDateTimeString(en_US, tz,
+        assertEquals("Jan 29, 10:50\u202fAM", getRelativeDateTimeString(en_US, tz,
                 base - 7 * DAY_IN_MILLIS, base, 0, WEEK_IN_MILLIS, 0));
-        assertEquals("11/27/2017, 10:50 AM", getRelativeDateTimeString(en_US, tz,
+        assertEquals("11/27/2017, 10:50\u202fAM", getRelativeDateTimeString(en_US, tz,
                 base - 10 * WEEK_IN_MILLIS, base, 0, WEEK_IN_MILLIS, 0));
 
         assertEquals("January 6", getRelativeTimeSpanString(en_US, tz,

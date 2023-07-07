@@ -44,6 +44,13 @@ public class ClientMonitorCompositeCallback implements ClientMonitorCallback {
     }
 
     @Override
+    public final void onBiometricAction(int action) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onBiometricAction(action);
+        }
+    }
+
+    @Override
     public final void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
             boolean success) {
         for (int i = mCallbacks.size() - 1; i >= 0; i--) {

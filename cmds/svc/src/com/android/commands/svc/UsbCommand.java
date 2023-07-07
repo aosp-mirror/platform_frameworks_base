@@ -29,11 +29,17 @@ import android.os.ServiceManager;
 import java.util.function.Consumer;
 import java.util.concurrent.Executor;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UsbCommand extends Svc.Command {
     public UsbCommand() {
         super("usb");
     }
+
+    /**
+     * Counter for tracking UsbOperation operations.
+     */
+    private static final AtomicInteger sUsbOperationCount = new AtomicInteger();
 
     @Override
     public String shortHelp() {
@@ -92,8 +98,10 @@ public class UsbCommand extends Svc.Command {
 
             if ("setFunctions".equals(args[1])) {
                 try {
+                    int operationId = sUsbOperationCount.incrementAndGet();
+                    System.out.println("setCurrentFunctions opId:" + operationId);
                     usbMgr.setCurrentFunctions(UsbManager.usbFunctionsFromString(
-                            args.length >= 3 ? args[2] : ""));
+                            args.length >= 3 ? args[2] : ""), operationId);
                 } catch (RemoteException e) {
                     System.err.println("Error communicating with UsbManager: " + e);
                 }

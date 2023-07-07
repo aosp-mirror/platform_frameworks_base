@@ -238,7 +238,7 @@ public class UsbDeviceConnection {
      * or negative value for failure
      */
     public int controlTransfer(int requestType, int request, int value,
-            int index, byte[] buffer, int length, int timeout) {
+            int index, @Nullable byte[] buffer, int length, int timeout) {
         return controlTransfer(requestType, request, value, index, buffer, 0, length, timeout);
     }
 
@@ -263,7 +263,7 @@ public class UsbDeviceConnection {
      * or negative value for failure
      */
     public int controlTransfer(int requestType, int request, int value, int index,
-            byte[] buffer, int offset, int length, int timeout) {
+            @Nullable byte[] buffer, int offset, int length, int timeout) {
         checkBounds(buffer, offset, length);
         return native_control_request(requestType, request, value, index,
                 buffer, offset, length, timeout);

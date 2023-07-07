@@ -35,9 +35,16 @@
     <!-- How many lines to show in the security footer -->
     <integer name="qs_security_footer_maxLines">1</integer>
 
-    <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
-    <bool name="allow_force_nav_bar_handle_opaque">false</bool>
-
     <bool name="config_use_large_screen_shade_header">true</bool>
 
+    <!-- A collection of defaults for the quick affordances on the lock screen. Each item must be a
+    string with two parts: the ID of the slot and the comma-delimited list of affordance IDs,
+    separated by a colon ':' character. For example: <item>bottom_end:home,wallet</item>. The
+    default is displayed by System UI as long as the user hasn't made a different choice for that
+    slot. If the user did make a choice, even if the choice is the "None" option, the default is
+    ignored. -->
+    <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
+        <item>bottom_start:home</item>
+        <item>bottom_end:create_note</item>
+    </string-array>
 </resources>

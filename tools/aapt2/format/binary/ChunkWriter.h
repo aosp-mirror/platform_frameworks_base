@@ -18,16 +18,15 @@
 #define AAPT_FORMAT_BINARY_CHUNKWRITER_H
 
 #include "android-base/macros.h"
+#include "androidfw/BigBuffer.h"
 #include "androidfw/ResourceTypes.h"
-
-#include "util/BigBuffer.h"
 #include "util/Util.h"
 
 namespace aapt {
 
 class ChunkWriter {
  public:
-  explicit inline ChunkWriter(BigBuffer* buffer) : buffer_(buffer) {
+  explicit inline ChunkWriter(android::BigBuffer* buffer) : buffer_(buffer) {
   }
   ChunkWriter(ChunkWriter&&) = default;
   ChunkWriter& operator=(ChunkWriter&&) = default;
@@ -37,8 +36,8 @@ class ChunkWriter {
     start_size_ = buffer_->size();
     T* chunk = buffer_->NextBlock<T>();
     header_ = &chunk->header;
-    header_->type = util::HostToDevice16(type);
-    header_->headerSize = util::HostToDevice16(sizeof(T));
+    header_->type = android::util::HostToDevice16(type);
+    header_->headerSize = android::util::HostToDevice16(sizeof(T));
     return chunk;
   }
 
@@ -47,7 +46,7 @@ class ChunkWriter {
     return buffer_->NextBlock<T>(count);
   }
 
-  inline BigBuffer* buffer() {
+  inline android::BigBuffer* buffer() {
     return buffer_;
   }
 
@@ -61,14 +60,14 @@ class ChunkWriter {
 
   inline android::ResChunk_header* Finish() {
     buffer_->Align4();
-    header_->size = util::HostToDevice32(buffer_->size() - start_size_);
+    header_->size = android::util::HostToDevice32(buffer_->size() - start_size_);
     return header_;
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ChunkWriter);
 
-  BigBuffer* buffer_;
+  android::BigBuffer* buffer_;
   size_t start_size_ = 0;
   android::ResChunk_header* header_ = nullptr;
 };
@@ -77,8 +76,8 @@ template <>
 inline android::ResChunk_header* ChunkWriter::StartChunk(uint16_t type) {
   start_size_ = buffer_->size();
   header_ = buffer_->NextBlock<android::ResChunk_header>();
-  header_->type = util::HostToDevice16(type);
-  header_->headerSize = util::HostToDevice16(sizeof(android::ResChunk_header));
+  header_->type = android::util::HostToDevice16(type);
+  header_->headerSize = android::util::HostToDevice16(sizeof(android::ResChunk_header));
   return header_;
 }
 

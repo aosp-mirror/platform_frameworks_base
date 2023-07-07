@@ -39,10 +39,12 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.LockSettingsStrongAuth.NonStrongBiometricIdleTimeoutAlarmListener;
 import com.android.server.locksettings.LockSettingsStrongAuth.NonStrongBiometricTimeoutAlarmListener;
@@ -50,10 +52,13 @@ import com.android.server.locksettings.LockSettingsStrongAuth.StrongAuthTimeoutA
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
 public class LockSettingsStrongAuthTest {
 
     private static final String TAG = LockSettingsStrongAuthTest.class.getSimpleName();
@@ -250,8 +255,8 @@ public class LockSettingsStrongAuthTest {
         // schedule (a) an alarm for non-strong biometric fallback timeout and (b) an alarm for
         // non-strong biometric idle timeout, so later we can verify that unlocking with
         // strong biometric or primary auth will cancel those alarms
-        mStrongAuth.reportSuccessfulBiometricUnlock(false /* isStrongBiometric */, PRIMARY_USER_ID);
-        mStrongAuth.scheduleNonStrongBiometricIdleTimeout(PRIMARY_USER_ID);
+        mStrongAuth.reportSuccessfulBiometricUnlock(false /* isStrongBiometric */, userId);
+        mStrongAuth.scheduleNonStrongBiometricIdleTimeout(userId);
     }
 
     private void verifyAlarmsCancelledAndNonStrongBiometricAllowed(int userId) {

@@ -71,6 +71,8 @@
         <TextView
             android:id="@+id/entity_header_second_summary"
             style="@style/TextAppearance.EntityHeaderSummary"
+            android:singleLine="false"
+            android:maxLines="4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

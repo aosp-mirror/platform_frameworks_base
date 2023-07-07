@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -27,41 +28,60 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.UiServiceTestCase;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.FieldSetter;
@@ -70,7 +90,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class NotificationListenersTest extends UiServiceTestCase {
 
@@ -78,6 +100,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     private PackageManager mPm;
     @Mock
     private IPackageManager miPm;
+    @Mock
+    private Resources mResources;
 
     @Mock
     NotificationManagerService mNm;
@@ -89,13 +113,16 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
     private ComponentName mCn1 = new ComponentName("pkg", "pkg.cmp");
     private ComponentName mCn2 = new ComponentName("pkg2", "pkg2.cmp2");
-
+    private ComponentName mUninstalledComponent = new ComponentName("pkg3",
+            "pkg3.NotificationListenerService");
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         getContext().setMockPackageManager(mPm);
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
+
+        when(mNm.isInteractionVisibleToListener(any(), anyInt())).thenReturn(true);
 
         mListeners = spy(mNm.new NotificationListeners(
                 mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm));
@@ -104,7 +131,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
     @Test
     public void testReadExtraTag() throws Exception {
-        String xml = "<" + TAG_REQUESTED_LISTENERS+ ">"
+        String xml = "<" + TAG_REQUESTED_LISTENERS + ">"
                 + "<listener component=\"" + mCn1.flattenToString() + "\" user=\"0\">"
                 + "<allowed types=\"7\" />"
                 + "</listener>"
@@ -124,11 +151,55 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
+    public void loadDefaultsFromConfig_forHeadlessSystemUser_loadUninstalled() throws Exception {
+        // setup with headless system user mode
+        mListeners = spy(mNm.new NotificationListeners(
+                mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm,
+                /* isHeadlessSystemUserMode= */ true));
+        mockDefaultListenerConfigForUninstalledComponent(mUninstalledComponent);
+
+        mListeners.loadDefaultsFromConfig();
+
+        assertThat(mListeners.getDefaultComponents()).contains(mUninstalledComponent);
+    }
+
+    @Test
+    public void loadDefaultsFromConfig_forNonHeadlessSystemUser_ignoreUninstalled()
+            throws Exception {
+        // setup without headless system user mode
+        mListeners = spy(mNm.new NotificationListeners(
+                mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm,
+                /* isHeadlessSystemUserMode= */ false));
+        mockDefaultListenerConfigForUninstalledComponent(mUninstalledComponent);
+
+        mListeners.loadDefaultsFromConfig();
+
+        assertThat(mListeners.getDefaultComponents()).doesNotContain(mUninstalledComponent);
+    }
+
+    private void mockDefaultListenerConfigForUninstalledComponent(ComponentName componentName) {
+        ArraySet<ComponentName> components = new ArraySet<>(Arrays.asList(componentName));
+        when(mResources
+                .getString(
+                        com.android.internal.R.string.config_defaultListenerAccessPackages))
+                .thenReturn(componentName.getPackageName());
+        when(mContext.getResources()).thenReturn(mResources);
+        doReturn(components).when(mListeners).queryPackageForServices(
+                eq(componentName.getPackageName()),
+                intThat(hasIntBitFlag(MATCH_ANY_USER)),
+                anyInt());
+    }
+
+    public static ArgumentMatcher<Integer> hasIntBitFlag(int flag) {
+        return arg -> arg != null && ((arg & flag) == flag);
+    }
+
+    @Test
     public void testWriteExtraTag() throws Exception {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
         VersionedPackage a1 = new VersionedPackage("pkg1", 243);
         NotificationListenerFilter nlf2 =
-                new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
+                new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[]{a1}));
         mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
         mListeners.setNotificationListenerFilter(Pair.create(mCn2, 10), nlf2);
 
@@ -505,5 +576,127 @@ public class NotificationListenersTest extends UiServiceTestCase {
         mListeners.notifyRemovedLocked(r1, 0, rs1);
         mListeners.notifyRemovedLocked(r1, 0, rs1);
         verify(r1, atLeast(2)).getSbn();
+    }
+
+    @Test
+    public void testImplicitGrant() {
+        String pkg = "pkg";
+        int uid = 9;
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setTimeoutAfter(1);
+
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(uid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
+
+        ManagedServices.ManagedServiceInfo info = mListeners.new ManagedServiceInfo(
+                null, new ComponentName("a", "a"), sbn.getUserId(), false, null, 33, 33);
+        List<ManagedServices.ManagedServiceInfo> services = ImmutableList.of(info);
+        when(mListeners.getServices()).thenReturn(services);
+
+        when(mNm.isVisibleToListener(any(), anyInt(), any())).thenReturn(true);
+        when(mNm.makeRankingUpdateLocked(info)).thenReturn(mock(NotificationRankingUpdate.class));
+        mNm.mPackageManagerInternal = mPmi;
+
+        mListeners.notifyPostedLocked(r, null);
+
+        verify(mPmi).grantImplicitAccess(sbn.getUserId(), null, UserHandle.getAppId(33),
+                sbn.getUid(), false, false);
+    }
+
+    @Test
+    public void testUpdateGroup_notifyTwoListeners() throws Exception {
+        final NotificationChannelGroup updated = new NotificationChannelGroup("id", "name");
+        updated.setChannels(ImmutableList.of(
+                new NotificationChannel("a", "a", 1), new NotificationChannel("b", "b", 2)));
+        updated.setBlocked(true);
+
+        ManagedServices.ManagedServiceInfo i1 = getParcelingListener(updated);
+        ManagedServices.ManagedServiceInfo i2= getParcelingListener(updated);
+        when(mListeners.getServices()).thenReturn(ImmutableList.of(i1, i2));
+        NotificationChannelGroup existing = new NotificationChannelGroup("id", "name");
+
+        mListeners.notifyNotificationChannelGroupChanged("pkg", UserHandle.of(0), updated, 0);
+        Thread.sleep(500);
+
+        verify(((INotificationListener) i1.getService()), times(1))
+                .onNotificationChannelGroupModification(anyString(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testNotificationListenerFilter_threadSafety() throws Exception {
+        testThreadSafety(() -> {
+            mListeners.setNotificationListenerFilter(
+                    new Pair<>(new ComponentName("pkg1", "cls1"), 0),
+                    new NotificationListenerFilter());
+            mListeners.setNotificationListenerFilter(
+                    new Pair<>(new ComponentName("pkg2", "cls2"), 10),
+                    new NotificationListenerFilter());
+            mListeners.setNotificationListenerFilter(
+                    new Pair<>(new ComponentName("pkg3", "cls3"), 11),
+                    new NotificationListenerFilter());
+
+            mListeners.onUserRemoved(10);
+            mListeners.onPackagesChanged(true, new String[]{"pkg1", "pkg2"}, new int[]{0, 0});
+        }, 20, 50);
+    }
+
+    /**
+     * Helper method to test the thread safety of some operations.
+     *
+     * <p>Runs the supplied {@code operationToTest}, {@code nRunsPerThread} times,
+     * concurrently using {@code nThreads} threads, and waits for all of them to finish.
+     */
+    private static void testThreadSafety(Runnable operationToTest, int nThreads,
+            int nRunsPerThread) throws InterruptedException {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch doneLatch = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            Runnable threadRunnable = () -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < nRunsPerThread; j++) {
+                        operationToTest.run();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+            new Thread(threadRunnable, "Test Thread #" + i).start();
+        }
+
+        // Ready set go
+        startLatch.countDown();
+
+        // Wait for all test threads to be done.
+        doneLatch.await();
+    }
+
+    private ManagedServices.ManagedServiceInfo getParcelingListener(
+            final NotificationChannelGroup toParcel)
+            throws RemoteException {
+        ManagedServices.ManagedServiceInfo i1 = mock(ManagedServices.ManagedServiceInfo.class);
+        when(i1.isSystem()).thenReturn(true);
+        INotificationListener l1 = mock(INotificationListener.class);
+        when(i1.enabledAndUserMatches(anyInt())).thenReturn(true);
+        doAnswer(invocationOnMock -> {
+            try {
+                toParcel.writeToParcel(Parcel.obtain(), 0);
+            } catch (Exception e) {
+                fail("Failed to parcel group to listener");
+                return e;
+
+            }
+            return null;
+        }).when(l1).onNotificationChannelGroupModification(anyString(), any(), any(), anyInt());
+        when(i1.getService()).thenReturn(l1);
+        return i1;
     }
 }

@@ -85,7 +85,7 @@
                     android:layout_height="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_gravity="center"
                     android:tint="?android:attr/textColorPrimary"
-                    android:src="@drawable/ic_volume_ringer_mute" />
+                    android:src="@drawable/ic_speaker_mute" />
 
             </FrameLayout>
 
@@ -102,7 +102,7 @@
                     android:layout_height="@dimen/volume_ringer_drawer_icon_size"
                     android:layout_gravity="center"
                     android:tint="?android:attr/textColorPrimary"
-                    android:src="@drawable/ic_volume_ringer" />
+                    android:src="@drawable/ic_speaker_on" />
 
             </FrameLayout>
 

@@ -16,19 +16,9 @@
 
 package com.android.systemui.statusbar;
 
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-import static android.app.NotificationManager.IMPORTANCE_LOW;
-import static android.content.Intent.ACTION_USER_SWITCHED;
-
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_ALERTING;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_MEDIA_CONTROLS;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_PEOPLE;
-import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,7 +32,6 @@ import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -55,14 +44,17 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -87,18 +79,20 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationPresenter mPresenter;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private UserTracker mUserTracker;
 
     // Dependency mocks:
     @Mock
     private NotificationVisibilityProvider mVisibilityProvider;
-    @Mock
-    private NotificationEntryManager mEntryManager;
     @Mock
     private CommonNotifCollection mNotifCollection;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private NotificationClickNotifier mClickNotifier;
+    @Mock
+    private OverviewProxyService mOverviewProxyService;
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
@@ -118,13 +112,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationEntry mCurrentUserNotif;
     private NotificationEntry mSecondaryUserNotif;
     private NotificationEntry mWorkProfileNotif;
+    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
 
         int currentUserId = ActivityManager.getCurrentUser();
+        when(mUserTracker.getUserId()).thenReturn(currentUserId);
         mSettings = new FakeSettings();
         mSettings.setUserId(ActivityManager.getCurrentUser());
         mCurrentUser = new UserInfo(currentUserId, "", 0);
@@ -154,12 +149,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
-    }
-
-    @Test
-    public void testLockScreenShowNotificationsChangeUpdatesNotifications() {
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        verify(mEntryManager, times(1)).updateNotifications(anyString());
     }
 
     @Test
@@ -305,18 +294,18 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSettingsObserverUpdatesNotifications() {
-        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        mLockscreenUserManager.getSettingsObserverForTest().onChange(false);
-        verify(mEntryManager, times(1)).updateNotifications(anyString());
+    public void testUserSwitchedCallsOnUserSwitching() {
+        mFakeFeatureFlags.set(Flags.LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE, true);
+        mLockscreenUserManager.getUserTrackerCallbackForTest().onUserChanging(mSecondaryUser.id,
+                mContext);
+        verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
     }
 
     @Test
-    public void testActionUserSwitchedCallsOnUserSwitched() {
-        Intent intent = new Intent()
-                .setAction(ACTION_USER_SWITCHED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, mSecondaryUser.id);
-        mLockscreenUserManager.getBaseBroadcastReceiverForTest().onReceive(mContext, intent);
+    public void testUserSwitchedCallsOnUserSwitched() {
+        mFakeFeatureFlags.set(Flags.LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE, false);
+        mLockscreenUserManager.getUserTrackerCallbackForTest().onUserChanged(mSecondaryUser.id,
+                mContext);
         verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
     }
 
@@ -359,93 +348,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         verify(listener, never()).onNotificationStateChanged();
     }
 
-    @Test
-    public void testShowSilentNotifications_settingSaysShow() {
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setImportance(IMPORTANCE_LOW)
-                .build();
-        entry.setBucket(BUCKET_SILENT);
-
-        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
-    }
-
-    @Test
-    public void testShowSilentNotifications_settingSaysHide() {
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-
-        final Notification notification = mock(Notification.class);
-        when(notification.isForegroundService()).thenReturn(true);
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setImportance(IMPORTANCE_LOW)
-                .setNotification(notification)
-                .build();
-        entry.setBucket(BUCKET_SILENT);
-        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
-    }
-
-    @Test
-    public void testShowSilentNotificationsPeopleBucket_settingSaysHide() {
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-
-        final Notification notification = mock(Notification.class);
-        when(notification.isForegroundService()).thenReturn(true);
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setImportance(IMPORTANCE_LOW)
-                .setNotification(notification)
-                .build();
-        entry.setBucket(BUCKET_PEOPLE);
-        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
-    }
-
-    @Test
-    public void testShowSilentNotificationsMediaBucket_settingSaysHide() {
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-
-        final Notification notification = mock(Notification.class);
-        when(notification.isForegroundService()).thenReturn(true);
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setImportance(IMPORTANCE_LOW)
-                .setNotification(notification)
-                .build();
-        entry.setBucket(BUCKET_MEDIA_CONTROLS);
-        // always show media controls, even if they're silent
-        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
-    }
-
-    @Test
-    public void testKeyguardNotificationSuppressors() {
-        // GIVEN a notification that should be shown on the lockscreen
-        mSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
-        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        final NotificationEntry entry = new NotificationEntryBuilder()
-                .setImportance(IMPORTANCE_HIGH)
-                .build();
-        entry.setBucket(BUCKET_ALERTING);
-
-        // WHEN a suppressor is added that filters out all entries
-        FakeKeyguardSuppressor suppressor = new FakeKeyguardSuppressor();
-        mLockscreenUserManager.addKeyguardNotificationSuppressor(suppressor);
-
-        // THEN it's filtered out
-        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
-
-        // WHEN the suppressor no longer filters out entries
-        suppressor.setShouldSuppress(false);
-
-        // THEN it's no longer filtered out
-        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
-    }
-
     private class TestNotificationLockscreenUserManager
             extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
@@ -454,20 +356,28 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mBroadcastDispatcher,
                     mDevicePolicyManager,
                     mUserManager,
+                    mUserTracker,
                     (() -> mVisibilityProvider),
                     (() -> mNotifCollection),
                     mClickNotifier,
+                    (() -> mOverviewProxyService),
                     NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController,
                     Handler.createAsync(Looper.myLooper()),
                     mDeviceProvisionedController,
                     mKeyguardStateController,
                     mSettings,
-                    mock(DumpManager.class));
+                    mock(DumpManager.class),
+                    mock(LockPatternUtils.class),
+                    mFakeFeatureFlags);
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {
             return mBaseBroadcastReceiver;
+        }
+
+        public UserTracker.Callback getUserTrackerCallbackForTest() {
+            return mUserChangedCallback;
         }
 
         public ContentObserver getLockscreenSettingsObserverForTest() {
@@ -476,19 +386,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         public ContentObserver getSettingsObserverForTest() {
             return mSettingsObserver;
-        }
-    }
-
-    private static class FakeKeyguardSuppressor implements KeyguardNotificationSuppressor {
-        private boolean mShouldSuppress = true;
-
-        @Override
-        public boolean shouldSuppressOnKeyguard(NotificationEntry entry) {
-            return mShouldSuppress;
-        }
-
-        public void setShouldSuppress(boolean shouldSuppress) {
-            mShouldSuppress = shouldSuppress;
         }
     }
 }
