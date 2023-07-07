@@ -21,7 +21,6 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
-import static com.android.server.job.controllers.Package.packageToString;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
@@ -31,6 +30,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.pm.UserPackage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -46,7 +46,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.utils.AlarmQueue;
@@ -81,6 +81,8 @@ public class PrefetchController extends StateController {
      */
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Long> mEstimatedLaunchTimes = new SparseArrayMap<>();
+    @GuardedBy("mLock")
+    private final ArraySet<PrefetchChangedListener> mPrefetchChangedListeners = new ArraySet<>();
     private final ThresholdAlarmListener mThresholdAlarmListener;
 
     /**
@@ -98,6 +100,13 @@ public class PrefetchController extends StateController {
      */
     @GuardedBy("mLock")
     private long mLaunchTimeAllowanceMs = PcConstants.DEFAULT_LAUNCH_TIME_ALLOWANCE_MS;
+
+    /** Called by Prefetch Controller after local cache has been updated */
+    public interface PrefetchChangedListener {
+        /** Callback to inform listeners when estimated launch times change. */
+        void onPrefetchCacheUpdated(ArraySet<JobStatus> jobs, int userId, String pkgName,
+                long prevEstimatedLaunchTime, long newEstimatedLaunchTime, long nowElapsed);
+    }
 
     @SuppressWarnings("FieldCanBeLocal")
     private final EstimatedLaunchTimeChangedListener mEstimatedLaunchTimeChangedListener =
@@ -121,9 +130,9 @@ public class PrefetchController extends StateController {
     public PrefetchController(JobSchedulerService service) {
         super(service);
         mPcConstants = new PcConstants();
-        mHandler = new PcHandler(mContext.getMainLooper());
+        mHandler = new PcHandler(AppSchedulingModuleThread.get().getLooper());
         mThresholdAlarmListener = new ThresholdAlarmListener(
-                mContext, JobSchedulerBackgroundThread.get().getLooper());
+                mContext, AppSchedulingModuleThread.get().getLooper());
         mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
 
         mUsageStatsManagerInternal
@@ -158,13 +167,12 @@ public class PrefetchController extends StateController {
 
     @Override
     @GuardedBy("mLock")
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
         final ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
         if (jobs != null && jobs.remove(jobStatus) && jobs.size() == 0) {
-            mThresholdAlarmListener.removeAlarmForKey(new Package(userId, pkgName));
+            mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, pkgName));
         }
     }
 
@@ -178,7 +186,7 @@ public class PrefetchController extends StateController {
         final int userId = UserHandle.getUserId(uid);
         mTrackedJobs.delete(userId, packageName);
         mEstimatedLaunchTimes.delete(userId, packageName);
-        mThresholdAlarmListener.removeAlarmForKey(new Package(userId, packageName));
+        mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, packageName));
     }
 
     @Override
@@ -291,12 +299,18 @@ public class PrefetchController extends StateController {
                 // Don't bother caching the value unless the app has scheduled prefetch jobs
                 // before. This is based on the assumption that if an app has scheduled a
                 // prefetch job before, then it will probably schedule another one again.
+                final long prevEstimatedLaunchTime = mEstimatedLaunchTimes.get(userId, pkgName);
                 mEstimatedLaunchTimes.add(userId, pkgName, newEstimatedLaunchTime);
 
                 if (!jobs.isEmpty()) {
                     final long now = sSystemClock.millis();
                     final long nowElapsed = sElapsedRealtimeClock.millis();
                     updateThresholdAlarmLocked(userId, pkgName, now, nowElapsed);
+                    for (int i = 0; i < mPrefetchChangedListeners.size(); i++) {
+                        mPrefetchChangedListeners.valueAt(i).onPrefetchCacheUpdated(
+                                jobs, userId, pkgName, prevEstimatedLaunchTime,
+                                newEstimatedLaunchTime, nowElapsed);
+                    }
                     if (maybeUpdateConstraintForPkgLocked(now, nowElapsed, userId, pkgName)) {
                         mStateChangedListener.onControllerStateChanged(jobs);
                     }
@@ -340,7 +354,7 @@ public class PrefetchController extends StateController {
             @CurrentTimeMillisLong long now, @ElapsedRealtimeLong long nowElapsed) {
         final ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
         if (jobs == null || jobs.size() == 0) {
-            mThresholdAlarmListener.removeAlarmForKey(new Package(userId, pkgName));
+            mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, pkgName));
             return;
         }
 
@@ -351,10 +365,10 @@ public class PrefetchController extends StateController {
             // Set alarm to be notified when this crosses the threshold.
             final long timeToCrossThresholdMs =
                     nextEstimatedLaunchTime - (now + mLaunchTimeThresholdMs);
-            mThresholdAlarmListener.addAlarm(new Package(userId, pkgName),
+            mThresholdAlarmListener.addAlarm(UserPackage.of(userId, pkgName),
                     nowElapsed + timeToCrossThresholdMs);
         } else {
-            mThresholdAlarmListener.removeAlarmForKey(new Package(userId, pkgName));
+            mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, pkgName));
         }
     }
 
@@ -386,7 +400,7 @@ public class PrefetchController extends StateController {
     public void onConstantsUpdatedLocked() {
         if (mPcConstants.mShouldReevaluateConstraints) {
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 final ArraySet<JobStatus> changedJobs = new ArraySet<>();
                 synchronized (mLock) {
                     final long nowElapsed = sElapsedRealtimeClock.millis();
@@ -413,25 +427,25 @@ public class PrefetchController extends StateController {
     }
 
     /** Track when apps will cross the "will run soon" threshold. */
-    private class ThresholdAlarmListener extends AlarmQueue<Package> {
+    private class ThresholdAlarmListener extends AlarmQueue<UserPackage> {
         private ThresholdAlarmListener(Context context, Looper looper) {
             super(context, looper, "*job.prefetch*", "Prefetch threshold", false,
                     PcConstants.DEFAULT_LAUNCH_TIME_THRESHOLD_MS / 10);
         }
 
         @Override
-        protected boolean isForUser(@NonNull Package key, int userId) {
+        protected boolean isForUser(@NonNull UserPackage key, int userId) {
             return key.userId == userId;
         }
 
         @Override
-        protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
+        protected void processExpiredAlarms(@NonNull ArraySet<UserPackage> expired) {
             final ArraySet<JobStatus> changedJobs = new ArraySet<>();
             synchronized (mLock) {
                 final long now = sSystemClock.millis();
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 for (int i = 0; i < expired.size(); ++i) {
-                    Package p = expired.valueAt(i);
+                    UserPackage p = expired.valueAt(i);
                     if (!willBeLaunchedSoonLocked(p.userId, p.packageName, now)) {
                         Slog.e(TAG, "Alarm expired for "
                                 + packageToString(p.userId, p.packageName) + " at the wrong time");
@@ -445,6 +459,18 @@ public class PrefetchController extends StateController {
             if (changedJobs.size() > 0) {
                 mStateChangedListener.onControllerStateChanged(changedJobs);
             }
+        }
+    }
+
+    void registerPrefetchChangedListener(PrefetchChangedListener listener) {
+        synchronized (mLock) {
+            mPrefetchChangedListeners.add(listener);
+        }
+    }
+
+    void unRegisterPrefetchChangedListener(PrefetchChangedListener listener) {
+        synchronized (mLock) {
+            mPrefetchChangedListeners.remove(listener);
         }
     }
 

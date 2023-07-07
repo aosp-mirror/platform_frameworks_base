@@ -18,6 +18,7 @@ package android.app.time;
 
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,11 +28,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * User visible settings that control the behavior of the time zone detector / manual time zone
- * entry.
+ * User visible settings that control the behavior of the time detector / manual time entry.
+ *
+ * <p>When reading the configuration, values for all settings will be provided. In some cases, such
+ * as when the device behavior relies on optional hardware / OEM configuration, or the value of
+ * several settings, the device behavior may not be directly affected by the setting value.
+ *
+ * <p>Settings can be left absent when updating configuration via {@link
+ * TimeManager#updateTimeConfiguration(TimeConfiguration)} and those settings will not be
+ * changed. Not all configuration settings can be modified by all users: see {@link
+ * TimeManager#getTimeCapabilitiesAndConfig()} and {@link TimeCapabilities} for details.
  *
  * @hide
  */
+@SystemApi
 public final class TimeConfiguration implements Parcelable {
 
     public static final @NonNull Creator<TimeConfiguration> CREATOR =
@@ -47,10 +57,16 @@ public final class TimeConfiguration implements Parcelable {
                 }
             };
 
+    /**
+     * All configuration properties
+     *
+     * @hide
+     */
     @StringDef(SETTING_AUTO_DETECTION_ENABLED)
     @Retention(RetentionPolicy.SOURCE)
     @interface Setting {}
 
+    /** See {@link TimeConfiguration#isAutoDetectionEnabled()} for details. */
     @Setting
     private static final String SETTING_AUTO_DETECTION_ENABLED = "autoDetectionEnabled";
 
@@ -61,18 +77,10 @@ public final class TimeConfiguration implements Parcelable {
         this.mBundle = builder.mBundle;
     }
 
-    /**
-     * Returns the value of the {@link #SETTING_AUTO_DETECTION_ENABLED} setting. This
-     * controls whether a device will attempt to determine the time automatically using
-     * contextual information if the device supports auto detection.
-     */
-    public boolean isAutoDetectionEnabled() {
-        return mBundle.getBoolean(SETTING_AUTO_DETECTION_ENABLED);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
+    private static TimeConfiguration readFromParcel(Parcel in) {
+        return new TimeConfiguration.Builder()
+                .setPropertyBundleInternal(in.readBundle())
+                .build();
     }
 
     @Override
@@ -80,10 +88,42 @@ public final class TimeConfiguration implements Parcelable {
         dest.writeBundle(mBundle);
     }
 
-    private static TimeConfiguration readFromParcel(Parcel in) {
-        return new TimeConfiguration.Builder()
-                .merge(in.readBundle())
-                .build();
+    /**
+     * Returns {@code true} if all known settings are present.
+     *
+     * @hide
+     */
+    public boolean isComplete() {
+        return hasIsAutoDetectionEnabled();
+    }
+
+    /**
+     * Returns the value of the {@link #SETTING_AUTO_DETECTION_ENABLED} setting. This
+     * controls whether a device will attempt to determine the time automatically using
+     * contextual information if the device supports auto detection.
+     *
+     * <p>See {@link TimeCapabilities#getConfigureAutoDetectionEnabledCapability()} for how to
+     * tell if the setting is meaningful for the current user at this time.
+     *
+     * @throws IllegalStateException if the setting is not present
+     */
+    public boolean isAutoDetectionEnabled() {
+        enforceSettingPresent(SETTING_AUTO_DETECTION_ENABLED);
+        return mBundle.getBoolean(SETTING_AUTO_DETECTION_ENABLED);
+    }
+
+    /**
+     * Returns {@code true} if the {@link #isAutoDetectionEnabled()} setting is present.
+     *
+     * @hide
+     */
+    public boolean hasIsAutoDetectionEnabled() {
+        return mBundle.containsKey(SETTING_AUTO_DETECTION_ENABLED);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override
@@ -106,18 +146,50 @@ public final class TimeConfiguration implements Parcelable {
                 + '}';
     }
 
+    private void enforceSettingPresent(@TimeZoneConfiguration.Setting String setting) {
+        if (!mBundle.containsKey(setting)) {
+            throw new IllegalStateException(setting + " is not set");
+        }
+    }
+
     /**
      * A builder for {@link TimeConfiguration} objects.
      *
      * @hide
      */
+    @SystemApi
     public static final class Builder {
+
         private final Bundle mBundle = new Bundle();
 
+        /**
+         * Creates a new Builder with no settings held.
+         */
         public Builder() {}
 
-        public Builder(@NonNull TimeConfiguration configuration) {
-            mBundle.putAll(configuration.mBundle);
+        /**
+         * Creates a new Builder by copying the settings from an existing instance.
+         */
+        public Builder(@NonNull TimeConfiguration toCopy) {
+            mergeProperties(toCopy);
+        }
+
+        /**
+         * Merges {@code other} settings into this instances, replacing existing values in this
+         * where the settings appear in both.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder mergeProperties(@NonNull TimeConfiguration toCopy) {
+            mBundle.putAll(toCopy.mBundle);
+            return this;
+        }
+
+        @NonNull
+        Builder setPropertyBundleInternal(@NonNull Bundle bundle) {
+            this.mBundle.putAll(bundle);
+            return this;
         }
 
         /** Sets whether auto detection is enabled or not. */
@@ -127,12 +199,7 @@ public final class TimeConfiguration implements Parcelable {
             return this;
         }
 
-        Builder merge(@NonNull Bundle bundle) {
-            mBundle.putAll(bundle);
-            return this;
-        }
-
-        /** Returns {@link TimeConfiguration} object. */
+        /** Returns the {@link TimeConfiguration}. */
         @NonNull
         public TimeConfiguration build() {
             return new TimeConfiguration(this);

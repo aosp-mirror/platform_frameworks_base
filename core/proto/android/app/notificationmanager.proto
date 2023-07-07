@@ -45,6 +45,8 @@ message PolicyProto {
         MEDIA = 7;
         // System (catch-all for non-never suppressible sounds) are prioritized.
         SYSTEM = 8;
+        // Priority conversations are prioritized
+        CONVERSATIONS = 9;
     }
     repeated Category priority_categories = 1;
 

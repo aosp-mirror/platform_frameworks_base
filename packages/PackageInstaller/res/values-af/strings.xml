@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Program geïnstalleer."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil jy hierdie program installeer?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil jy hierdie program opdateer?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Dateer hierdie app vanaf <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> op?\n\nHierdie app kry gewoonlik opdaterings vanaf <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou foon kry. Appfunksie kan verander."</string>
     <string name="install_failed" msgid="5777824004474125469">"Program nie geïnstalleer nie."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die installering van die pakket is geblokkeer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Program is nie geïnstalleer nie omdat pakket met \'n bestaande pakket bots."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Hierdie gebruiker kan nie onbekende programme installeer nie"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Hierdie gebruiker word nie toegelaat om programme te installeer nie"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Dateer in elk geval op"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Bestuur programme"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Geen spasie oor nie"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> kon nie geïnstalleer word nie. Maak spasie beskikbaar en probeer weer."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Vervang hierdie program met die fabriekweergawe? Alle data sal verwyder word."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vervang hierdie program met die fabriekweergawe? Alle data sal verwyder word. Dit beïnvloed alle gebruikers van hierdie toestel, insluitend dié met werkprofiele."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Hou <xliff:g id="SIZE">%1$s</xliff:g> se programdata."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Wil jy hierdie app uitvee?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Wil jy hierdie app deïnstalleer? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon sal ook uitgevee word."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Voer tans deïnstallerings uit"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mislukte deïnstallerings"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Deïnstalleer tans …"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Deïnstalleer tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Deïnstallering is klaar."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Het <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> gedeïnstalleer"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Het <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon uitgevee"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Deïnstallering onsuksesvol."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Kon nie <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deïnstalleer nie."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Vee tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon uit …"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan nie aktiewe toesteladministrasieprogram deïnstalleer nie"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan nie aktiewe toesteladministrasieprogram vir <xliff:g id="USERNAME">%1$s</xliff:g> deïnstalleer nie"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Dié program word vir sommige gebruikers of profiele vereis en is vir ander gedeïnstalleer"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Onbekend"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Jou tablet word vir jou veiligheid tans nie toegelaat om onbekende programme van hierdie bron af te installeer nie. Jy kan dit in Instellings verander."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Jou TV word vir jou veiligheid tans nie toegelaat om onbekende programme van hierdie bron af te installeer nie. Jy kan dit in Instellings verander."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Jou horlosie word vir jou veiligheid tans nie toegelaat om onbekende apps van hierdie bron af te installeer nie. Jy kan dit in Instellings verander."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Jou foon word vir jou veiligheid tans nie toegelaat om onbekende programme van hierdie bron af te installeer nie. Jy kan dit in Instellings verander."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Jou foon en persoonlike data is meer kwesbaar vir aanvalle deur onbekende programme. Deur hierdie program te installeer, stem jy in dat jy verantwoordelik is vir enige skade aan jou foon of verlies van data wat uit sy gebruik kan spruit."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Jou tablet en persoonlike data is meer kwesbaar vir aanvalle deur onbekende programme. Deur hierdie program te installeer, stem jy in dat jy verantwoordelik is vir enige skade aan jou tablet of verlies van data wat uit sy gebruik kan spruit."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Jou TV en persoonlike data is meer kwesbaar vir aanvalle deur onbekende programme. Deur hierdie program te installeer, stem jy in dat jy verantwoordelik is vir enige skade aan jou TV of verlies van data wat uit sy gebruik kan spruit."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Gaan voort"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Instellings"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Installeer/deïnstalleer Wear-programme"</string>

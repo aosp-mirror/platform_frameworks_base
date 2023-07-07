@@ -23,9 +23,14 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.hardware.CameraExtensionSessionStats;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
@@ -55,7 +60,6 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
@@ -104,6 +108,42 @@ public final class CameraManager {
     private final boolean mHasOpenCloseListenerPermission;
 
     /**
+     * Force camera output to be rotated to portrait orientation on landscape cameras.
+     * Many apps do not handle this situation and display stretched images otherwise.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
+    @TestApi
+    public static final long OVERRIDE_CAMERA_LANDSCAPE_TO_PORTRAIT = 250678880L;
+
+    /**
+     * System property for allowing the above
+     * @hide
+     */
+    @TestApi
+    public static final String LANDSCAPE_TO_PORTRAIT_PROP =
+            "camera.enable_landscape_to_portrait";
+
+    /**
+     * Enable physical camera availability callbacks when the logical camera is unavailable
+     *
+     * <p>Previously once a logical camera becomes unavailable, no {@link
+     * #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable} will be called until
+     * the logical camera becomes available again. The results in the app opening the logical
+     * camera not able to receive physical camera availability change.</p>
+     *
+     * <p>With this change, the {@link #onPhysicalCameraAvailable} and {@link
+     * #onPhysicalCameraUnavailable} can still be called while the logical camera is unavailable.
+     * </p>
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static final long ENABLE_PHYSICAL_CAMERA_CALLBACK_FOR_UNAVAILABLE_LOGICAL_CAMERA =
+            244358506L;
+
+    /**
      * @hide
      */
     public CameraManager(Context context) {
@@ -113,29 +153,7 @@ public final class CameraManager {
                     mContext.checkSelfPermission(CAMERA_OPEN_CLOSE_LISTENER_PERMISSION) ==
                     PackageManager.PERMISSION_GRANTED;
         }
-
-        mHandlerThread = new HandlerThread(TAG);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
-        mFoldStateListener = new FoldStateListener(context);
-        try {
-            context.getSystemService(DeviceStateManager.class)
-                    .registerCallback(new HandlerExecutor(mHandler), mFoldStateListener);
-        } catch (IllegalStateException e) {
-            Log.v(TAG, "Failed to register device state listener!");
-            Log.v(TAG, "Device state dependent characteristics updates will not be functional!");
-            mHandlerThread.quitSafely();
-            mHandler = null;
-            mFoldStateListener = null;
-        }
     }
-
-    private HandlerThread mHandlerThread;
-    private Handler mHandler;
-    private FoldStateListener mFoldStateListener;
-    @GuardedBy("mLock")
-    private ArrayList<WeakReference<DeviceStateListener>> mDeviceStateListeners = new ArrayList<>();
-    private boolean mFoldedDeviceState;
 
     /**
      * @hide
@@ -144,31 +162,39 @@ public final class CameraManager {
         void onDeviceStateChanged(boolean folded);
     }
 
-    private final class FoldStateListener implements DeviceStateManager.DeviceStateCallback {
+    private static final class FoldStateListener implements DeviceStateManager.DeviceStateCallback {
         private final int[] mFoldedDeviceStates;
+
+        private ArrayList<WeakReference<DeviceStateListener>> mDeviceStateListeners =
+                new ArrayList<>();
+        private boolean mFoldedDeviceState;
 
         public FoldStateListener(Context context) {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
         }
 
-        private void handleStateChange(int state) {
+        private synchronized void handleStateChange(int state) {
             boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
-            synchronized (mLock) {
-                mFoldedDeviceState = folded;
-                ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
-                for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
-                    DeviceStateListener callback = listener.get();
-                    if (callback != null) {
-                        callback.onDeviceStateChanged(folded);
-                    } else {
-                        invalidListeners.add(listener);
-                    }
-                }
-                if (!invalidListeners.isEmpty()) {
-                    mDeviceStateListeners.removeAll(invalidListeners);
+
+            mFoldedDeviceState = folded;
+            ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
+            for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
+                DeviceStateListener callback = listener.get();
+                if (callback != null) {
+                    callback.onDeviceStateChanged(folded);
+                } else {
+                    invalidListeners.add(listener);
                 }
             }
+            if (!invalidListeners.isEmpty()) {
+                mDeviceStateListeners.removeAll(invalidListeners);
+            }
+        }
+
+        public synchronized void addDeviceStateListener(DeviceStateListener listener) {
+            listener.onDeviceStateChanged(mFoldedDeviceState);
+            mDeviceStateListeners.add(new WeakReference<>(listener));
         }
 
         @Override
@@ -190,13 +216,7 @@ public final class CameraManager {
      * @hide
      */
     public void registerDeviceStateListener(@NonNull CameraCharacteristics chars) {
-        synchronized (mLock) {
-            DeviceStateListener listener = chars.getDeviceStateListener();
-            listener.onDeviceStateChanged(mFoldedDeviceState);
-            if (mFoldStateListener != null) {
-                mDeviceStateListeners.add(new WeakReference<>(listener));
-            }
-        }
+        CameraManagerGlobal.get().registerDeviceStateListener(chars, mContext);
     }
 
     /**
@@ -219,7 +239,7 @@ public final class CameraManager {
 
     /**
      * Similar to getCameraIdList(). However, getCamerIdListNoLazy() necessarily communicates with
-     * cameraserver in order to get the list of camera ids. This is to faciliate testing since some
+     * cameraserver in order to get the list of camera ids. This is to facilitate testing since some
      * camera ids may go 'offline' without callbacks from cameraserver because of changes in
      * SYSTEM_CAMERA permissions (though this is not a changeable permission, tests may call
      * adopt(drop)ShellPermissionIdentity() and effectively change their permissions). This call
@@ -241,11 +261,13 @@ public final class CameraManager {
      * applications is not guaranteed to be supported, however.</p>
      *
      * <p>For concurrent operation, in chronological order :
-     * - Applications must first close any open cameras that have sessions configured, using
-     *   {@link CameraDevice#close}.
-     * - All camera devices intended to be operated concurrently, must be opened using
-     *   {@link #openCamera}, before configuring sessions on any of the camera devices.</p>
-     *
+     * <ul>
+     * <li> Applications must first close any open cameras that have sessions configured, using
+     *   {@link CameraDevice#close}. </li>
+     * <li> All camera devices intended to be operated concurrently, must be opened using
+     *   {@link #openCamera}, before configuring sessions on any of the camera devices.</li>
+     *</ul>
+     *</p>
      * <p>Each device in a combination, is guaranteed to support stream combinations which may be
      * obtained by querying {@link #getCameraCharacteristics} for the key
      * {@link android.hardware.camera2.CameraCharacteristics#SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS}.</p>
@@ -521,7 +543,7 @@ public final class CameraManager {
         }
 
         // Query the characteristics of all physical sub-cameras, and combine the multi-resolution
-        // stream configurations. Alternatively, for ultra-high resolution camera, direclty use
+        // stream configurations. Alternatively, for ultra-high resolution camera, directly use
         // its multi-resolution stream configurations. Note that framework derived formats such as
         // HEIC and DEPTH_JPEG aren't supported as multi-resolution input or output formats.
         Set<String> physicalCameraIds = info.getPhysicalCameraIds();
@@ -537,7 +559,8 @@ public final class CameraManager {
             for (String physicalCameraId : physicalCameraIds) {
                 CameraMetadataNative physicalCameraInfo =
                         cameraService.getCameraCharacteristics(physicalCameraId,
-                                mContext.getApplicationInfo().targetSdkVersion);
+                                mContext.getApplicationInfo().targetSdkVersion,
+                                /*overrideToPortrait*/false);
                 StreamConfiguration[] configs = physicalCameraInfo.get(
                         CameraCharacteristics.
                                 SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS);
@@ -583,6 +606,31 @@ public final class CameraManager {
     @NonNull
     public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId)
             throws CameraAccessException {
+        return getCameraCharacteristics(cameraId, shouldOverrideToPortrait(mContext));
+    }
+
+    /**
+     * <p>Query the capabilities of a camera device. These capabilities are
+     * immutable for a given camera.</p>
+     *
+     * <p>The value of {@link CameraCharacteristics.SENSOR_ORIENTATION} will change for landscape
+     * cameras depending on whether overrideToPortrait is enabled. If enabled, these cameras will
+     * appear to be portrait orientation instead, provided that the override is supported by the
+     * camera device. Only devices that can be opened by {@link #openCamera} will report a changed
+     * {@link CameraCharacteristics.SENSOR_ORIENTATION}.</p>
+     *
+     * @param cameraId The id of the camera device to query. This could be either a standalone
+     * camera ID which can be directly opened by {@link #openCamera}, or a physical camera ID that
+     * can only used as part of a logical multi-camera.
+     * @param overrideToPortrait Whether to apply the landscape to portrait override.
+     * @return The properties of the given camera
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId,
+            boolean overrideToPortrait) throws CameraAccessException {
         CameraCharacteristics characteristics = null;
         if (CameraManagerGlobal.sCameraServiceDisabled) {
             throw new IllegalArgumentException("No cameras available on device");
@@ -597,7 +645,7 @@ public final class CameraManager {
                 Size displaySize = getDisplaySize();
 
                 CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
-                        mContext.getApplicationInfo().targetSdkVersion);
+                        mContext.getApplicationInfo().targetSdkVersion, overrideToPortrait);
                 try {
                     info.setCameraId(Integer.parseInt(cameraId));
                 } catch (NumberFormatException e) {
@@ -647,7 +695,10 @@ public final class CameraManager {
     public CameraExtensionCharacteristics getCameraExtensionCharacteristics(
             @NonNull String cameraId) throws CameraAccessException {
         CameraCharacteristics chars = getCameraCharacteristics(cameraId);
-        return new CameraExtensionCharacteristics(mContext, cameraId, chars);
+        Map<String, CameraCharacteristics> characteristicsMap = getPhysicalIdToCharsMap(chars);
+        characteristicsMap.put(cameraId, chars);
+
+        return new CameraExtensionCharacteristics(mContext, cameraId, characteristicsMap);
     }
 
     private Map<String, CameraCharacteristics> getPhysicalIdToCharsMap(
@@ -687,7 +738,7 @@ public final class CameraManager {
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
             CameraDevice.StateCallback callback, Executor executor, final int uid,
-            final int oomScoreOffset) throws CameraAccessException {
+            final int oomScoreOffset, boolean overrideToPortrait) throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
         Map<String, CameraCharacteristics> physicalIdsToChars =
@@ -714,9 +765,11 @@ public final class CameraManager {
                         ICameraService.ERROR_DISCONNECTED,
                         "Camera service is currently unavailable");
                 }
+
                 cameraUser = cameraService.connectDevice(callbacks, cameraId,
-                    mContext.getOpPackageName(),  mContext.getAttributionTag(), uid,
-                    oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion);
+                    mContext.getOpPackageName(), mContext.getAttributionTag(), uid,
+                    oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion,
+                    overrideToPortrait);
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
                     throw new AssertionError("Should've gone down the shim path");
@@ -783,7 +836,7 @@ public final class CameraManager {
      * Opening the same camera ID twice in the same application will similarly cause the
      * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback
      * being fired for the {@link CameraDevice} from the first open call and all ongoing tasks
-     * being droppped.</p>
+     * being dropped.</p>
      *
      * <p>Once the camera is successfully opened, {@link CameraDevice.StateCallback#onOpened} will
      * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
@@ -845,6 +898,43 @@ public final class CameraManager {
 
         openCameraForUid(cameraId, callback, CameraDeviceImpl.checkAndWrapHandler(handler),
                 USE_CALLING_UID);
+    }
+
+    /**
+     * Open a connection to a camera with the given ID. Also specify overrideToPortrait for testing.
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device to open
+     * @param handler
+     *             The handler on which the callback should be invoked, or
+     *             {@code null} to use the current thread's {@link android.os.Looper looper}.
+     * @param callback
+     *             The callback which is invoked once the camera is opened
+     * @param overrideToPortrait
+     *             Whether to apply the landscape to portrait override, using rotate and crop.
+     *
+     * @throws CameraAccessException if the camera is disabled by device policy,
+     * has been disconnected, or is being used by a higher-priority camera API client.
+     *
+     * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+     * or the cameraId does not match any currently or previously available
+     * camera device.
+     *
+     * @throws SecurityException if the application does not have permission to
+     * access the camera
+     *
+     * @see #getCameraIdList
+     * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CAMERA)
+    public void openCamera(@NonNull String cameraId, boolean overrideToPortrait,
+            @Nullable Handler handler,
+            @NonNull final CameraDevice.StateCallback callback) throws CameraAccessException {
+        openCameraForUid(cameraId, callback, CameraDeviceImpl.checkAndWrapHandler(handler),
+                         USE_CALLING_UID, /*oomScoreOffset*/0, overrideToPortrait);
     }
 
     /**
@@ -951,7 +1041,8 @@ public final class CameraManager {
             throw new IllegalArgumentException(
                     "oomScoreOffset < 0, cannot increase priority of camera client");
         }
-        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset);
+        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset,
+                shouldOverrideToPortrait(mContext));
     }
 
     /**
@@ -973,7 +1064,8 @@ public final class CameraManager {
      */
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
-            int clientUid, int oomScoreOffset) throws CameraAccessException {
+            int clientUid, int oomScoreOffset, boolean overrideToPortrait)
+            throws CameraAccessException {
 
         if (cameraId == null) {
             throw new IllegalArgumentException("cameraId was null");
@@ -984,7 +1076,8 @@ public final class CameraManager {
             throw new IllegalArgumentException("No cameras available on device");
         }
 
-        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset);
+        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset,
+                overrideToPortrait);
     }
 
     /**
@@ -1005,7 +1098,8 @@ public final class CameraManager {
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
             int clientUid) throws CameraAccessException {
-            openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0);
+        openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0,
+                shouldOverrideToPortrait(mContext));
     }
 
     /**
@@ -1145,6 +1239,52 @@ public final class CameraManager {
     }
 
     /**
+     * @hide
+     */
+    public static boolean shouldOverrideToPortrait(@Nullable Context context) {
+        PackageManager packageManager = null;
+        String packageName = null;
+
+        if (context != null) {
+            packageManager = context.getPackageManager();
+            packageName = context.getOpPackageName();
+        }
+
+        return shouldOverrideToPortrait(packageManager, packageName);
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public static boolean shouldOverrideToPortrait(@Nullable PackageManager packageManager,
+                                                   @Nullable String packageName) {
+        if (!CameraManagerGlobal.sLandscapeToPortrait) {
+            return false;
+        }
+
+        if (packageManager != null && packageName != null) {
+            try {
+                return packageManager.getProperty(
+                        PackageManager.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT,
+                        packageName).getBoolean();
+            } catch (PackageManager.NameNotFoundException e) {
+                // No such property
+            }
+        }
+
+        return CompatChanges.isChangeEnabled(OVERRIDE_CAMERA_LANDSCAPE_TO_PORTRAIT);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean physicalCallbacksAreEnabledForUnavailableCamera() {
+        return CompatChanges.isChangeEnabled(
+                ENABLE_PHYSICAL_CAMERA_CALLBACK_FOR_UNAVAILABLE_LOGICAL_CAMERA);
+    }
+
+    /**
      * A callback for camera devices becoming available or unavailable to open.
      *
      * <p>Cameras become available when they are no longer in use, or when a new
@@ -1221,6 +1361,48 @@ public final class CameraManager {
          * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
          * {@link #onCameraAvailable}.</p>
          *
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &lt; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, opening a logical camera
+         * disables the {@link #onPhysicalCameraAvailable} and {@link #onPhysicalCameraUnavailable}
+         * callbacks for its physical cameras. For example, if app A opens the camera device:</p>
+         *
+         * <ul>
+         *
+         * <li>All apps subscribing to ActivityCallback get {@link #onCameraUnavailable}.</li>
+         *
+         * <li>No app (including app A) subscribing to ActivityCallback gets
+         * {@link #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable}, because
+         * the logical camera is unavailable (some app is using it).</li>
+         *
+         * </ul>
+         *
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &ge; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}:</p>
+         *
+         * <ul>
+         *
+         * <li>A physical camera status change will trigger {@link #onPhysicalCameraAvailable}
+         * or {@link #onPhysicalCameraUnavailable} even after the logical camera becomes
+         * unavailable. A {@link #onCameraUnavailable} call for a logical camera doesn't reset the
+         * physical cameras' availability status. This makes it possible for an application opening
+         * the logical camera device to know which physical camera becomes unavailable or available
+         * to use.</li>
+         *
+         * <li>Similar to {@link android.os.Build.VERSION_CODES#TIRAMISU Android 13} and earlier,
+         * the logical camera's {@link #onCameraAvailable} callback implies all of its physical
+         * cameras' status become available. {@link #onPhysicalCameraUnavailable} will be called
+         * for any unavailable physical cameras upon the logical camera becoming available.</li>
+         *
+         * </ul>
+         *
+         * <p>Given the pipeline nature of the camera capture through {@link
+         * android.hardware.camera2.CaptureRequest}, there may be frame drops if the application
+         * requests images from a physical camera of a logical multi-camera and that physical camera
+         * becomes unavailable. The application should stop requesting directly from an unavailable
+         * physical camera as soon as {@link #onPhysicalCameraUnavailable} is received, and also be
+         * ready to robustly handle frame drop errors for requests targeting physical cameras,
+         * since those errors may arrive before the unavailability callback.</p>
+         *
          * <p>The default implementation of this method does nothing.</p>
          *
          * @param cameraId The unique identifier of the logical multi-camera.
@@ -1238,11 +1420,52 @@ public final class CameraManager {
          * A previously-available physical camera has become unavailable for use.
          *
          * <p>By default, all of the physical cameras of a logical multi-camera are
-         * available, so {@link #onPhysicalCameraAvailable} is not called for any of the physical
-         * cameras of a logical multi-camera, when {@link #onCameraAvailable} for the logical
-         * multi-camera is invoked. If some specific physical cameras are unavailable
-         * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
-         * {@link #onCameraAvailable}.</p>
+         * unavailable if the logical camera itself is unavailable.
+         * No availability callbacks will be called for any of the physical
+         * cameras of its parent logical multi-camera, when {@link #onCameraUnavailable} for
+         * the logical multi-camera is invoked.</p>
+         *
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &lt; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, opening a logical camera
+         * disables the {@link #onPhysicalCameraAvailable} and {@link #onPhysicalCameraUnavailable}
+         * callbacks for its physical cameras. For example, if app A opens the camera device:</p>
+         *
+         * <ul>
+         *
+         * <li>All apps subscribing to ActivityCallback get {@link #onCameraUnavailable}.</li>
+         *
+         * <li>No app (including app A) subscribing to ActivityCallback gets
+         * {@link #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable}, because
+         * the logical camera is unavailable (some app is using it).</li>
+         *
+         * </ul>
+         *
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &ge; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}:</p>
+         *
+         * <ul>
+         *
+         * <li>A physical camera status change will trigger {@link #onPhysicalCameraAvailable}
+         * or {@link #onPhysicalCameraUnavailable} even after the logical camera becomes
+         * unavailable. A {@link #onCameraUnavailable} call for a logical camera doesn't reset the
+         * physical cameras' availability status. This makes it possible for an application opening
+         * the logical camera device to know which physical camera becomes unavailable or available
+         * to use.</li>
+         *
+         * <li>Similar to {@link android.os.Build.VERSION_CODES#TIRAMISU Android 13} and earlier,
+         * the logical camera's {@link #onCameraAvailable} callback implies all of its physical
+         * cameras' status become available. {@link #onPhysicalCameraUnavailable} will be called
+         * for any unavailable physical cameras upon the logical camera becoming available.</li>
+         *
+         * </ul>
+         *
+         * <p>Given the pipeline nature of the camera capture through {@link
+         * android.hardware.camera2.CaptureRequest}, there may be frame drops if the application
+         * requests images from a physical camera of a logical multi-camera and that physical camera
+         * becomes unavailable. The application should stop requesting directly from an unavailable
+         * physical camera as soon as {@link #onPhysicalCameraUnavailable} is received, and also be
+         * ready to robustly handle frame drop errors for requests targeting physical cameras,
+         * since those errors may arrive before the unavailability callback.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -1505,6 +1728,30 @@ public final class CameraManager {
     }
 
     /**
+     * Reports {@link CameraExtensionSessionStats} to the {@link ICameraService} to be logged for
+     * currently active session. Validation is done downstream.
+     *
+     * @param extStats Extension Session stats to be logged by cameraservice
+     *
+     * @return the key to be used with the next call.
+     *         See {@link ICameraService#reportExtensionSessionStats}.
+     * @hide
+     */
+    public static String reportExtensionSessionStats(CameraExtensionSessionStats extStats) {
+        ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+        if (cameraService == null) {
+            Log.e(TAG, "CameraService not available. Not reporting extension stats.");
+            return "";
+        }
+        try {
+            return cameraService.reportExtensionSessionStats(extStats);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to report extension session stats to cameraservice.", e);
+        }
+        return "";
+    }
+
+    /**
      * A per-process global camera manager instance, to retain a connection to the camera service,
      * and to distribute camera availability notices to API-registered callbacks
      */
@@ -1537,7 +1784,7 @@ public final class CameraManager {
         private final Set<Set<String>> mConcurrentCameraIdCombinations =
                 new ArraySet<Set<String>>();
 
-        // Registered availablility callbacks and their executors
+        // Registered availability callbacks and their executors
         private final ArrayMap<AvailabilityCallback, Executor> mCallbackMap =
             new ArrayMap<AvailabilityCallback, Executor>();
 
@@ -1557,14 +1804,48 @@ public final class CameraManager {
         private ICameraService mCameraService;
         private boolean mHasOpenCloseListenerPermission = false;
 
+        private HandlerThread mDeviceStateHandlerThread;
+        private Handler mDeviceStateHandler;
+        private FoldStateListener mFoldStateListener;
+
         // Singleton, don't allow construction
         private CameraManagerGlobal() { }
 
         public static final boolean sCameraServiceDisabled =
                 SystemProperties.getBoolean("config.disable_cameraservice", false);
 
+        public static final boolean sLandscapeToPortrait =
+                SystemProperties.getBoolean(LANDSCAPE_TO_PORTRAIT_PROP, false);
+
         public static CameraManagerGlobal get() {
             return gCameraManager;
+        }
+
+        public void registerDeviceStateListener(@NonNull CameraCharacteristics chars,
+                @NonNull Context ctx) {
+            synchronized(mLock) {
+                if (mDeviceStateHandlerThread == null) {
+                    mDeviceStateHandlerThread = new HandlerThread(TAG);
+                    mDeviceStateHandlerThread.start();
+                    mDeviceStateHandler = new Handler(mDeviceStateHandlerThread.getLooper());
+                }
+
+                if (mFoldStateListener == null) {
+                    mFoldStateListener = new FoldStateListener(ctx);
+                    try {
+                        ctx.getSystemService(DeviceStateManager.class).registerCallback(
+                                new HandlerExecutor(mDeviceStateHandler), mFoldStateListener);
+                    } catch (IllegalStateException e) {
+                        mFoldStateListener = null;
+                        Log.v(TAG, "Failed to register device state listener!");
+                        Log.v(TAG, "Device state dependent characteristics updates will not be" +
+                                "functional!");
+                        return;
+                    }
+                }
+
+                mFoldStateListener.addDeviceStateListener(chars.getDeviceStateListener());
+            }
         }
 
         @Override
@@ -2189,7 +2470,8 @@ public final class CameraManager {
                 postSingleUpdate(callback, executor, id, null /*physicalId*/, status);
 
                 // Send the NOT_PRESENT state for unavailable physical cameras
-                if (isAvailable(status) && mUnavailablePhysicalDevices.containsKey(id)) {
+                if ((isAvailable(status) || physicalCallbacksAreEnabledForUnavailableCamera())
+                        && mUnavailablePhysicalDevices.containsKey(id)) {
                     ArrayList<String> unavailableIds = mUnavailablePhysicalDevices.get(id);
                     for (String unavailableId : unavailableIds) {
                         postSingleUpdate(callback, executor, id, unavailableId,
@@ -2268,6 +2550,15 @@ public final class CameraManager {
                 final AvailabilityCallback callback = mCallbackMap.keyAt(i);
 
                 postSingleUpdate(callback, executor, id, null /*physicalId*/, status);
+
+                // Send the NOT_PRESENT state for unavailable physical cameras
+                if (isAvailable(status) && mUnavailablePhysicalDevices.containsKey(id)) {
+                    ArrayList<String> unavailableIds = mUnavailablePhysicalDevices.get(id);
+                    for (String unavailableId : unavailableIds) {
+                        postSingleUpdate(callback, executor, id, unavailableId,
+                                ICameraServiceListener.STATUS_NOT_PRESENT);
+                    }
+                }
             }
         } // onStatusChangedLocked
 
@@ -2287,9 +2578,8 @@ public final class CameraManager {
             }
 
             //TODO: Do we need to treat this as error?
-            if (!mDeviceStatus.containsKey(id) || !isAvailable(mDeviceStatus.get(id))
-                    || !mUnavailablePhysicalDevices.containsKey(id)) {
-                Log.e(TAG, String.format("Camera %s is not available. Ignore physical camera "
+            if (!mDeviceStatus.containsKey(id) || !mUnavailablePhysicalDevices.containsKey(id)) {
+                Log.e(TAG, String.format("Camera %s is not present. Ignore physical camera "
                         + "status change", id));
                 return;
             }
@@ -2311,6 +2601,13 @@ public final class CameraManager {
                                 !unavailablePhysicalDevices.contains(physicalId),
                                 isAvailable(status)));
                 }
+                return;
+            }
+
+            if (!physicalCallbacksAreEnabledForUnavailableCamera()
+                    && !isAvailable(mDeviceStatus.get(id))) {
+                Log.i(TAG, String.format("Camera %s is not available. Ignore physical camera "
+                        + "status change callback(s)", id));
                 return;
             }
 
@@ -2590,7 +2887,7 @@ public final class CameraManager {
                 // Tell listeners that the cameras and torch modes are unavailable and schedule a
                 // reconnection to camera service. When camera service is reconnected, the camera
                 // and torch statuses will be updated.
-                // Iterate from the end to the beginning befcause onStatusChangedLocked removes
+                // Iterate from the end to the beginning because onStatusChangedLocked removes
                 // entries from the ArrayMap.
                 for (int i = mDeviceStatus.size() - 1; i >= 0; i--) {
                     String cameraId = mDeviceStatus.keyAt(i);

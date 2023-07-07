@@ -272,10 +272,10 @@ public class SystemUIToast implements ToastPlugin.Toast {
 
     private static boolean showApplicationIcon(ApplicationInfo appInfo,
             PackageManager packageManager) {
-        if (hasFlag(appInfo.flags, FLAG_UPDATED_SYSTEM_APP)) {
+        if (hasFlag(appInfo.flags, FLAG_UPDATED_SYSTEM_APP | FLAG_SYSTEM)) {
             return packageManager.getLaunchIntentForPackage(appInfo.packageName) != null;
         }
-        return !hasFlag(appInfo.flags, FLAG_SYSTEM);
+        return true;
     }
 
     private static boolean hasFlag(int flags, int flag) {

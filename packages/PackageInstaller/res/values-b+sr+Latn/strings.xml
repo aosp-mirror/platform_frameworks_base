@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikacija je instalirana."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Želite da instalirate ovu aplikaciju?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Želite da ažurirate ovu aplikaciju?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Želite da ažurirate ovu aplikaciju iz izvora <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nOva aplikacija se obično ažurira iz izvora <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Ako ažurirate iz drugog izvora, možete da primate buduća ažuriranja iz bilo kog izvora na telefonu. Funkcije aplikacije mogu da se promene."</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikacija nije instalirana."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instaliranje paketa je blokirano."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacija nije instalirana jer je paket neusaglašen sa postojećim paketom."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ovaj korisnik ne može da instalira nepoznate aplikacije"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ovom korisniku nije dozvoljeno da instalira aplikacije"</string>
     <string name="ok" msgid="7871959885003339302">"Potvrdi"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Ipak ažuriraj"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Upravljajte apl."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nema više prostora"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Nismo uspeli da instaliramo aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>. Oslobodite prostor i probajte ponovo."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Želite li da zamenite ovu aplikaciju fabričkom verzijom? Svi podaci će biti uklonjeni."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Želite li da zamenite ovu aplikaciju fabričkom verzijom? Svi podaci će biti uklonjeni. Ovo utiče na sve korisnike ovog uređaja, uključujući i one sa poslovnim profilima."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Zadrži <xliff:g id="SIZE">%1$s</xliff:g> podataka aplikacije."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Želite da izbrišete ovu aplikaciju?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Želite da deinstalirate ovu aplikaciju? Klon aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> će takođe biti izbrisan."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Aktivna deinstaliranja"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Neuspela deinstaliranja"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Deinstalira se…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> se deinstalira…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Deinstaliranje je završeno."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> je deinstalirana"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Izbrisan je <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klon"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Deinstaliranje nije uspelo."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Deinstaliranje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nije uspelo."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Briše se klon aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Ne možete da deinstalirate aplikaciju za aktivnog administratora uređaja"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Ne možete da deinstalirate aplikaciju za aktivnog administratora uređaja za <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ova aplikacija je obavezna za neke korisnike ili profile, a deinstalirana je za druge"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Nepoznato"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Iz bezbednosnih razloga tabletu trenutno nije dozvoljeno da instalira nepoznate aplikacije iz ovog izvora. To možete da promenite u podešavanjima."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Iz bezbednosnih razloga televizoru trenutno nije dozvoljeno da instalira nepoznate aplikacije iz ovog izvora. To možete da promenite u podešavanjima."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Iz bezbednosnih razloga satu trenutno nije dozvoljeno da instalira nepoznate aplikacije iz ovog izvora. To možete da promenite u Podešavanjima."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Iz bezbednosnih razloga telefonu trenutno nije dozvoljeno da instalira nepoznate aplikacije iz ovog izvora. To možete da promenite u podešavanjima."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefon i lični podaci su podložniji napadu nepoznatih aplikacija. Ako instalirate ovu aplikaciju, prihvatate da ste odgovorni za eventualna oštećenja telefona ili gubitak podataka do kojih može da dođe zbog njenog korišćenja."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet i lični podaci su podložniji napadu nepoznatih aplikacija. Ako instalirate ovu aplikaciju, prihvatate da ste odgovorni za eventualna oštećenja tableta ili gubitak podataka do kojih može da dođe zbog njenog korišćenja."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV i lični podaci su podložniji napadu nepoznatih aplikacija. Ako instalirate ovu aplikaciju, prihvatate da ste odgovorni za eventualna oštećenja TV-a ili gubitak podataka do kojih može da dođe zbog njenog korišćenja."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klon aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Nastavi"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Podešavanja"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instaliranje/deinstaliranje Wear aplikac."</string>

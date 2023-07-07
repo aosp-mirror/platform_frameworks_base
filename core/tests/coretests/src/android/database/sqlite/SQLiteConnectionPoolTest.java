@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Tests for {@link SQLiteConnectionPool}
@@ -74,7 +75,7 @@ public class SQLiteConnectionPoolTest {
         Log.i(TAG, "Starting " + thread.getName());
         thread.start();
         SQLiteConnectionPool pool = SQLiteConnectionPool.open(mTestConf);
-        pool.setupIdleConnectionHandler(thread.getLooper(), 100);
+        pool.setupIdleConnectionHandler(thread.getLooper(), 100, null);
         SQLiteConnection c1 = pool.acquireConnection("pragma user_version", 0, null);
         assertEquals("First connection should be returned", 0, c1.getConnectionId());
         pool.releaseConnection(c1);
@@ -88,5 +89,32 @@ public class SQLiteConnectionPoolTest {
         pool.releaseConnection(c3);
         pool.close();
         thread.quit();
+    }
+
+    @Test
+    public void testNonprimaryConnectionPoolRecycling() throws InterruptedException {
+        HandlerThread thread = new HandlerThread("test-close-idle-connections-thread");
+        thread.start();
+        SQLiteConnectionPool pool = SQLiteConnectionPool.open(mTestConf);
+        CountDownLatch latch = new CountDownLatch(1);
+        Runnable onIdleConnectionTimeout = () -> latch.countDown();
+        pool.setupIdleConnectionHandler(thread.getLooper(), 1, onIdleConnectionTimeout);
+
+        assertTrue("When the pool was just opened there should only be a primary connection.",
+                !pool.hasAnyAvailableNonPrimaryConnection());
+        SQLiteConnection connection = pool.acquireConnection("pragma user_version", 0, null);
+        pool.releaseConnection(connection);
+        assertTrue("First time acquire should will return the primary connection.",
+                !pool.hasAnyAvailableNonPrimaryConnection());
+
+        // Wait for primary connection to time out
+        latch.await();
+
+        // Now that the primary is closed, acquiring again should open a non primary connection
+        connection = pool.acquireConnection("pragma user_version", 0, null);
+        pool.releaseConnection(connection);
+        assertTrue("There should be an available non primary connection in the pool.",
+                pool.hasAnyAvailableNonPrimaryConnection());
+        pool.close();
     }
 }

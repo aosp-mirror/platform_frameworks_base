@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -726,45 +727,75 @@ public final class ContextHubManager {
         return new IContextHubClientCallback.Stub() {
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                executor.execute(() -> callback.onMessageFromNanoApp(client, message));
+                executor.execute(
+                        () -> {
+                            callback.onMessageFromNanoApp(client, message);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onHubReset() {
-                executor.execute(() -> callback.onHubReset(client));
+                executor.execute(
+                        () -> {
+                            callback.onHubReset(client);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppAborted(long nanoAppId, int abortCode) {
-                executor.execute(() -> callback.onNanoAppAborted(client, nanoAppId, abortCode));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppAborted(client, nanoAppId, abortCode);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppLoaded(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppLoaded(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppLoaded(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppUnloaded(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppUnloaded(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppUnloaded(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppEnabled(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppEnabled(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppEnabled(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppDisabled(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppDisabled(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onClientAuthorizationChanged(
                     long nanoAppId, @ContextHubManager.AuthorizationState int authorization) {
                 executor.execute(
-                        () -> callback.onClientAuthorizationChanged(
-                                client, nanoAppId, authorization));
+                        () -> {
+                            callback.onClientAuthorizationChanged(client, nanoAppId, authorization);
+                            client.callbackFinished();
+                        });
             }
         };
     }
@@ -829,7 +860,7 @@ public final class ContextHubManager {
 
     /**
      * Equivalent to
-     * {@link #createClient(ContextHubInfo, Executor, String, ContextHubClientCallback)}
+     * {@link  #createClient(Context, ContextHubInfo, Executor, ContextHubClientCallback)}
      * with the {@link Context} being set to null.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
@@ -933,6 +964,79 @@ public final class ContextHubManager {
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
         return createClient(null /* context */, hubInfo, pendingIntent, nanoAppId);
+    }
+
+    /**
+     * Queries for the list of preloaded nanoapp IDs on the system.
+     *
+     * @param hubInfo The Context Hub to query a list of nanoapp IDs from.
+     *
+     * @return The list of 64-bit IDs of the preloaded nanoapps.
+     *
+     * @throws NullPointerException if hubInfo is null
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull public long[] getPreloadedNanoAppIds(@NonNull ContextHubInfo hubInfo) {
+        Objects.requireNonNull(hubInfo, "hubInfo cannot be null");
+
+        long[] nanoappIds = null;
+        try {
+            nanoappIds = mService.getPreloadedNanoAppIds(hubInfo);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        if (nanoappIds == null) {
+            nanoappIds = new long[0];
+        }
+        return nanoappIds;
+    }
+
+    /**
+     * Puts the Context Hub in test mode.
+     *
+     * The purpose of this API is to make testing CHRE/Context Hub more
+     * predictable and robust. This temporarily unloads all
+     * nanoapps.
+     *
+     * Note that this API must not cause CHRE/Context Hub to behave differently
+     * in test compared to production.
+     *
+     * @return true if the enable test mode operation succeeded.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull public boolean enableTestMode() {
+        try {
+            return mService.setTestMode(true);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Puts the Context Hub out of test mode.
+     *
+     * This API will undo any previously made enableTestMode() calls.
+     * After this API is called, it should restore the state of the system
+     * to the normal/production mode before any enableTestMode() call was
+     * made. If the enableTestMode() call unloaded any nanoapps
+     * to enter test mode, it should reload those nanoapps in this API call.
+     *
+     * @return true if the disable operation succeeded.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull public boolean disableTestMode() {
+        try {
+            return mService.setTestMode(false);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

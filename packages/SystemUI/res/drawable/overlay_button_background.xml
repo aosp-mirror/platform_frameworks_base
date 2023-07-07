@@ -17,12 +17,11 @@
 <!-- Button background for activities downstream of overlays
      (clipboard text editor, long screenshots) -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:color="@color/overlay_button_ripple">
     <item android:id="@android:id/background">
         <inset android:insetTop="4dp" android:insetBottom="4dp">
             <shape android:shape="rectangle">
-                <solid android:color="?androidprv:attr/colorAccentPrimary"/>
+                <solid android:color="#fff"/>
                 <corners android:radius="20dp"/>
                 <size android:height="40dp"/>
             </shape>
@@ -31,7 +30,7 @@
     <item android:id="@android:id/mask">
         <inset android:insetTop="4dp" android:insetBottom="4dp">
             <shape android:shape="rectangle">
-                <solid android:color="?android:textColorPrimary"/>
+                <solid android:color="#000"/>
                 <corners android:radius="20dp"/>
                 <size android:height="40dp"/>
             </shape>

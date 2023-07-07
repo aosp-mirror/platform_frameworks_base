@@ -53,7 +53,7 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onInitialize() {
+    boolean onInitialize() {
         mProxy.initialize(new LocationTimeZoneProviderProxy.Listener() {
             @Override
             public void onReportTimeZoneProviderEvent(
@@ -71,6 +71,7 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
                 handleTemporaryFailure("onProviderUnbound()");
             }
         });
+        return true;
     }
 
     @Override

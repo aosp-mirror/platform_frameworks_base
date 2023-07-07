@@ -27,21 +27,26 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
  * Drawable used on SysUI scrims.
  */
 public class ScrimDrawable extends Drawable {
     private static final String TAG = "ScrimDrawable";
-    private static final long COLOR_ANIMATION_DURATION = 2000;
 
+    private boolean mShouldUseLargeScreenSize;
     private final Paint mPaint;
+    private final Path mPath = new Path();
+    private final RectF mBoundsRectF = new RectF();
+
     private int mAlpha = 255;
     private int mMainColor;
     private ValueAnimator mColorAnimation;
@@ -49,11 +54,13 @@ public class ScrimDrawable extends Drawable {
     private float mCornerRadius;
     private ConcaveInfo mConcaveInfo;
     private int mBottomEdgePosition;
+    private float mBottomEdgeRadius = -1;
     private boolean mCornerRadiusEnabled;
 
     public ScrimDrawable() {
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
+        mShouldUseLargeScreenSize = false;
     }
 
     /**
@@ -76,7 +83,7 @@ public class ScrimDrawable extends Drawable {
             final int mainFrom = mMainColor;
 
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-            anim.setDuration(COLOR_ANIMATION_DURATION);
+            anim.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
             anim.addUpdateListener(animation -> {
                 float ratio = (float) animation.getAnimatedValue();
                 mMainColor = ColorUtils.blendARGB(mainFrom, mainColor, ratio);
@@ -131,6 +138,10 @@ public class ScrimDrawable extends Drawable {
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
+    }
+
+    public void setShouldUseLargeScreenSize(boolean v) {
+        mShouldUseLargeScreenSize = v;
     }
 
     /**
@@ -191,6 +202,13 @@ public class ScrimDrawable extends Drawable {
         invalidateSelf();
     }
 
+    public void setBottomEdgeRadius(float radius) {
+        if (mBottomEdgeRadius != radius) {
+            mBottomEdgeRadius = radius;
+            invalidateSelf();
+        }
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         mPaint.setColor(mMainColor);
@@ -198,9 +216,46 @@ public class ScrimDrawable extends Drawable {
         if (mConcaveInfo != null) {
             drawConcave(canvas);
         } else if (mCornerRadiusEnabled && mCornerRadius > 0) {
-            canvas.drawRoundRect(getBounds().left, getBounds().top, getBounds().right,
-                    getBounds().bottom,
-                    /* x radius*/ mCornerRadius, /* y radius*/ mCornerRadius, mPaint);
+            float topEdgeRadius = mCornerRadius;
+            float bottomEdgeRadius = mBottomEdgeRadius == -1.0 ? mCornerRadius : mBottomEdgeRadius;
+
+            mBoundsRectF.set(getBounds());
+
+            // When the back gesture causes the notification scrim to be scaled down,
+            // this offset "reveals" the rounded bottom edge as it "pulls away".
+            // We must *not* make this adjustment on largescreen shades (where the corner is sharp).
+            if (!mShouldUseLargeScreenSize && mBottomEdgeRadius != -1) {
+                mBoundsRectF.bottom -= bottomEdgeRadius;
+            }
+
+            // We need a box with rounded corners but its lower corners are not rounded on large
+            // screen devices in "portrait" orientation.
+            // Thus, we cannot draw a symmetric rounded rectangle via canvas.drawRoundRect()
+            // and must build a box with different corner radii at the top and at the bottom.
+            // Additionally, when the scrim is pushed to the very bottom of the screen, do not draw
+            // anything (drawing a rounded box with these specifications is not possible).
+            // TODO(b/271030611) perhaps this could be accomplished via Path.addRoundRect instead?
+            if (mBoundsRectF.bottom - mBoundsRectF.top > bottomEdgeRadius) {
+                mPath.reset();
+                mPath.moveTo(mBoundsRectF.right, mBoundsRectF.top + topEdgeRadius);
+                mPath.cubicTo(mBoundsRectF.right, mBoundsRectF.top + topEdgeRadius,
+                        mBoundsRectF.right, mBoundsRectF.top,
+                        mBoundsRectF.right - topEdgeRadius, mBoundsRectF.top);
+                mPath.lineTo(mBoundsRectF.left + topEdgeRadius, mBoundsRectF.top);
+                mPath.cubicTo(mBoundsRectF.left + topEdgeRadius, mBoundsRectF.top,
+                        mBoundsRectF.left, mBoundsRectF.top,
+                        mBoundsRectF.left, mBoundsRectF.top + topEdgeRadius);
+                mPath.lineTo(mBoundsRectF.left, mBoundsRectF.bottom - bottomEdgeRadius);
+                mPath.cubicTo(mBoundsRectF.left, mBoundsRectF.bottom - bottomEdgeRadius,
+                        mBoundsRectF.left, mBoundsRectF.bottom,
+                        mBoundsRectF.left + bottomEdgeRadius, mBoundsRectF.bottom);
+                mPath.lineTo(mBoundsRectF.right - bottomEdgeRadius, mBoundsRectF.bottom);
+                mPath.cubicTo(mBoundsRectF.right - bottomEdgeRadius, mBoundsRectF.bottom,
+                        mBoundsRectF.right, mBoundsRectF.bottom,
+                        mBoundsRectF.right, mBoundsRectF.bottom - bottomEdgeRadius);
+                mPath.close();
+                canvas.drawPath(mPath, mPaint);
+            }
         } else {
             canvas.drawRect(getBounds().left, getBounds().top, getBounds().right,
                     getBounds().bottom, mPaint);

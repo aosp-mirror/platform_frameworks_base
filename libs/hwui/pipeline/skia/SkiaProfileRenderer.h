@@ -23,18 +23,21 @@ namespace uirenderer {
 
 class SkiaProfileRenderer : public IProfileRenderer {
 public:
-    explicit SkiaProfileRenderer(SkCanvas* canvas) : mCanvas(canvas) {}
+    explicit SkiaProfileRenderer(SkCanvas* canvas, uint32_t width, uint32_t height)
+            : mCanvas(canvas), mWidth(width), mHeight(height) {}
 
     void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
     void drawRects(const float* rects, int count, const SkPaint& paint) override;
-    uint32_t getViewportWidth() override;
-    uint32_t getViewportHeight() override;
+    uint32_t getViewportWidth() override { return mWidth; }
+    uint32_t getViewportHeight() override { return mHeight; }
 
     virtual ~SkiaProfileRenderer() {}
 
 private:
     // Does not have ownership.
     SkCanvas* mCanvas;
+    uint32_t mWidth;
+    uint32_t mHeight;
 };
 
 } /* namespace uirenderer */

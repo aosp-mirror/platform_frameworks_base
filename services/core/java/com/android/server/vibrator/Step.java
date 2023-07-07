@@ -38,7 +38,7 @@ abstract class Step implements Comparable<Step> {
         this.startTime = startTime;
     }
 
-    protected Vibration getVibration() {
+    protected HalVibration getVibration() {
         return conductor.getVibration();
     }
 

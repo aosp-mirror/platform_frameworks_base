@@ -22,8 +22,6 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Intent;
 import android.content.IntentFilter;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -31,7 +29,9 @@ import android.util.Patterns;
 
 import com.android.server.SystemConfig;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
 
 import java.util.List;
 import java.util.Objects;

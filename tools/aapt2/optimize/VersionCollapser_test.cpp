@@ -23,7 +23,7 @@ using android::StringPiece;
 namespace aapt {
 
 static std::unique_ptr<ResourceTable> BuildTableWithConfigs(
-    const StringPiece& name, std::initializer_list<std::string> list) {
+    StringPiece name, std::initializer_list<std::string> list) {
   test::ResourceTableBuilder builder;
   for (const std::string& item : list) {
     builder.AddSimple(name, test::ParseConfigOrDie(item));

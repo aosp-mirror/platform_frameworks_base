@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.splitscreen;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.view.SurfaceSession;
@@ -38,10 +37,9 @@ class SideStage extends StageTaskListener {
 
     SideStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider,
-            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
-        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession, iconProvider,
-                stageTaskUnfoldController);
+            SurfaceSession surfaceSession, IconProvider iconProvider) {
+        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
+                iconProvider);
     }
 
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
@@ -49,8 +47,8 @@ class SideStage extends StageTaskListener {
         wct.reparentTasks(
                 mRootTaskInfo.token,
                 null /* newParent */,
-                CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
-                CONTROLLED_ACTIVITY_TYPES,
+                null /* windowingModes */,
+                null /* activityTypes */,
                 toTop);
         return true;
     }

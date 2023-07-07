@@ -28,6 +28,7 @@ import com.android.internal.infra.AndroidFuture;
  * @hide
  */
 oneway interface IGameSessionService {
+    @RequiresNoPermission
     void create(
             in IGameSessionController gameSessionController,
             in CreateGameSessionRequest createGameSessionRequest,

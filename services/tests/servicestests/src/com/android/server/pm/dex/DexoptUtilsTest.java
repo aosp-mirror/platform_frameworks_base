@@ -23,16 +23,16 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.pm.SharedLibraryInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;

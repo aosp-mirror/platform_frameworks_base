@@ -139,7 +139,7 @@ bool mkdirs(const std::string& path) {
   return ::android::base::utf8::mkdir(path.c_str(), mode) == 0 || errno == EEXIST;
 }
 
-StringPiece GetStem(const StringPiece& path) {
+StringPiece GetStem(StringPiece path) {
   const char* start = path.begin();
   const char* end = path.end();
   for (const char* current = end - 1; current != start - 1; --current) {
@@ -150,7 +150,7 @@ StringPiece GetStem(const StringPiece& path) {
   return {};
 }
 
-StringPiece GetFilename(const StringPiece& path) {
+StringPiece GetFilename(StringPiece path) {
   const char* end = path.end();
   const char* last_dir_sep = path.begin();
   for (const char* c = path.begin(); c != end; ++c) {
@@ -161,7 +161,7 @@ StringPiece GetFilename(const StringPiece& path) {
   return StringPiece(last_dir_sep, end - last_dir_sep);
 }
 
-StringPiece GetExtension(const StringPiece& path) {
+StringPiece GetExtension(StringPiece path) {
   StringPiece filename = GetFilename(path);
   const char* const end = filename.end();
   const char* c = std::find(filename.begin(), end, '.');
@@ -171,7 +171,7 @@ StringPiece GetExtension(const StringPiece& path) {
   return {};
 }
 
-bool IsHidden(const android::StringPiece& path) {
+bool IsHidden(android::StringPiece path) {
   return util::StartsWith(GetFilename(path), ".");
 }
 
@@ -193,16 +193,16 @@ std::string BuildPath(std::vector<const StringPiece>&& args) {
   if (args.empty()) {
     return "";
   }
-  std::string out = args[0].to_string();
+  std::string out{args[0]};
   for (int i = 1; i < args.size(); i++) {
     file::AppendPath(&out, args[i]);
   }
   return out;
 }
 
-std::string PackageToPath(const StringPiece& package) {
+std::string PackageToPath(StringPiece package) {
   std::string out_path;
-  for (const StringPiece& part : util::Tokenize(package, '.')) {
+  for (StringPiece part : util::Tokenize(package, '.')) {
     AppendPath(&out_path, part);
   }
   return out_path;
@@ -241,10 +241,10 @@ std::optional<FileMap> MmapPath(const std::string& path, std::string* out_error)
   return std::move(filemap);
 }
 
-bool AppendArgsFromFile(const StringPiece& path, std::vector<std::string>* out_arglist,
+bool AppendArgsFromFile(StringPiece path, std::vector<std::string>* out_arglist,
                         std::string* out_error) {
   std::string contents;
-  if (!ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
+  if (!ReadFileToString(std::string(path), &contents, true /*follow_symlinks*/)) {
     if (out_error) {
       *out_error = "failed to read argument-list file";
     }
@@ -254,16 +254,16 @@ bool AppendArgsFromFile(const StringPiece& path, std::vector<std::string>* out_a
   for (StringPiece line : util::Tokenize(contents, ' ')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      out_arglist->push_back(line.to_string());
+      out_arglist->emplace_back(line);
     }
   }
   return true;
 }
 
-bool AppendSetArgsFromFile(const StringPiece& path, std::unordered_set<std::string>* out_argset,
+bool AppendSetArgsFromFile(StringPiece path, std::unordered_set<std::string>* out_argset,
                            std::string* out_error) {
   std::string contents;
-  if(!ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
+  if (!ReadFileToString(std::string(path), &contents, true /*follow_symlinks*/)) {
     if (out_error) {
       *out_error = "failed to read argument-list file";
     }
@@ -273,13 +273,13 @@ bool AppendSetArgsFromFile(const StringPiece& path, std::unordered_set<std::stri
   for (StringPiece line : util::Tokenize(contents, ' ')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      out_argset->insert(line.to_string());
+      out_argset->emplace(line);
     }
   }
   return true;
 }
 
-bool FileFilter::SetPattern(const StringPiece& pattern) {
+bool FileFilter::SetPattern(StringPiece pattern) {
   pattern_tokens_ = util::SplitAndLowercase(pattern, ':');
   return true;
 }
@@ -333,9 +333,8 @@ bool FileFilter::operator()(const std::string& filename, FileType type) const {
 
     if (ignore) {
       if (chatty) {
-        diag_->Warn(DiagMessage()
-                    << "skipping "
-                    << (type == FileType::kDirectory ? "dir '" : "file '")
+        diag_->Warn(android::DiagMessage()
+                    << "skipping " << (type == FileType::kDirectory ? "dir '" : "file '")
                     << filename << "' due to ignore pattern '" << token << "'");
       }
       return false;
@@ -344,12 +343,13 @@ bool FileFilter::operator()(const std::string& filename, FileType type) const {
   return true;
 }
 
-std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& path,
-                                                  IDiagnostics* diag, const FileFilter* filter) {
-  const std::string root_dir = path.to_string();
+std::optional<std::vector<std::string>> FindFiles(android::StringPiece path,
+                                                  android::IDiagnostics* diag,
+                                                  const FileFilter* filter) {
+  const auto& root_dir = path;
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
-    diag->Error(DiagMessage() << SystemErrorCodeToString(errno) << ": " << root_dir);
+    diag->Error(android::DiagMessage() << SystemErrorCodeToString(errno) << ": " << root_dir);
     return {};
   }
 
@@ -361,7 +361,7 @@ std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& pa
     }
 
     std::string file_name = entry->d_name;
-    std::string full_path = root_dir;
+    std::string full_path{root_dir};
     AppendPath(&full_path, file_name);
     const FileType file_type = GetFileType(full_path);
 
@@ -380,7 +380,7 @@ std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& pa
 
   // Now process subdirs.
   for (const std::string& subdir : subdirs) {
-    std::string full_subdir = root_dir;
+    std::string full_subdir{root_dir};
     AppendPath(&full_subdir, subdir);
     std::optional<std::vector<std::string>> subfiles = FindFiles(full_subdir, diag, filter);
     if (!subfiles) {

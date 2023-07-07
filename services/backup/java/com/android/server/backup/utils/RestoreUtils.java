@@ -160,7 +160,8 @@ public class RestoreUtils {
                             PackageManagerInternal pmi = LocalServices.getService(
                                     PackageManagerInternal.class);
                             BackupEligibilityRules eligibilityRules =
-                                    BackupEligibilityRules.forBackup(packageManager, pmi, userId);
+                                    BackupEligibilityRules.forBackup(packageManager, pmi, userId,
+                                            context);
                             if (eligibilityRules.signaturesMatch(sigs, pkg)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.

@@ -30,7 +30,9 @@ android_test {
     ],
     test_suites: [
         "general-tests",
-        "vts",
     ],
-    sdk_version: "31",
+    data: [
+        ":SimpleTestIme",
+    ],
+    sdk_version: "current",
 }

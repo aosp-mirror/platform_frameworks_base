@@ -127,7 +127,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final ClientWindowFrames mOutFrames = new ClientWindowFrames();
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
-        final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
+        final InsetsSourceControl.Array mOutControls = new InsetsSourceControl.Array();
         final IWindow mWindow;
         final View mView;
         final WindowManager.LayoutParams mParams;
@@ -153,9 +153,9 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
                 session.relayout(mWindow, mParams, mWidth, mHeight,
-                        mViewVisibility.getAsInt(), mFlags, mOutFrames,
-                        mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
-                        new Bundle());
+                        mViewVisibility.getAsInt(), mFlags, 0 /* seq */, 0 /* lastSyncSeqId */,
+                        mOutFrames, mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState,
+                        mOutControls, new Bundle());
             }
         }
     }

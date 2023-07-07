@@ -115,7 +115,7 @@ public class BrightnessSynchronizer {
             Slog.i(TAG, "Setting initial brightness to default value of: " + defaultBrightness);
         }
 
-        mBrightnessSyncObserver.startObserving();
+        mBrightnessSyncObserver.startObserving(mHandler);
         mHandler.sendEmptyMessageAtTime(MSG_RUN_UPDATE, mClock.uptimeMillis());
     }
 
@@ -482,30 +482,31 @@ public class BrightnessSynchronizer {
             }
         };
 
-        private final ContentObserver mContentObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                if (selfChange) {
-                    return;
+        private ContentObserver createBrightnessContentObserver(Handler handler) {
+            return new ContentObserver(handler) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri) {
+                    if (selfChange) {
+                        return;
+                    }
+                    if (BRIGHTNESS_URI.equals(uri)) {
+                        handleBrightnessChangeInt(getScreenBrightnessInt());
+                    }
                 }
-                if (BRIGHTNESS_URI.equals(uri)) {
-                    handleBrightnessChangeInt(getScreenBrightnessInt());
-                }
-            }
-        };
+            };
+        }
 
         boolean isObserving() {
             return mIsObserving;
         }
 
-        void startObserving() {
+        void startObserving(Handler handler) {
             final ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(BRIGHTNESS_URI, false, mContentObserver,
-                    UserHandle.USER_ALL);
-            mDisplayManager.registerDisplayListener(mListener, mHandler,
+            cr.registerContentObserver(BRIGHTNESS_URI, false,
+                    createBrightnessContentObserver(handler), UserHandle.USER_ALL);
+            mDisplayManager.registerDisplayListener(mListener, handler,
                     DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
             mIsObserving = true;
         }
-
     }
 }

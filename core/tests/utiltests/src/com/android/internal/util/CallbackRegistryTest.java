@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,11 +40,11 @@ public class CallbackRegistryTest extends TestCase {
     Integer argValue;
 
     private void addNotifyCount(Integer callback) {
-        if (callback == callback1) {
+        if (Objects.equals(callback, callback1)) {
             notify1++;
-        } else if (callback == callback2) {
+        } else if (Objects.equals(callback, callback2)) {
             notify2++;
-        } else if (callback == callback3) {
+        } else if (Objects.equals(callback, callback3)) {
             notify3++;
         }
         deepNotifyCount[callback]++;
@@ -114,7 +115,7 @@ public class CallbackRegistryTest extends TestCase {
                     public void onNotifyCallback(Integer callback, CallbackRegistryTest sender,
                             int arg1, Integer arg) {
                         addNotifyCount(callback);
-                        if (callback == callback1) {
+                        if (Objects.equals(callback, callback1)) {
                             registry.remove(callback1);
                             registry.remove(callback2);
                         }
@@ -166,9 +167,9 @@ public class CallbackRegistryTest extends TestCase {
                     public void onNotifyCallback(Integer callback, CallbackRegistryTest sender,
                             int arg1, Integer arg) {
                         addNotifyCount(callback);
-                        if (callback == callback1) {
+                        if (Objects.equals(callback, callback1)) {
                             registry.remove(callback2);
-                        } else if (callback == callback3) {
+                        } else if (Objects.equals(callback, callback3)) {
                             registry.add(callback2);
                         }
                     }

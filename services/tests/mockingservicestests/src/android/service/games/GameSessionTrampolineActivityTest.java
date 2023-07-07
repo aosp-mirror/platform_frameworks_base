@@ -42,6 +42,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.test.espresso.NoActivityResumedException;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.infra.AndroidFuture;
@@ -80,6 +81,7 @@ public class GameSessionTrampolineActivityTest {
     }
 
     @Test
+    @FlakyTest(bugId = 245615459)
     public void launch_targetActivityFinishesSuccessfully_futureCompletedWithSameResults() {
         AndroidFuture<GameSessionActivityResult> resultFuture =
                 startTestActivityViaGameSessionTrampolineActivity();
@@ -96,6 +98,7 @@ public class GameSessionTrampolineActivityTest {
     }
 
     @Test
+    @FlakyTest(bugId = 245616660)
     public void launch_trampolineActivityProcessDeath_futureCompletedWithSameResults() {
         setAlwaysFinishActivities(true);
 

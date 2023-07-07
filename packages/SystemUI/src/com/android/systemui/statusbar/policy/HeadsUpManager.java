@@ -24,6 +24,8 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.accessibility.AccessibilityManager;
@@ -31,9 +33,9 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -79,13 +81,18 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    public HeadsUpManager(@NonNull final Context context, HeadsUpManagerLogger logger) {
-        super(logger);
+    public HeadsUpManager(@NonNull final Context context,
+            HeadsUpManagerLogger logger,
+            @Main Handler handler,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            UiEventLogger uiEventLogger) {
+        super(logger, handler);
         mContext = context;
-        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
-        mUiEventLogger = Dependency.get(UiEventLogger.class);
+        mAccessibilityMgr = accessibilityManagerWrapper;
+        mUiEventLogger = uiEventLogger;
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
+        mStickyDisplayTime = resources.getInteger(R.integer.sticky_heads_up_notification_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
@@ -94,7 +101,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
         mSnoozeLengthMs = Settings.Global.getInt(context.getContentResolver(),
                 SETTING_HEADS_UP_SNOOZE_LENGTH_MS, defaultSnoozeLengthMs);
-        ContentObserver settingsObserver = new ContentObserver(mHandler) {
+        ContentObserver settingsObserver = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
                 final int packageSnoozeLengthMs = Settings.Global.getInt(
@@ -133,7 +140,13 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     protected boolean shouldHeadsUpBecomePinned(@NonNull NotificationEntry entry) {
-        return hasFullScreenIntent(entry);
+        final HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
+        if (headsUpEntry == null) {
+            // This should not happen since shouldHeadsUpBecomePinned is always called after adding
+            // the NotificationEntry into AlertingNotificationManager's mAlertEntries map.
+            return hasFullScreenIntent(entry);
+        }
+        return hasFullScreenIntent(entry) && !headsUpEntry.wasUnpinned;
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
@@ -142,8 +155,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     protected void setEntryPinned(
             @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
-        mLogger.logSetEntryPinned(headsUpEntry.mEntry.getKey(), isPinned);
+        mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
+        if (!isPinned) {
+            headsUpEntry.wasUnpinned = true;
+        }
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
             updatePinnedMode();
@@ -170,7 +186,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     protected void onAlertEntryAdded(AlertEntry alertEntry) {
         NotificationEntry entry = alertEntry.mEntry;
         entry.setHeadsUp(true);
-        setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(entry));
+
+        final boolean shouldPin = shouldHeadsUpBecomePinned(entry);
+        setEntryPinned((HeadsUpEntry) alertEntry, shouldPin);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, true);
@@ -183,7 +201,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
-        mLogger.logNotificationActuallyRemoved(entry.getKey());
+        mLogger.logNotificationActuallyRemoved(entry);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
@@ -272,6 +290,10 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      */
     public void setUser(int user) {
         mUser = user;
+    }
+
+    public int getUser() {
+        return  mUser;
     }
 
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
@@ -371,6 +393,31 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
+    /**
+     * Notes that the user took an action on an entry that might indirectly cause the system or the
+     * app to remove the notification.
+     *
+     * @param entry the entry that might be indirectly removed by the user's action
+     *
+     * @see com.android.systemui.statusbar.notification.collection.coordinator.HeadsUpCoordinator#mActionPressListener
+     * @see #canRemoveImmediately(String)
+     */
+    public void setUserActionMayIndirectlyRemove(@NonNull NotificationEntry entry) {
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
+        if (headsUpEntry != null) {
+            headsUpEntry.userActionMayIndirectlyRemove = true;
+        }
+    }
+
+    @Override
+    public boolean canRemoveImmediately(@NonNull String key) {
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
+        if (headsUpEntry != null && headsUpEntry.userActionMayIndirectlyRemove) {
+            return true;
+        }
+        return super.canRemoveImmediately(key);
+    }
+
     @NonNull
     @Override
     protected HeadsUpEntry createAlertEntry() {
@@ -399,12 +446,21 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      */
     protected class HeadsUpEntry extends AlertEntry {
         public boolean remoteInputActive;
+        public boolean userActionMayIndirectlyRemove;
+
         protected boolean expanded;
+        protected boolean wasUnpinned;
 
         @Override
         public boolean isSticky() {
             return (mEntry.isRowPinned() && expanded)
-                    || remoteInputActive || hasFullScreenIntent(mEntry);
+                    || remoteInputActive
+                    || hasFullScreenIntent(mEntry);
+        }
+
+        @Override
+        public boolean isStickyForSomeTime() {
+            return mEntry.isStickyAndNotDemoted();
         }
 
         @Override
@@ -460,9 +516,16 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             return super.calculatePostTime() + mTouchAcceptanceDelay;
         }
 
+        /**
+         * @return When the notification should auto-dismiss itself, based on
+         * {@link SystemClock#elapsedRealTime()}
+         */
         @Override
         protected long calculateFinishTime() {
-            return mPostTime + getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
+            final long duration = getRecommendedHeadsUpTimeoutMs(
+                    isStickyForSomeTime() ? mStickyDisplayTime : mAutoDismissNotificationDecay);
+
+            return mPostTime + duration;
         }
 
         /**

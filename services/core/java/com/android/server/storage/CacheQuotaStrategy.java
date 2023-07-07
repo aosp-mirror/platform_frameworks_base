@@ -47,11 +47,11 @@ import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.Installer;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -170,10 +170,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         List<CacheQuotaHint> requests = new ArrayList<>();
         UserManager um = mContext.getSystemService(UserManager.class);
         final List<UserInfo> users = um.getUsers();
-        final int userCount = users.size();
         final PackageManager packageManager = mContext.getPackageManager();
-        for (int i = 0; i < userCount; i++) {
-            UserInfo info = users.get(i);
+        for (UserInfo info : users) {
             List<UsageStats> stats =
                     mUsageStats.queryUsageStatsForUser(info.id, UsageStatsManager.INTERVAL_BEST,
                             oneYearAgo, timeNow, /*obfuscateInstantApps=*/ false);
@@ -181,7 +179,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
                 continue;
             }
 
-            for (UsageStats stat : stats) {
+            for (int i = 0; i < stats.size(); ++i) {
+                UsageStats stat = stats.get(i);
                 String packageName = stat.getPackageName();
                 try {
                     // We need the app info to determine the uid and the uuid of the volume
@@ -208,15 +207,13 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     public void onResult(Bundle data) {
         final List<CacheQuotaHint> processedRequests =
                 data.getParcelableArrayList(
-                        CacheQuotaService.REQUEST_LIST_KEY);
+                        CacheQuotaService.REQUEST_LIST_KEY, android.app.usage.CacheQuotaHint.class);
         pushProcessedQuotas(processedRequests);
         writeXmlToFile(processedRequests);
     }
 
     private void pushProcessedQuotas(List<CacheQuotaHint> processedRequests) {
-        final int requestSize = processedRequests.size();
-        for (int i = 0; i < requestSize; i++) {
-            CacheQuotaHint request = processedRequests.get(i);
+        for (CacheQuotaHint request : processedRequests) {
             long proposedQuota = request.getQuota();
             if (proposedQuota == CacheQuotaHint.QUOTA_NOT_SET) {
                 continue;
@@ -321,11 +318,9 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
             List<CacheQuotaHint> requests, long bytesWhenCalculated) throws IOException {
         out.startDocument(null, true);
         out.startTag(null, CACHE_INFO_TAG);
-        int requestSize = requests.size();
         out.attributeLong(null, ATTR_PREVIOUS_BYTES, bytesWhenCalculated);
 
-        for (int i = 0; i < requestSize; i++) {
-            CacheQuotaHint request = requests.get(i);
+        for (CacheQuotaHint request : requests) {
             out.startTag(null, TAG_QUOTA);
             String uuid = request.getVolumeUuid();
             if (uuid != null) {

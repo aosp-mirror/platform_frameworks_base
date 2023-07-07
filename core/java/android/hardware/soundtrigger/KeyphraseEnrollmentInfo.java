@@ -40,11 +40,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -151,7 +151,7 @@ public class KeyphraseEnrollmentInfo {
             return;
         }
 
-        List<String> parseErrors = new LinkedList<>();
+        List<String> parseErrors = new ArrayList<>();
         mKeyphrasePackageMap = new HashMap<>();
         for (ResolveInfo ri : ris) {
             try {

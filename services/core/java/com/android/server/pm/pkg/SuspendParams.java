@@ -21,8 +21,9 @@ import android.content.pm.SuspendDialogInfo;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

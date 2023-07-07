@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 
 const val EXTRA_LAYOUT = "layout"
 const val EXTRA_TITLE = "title"
+const val EXTRA_COMMON_CONTROLS = "common_controls"
 
 class CommonDemoActivity : BaseDemoActivity() {
 
@@ -38,8 +39,13 @@ class CommonDemoActivity : BaseDemoActivity() {
         val title = extras.getString(EXTRA_TITLE, "SilkFX")
         window.setTitle(title)
 
-        setContentView(R.layout.common_base)
+        if (extras.getBoolean(EXTRA_COMMON_CONTROLS, true)) {
+            setContentView(R.layout.common_base)
+            LayoutInflater.from(this).inflate(layout, findViewById(R.id.demo_container), true)
+        } else {
+            setContentView(layout)
+        }
+
         actionBar?.title = title
-        LayoutInflater.from(this).inflate(layout, findViewById(R.id.demo_container), true)
     }
 }

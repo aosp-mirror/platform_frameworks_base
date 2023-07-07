@@ -65,6 +65,14 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
     }
 
     /**
+     * Add a set of values for key n.
+     */
+    public void addAll(int n, ArraySet<T> values) {
+        mStorage.addAll(n, values);
+        onChanged();
+    }
+
+    /**
      * Removes all mappings from this SparseSetArray.
      */
     public void clear() {
