@@ -76,19 +76,17 @@ typedef std::array<int, N_ANDROID_TIMERFDS> TimerFds;
 class AlarmImpl
 {
 public:
-    AlarmImpl(const TimerFds &fds, int epollfd, const std::string &rtc_dev)
-          : fds{fds}, epollfd{epollfd}, rtc_dev{rtc_dev} {}
+    AlarmImpl(const TimerFds &fds, int epollfd)
+          : fds{fds}, epollfd{epollfd} {}
     ~AlarmImpl();
 
     int set(int type, struct timespec *ts);
-    int setTime(struct timeval *tv);
     int waitForAlarm();
     int getTime(int type, struct itimerspec *spec);
 
 private:
     const TimerFds fds;
     const int epollfd;
-    std::string rtc_dev;
 };
 
 AlarmImpl::~AlarmImpl()
@@ -131,43 +129,6 @@ int AlarmImpl::getTime(int type, struct itimerspec *spec)
     return timerfd_gettime(fds[type], spec);
 }
 
-int AlarmImpl::setTime(struct timeval *tv)
-{
-    if (settimeofday(tv, NULL) == -1) {
-        ALOGV("settimeofday() failed: %s", strerror(errno));
-        return -1;
-    }
-
-    android::base::unique_fd fd{open(rtc_dev.c_str(), O_RDWR)};
-    if (!fd.ok()) {
-        ALOGE("Unable to open %s: %s", rtc_dev.c_str(), strerror(errno));
-        return -1;
-    }
-
-    struct tm tm;
-    if (!gmtime_r(&tv->tv_sec, &tm)) {
-        ALOGV("gmtime_r() failed: %s", strerror(errno));
-        return -1;
-    }
-
-    struct rtc_time rtc = {};
-    rtc.tm_sec = tm.tm_sec;
-    rtc.tm_min = tm.tm_min;
-    rtc.tm_hour = tm.tm_hour;
-    rtc.tm_mday = tm.tm_mday;
-    rtc.tm_mon = tm.tm_mon;
-    rtc.tm_year = tm.tm_year;
-    rtc.tm_wday = tm.tm_wday;
-    rtc.tm_yday = tm.tm_yday;
-    rtc.tm_isdst = tm.tm_isdst;
-    if (ioctl(fd, RTC_SET_TIME, &rtc) == -1) {
-        ALOGV("RTC_SET_TIME ioctl failed: %s", strerror(errno));
-        return -1;
-    }
-
-    return 0;
-}
-
 int AlarmImpl::waitForAlarm()
 {
     epoll_event events[N_ANDROID_TIMERFDS];
@@ -196,28 +157,6 @@ int AlarmImpl::waitForAlarm()
     }
 
     return result;
-}
-
-static jint android_server_alarm_AlarmManagerService_setKernelTime(JNIEnv*, jobject, jlong nativeData, jlong millis)
-{
-    AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
-
-    if (millis <= 0 || millis / 1000LL >= std::numeric_limits<time_t>::max()) {
-        return -1;
-    }
-
-    struct timeval tv;
-    tv.tv_sec = (millis / 1000LL);
-    tv.tv_usec = ((millis % 1000LL) * 1000LL);
-
-    ALOGD("Setting time of day to sec=%ld", tv.tv_sec);
-
-    int ret = impl->setTime(&tv);
-    if (ret < 0) {
-        ALOGW("Unable to set rtc to %ld: %s", tv.tv_sec, strerror(errno));
-        ret = -1;
-    }
-    return ret;
 }
 
 static jint android_server_alarm_AlarmManagerService_setKernelTimezone(JNIEnv*, jobject, jlong, jint minswest)
@@ -287,19 +226,7 @@ static jlong android_server_alarm_AlarmManagerService_init(JNIEnv*, jobject)
         }
     }
 
-    // Find the wall clock RTC. We expect this always to be /dev/rtc0, but
-    // check the /dev/rtc symlink first so that legacy devices that don't use
-    // rtc0 can add a symlink rather than need to carry a local patch to this
-    // code.
-    //
-    // TODO: if you're reading this in a world where all devices are using the
-    // GKI, you can remove the readlink and just assume /dev/rtc0.
-    std::string dev_rtc;
-    if (!android::base::Readlink("/dev/rtc", &dev_rtc)) {
-        dev_rtc = "/dev/rtc0";
-    }
-
-    std::unique_ptr<AlarmImpl> alarm{new AlarmImpl(fds, epollfd, dev_rtc)};
+    std::unique_ptr<AlarmImpl> alarm{new AlarmImpl(fds, epollfd)};
 
     for (size_t i = 0; i < fds.size(); i++) {
         epoll_event event;
@@ -392,7 +319,6 @@ static const JNINativeMethod sMethods[] = {
     {"close", "(J)V", (void*)android_server_alarm_AlarmManagerService_close},
     {"set", "(JIJJ)I", (void*)android_server_alarm_AlarmManagerService_set},
     {"waitForAlarm", "(J)I", (void*)android_server_alarm_AlarmManagerService_waitForAlarm},
-    {"setKernelTime", "(JJ)I", (void*)android_server_alarm_AlarmManagerService_setKernelTime},
     {"setKernelTimezone", "(JI)I", (void*)android_server_alarm_AlarmManagerService_setKernelTimezone},
     {"getNextAlarm", "(JI)J", (void*)android_server_alarm_AlarmManagerService_getNextAlarm},
 };

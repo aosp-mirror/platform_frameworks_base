@@ -67,7 +67,6 @@ import java.util.List;
 public class NotificationShellCmdTest extends UiServiceTestCase {
     private final Binder mBinder = new Binder();
     private final ShellCallback mCallback = new ShellCallback();
-    private final TestableContext mTestableContext = spy(getContext());
     @Mock
     NotificationManagerService mMockService;
     @Mock
@@ -82,7 +81,7 @@ public class NotificationShellCmdTest extends UiServiceTestCase {
         mTestableLooper = TestableLooper.get(this);
         mResultReceiver = new ResultReceiver(new Handler(mTestableLooper.getLooper()));
 
-        when(mMockService.getContext()).thenReturn(mTestableContext);
+        when(mMockService.getContext()).thenReturn(mContext);
         when(mMockService.getBinderService()).thenReturn(mMockBinderService);
     }
 
@@ -116,9 +115,10 @@ public class NotificationShellCmdTest extends UiServiceTestCase {
     Notification captureNotification(String aTag) throws Exception {
         ArgumentCaptor<Notification> notificationCaptor =
                 ArgumentCaptor.forClass(Notification.class);
+        final String pkg = getContext().getPackageName();
         verify(mMockBinderService).enqueueNotificationWithTag(
-                eq(getContext().getPackageName()),
-                eq(getContext().getPackageName()),
+                eq(pkg),
+                eq(pkg),
                 eq(aTag),
                 eq(NotificationShellCmd.NOTIFICATION_ID),
                 notificationCaptor.capture(),

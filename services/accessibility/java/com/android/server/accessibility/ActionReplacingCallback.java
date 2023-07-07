@@ -167,6 +167,12 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
         mServiceCallback.setPerformAccessibilityActionResult(succeeded, interactionId);
     }
 
+    @Override
+    public void sendTakeScreenshotOfWindowError(int errorCode, int interactionId)
+            throws RemoteException {
+        mServiceCallback.sendTakeScreenshotOfWindowError(errorCode, interactionId);
+    }
+
     private void replaceInfoActionsAndCallService() {
         final AccessibilityNodeInfo nodeToReturn;
         boolean doCallback = false;

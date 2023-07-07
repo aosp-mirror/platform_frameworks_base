@@ -48,15 +48,18 @@ class CredstorePresentationSession extends PresentationSession {
     private byte[] mSessionTranscript = null;
     private boolean mOperationHandleSet = false;
     private long mOperationHandle = 0;
+    private int mFeatureVersion = 0;
 
     CredstorePresentationSession(Context context,
             @IdentityCredentialStore.Ciphersuite int cipherSuite,
             CredstoreIdentityCredentialStore store,
-            ISession binder) {
+            ISession binder,
+            int featureVersion) {
         mContext = context;
         mCipherSuite = cipherSuite;
         mStore = store;
         mBinder = binder;
+        mFeatureVersion = featureVersion;
     }
 
     private void ensureEphemeralKeyPair() {
@@ -147,7 +150,7 @@ class CredstorePresentationSession extends PresentationSession {
                     mBinder.getCredentialForPresentation(credentialName);
                 credential = new CredstoreIdentityCredential(mContext, credentialName,
                                                              mCipherSuite, credstoreCredential,
-                                                             this);
+                                                             this, mFeatureVersion);
                 mCredentialCache.put(credentialName, credential);
 
                 credential.setAllowUsingExhaustedKeys(request.isAllowUsingExhaustedKeys());

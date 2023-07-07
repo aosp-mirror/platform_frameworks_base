@@ -111,6 +111,7 @@ public final class NdefFormatable extends BasicTagTechnology {
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message to write is malformed
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public void formatReadOnly(NdefMessage firstMessage) throws IOException, FormatException {
         format(firstMessage, true);
@@ -123,6 +124,9 @@ public final class NdefFormatable extends BasicTagTechnology {
         try {
             int serviceHandle = mTag.getServiceHandle();
             INfcTag tagService = mTag.getTagService();
+            if (tagService == null) {
+                throw new IOException();
+            }
             int errorCode = tagService.formatNdef(serviceHandle, MifareClassic.KEY_DEFAULT);
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:

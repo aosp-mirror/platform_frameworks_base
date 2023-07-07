@@ -17,10 +17,6 @@
 #ifndef VULKANMANAGER_H
 #define VULKANMANAGER_H
 
-#include <functional>
-#include <mutex>
-
-#include "vulkan/vulkan_core.h"
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
@@ -51,7 +47,8 @@ typedef void(VKAPI_PTR* PFN_vkFrameBoundaryANDROID)(VkDevice device, VkSemaphore
 #include "VulkanSurface.h"
 #include "private/hwui/DrawVkInfo.h"
 
-class GrVkExtensions;
+#include <SkColorSpace.h>
+#include <SkRefCnt.h>
 
 namespace android {
 namespace uirenderer {
@@ -65,6 +62,7 @@ class RenderThread;
 class VulkanManager final : public RefBase {
 public:
     static sp<VulkanManager> getInstance();
+    static sp<VulkanManager> peekInstance();
 
     // Sets up the vulkan context that is shared amonst all clients of the VulkanManager. This must
     // be call once before use of the VulkanManager. Multiple calls after the first will simiply
@@ -108,7 +106,7 @@ public:
     };
 
     // returns a Skia graphic context used to draw content on the specified thread
-    sk_sp<GrDirectContext> createContext(const GrContextOptions& options,
+    sk_sp<GrDirectContext> createContext(GrContextOptions& options,
                                          ContextType contextType = ContextType::kRenderThread);
 
     uint32_t getDriverVersion() const { return mDriverVersion; }
@@ -184,25 +182,8 @@ private:
     VkDevice mDevice = VK_NULL_HANDLE;
 
     uint32_t mGraphicsQueueIndex;
-
-    std::mutex mGraphicsQueueMutex;
     VkQueue mGraphicsQueue = VK_NULL_HANDLE;
-
-    static VKAPI_ATTR VkResult interceptedVkQueueSubmit(VkQueue queue, uint32_t submitCount,
-                                                        const VkSubmitInfo* pSubmits,
-                                                        VkFence fence) {
-        sp<VulkanManager> manager = VulkanManager::getInstance();
-        std::lock_guard<std::mutex> lock(manager->mGraphicsQueueMutex);
-        return manager->mQueueSubmit(queue, submitCount, pSubmits, fence);
-    }
-
-    static VKAPI_ATTR VkResult interceptedVkQueueWaitIdle(VkQueue queue) {
-        sp<VulkanManager> manager = VulkanManager::getInstance();
-        std::lock_guard<std::mutex> lock(manager->mGraphicsQueueMutex);
-        return manager->mQueueWaitIdle(queue);
-    }
-
-    static GrVkGetProc sSkiaGetProp;
+    VkQueue mAHBUploadQueue = VK_NULL_HANDLE;
 
     // Variables saved to populate VkFunctorInitParams.
     static const uint32_t mAPIVersion = VK_MAKE_VERSION(1, 1, 0);

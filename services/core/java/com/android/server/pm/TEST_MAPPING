@@ -32,6 +32,15 @@
       ]
     },
     {
+      "file_patterns": ["(/|^)PackageManagerService\\.java","(/|^)UserManagerService\\.java"],
+      "name": "CtsAppCloningDeviceTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "CtsShortcutHostTestCases",
       "file_patterns": ["(/|^)ShortcutService\\.java"]
     },

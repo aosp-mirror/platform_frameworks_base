@@ -40,5 +40,5 @@ public class AndroidException extends Exception {
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-};
+}
 

@@ -16,15 +16,8 @@
 
 package com.android.server.notification;
 
-import android.app.AlarmManager;
 import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Handler;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -40,11 +33,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -60,23 +54,14 @@ public class NotificationHistoryDatabase {
     private static final String TAG = "NotiHistoryDatabase";
     private static final boolean DEBUG = NotificationManagerService.DBG;
     private static final int HISTORY_RETENTION_DAYS = 1;
-    private static final int HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
     private static final long WRITE_BUFFER_INTERVAL_MS = 1000 * 60 * 20;
     private static final long INVALID_FILE_TIME_MS = -1;
 
-    private static final String ACTION_HISTORY_DELETION =
-            NotificationHistoryDatabase.class.getSimpleName() + ".CLEANUP";
-    private static final int REQUEST_CODE_DELETION = 1;
-    private static final String SCHEME_DELETION = "delete";
-    private static final String EXTRA_KEY = "key";
-
-    private final Context mContext;
-    private final AlarmManager mAlarmManager;
     private final Object mLock = new Object();
     private final Handler mFileWriteHandler;
     @VisibleForTesting
     // List of files holding history information, sorted newest to oldest
-    final LinkedList<AtomicFile> mHistoryFiles;
+    final List<AtomicFile> mHistoryFiles;
     private final File mHistoryDir;
     private final File mVersionFile;
     // Current version of the database files schema
@@ -87,21 +72,14 @@ public class NotificationHistoryDatabase {
     @VisibleForTesting
     NotificationHistory mBuffer;
 
-    public NotificationHistoryDatabase(Context context, Handler fileWriteHandler, File dir) {
-        mContext = context;
-        mAlarmManager = context.getSystemService(AlarmManager.class);
+    public NotificationHistoryDatabase(Handler fileWriteHandler, File dir) {
         mCurrentVersion = DEFAULT_CURRENT_VERSION;
         mFileWriteHandler = fileWriteHandler;
         mVersionFile = new File(dir, "version");
         mHistoryDir = new File(dir, "history");
-        mHistoryFiles = new LinkedList<>();
+        mHistoryFiles = new ArrayList<>();
         mBuffer = new NotificationHistory();
         mWriteBufferRunnable = new WriteBufferRunnable();
-
-        IntentFilter deletionFilter = new IntentFilter(ACTION_HISTORY_DELETION);
-        deletionFilter.addDataScheme(SCHEME_DELETION);
-        mContext.registerReceiver(mFileCleanupReceiver, deletionFilter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     public void init() {
@@ -117,7 +95,7 @@ public class NotificationHistoryDatabase {
 
             checkVersionAndBuildLocked();
             indexFilesLocked();
-            prune(HISTORY_RETENTION_DAYS, System.currentTimeMillis());
+            prune();
         }
     }
 
@@ -133,7 +111,7 @@ public class NotificationHistoryDatabase {
                 safeParseLong(lhs.getName())));
 
         for (File file : files) {
-            mHistoryFiles.addLast(new AtomicFile(file));
+            mHistoryFiles.add(new AtomicFile(file));
         }
     }
 
@@ -246,7 +224,14 @@ public class NotificationHistoryDatabase {
     }
 
     /**
-     * Remove any files that are too old and schedule jobs to clean up the rest
+     * Remove any files that are too old.
+     */
+    void prune() {
+        prune(HISTORY_RETENTION_DAYS, System.currentTimeMillis());
+    }
+
+    /**
+     * Remove any files that are too old.
      */
     void prune(final int retentionDays, final long currentTimeMillis) {
         synchronized (mLock) {
@@ -265,10 +250,6 @@ public class NotificationHistoryDatabase {
 
                 if (creationTime <= retentionBoundary.getTimeInMillis()) {
                     deleteFile(currentOldestFile);
-                } else {
-                    // all remaining files are newer than the cut off; schedule jobs to delete
-                    scheduleDeletion(
-                            currentOldestFile.getBaseFile(), creationTime, retentionDays);
                 }
             }
         }
@@ -306,26 +287,6 @@ public class NotificationHistoryDatabase {
         removeFilePathFromHistory(file.getBaseFile().getAbsolutePath());
     }
 
-    private void scheduleDeletion(File file, long creationTime, int retentionDays) {
-        final long deletionTime = creationTime + (retentionDays * HISTORY_RETENTION_MS);
-        scheduleDeletion(file, deletionTime);
-    }
-
-    private void scheduleDeletion(File file, long deletionTime) {
-        if (DEBUG) {
-            Slog.d(TAG, "Scheduling deletion for " + file.getName() + " at " + deletionTime);
-        }
-        final PendingIntent pi = PendingIntent.getBroadcast(mContext,
-                REQUEST_CODE_DELETION,
-                new Intent(ACTION_HISTORY_DELETION)
-                        .setData(new Uri.Builder().scheme(SCHEME_DELETION)
-                                .appendPath(file.getAbsolutePath()).build())
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        .putExtra(EXTRA_KEY, file.getAbsolutePath()),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, deletionTime, pi);
-    }
-
     private void writeLocked(AtomicFile file, NotificationHistory notifications)
             throws IOException {
         FileOutputStream fos = file.startWrite();
@@ -355,12 +316,6 @@ public class NotificationHistoryDatabase {
         }
     }
 
-    public void unregisterFileCleanupReceiver() {
-        if(mContext != null) {
-            mContext.unregisterReceiver(mFileCleanupReceiver);
-        }
-    }
-
     private static long safeParseLong(String fileName) {
         // AtomicFile will create copies of the numeric files with ".new" and ".bak"
         // over the course of its processing. If these files still exist on boot we need to clean
@@ -372,49 +327,22 @@ public class NotificationHistoryDatabase {
         }
     }
 
-    private final BroadcastReceiver mFileCleanupReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action == null) {
-                return;
-            }
-            if (ACTION_HISTORY_DELETION.equals(action)) {
-                try {
-                    synchronized (mLock) {
-                        final String filePath = intent.getStringExtra(EXTRA_KEY);
-                        AtomicFile fileToDelete = new AtomicFile(new File(filePath));
-                        if (DEBUG) {
-                            Slog.d(TAG, "Removed " + fileToDelete.getBaseFile().getName());
-                        }
-                        fileToDelete.delete();
-                        removeFilePathFromHistory(filePath);
-                    }
-                } catch (Exception e) {
-                    Slog.e(TAG, "Failed to delete notification history file", e);
-                }
-            }
-        }
-    };
-
     final class WriteBufferRunnable implements Runnable {
 
         @Override
         public void run() {
             long time = System.currentTimeMillis();
-            run(time, new AtomicFile(new File(mHistoryDir, String.valueOf(time))));
+            run(new AtomicFile(new File(mHistoryDir, String.valueOf(time))));
         }
 
-        void run(long time, AtomicFile file) {
+        void run(AtomicFile file) {
             synchronized (mLock) {
                 if (DEBUG) Slog.d(TAG, "WriteBufferRunnable "
                         + file.getBaseFile().getAbsolutePath());
                 try {
                     writeLocked(file, mBuffer);
-                    mHistoryFiles.addFirst(file);
+                    mHistoryFiles.add(0, file);
                     mBuffer = new NotificationHistory();
-
-                    scheduleDeletion(file.getBaseFile(), time, HISTORY_RETENTION_DAYS);
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to write buffer to disk. not flushing buffer", e);
                 }

@@ -16,224 +16,579 @@
 
 package com.android.inputmethod.stresstest;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED;
 
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.INPUT_METHOD_MANAGER_HIDE_ON_CREATE;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.INPUT_METHOD_MANAGER_SHOW_ON_CREATE;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.REQUEST_FOCUS_ON_CREATE;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.TestActivity;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.TestActivity.createIntent;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.WINDOW_INSETS_CONTROLLER_HIDE_ON_CREATE;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.WINDOW_INSETS_CONTROLLER_SHOW_ON_CREATE;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.callOnMainSync;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.getWindowAndSoftInputFlagParameters;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.hasUnfocusableWindowFlags;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.isImeShown;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeAlwaysHiddenWithWindowFlagSet;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeIsAlwaysHidden;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyWindowAndViewFocus;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntil;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsHidden;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
 
-import android.app.Activity;
+import static com.google.common.truth.Truth.assertThat;
+
 import android.app.Instrumentation;
 import android.content.Intent;
-import android.os.Bundle;
+import android.os.Build;
 import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
+import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
-import android.view.WindowInsets;
-import android.view.WindowInsetsAnimation;
-import android.view.inputmethod.InputMethodManager;
+import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RootPermissionTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public final class ImeOpenCloseStressTest {
 
     private static final String TAG = "ImeOpenCloseStressTest";
     private static final int NUM_TEST_ITERATIONS = 10;
 
-    @Rule
-    public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
-
-    @Rule
-    public ScreenCaptureRule mScreenCaptureRule =
+    @Rule(order = 0) public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
+    @Rule(order = 1) public ImeStressTestRule mImeStressTestRule =
+            new ImeStressTestRule(true /* useSimpleTestIme */);
+    @Rule(order = 2) public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
-    private Instrumentation mInstrumentation;
 
-    @Before
-    public void setUp() {
+    private final Instrumentation mInstrumentation;
+    private final int mSoftInputFlags;
+    private final int mWindowFocusFlags;
+
+    @Parameterized.Parameters(
+            name = "windowFocusFlags={0}, softInputVisibility={1}, softInputAdjustment={2}")
+    public static List<Object[]> windowAndSoftInputFlagParameters() {
+        return getWindowAndSoftInputFlagParameters();
+    }
+
+    public ImeOpenCloseStressTest(
+            int windowFocusFlags, int softInputVisibility, int softInputAdjustment) {
+        mSoftInputFlags = softInputVisibility | softInputAdjustment;
+        mWindowFocusFlags = windowFocusFlags;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
     }
 
     @Test
-    public void testShowHide_waitingVisibilityChange() {
-        TestActivity activity = TestActivity.start();
-        EditText editText = activity.getEditText();
-        waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
-        for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
+    public void testShowHideWithInputMethodManager_waitingVisibilityChange() {
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+        // Test only once if window flags set to save time.
+        int iterNum = hasUnfocusableWindowFlags(activity) ? 1 : NUM_TEST_ITERATIONS;
+        for (int i = 0; i < iterNum; i++) {
             String msgPrefix = "Iteration #" + i + " ";
             Log.i(TAG, msgPrefix + "start");
-            mInstrumentation.runOnMainSync(activity::showIme);
-            waitOnMainUntil(msgPrefix + "IME should be visible", () -> isImeShown(editText));
-            mInstrumentation.runOnMainSync(activity::hideIme);
-            waitOnMainUntil(msgPrefix + "IME should be hidden", () -> !isImeShown(editText));
+            callOnMainSync(activity::showImeWithInputMethodManager);
+            verifyShowBehavior(activity);
+
+            callOnMainSync(activity::hideImeWithInputMethodManager);
+
+            verifyHideBehavior(activity);
         }
     }
 
     @Test
-    public void testShowHide_waitingAnimationEnd() {
-        TestActivity activity = TestActivity.start();
+    public void testShowHideWithInputMethodManager_waitingAnimationEnd() {
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+
+        if (hasUnfocusableWindowFlags(activity)) {
+            return; // Skip to save time.
+        }
         activity.enableAnimationMonitoring();
         EditText editText = activity.getEditText();
-        waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
             String msgPrefix = "Iteration #" + i + " ";
             Log.i(TAG, msgPrefix + "start");
-            mInstrumentation.runOnMainSync(activity::showIme);
-            waitOnMainUntil(msgPrefix + "IME should be visible",
+            callOnMainSync(activity::showImeWithInputMethodManager);
+            waitOnMainUntil(
+                    msgPrefix + "IME should be visible",
                     () -> !activity.isAnimating() && isImeShown(editText));
-            mInstrumentation.runOnMainSync(activity::hideIme);
-            waitOnMainUntil(msgPrefix + "IME should be hidden",
+
+            callOnMainSync(activity::hideImeWithInputMethodManager);
+            waitOnMainUntil(
+                    msgPrefix + "IME should be hidden",
                     () -> !activity.isAnimating() && !isImeShown(editText));
         }
     }
 
     @Test
-    public void testShowHide_intervalAfterHide() {
+    public void testShowHideWithInputMethodManager_intervalAfterHide() {
         // Regression test for b/221483132
-        TestActivity activity = TestActivity.start();
-        EditText editText = activity.getEditText();
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+        if (hasUnfocusableWindowFlags(activity)) {
+            return; // Skip to save time.
+        }
         // Intervals = 10, 20, 30, ..., 100, 150, 200, ...
         List<Integer> intervals = new ArrayList<>();
         for (int i = 10; i < 100; i += 10) intervals.add(i);
         for (int i = 100; i < 1000; i += 50) intervals.add(i);
-        waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
         for (int intervalMillis : intervals) {
             String msgPrefix = "Interval = " + intervalMillis + " ";
             Log.i(TAG, msgPrefix + " start");
-            mInstrumentation.runOnMainSync(activity::hideIme);
+            callOnMainSync(activity::hideImeWithInputMethodManager);
             SystemClock.sleep(intervalMillis);
-            mInstrumentation.runOnMainSync(activity::showIme);
-            waitOnMainUntil(msgPrefix + "IME should be visible",
-                    () -> isImeShown(editText));
+
+            callOnMainSync(activity::showImeWithInputMethodManager);
+            verifyShowBehavior(activity);
         }
     }
 
     @Test
-    public void testShowHideInSameFrame() {
-        TestActivity activity = TestActivity.start();
-        activity.enableAnimationMonitoring();
-        EditText editText = activity.getEditText();
-        waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
+    public void testShowHideWithInputMethodManager_inSameFrame() {
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
 
+        if (hasUnfocusableWindowFlags(activity)) {
+            return; // Skip to save time.
+        }
         // hidden -> show -> hide
-        mInstrumentation.runOnMainSync(() -> {
-            Log.i(TAG, "Calling showIme() and hideIme()");
-            activity.showIme();
-            activity.hideIme();
-        });
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    Log.i(TAG, "Calling showIme() and hideIme()");
+                    activity.showImeWithInputMethodManager();
+                    activity.hideImeWithInputMethodManager();
+                });
         // Wait until IMMS / IMS handles messages.
         SystemClock.sleep(1000);
         mInstrumentation.waitForIdleSync();
-        waitOnMainUntil("IME should be invisible after show/hide", () -> !isImeShown(editText));
+        verifyHideBehavior(activity);
 
-        mInstrumentation.runOnMainSync(activity::showIme);
-        waitOnMainUntil("IME should be visible",
-                () -> !activity.isAnimating() && isImeShown(editText));
+        mInstrumentation.runOnMainSync(activity::showImeWithInputMethodManager);
+        verifyShowBehavior(activity);
         mInstrumentation.waitForIdleSync();
 
         // shown -> hide -> show
-        mInstrumentation.runOnMainSync(() -> {
-            Log.i(TAG, "Calling hideIme() and showIme()");
-            activity.hideIme();
-            activity.showIme();
-        });
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    Log.i(TAG, "Calling hideIme() and showIme()");
+                    activity.hideImeWithInputMethodManager();
+                    activity.showImeWithInputMethodManager();
+                });
         // Wait until IMMS / IMS handles messages.
         SystemClock.sleep(1000);
         mInstrumentation.waitForIdleSync();
-        waitOnMainUntil("IME should be visible after hide/show",
-                () -> !activity.isAnimating() && isImeShown(editText));
+        verifyShowBehavior(activity);
     }
 
-    public static class TestActivity extends Activity {
+    /**
+     * Test IME hidden by calling show and hide IME consecutively with
+     * {@link android.view.inputmethod.InputMethodManager} APIs in
+     * {@link android.app.Activity#onCreate}.
+     *
+     * <p> Note for developers: Use {@link WindowManager.LayoutParams#SOFT_INPUT_STATE_UNCHANGED}
+     * window flag to avoid some softInputMode visibility flags may take presence over
+     * {@link android.view.inputmethod.InputMethodManager} APIs (e.g. use showSoftInput to show
+     * IME in {@link android.app.Activity#onCreate} but being hidden by
+     * {@link WindowManager.LayoutParams#SOFT_INPUT_STATE_ALWAYS_HIDDEN} window flag after the
+     * activity window focused).</p>
+     */
+    @Test
+    public void testShowHideWithInputMethodManager_onCreate() {
+        if (mSoftInputFlags != SOFT_INPUT_STATE_UNCHANGED) {
+            return;
+        }
+        // Show and hide with InputMethodManager at onCreate()
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Arrays.asList(
+                                REQUEST_FOCUS_ON_CREATE,
+                                INPUT_METHOD_MANAGER_SHOW_ON_CREATE,
+                                INPUT_METHOD_MANAGER_HIDE_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent);
 
-        private EditText mEditText;
-        private boolean mIsAnimating;
+        verifyHideBehavior(activity);
+    }
 
-        private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
-                new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
-                    @Override
-                    public WindowInsetsAnimation.Bounds onStart(WindowInsetsAnimation animation,
-                            WindowInsetsAnimation.Bounds bounds) {
-                        mIsAnimating = true;
-                        return super.onStart(animation, bounds);
-                    }
+    @Test
+    public void testShowWithInputMethodManager_notRequestFocus() {
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
 
-                    @Override
-                    public void onEnd(WindowInsetsAnimation animation) {
-                        super.onEnd(animation);
-                        mIsAnimating = false;
-                    }
+        // Show InputMethodManager without requesting focus
+        callOnMainSync(activity::showImeWithInputMethodManager);
 
-                    @Override
-                    public WindowInsets onProgress(WindowInsets insets,
-                            List<WindowInsetsAnimation> runningAnimations) {
-                        return insets;
-                    }
-                };
+        int windowFlags = activity.getWindow().getAttributes().flags;
+        EditText editText = activity.getEditText();
+        if ((windowFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ false, /*expectViewFocus*/ false);
+        } else {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
+        }
+        // The Ime should always be hidden because view never gains focus.
+        verifyImeIsAlwaysHidden(editText);
+    }
 
-        public static TestActivity start() {
-            Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-            Intent intent = new Intent()
-                    .setAction(Intent.ACTION_MAIN)
-                    .setClass(instrumentation.getContext(), TestActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            return (TestActivity) instrumentation.startActivitySync(intent);
+    @Test
+    public void testShowHideWithWindowInsetsController_waitingVisibilityChange() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+        // Test only once if window flags set to save time.
+        int iterNum = hasUnfocusableWindowFlags(activity) ? 1 : NUM_TEST_ITERATIONS;
+        for (int i = 0; i < iterNum; i++) {
+            String msgPrefix = "Iteration #" + i + " ";
+            Log.i(TAG, msgPrefix + "start");
+            mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
+            verifyShowBehavior(activity);
+            mInstrumentation.runOnMainSync(activity::hideImeWithWindowInsetsController);
+            verifyHideBehavior(activity);
+        }
+    }
+
+    @Test
+    public void testShowHideWithWindowInsetsController_waitingAnimationEnd() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+
+        if (hasUnfocusableWindowFlags(activity)) {
+            return; // Skip to save time.
+        }
+        activity.enableAnimationMonitoring();
+        EditText editText = activity.getEditText();
+        for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
+            String msgPrefix = "Iteration #" + i + " ";
+            Log.i(TAG, msgPrefix + "start");
+            mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
+            waitOnMainUntil(
+                    msgPrefix + "IME should be visible",
+                    () -> !activity.isAnimating() && isImeShown(editText));
+
+            mInstrumentation.runOnMainSync(activity::hideImeWithWindowInsetsController);
+            waitOnMainUntil(
+                    msgPrefix + "IME should be hidden",
+                    () -> !activity.isAnimating() && !isImeShown(editText));
+        }
+    }
+
+    @Test
+    public void testShowHideWithWindowInsetsController_intervalAfterHide() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+
+        if (hasUnfocusableWindowFlags(activity)) {
+            return; // Skip to save time.
+        }
+        // Intervals = 10, 20, 30, ..., 100, 150, 200, ...
+        List<Integer> intervals = new ArrayList<>();
+        for (int i = 10; i < 100; i += 10) intervals.add(i);
+        for (int i = 100; i < 1000; i += 50) intervals.add(i);
+        for (int intervalMillis : intervals) {
+            String msgPrefix = "Interval = " + intervalMillis + " ";
+            Log.i(TAG, msgPrefix + " start");
+            mInstrumentation.runOnMainSync(activity::hideImeWithWindowInsetsController);
+            SystemClock.sleep(intervalMillis);
+
+            mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
+            verifyShowBehavior(activity);
+        }
+    }
+
+    @Test
+    public void testShowHideWithWindowInsetsController_inSameFrame() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request focus after app starts to avoid triggering auto-show behavior.
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+
+        if (hasUnfocusableWindowFlags(activity)) {
+            return; // Skip to save time.
+        }
+        // hidden -> show -> hide
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    Log.i(TAG, "Calling showIme() and hideIme()");
+                    activity.showImeWithWindowInsetsController();
+                    activity.hideImeWithWindowInsetsController();
+                });
+        // Wait until IMMS / IMS handles messages.
+        SystemClock.sleep(1000);
+        mInstrumentation.waitForIdleSync();
+        verifyHideBehavior(activity);
+
+        mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
+        verifyShowBehavior(activity);
+        mInstrumentation.waitForIdleSync();
+
+        // shown -> hide -> show
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    Log.i(TAG, "Calling hideIme() and showIme()");
+                    activity.hideImeWithWindowInsetsController();
+                    activity.showImeWithWindowInsetsController();
+                });
+        // Wait until IMMS / IMS handles messages.
+        SystemClock.sleep(1000);
+        mInstrumentation.waitForIdleSync();
+        verifyShowBehavior(activity);
+    }
+
+    @Test
+    public void testShowWithWindowInsetsController_onCreate_requestFocus() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        // Show with InputMethodManager at onCreate()
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Arrays.asList(
+                                REQUEST_FOCUS_ON_CREATE, WINDOW_INSETS_CONTROLLER_SHOW_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent);
+
+        verifyShowBehavior(activity);
+    }
+
+    @Test
+    public void testShowWithWindowInsetsController_onCreate_notRequestFocus() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        // Show and hide with InputMethodManager at onCreate()
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(WINDOW_INSETS_CONTROLLER_SHOW_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent);
+
+        // Ime is shown but with a fallback InputConnection
+        verifyShowBehaviorNotRequestFocus(activity);
+    }
+
+    @Test
+    public void testShowWithWindowInsetsController_afterStart_notRequestFocus() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        // Show and hide with InputMethodManager at onCreate()
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
+
+        // Ime is shown but with a fallback InputConnection
+        verifyShowBehaviorNotRequestFocus(activity);
+    }
+
+    /**
+     * Test IME hidden by calling show and hide IME consecutively with
+     * {@link android.view.WindowInsetsController} APIs in {@link android.app.Activity#onCreate}.
+     *
+     * <p> Note for developers: Use {@link WindowManager.LayoutParams#SOFT_INPUT_STATE_UNCHANGED}
+     * window flag to avoid some softInputMode visibility flags may take presence over
+     * {@link android.view.WindowInsetsController} APIs (e.g. use showSoftInput to show
+     * IME in {@link android.app.Activity#onCreate} but being hidden by
+     * {@link WindowManager.LayoutParams#SOFT_INPUT_STATE_ALWAYS_HIDDEN} window flag after the
+     * activity window focused).</p>
+     */
+    @Test
+    public void testHideWithWindowInsetsController_onCreate_requestFocus() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return;
+        }
+        if (mSoftInputFlags != SOFT_INPUT_STATE_UNCHANGED) {
+            return;
+        }
+        // Show and hide with InputMethodManager at onCreate()
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Arrays.asList(
+                                REQUEST_FOCUS_ON_CREATE,
+                                WINDOW_INSETS_CONTROLLER_SHOW_ON_CREATE,
+                                WINDOW_INSETS_CONTROLLER_HIDE_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent);
+
+        verifyHideBehavior(activity);
+    }
+
+    @Test
+    public void testScreenOffOn() throws Exception {
+        Intent intent1 =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent1);
+        // Show Ime with InputMethodManager to ensure the keyboard is shown on the second activity
+        callOnMainSync(activity::showImeWithInputMethodManager);
+
+        Thread.sleep(1000);
+        verifyShowBehavior(activity);
+
+        UiDevice uiDevice = UiDevice.getInstance(mInstrumentation);
+
+        if (uiDevice.isScreenOn()) {
+            uiDevice.sleep();
+        }
+        Thread.sleep(1000);
+        if (!uiDevice.isScreenOn()) {
+            uiDevice.wakeUp();
         }
 
-        @Override
-        protected void onCreate(@Nullable Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            LinearLayout rootView = new LinearLayout(this);
-            rootView.setOrientation(LinearLayout.VERTICAL);
-            mEditText = new EditText(this);
-            rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
-            setContentView(rootView);
+        verifyShowBehavior(activity);
+    }
+
+    // TODO: Add tests for activities that don't handle the rotation.
+    @Test
+    public void testRotateScreenWithKeyboardOn() throws Exception {
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent);
+        // Show Ime with InputMethodManager to ensure the keyboard is shown on the second activity
+        callOnMainSync(activity::showImeWithInputMethodManager);
+        Thread.sleep(2000);
+        verifyShowBehavior(activity);
+
+        UiDevice uiDevice = UiDevice.getInstance(mInstrumentation);
+
+        uiDevice.setOrientationRight();
+        uiDevice.waitForIdle();
+        Thread.sleep(1000);
+        Log.i(TAG, "Rotate screen right");
+        assertThat(uiDevice.isNaturalOrientation()).isFalse();
+        verifyRotateBehavior(activity);
+
+        uiDevice.setOrientationLeft();
+        uiDevice.waitForIdle();
+        Thread.sleep(1000);
+        Log.i(TAG, "Rotate screen left");
+        assertThat(uiDevice.isNaturalOrientation()).isFalse();
+        verifyRotateBehavior(activity);
+
+        uiDevice.setOrientationNatural();
+        uiDevice.waitForIdle();
+    }
+
+    private static void verifyShowBehavior(TestActivity activity) {
+        if (hasUnfocusableWindowFlags(activity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(activity);
+            return;
+        }
+        EditText editText = activity.getEditText();
+
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        waitOnMainUntilImeIsShown(editText);
+    }
+
+    private static void verifyHideBehavior(TestActivity activity) {
+        if (hasUnfocusableWindowFlags(activity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(activity);
+            return;
+        }
+        EditText editText = activity.getEditText();
+
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        waitOnMainUntilImeIsHidden(editText);
+    }
+
+    private static void verifyShowBehaviorNotRequestFocus(TestActivity activity) {
+        int windowFlags = activity.getWindow().getAttributes().flags;
+        EditText editText = activity.getEditText();
+
+        if ((windowFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ false, /*expectViewFocus*/ false);
+            verifyImeIsAlwaysHidden(editText);
+        } else if ((windowFlags & WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM) != 0
+                || (windowFlags & WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0) {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
+            verifyImeIsAlwaysHidden(editText);
+        } else {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
+            // Ime is shown but with a fallback InputConnection
+            waitOnMainUntilImeIsShown(editText);
+        }
+    }
+
+    private static void verifyRotateBehavior(TestActivity activity) {
+        // Get the new TestActivity after recreation.
+        TestActivity newActivity = TestActivity.getLastCreatedInstance();
+        assertThat(newActivity).isNotNull();
+        assertThat(newActivity).isNotEqualTo(activity);
+
+        EditText newEditText = newActivity.getEditText();
+        int softInputMode = newActivity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+
+        if (hasUnfocusableWindowFlags(newActivity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(newActivity);
+            return;
         }
 
-        public EditText getEditText() {
-            return mEditText;
-        }
+        if (softInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+            // After rotation, the keyboard would be hidden only when the flag is
+            // SOFT_INPUT_STATE_ALWAYS_HIDDEN. However, SOFT_INPUT_STATE_HIDDEN is different because
+            // it requires appending SOFT_INPUT_IS_FORWARD_NAVIGATION flag, which won't be added
+            // when rotating the devices (rotating doesn't navigate forward to the next app window.)
+            verifyWindowAndViewFocus(newEditText, /*expectWindowFocus*/ true, /*expectViewFocus*/
+                    true);
+            waitOnMainUntilImeIsHidden(newEditText);
 
-        public void showIme() {
-            Log.i(TAG, "TestActivity.showIme");
-            mEditText.requestFocus();
-            InputMethodManager imm = getSystemService(InputMethodManager.class);
-            imm.showSoftInput(mEditText, 0);
-        }
-
-        public void hideIme() {
-            Log.i(TAG, "TestActivity.hideIme");
-            InputMethodManager imm = getSystemService(InputMethodManager.class);
-            imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
-        }
-
-        public void enableAnimationMonitoring() {
-            // Enable WindowInsetsAnimation.
-            // Note that this has a side effect of disabling InsetsAnimationThreadControlRunner.
-            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-                getWindow().setDecorFitsSystemWindows(false);
-                mEditText.setWindowInsetsAnimationCallback(mWindowInsetsAnimationCallback);
-            });
-        }
-
-        public boolean isAnimating() {
-            return mIsAnimating;
+        } else {
+            // Other cases, keyboard would be shown.
+            verifyWindowAndViewFocus(newEditText, /*expectWindowFocus*/ true, /*expectViewFocus*/
+                    true);
+            waitOnMainUntilImeIsShown(newEditText);
         }
     }
 }

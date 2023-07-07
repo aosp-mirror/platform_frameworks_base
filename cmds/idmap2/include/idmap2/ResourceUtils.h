@@ -19,6 +19,7 @@
 
 #include <optional>
 #include <string>
+#include <android-base/unique_fd.h>
 
 #include "androidfw/AssetManager2.h"
 #include "idmap2/Result.h"
@@ -29,17 +30,28 @@ namespace android::idmap2 {
 #define EXTRACT_ENTRY(resid) (0x0000ffff & (resid))
 
 // use typedefs to let the compiler warn us about implicit casts
-using ResourceId = uint32_t;  // 0xpptteeee
+using ResourceId = android::ResourceId;  // 0xpptteeee
 using PackageId = uint8_t;    // pp in 0xpptteeee
 using TypeId = uint8_t;       // tt in 0xpptteeee
 using EntryId = uint16_t;     // eeee in 0xpptteeee
 
-using DataType = uint8_t;    // Res_value::dataType
-using DataValue = uint32_t;  // Res_value::data
+using DataType = android::DataType;    // Res_value::dataType
+using DataValue = android::DataValue;  // Res_value::data
 
 struct TargetValue {
   DataType data_type;
   DataValue data_value;
+  std::string data_string_value;
+  std::optional<android::base::borrowed_fd> data_binary_value;
+};
+
+struct TargetValueWithConfig {
+  TargetValue value;
+  std::string config;
+
+  [[nodiscard]] std::pair<std::string, TargetValue> to_pair() const {
+    return std::make_pair(config, value);
+  }
 };
 
 namespace utils {

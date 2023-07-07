@@ -18,12 +18,6 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- [CHAR LIMIT=16] Message shown in upgrading dialog for each .apk that is optimized. -->
-    <!-- Each word has an 8 character limit due to screen width limitation. -->
-    <string name="android_upgrading_apk">App
-        <xliff:g id="number" example="123">%1$d</xliff:g> of
-        <xliff:g id="number" example="123">%2$d</xliff:g>.</string>
-
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. Override from base which says "Body Sensors". [CHAR_LIMIT=25] -->
     <string name="permgrouplab_sensors">Sensors</string>
 

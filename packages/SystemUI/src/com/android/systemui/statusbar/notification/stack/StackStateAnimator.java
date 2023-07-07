@@ -22,9 +22,10 @@ import android.animation.ValueAnimator;
 import android.util.Property;
 import android.view.View;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -52,7 +53,8 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_CLOSE_REMOTE_INPUT = 150;
     public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 400;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 400;
-    public static final int ANIMATION_DURATION_FOLD_TO_AOD = 600;
+    public static final int ANIMATION_DURATION_FOLD_TO_AOD =
+            AnimatableClockView.ANIMATION_DURATION_FOLD_TO_AOD;
     public static final int ANIMATION_DURATION_PULSE_APPEAR =
             KeyguardSliceView.DEFAULT_ANIM_DURATION;
     public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;
@@ -167,9 +169,9 @@ public class StackStateAnimator {
         adaptDurationWhenGoingToFullShade(child, viewState, wasAdded, animationStaggerCount);
         mAnimationProperties.delay = 0;
         if (wasAdded || mAnimationFilter.hasDelays
-                        && (viewState.yTranslation != child.getTranslationY()
-                        || viewState.zTranslation != child.getTranslationZ()
-                        || viewState.alpha != child.getAlpha()
+                        && (viewState.getYTranslation() != child.getTranslationY()
+                        || viewState.getZTranslation() != child.getTranslationZ()
+                        || viewState.getAlpha() != child.getAlpha()
                         || viewState.height != child.getActualHeight()
                         || viewState.clipTopAmount != child.getClipTopAmount())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
@@ -189,7 +191,7 @@ public class StackStateAnimator {
                 mAnimationProperties.duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50
                         + (long) (100 * longerDurationFactor);
             }
-            child.setTranslationY(viewState.yTranslation + startOffset);
+            child.setTranslationY(viewState.getYTranslation() + startOffset);
         }
     }
 
@@ -398,7 +400,7 @@ public class StackStateAnimator {
                     // travelled
                     ExpandableViewState viewState =
                             ((ExpandableView) event.viewAfterChangingView).getViewState();
-                    translationDirection = ((viewState.yTranslation
+                    translationDirection = ((viewState.getYTranslation()
                             - (ownPosition + actualHeight / 2.0f)) * 2 /
                             actualHeight);
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
@@ -431,7 +433,7 @@ public class StackStateAnimator {
                 ExpandableViewState viewState = changingView.getViewState();
                 mTmpState.copyFrom(viewState);
                 if (event.headsUpFromBottom) {
-                    mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
+                    mTmpState.setYTranslation(mHeadsUpAppearHeightBottom);
                 } else {
                     Runnable onAnimationEnd = null;
                     if (loggable) {

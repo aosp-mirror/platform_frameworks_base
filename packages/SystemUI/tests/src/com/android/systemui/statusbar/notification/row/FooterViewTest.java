@@ -16,18 +16,20 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
 
+import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -37,7 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 public class FooterViewTest extends SysuiTestCase {
 
     FooterView mView;
@@ -97,6 +99,24 @@ public class FooterViewTest extends SysuiTestCase {
         assertFalse(mView.isSecondaryVisible());
 
         mView.setSecondaryVisible(true /* visible */, true /* animate */);
+    }
+
+    @Test
+    public void testSetFooterLabelVisible() {
+        mView.setFooterLabelVisible(true);
+        assertThat(mView.findViewById(R.id.manage_text).getVisibility()).isEqualTo(View.GONE);
+        assertThat(mView.findSecondaryView().getVisibility()).isEqualTo(View.GONE);
+        assertThat(mView.findViewById(R.id.unlock_prompt_footer).getVisibility())
+                .isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testSetFooterLabelInvisible() {
+        mView.setFooterLabelVisible(false);
+        assertThat(mView.findViewById(R.id.manage_text).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mView.findSecondaryView().getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mView.findViewById(R.id.unlock_prompt_footer).getVisibility())
+                .isEqualTo(View.GONE);
     }
 }
 

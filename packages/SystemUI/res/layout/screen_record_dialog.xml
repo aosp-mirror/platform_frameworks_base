@@ -49,13 +49,13 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:fontFamily="@*android:string/config_headlineFontFamily"
-                    android:text="@string/screenrecord_start_label"
+                    android:text="@string/screenrecord_permission_dialog_title"
                     android:layout_marginTop="22dp"
                     android:layout_marginBottom="15dp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/screenrecord_description"
+                    android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?android:textColorSecondary"
                     android:gravity="center"
@@ -73,7 +73,7 @@
                         android:tint="?android:attr/textColorSecondary"
                         android:layout_gravity="center"
                         android:layout_weight="0"
-                        android:layout_marginRight="@dimen/screenrecord_option_padding"/>
+                        android:layout_marginEnd="@dimen/screenrecord_option_padding"/>
                     <Spinner
                         android:id="@+id/screen_recording_options"
                         android:layout_width="0dp"
@@ -106,7 +106,7 @@
                         android:src="@drawable/ic_touch"
                         android:tint="?android:attr/textColorSecondary"
                         android:layout_gravity="center"
-                        android:layout_marginRight="@dimen/screenrecord_option_padding"/>
+                        android:layout_marginEnd="@dimen/screenrecord_option_padding"/>
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -148,13 +148,27 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"/>
+
+                <!-- Temporary entrypoint for the partial screensharing used for teamfooding -->
+                <!-- TODO(b/236838395) remove this and use redesigned dialog -->
+                <TextView
+                    android:id="@+id/button_app"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="8dp"
+                    android:text="App"
+                    style="@style/Widget.Dialog.Button.BorderButton" />
+
                 <TextView
                     android:id="@+id/button_start"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:layout_gravity="end"
-                    android:text="@string/screenrecord_start"
+                    android:text="@string/screenrecord_continue"
                     style="@style/Widget.Dialog.Button" />
             </LinearLayout>
         </LinearLayout>

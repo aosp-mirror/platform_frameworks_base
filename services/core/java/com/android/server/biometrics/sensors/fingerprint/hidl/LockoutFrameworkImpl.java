@@ -24,6 +24,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -69,6 +71,7 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     private final SparseIntArray mFailedAttempts;
     private final AlarmManager mAlarmManager;
     private final LockoutReceiver mLockoutReceiver;
+    private final Handler mHandler;
 
     public LockoutFrameworkImpl(Context context, LockoutResetCallback lockoutResetCallback) {
         mContext = context;
@@ -77,6 +80,7 @@ public class LockoutFrameworkImpl implements LockoutTracker {
         mFailedAttempts = new SparseIntArray();
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mLockoutReceiver = new LockoutReceiver();
+        mHandler = new Handler(Looper.getMainLooper());
 
         context.registerReceiver(mLockoutReceiver, new IntentFilter(ACTION_LOCKOUT_RESET),
                 RESET_FINGERPRINT_LOCKOUT, null /* handler */, Context.RECEIVER_EXPORTED);
@@ -127,9 +131,11 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     }
 
     private void scheduleLockoutResetForUser(int userId) {
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        mHandler.post(() -> {
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + FAIL_LOCKOUT_TIMEOUT_MS,
                 getLockoutResetIntentForUser(userId));
+        });
     }
 
     private PendingIntent getLockoutResetIntentForUser(int userId) {

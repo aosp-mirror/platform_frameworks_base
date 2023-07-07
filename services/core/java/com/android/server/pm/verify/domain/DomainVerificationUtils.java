@@ -28,7 +28,7 @@ import android.util.Patterns;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.util.Set;
 import java.util.regex.Matcher;

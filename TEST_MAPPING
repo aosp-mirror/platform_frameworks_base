@@ -15,6 +15,22 @@
       ]
     }
   ],
+  "presubmit-pm": [
+    {
+      "name": "PackageManagerServiceServerTests",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ],
   "presubmit": [
     {
       "name": "ManagedProvisioningTests",
@@ -49,15 +65,16 @@
       ]
     },
     {
-      "name": "ExtServicesUnitTests",
+      "name": "FrameworksInputMethodSystemServerTests",
       "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
+        {"include-filter": "com.android.server.inputmethod"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
       ]
     },
     {
-      "name": "TestablesTests",
+      "name": "ExtServicesUnitTests",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -159,6 +176,45 @@
      "options": [
        {
          "include-annotation": "android.platform.test.annotations.Presubmit"
+       },
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       },
+       {
+         "exclude-annotation": "org.junit.Ignore"
+       }
+     ]
+   },
+   {
+     "name": "PackageManagerServiceServerTests",
+     "options": [
+       {
+         "include-annotation": "android.platform.test.annotations.Presubmit"
+       },
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       },
+       {
+         "exclude-annotation": "org.junit.Ignore"
+       }
+     ]
+   }
+ ],
+ "auto-features-postsubmit": [
+   // Test tag for automotive feature targets. These are only running in postsubmit.
+   // This tag is used in targeted test features testing to limit resource use.
+   // TODO(b/256932212): this tag to be removed once the above is no longer in use.
+   {
+     "name": "FrameworksMockingServicesTests",
+     "options": [
+       {
+         "include-filter": "com.android.server.pm.UserVisibilityMediatorSUSDTest"
+       },
+       {
+         "include-filter": "com.android.server.pm.UserVisibilityMediatorMUMDTest"
+       },
+       {
+         "include-filter": "com.android.server.pm.UserVisibilityMediatorMUPANDTest"
        },
        {
          "exclude-annotation": "androidx.test.filters.FlakyTest"

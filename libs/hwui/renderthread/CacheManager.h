@@ -22,7 +22,11 @@
 #endif
 #include <SkSurface.h>
 #include <utils/String8.h>
+
 #include <vector>
+
+#include "MemoryPolicy.h"
+#include "utils/RingBuffer.h"
 #include "utils/TimeUtils.h"
 
 namespace android {
@@ -35,17 +39,16 @@ class RenderState;
 
 namespace renderthread {
 
-class IRenderPipeline;
 class RenderThread;
+class CanvasContext;
 
 class CacheManager {
 public:
-    enum class TrimMemoryMode { Complete, UiHidden };
-
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void configureContext(GrContextOptions* context, const void* identity, ssize_t size);
 #endif
-    void trimMemory(TrimMemoryMode mode);
+    void trimMemory(TrimLevel mode);
+    void trimCaches(CacheTrimLevel mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
     void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
@@ -53,30 +56,50 @@ public:
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
     void onFrameCompleted();
+    void notifyNextFrameSize(int width, int height);
 
-    void performDeferredCleanup(nsecs_t cleanupOlderThanMillis);
+    void onThreadIdle();
+
+    void registerCanvasContext(CanvasContext* context);
+    void unregisterCanvasContext(CanvasContext* context);
+    void onContextStopped(CanvasContext* context);
 
 private:
     friend class RenderThread;
 
-    explicit CacheManager();
+    explicit CacheManager(RenderThread& thread);
+    void setupCacheLimits();
+    bool areAllContextsStopped();
+    void checkUiHidden();
+    void scheduleDestroyContext();
+    void cancelDestroyContext();
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void reset(sk_sp<GrDirectContext> grContext);
 #endif
     void destroy();
 
-    const size_t mMaxSurfaceArea;
+    RenderThread& mRenderThread;
+    const MemoryPolicy& mMemoryPolicy;
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     sk_sp<GrDirectContext> mGrContext;
 #endif
 
-    const size_t mMaxResourceBytes;
-    const size_t mBackgroundResourceBytes;
+    size_t mMaxSurfaceArea = 0;
 
-    const size_t mMaxGpuFontAtlasBytes;
-    const size_t mMaxCpuFontCacheBytes;
-    const size_t mBackgroundCpuFontCacheBytes;
+    size_t mMaxResourceBytes = 0;
+    size_t mBackgroundResourceBytes = 0;
+
+    size_t mMaxGpuFontAtlasBytes = 0;
+    size_t mMaxCpuFontCacheBytes = 0;
+    size_t mBackgroundCpuFontCacheBytes = 0;
+
+    std::vector<CanvasContext*> mCanvasContexts;
+    RingBuffer<uint64_t, 100> mFrameCompletions;
+
+    nsecs_t mLastDeferredCleanup = 0;
+    bool mIsDestructionPending = false;
+    uint32_t mGenerationId = 0;
 };
 
 } /* namespace renderthread */

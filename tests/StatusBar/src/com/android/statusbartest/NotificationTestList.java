@@ -1156,12 +1156,12 @@ public class NotificationTestList extends TestActivity
     private PendingIntent makeIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private PendingIntent makeIntent2() {
         Intent intent = new Intent(this, StatusBarTest.class);
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
 

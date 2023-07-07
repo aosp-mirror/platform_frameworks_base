@@ -48,8 +48,6 @@ import java.util.List;
  * the PreAuthInfo should not change any sensor state.
  */
 class PreAuthInfo {
-    private static final String TAG = "BiometricService/PreAuthInfo";
-
     static final int AUTHENTICATOR_OK = 1;
     static final int BIOMETRIC_NO_HARDWARE = 2;
     static final int BIOMETRIC_DISABLED_BY_DEVICE_POLICY = 3;
@@ -62,24 +60,7 @@ class PreAuthInfo {
     static final int BIOMETRIC_LOCKOUT_TIMED = 10;
     static final int BIOMETRIC_LOCKOUT_PERMANENT = 11;
     static final int BIOMETRIC_SENSOR_PRIVACY_ENABLED = 12;
-    @IntDef({AUTHENTICATOR_OK,
-            BIOMETRIC_NO_HARDWARE,
-            BIOMETRIC_DISABLED_BY_DEVICE_POLICY,
-            BIOMETRIC_INSUFFICIENT_STRENGTH,
-            BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE,
-            BIOMETRIC_HARDWARE_NOT_DETECTED,
-            BIOMETRIC_NOT_ENROLLED,
-            BIOMETRIC_NOT_ENABLED_FOR_APPS,
-            CREDENTIAL_NOT_ENROLLED,
-            BIOMETRIC_LOCKOUT_TIMED,
-            BIOMETRIC_LOCKOUT_PERMANENT,
-            BIOMETRIC_SENSOR_PRIVACY_ENABLED})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface AuthenticatorStatus {}
-
-    private final boolean mBiometricRequested;
-    private final int mBiometricStrengthRequested;
-
+    private static final String TAG = "BiometricService/PreAuthInfo";
     final boolean credentialRequested;
     // Sensors that can be used for this request (e.g. strong enough, enrolled, enabled).
     final List<BiometricSensor> eligibleSensors;
@@ -90,6 +71,25 @@ class PreAuthInfo {
     final boolean ignoreEnrollmentState;
     final int userId;
     final Context context;
+    private final boolean mBiometricRequested;
+    private final int mBiometricStrengthRequested;
+    private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
+            boolean credentialRequested, List<BiometricSensor> eligibleSensors,
+            List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
+            boolean confirmationRequested, boolean ignoreEnrollmentState, int userId,
+            Context context) {
+        mBiometricRequested = biometricRequested;
+        mBiometricStrengthRequested = biometricStrengthRequested;
+        this.credentialRequested = credentialRequested;
+
+        this.eligibleSensors = eligibleSensors;
+        this.ineligibleSensors = ineligibleSensors;
+        this.credentialAvailable = credentialAvailable;
+        this.confirmationRequested = confirmationRequested;
+        this.ignoreEnrollmentState = ignoreEnrollmentState;
+        this.userId = userId;
+        this.context = context;
+    }
 
     static PreAuthInfo create(ITrustManager trustManager,
             DevicePolicyManager devicePolicyManager,
@@ -158,7 +158,8 @@ class PreAuthInfo {
      *
      * @return @AuthenticatorStatus
      */
-    private static @AuthenticatorStatus int getStatusForBiometricAuthenticator(
+    private static @AuthenticatorStatus
+    int getStatusForBiometricAuthenticator(
             DevicePolicyManager devicePolicyManager,
             BiometricService.SettingObserver settingObserver,
             BiometricSensor sensor, int userId, String opPackageName,
@@ -199,7 +200,6 @@ class PreAuthInfo {
                     return BIOMETRIC_SENSOR_PRIVACY_ENABLED;
                 }
             }
-
 
             final @LockoutTracker.LockoutMode int lockoutMode =
                     sensor.impl.getLockoutModeForUser(userId);
@@ -248,8 +248,8 @@ class PreAuthInfo {
 
     /**
      * @param modality one of {@link BiometricAuthenticator#TYPE_FINGERPRINT},
-     * {@link BiometricAuthenticator#TYPE_IRIS} or {@link BiometricAuthenticator#TYPE_FACE}
-     * @return
+     *                 {@link BiometricAuthenticator#TYPE_IRIS} or
+     *                 {@link BiometricAuthenticator#TYPE_FACE}
      */
     private static int mapModalityToDevicePolicyType(int modality) {
         switch (modality) {
@@ -263,24 +263,6 @@ class PreAuthInfo {
                 Slog.e(TAG, "Error modality=" + modality);
                 return DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
         }
-    }
-
-    private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
-            boolean credentialRequested, List<BiometricSensor> eligibleSensors,
-            List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
-            boolean confirmationRequested, boolean ignoreEnrollmentState, int userId,
-            Context context) {
-        mBiometricRequested = biometricRequested;
-        mBiometricStrengthRequested = biometricStrengthRequested;
-        this.credentialRequested = credentialRequested;
-
-        this.eligibleSensors = eligibleSensors;
-        this.ineligibleSensors = ineligibleSensors;
-        this.credentialAvailable = credentialAvailable;
-        this.confirmationRequested = confirmationRequested;
-        this.ignoreEnrollmentState = ignoreEnrollmentState;
-        this.userId = userId;
-        this.context = context;
     }
 
     private Pair<BiometricSensor, Integer> calculateErrorByPriority() {
@@ -303,6 +285,7 @@ class PreAuthInfo {
      * surface, combined with the actual sensor/credential and user/system settings, calculate the
      * internal {@link AuthenticatorStatus} that should be returned to the client. Note that this
      * will need to be converted into the public API constant.
+     *
      * @return Pair<Modality, Error> with error being the internal {@link AuthenticatorStatus} code
      */
     private Pair<Integer, Integer> getInternalStatus() {
@@ -391,7 +374,8 @@ class PreAuthInfo {
     /**
      * @return public BiometricManager result for the current request.
      */
-    @BiometricManager.BiometricError int getCanAuthenticateResult() {
+    @BiometricManager.BiometricError
+    int getCanAuthenticateResult() {
         // TODO: Convert this directly
         return Utils.biometricConstantsToBiometricManager(
                 Utils.authenticatorStatusToBiometricConstant(
@@ -401,6 +385,7 @@ class PreAuthInfo {
     /**
      * For the given request, generate the appropriate reason why authentication cannot be started.
      * Note that for some errors, modality is intentionally cleared.
+     *
      * @return Pair<Modality, Error> with modality being filtered if necessary, and error
      * being one of the public {@link android.hardware.biometrics.BiometricConstants} codes.
      */
@@ -443,7 +428,8 @@ class PreAuthInfo {
      * @return bitmask representing the modalities that are running or could be running for the
      * current session.
      */
-    @BiometricAuthenticator.Modality int getEligibleModalities() {
+    @BiometricAuthenticator.Modality
+    int getEligibleModalities() {
         @BiometricAuthenticator.Modality int modalities = 0;
         for (BiometricSensor sensor : eligibleSensors) {
             modalities |= sensor.modality;
@@ -474,7 +460,7 @@ class PreAuthInfo {
                         + ", StrengthRequested: " + mBiometricStrengthRequested
                         + ", CredentialRequested: " + credentialRequested);
         string.append(", Eligible:{");
-        for (BiometricSensor sensor: eligibleSensors) {
+        for (BiometricSensor sensor : eligibleSensors) {
             string.append(sensor.id).append(" ");
         }
         string.append("}");
@@ -488,5 +474,21 @@ class PreAuthInfo {
         string.append(", CredentialAvailable: ").append(credentialAvailable);
         string.append(", ");
         return string.toString();
+    }
+
+    @IntDef({AUTHENTICATOR_OK,
+            BIOMETRIC_NO_HARDWARE,
+            BIOMETRIC_DISABLED_BY_DEVICE_POLICY,
+            BIOMETRIC_INSUFFICIENT_STRENGTH,
+            BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE,
+            BIOMETRIC_HARDWARE_NOT_DETECTED,
+            BIOMETRIC_NOT_ENROLLED,
+            BIOMETRIC_NOT_ENABLED_FOR_APPS,
+            CREDENTIAL_NOT_ENROLLED,
+            BIOMETRIC_LOCKOUT_TIMED,
+            BIOMETRIC_LOCKOUT_PERMANENT,
+            BIOMETRIC_SENSOR_PRIVACY_ENABLED})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface AuthenticatorStatus {
     }
 }

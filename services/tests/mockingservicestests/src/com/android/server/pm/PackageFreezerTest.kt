@@ -37,6 +37,7 @@ class PackageFreezerTest {
     companion object {
         const val TEST_PACKAGE = "com.android.test.package"
         const val TEST_REASON = "test reason"
+        const val TEST_EXIT_REASON = 1
         const val TEST_USER_ID = 0
     }
 
@@ -53,7 +54,6 @@ class PackageFreezerTest {
                 rule.system().dataAppDirectory)
         }
         var pms = PackageManagerService(rule.mocks().injector,
-            false /*coreOnly*/,
             false /*factoryTest*/,
             MockSystem.DEFAULT_VERSION_INFO.fingerprint,
             false /*isEngBuild*/,
@@ -83,14 +83,15 @@ class PackageFreezerTest {
     fun setup() {
         rule.system().stageNominalSystemState()
         pms = spy(createPackageManagerService(TEST_PACKAGE))
-        whenever(pms.killApplication(any(), any(), any(), any()))
+        whenever(pms.killApplication(any(), any(), any(), any(), any()))
     }
 
     @Test
     fun freezePackage() {
-        val freezer = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms)
+        val freezer = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms, TEST_EXIT_REASON)
         verify(pms, times(1))
-            .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON))
+            .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON),
+                    eq(TEST_EXIT_REASON))
 
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
             checkPackageStartable()
@@ -102,10 +103,13 @@ class PackageFreezerTest {
 
     @Test
     fun freezePackage_twice() {
-        val freezer1 = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms)
-        val freezer2 = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms)
+        val freezer1 = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
+                TEST_EXIT_REASON)
+        val freezer2 = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
+                TEST_EXIT_REASON)
         verify(pms, times(2))
-            .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON))
+            .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON),
+                    eq(TEST_EXIT_REASON))
 
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
             checkPackageStartable()
@@ -122,9 +126,11 @@ class PackageFreezerTest {
 
     @Test
     fun freezePackage_withoutClosing() {
-        var freezer: PackageFreezer? = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms)
+        var freezer: PackageFreezer? = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
+                TEST_EXIT_REASON)
         verify(pms, times(1))
-            .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON))
+            .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON),
+                    eq(TEST_EXIT_REASON))
 
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
             checkPackageStartable()

@@ -26,6 +26,7 @@ import android.widget.BaseExpandableListAdapter
 import android.widget.ExpandableListView
 import android.widget.TextView
 import com.android.test.silkfx.app.CommonDemoActivity
+import com.android.test.silkfx.app.EXTRA_COMMON_CONTROLS
 import com.android.test.silkfx.app.EXTRA_LAYOUT
 import com.android.test.silkfx.app.EXTRA_TITLE
 import com.android.test.silkfx.hdr.GlowActivity
@@ -37,10 +38,11 @@ class Demo(val name: String, val makeIntent: (Context) -> Intent) {
     constructor(name: String, activity: KClass<out Activity>) : this(name, { context ->
         Intent(context, activity.java)
     })
-    constructor(name: String, layout: Int) : this(name, { context ->
+    constructor(name: String, layout: Int, commonControls: Boolean = true) : this(name, { context ->
         Intent(context, CommonDemoActivity::class.java).apply {
             putExtra(EXTRA_LAYOUT, layout)
             putExtra(EXTRA_TITLE, name)
+            putExtra(EXTRA_COMMON_CONTROLS, commonControls)
         }
     })
 }
@@ -49,7 +51,13 @@ data class DemoGroup(val groupName: String, val demos: List<Demo>)
 private val AllDemos = listOf(
         DemoGroup("HDR", listOf(
                 Demo("Glow", GlowActivity::class),
-                Demo("Blingy Notifications", R.layout.bling_notifications)
+                Demo("Blingy Notifications", R.layout.bling_notifications),
+                Demo("Color Grid", R.layout.color_grid),
+                Demo("Gradient Sweep", R.layout.gradient_sweep),
+                Demo("Gainmap Image", R.layout.gainmap_image),
+                Demo("Gainmap Decode Test", R.layout.gainmap_decode_test, commonControls = false),
+                Demo("Gainmap Transform Test", R.layout.gainmap_transform_test,
+                        commonControls = false)
         )),
         DemoGroup("Materials", listOf(
                 Demo("Glass", GlassActivity::class),

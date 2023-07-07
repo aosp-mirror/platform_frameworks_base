@@ -22,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -128,5 +130,15 @@ public class WindowProcessControllerMapTests extends WindowTestsBase {
         assertTrue(uid2processes.contains(pid1uid2));
         assertEquals(uid2processes.size(), 1);
         assertEquals(mProcessMap.getProcess(FAKE_PID1), pid1uid2);
+    }
+
+    @Test
+    public void testRemove_callsDestroy() {
+        var proc = spy(pid1uid1);
+        mProcessMap.put(FAKE_PID1, proc);
+
+        mProcessMap.remove(FAKE_PID1);
+
+        verify(proc).destroy();
     }
 }

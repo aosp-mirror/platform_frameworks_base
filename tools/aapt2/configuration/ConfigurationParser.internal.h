@@ -47,15 +47,16 @@ using Entry = std::unordered_map<std::string, T>;
 template <class T>
 using Group = Entry<OrderedEntry<T>>;
 
-template<typename T>
-bool IsGroupValid(const Group<T>& group, const std::string& name, IDiagnostics* diag) {
+template <typename T>
+bool IsGroupValid(const Group<T>& group, const std::string& name, android::IDiagnostics* diag) {
   std::set<int32_t> orders;
   for (const auto& p : group) {
     orders.insert(p.second.order);
   }
   bool valid = orders.size() == group.size();
   if (!valid) {
-    diag->Error(DiagMessage() << name << " have overlapping version-code-order attributes");
+    diag->Error(android::DiagMessage()
+                << name << " have overlapping version-code-order attributes");
   }
   return valid;
 }
@@ -137,12 +138,12 @@ struct ConfiguredArtifact {
   std::optional<std::string> gl_texture_group;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  std::optional<std::string> ToArtifactName(const android::StringPiece& format,
-                                            const android::StringPiece& apk_name,
-                                            IDiagnostics* diag) const;
+  std::optional<std::string> ToArtifactName(android::StringPiece format,
+                                            android::StringPiece apk_name,
+                                            android::IDiagnostics* diag) const;
 
   /** Convert an artifact name template into a name string based on configuration contents. */
-  std::optional<std::string> Name(const android::StringPiece& apk_name, IDiagnostics* diag) const;
+  std::optional<std::string> Name(android::StringPiece apk_name, android::IDiagnostics* diag) const;
 };
 
 /** AAPT2 XML configuration file binary representation. */
@@ -157,7 +158,7 @@ struct PostProcessingConfiguration {
   Group<GlTexture> gl_texture_groups;
   Entry<AndroidSdk> android_sdks;
 
-  bool ValidateVersionCodeOrdering(IDiagnostics* diag) {
+  bool ValidateVersionCodeOrdering(android::IDiagnostics* diag) {
     bool valid = IsGroupValid(abi_groups, "abi-groups", diag);
     valid &= IsGroupValid(screen_density_groups, "screen-density-groups", diag);
     valid &= IsGroupValid(locale_groups, "locale-groups", diag);
@@ -215,41 +216,41 @@ struct PostProcessingConfiguration {
 /** Parses the provided XML document returning the post processing configuration. */
 std::optional<PostProcessingConfiguration> ExtractConfiguration(const std::string& contents,
                                                                 const std::string& config_path,
-                                                                IDiagnostics* diag);
+                                                                android::IDiagnostics* diag);
 
 namespace handler {
 
 /** Handler for <artifact> tags. */
 bool ArtifactTagHandler(configuration::PostProcessingConfiguration* config, xml::Element* element,
-                        IDiagnostics* diag);
+                        android::IDiagnostics* diag);
 
 /** Handler for <artifact-format> tags. */
 bool ArtifactFormatTagHandler(configuration::PostProcessingConfiguration* config,
-                              xml::Element* element, IDiagnostics* diag);
+                              xml::Element* element, android::IDiagnostics* diag);
 
 /** Handler for <abi-group> tags. */
 bool AbiGroupTagHandler(configuration::PostProcessingConfiguration* config, xml::Element* element,
-                        IDiagnostics* diag);
+                        android::IDiagnostics* diag);
 
 /** Handler for <screen-density-group> tags. */
 bool ScreenDensityGroupTagHandler(configuration::PostProcessingConfiguration* config,
-                                  xml::Element* element, IDiagnostics* diag);
+                                  xml::Element* element, android::IDiagnostics* diag);
 
 /** Handler for <locale-group> tags. */
 bool LocaleGroupTagHandler(configuration::PostProcessingConfiguration* config,
-                           xml::Element* element, IDiagnostics* diag);
+                           xml::Element* element, android::IDiagnostics* diag);
 
 /** Handler for <android-sdk> tags. */
 bool AndroidSdkTagHandler(configuration::PostProcessingConfiguration* config, xml::Element* element,
-                          IDiagnostics* diag);
+                          android::IDiagnostics* diag);
 
 /** Handler for <gl-texture-group> tags. */
 bool GlTextureGroupTagHandler(configuration::PostProcessingConfiguration* config,
-                              xml::Element* element, IDiagnostics* diag);
+                              xml::Element* element, android::IDiagnostics* diag);
 
 /** Handler for <device-feature-group> tags. */
 bool DeviceFeatureGroupTagHandler(configuration::PostProcessingConfiguration* config,
-                                  xml::Element* element, IDiagnostics* diag);
+                                  xml::Element* element, android::IDiagnostics* diag);
 
 }  // namespace handler
 }  // namespace configuration

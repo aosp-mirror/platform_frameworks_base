@@ -61,7 +61,7 @@ public class MainStageTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
         mMainStage = new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mIconProvider, null);
+                mSyncQueue, mSurfaceSession, mIconProvider);
         mMainStage.onTaskAppeared(mRootTaskInfo, mRootLeash);
     }
 

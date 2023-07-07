@@ -36,6 +36,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -188,16 +189,17 @@ public final class RcsConfig {
             String tag = null;
             while (eventType != XmlPullParser.END_DOCUMENT && current != null) {
                 if (eventType == XmlPullParser.START_TAG) {
-                    tag = xpp.getName().trim().toLowerCase();
+                    tag = xpp.getName().trim().toLowerCase(Locale.ROOT);
                     if (TAG_CHARACTERISTIC.equals(tag)) {
                         int count = xpp.getAttributeCount();
                         String type = null;
                         if (count > 0) {
                             for (int i = 0; i < count; i++) {
-                                String name = xpp.getAttributeName(i).trim().toLowerCase();
+                                String name = xpp.getAttributeName(i).trim()
+                                        .toLowerCase(Locale.ROOT);
                                 if (ATTRIBUTE_TYPE.equals(name)) {
                                     type = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
-                                            name).trim().toLowerCase();
+                                            name).trim().toLowerCase(Locale.ROOT);
                                     break;
                                 }
                             }
@@ -211,10 +213,11 @@ public final class RcsConfig {
                         String value = null;
                         if (count > 1) {
                             for (int i = 0; i < count; i++) {
-                                String name = xpp.getAttributeName(i).trim().toLowerCase();
+                                String name = xpp.getAttributeName(i).trim()
+                                        .toLowerCase(Locale.ROOT);
                                 if (ATTRIBUTE_NAME.equals(name)) {
                                     key = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
-                                            name).trim().toLowerCase();
+                                            name).trim().toLowerCase(Locale.ROOT);
                                 } else if (ATTRIBUTE_VALUE.equals(name)) {
                                     value = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
                                             name).trim();
@@ -226,7 +229,7 @@ public final class RcsConfig {
                         }
                     }
                 } else if (eventType == XmlPullParser.END_TAG) {
-                    tag = xpp.getName().trim().toLowerCase();
+                    tag = xpp.getName().trim().toLowerCase(Locale.ROOT);
                     if (TAG_CHARACTERISTIC.equals(tag)) {
                         current = current.getParent();
                     }
@@ -254,7 +257,7 @@ public final class RcsConfig {
      * @return Returns the config value if it exists, or defaultVal.
      */
     public @Nullable String getString(@NonNull String tag, @Nullable String defaultVal) {
-        String value = mCurrent.getParmValue(tag.trim().toLowerCase());
+        String value = mCurrent.getParmValue(tag.trim().toLowerCase(Locale.ROOT));
         return value != null ?  value : defaultVal;
     }
 
@@ -296,21 +299,21 @@ public final class RcsConfig {
      * @return Returns true if it exists, or false.
      */
     public boolean hasConfig(@NonNull String tag) {
-        return mCurrent.hasParm(tag.trim().toLowerCase());
+        return mCurrent.hasParm(tag.trim().toLowerCase(Locale.ROOT));
     }
 
     /**
      * Return the Characteristic with the given type
      */
     public @Nullable Characteristic getCharacteristic(@NonNull String type) {
-        return mCurrent.getSubByType(type.trim().toLowerCase());
+        return mCurrent.getSubByType(type.trim().toLowerCase(Locale.ROOT));
     }
 
     /**
      * Check whether the Characteristic with the given type exists
      */
     public boolean hasCharacteristic(@NonNull String type) {
-        return mCurrent.getSubByType(type.trim().toLowerCase()) != null;
+        return mCurrent.getSubByType(type.trim().toLowerCase(Locale.ROOT)) != null;
     }
 
     /**

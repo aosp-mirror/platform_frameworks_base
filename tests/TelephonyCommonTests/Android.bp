@@ -47,7 +47,7 @@ android_test {
 
     // Uncomment this and comment out the jarjar rule if you want to attach a debugger and step
     // through the renamed classes.
-    // platform_apis: true,
+    platform_apis: true,
 
     libs: [
         "android.test.runner",

@@ -17,44 +17,26 @@
 package com.android.systemui.statusbar.notification
 
 import android.content.Context
-import android.util.Log
-import android.widget.Toast
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.FlagResolver
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class NotifPipelineFlags @Inject constructor(
     val context: Context,
-    val featureFlags: FeatureFlags
+    val featureFlags: FeatureFlags,
+    val sysPropFlags: FlagResolver,
 ) {
-    fun checkLegacyPipelineEnabled(): Boolean {
-        if (!isNewPipelineEnabled()) {
-            return true
-        }
-
-        if (Compile.IS_DEBUG) {
-            Toast.makeText(context, "Old pipeline code running!", Toast.LENGTH_SHORT).show()
-        }
-        if (featureFlags.isEnabled(Flags.NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE)) {
-            throw RuntimeException("Old pipeline code running with new pipeline enabled")
-        } else {
-            Log.d("NotifPipeline", "Old pipeline code running with new pipeline enabled",
-                    Exception())
-        }
-        return false
-    }
-
-    fun assertLegacyPipelineEnabled(): Unit =
-        check(!isNewPipelineEnabled()) { "Old pipeline code running w/ new pipeline enabled" }
-
-    fun isNewPipelineEnabled(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
-
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
 
-    fun isSmartspaceDedupingEnabled(): Boolean =
-            featureFlags.isEnabled(Flags.SMARTSPACE) &&
-                    featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
+    fun allowDismissOngoing(): Boolean =
+            sysPropFlags.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)
+
+    fun isOtpRedactionEnabled(): Boolean =
+            sysPropFlags.isEnabled(NotificationFlags.OTP_REDACTION)
+
+    val isNoHunForOldWhenEnabled: Boolean
+        get() = featureFlags.isEnabled(Flags.NO_HUN_FOR_OLD_WHEN)
 }

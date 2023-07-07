@@ -15,9 +15,13 @@
  */
 package com.android.server.notification;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.Person;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -39,12 +44,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
+import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableString;
+import android.util.ArraySet;
+import android.util.LruCache;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
+import com.android.server.notification.ValidateNotificationPeople.LookupResult;
+import com.android.server.notification.ValidateNotificationPeople.PeopleRankingReconsideration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +64,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -209,7 +220,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
                 ContactsContract.Contacts.CONTENT_LOOKUP_URI,
                 ContactsContract.Contacts.ENTERPRISE_CONTACT_LOOKUP_PREFIX + contactId);
 
-        new ValidateNotificationPeople().searchContacts(mockContext, lookupUri);
+        PeopleRankingReconsideration.searchContacts(mockContext, lookupUri);
 
         ArgumentCaptor<Uri> queryUri = ArgumentCaptor.forClass(Uri.class);
         verify(mockContentResolver).query(
@@ -236,7 +247,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         final Uri lookupUri = Uri.withAppendedPath(
                 ContactsContract.Contacts.CONTENT_LOOKUP_URI, String.valueOf(contactId));
 
-        new ValidateNotificationPeople().searchContacts(mockContext, lookupUri);
+        PeopleRankingReconsideration.searchContacts(mockContext, lookupUri);
 
         ArgumentCaptor<Uri> queryUri = ArgumentCaptor.forClass(Uri.class);
         verify(mockContentResolver).query(
@@ -271,7 +282,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
 
         // call searchContacts and then mergePhoneNumbers, make sure we never actually
         // query the content resolver for a phone number
-        new ValidateNotificationPeople().searchContactsAndLookupNumbers(mockContext, lookupUri);
+        PeopleRankingReconsideration.searchContactsAndLookupNumbers(mockContext, lookupUri);
         verify(mockContentResolver, never()).query(
                 eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
                 eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
@@ -314,13 +325,92 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
 
         // call searchContacts and then mergePhoneNumbers, and check that we query
         // once for the
-        new ValidateNotificationPeople().searchContactsAndLookupNumbers(mockContext, lookupUri);
+        PeopleRankingReconsideration.searchContactsAndLookupNumbers(mockContext, lookupUri);
         verify(mockContentResolver, times(1)).query(
                 eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
                 eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
                 contains(ContactsContract.Contacts.LOOKUP_KEY),
                 eq(new String[] { "testlookupkey" }),  // selection args
                 isNull());  // sort order
+    }
+
+    @Test
+    public void testValidatePeople_needsLookupWhenNoCache() {
+        final Context mockContext = mock(Context.class);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        final NotificationUsageStats mockNotificationUsageStats =
+                mock(NotificationUsageStats.class);
+
+        // Create validator with empty cache
+        ValidateNotificationPeople vnp = new ValidateNotificationPeople();
+        LruCache<String, LookupResult> cache = new LruCache<>(5);
+        vnp.initForTests(mockContext, mockNotificationUsageStats, cache);
+
+        NotificationRecord record = getNotificationRecord();
+        String[] callNumber = new String[]{"tel:12345678910"};
+        setNotificationPeople(record, callNumber);
+
+        // Returned ranking reconsideration not null indicates that there is a lookup to be done
+        RankingReconsideration rr = vnp.validatePeople(mockContext, record);
+        assertNotNull(rr);
+    }
+
+    @Test
+    public void testValidatePeople_noLookupWhenCached_andPopulatesContactInfo() {
+        final Context mockContext = mock(Context.class);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        when(mockContext.getUserId()).thenReturn(1);
+        final NotificationUsageStats mockNotificationUsageStats =
+                mock(NotificationUsageStats.class);
+
+        // Information to be passed in & returned from the lookup result
+        String lookup = "lookup:contactinfohere";
+        String lookupTel = "16175551234";
+        float affinity = 0.7f;
+
+        // Create a fake LookupResult for the data we'll pass in
+        LruCache<String, LookupResult> cache = new LruCache<>(5);
+        LookupResult lr = mock(LookupResult.class);
+        when(lr.getAffinity()).thenReturn(affinity);
+        when(lr.getPhoneNumbers()).thenReturn(new ArraySet<>(new String[]{lookupTel}));
+        when(lr.isExpired()).thenReturn(false);
+        cache.put(ValidateNotificationPeople.getCacheKey(1, lookup), lr);
+
+        // Create validator with the established cache
+        ValidateNotificationPeople vnp = new ValidateNotificationPeople();
+        vnp.initForTests(mockContext, mockNotificationUsageStats, cache);
+
+        NotificationRecord record = getNotificationRecord();
+        String[] peopleInfo = new String[]{lookup};
+        setNotificationPeople(record, peopleInfo);
+
+        // Returned ranking reconsideration null indicates that there is no pending work to be done
+        RankingReconsideration rr = vnp.validatePeople(mockContext, record);
+        assertNull(rr);
+
+        // Confirm that the affinity & phone number made it into our record
+        assertEquals(affinity, record.getContactAffinity(), 1e-8);
+        assertNotNull(record.getPhoneNumbers());
+        assertTrue(record.getPhoneNumbers().contains(lookupTel));
+    }
+
+    @Test
+    public void validatePeople_reconsiderationWillNotBeDelayed() {
+        final Context mockContext = mock(Context.class);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        ValidateNotificationPeople vnp = new ValidateNotificationPeople();
+        vnp.initForTests(mockContext, mock(NotificationUsageStats.class), new LruCache<>(5));
+        NotificationRecord record = getNotificationRecord();
+        String[] callNumber = new String[]{"tel:12345678910"};
+        setNotificationPeople(record, callNumber);
+
+        RankingReconsideration rr = vnp.validatePeople(mockContext, record);
+
+        assertThat(rr).isNotNull();
+        assertThat(rr.getDelay(TimeUnit.MILLISECONDS)).isEqualTo(0);
     }
 
     // Creates a cursor that points to one item of Contacts data with the specified
@@ -364,5 +454,18 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         String expectedString = Arrays.toString(expected);
         String resultString = Arrays.toString(result);
         assertEquals(message + ": arrays differ", expectedString, resultString);
+    }
+
+    private NotificationRecord getNotificationRecord() {
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        Notification notification = mock(Notification.class);
+        when(sbn.getNotification()).thenReturn(notification);
+        return new NotificationRecord(mContext, sbn, mock(NotificationChannel.class));
+    }
+
+    private void setNotificationPeople(NotificationRecord r, String[] people) {
+        Bundle extras = new Bundle();
+        extras.putObject(Notification.EXTRA_PEOPLE_LIST, people);
+        r.getSbn().getNotification().extras = extras;
     }
 }

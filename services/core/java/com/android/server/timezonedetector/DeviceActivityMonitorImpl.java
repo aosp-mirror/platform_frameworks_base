@@ -77,12 +77,18 @@ class DeviceActivityMonitorImpl implements DeviceActivityMonitor {
         mListeners.add(listener);
     }
 
-    private synchronized void notifyFlightComplete() {
+    private void notifyFlightComplete() {
         if (DBG) {
             Slog.d(LOG_TAG, "notifyFlightComplete");
         }
 
-        for (Listener listener : mListeners) {
+        // Copy the listeners holding the "this" lock but don't hold the lock while delivering the
+        // notifications to avoid deadlocks.
+        List<Listener> listeners;
+        synchronized (this) {
+            listeners = new ArrayList<>(mListeners);
+        }
+        for (Listener listener : listeners) {
             listener.onFlightComplete();
         }
     }

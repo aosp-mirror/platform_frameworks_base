@@ -126,8 +126,10 @@ class WindowSurfaceController {
         try {
             transaction.hide(mSurfaceControl);
             if (mAnimator.mIsWallpaper) {
+                final DisplayContent dc = mAnimator.mWin.getDisplayContent();
                 EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
-                        mAnimator.mWin.getDisplayId(), 0 /* request hidden */);
+                        dc.mDisplayId, 0 /* request hidden */,
+                        String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception hiding surface in " + this);
@@ -139,6 +141,12 @@ class WindowSurfaceController {
                 "Destroying surface %s called by %s", this, Debug.getCallers(8));
         try {
             if (mSurfaceControl != null) {
+                if (mAnimator.mIsWallpaper && !mAnimator.mWin.mWindowRemovalAllowed
+                        && !mAnimator.mWin.mRemoveOnExit) {
+                    // The wallpaper surface should have the same lifetime as its window.
+                    Slog.e(TAG, "Unexpected removing wallpaper surface of " + mAnimator.mWin
+                            + " by " + Debug.getCallers(8));
+                }
                 t.remove(mSurfaceControl);
             }
         } catch (RuntimeException e) {
@@ -228,42 +236,32 @@ class WindowSurfaceController {
         }
     }
 
-    void setColorSpaceAgnostic(boolean agnostic) {
+    void setColorSpaceAgnostic(SurfaceControl.Transaction t, boolean agnostic) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isColorSpaceAgnostic=%b: %s", agnostic, title);
 
         if (mSurfaceControl == null) {
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) {
-            Slog.i(TAG, ">>> OPEN TRANSACTION setColorSpaceAgnosticLocked");
-        }
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setColorSpaceAgnostic(mSurfaceControl, agnostic);
-        } finally {
-            mService.closeSurfaceTransaction("setColorSpaceAgnostic");
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(TAG, "<<< CLOSE TRANSACTION setColorSpaceAgnosticLocked");
-            }
-        }
+        t.setColorSpaceAgnostic(mSurfaceControl, agnostic);
     }
 
-    boolean showRobustly(SurfaceControl.Transaction t) {
+    void showRobustly(SurfaceControl.Transaction t) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", title);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
 
         if (mSurfaceShown) {
-            return true;
+            return;
         }
 
         setShown(true);
         t.show(mSurfaceControl);
         if (mAnimator.mIsWallpaper) {
+            final DisplayContent dc = mAnimator.mWin.getDisplayContent();
             EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
-                    mAnimator.mWin.getDisplayId(), 1 /* request shown */);
+                    dc.mDisplayId, 1 /* request shown */,
+                    String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
         }
-        return true;
     }
 
     boolean clearWindowContentFrameStats() {

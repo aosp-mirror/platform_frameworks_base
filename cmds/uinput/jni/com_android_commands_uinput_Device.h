@@ -48,6 +48,7 @@ class UinputDevice {
 public:
     static std::unique_ptr<UinputDevice> open(int32_t id, const char* name, int32_t vid,
                                               int32_t pid, uint16_t bus, uint32_t ff_effects_max,
+                                              const char* port,
                                               std::unique_ptr<DeviceCallback> callback);
 
     virtual ~UinputDevice();

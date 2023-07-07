@@ -24,6 +24,13 @@ import android.hardware.radio.RadioMetadata;
 /** {@hide} */
 oneway interface ITunerCallback {
     void onError(int status);
+
+    /**
+     * Callback called when tuning operations, such as tune, step, seek, failed.
+     *
+     * @param result Tuning result of {@link RadioTuner#TunerResultType} type.
+     * @param selector Program selector used for the tuning operation.
+     */
     void onTuneFailed(int result, in ProgramSelector selector);
     void onConfigurationChanged(in RadioManager.BandConfig config);
     void onCurrentProgramInfoChanged(in RadioManager.ProgramInfo info);
@@ -36,6 +43,18 @@ oneway interface ITunerCallback {
     void onProgramListUpdated(in ProgramList.Chunk chunk);
 
     /**
+     * Callback for passing updates to config flags from {@link IRadioService} to
+     * {@link RadioTuner}.
+     *
+     * @param flag Config flag (defined in {@link RadioManager.ConfigFlag}) updated
+     * @param value Updated value for the config flag
+     */
+    void onConfigFlagUpdated(int flag, boolean value);
+
+    /**
+     * Callback for passing updates to vendor-specific parameter values from
+     * {@link IRadioService} to {@link RadioTuner}.
+     *
      * @param parameters Vendor-specific key-value pairs
      */
     void onParametersUpdated(in Map<String, String> parameters);

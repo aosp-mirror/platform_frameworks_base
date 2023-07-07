@@ -31,6 +31,7 @@ import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.ITrustManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -51,6 +52,7 @@ import android.view.IWindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.util.Preconditions;
@@ -108,6 +110,13 @@ public class KeyguardManager {
             "android.app.action.CONFIRM_FRP_CREDENTIAL";
 
     /**
+     * Intent used to prompt user to to validate the credentials of a remote device.
+     * @hide
+     */
+    public static final String ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL =
+            "android.app.action.CONFIRM_REMOTE_DEVICE_CREDENTIAL";
+
+    /**
      * A CharSequence dialog title to show to the user when used with a
      * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
      * @hide
@@ -130,9 +139,34 @@ public class KeyguardManager {
             "android.app.extra.ALTERNATE_BUTTON_LABEL";
 
     /**
+     * A CharSequence label for the checkbox when used with
+     * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL}
+     * @hide
+     */
+    public static final String EXTRA_CHECKBOX_LABEL = "android.app.extra.CHECKBOX_LABEL";
+
+    /**
+     * A {@link RemoteLockscreenValidationSession} extra to be sent along with
+     * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL} containing the data needed to prompt for
+     * a remote device's lock screen.
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_LOCKSCREEN_VALIDATION_SESSION =
+            "android.app.extra.REMOTE_LOCKSCREEN_VALIDATION_SESSION";
+
+    /**
+     * A boolean indicating that credential confirmation activity should be a task overlay.
+     * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER}.
+     * @hide
+     */
+    public static final String EXTRA_FORCE_TASK_OVERLAY =
+            "android.app.KeyguardManager.FORCE_TASK_OVERLAY";
+
+    /**
      * Result code returned by the activity started by
-     * {@link #createConfirmFactoryResetCredentialIntent} indicating that the user clicked the
-     * alternate button.
+     * {@link #createConfirmFactoryResetCredentialIntent} or
+     * {@link #createConfirmDeviceCredentialForRemoteValidationIntent}
+     * indicating that the user clicked the alternate button.
      *
      * @hide
      */
@@ -323,6 +357,45 @@ public class KeyguardManager {
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
         intent.putExtra(EXTRA_ALTERNATE_BUTTON_LABEL, alternateButtonLabel);
+
+        // explicitly set the package for security
+        intent.setPackage(getSettingsPackageForIntent(intent));
+
+        return intent;
+    }
+
+    /**
+     * Get an Intent to launch an activity to prompt the user to confirm the
+     * credentials (pin, pattern or password) of a remote device.
+     * @param session contains information necessary to start remote device credential validation.
+     * @param remoteLockscreenValidationServiceComponent
+     *          the {@link ComponentName} of the implementation of
+     *          {@link android.service.remotelockscreenvalidation.RemoteLockscreenValidationService}
+     * @param checkboxLabel if not empty, a checkbox is provided with the given label. When checked,
+     *                      the validated remote device credential will be set as the device lock of
+     *                      the current device.
+     * @param alternateButtonLabel if not empty, a button is provided with the given label. Upon
+     *                             clicking this button, the activity returns
+     *                             {@link #RESULT_ALTERNATE}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
+    @NonNull
+    public Intent createConfirmDeviceCredentialForRemoteValidationIntent(
+            @NonNull RemoteLockscreenValidationSession session,
+            @NonNull ComponentName remoteLockscreenValidationServiceComponent,
+            @Nullable CharSequence title,
+            @Nullable CharSequence description,
+            @Nullable CharSequence checkboxLabel,
+            @Nullable CharSequence alternateButtonLabel) {
+        Intent intent = new Intent(ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL)
+                .putExtra(EXTRA_REMOTE_LOCKSCREEN_VALIDATION_SESSION, session)
+                .putExtra(Intent.EXTRA_COMPONENT_NAME, remoteLockscreenValidationServiceComponent)
+                .putExtra(EXTRA_TITLE, title)
+                .putExtra(EXTRA_DESCRIPTION, description)
+                .putExtra(EXTRA_CHECKBOX_LABEL, checkboxLabel)
+                .putExtra(EXTRA_ALTERNATE_BUTTON_LABEL, alternateButtonLabel);
 
         // explicitly set the package for security
         intent.setPackage(getSettingsPackageForIntent(intent));
@@ -758,7 +831,9 @@ public class KeyguardManager {
         }
     }
 
-    private boolean checkInitialLockMethodUsage() {
+    /** @hide */
+    @VisibleForTesting
+    public boolean checkInitialLockMethodUsage() {
         if (!hasPermission(Manifest.permission.SET_INITIAL_LOCK)) {
             throw new SecurityException("Requires SET_INITIAL_LOCK permission.");
         }
@@ -1070,6 +1145,45 @@ public class KeyguardManager {
             return false;
         }
         return response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
+    }
+
+    /** Starts a session to verify lockscreen credentials provided by a remote device.
+     *
+     * The session and corresponding public key will be removed when
+     * {@code validateRemoteLockScreen} provides a correct guess or after 10 minutes of inactivity.
+     *
+     * @return information necessary to perform remote lock screen credentials check, including
+
+     * short lived public key used to send encrypted guess and lock screen type.
+     *
+     * @throws IllegalStateException if lock screen is not set
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
+    @NonNull
+    public RemoteLockscreenValidationSession startRemoteLockscreenValidation() {
+        return mLockPatternUtils.startRemoteLockscreenValidation();
+    }
+
+    /**
+     * Verifies credentials guess from a remote device.
+     *
+     * <p>Secret must be encrypted using {@code SecureBox} library
+     * with public key from {@code RemoteLockscreenValidationSession}
+     * and header set to {@code "encrypted_remote_credentials"} in UTF-8 encoding.
+     *
+     * @throws IllegalStateException if there was a decryption error.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
+    @NonNull
+    public RemoteLockscreenValidationResult validateRemoteLockscreen(
+            @NonNull byte[] encryptedCredential) {
+        return mLockPatternUtils.validateRemoteLockscreen(encryptedCredential);
     }
 
     private LockscreenCredential createLockscreenCredential(
